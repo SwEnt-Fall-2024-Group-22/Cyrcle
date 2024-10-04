@@ -1,4 +1,4 @@
-package com.github.se.group22
+package com.github.se.cyrcle
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

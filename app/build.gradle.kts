@@ -1,5 +1,3 @@
-import com.android.build.api.dsl.Packaging
-import org.jetbrains.kotlin.util.capitalizeDecapitalize.toLowerCaseAsciiOnly
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -13,7 +11,7 @@ plugins {
 }
 
 android {
-    namespace = "com.github.se.group22"
+    namespace = "com.github.se.cyrcle"
     compileSdk = 34
 
 
@@ -28,7 +26,7 @@ android {
 
 
     defaultConfig {
-        applicationId = "com.github.se.group22"
+        applicationId = "com.github.se.cyrcle"
         minSdk = 29
         targetSdk = 34
         versionCode = 1
@@ -86,7 +84,7 @@ android {
 
             isReturnDefaultValues = true
         }
-        packagingOptions {
+        packaging {
             jniLibs {
                 useLegacyPackaging = true
             }
@@ -223,14 +221,14 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         "android/**/*.*",
         "**/sigchecks/**",
     )
-    val debugTree = fileTree("${project.buildDir}/tmp/kotlin-classes/debug") {
+    val debugTree = fileTree("${layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
         exclude(fileFilter)
     }
     val mainSrc = "${project.projectDir}/src/main/java"
 
     sourceDirectories.setFrom(files(mainSrc))
     classDirectories.setFrom(files(debugTree))
-    executionData.setFrom(fileTree(project.buildDir) {
+    executionData.setFrom(fileTree(layout.buildDirectory.get()) {
         include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
         include("outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec")
     })
