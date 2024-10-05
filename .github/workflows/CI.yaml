@@ -69,24 +69,24 @@ jobs:
 
       - name: Grant execute permission for gradlew
         run: |
-          chmod +x ./cyrcle/gradlew
+          chmod +x ./gradlew
 
       # Check formatting
       - name: KTFmt Check
         run: |
-          ./cyrcle/gradlew ktfmtCheck
+          ./gradlew ktfmtCheck
 
       # This step runs gradle commands to build the application
       - name: Assemble
         run: |
           # To run the CI with debug information, add --info
-          ./cyrcle/gradlew assemble lint --parallel --build-cache
+          ./gradlew assemble lint --parallel --build-cache
 
       # Run Unit tests
       - name: Run tests
         run: |
           # To run the CI with debug information, add --info
-          ./cyrcle/gradlew check --parallel --build-cache
+          ./gradlew check --parallel --build-cache
 
       # Run connected tests on the emulator
       - name: run tests
@@ -98,16 +98,16 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./cyrcle/gradlew connectedCheck --parallel --build-cache
+          script: ./gradlew connectedCheck --parallel --build-cache
 
       # This step generates the coverage report which will be uploaded to sonar
       - name: Generate Coverage Report
         run: |
-          ./cyrcle/gradlew jacocoTestReport
+          ./gradlew jacocoTestReport
 
       # Upload the various reports to sonar
       - name: Upload report to SonarCloud
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./cyrcle/gradlew sonar --parallel --build-cache
+        run: ./gradlew sonar --parallel --build-cache
