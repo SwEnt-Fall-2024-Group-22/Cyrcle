@@ -34,14 +34,14 @@ Closes #56
 ### Branches
 
 The default branch is `main`. From it originate
--  **`feature` feature development**\
+-  **feature feature development**\
   Each new feature should originate from it, with the name `feature-<FEATURE_NAME>`, where 
   `<FEATURE_NAME>` is a shortcut name for the feature (for example `coffee-order` if the feature add
   the possibility to order a coffee)
--  **`bugfix` for bug fixing**\
+-  **bugfix for bug fixing**\
   When a new bug is found, the branch for it should be named `bugfix-<ISSUE_NR>`, where `<ISSUE_NR>`
     is the issue number on GitHub.
--  **`documentation` for documentation changes/improvement**\
+-  **documentation for documentation changes/improvement**\
   A more miscellaneous branch for documentation enhancement (modifying `README.md`, ...). It 
   should be pretty low usage, so no need for deeper branch, as the modification should be quick, 
   small pushes.
@@ -55,14 +55,23 @@ config:
     fontFamily: helvetica
 ---
 flowchart TB
-    main{main} --- feature>feature]
-    main --- bugfix>bugfix]
-    main --- documentation>documentation]
-    feature -.- a(feature-coffee-order)
-    feature -.- b(feature-nft-transaction)
-    feature -.- c(feature-paint3d-intergration)
-    bugfix -.- d(bugfix-69)
-    bugfix -.- e(bugfix-420)
+    main{main}
+    main --- feature
+    main --- bugfix
+    
+    subgraph feature ["`**Feature**`"]
+      a(feature-coffee-order)
+      b(feature-nft-transaction)
+      c(feature-paint3d-intergration)
+    end
+    
+    main --- documentation(documentation)
+    
+    subgraph bugfix ["`**Bugfix**`"]
+      d(bugfix-69)
+      e(bugfix-420)    
+    end
+    
 ```
 
 ## GitHub
