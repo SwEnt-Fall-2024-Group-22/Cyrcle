@@ -22,7 +22,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: ./cyrcle
+        working-directory: ./${{ env.base_folder }}
 
     steps:
       - name: Checkout
