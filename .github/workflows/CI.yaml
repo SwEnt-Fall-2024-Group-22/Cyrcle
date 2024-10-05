@@ -25,6 +25,16 @@ jobs:
           submodules: recursive
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of Sonar analysis
 
+      # Caused issues during the bootcamp. If any arise in this project, uncomment these lines
+      #- name: Remove current gradle cache
+      #  run: rm -rf ~/.gradle
+
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+=="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
       # Kernel-based Virtual Machine (KVM) is an open source virtualization technology built into Linux.
       # Enabling it allows the Android emulator to run faster.
       - name: Enable KVM group perms
@@ -44,6 +54,14 @@ jobs:
       # To avoid that, we cache the the gradle folder to reuse it later.
       - name: Gradle cache
         uses: gradle/actions/setup-gradle@v3
+
+      - name: Decode secrets
+        env:
+          GOOGLE_SERVICES: ${{ secrets.GOOGLE_SERVICES }}
+          LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
+        run: |
+          echo "$GOOGLE_SERVICES" | base64 --decode > ./app/google-services.json
+          echo "$LOCAL_PROPERTIES" | base64 --decode > ./local.properties
 
       # Cache the Emulator, if the cache does not hit, create the emulator
       - name: AVD cache
