@@ -15,8 +15,7 @@ jobs:
   cyrcle-ci:
     name: Cyrcle CI
 
-    runs-on:
-      group: ubuntu-latest
+    runs-on: ubuntu-latest
 
     env:
       app_name: CyrcleDebug
