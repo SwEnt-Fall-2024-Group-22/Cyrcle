@@ -115,4 +115,5 @@ Something could be optimized
 A question to ask the course staff
 
 ### Code beauty
-In a file, please stay within 80-, 100-, or 120 character length.
+In a file, please stay within 80-, 100-, or 120 character length. Choose one and stay consistent
+within a file.
