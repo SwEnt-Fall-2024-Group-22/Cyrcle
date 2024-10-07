@@ -7,17 +7,17 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavHostController
 
 object Route {
-  const val Auth = "Auth"
-  const val List = "List"
-  const val Map = "Map"
-  const val Card = "Card"
+  const val AUTH = "Auth"
+  const val LIST = "List"
+  const val MAP = "Map"
+  const val CARD = "Card"
 }
 
 object Screen {
-  const val Auth = "Auth Screen"
-  const val List = "List Screen"
-  const val Map = "Map Screen"
-  const val Card = "Card Screen"
+  const val AUTH = "Auth Screen"
+  const val LIST = "List Screen"
+  const val MAP = "Map Screen"
+  const val CARD = "Card Screen"
 }
 
 /**
@@ -31,12 +31,12 @@ data class TopLevelDestination(val route: String, val icon: ImageVector, val tex
 
 /** Object containing the top level destinations in the app. */
 object TopLevelDestinations {
-  val List = TopLevelDestination(route = Route.List, icon = Icons.Outlined.Menu, textId = "List")
-  val Map = TopLevelDestination(route = Route.Map, icon = Icons.Outlined.LocationOn, textId = "Map")
+  val LIST = TopLevelDestination(route = Route.LIST, icon = Icons.Outlined.Menu, textId = "List")
+  val MAP = TopLevelDestination(route = Route.MAP, icon = Icons.Outlined.LocationOn, textId = "Map")
 }
 
 /** List of top level destinations in the app. */
-val LIST_TOP_LEVEL_DESTINATION = listOf(TopLevelDestinations.List, TopLevelDestinations.Map)
+val LIST_TOP_LEVEL_DESTINATION = listOf(TopLevelDestinations.LIST, TopLevelDestinations.MAP)
 
 /** Adapter class for navigating between screens in the app. */
 open class NavigationActions(private val navController: NavHostController) {
