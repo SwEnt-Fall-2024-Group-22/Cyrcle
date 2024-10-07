@@ -24,38 +24,38 @@ class MainActivity : ComponentActivity() {
     val navController = rememberNavController()
     val navigationActions = NavigationActions(navController)
 
-    NavHost(navController = navController, startDestination = Route.Auth) {
+    NavHost(navController = navController, startDestination = Route.AUTH) {
       navigation(
-          startDestination = Screen.Auth,
-          route = Route.Auth,
+          startDestination = Screen.AUTH,
+          route = Route.AUTH,
       ) {
-        composable(Screen.Auth) {
+        composable(Screen.AUTH) {
           /* TO BE COMPLETED */
         }
 
         navigation(
-            startDestination = Screen.List,
-            route = Route.List,
+            startDestination = Screen.LIST,
+            route = Route.LIST,
         ) {
-          composable(Screen.List) {
+          composable(Screen.LIST) {
             /* TO BE COMPLETED */
           }
         }
 
         navigation(
-            startDestination = Screen.Map,
-            route = Route.Map,
+            startDestination = Screen.MAP,
+            route = Route.MAP,
         ) {
-          composable(Screen.Map) {
+          composable(Screen.MAP) {
             /* TO BE COMPLETED */
           }
         }
 
         navigation(
-            startDestination = Screen.Card,
-            route = Route.Card,
+            startDestination = Screen.CARD,
+            route = Route.CARD,
         ) {
-          composable(Screen.Card) {
+          composable(Screen.CARD) {
             /* TO BE COMPLETED */
           }
         }
