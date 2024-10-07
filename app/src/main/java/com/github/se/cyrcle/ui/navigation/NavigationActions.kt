@@ -20,13 +20,22 @@ object Screen {
   const val Card = "Card Screen"
 }
 
+/**
+ * Data class representing a top level destination in the app.
+ *
+ * @param route The route of the destination
+ * @param icon The icon to display for the destination
+ * @param textId The string resource ID for the text to display for the destination
+ */
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
 
+/** Object containing the top level destinations in the app. */
 object TopLevelDestinations {
   val List = TopLevelDestination(route = Route.List, icon = Icons.Outlined.Menu, textId = "List")
   val Map = TopLevelDestination(route = Route.Map, icon = Icons.Outlined.LocationOn, textId = "Map")
 }
 
+/** Adapter class for navigating between screens in the app. */
 open class NavigationActions(private val navController: NavHostController) {
 
   /**
@@ -54,6 +63,11 @@ open class NavigationActions(private val navController: NavHostController) {
     navController.popBackStack()
   }
 
+  /**
+   * Get the current route of the navigation controller.
+   *
+   * @return The current route
+   */
   open fun currentRoute(): String {
     return navController.currentDestination?.route ?: ""
   }
