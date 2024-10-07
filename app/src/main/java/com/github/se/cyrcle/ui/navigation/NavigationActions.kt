@@ -35,6 +35,9 @@ object TopLevelDestinations {
   val Map = TopLevelDestination(route = Route.Map, icon = Icons.Outlined.LocationOn, textId = "Map")
 }
 
+/** List of top level destinations in the app. */
+val LIST_TOP_LEVEL_DESTINATION = listOf(TopLevelDestinations.List, TopLevelDestinations.Map)
+
 /** Adapter class for navigating between screens in the app. */
 open class NavigationActions(private val navController: NavHostController) {
 
