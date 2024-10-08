@@ -37,11 +37,7 @@ object TopLevelDestinations {
   val MAP =
       TopLevelDestination(route = Route.MAP, icon = Icons.Outlined.LocationOn, textId = Route.MAP)
   val AUTH =
-      TopLevelDestination(route = Route.AUTH, icon = Icons.Outlined.AccountBox, textId = "Auth")
-  val LIST =
-      TopLevelDestination(route = Route.LIST, icon = Icons.Outlined.Menu, textId = Route.LIST)
-  val MAP =
-      TopLevelDestination(route = Route.MAP, icon = Icons.Outlined.LocationOn, textId = Route.MAP)
+      TopLevelDestination(route = Route.AUTH, icon = Icons.Outlined.AccountBox, textId = Route.AUTH)
 }
 
 /** List of top level destinations in the app. */
