@@ -32,32 +32,32 @@ class MainActivity : ComponentActivity() {
         composable(Screen.AUTH) {
           /* TO BE COMPLETED */
         }
+      }
 
-        navigation(
-            startDestination = Screen.LIST,
-            route = Route.LIST,
-        ) {
-          composable(Screen.LIST) {
-            /* TO BE COMPLETED */
-          }
+      navigation(
+          startDestination = Screen.LIST,
+          route = Route.LIST,
+      ) {
+        composable(Screen.LIST) {
+          /* TO BE COMPLETED */
         }
+      }
 
-        navigation(
-            startDestination = Screen.MAP,
-            route = Route.MAP,
-        ) {
-          composable(Screen.MAP) {
-            /* TO BE COMPLETED */
-          }
+      navigation(
+          startDestination = Screen.MAP,
+          route = Route.MAP,
+      ) {
+        composable(Screen.MAP) {
+          /* TO BE COMPLETED */
         }
+      }
 
-        navigation(
-            startDestination = Screen.CARD,
-            route = Route.CARD,
-        ) {
-          composable(Screen.CARD) {
-            /* TO BE COMPLETED */
-          }
+      navigation(
+          startDestination = Screen.CARD,
+          route = Route.CARD,
+      ) {
+        composable(Screen.CARD) {
+          /* TO BE COMPLETED */
         }
       }
     }
