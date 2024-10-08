@@ -53,8 +53,8 @@ jobs:
         env:
           GOOGLE_SERVICES: ${{ secrets.GOOGLE_SERVICES }}
           LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
-          MAPBOX_ACCESS_TOKEN: ${{ secrets.MAP_ACCESS_TOKEN }}
-          MAPBOX_DOWNLOADS_TOKEN: ${{ secrets.MAP_DOWNLOADS_TOKEN }}
+          MAPBOX_ACCESS_TOKEN: ${{ secrets.MAPBOX_ACCESS_TOKEN }}
+          MAPBOX_DOWNLOADS_TOKEN: ${{ secrets.MAPBOX_DOWNLOADS_TOKEN }}
         run: |
           echo "$GOOGLE_SERVICES" | base64 --decode > ./app/google-services.json
           echo "MAPBOX_ACCESS_TOKEN=" > ./local.properties
