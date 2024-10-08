@@ -3,25 +3,23 @@ package com.github.se.cyrcle
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
+import com.github.se.cyrcle.ui.authentication.SignInScreen
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Surface
-import androidx.compose.ui.Modifier
-import com.github.se.cyrcle.ui.authentication.SignInScreen
 import com.github.se.cyrcle.ui.theme.CyrcleTheme
 import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
   private lateinit var auth: FirebaseAuth
-
-
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -33,13 +31,7 @@ class MainActivity : ComponentActivity() {
       auth.signOut()
     }
 
-    setContent {
-      CyrcleTheme {
-        Surface(modifier = Modifier.fillMaxSize()) {
-          SignInScreen()
-        }
-      }
-    }
+    setContent { CyrcleTheme { Surface(modifier = Modifier.fillMaxSize()) { CyrcleApp() } } }
   }
 
   @Composable
@@ -52,35 +44,33 @@ class MainActivity : ComponentActivity() {
           startDestination = Screen.AUTH,
           route = Route.AUTH,
       ) {
-        composable(Screen.AUTH) {
+        composable(Screen.AUTH) { SignInScreen(navigationActions) }
+      }
+
+      navigation(
+          startDestination = Screen.LIST,
+          route = Route.LIST,
+      ) {
+        composable(Screen.LIST) {
           /* TO BE COMPLETED */
         }
+      }
 
-        navigation(
-            startDestination = Screen.LIST,
-            route = Route.LIST,
-        ) {
-          composable(Screen.LIST) {
-            /* TO BE COMPLETED */
-          }
+      navigation(
+          startDestination = Screen.MAP,
+          route = Route.MAP,
+      ) {
+        composable(Screen.MAP) {
+          /* TO BE COMPLETED */
         }
+      }
 
-        navigation(
-            startDestination = Screen.MAP,
-            route = Route.MAP,
-        ) {
-          composable(Screen.MAP) {
-            /* TO BE COMPLETED */
-          }
-        }
-
-        navigation(
-            startDestination = Screen.CARD,
-            route = Route.CARD,
-        ) {
-          composable(Screen.CARD) {
-            /* TO BE COMPLETED */
-          }
+      navigation(
+          startDestination = Screen.CARD,
+          route = Route.CARD,
+      ) {
+        composable(Screen.CARD) {
+          /* TO BE COMPLETED */
         }
       }
     }
