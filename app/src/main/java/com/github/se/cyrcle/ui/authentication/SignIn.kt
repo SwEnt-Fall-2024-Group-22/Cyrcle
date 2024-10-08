@@ -77,15 +77,6 @@ fun SignInScreen(navigationActions: NavigationActions) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-
-          // App Logo Image
-          Image(
-              painter = painterResource(id = R.drawable.app_logo),
-              contentDescription = "App Logo",
-              modifier = Modifier.size(250.dp))
-
-          Spacer(modifier = Modifier.height(16.dp))
-
           // Welcome Text
           Text(
               modifier = Modifier.testTag("loginTitle"),
@@ -94,6 +85,13 @@ fun SignInScreen(navigationActions: NavigationActions) {
                   MaterialTheme.typography.headlineLarge.copy(fontSize = 57.sp, lineHeight = 64.sp),
               fontWeight = FontWeight.Bold,
               textAlign = TextAlign.Center)
+          Spacer(modifier = Modifier.height(16.dp))
+
+          // App Logo Image
+          Image(
+              painter = painterResource(id = R.drawable.app_logo),
+              contentDescription = "App Logo",
+              modifier = Modifier.size(350.dp))
 
           Spacer(modifier = Modifier.height(48.dp))
 
@@ -120,7 +118,7 @@ fun GoogleSignInButton(onSignInClick: () -> Unit) {
       shape = RoundedCornerShape(50),
       border = BorderStroke(1.dp, Color.LightGray),
       modifier =
-          Modifier.padding(8.dp)
+          Modifier.padding(16.dp)
               .height(48.dp) // Adjust height as needed
               .testTag("loginButton")) {
         Row(
