@@ -31,8 +31,10 @@ data class TopLevelDestination(val route: String, val icon: ImageVector, val tex
 
 /** Object containing the top level destinations in the app. */
 object TopLevelDestinations {
-  val LIST = TopLevelDestination(route = Route.LIST, icon = Icons.Outlined.Menu, textId = "List")
-  val MAP = TopLevelDestination(route = Route.MAP, icon = Icons.Outlined.LocationOn, textId = "Map")
+  val LIST =
+      TopLevelDestination(route = Route.LIST, icon = Icons.Outlined.Menu, textId = Route.LIST)
+  val MAP =
+      TopLevelDestination(route = Route.MAP, icon = Icons.Outlined.LocationOn, textId = Route.MAP)
 }
 
 /** List of top level destinations in the app. */
