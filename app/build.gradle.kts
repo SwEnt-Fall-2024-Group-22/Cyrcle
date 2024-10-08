@@ -139,11 +139,7 @@ android {
         res.setSrcDirs(emptyList<File>())
         resources.setSrcDirs(emptyList<File>())
     }
-
-
 }
-
-
 
 
 dependencies {
