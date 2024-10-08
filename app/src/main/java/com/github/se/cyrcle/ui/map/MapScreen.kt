@@ -20,6 +20,5 @@ fun MapScreen() {
               pitch(0.0)
               bearing(0.0)
             }
-          }
-  )
+          })
 }
