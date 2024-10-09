@@ -197,6 +197,9 @@ dependencies {
             // Networking with OkHttp
             implementation(libs.okhttp)
 
+            // GSON
+            implementation(libs.gson)
+
             // Testing Unit
             testImplementation(libs.junit)
             androidTestImplementation(libs.mockk)
