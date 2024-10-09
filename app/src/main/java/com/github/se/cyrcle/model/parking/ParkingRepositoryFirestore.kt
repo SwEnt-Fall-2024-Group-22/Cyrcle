@@ -4,6 +4,8 @@ import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRepository {
 
@@ -26,8 +28,7 @@ class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRep
     db.collection(collectionPath).get().addOnCompleteListener { task ->
       if (task.isSuccessful) {
         val parkings =
-            task.result?.mapNotNull { document -> document.toObject(Parking::class.java) }
-                ?: emptyList()
+            task.result?.mapNotNull { document -> deserializeParking(document.data) } ?: emptyList()
         onSuccess(parkings)
       } else {
         task.exception?.let { e ->
@@ -47,7 +48,7 @@ class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRep
         .document(id)
         .get()
         .addOnSuccessListener { document ->
-          val parking = document.toObject(Parking::class.java)
+          val parking = document.data?.let { deserializeParking(it) }
           if (parking != null) {
             onSuccess(parking)
           } else {
@@ -73,7 +74,7 @@ class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRep
         .addOnCompleteListener { task ->
           if (task.isSuccessful) {
             val parkings =
-                task.result?.mapNotNull { document -> document.toObject(Parking::class.java) }
+                task.result?.mapNotNull { document -> deserializeParking(document.data) }
                     ?: emptyList()
             onSuccess(parkings)
           } else {
@@ -121,7 +122,7 @@ class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRep
   override fun addParking(parking: Parking, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     db.collection(collectionPath)
         .document(parking.uid)
-        .set(parking)
+        .set(serializeParking(parking))
         .addOnSuccessListener { onSuccess() }
         .addOnFailureListener { onFailure(it) }
   }
@@ -133,7 +134,7 @@ class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRep
   ) {
     db.collection(collectionPath)
         .document(parking.uid)
-        .set(parking)
+        .set(serializeParking(parking))
         .addOnSuccessListener { onSuccess() }
         .addOnFailureListener { onFailure(it) }
   }
@@ -148,5 +149,16 @@ class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRep
         .delete()
         .addOnSuccessListener { onSuccess() }
         .addOnFailureListener { onFailure(it) }
+  }
+
+  private fun serializeParking(parking: Parking): Map<String, Any> {
+    val gson = Gson()
+    val type = object : TypeToken<Map<String, Any>>() {}.type
+    return gson.fromJson(gson.toJson(parking), type)
+  }
+
+  private fun deserializeParking(map: Map<String, Any>): Parking {
+    val gson = Gson()
+    return gson.fromJson(gson.toJson(map), Parking::class.java)
   }
 }
