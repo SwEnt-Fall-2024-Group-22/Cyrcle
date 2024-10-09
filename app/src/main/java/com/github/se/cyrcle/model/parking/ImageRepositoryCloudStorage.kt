@@ -6,6 +6,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 
 class ImageRepositoryCloudStorage(private val auth: FirebaseAuth) : ImageRepository {
@@ -13,27 +14,23 @@ class ImageRepositoryCloudStorage(private val auth: FirebaseAuth) : ImageReposit
   private val storage: FirebaseStorage = FirebaseStorage.getInstance()
   private val storageRef: StorageReference = storage.reference
 
-  init {
-    if (auth.currentUser == null) {
-      // This forces the user to sign in anonymously to use the app.
-      // this is not a good practice. a mock should be used instead when testing.
-      auth.signInAnonymously().addOnCompleteListener {
-        if (it.isSuccessful) {
-          Log.d("ParkingRepositoryCloudStorage", "signInAnonymously:success")
-        } else {
-          Log.e("ParkingRepositoryCloudStorage", "signInAnonymously:failure", it.exception)
-        }
+  private suspend fun signInAnonymously() =
+      suspendCancellableCoroutine<Unit> { continuation ->
+        auth
+            .signInAnonymously()
+            .addOnSuccessListener { continuation.resume(Unit) }
+            .addOnFailureListener { exception -> continuation.resumeWithException(exception) }
       }
-    }
-  }
 
-  suspend fun getUrl(path: String): String = suspendCancellableCoroutine { continuation ->
+  override suspend fun getUrl(path: String): String = suspendCancellableCoroutine { continuation ->
     if (auth.currentUser == null) {
-      storageRef
-          .child(path)
-          .downloadUrl
-          .addOnSuccessListener { uri -> continuation.resume(uri.toString()) }
-          .addOnFailureListener { exception -> continuation.resumeWithException(exception) }
+      Log.d("ImageRepositoryCloudStorage", "user not logged in , signInAnonymously")
+      runBlocking { signInAnonymously() }
     }
+    storageRef
+        .child(path)
+        .downloadUrl
+        .addOnSuccessListener { uri -> continuation.resume(uri.toString()) }
+        .addOnFailureListener { exception -> continuation.resumeWithException(exception) }
   }
 }
