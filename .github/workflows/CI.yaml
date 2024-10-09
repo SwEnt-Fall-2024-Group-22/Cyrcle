@@ -56,15 +56,8 @@ jobs:
           MAPBOX_ACCESS_TOKEN: ${{ secrets.MAPBOX_ACCESS_TOKEN }}
           MAPBOX_DOWNLOADS_TOKEN: ${{ secrets.MAPBOX_DOWNLOADS_TOKEN }}
         run: |
-          echo -n "$GOOGLE_SERVICES" | base64 --decode > ./app/google-services.json
-          {
-            echo -n "MAPBOX_ACCESS_TOKEN="
-            echo -n "$MAPBOX_ACCESS_TOKEN" | base64 --decode
-            echo # Line break
-            echo -n "MAPBOX_DOWNLOADS_TOKEN="
-            echo -n "$MAPBOX_DOWNLOADS_TOKEN" | base64 --decode
-          } > ./local.properties
-      
+          echo "$GOOGLE_SERVICES" | base64 --decode > ./app/google-services.json
+          echo "$LOCAL_PROPERTIES" | base64 --decode > ./local.properties
 
       # Cache the Emulator, if the cache does not hit, create the emulator
       - name: AVD cache
