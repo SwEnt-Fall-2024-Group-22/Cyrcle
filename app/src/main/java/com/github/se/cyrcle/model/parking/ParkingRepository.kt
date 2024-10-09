@@ -13,7 +13,7 @@ interface ParkingRepository {
    *
    * @param onSuccess a callback that is called when the repository is initialized
    */
-  fun init(onSuccess: () -> Unit)
+  fun init(onSuccess: () -> Unit = {})
 
   /**
    * Get all parkings
@@ -21,7 +21,7 @@ interface ParkingRepository {
    * @param onSuccess a callback that is called when the parkings are retrieved
    * @param onFailure a callback that is called when an error occurs
    */
-  fun getParkings(onSuccess: (List<Parking>) -> Unit, onFailure: (Exception) -> Unit)
+  fun getParkings(onSuccess: (List<Parking>) -> Unit = {}, onFailure: (Exception) -> Unit = {})
 
   /**
    * Get a parking by its identifier
@@ -30,7 +30,11 @@ interface ParkingRepository {
    * @param onSuccess a callback that is called when the parking is retrieved
    * @param onFailure a callback that is called when an error occurs
    */
-  fun getParkingById(id: String, onSuccess: (Parking) -> Unit, onFailure: (Exception) -> Unit)
+  fun getParkingById(
+      id: String,
+      onSuccess: (Parking) -> Unit = {},
+      onFailure: (Exception) -> Unit = {}
+  )
 
   /**
    * Get parkings between two points
@@ -50,8 +54,8 @@ interface ParkingRepository {
   fun getKClosestParkings(
       location: Point,
       k: Int,
-      onSuccess: (List<Parking>) -> Unit,
-      onFailure: (Exception) -> Unit
+      onSuccess: (List<Parking>) -> Unit = {},
+      onFailure: (Exception) -> Unit = {}
   )
 
   /**
@@ -61,7 +65,7 @@ interface ParkingRepository {
    * @param onSuccess a callback that is called when the parking is added
    * @param onFailure a callback that is called when an error occurs
    */
-  fun addParking(parking: Parking, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
+  fun addParking(parking: Parking, onSuccess: () -> Unit = {}, onFailure: (Exception) -> Unit = {})
 
   /**
    * Update a parking
@@ -70,7 +74,11 @@ interface ParkingRepository {
    * @param onSuccess a callback that is called when the parking is updated
    * @param onFailure a callback that is called when an error occurs
    */
-  fun updateParking(parking: Parking, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
+  fun updateParking(
+      parking: Parking,
+      onSuccess: () -> Unit = {},
+      onFailure: (Exception) -> Unit = {}
+  )
 
   /**
    * Delete a parking by its identifier
@@ -79,5 +87,5 @@ interface ParkingRepository {
    * @param onSuccess a callback that is called when the parking is deleted
    * @param onFailure a callback that is called when an error occurs
    */
-  fun deleteParkingById(id: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
+  fun deleteParkingById(id: String, onSuccess: () -> Unit = {}, onFailure: (Exception) -> Unit = {})
 }
