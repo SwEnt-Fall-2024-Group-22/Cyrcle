@@ -1,53 +1,68 @@
 package com.github.se.cyrcle.model.parking
 
-import com.google.gson.Gson
-import org.junit.Before
+import org.junit.Assert.*
 import org.junit.Test
 
-class ParkingTest {
-  private lateinit var gson: Gson
-  private lateinit var parking: Parking
+class ParkingsTest {
 
-  @Before
-  fun setUp() {
-    gson = Gson()
-    parking =
+  @Test
+  fun testConstructor() {
+    val point = Point(46.518, 6.545)
+    val location = Location(point)
+    val parking =
         Parking(
-            "1",
-            "EPFL",
-            "Parking for EPFL",
-            Pair(46.518, 6.565),
-            listOf("imageUrl"),
-            ParkingCapacity.LARGE,
-            ParkingRackType.TWO_TIER,
-            ParkingProtection.COVERED,
-            0.0,
-            true)
+            uid = "1",
+            optName = "Parking",
+            optDescription = null,
+            location = location,
+            images = listOf("image_url"),
+            capacity = ParkingCapacity.LARGE,
+            rackType = ParkingRackType.U_RACK,
+            protection = ParkingProtection.COVERED,
+            price = 0.0,
+            hasSecurity = true)
+
+    assertEquals("1", parking.uid)
+    assertEquals("Parking", parking.optName)
+    assertNull(parking.optDescription)
+    assertEquals(location, parking.location)
+    assertEquals(listOf("image_url"), parking.images)
+    assertEquals(ParkingCapacity.LARGE, parking.capacity)
+    assertEquals(ParkingRackType.U_RACK, parking.rackType)
+    assertEquals(ParkingProtection.COVERED, parking.protection)
+    assertEquals(0.0, parking.price, 0.0)
+    assertTrue(parking.hasSecurity)
   }
 
   @Test
-  fun testJsonSerialization() {
-    val json = gson.toJson(parking)
-    val parkingFromJson = gson.fromJson(json, Parking::class.java)
-    assert(parking == parkingFromJson)
-  }
-
-  @Test
-  fun testJsonSerializationWithoutName() {
-    val parkingWithoutName =
+  fun testEqualsAndHashCode() {
+    val parking1 =
         Parking(
-            "1",
-            null,
-            null,
-            Pair(46.518, 6.565),
-            listOf("imageUrl"),
-            ParkingCapacity.LARGE,
-            ParkingRackType.TWO_TIER,
-            ParkingProtection.COVERED,
-            0.0,
-            true)
-    val json = gson.toJson(parkingWithoutName)
-    val parkingFromJson = gson.fromJson(json, Parking::class.java)
-    assert(parkingWithoutName == parkingFromJson)
+            uid = "1",
+            optName = "Parking",
+            optDescription = null,
+            location = Location(Point(46.518, 6.545)),
+            images = listOf("image_url"),
+            capacity = ParkingCapacity.LARGE,
+            rackType = ParkingRackType.U_RACK,
+            protection = ParkingProtection.COVERED,
+            price = 0.0,
+            hasSecurity = true)
+
+    val parking2 =
+        Parking(
+            uid = "1",
+            optName = "Parking",
+            optDescription = null,
+            location = Location(Point(46.518, 6.545)),
+            images = listOf("image_url"),
+            capacity = ParkingCapacity.LARGE,
+            rackType = ParkingRackType.U_RACK,
+            protection = ParkingProtection.COVERED,
+            price = 0.0,
+            hasSecurity = true)
+
+    assertEquals(parking1, parking2)
+    assertEquals(parking1.hashCode(), parking2.hashCode())
   }
 }

@@ -1,5 +1,8 @@
 package com.github.se.cyrcle.model.parking
 
+import kotlin.math.pow
+import kotlin.math.sqrt
+
 /**
  * Data class representing a parking spot.
  *
@@ -18,7 +21,7 @@ data class Parking(
     val uid: String,
     val optName: String?,
     val optDescription: String?,
-    val location: Pair<Double, Double>, // TODO: Replace with Mapbox Point
+    val location: Location,
     val images: List<String>,
     val capacity: ParkingCapacity,
     val rackType: ParkingRackType,
@@ -54,4 +57,39 @@ enum class ParkingProtection {
   INDOOR,
   COVERED,
   NONE
+}
+
+data class Point(val latitude: Double, val longitude: Double) {
+  override fun toString(): String {
+    return "Point(latitude=$latitude, longitude=$longitude)"
+  }
+
+  fun distanceTo(other: Point): Double {
+    return sqrt((latitude - other.latitude).pow(2) + (longitude - other.longitude).pow(2))
+  }
+}
+
+data class Location(
+    // TODO replace with Point Mapbox.Point
+    val topLeft: Point?,
+    val topRight: Point?,
+    val bottomLeft: Point?,
+    val bottomRight: Point?,
+    val center: Point?
+) {
+  constructor(
+      topLeft: Point,
+      topRight: Point,
+      bottomLeft: Point,
+      bottomRight: Point
+  ) : this(
+      topLeft,
+      topRight,
+      bottomLeft,
+      bottomRight,
+      Point(
+          (topLeft.latitude + bottomRight.latitude) / 2,
+          (topLeft.longitude + bottomRight.longitude) / 2))
+
+  constructor(center: Point) : this(null, null, null, null, center)
 }
