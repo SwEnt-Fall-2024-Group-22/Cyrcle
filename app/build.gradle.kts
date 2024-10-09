@@ -175,6 +175,8 @@ dependencies {
             implementation ("com.mapbox.extension:maps-compose:11.7.0")
             implementation("com.mapbox.maps:android:11.7.0")
 
+            // Coil
+            implementation(libs.coil.compose)
 
             // Navigation
             implementation(libs.androidx.navigation.compose)
@@ -193,7 +195,7 @@ dependencies {
             implementation(libs.firebase.ui.auth)
             implementation(libs.firebase.auth.ktx)
             implementation(libs.firebase.auth)
-
+            implementation(libs.firebase.storage.ktx)
             // Networking with OkHttp
             implementation(libs.okhttp)
 
@@ -216,11 +218,19 @@ dependencies {
             androidTestImplementation(libs.mockito.android)
             androidTestImplementation(libs.mockito.kotlin)
             testImplementation(libs.robolectric)
-    androidTestImplementation(libs.kaspresso)
-    androidTestImplementation(libs.kaspresso.allure.support)
-    androidTestImplementation(libs.kaspresso.compose.support)
+    androidTestImplementation(libs.kaspresso) {
+        exclude(group = "com.google.protobuf", module = "protobuf-lite")
+    }
+    androidTestImplementation(libs.kaspresso.allure.support) {
+        exclude(group = "com.google.protobuf", module = "protobuf-lite")
+    }
+    androidTestImplementation(libs.kaspresso.compose.support) {
+        exclude(group = "com.google.protobuf", module = "protobuf-lite")
+    }
+
 
             testImplementation(libs.kotlinx.coroutines.test)
+
 
 }
 
