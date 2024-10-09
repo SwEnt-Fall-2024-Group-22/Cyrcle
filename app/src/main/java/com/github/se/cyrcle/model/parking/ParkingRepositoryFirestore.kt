@@ -97,7 +97,7 @@ class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRep
   ) {
     // variables for radius search
     val initialRadius = 0.01
-    val maxRadius = 0.2
+    val maxRadius = 0.5
     val step = 0.01
 
     var currentRadius = initialRadius
@@ -113,7 +113,7 @@ class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRep
               currentRadius += step
               getMoreParkings()
             } else {
-              onSuccess(parkings.take(k))
+              onSuccess(parkings.sortedBy { it.location.center?.distanceTo(location) }.take(k))
             }
           },
           onFailure)
