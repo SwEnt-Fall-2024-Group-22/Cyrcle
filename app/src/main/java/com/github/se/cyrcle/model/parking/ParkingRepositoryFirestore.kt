@@ -64,7 +64,10 @@ class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRep
       onSuccess: (List<Parking>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-
+    if (start.first > end.first || start.second > end.second) {
+      onFailure(Exception("Invalid range"))
+      return
+    }
     db.collection(collectionPath)
         .whereGreaterThanOrEqualTo("location.first", start.first)
         .whereLessThanOrEqualTo("location.first", end.first)

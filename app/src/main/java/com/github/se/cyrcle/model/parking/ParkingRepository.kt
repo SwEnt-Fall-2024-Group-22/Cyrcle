@@ -35,8 +35,8 @@ interface ParkingRepository {
   /**
    * Get parkings between two points
    *
-   * @param start the start point (top left corner) of the area
-   * @param end the end point (bottom right corner) of the area
+   * @param start the start point (bottom left) of the area
+   * @param end the end point (top right corner) of the area
    * @param onSuccess a callback that is called when the parkings are retrieved
    * @param onFailure a callback that is called when an error occurs
    */
