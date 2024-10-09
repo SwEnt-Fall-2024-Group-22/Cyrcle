@@ -39,7 +39,7 @@ class ParkingRepositoryFirestoreTest {
           uid = "1",
           optName = "Parking",
           optDescription = null,
-          location = Pair(46.518, 6.565),
+          location = Location(Point(46.518, 6.545)),
           images = listOf(imageUrl),
           capacity = ParkingCapacity.LARGE,
           rackType = ParkingRackType.U_RACK,
@@ -161,8 +161,8 @@ class ParkingRepositoryFirestoreTest {
 
     // Call the method under test
     parkingRepositoryFirestore.getParkingsBetween(
-        start = Pair(46.5, 6.5),
-        end = Pair(47.0, 6.6),
+        start = Point(46.5, 6.5),
+        end = Point(46.6, 6.6),
         onSuccess = { parkings ->
           // Assert that the returned list contains the expected Parking object
           assert(parkings.size == 1)
@@ -194,7 +194,7 @@ class ParkingRepositoryFirestoreTest {
 
     // Call the method under test
     parkingRepositoryFirestore.getKClosestParkings(
-        location = Pair(46.5, 6.5),
+        location = Point(46.5, 6.5),
         k = 1,
         onSuccess = { parkings ->
           // Assert that the returned list contains the expected Parking object

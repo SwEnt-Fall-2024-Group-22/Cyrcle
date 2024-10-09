@@ -41,14 +41,14 @@ interface ParkingRepository {
    * @param onFailure a callback that is called when an error occurs
    */
   fun getParkingsBetween(
-      start: Pair<Double, Double>,
-      end: Pair<Double, Double>,
-      onSuccess: (List<Parking>) -> Unit,
-      onFailure: (Exception) -> Unit
+      start: Point,
+      end: Point,
+      onSuccess: (List<Parking>) -> Unit = {},
+      onFailure: (Exception) -> Unit = {}
   )
 
   fun getKClosestParkings(
-      location: Pair<Double, Double>,
+      location: Point,
       k: Int,
       onSuccess: (List<Parking>) -> Unit,
       onFailure: (Exception) -> Unit

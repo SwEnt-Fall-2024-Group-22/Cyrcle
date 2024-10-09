@@ -59,20 +59,20 @@ class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRep
   }
 
   override fun getParkingsBetween(
-      start: Pair<Double, Double>,
-      end: Pair<Double, Double>,
+      start: Point,
+      end: Point,
       onSuccess: (List<Parking>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    if (start.first > end.first || start.second > end.second) {
+    if (start.latitude > end.latitude || start.longitude > end.longitude) {
       onFailure(Exception("Invalid range"))
       return
     }
     db.collection(collectionPath)
-        .whereGreaterThanOrEqualTo("location.first", start.first)
-        .whereLessThanOrEqualTo("location.first", end.first)
-        .whereGreaterThanOrEqualTo("location.second", start.second)
-        .whereLessThanOrEqualTo("location.second", end.second)
+        .whereGreaterThanOrEqualTo("location.center.latitude", start.latitude)
+        .whereLessThanOrEqualTo("location.center.latitude", end.latitude)
+        .whereGreaterThanOrEqualTo("location.center.longitude", start.longitude)
+        .whereLessThanOrEqualTo("location.center.longitude", end.longitude)
         .get()
         .addOnCompleteListener { task ->
           if (task.isSuccessful) {
@@ -90,7 +90,7 @@ class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRep
   }
 
   override fun getKClosestParkings(
-      location: Pair<Double, Double>,
+      location: Point,
       k: Int,
       onSuccess: (List<Parking>) -> Unit,
       onFailure: (Exception) -> Unit
@@ -105,8 +105,8 @@ class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRep
 
     fun getMoreParkings() {
       getParkingsBetween(
-          Pair(location.first - currentRadius, location.second - currentRadius),
-          Pair(location.first + currentRadius, location.second + currentRadius),
+          Point(location.latitude - currentRadius, location.longitude - currentRadius),
+          Point(location.latitude + currentRadius, location.longitude + currentRadius),
           { newParkings ->
             parkings = (parkings + newParkings).distinctBy { it.uid }
             if (parkings.size < k && currentRadius < maxRadius) {
