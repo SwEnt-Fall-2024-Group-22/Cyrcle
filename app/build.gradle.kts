@@ -39,6 +39,27 @@ android {
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
     }
 
+    // This block was added to read the mapbox_access_token from local.properties and write mapbox_access_token.xml
+    if (localPropertiesFile.exists()) {
+        localProperties.load(localPropertiesFile.inputStream())
+    }
+
+    val mapboxAccessToken = localProperties.getProperty("MAPBOX_ACCESS_TOKEN")
+    if (mapboxAccessToken != null) {
+        val mapboxAccessTokenXmlFile = file("src/main/res/values/mapbox_access_token.xml")
+        val mapboxAccessTokenXmlContent = """
+            <?xml version="1.0" encoding="utf-8"?>
+            <resources xmlns:tools="http://schemas.android.com/tools">
+                <string name="mapbox_access_token" translatable="false" tools:ignore="UnusedResources">$mapboxAccessToken</string>
+            </resources>
+        """.trimIndent()
+
+        mapboxAccessTokenXmlFile.writeText(mapboxAccessTokenXmlContent)
+    } else {
+        throw GradleException("mapbox_access_token not found in local.properties")
+    }
+
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -118,7 +139,11 @@ android {
         res.setSrcDirs(emptyList<File>())
         resources.setSrcDirs(emptyList<File>())
     }
+
+
 }
+
+
 
 
 dependencies {
@@ -145,6 +170,10 @@ dependencies {
             debugImplementation(libs.androidx.ui.tooling)
             debugImplementation(libs.androidx.ui.test.manifest)
             implementation(libs.material)
+
+            // MapBox API
+            implementation ("com.mapbox.extension:maps-compose:11.7.0")
+            implementation("com.mapbox.maps:android:11.7.0")
 
 
             // Navigation
