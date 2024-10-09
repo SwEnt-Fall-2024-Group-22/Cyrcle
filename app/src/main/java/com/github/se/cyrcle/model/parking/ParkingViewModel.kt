@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.model.parking
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -18,6 +19,10 @@ class ParkingViewModel(
     private val imageRepositoryCloudStorage: ImageRepository,
     private val parkingRepositoryFirestore: ParkingRepository
 ) : ViewModel() {
+
+  // a state that holds all displayed parkings slots
+  private val _displayedSpots = MutableStateFlow<List<Parking>>(emptyList())
+  val displayedSpots: StateFlow<List<Parking>> = _displayedSpots
 
   /**
    * Fetches the image URL from the cloud storage, This function as to be called after retrieving
@@ -39,8 +44,39 @@ class ParkingViewModel(
   }
 
   /** Adds a parking spot to the Firestore database. */
-  fun addParking(parking: Parking, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-    parkingRepositoryFirestore.addParking(parking, onSuccess, onFailure)
+  fun addParking(parking: Parking) {
+    parkingRepositoryFirestore.addParking(parking, {}, {})
+  }
+
+  fun getParking(uid: String) {
+    parkingRepositoryFirestore.getParkingById(
+        uid,
+        { _displayedSpots.value = listOf(it) },
+        { Log.e("ParkingViewModel", "Error getting parking: $it") })
+  }
+
+  fun getParkings(
+      startPos: Pair<Double, Double>,
+      endPos: Pair<Double, Double>,
+  ) {
+    val newStartPos = Pair(minOf(startPos.first, endPos.first), minOf(startPos.second, endPos.second))
+    val newEndPos = Pair(maxOf(startPos.first, endPos.first), maxOf(startPos.second, endPos.second))
+    parkingRepositoryFirestore.getParkingsBetween(
+        newStartPos,
+        newEndPos,
+        { _displayedSpots.value = it },
+        { Log.e("ParkingViewModel", "Error getting parkings: $it") })
+  }
+
+  fun getParkingsByLocation(
+      location: Pair<Double, Double>,
+      k: Int,
+  ) {
+    parkingRepositoryFirestore.getKClosestParkings(
+        location,
+        k,
+        { _displayedSpots.value = it },
+        { Log.e("ParkingViewModel", "Error getting parkings: $it") })
   }
 
   // create factory (imported from bootcamp)
