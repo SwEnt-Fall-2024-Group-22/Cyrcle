@@ -55,21 +55,17 @@ class ParkingViewModel(
         { Log.e("ParkingViewModel", "Error getting parking: $it") })
   }
 
-  fun getParkings(
-      startPos: Pair<Double, Double>,
-      endPos: Pair<Double, Double>,
-  ) {
-    val newStartPos = Pair(minOf(startPos.first, endPos.first), minOf(startPos.second, endPos.second))
-    val newEndPos = Pair(maxOf(startPos.first, endPos.first), maxOf(startPos.second, endPos.second))
+  fun getParkings(startPos: Point, endPos: Point) {
+
     parkingRepositoryFirestore.getParkingsBetween(
-        newStartPos,
-        newEndPos,
+        startPos,
+        endPos,
         { _displayedSpots.value = it },
         { Log.e("ParkingViewModel", "Error getting parkings: $it") })
   }
 
   fun getParkingsByLocation(
-      location: Pair<Double, Double>,
+      location: Point,
       k: Int,
   ) {
     parkingRepositoryFirestore.getKClosestParkings(
