@@ -91,7 +91,31 @@ class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRep
       onSuccess: (List<Parking>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    TODO("Not yet implemented")
+    // variables for radius search
+    val initialRadius = 0.01
+    val maxRadius = 0.2
+    val step = 0.01
+
+    var currentRadius = initialRadius
+    var parkings = emptyList<Parking>()
+
+    fun getMoreParkings() {
+      getParkingsBetween(
+          Pair(location.first - currentRadius, location.second - currentRadius),
+          Pair(location.first + currentRadius, location.second + currentRadius),
+          { newParkings ->
+            parkings = (parkings + newParkings).distinctBy { it.uid }
+            if (parkings.size < k && currentRadius < maxRadius) {
+              currentRadius += step
+              getMoreParkings()
+            } else {
+              onSuccess(parkings.take(k))
+            }
+          },
+          onFailure)
+    }
+
+    getMoreParkings()
   }
 
   override fun addParking(parking: Parking, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {

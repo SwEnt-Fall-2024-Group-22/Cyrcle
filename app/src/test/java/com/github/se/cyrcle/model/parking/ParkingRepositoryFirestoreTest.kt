@@ -176,6 +176,39 @@ class ParkingRepositoryFirestoreTest {
   }
 
   @Test
+  fun getKClosesParkings_returnsCorrectValues() {
+    // Mock the DocumentSnapshot to return the expected Parking object
+    `when`(mockDocumentSnapshot.toObject(Parking::class.java)).thenReturn(parking)
+
+    // Ensure that mockParkingQuerySnapshot is properly initialized and mocked
+    `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockParkingQuerySnapshot))
+
+    // Ensure the QuerySnapshot returns a list of mock DocumentSnapshots
+    `when`(mockParkingQuerySnapshot.documents).thenReturn(listOf(mockDocumentSnapshot))
+
+    // Mock the QuerySnapshot to return the expected Parking object
+    `when`(mockCollectionReference.whereGreaterThanOrEqualTo(any<String>(), any()))
+        .thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.whereLessThanOrEqualTo(any<String>(), any()))
+        .thenReturn(mockCollectionReference)
+
+    // Call the method under test
+    parkingRepositoryFirestore.getKClosestParkings(
+        location = Pair(46.5, 6.5),
+        k = 1,
+        onSuccess = { parkings ->
+          // Assert that the returned list contains the expected Parking object
+          assert(parkings.size == 1)
+          assert(parkings[0] == parking)
+        },
+        onFailure = { fail("Expected success but got failure") })
+
+    // Verify that the 'documents' field was accessed
+    verify(timeout(100)) { (mockParkingQuerySnapshot).documents }
+    verify(timeout(100)) { mockDocumentSnapshot.toObject(Parking::class.java) }
+  }
+
+  @Test
   fun addParking_callsFirestoreSet() {
     `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
 
