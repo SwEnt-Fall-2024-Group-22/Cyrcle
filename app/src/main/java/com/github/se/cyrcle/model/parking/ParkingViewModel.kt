@@ -13,11 +13,11 @@ import kotlinx.coroutines.launch
 /**
  * ViewModel for the Parking feature.
  *
- * @param imageRepositoryCloudStorage the repository for the Parking feature
+ * @param imageRepository the repository for the Parking feature
  */
 class ParkingViewModel(
-    private val imageRepositoryCloudStorage: ImageRepository,
-    private val parkingRepositoryFirestore: ParkingRepository
+    private val imageRepository: ImageRepository,
+    private val parkingRepository: ParkingRepository
 ) : ViewModel() {
 
   // a state that holds all displayed parkings slots /selected parkings
@@ -35,7 +35,7 @@ class ParkingViewModel(
     val imageUrlFlow = MutableStateFlow<String?>(null)
     viewModelScope.launch {
       try {
-        imageUrlFlow.value = imageRepositoryCloudStorage.getUrl(path)
+        imageUrlFlow.value = imageRepository.getUrl(path)
       } catch (e: Exception) {
         imageUrlFlow.value = null
       }
@@ -45,11 +45,11 @@ class ParkingViewModel(
 
   /** Adds a parking spot to the Firestore database. */
   fun addParking(parking: Parking) {
-    parkingRepositoryFirestore.addParking(parking, {}, {})
+    parkingRepository.addParking(parking, {}, {})
   }
 
   fun getParking(uid: String) {
-    parkingRepositoryFirestore.getParkingById(
+    parkingRepository.getParkingById(
         uid,
         { _selectedParkings.value = listOf(it) },
         { Log.e("ParkingViewModel", "Error getting parking: $it") })
@@ -57,7 +57,7 @@ class ParkingViewModel(
 
   fun getParkings(startPos: Point, endPos: Point) {
 
-    parkingRepositoryFirestore.getParkingsBetween(
+    parkingRepository.getParkingsBetween(
         startPos,
         endPos,
         { _selectedParkings.value = it },
@@ -68,7 +68,7 @@ class ParkingViewModel(
       location: Point,
       k: Int,
   ) {
-    parkingRepositoryFirestore.getKClosestParkings(
+    parkingRepository.getKClosestParkings(
         location,
         k,
         { _selectedParkings.value = it },
