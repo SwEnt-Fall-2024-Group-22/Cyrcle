@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.model.parking
 
-import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -24,19 +23,16 @@ class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRep
   }
 
   override fun getParkings(onSuccess: (List<Parking>) -> Unit, onFailure: (Exception) -> Unit) {
-    Log.d("ParkingRepositoryFirestore", "getParkings")
-    db.collection(collectionPath).get().addOnCompleteListener { task ->
-      if (task.isSuccessful) {
-        val parkings =
-            task.result?.mapNotNull { document -> deserializeParking(document.data) } ?: emptyList()
-        onSuccess(parkings)
-      } else {
-        task.exception?.let { e ->
-          Log.e("ParkingRepositoryFirestore", "Error getting documents", e)
-          onFailure(e)
+    db.collection(collectionPath)
+        .get()
+        .addOnSuccessListener { querySnapshot ->
+          val parkings =
+              querySnapshot.documents.mapNotNull { document ->
+                document.data?.let { deserializeParking(it) }
+              }
+          onSuccess(parkings)
         }
-      }
-    }
+        .addOnFailureListener { onFailure(it) }
   }
 
   override fun getParkingById(
@@ -74,19 +70,14 @@ class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRep
         .whereGreaterThanOrEqualTo("location.center.longitude", start.longitude)
         .whereLessThanOrEqualTo("location.center.longitude", end.longitude)
         .get()
-        .addOnCompleteListener { task ->
-          if (task.isSuccessful) {
-            val parkings =
-                task.result?.mapNotNull { document -> deserializeParking(document.data) }
-                    ?: emptyList()
-            onSuccess(parkings)
-          } else {
-            task.exception?.let { e ->
-              Log.e("ParkingRepositoryFirestore", "Error getting documents", e)
-              onFailure(e)
-            }
-          }
+        .addOnSuccessListener { querySnapshot ->
+          val parkings =
+              querySnapshot.documents.mapNotNull { document ->
+                document.data?.let { deserializeParking(it) }
+              }
+          onSuccess(parkings)
         }
+        .addOnFailureListener { e -> onFailure(e) }
   }
 
   override fun getKClosestParkings(
