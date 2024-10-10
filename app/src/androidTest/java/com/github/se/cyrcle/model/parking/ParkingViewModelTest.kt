@@ -104,7 +104,7 @@ class ParkingViewModelTest {
 
     // Check if the parkings returned are the correct ones
     val parkingsReturned = parkingViewModel.selectedParkings.value
-    // assert(parkingsReturned.size == 1)
+    assert(parkingsReturned.size == 1)
     assert(parkingsReturned[0] == TestInstancesParking.parking3)
   }
 }
