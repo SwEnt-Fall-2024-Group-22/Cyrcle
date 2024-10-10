@@ -1,7 +1,6 @@
 package com.github.se.cyrcle.ui.navigation
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AccountBox
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -36,13 +35,10 @@ object TopLevelDestinations {
       TopLevelDestination(route = Route.LIST, icon = Icons.Outlined.Menu, textId = Route.LIST)
   val MAP =
       TopLevelDestination(route = Route.MAP, icon = Icons.Outlined.LocationOn, textId = Route.MAP)
-  val AUTH =
-      TopLevelDestination(route = Route.AUTH, icon = Icons.Outlined.AccountBox, textId = Route.AUTH)
 }
 
 /** List of top level destinations in the app. */
-val LIST_TOP_LEVEL_DESTINATION =
-    listOf(TopLevelDestinations.AUTH, TopLevelDestinations.LIST, TopLevelDestinations.MAP)
+val LIST_TOP_LEVEL_DESTINATION = listOf(TopLevelDestinations.MAP, TopLevelDestinations.LIST)
 
 /** Adapter class for navigating between screens in the app. */
 open class NavigationActions(private val navController: NavHostController) {
