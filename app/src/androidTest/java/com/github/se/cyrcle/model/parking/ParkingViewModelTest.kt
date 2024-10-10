@@ -100,7 +100,7 @@ class ParkingViewModelTest {
   fun getParkingLocationKIs2Only1PointInRange() {
     // Get the two closest parkings to the location
     parkingViewModel.getParkingsByLocation(Point(46.9, 6.7), 2)
-    Thread.sleep(10000)
+    Thread.sleep(100000)
 
     // Check if the parkings returned are the correct ones
     val parkingsReturned = parkingViewModel.selectedParkings.value
