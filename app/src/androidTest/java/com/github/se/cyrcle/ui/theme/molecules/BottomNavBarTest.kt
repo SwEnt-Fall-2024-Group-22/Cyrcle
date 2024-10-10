@@ -22,40 +22,34 @@ import org.mockito.Mockito.mock
 @RunWith(AndroidJUnit4::class)
 class NavigationActionsTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
-    private lateinit var navigationDestination: NavDestination
-    private lateinit var navHostController: NavHostController
-    private lateinit var navigationActions: NavigationActions
+  private lateinit var navigationDestination: NavDestination
+  private lateinit var navHostController: NavHostController
+  private lateinit var navigationActions: NavigationActions
 
-    @Before
-    fun setUp() {
-        navigationDestination = mock(NavDestination::class.java)
-        navHostController = mock(NavHostController::class.java)
-        navigationActions = NavigationActions(navHostController)
+  @Before
+  fun setUp() {
+    navigationDestination = mock(NavDestination::class.java)
+    navHostController = mock(NavHostController::class.java)
+    navigationActions = NavigationActions(navHostController)
+  }
+
+  @Test
+  fun displayBottomNavigationBar() {
+    val testTag = "BottamNavigationBar"
+    composeTestRule.setContent {
+      Scaffold(
+          bottomBar = {
+            BottomNavigationBar({}, LIST_TOP_LEVEL_DESTINATION, Route.AUTH, testTag = testTag)
+          }) { innerPadding ->
+            Column(modifier = Modifier.padding(innerPadding)) {}
+          }
     }
 
-    @Test
-    fun displayBottomNavigationBar() {
-        val testTag = "BottamNavigationBar"
-        composeTestRule.setContent {
-            Scaffold(bottomBar = {
-                BottomNavigationBar(
-                    { },
-                    LIST_TOP_LEVEL_DESTINATION,
-                    Route.AUTH,
-                    testTag = testTag
-                )
-            } ) { innerPadding ->
-                Column(
-                    modifier = Modifier.padding(innerPadding)
-                ) {}
-            }
-        }
-
-        composeTestRule.onNodeWithTag(testTag).assertIsDisplayed()
-        for (topLevelDestination in LIST_TOP_LEVEL_DESTINATION)
-            composeTestRule.onNodeWithTag(topLevelDestination.textId).assertIsDisplayed()
-    }
+    composeTestRule.onNodeWithTag(testTag).assertIsDisplayed()
+    for (topLevelDestination in LIST_TOP_LEVEL_DESTINATION) composeTestRule
+        .onNodeWithTag(topLevelDestination.textId)
+        .assertIsDisplayed()
+  }
 }
