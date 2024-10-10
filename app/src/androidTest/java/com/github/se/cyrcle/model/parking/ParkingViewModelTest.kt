@@ -11,7 +11,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.MockitoAnnotations
 
-class ParkingViewModelTest2 {
+class ParkingViewModelTest {
   private lateinit var parkingViewModel: ParkingViewModel
   private lateinit var parkingRepositoryFirestore: ParkingRepositoryFirestore
   @Mock private lateinit var imageRepository: ImageRepository
@@ -41,7 +41,7 @@ class ParkingViewModelTest2 {
     Thread.sleep(5000)
 
     // Check if the parking returned is the correct one
-    val parkingReturned = parkingViewModel.displayedSpots.value[0]
+    val parkingReturned = parkingViewModel.selectedParkings.value[0]
     assert(parkingReturned == TestInstancesParking.parking1)
   }
 
@@ -52,7 +52,7 @@ class ParkingViewModelTest2 {
     Thread.sleep(5000)
 
     // Check if the parkings returned are the correct ones
-    val parkingsReturned = parkingViewModel.displayedSpots.value
+    val parkingsReturned = parkingViewModel.selectedParkings.value
     Log.d("parkingsReturned", parkingsReturned.toString())
     assert(parkingsReturned.size == 2)
 
@@ -67,7 +67,7 @@ class ParkingViewModelTest2 {
     Thread.sleep(5000)
 
     // Check if the parkings returned are the correct ones
-    val parkingsReturned = parkingViewModel.displayedSpots.value
+    val parkingsReturned = parkingViewModel.selectedParkings.value
     assert(parkingsReturned.isEmpty())
   }
 
@@ -78,7 +78,7 @@ class ParkingViewModelTest2 {
     Thread.sleep(5000)
 
     // Check if the parkings returned are the correct ones
-    val parkingsReturned = parkingViewModel.displayedSpots.value
+    val parkingsReturned = parkingViewModel.selectedParkings.value
     assert(parkingsReturned.size == 1)
     assert(parkingsReturned[0] == TestInstancesParking.parking3)
   }
@@ -90,7 +90,7 @@ class ParkingViewModelTest2 {
     Thread.sleep(10000)
 
     // Check if the parkings returned are the correct ones
-    val parkingsReturned = parkingViewModel.displayedSpots.value
+    val parkingsReturned = parkingViewModel.selectedParkings.value
     assert(parkingsReturned.size == 2)
     assert(parkingsReturned[0] == TestInstancesParking.parking2)
     assert(parkingsReturned[1] == TestInstancesParking.parking3)
@@ -103,7 +103,7 @@ class ParkingViewModelTest2 {
     Thread.sleep(10000)
 
     // Check if the parkings returned are the correct ones
-    val parkingsReturned = parkingViewModel.displayedSpots.value
+    val parkingsReturned = parkingViewModel.selectedParkings.value
     assert(parkingsReturned.size == 1)
     assert(parkingsReturned[0] == TestInstancesParking.parking3)
   }

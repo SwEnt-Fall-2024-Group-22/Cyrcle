@@ -20,9 +20,9 @@ class ParkingViewModel(
     private val parkingRepositoryFirestore: ParkingRepository
 ) : ViewModel() {
 
-  // a state that holds all displayed parkings slots
-  private val _displayedSpots = MutableStateFlow<List<Parking>>(emptyList())
-  val displayedSpots: StateFlow<List<Parking>> = _displayedSpots
+  // a state that holds all displayed parkings slots /selected parkings
+  private val _selectedParkings = MutableStateFlow<List<Parking>>(emptyList())
+  val selectedParkings: StateFlow<List<Parking>> = _selectedParkings
 
   /**
    * Fetches the image URL from the cloud storage, This function as to be called after retrieving
@@ -51,7 +51,7 @@ class ParkingViewModel(
   fun getParking(uid: String) {
     parkingRepositoryFirestore.getParkingById(
         uid,
-        { _displayedSpots.value = listOf(it) },
+        { _selectedParkings.value = listOf(it) },
         { Log.e("ParkingViewModel", "Error getting parking: $it") })
   }
 
@@ -60,7 +60,7 @@ class ParkingViewModel(
     parkingRepositoryFirestore.getParkingsBetween(
         startPos,
         endPos,
-        { _displayedSpots.value = it },
+        { _selectedParkings.value = it },
         { Log.e("ParkingViewModel", "Error getting parkings: $it") })
   }
 
@@ -71,7 +71,7 @@ class ParkingViewModel(
     parkingRepositoryFirestore.getKClosestParkings(
         location,
         k,
-        { _displayedSpots.value = it },
+        { _selectedParkings.value = it },
         { Log.e("ParkingViewModel", "Error getting parkings: $it") })
   }
 
