@@ -2,8 +2,7 @@ import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import com.github.se.cyrcle.FilterHeader
-import com.github.se.cyrcle.ui.card.ParkingCapacity
+import com.github.se.cyrcle.model.parking.*
 import com.github.se.cyrcle.ui.list.FilterHeader
 import org.junit.Rule
 import org.junit.Test
