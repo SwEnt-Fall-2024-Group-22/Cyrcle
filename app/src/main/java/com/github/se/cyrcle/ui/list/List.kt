@@ -14,7 +14,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import com.github.se.cyrcle.ui.card.*
+import com.github.se.cyrcle.model.parking.*
 import com.github.se.cyrcle.ui.theme.DarkBlue
 import kotlin.math.atan2
 import kotlin.math.cos
