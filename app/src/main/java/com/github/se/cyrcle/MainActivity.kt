@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import com.github.se.cyrcle.ui.authentication.SignInScreen
+import com.github.se.cyrcle.ui.map.MapScreen
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
@@ -60,9 +61,7 @@ class MainActivity : ComponentActivity() {
           startDestination = Screen.MAP,
           route = Route.MAP,
       ) {
-        composable(Screen.MAP) {
-          /* TO BE COMPLETED */
-        }
+        composable(Screen.MAP) { MapScreen(navigationActions) }
       }
 
       navigation(
