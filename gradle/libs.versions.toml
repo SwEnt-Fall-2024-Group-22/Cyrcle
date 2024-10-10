@@ -1,6 +1,7 @@
 [versions]
 # Plugins
 agp = "8.4.2"
+gson = "2.11.0"
 json = "20240303"
 kotlin = "1.9.0"
 gms = "4.4.2"
@@ -91,6 +92,7 @@ firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx", version.
 firebase-database-ktx = { module = "com.google.firebase:firebase-database-ktx", version.ref = "firebaseDatabaseKtx" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore", version.ref = "firebaseFirestore" }
 firebase-ui-auth = { module = "com.firebaseui:firebase-ui-auth", version.ref = "firebaseUiAuth" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 json = { module = "org.json:json", version.ref = "json" }
 junit = { module = "junit:junit", version.ref = "junit" }
 kaspresso = { module = "com.kaspersky.android-components:kaspresso", version.ref = "kaspresso" }
