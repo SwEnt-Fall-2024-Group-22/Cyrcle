@@ -171,6 +171,7 @@ dependencies {
             debugImplementation(libs.androidx.ui.test.manifest)
             implementation(libs.material)
 
+
             // MapBox API
             implementation ("com.mapbox.extension:maps-compose:11.7.0")
             implementation("com.mapbox.maps:android:11.7.0")
@@ -207,6 +208,7 @@ dependencies {
             androidTestImplementation(libs.mockk)
             androidTestImplementation(libs.mockk.android)
             androidTestImplementation(libs.mockk.agent)
+            androidTestImplementation("androidx.navigation:navigation-testing:2.7.3")
             testImplementation(libs.json)
 
             // Test UI
