@@ -2,7 +2,6 @@ package com.github.se.cyrcle.ui.authentication
 
 import android.content.Intent
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
@@ -59,13 +58,9 @@ fun SignInScreen(navigationActions: NavigationActions) {
       rememberFirebaseAuthLauncher(
           onAuthComplete = { result ->
             Log.d("Cyrcle", "User signed in: ${result.user?.displayName}")
-            Toast.makeText(context, "Login successful!", Toast.LENGTH_LONG).show()
             navigationActions.navigateTo(TopLevelDestinations.MAP)
           },
-          onAuthError = {
-            Log.e("Cyrcle", "Failed to sign in: ${it.statusCode}")
-            Toast.makeText(context, "Login Failed!", Toast.LENGTH_LONG).show()
-          })
+          onAuthError = { Log.e("Cyrcle", "Failed to sign in: ${it.statusCode}") })
 
   // The main container for the screen
   // A surface container using the 'background' color from the theme
