@@ -14,7 +14,7 @@ flowchart TB
     
     ANDROID_TEST -.Same structure as.-> C_GH_SE_CYRCLE>com/github/se/cyrcle]
 
-    MAIN --> RES>res]
+    MAIN --> RES>res/...]
     MAIN --> SRC_files(AndroidManifest.xml)
     MAIN --> JAVA>java]
     JAVA --> C_GH_SE_CYRCLE
@@ -25,12 +25,14 @@ flowchart TB
     C_GH_SE_CYRCLE --> UI>ui]
     
     MODEL --> MODEL_MAP>map]
+    MODEL --> MODEL_PARKING>parking]
     
     UI --> UI_AUTH>authentication]
     UI --> UI_MAP>map]
     UI --> UI_NAV>navigation]
     UI --> UI_THEME>theme]
 ```
+The `res` folder is not precised here as it do not add a lot at this point of the project.
 
 ## Project from above the `src` directory
 
