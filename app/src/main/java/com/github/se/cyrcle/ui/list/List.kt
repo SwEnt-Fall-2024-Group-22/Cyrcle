@@ -15,7 +15,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.model.parking.*
+import com.github.se.cyrcle.ui.navigation.LIST_TOP_LEVEL_DESTINATION
+import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.DarkBlue
+import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
@@ -265,14 +269,19 @@ fun FilterSection(
 }
 
 @Composable
-fun SpotCard(parking: Parking, distance: Double, matchedCriteria: List<String>) {
+fun SpotCard(
+    navigationActions: NavigationActions,
+    parking: Parking,
+    distance: Double,
+    matchedCriteria: List<String>
+) {
   Card(
       modifier =
           Modifier.fillMaxWidth()
               .height(120.dp)
               .shadow(8.dp, shape = MaterialTheme.shapes.medium)
               .padding(4.dp)
-              .clickable(onClick = { /* Handle card click */})
+              .clickable(onClick = { navigationActions.navigateTo(Screen.CARD) })
               .testTag("SpotCard_${parking.optName ?: "Unnamed"}"),
       colors = CardDefaults.cardColors(containerColor = DarkBlue),
       shape = MaterialTheme.shapes.medium,
@@ -317,30 +326,8 @@ fun SpotCard(parking: Parking, distance: Double, matchedCriteria: List<String>) 
 }
 
 @Composable
-fun BottomBar(isListSelected: Boolean, onNavigateToMap: () -> Unit) {
-  Row(
-      modifier = Modifier.fillMaxWidth().padding(16.dp).background(Color.Gray),
-      horizontalArrangement = Arrangement.SpaceBetween) {
-        Button(
-            onClick = onNavigateToMap,
-            colors =
-                ButtonDefaults.buttonColors(
-                    containerColor = if (isListSelected) Color.Gray else Color(0xFFFFA500))) {
-              Text("Navigate to Map")
-            }
-        Button(
-            onClick = { /* Do nothing, as this is the current screen */},
-            colors =
-                ButtonDefaults.buttonColors(
-                    containerColor = if (isListSelected) Color(0xFF000000) else Color.Gray),
-            enabled = false) {
-              Text("List")
-            }
-      }
-}
-
-@Composable
 fun SpotListScreen(
+    navigationActions: NavigationActions,
     parkingSpots: List<Parking> = parkingSpots1,
     referencePoint: Point = referencePoint1
 ) {
@@ -372,7 +359,10 @@ fun SpotListScreen(
 
   Scaffold(
       bottomBar = {
-        BottomBar(isListSelected = true, onNavigateToMap = { /* Navigate to Map */})
+        BottomNavigationBar(
+            onTabSelect = { navigationActions.navigateTo(it) },
+            tabList = LIST_TOP_LEVEL_DESTINATION,
+            selectedItem = Screen.LIST)
       }) { innerPadding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(innerPadding).padding(bottom = 16.dp),
@@ -382,27 +372,30 @@ fun SpotListScreen(
                 FilterHeader(
                     selectedProtection = selectedProtection,
                     onProtectionSelected = { protection ->
-                      if (selectedProtection.contains(protection)) {
-                        selectedProtection = selectedProtection - protection
-                      } else {
-                        selectedProtection = selectedProtection + protection
-                      }
+                      selectedProtection =
+                          if (selectedProtection.contains(protection)) {
+                            selectedProtection - protection
+                          } else {
+                            selectedProtection + protection
+                          }
                     },
                     selectedRackTypes = selectedRackTypes,
                     onRackTypeSelected = { rackType ->
-                      if (selectedRackTypes.contains(rackType)) {
-                        selectedRackTypes = selectedRackTypes - rackType
-                      } else {
-                        selectedRackTypes = selectedRackTypes + rackType
-                      }
+                      selectedRackTypes =
+                          if (selectedRackTypes.contains(rackType)) {
+                            selectedRackTypes - rackType
+                          } else {
+                            selectedRackTypes + rackType
+                          }
                     },
                     selectedCapacities = selectedCapacities,
                     onCapacitySelected = { capacity ->
-                      if (selectedCapacities.contains(capacity)) {
-                        selectedCapacities = selectedCapacities - capacity
-                      } else {
-                        selectedCapacities = selectedCapacities + capacity
-                      }
+                      selectedCapacities =
+                          if (selectedCapacities.contains(capacity)) {
+                            selectedCapacities - capacity
+                          } else {
+                            selectedCapacities + capacity
+                          }
                     })
               }
               items(sortedFilteredParkingSpots) { (parking, distance) ->
@@ -421,7 +414,7 @@ fun SpotListScreen(
                   matchedCriteria.add("Capacity: ${parking.capacity}")
                 }
 
-                SpotCard(parking, distance, matchedCriteria)
+                SpotCard(navigationActions, parking, distance, matchedCriteria)
               }
             }
       }

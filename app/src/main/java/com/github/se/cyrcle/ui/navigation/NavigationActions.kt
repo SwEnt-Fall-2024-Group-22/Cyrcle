@@ -1,10 +1,10 @@
 package com.github.se.cyrcle.ui.navigation
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AccountBox
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 
 object Route {
@@ -36,13 +36,10 @@ object TopLevelDestinations {
       TopLevelDestination(route = Route.LIST, icon = Icons.Outlined.Menu, textId = Route.LIST)
   val MAP =
       TopLevelDestination(route = Route.MAP, icon = Icons.Outlined.LocationOn, textId = Route.MAP)
-  val AUTH =
-      TopLevelDestination(route = Route.AUTH, icon = Icons.Outlined.AccountBox, textId = Route.AUTH)
 }
 
 /** List of top level destinations in the app. */
-val LIST_TOP_LEVEL_DESTINATION =
-    listOf(TopLevelDestinations.AUTH, TopLevelDestinations.LIST, TopLevelDestinations.MAP)
+val LIST_TOP_LEVEL_DESTINATION = listOf(TopLevelDestinations.MAP, TopLevelDestinations.LIST)
 
 /** Adapter class for navigating between screens in the app. */
 open class NavigationActions(private val navController: NavHostController) {
@@ -55,7 +52,20 @@ open class NavigationActions(private val navController: NavHostController) {
    * Clear the back stack when navigating to a new destination.
    */
   open fun navigateTo(destination: TopLevelDestination) {
-    navController.navigate(destination.route) { popUpTo(navController.graph.startDestinationId) }
+    navController.navigate(destination.route) {
+      // Pop up to the start destination of the graph to
+      // avoid building up a large stack of destinations
+      // on the back stack as users select items
+      popUpTo(navController.graph.findStartDestination().id) {
+        saveState = true
+        inclusive = true
+      }
+      // Avoid multiple copies of the same destination when
+      // reselecting the same item
+      launchSingleTop = true
+      // Restore state when reselecting a previously selected item
+      restoreState = true
+    }
   }
 
   /**
