@@ -41,7 +41,7 @@ class ParkingViewModelTest {
     Thread.sleep(5000)
 
     // Check if the parking returned is the correct one
-    val parkingReturned = parkingViewModel.selectedParkings.value[0]
+    val parkingReturned = parkingViewModel.queriedParkings.value[0]
     assert(parkingReturned == TestInstancesParking.parking1)
   }
 
@@ -52,7 +52,7 @@ class ParkingViewModelTest {
     Thread.sleep(5000)
 
     // Check if the parkings returned are the correct ones
-    val parkingsReturned = parkingViewModel.selectedParkings.value
+    val parkingsReturned = parkingViewModel.queriedParkings.value
     Log.d("parkingsReturned", parkingsReturned.toString())
     assert(parkingsReturned.size == 2)
 
@@ -67,7 +67,7 @@ class ParkingViewModelTest {
     Thread.sleep(5000)
 
     // Check if the parkings returned are the correct ones
-    val parkingsReturned = parkingViewModel.selectedParkings.value
+    val parkingsReturned = parkingViewModel.queriedParkings.value
     assert(parkingsReturned.isEmpty())
   }
 
@@ -78,7 +78,7 @@ class ParkingViewModelTest {
     Thread.sleep(5000)
 
     // Check if the parkings returned are the correct ones
-    val parkingsReturned = parkingViewModel.selectedParkings.value
+    val parkingsReturned = parkingViewModel.queriedParkings.value
     assert(parkingsReturned.size == 1)
     assert(parkingsReturned[0] == TestInstancesParking.parking3)
   }
@@ -90,7 +90,7 @@ class ParkingViewModelTest {
     Thread.sleep(10000)
 
     // Check if the parkings returned are the correct ones
-    val parkingsReturned = parkingViewModel.selectedParkings.value
+    val parkingsReturned = parkingViewModel.queriedParkings.value
     assert(parkingsReturned.size == 2)
     assert(parkingsReturned[0] == TestInstancesParking.parking2)
     assert(parkingsReturned[1] == TestInstancesParking.parking3)
@@ -103,7 +103,7 @@ class ParkingViewModelTest {
     Thread.sleep(100000)
 
     // Check if the parkings returned are the correct ones
-    val parkingsReturned = parkingViewModel.selectedParkings.value
+    val parkingsReturned = parkingViewModel.queriedParkings.value
     assert(parkingsReturned.size == 1)
     assert(parkingsReturned[0] == TestInstancesParking.parking3)
   }

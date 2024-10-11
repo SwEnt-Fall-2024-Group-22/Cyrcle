@@ -20,9 +20,13 @@ class ParkingViewModel(
     private val parkingRepository: ParkingRepository
 ) : ViewModel() {
 
-  // a state that holds all displayed parkings slots /selected parkings
-  private val _selectedParkings = MutableStateFlow<List<Parking>>(emptyList())
-  val selectedParkings: StateFlow<List<Parking>> = _selectedParkings
+  /** List of parkings satisfying the queries */
+  private val _queriedParkings = MutableStateFlow<List<Parking>>(emptyList())
+  val queriedParkings: StateFlow<List<Parking>> = _queriedParkings
+
+  /** Selected parking to review/edit */
+  private val _selectedParking = MutableStateFlow<Parking?>(null)
+  val selectedParking: StateFlow<Parking?> = _selectedParking
 
   /**
    * Fetches the image URL from the cloud storage, This function as to be called after retrieving
@@ -34,33 +38,45 @@ class ParkingViewModel(
   fun fetchImageUrl(path: String): StateFlow<String?> {
     val imageUrlFlow = MutableStateFlow<String?>(null)
     viewModelScope.launch {
-      try {
-        imageUrlFlow.value = imageRepository.getUrl(path)
-      } catch (e: Exception) {
-        imageUrlFlow.value = null
-      }
+      imageUrlFlow.value =
+          try {
+            imageRepository.getUrl(path)
+          } catch (e: Exception) {
+            null
+          }
     }
     return imageUrlFlow
   }
 
-  /** Adds a parking spot to the Firestore database. */
+  /**
+   * Adds a parking to the repository.
+   *
+   * @param parking the parking to add
+   */
   fun addParking(parking: Parking) {
-    parkingRepository.addParking(parking, {}, {})
+    parkingRepository.addParking(
+        parking,
+        { _queriedParkings.value += parking },
+        { Log.e("ParkingViewModel", "Error adding parking", it) })
   }
 
+  /**
+   * Extracts a parking from the repository.
+   *
+   * @param uid the parking id to get
+   */
   fun getParking(uid: String) {
     parkingRepository.getParkingById(
         uid,
-        { _selectedParkings.value = listOf(it) },
+        { _queriedParkings.value = listOf(it) },
         { Log.e("ParkingViewModel", "Error getting parking: $it") })
   }
 
   fun getParkings(startPos: Point, endPos: Point) {
-
     parkingRepository.getParkingsBetween(
         startPos,
         endPos,
-        { _selectedParkings.value = it },
+        { _queriedParkings.value = it },
         { Log.e("ParkingViewModel", "Error getting parkings: $it") })
   }
 
@@ -71,7 +87,7 @@ class ParkingViewModel(
     parkingRepository.getKClosestParkings(
         location,
         k,
-        { _selectedParkings.value = it },
+        { _queriedParkings.value = it },
         { Log.e("ParkingViewModel", "Error getting parkings: $it") })
   }
 
