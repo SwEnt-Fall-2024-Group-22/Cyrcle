@@ -208,7 +208,6 @@ dependencies {
             androidTestImplementation(libs.mockk)
             androidTestImplementation(libs.mockk.android)
             androidTestImplementation(libs.mockk.agent)
-            androidTestImplementation("androidx.navigation:navigation-testing:2.7.3")
             testImplementation(libs.json)
 
             // Test UI

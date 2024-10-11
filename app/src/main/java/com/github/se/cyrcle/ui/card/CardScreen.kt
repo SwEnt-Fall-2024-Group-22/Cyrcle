@@ -125,7 +125,7 @@ val parking3 =
 // Main UI Composable function to display card with parking information
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CardScreen(curParking: Parking = parking1, navigationActions: NavigationActions) {
+fun CardScreen(navigationActions: NavigationActions, curParking: Parking = parking1) {
   // Scaffold provides the structure for the screen with a TopAppBar
   Scaffold(
       topBar = {
