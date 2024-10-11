@@ -12,6 +12,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import com.github.se.cyrcle.ui.authentication.SignInScreen
+import com.github.se.cyrcle.ui.card.CardScreen
+import com.github.se.cyrcle.ui.list.SpotListScreen
 import com.github.se.cyrcle.ui.map.MapScreen
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
@@ -52,9 +54,8 @@ class MainActivity : ComponentActivity() {
           startDestination = Screen.LIST,
           route = Route.LIST,
       ) {
-        composable(Screen.LIST) {
-          /* TO BE COMPLETED */
-        }
+        composable(Screen.LIST) { SpotListScreen(navigationActions) }
+        composable(Screen.CARD) { CardScreen(navigationActions) }
       }
 
       navigation(
@@ -62,15 +63,6 @@ class MainActivity : ComponentActivity() {
           route = Route.MAP,
       ) {
         composable(Screen.MAP) { MapScreen(navigationActions) }
-      }
-
-      navigation(
-          startDestination = Screen.CARD,
-          route = Route.CARD,
-      ) {
-        composable(Screen.CARD) {
-          /* TO BE COMPLETED */
-        }
       }
     }
   }

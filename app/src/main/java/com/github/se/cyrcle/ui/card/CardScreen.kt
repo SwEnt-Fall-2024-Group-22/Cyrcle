@@ -18,8 +18,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,7 +37,7 @@ import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.Point
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.Cerulean
-import com.github.se.cyrcle.ui.theme.LightBlue
+import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
 // Function to convert ParkingProtection enum to human-readable string
 fun convertProtectionToString(protection: ParkingProtection): String {
@@ -123,31 +121,22 @@ val parking3 =
         true)
 
 // Main UI Composable function to display card with parking information
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 fun CardScreen(navigationActions: NavigationActions, curParking: Parking = parking1) {
   // Scaffold provides the structure for the screen with a TopAppBar
   Scaffold(
       topBar = {
         TopAppBar(
+            navigationActions,
             title = {
               Text(
                   text = "Description of ${curParking.uid}",
                   fontSize = 20.sp,
                   fontWeight = FontWeight.Bold,
                   color = Color.White,
-                  modifier = Modifier.testTag("TopAppBarTitle") // Test tag for title
-                  )
-            },
-            colors =
-                TopAppBarColors(
-                    navigationIconContentColor = Color.Black,
-                    titleContentColor = Color.Red,
-                    containerColor = Cerulean,
-                    actionIconContentColor = Color.White,
-                    scrolledContainerColor = LightBlue),
-            modifier = Modifier.padding(vertical = 8.dp).testTag("TopAppBar") // Test tag for AppBar
-            )
+                  modifier = Modifier.testTag("TopAppBarTitle")) // Test tag for title
+            })
       }) {
         Box(
             modifier =
