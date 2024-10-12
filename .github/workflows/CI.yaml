@@ -26,8 +26,8 @@ jobs:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of Sonar analysis
 
       # Caused issues during the bootcamp. If any arise in this project, uncomment these lines
-      - name: Remove current gradle cache
-        run: rm -rf ~/.gradle
+      #- name: Remove current gradle cache
+      #  run: rm -rf ~/.gradle
 
       # Kernel-based Virtual Machine (KVM) is an open source virtualization technology built into Linux.
       # Enabling it allows the Android emulator to run faster.
