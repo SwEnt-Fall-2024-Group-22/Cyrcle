@@ -8,13 +8,11 @@ plugins {
     alias(libs.plugins.ktfmt)
     alias(libs.plugins.gms)
     alias(libs.plugins.sonar)
-
 }
 
 android {
     namespace = "com.github.se.cyrcle"
     compileSdk = 34
-
 
     // Load the API key from local.properties
     val localProperties = Properties()
@@ -24,7 +22,6 @@ android {
     }
 
     val mapsApiKey: String = localProperties.getProperty("MAPS_API_KEY") ?: ""
-
 
     defaultConfig {
         applicationId = "com.github.se.cyrcle"
@@ -59,7 +56,6 @@ android {
     } else {
         throw GradleException("mapbox_access_token not found in local.properties")
     }
-
 
     buildTypes {
         release {
@@ -103,7 +99,6 @@ android {
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
-
             isReturnDefaultValues = true
         }
         packaging {
@@ -112,7 +107,6 @@ android {
             }
         }
     }
-
 
     buildFeatures {
         compose = true
@@ -140,8 +134,6 @@ android {
         res.setSrcDirs(emptyList<File>())
         resources.setSrcDirs(emptyList<File>())
     }
-
-
 }
 
 
@@ -160,8 +152,8 @@ sonar {
     }
 }
 
-dependencies {
 
+dependencies {
     // Core
     implementation(libs.core.ktx)
     implementation(libs.androidx.core.ktx)
@@ -245,10 +237,7 @@ dependencies {
         exclude(group = "com.google.protobuf", module = "protobuf-lite")
     }
 
-
             testImplementation(libs.kotlinx.coroutines.test)
-
-
 }
 
 
@@ -289,8 +278,3 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         include("outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec")
     })
 }
-
-
-
-
-
