@@ -1,6 +1,10 @@
 import java.io.FileInputStream
 import java.util.Properties
 
+
+val jacocoReportLocation = layout.projectDirectory.dir("report")
+
+
 plugins {
     jacoco
     alias(libs.plugins.androidApplication)
@@ -9,6 +13,7 @@ plugins {
     alias(libs.plugins.gms)
     alias(libs.plugins.sonar)
 }
+
 
 android {
     namespace = "com.github.se.cyrcle"
@@ -147,7 +152,7 @@ sonar {
         // Each path may be absolute or relative to the project base directory.
         property("sonar.junit.reportPaths", "${project.layout.buildDirectory.get()}/reports/androidTests/connected/debug")
         // Paths to JaCoCo XML coverage report files.
-        property("sonar.coverage.jacoco.xmlReportPaths", "${project.layout.buildDirectory.get()}/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
+        property("sonar.coverage.jacoco.xmlReportPaths", jacocoReportLocation)
     }
 }
 
@@ -280,4 +285,8 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
         include("outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec")
     })
+}
+
+jacoco {
+    reportsDirectory = jacocoReportLocation
 }
