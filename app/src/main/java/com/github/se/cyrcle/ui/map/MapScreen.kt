@@ -21,7 +21,7 @@ import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
-import com.mapbox.maps.extension.compose.style.GenericStyle
+import com.mapbox.maps.extension.compose.style.MapStyle
 
 @Composable
 fun MapScreen(navigationActions: NavigationActions) {
@@ -44,7 +44,7 @@ fun MapScreen(navigationActions: NavigationActions) {
         MapboxMap(
             Modifier.fillMaxSize().padding(padding).testTag("MapScreen"),
             mapViewportState = mapViewportState,
-            style = { GenericStyle(style = "mapbox://styles/mapbox/light-v11") })
+            style = { MapStyle("mapbox://styles/seanprz/cm27wh9ff00jl01r21jz3hcb1") })
 
         Column(
             Modifier.padding(padding).fillMaxHeight(),
