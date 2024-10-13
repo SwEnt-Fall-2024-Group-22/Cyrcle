@@ -36,7 +36,6 @@ class LoginTest {
 
     navigationHost = mock(NavHostController::class.java)
     navigationActions = NavigationActions(navigationHost)
-
   }
 
   // Release Intents after each test
