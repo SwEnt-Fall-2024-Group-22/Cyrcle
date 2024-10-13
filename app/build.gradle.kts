@@ -2,7 +2,7 @@ import java.io.FileInputStream
 import java.util.Properties
 
 
-val jacocoReportLocation = layout.projectDirectory.dir("build/reports/jacoco/jacocoTestReport")
+val jacocoReportLocation = layout.projectDirectory.dir("build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
 
 
 plugins {
