@@ -146,9 +146,7 @@ sonar {
         // Comma-separated paths to the various directories containing the *.xml JUnit report files.
         // Each path may be absolute or relative to the project base directory.
         // Paths to JaCoCo XML coverage report files.
-        property("sonar.coverage.jacoco.xmlReportPaths", "app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
-        property("sonar.coverage.jacoco.xmlReportPaths", "Cyrcle/app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
-        property("sonar.coverage.jacoco.xmlReportPaths", "Cyrcle/Cyrcle/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
+        property("sonar.coverage.jacoco.xmlReportPaths", "${project.layout.buildDirectory.get()}/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
     }
 }
 
