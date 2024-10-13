@@ -2,7 +2,7 @@ import java.io.FileInputStream
 import java.util.Properties
 
 
-val jacocoReportLocation = layout.projectDirectory.dir("report")
+val jacocoReportLocation = layout.projectDirectory.dir("build/reports/jacoco/jacocoTestReport")
 
 
 plugins {
@@ -281,8 +281,4 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
         include("outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec")
     })
-}
-
-jacoco {
-    reportsDirectory = jacocoReportLocation
 }
