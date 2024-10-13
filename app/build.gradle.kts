@@ -145,6 +145,7 @@ sonar {
         property("sonar.host.url", "https://sonarcloud.io")
         // Comma-separated paths to the various directories containing the *.xml JUnit report files.
         // Each path may be absolute or relative to the project base directory.
+        property("sonar.junit.reportPaths", "${project.layout.buildDirectory.get()}/reports/androidTests/connected/debug")
         // Paths to JaCoCo XML coverage report files.
         property("sonar.coverage.jacoco.xmlReportPaths", "${project.layout.buildDirectory.get()}/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
     }
