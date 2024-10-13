@@ -33,5 +33,10 @@ class MapScreenTest : TestCase() {
 
     composeTestRule.onNodeWithTag("MapScreen").assertIsDisplayed()
     composeTestRule.onNodeWithTag("BottomNavigationBar").assertIsDisplayed()
+
+    // Assert that the zoom controls are displayed
+    composeTestRule.onNodeWithTag("ZoomControls").assertIsDisplayed()
+    // Assert that the add button is displayed
+    composeTestRule.onNodeWithTag("AddButton").assertIsDisplayed()
   }
 }

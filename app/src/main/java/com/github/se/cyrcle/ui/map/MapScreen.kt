@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
@@ -35,14 +33,7 @@ fun MapScreen(navigationActions: NavigationActions) {
       bearing(0.0)
     }
   }
-  LaunchedEffect(mapViewportState.cameraState) {
-    snapshotFlow { mapViewportState.cameraState?.center }
-        .collect { centerPoint ->
-          centerPoint?.let {
-            println("Center Point: Latitude = ${it.latitude()}, Longitude = ${it.longitude()}")
-          }
-        }
-  }
+
   Scaffold(
       bottomBar = {
         BottomNavigationBar(

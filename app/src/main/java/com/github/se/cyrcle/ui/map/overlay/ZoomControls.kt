@@ -15,6 +15,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.ui.theme.CyrcleTheme
@@ -26,7 +27,8 @@ fun ZoomControls(onZoomIn: () -> Unit, onZoomOut: () -> Unit) {
         modifier =
             Modifier.padding(15.dp)
                 .background(Color.Black.copy(alpha = 0.70f), shape = RoundedCornerShape(8.dp))
-                .sizeIn(maxWidth = 35.dp)) {
+                .sizeIn(maxWidth = 35.dp)
+                .testTag("ZoomControls")) {
           Box {
             IconButton(onClick = onZoomIn) {
               Icon(Icons.Default.Add, contentDescription = "Zoom In", tint = Color.White)
