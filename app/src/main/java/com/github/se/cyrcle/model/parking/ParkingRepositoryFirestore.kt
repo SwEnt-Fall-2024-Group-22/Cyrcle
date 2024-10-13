@@ -3,6 +3,9 @@ package com.github.se.cyrcle.model.parking
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.firestoreSettings
+import com.google.firebase.firestore.memoryCacheSettings
+import com.google.firebase.firestore.persistentCacheSettings
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
@@ -10,16 +13,26 @@ class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRep
 
   private val collectionPath = "parkings"
 
-  override fun getNewUid(): String {
-    return db.collection(collectionPath).document().id
+  init {
+    val settings = firestoreSettings {
+      // Use memory cache
+      setLocalCacheSettings(memoryCacheSettings {})
+      // Use persistent disk cache (default)
+      setLocalCacheSettings(persistentCacheSettings {})
+    }
+    db.firestoreSettings = settings
   }
 
-  override fun init(onSuccess: () -> Unit) {
+  override fun onSignIn(onSuccess: () -> Unit) {
     Firebase.auth.addAuthStateListener {
       if (it.currentUser != null) {
         onSuccess()
       }
     }
+  }
+
+  override fun getNewUid(): String {
+    return db.collection(collectionPath).document().id
   }
 
   override fun getParkings(onSuccess: (List<Parking>) -> Unit, onFailure: (Exception) -> Unit) {

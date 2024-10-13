@@ -20,9 +20,13 @@ class ParkingViewModel(
     private val parkingRepository: ParkingRepository
 ) : ViewModel() {
 
-  /** List of parkings satisfying the queries */
-  private val _queriedParkings = MutableStateFlow<List<Parking>>(emptyList())
-  val queriedParkings: StateFlow<List<Parking>> = _queriedParkings
+  /** List of parkings within the designated area */
+  private val _rectParkings = MutableStateFlow<List<Parking>>(emptyList())
+  val rectParkings: StateFlow<List<Parking>> = _rectParkings
+
+  /** List of k (or less) closest parking queried */
+  private val _kClosestParkings = MutableStateFlow<List<Parking>>(emptyList())
+  val kClosestParkings: StateFlow<List<Parking>> = _kClosestParkings
 
   /** Selected parking to review/edit */
   private val _selectedParking = MutableStateFlow<Parking?>(null)
@@ -55,39 +59,34 @@ class ParkingViewModel(
    */
   fun addParking(parking: Parking) {
     parkingRepository.addParking(
-        parking,
-        { _queriedParkings.value += parking },
-        { Log.e("ParkingViewModel", "Error adding parking", it) })
+        parking, {}, { Log.e("ParkingViewModel", "Error adding parking", it) })
   }
 
   /**
-   * Extracts a parking from the repository.
+   * Select a parking to review/edit.
    *
-   * @param uid the parking id to get
+   * @param parking the parking id to get
    */
-  fun getParking(uid: String) {
-    parkingRepository.getParkingById(
-        uid,
-        { _queriedParkings.value = listOf(it) },
-        { Log.e("ParkingViewModel", "Error getting parking: $it") })
+  fun selectParking(parking: Parking) {
+    _selectedParking.value = parking
   }
 
-  fun getParkings(startPos: Point, endPos: Point) {
+  fun getParkingsInRect(startPos: Point, endPos: Point) {
     parkingRepository.getParkingsBetween(
         startPos,
         endPos,
-        { _queriedParkings.value = it },
+        { _rectParkings.value = it },
         { Log.e("ParkingViewModel", "Error getting parkings: $it") })
   }
 
-  fun getParkingsByLocation(
+  fun getKClosestParkings(
       location: Point,
       k: Int,
   ) {
     parkingRepository.getKClosestParkings(
         location,
         k,
-        { _queriedParkings.value = it },
+        { _kClosestParkings.value = it },
         { Log.e("ParkingViewModel", "Error getting parkings: $it") })
   }
 

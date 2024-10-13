@@ -13,7 +13,7 @@ interface ParkingRepository {
    *
    * @param onSuccess a callback that is called when the repository is initialized
    */
-  fun init(onSuccess: () -> Unit = {})
+  fun onSignIn(onSuccess: () -> Unit = {})
 
   /**
    * Get all parkings
