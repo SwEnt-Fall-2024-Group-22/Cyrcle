@@ -131,7 +131,6 @@ jobs:
       #  run: |
       #    ls -la
 
-
       # Upload the various reports to sonar
       - name: Upload report to SonarCloud
         env:
