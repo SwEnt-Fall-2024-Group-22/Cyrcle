@@ -125,7 +125,8 @@ class ParkingRepositoryFirestoreTest {
     `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
     `when`(mockDocumentSnapshot.toObject(Parking::class.java)).thenReturn(parking)
 
-    parkingRepositoryFirestore.getParkingById(parking.uid, onSuccess = { assert(it == parking) })
+    parkingRepositoryFirestore.getParkingById(
+        parking.uid, { assert(it == parking) }, { fail("Expected success but got failure") })
     verify(timeout(100)) { mockDocumentReference.get() }
     verify(timeout(100)) { mockDocumentSnapshot.toObject(Parking::class.java) }
   }

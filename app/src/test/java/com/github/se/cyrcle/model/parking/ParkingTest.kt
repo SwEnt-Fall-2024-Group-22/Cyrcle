@@ -1,6 +1,8 @@
 package com.github.se.cyrcle.model.parking
 
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ParkingsTest {

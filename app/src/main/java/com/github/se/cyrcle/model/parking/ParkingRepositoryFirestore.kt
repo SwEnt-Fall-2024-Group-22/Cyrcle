@@ -10,16 +10,16 @@ class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRep
 
   private val collectionPath = "parkings"
 
-  override fun getNewUid(): String {
-    return db.collection(collectionPath).document().id
-  }
-
-  override fun init(onSuccess: () -> Unit) {
+  override fun onSignIn(onSuccess: () -> Unit) {
     Firebase.auth.addAuthStateListener {
       if (it.currentUser != null) {
         onSuccess()
       }
     }
+  }
+
+  override fun getNewUid(): String {
+    return db.collection(collectionPath).document().id
   }
 
   override fun getParkings(onSuccess: (List<Parking>) -> Unit, onFailure: (Exception) -> Unit) {
