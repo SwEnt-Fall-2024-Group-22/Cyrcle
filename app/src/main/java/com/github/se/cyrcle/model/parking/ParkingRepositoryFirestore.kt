@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.model.parking
 
-import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -158,7 +157,7 @@ class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRep
         .addOnFailureListener { onFailure(it) }
   }
 
-  fun serializeParking(parking: Parking): Map<String, Any> {
+  private fun serializeParking(parking: Parking): Map<String, Any> {
     val gson = Gson()
     val type = object : TypeToken<Map<String, Any>>() {}.type
     val parkingMap: MutableMap<String, Any> = gson.fromJson(gson.toJson(parking), type)
@@ -166,39 +165,48 @@ class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRep
     // Replace Mapbox Point with Point2D serialization
     val locationMap = (parkingMap["location"] as? Map<*, *>)?.toMutableMap()
     locationMap?.let { location ->
-      location["center"] = gson.toJson(Point2D.fromMapboxPoint(parking.location.center))
+      location["center"] = Point2D.fromMapboxPoint(parking.location.center).toSerializedMap()
       parking.location.topLeft?.let { point ->
-        location["topLeft"] = gson.toJson(Point2D.fromMapboxPoint(point))
+        location["topLeft"] = Point2D.fromMapboxPoint(point).toSerializedMap()
       }
       parking.location.topRight?.let { point ->
-        location["topRight"] = gson.toJson(Point2D.fromMapboxPoint(point))
+        location["topRight"] = Point2D.fromMapboxPoint(point).toSerializedMap()
       }
       parking.location.bottomLeft?.let { point ->
-        location["bottomLeft"] = gson.toJson(Point2D.fromMapboxPoint(point))
+        location["bottomLeft"] = Point2D.fromMapboxPoint(point).toSerializedMap()
       }
       parking.location.bottomRight?.let { point ->
-        location["bottomRight"] = gson.toJson(Point2D.fromMapboxPoint(point))
+        location["bottomRight"] = Point2D.fromMapboxPoint(point).toSerializedMap()
       }
       parkingMap["location"] = location
     }
-
     return parkingMap
   }
 
-  fun deserializeParking(map: Map<String, Any>): Parking {
+  private fun deserializeParking(map: Map<String, Any>): Parking {
     val gson = Gson()
     val type = object : TypeToken<Map<String, Any>>() {}.type
     val parkingMap: MutableMap<String, Any> = gson.fromJson(gson.toJson(map), type)
 
     // Replace Point2D serialization with Mapbox Point
     val locationMap = (parkingMap["location"] as? Map<*, *>)?.toMutableMap()
-    print(locationMap)
     locationMap?.let { location ->
-      location["center"] = gson.fromJson(gson.toJson(location["center"]), Point::class.java)
-      location["topLeft"]?.let { location["topLeft"] = gson.fromJson(gson.toJson(it), Point::class.java) }
-      location["topRight"]?.let { location["topRight"] = gson.fromJson(gson.toJson(it), Point::class.java) }
-      location["bottomLeft"]?.let { location["bottomLeft"] = gson.fromJson(gson.toJson(it), Point::class.java) }
-      location["bottomRight"]?.let { location["bottomRight"] = gson.fromJson(gson.toJson(it), Point::class.java) }
+      location["center"] =
+          Point2D.fromSerializedMap(location["center"] as Map<String, Double>).toMapboxPoint()
+      location["topLeft"]?.let {
+        location["topLeft"] = Point2D.fromSerializedMap(it as Map<String, Double>).toMapboxPoint()
+      }
+      location["topRight"]?.let {
+        location["topRight"] = Point2D.fromSerializedMap(it as Map<String, Double>).toMapboxPoint()
+      }
+      location["bottomLeft"]?.let {
+        location["bottomLeft"] =
+            Point2D.fromSerializedMap(it as Map<String, Double>).toMapboxPoint()
+      }
+      location["bottomRight"]?.let {
+        location["bottomRight"] =
+            Point2D.fromSerializedMap(it as Map<String, Double>).toMapboxPoint()
+      }
 
       parkingMap["location"] = location
     }
@@ -212,5 +220,17 @@ private data class Point2D(val longitude: Double, val latitude: Double) {
     fun fromMapboxPoint(point: Point): Point2D {
       return Point2D(point.longitude(), point.latitude())
     }
+
+    fun fromSerializedMap(map: Map<String, Double>): Point2D {
+      return Point2D(map["longitude"]!!, map["latitude"]!!)
+    }
+  }
+
+  fun toMapboxPoint(): Point {
+    return Point.fromLngLat(longitude, latitude)
+  }
+
+  fun toSerializedMap(): Map<String, Any> {
+    return Gson().fromJson(Gson().toJson(this), object : TypeToken<Map<String, Any>>() {}.type)
   }
 }

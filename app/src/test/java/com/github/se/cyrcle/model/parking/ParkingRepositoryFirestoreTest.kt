@@ -236,4 +236,40 @@ class ParkingRepositoryFirestoreTest {
 
     verify(mockDocumentReference).delete()
   }
+
+  /*
+  // This test is commented out because the serializeParking and deserializeParking methods are
+  // private
+  private val parking2 =
+      Parking(
+          uid = "2",
+          optName = "Parking",
+          optDescription = null,
+          location =
+              Location(
+                  Point.fromLngLat(6.545, 46.518),
+                  Point.fromLngLat(6.546, 46.518),
+                  Point.fromLngLat(6.546, 46.519),
+                  Point.fromLngLat(6.545, 46.519)),
+          images = listOf(imageUrl),
+          capacity = ParkingCapacity.LARGE,
+          rackType = ParkingRackType.U_RACK,
+          protection = ParkingProtection.COVERED,
+          price = 0.0,
+          hasSecurity = true)
+
+  @Test
+  fun serializeParking_and_deserializeParking() {
+    val serializedParking = parkingRepositoryFirestore.serializeParking(parking)
+    val deserializedParking = parkingRepositoryFirestore.deserializeParking(serializedParking)
+
+    assert(parking == deserializedParking)
+
+    val serializedParking2 = parkingRepositoryFirestore.serializeParking(parking2)
+    val deserializedParking2 = parkingRepositoryFirestore.deserializeParking(serializedParking2)
+
+    assert(parking2 == deserializedParking2)
+  }
+
+   */
 }
