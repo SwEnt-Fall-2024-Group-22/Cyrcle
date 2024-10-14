@@ -2,9 +2,6 @@ import java.io.FileInputStream
 import java.util.Properties
 
 
-val jacocoReportLocation = layout.projectDirectory.dir("build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
-
-
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
@@ -66,45 +63,49 @@ android {
         release {
             isMinifyEnabled = false
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
             )
         }
+
         debug {
             enableUnitTestCoverage = true
             enableAndroidTestCoverage = true
         }
     }
+
     testCoverage {
         jacocoVersion = "0.8.8"
     }
-    compileOptions {
+    /*compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
         jvmTarget = "11"
-    }
+    }*/
 
     buildFeatures {
         compose = true
-        buildConfig = true
+        //buildConfig = true
     }
 
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
     }
 
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
-            merges += "META-INF/LICENSE.md"
-            merges += "META-INF/LICENSE-notice.md"
-            excludes += "META-INF/LICENSE-notice.md"
-            excludes += "META-INF/LICENSE.md"
-            excludes += "META-INF/LICENSE"
-            excludes += "META-INF/LICENSE.txt"
-            excludes += "META-INF/NOTICE"
-            excludes += "META-INF/NOTICE.txt"
         }
     }
 
@@ -113,11 +114,11 @@ android {
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
         }
-        packaging {
+        /*packaging {
             jniLibs {
                 useLegacyPackaging = true
             }
-        }
+        }*/
     }
 
     // Robolectric needs to be run only in debug. But its tests are placed in the shared source set (test)
@@ -167,78 +168,78 @@ dependencies {
     // Core
     implementation(libs.core.ktx)
     implementation(libs.androidx.core.ktx)
-            implementation(libs.androidx.lifecycle.runtime.ktx)
-            implementation(libs.androidx.activity.compose)
-            implementation(libs.androidx.appcompat)
-            implementation(libs.androidx.constraintlayout)
-            implementation(libs.androidx.fragment.ktx)
-            implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.fragment.ktx)
+    implementation(libs.kotlinx.serialization.json)
 
-            // Jetpack Compose UI
-            implementation(libs.androidx.ui)
-            implementation(libs.androidx.ui.tooling.preview)
-            implementation(libs.androidx.ui.graphics)
-            implementation(libs.androidx.material)
-            implementation(libs.androidx.material3)
-            implementation(libs.androidx.navigation.compose)
-            implementation(platform(libs.androidx.compose.bom))
-            testImplementation(libs.test.core.ktx)
-            debugImplementation(libs.androidx.ui.tooling)
-            debugImplementation(libs.androidx.ui.test.manifest)
-            implementation(libs.material)
+    // Jetpack Compose UI
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.material)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.navigation.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.test.core.ktx)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.material)
 
-            // MapBox API
-            implementation ("com.mapbox.extension:maps-compose:11.7.0")
-            implementation("com.mapbox.maps:android:11.7.0")
+    // MapBox API
+    implementation ("com.mapbox.extension:maps-compose:11.7.0")
+    implementation("com.mapbox.maps:android:11.7.0")
 
-            // Coil
-            implementation(libs.coil.compose)
+    // Coil
+    implementation(libs.coil.compose)
 
-            // Navigation
-            implementation(libs.androidx.navigation.compose)
-            implementation(libs.androidx.navigation.fragment.ktx)
-            implementation(libs.androidx.navigation.ui.ktx)
+    // Navigation
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
 
-            // Google Service and Maps
-            implementation(libs.play.services.maps)
-            implementation(libs.maps.compose)
-            implementation(libs.maps.compose.utils)
-            implementation(libs.play.services.auth)
+    // Google Service and Maps
+    implementation(libs.play.services.maps)
+    implementation(libs.maps.compose)
+    implementation(libs.maps.compose.utils)
+    implementation(libs.play.services.auth)
 
-            // add material icons
-            implementation(libs.androidx.material.icons.extended)
-            // Firebase
-            implementation(libs.firebase.database.ktx)
-            implementation(libs.firebase.firestore)
-            implementation(libs.firebase.ui.auth)
-            implementation(libs.firebase.auth.ktx)
-            implementation(libs.firebase.auth)
-            implementation(libs.firebase.storage.ktx)
-            // Networking with OkHttp
-            implementation(libs.okhttp)
+    // add material icons
+    implementation(libs.androidx.material.icons.extended)
+    // Firebase
+    implementation(libs.firebase.database.ktx)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.ui.auth)
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.storage.ktx)
+    // Networking with OkHttp
+    implementation(libs.okhttp)
 
-            // GSON
-            implementation(libs.gson)
+    // GSON
+    implementation(libs.gson)
 
-            // Testing Unit
-            testImplementation(libs.junit)
-            androidTestImplementation(libs.mockk)
-            androidTestImplementation(libs.mockk.android)
-            androidTestImplementation(libs.mockk.agent)
-            testImplementation(libs.json)
+    // Testing Unit
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.mockk)
+    androidTestImplementation(libs.mockk.android)
+    androidTestImplementation(libs.mockk.agent)
+    testImplementation(libs.json)
 
-            // Test UI
+    // Test UI
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-            androidTestImplementation(libs.androidx.espresso.intents)
-            androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(libs.androidx.espresso.intents)
+    androidTestImplementation(libs.androidx.ui.test.junit4)
     androidTestImplementation(platform(libs.androidx.compose.bom))
-            testImplementation(libs.mockito.core)
-            testImplementation(libs.mockito.inline)
-            testImplementation(libs.mockito.kotlin)
-            androidTestImplementation(libs.mockito.android)
-            androidTestImplementation(libs.mockito.kotlin)
-            testImplementation(libs.robolectric)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.inline)
+    testImplementation(libs.mockito.kotlin)
+    androidTestImplementation(libs.mockito.android)
+    androidTestImplementation(libs.mockito.kotlin)
+    testImplementation(libs.robolectric)
     androidTestImplementation(libs.kaspresso) {
         exclude(group = "com.google.protobuf", module = "protobuf-lite")
     }
@@ -249,7 +250,7 @@ dependencies {
         exclude(group = "com.google.protobuf", module = "protobuf-lite")
     }
 
-            testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
 
 

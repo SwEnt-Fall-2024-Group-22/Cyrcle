@@ -1,5 +1,6 @@
 name: Cyrcle CI - Test Runner
 
+# Run the workflow when commits are pushed on main or when a PR is modified
 on:
   push:
     branches:
@@ -12,9 +13,9 @@ on:
       - reopened
 
 jobs:
-  cyrcle-ci:
+  ci:
     name: Cyrcle CI
-
+    # Execute the CI on the course's runners
     runs-on: ubuntu-latest
 
     steps:
@@ -25,9 +26,6 @@ jobs:
           submodules: recursive
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of Sonar analysis
 
-      # Caused issues during the bootcamp. If any arise in this project, uncomment these lines
-      - name: Remove current gradle cache
-        run: rm -rf ~/.gradle
 
       # Kernel-based Virtual Machine (KVM) is an open source virtualization technology built into Linux.
       # Enabling it allows the Android emulator to run faster.
@@ -43,19 +41,12 @@ jobs:
           distribution: "temurin"
           java-version: "17"
 
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
-          restore-keys: ${{ runner.os }}-gradle
+      # Caching is a very useful part of a CI, as a workflow is executed in a clean environment every time,
+      # this means that one would need to re-download and re-process gradle files for every run. Which is very time consuming.
+      #
+      # To avoid that, we cache the the gradle folder to reuse it later.
+      - name: Gradle cache
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Decode secrets
         env:
@@ -126,10 +117,6 @@ jobs:
       - name: Generate Coverage Report
         run: |
           ./gradlew jacocoTestReport
-
-      - name: Debug by LS
-        run: |
-          ls -la
 
       # Upload the various reports to sonar
       - name: Upload report to SonarCloud
