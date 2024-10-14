@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.model.parking
 
+import com.mapbox.geojson.Point
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -57,7 +58,7 @@ class ParkingViewModelTest {
     }
 
     // Get parkings between the two points
-    parkingViewModel.getParkingsInRect(Point(46.0, 6.0), Point(47.0, 7.0))
+    parkingViewModel.getParkingsInRect(Point.fromLngLat(6.0, 46.0), Point.fromLngLat(7.0, 47.0))
 
     // Check if the parkings returned are the correct ones
     val parkingsReturned = parkingViewModel.rectParkings.value
@@ -73,7 +74,7 @@ class ParkingViewModelTest {
     }
 
     // Get the two closest parkings to the location
-    parkingViewModel.getKClosestParkings(Point(47.1, 7.1), 0)
+    parkingViewModel.getKClosestParkings(Point.fromLngLat(7.1, 47.1), 0)
 
     // Check if the parkings returned are the correct ones
     assert(parkingViewModel.kClosestParkings.value.isEmpty())
@@ -86,7 +87,7 @@ class ParkingViewModelTest {
     }
 
     // Get the two closest parkings to the location
-    parkingViewModel.getKClosestParkings(Point(47.1, 7.1), 1)
+    parkingViewModel.getKClosestParkings(Point.fromLngLat(7.1, 47.1), 1)
 
     // Check if the parkings returned are the correct ones
     val parkingsReturned = parkingViewModel.kClosestParkings.value

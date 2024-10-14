@@ -1,5 +1,7 @@
 package com.github.se.cyrcle.model.parking
 
+import com.mapbox.geojson.Point
+
 /**
  * Data class representing a parking spot.
  *
@@ -57,19 +59,19 @@ enum class ParkingProtection {
 }
 
 data class Location(
-    val center: com.mapbox.geojson.Point,
-    val topLeft: com.mapbox.geojson.Point?,
-    val topRight: com.mapbox.geojson.Point?,
-    val bottomLeft: com.mapbox.geojson.Point?,
-    val bottomRight: com.mapbox.geojson.Point?,
+    val center: Point,
+    val topLeft: Point?,
+    val topRight: Point?,
+    val bottomLeft: Point?,
+    val bottomRight: Point?,
 ) {
   constructor(
-      topLeft: com.mapbox.geojson.Point,
-      topRight: com.mapbox.geojson.Point,
-      bottomLeft: com.mapbox.geojson.Point,
-      bottomRight: com.mapbox.geojson.Point
+      topLeft: Point,
+      topRight: Point,
+      bottomLeft: Point,
+      bottomRight: Point
   ) : this(
-      com.mapbox.geojson.Point.fromLngLat(
+      Point.fromLngLat(
           (topLeft.longitude() + bottomRight.longitude()) / 2,
           (topLeft.latitude() + bottomRight.latitude()) / 2),
       topLeft,
@@ -77,5 +79,5 @@ data class Location(
       bottomLeft,
       bottomRight)
 
-  constructor(center: com.mapbox.geojson.Point) : this(center, null, null, null, null)
+  constructor(center: Point) : this(center, null, null, null, null)
 }
