@@ -127,9 +127,9 @@ jobs:
         run: |
           ./gradlew jacocoTestReport
 
-      #- name: Debug by LS
-      #  run: |
-      #    ls -la
+      - name: Debug by LS
+        run: |
+          ls -la
 
       # Upload the various reports to sonar
       - name: Upload report to SonarCloud
