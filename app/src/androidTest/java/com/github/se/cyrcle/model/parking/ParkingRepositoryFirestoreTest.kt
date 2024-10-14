@@ -1,7 +1,6 @@
 package com.github.se.cyrcle.model.parking
 
 import android.content.Context
-import android.util.Log
 import androidx.test.core.app.ApplicationProvider
 import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.FirebaseFirestore
