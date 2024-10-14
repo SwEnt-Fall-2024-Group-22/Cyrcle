@@ -34,10 +34,10 @@ import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingCapacity
 import com.github.se.cyrcle.model.parking.ParkingProtection
 import com.github.se.cyrcle.model.parking.ParkingRackType
-import com.github.se.cyrcle.model.parking.Point
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.Cerulean
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
+import com.mapbox.geojson.Point
 
 // Function to convert ParkingProtection enum to human-readable string
 fun convertProtectionToString(protection: ParkingProtection): String {
@@ -79,7 +79,7 @@ val parking1 =
         "Test_spot_1",
         null,
         null,
-        Location(Point(46.2, 6.6)),
+        Location(Point.fromLngLat(6.6, 46.2)),
         listOf(
             "https://upload.wikimedia.org/wikipedia/commons/7/78/%22G%C3%A4nsemarkt%22_in_Amance_-_panoramio.jpg",
             "https://upload.wikimedia.org/wikipedia/commons/7/78/%22G%C3%A4nsemarkt%22_in_Amance_-_panoramio.jpg",
@@ -96,7 +96,7 @@ val parking2 =
         "Test_spot_2",
         null,
         null,
-        Location(Point(46.3, 6.7)),
+        Location(Point.fromLngLat(6.7, 46.3)),
         listOf(
             "https://upload.wikimedia.org/wikipedia/commons/6/6b/Bicycle_parking_at_Alewife_station%2C_August_2001.jpg"), // Corrected URL
         ParkingCapacity.SMALL,
@@ -111,7 +111,7 @@ val parking3 =
         "Test_spot_3",
         null,
         null,
-        Location(Point(47.1, 7.1)),
+        Location(Point.fromLngLat(7.1, 47.1)),
         listOf(
             "https://upload.wikimedia.org/wikipedia/commons/6/6b/Bicycle_parking_at_Alewife_station%2C_August_2001.jpg"), // Corrected URL
         ParkingCapacity.LARGE,

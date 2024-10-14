@@ -1,8 +1,5 @@
 package com.github.se.cyrcle.model.parking
 
-import kotlin.math.pow
-import kotlin.math.sqrt
-
 /**
  * Data class representing a parking spot.
  *
@@ -59,37 +56,26 @@ enum class ParkingProtection {
   NONE
 }
 
-data class Point(val latitude: Double, val longitude: Double) {
-  override fun toString(): String {
-    return "Point(latitude=$latitude, longitude=$longitude)"
-  }
-
-  fun distanceTo(other: Point): Double {
-    return sqrt((latitude - other.latitude).pow(2) + (longitude - other.longitude).pow(2))
-  }
-}
-
 data class Location(
-    // TODO replace with Point Mapbox.Point
-    val topLeft: Point?,
-    val topRight: Point?,
-    val bottomLeft: Point?,
-    val bottomRight: Point?,
-    val center: Point?
+    val center: com.mapbox.geojson.Point,
+    val topLeft: com.mapbox.geojson.Point?,
+    val topRight: com.mapbox.geojson.Point?,
+    val bottomLeft: com.mapbox.geojson.Point?,
+    val bottomRight: com.mapbox.geojson.Point?,
 ) {
   constructor(
-      topLeft: Point,
-      topRight: Point,
-      bottomLeft: Point,
-      bottomRight: Point
+      topLeft: com.mapbox.geojson.Point,
+      topRight: com.mapbox.geojson.Point,
+      bottomLeft: com.mapbox.geojson.Point,
+      bottomRight: com.mapbox.geojson.Point
   ) : this(
+      com.mapbox.geojson.Point.fromLngLat(
+          (topLeft.longitude() + bottomRight.longitude()) / 2,
+          (topLeft.latitude() + bottomRight.latitude()) / 2),
       topLeft,
       topRight,
       bottomLeft,
-      bottomRight,
-      Point(
-          (topLeft.latitude + bottomRight.latitude) / 2,
-          (topLeft.longitude + bottomRight.longitude) / 2))
+      bottomRight)
 
-  constructor(center: Point) : this(null, null, null, null, center)
+  constructor(center: com.mapbox.geojson.Point) : this(center, null, null, null, null)
 }

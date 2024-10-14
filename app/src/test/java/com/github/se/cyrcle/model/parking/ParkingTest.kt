@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.model.parking
 
+import com.mapbox.geojson.Point
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -9,7 +10,7 @@ class ParkingsTest {
 
   @Test
   fun testConstructor() {
-    val point = Point(46.518, 6.545)
+    val point = Point.fromLngLat(6.545, 46.518)
     val location = Location(point)
     val parking =
         Parking(
@@ -43,7 +44,7 @@ class ParkingsTest {
             uid = "1",
             optName = "Parking",
             optDescription = null,
-            location = Location(Point(46.518, 6.545)),
+            location = Location(Point.fromLngLat(6.545, 46.518)),
             images = listOf("image_url"),
             capacity = ParkingCapacity.LARGE,
             rackType = ParkingRackType.U_RACK,
@@ -56,7 +57,7 @@ class ParkingsTest {
             uid = "1",
             optName = "Parking",
             optDescription = null,
-            location = Location(Point(46.518, 6.545)),
+            location = Location(Point.fromLngLat(6.545, 46.518)),
             images = listOf("image_url"),
             capacity = ParkingCapacity.LARGE,
             rackType = ParkingRackType.U_RACK,

@@ -1,10 +1,13 @@
 package com.github.se.cyrcle.model.parking
 
+import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.mapbox.geojson.Point
+import com.mapbox.turf.TurfMeasurement
 
 class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRepository {
 
@@ -60,15 +63,15 @@ class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRep
       onSuccess: (List<Parking>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    if (start.latitude > end.latitude || start.longitude > end.longitude) {
+    if (start.latitude() > end.latitude() || start.longitude() > end.longitude()) {
       onFailure(Exception("Invalid range"))
       return
     }
     db.collection(collectionPath)
-        .whereGreaterThanOrEqualTo("location.center.latitude", start.latitude)
-        .whereLessThanOrEqualTo("location.center.latitude", end.latitude)
-        .whereGreaterThanOrEqualTo("location.center.longitude", start.longitude)
-        .whereLessThanOrEqualTo("location.center.longitude", end.longitude)
+        .whereGreaterThanOrEqualTo("location.center.latitude", start.latitude())
+        .whereLessThanOrEqualTo("location.center.latitude", end.latitude())
+        .whereGreaterThanOrEqualTo("location.center.longitude", start.longitude())
+        .whereLessThanOrEqualTo("location.center.longitude", end.longitude())
         .get()
         .addOnSuccessListener { querySnapshot ->
           val parkings =
@@ -96,15 +99,25 @@ class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRep
 
     fun getMoreParkings() {
       getParkingsBetween(
-          Point(location.latitude - currentRadius, location.longitude - currentRadius),
-          Point(location.latitude + currentRadius, location.longitude + currentRadius),
+          Point.fromLngLat(
+              location.longitude() - currentRadius, location.latitude() - currentRadius),
+          Point.fromLngLat(
+              location.longitude() + currentRadius, location.latitude() + currentRadius),
           { newParkings ->
             parkings = (parkings + newParkings).distinctBy { it.uid }
             if (parkings.size < k && currentRadius < maxRadius) {
               currentRadius += step
               getMoreParkings()
             } else {
-              onSuccess(parkings.sortedBy { it.location.center?.distanceTo(location) }.take(k))
+              onSuccess(
+                  parkings
+                      .sortedBy {
+                        TurfMeasurement.distance(
+                            location,
+                            Point.fromLngLat(
+                                it.location.center.longitude(), it.location.center.latitude()))
+                      }
+                      .take(k))
             }
           },
           onFailure)
@@ -145,14 +158,59 @@ class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRep
         .addOnFailureListener { onFailure(it) }
   }
 
-  private fun serializeParking(parking: Parking): Map<String, Any> {
+  fun serializeParking(parking: Parking): Map<String, Any> {
     val gson = Gson()
     val type = object : TypeToken<Map<String, Any>>() {}.type
-    return gson.fromJson(gson.toJson(parking), type)
+    val parkingMap: MutableMap<String, Any> = gson.fromJson(gson.toJson(parking), type)
+
+    // Replace Mapbox Point with Point2D serialization
+    val locationMap = (parkingMap["location"] as? Map<*, *>)?.toMutableMap()
+    locationMap?.let { location ->
+      location["center"] = gson.toJson(Point2D.fromMapboxPoint(parking.location.center))
+      parking.location.topLeft?.let { point ->
+        location["topLeft"] = gson.toJson(Point2D.fromMapboxPoint(point))
+      }
+      parking.location.topRight?.let { point ->
+        location["topRight"] = gson.toJson(Point2D.fromMapboxPoint(point))
+      }
+      parking.location.bottomLeft?.let { point ->
+        location["bottomLeft"] = gson.toJson(Point2D.fromMapboxPoint(point))
+      }
+      parking.location.bottomRight?.let { point ->
+        location["bottomRight"] = gson.toJson(Point2D.fromMapboxPoint(point))
+      }
+      parkingMap["location"] = location
+    }
+
+    return parkingMap
   }
 
-  private fun deserializeParking(map: Map<String, Any>): Parking {
+  fun deserializeParking(map: Map<String, Any>): Parking {
     val gson = Gson()
-    return gson.fromJson(gson.toJson(map), Parking::class.java)
+    val type = object : TypeToken<Map<String, Any>>() {}.type
+    val parkingMap: MutableMap<String, Any> = gson.fromJson(gson.toJson(map), type)
+
+    // Replace Point2D serialization with Mapbox Point
+    val locationMap = (parkingMap["location"] as? Map<*, *>)?.toMutableMap()
+    print(locationMap)
+    locationMap?.let { location ->
+      location["center"] = gson.fromJson(gson.toJson(location["center"]), Point::class.java)
+      location["topLeft"]?.let { location["topLeft"] = gson.fromJson(gson.toJson(it), Point::class.java) }
+      location["topRight"]?.let { location["topRight"] = gson.fromJson(gson.toJson(it), Point::class.java) }
+      location["bottomLeft"]?.let { location["bottomLeft"] = gson.fromJson(gson.toJson(it), Point::class.java) }
+      location["bottomRight"]?.let { location["bottomRight"] = gson.fromJson(gson.toJson(it), Point::class.java) }
+
+      parkingMap["location"] = location
+    }
+
+    return gson.fromJson(gson.toJson(parkingMap), Parking::class.java)
+  }
+}
+
+private data class Point2D(val longitude: Double, val latitude: Double) {
+  companion object {
+    fun fromMapboxPoint(point: Point): Point2D {
+      return Point2D(point.longitude(), point.latitude())
+    }
   }
 }
