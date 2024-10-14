@@ -190,6 +190,8 @@ dependencies {
             implementation(libs.maps.compose.utils)
             implementation(libs.play.services.auth)
 
+    // add material icons
+    implementation(libs.androidx.material.icons.extended)
             // Firebase
             implementation(libs.firebase.database.ktx)
             implementation(libs.firebase.firestore)
@@ -263,6 +265,7 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         "**/*Test*.*",
         "android/**/*.*",
         "**/sigchecks/**",
+        "**/preview/**"
     )
     val debugTree = fileTree("${layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
         exclude(fileFilter)
