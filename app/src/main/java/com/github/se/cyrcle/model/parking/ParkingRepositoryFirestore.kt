@@ -157,6 +157,12 @@ class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRep
         .addOnFailureListener { onFailure(it) }
   }
 
+  /**
+   * Serializes a Parking object to a Map
+   *
+   * @param parking The Parking object to serialize
+   * @return The serialized Map
+   */
   private fun serializeParking(parking: Parking): Map<String, Any> {
     val gson = Gson()
     val type = object : TypeToken<Map<String, Any>>() {}.type
@@ -183,6 +189,12 @@ class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRep
     return parkingMap
   }
 
+  /**
+   * Deserializes a Map to a Parking object
+   *
+   * @param map The map to deserialize
+   * @return The deserialized Parking object
+   */
   private fun deserializeParking(map: Map<String, Any>): Parking {
     val gson = Gson()
     val type = object : TypeToken<Map<String, Any>>() {}.type
@@ -215,21 +227,53 @@ class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRep
   }
 }
 
+/**
+ * Helper class to serialize and deserialize Mapbox Point to and from a Map to be stored in
+ * Firestore. Storing Mapbox Point directly in Firestore does not meet our needs as the coordinates
+ * are stored as an array of doubles. This prevents querying for parkings within a certain range of
+ * a location.
+ *
+ * @param longitude The longitude of the point
+ * @param latitude The latitude of the point
+ */
 private data class Point2D(val longitude: Double, val latitude: Double) {
+  /** Companion object to provide helper functions to convert between Mapbox Point and Point2D */
   companion object {
+    /**
+     * Converts a Mapbox Point to a Point2D
+     *
+     * @param point The Mapbox Point to convert
+     * @return The converted Point2D
+     */
     fun fromMapboxPoint(point: Point): Point2D {
       return Point2D(point.longitude(), point.latitude())
     }
 
+    /**
+     * Converts a Map to a Point2D object for deserialization
+     *
+     * @param map The map to convert
+     * @return The converted Point2D
+     */
     fun fromSerializedMap(map: Map<String, Double>): Point2D {
       return Point2D(map["longitude"]!!, map["latitude"]!!)
     }
   }
 
+  /**
+   * Converts the Point2D to a Mapbox Point
+   *
+   * @return The converted Mapbox Point
+   */
   fun toMapboxPoint(): Point {
     return Point.fromLngLat(longitude, latitude)
   }
 
+  /**
+   * Converts the Point2D to a Map for serialization
+   *
+   * @return The converted Map
+   */
   fun toSerializedMap(): Map<String, Any> {
     return Gson().fromJson(Gson().toJson(this), object : TypeToken<Map<String, Any>>() {}.type)
   }
