@@ -24,7 +24,6 @@ class ParkingRepositoryFirestoreTest {
   fun setUp() = runTest {
     val context = ApplicationProvider.getApplicationContext<Context>()
     FirebaseApp.initializeApp(context)
-    Log.d("AHHHHH", "Starting Before")
 
     val db = FirebaseFirestore.getInstance()
     val settings = firestoreSettings {
