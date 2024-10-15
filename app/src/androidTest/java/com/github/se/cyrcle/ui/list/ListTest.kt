@@ -11,40 +11,35 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.navigation.NavHostController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.model.parking.*
 import com.github.se.cyrcle.ui.navigation.NavigationActions
-import com.github.se.cyrcle.ui.navigation.Screen
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when`
 
 @RunWith(AndroidJUnit4::class)
 class ListTest {
 
   @get:Rule val composeTestRule = createComposeRule()
-  private lateinit var parkingRepository: ParkingRepository
-  private lateinit var imageRepository: ImageRepository
-  private lateinit var parkingViewModel: ParkingViewModel
+
+  private lateinit var navHostController: NavHostController
   private lateinit var navigationActions: NavigationActions
 
   @Before
   fun setUp() {
-    parkingRepository = mock(ParkingRepository::class.java)
-    navigationActions = mock(NavigationActions::class.java)
-    imageRepository = mock(ImageRepository::class.java)
-    parkingViewModel = ParkingViewModel(imageRepository, parkingRepository)
-
-    `when`(navigationActions.currentRoute()).thenReturn(Screen.LIST)
+    // Set up the test environment for the Compose UI test
+    navHostController = mock(NavHostController::class.java)
+    navigationActions = NavigationActions(navHostController)
   }
 
   @Test
   fun testSpotCardIsDisplayed() {
     composeTestRule.setContent {
-      SpotCard(navigationActions, parkingViewModel, TestInstancesParking.parking1, 0.0, emptyList())
+      SpotCard(navigationActions, TestInstancesParking.parking1, 0.0, emptyList())
     }
 
     composeTestRule.onNodeWithTag("SpotCard_Unnamed", useUnmergedTree = true).assertIsDisplayed()
@@ -142,7 +137,9 @@ class ListTest {
         .onAllNodesWithTag("ProtectionFilterItem")
         .assertCountEquals(ParkingProtection.entries.size)
         .assertAll(hasClickAction())
-    composeTestRule.onAllNodesWithTag("ProtectionFilterItem")[0].performClick()
+    composeTestRule
+        .onAllNodesWithTag("ProtectionFilterItem")[0]
+        .performClick()
     assert(selectedProtection.contains(ParkingProtection.entries[0]))
   }
 
@@ -174,7 +171,9 @@ class ListTest {
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("RackTypeFilter"))
     composeTestRule.onNodeWithTag("RackTypeFilter").assertIsDisplayed()
     composeTestRule.onAllNodesWithTag("RackTypeFilterItem").assertAll(hasClickAction())
-    composeTestRule.onAllNodesWithTag("RackTypeFilterItem")[0].performClick()
+    composeTestRule
+          .onAllNodesWithTag("RackTypeFilterItem")[0]
+          .performClick()
     assert(selectedRackType.contains(ParkingRackType.entries[0]))
   }
 
@@ -206,7 +205,9 @@ class ListTest {
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("CapacityFilter"))
     composeTestRule.onNodeWithTag("CapacityFilter").assertIsDisplayed()
     composeTestRule.onAllNodesWithTag("CapacityFilterItem").assertAll(hasClickAction())
-    composeTestRule.onAllNodesWithTag("CapacityFilterItem")[0].performClick()
+    composeTestRule
+          .onAllNodesWithTag("CapacityFilterItem")[0]
+          .performClick()
     assert(selectedCapacities.contains(ParkingCapacity.entries[0]))
   }
 }
