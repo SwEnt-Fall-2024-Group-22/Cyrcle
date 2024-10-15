@@ -118,6 +118,15 @@ jobs:
         run: |
           ./gradlew jacocoTestReport
 
+      - name: Debug step
+        run: |
+          pwd
+          ls -la
+          ls -la build/
+          ls -la build/test-results
+#          ls -la build/test-results
+#          ls -la build/test-results/binary
+
       # Upload the various reports to sonar
       - name: Upload report to SonarCloud
         env:
