@@ -20,22 +20,20 @@ import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.DarkBlue
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
-import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.sin
-import kotlin.math.sqrt
+import com.mapbox.geojson.Point
+import com.mapbox.turf.TurfMeasurement
 
 // EXAMPLES
 
-val referencePoint1 =
-    Point(0.0, 0.0) // Hardcoded. Will be the location via GPS of the user of the app.
+val referencePoint1: Point =
+    Point.fromLngLat(0.0, 0.0) // Hardcoded. Will be the location via GPS of the user of the app.
 val parkingSpots1 =
     listOf(
         Parking(
             uid = "1",
             optName = "City Center Parking",
             optDescription = "Covered parking near the city center",
-            location = Location(Point(0.3, 0.3)),
+            location = Location(Point.fromLngLat(0.3, 0.3)),
             images = listOf(),
             capacity = ParkingCapacity.MEDIUM,
             rackType = ParkingRackType.U_RACK,
@@ -46,7 +44,7 @@ val parkingSpots1 =
             uid = "2",
             optName = "Bike Hub Downtown",
             optDescription = "Secure indoor bike hub with surveillance",
-            location = Location(Point(0.5, 0.5)),
+            location = Location(Point.fromLngLat(0.5, 0.5)),
             images = listOf(),
             capacity = ParkingCapacity.LARGE,
             rackType = ParkingRackType.TWO_TIER,
@@ -57,7 +55,7 @@ val parkingSpots1 =
             uid = "3",
             optName = "Mall Parking",
             optDescription = "Outdoor parking at the shopping mall",
-            location = Location(Point(1.2, 1.2)),
+            location = Location(Point.fromLngLat(1.2, 1.2)),
             images = listOf(),
             capacity = ParkingCapacity.SMALL,
             rackType = ParkingRackType.POST_AND_RING,
@@ -68,7 +66,7 @@ val parkingSpots1 =
             uid = "4",
             optName = "Green Park Bike Racks",
             optDescription = "Bike parking near the park entrance",
-            location = Location(Point(0.8, 0.8)),
+            location = Location(Point.fromLngLat(0.8, 0.8)),
             images = listOf(),
             capacity = ParkingCapacity.XSMALL,
             rackType = ParkingRackType.WALL_BUTTERFLY,
@@ -79,7 +77,7 @@ val parkingSpots1 =
             uid = "5",
             optName = "Office Tower Garage",
             optDescription = "Indoor parking with two-tier racks",
-            location = Location(Point(2.1, 2.1)),
+            location = Location(Point.fromLngLat(2.1, 2.1)),
             images = listOf(),
             capacity = ParkingCapacity.LARGE,
             rackType = ParkingRackType.TWO_TIER,
@@ -90,7 +88,7 @@ val parkingSpots1 =
             uid = "6",
             optName = "Station Parking",
             optDescription = "Covered parking next to the train station",
-            location = Location(Point(1.5, 1.5)),
+            location = Location(Point.fromLngLat(1.5, 1.5)),
             images = listOf(),
             capacity = ParkingCapacity.MEDIUM,
             rackType = ParkingRackType.GRID,
@@ -101,7 +99,7 @@ val parkingSpots1 =
             uid = "7",
             optName = "University Bike Shelter",
             optDescription = "Secure parking for students and staff",
-            location = Location(Point(3.0, 3.0)),
+            location = Location(Point.fromLngLat(3.0, 3.0)),
             images = listOf(),
             capacity = ParkingCapacity.XLARGE,
             rackType = ParkingRackType.WAVE,
@@ -112,7 +110,7 @@ val parkingSpots1 =
             uid = "8",
             optName = "Residential Parking",
             optDescription = "Outdoor parking for residents",
-            location = Location(Point(0.9, 0.9)),
+            location = Location(Point.fromLngLat(0.9, 0.9)),
             images = listOf(),
             capacity = ParkingCapacity.SMALL,
             rackType = ParkingRackType.U_RACK,
@@ -123,7 +121,7 @@ val parkingSpots1 =
             uid = "9",
             optName = "Beachfront Bike Racks",
             optDescription = "Bike parking near the beach with no cover",
-            location = Location(Point(1.8, 1.8)),
+            location = Location(Point.fromLngLat(1.8, 1.8)),
             images = listOf(),
             capacity = ParkingCapacity.XSMALL,
             rackType = ParkingRackType.GRID,
@@ -134,7 +132,7 @@ val parkingSpots1 =
             uid = "10",
             optName = "Suburban Garage",
             optDescription = "Spacious indoor parking in suburban areas",
-            location = Location(Point(2.5, 2.5)),
+            location = Location(Point.fromLngLat(2.5, 2.5)),
             images = listOf(),
             capacity = ParkingCapacity.MEDIUM,
             rackType = ParkingRackType.VERTICAL,
@@ -333,7 +331,7 @@ fun SpotListScreen(
 ) {
   val sortedParkingSpots =
       parkingSpots.map { parking ->
-        parking to calculateDistance(referencePoint, parking.location.center!!)
+        parking to TurfMeasurement.distance(referencePoint, parking.location.center)
       }
 
   var selectedProtection by remember { mutableStateOf<Set<ParkingProtection>>(emptySet()) }
@@ -418,25 +416,4 @@ fun SpotListScreen(
               }
             }
       }
-}
-
-// Extension fuction to toggle selection
-fun <T> Set<T>.toggle(item: T): Set<T> {
-  return if (this.contains(item)) this - item else this + item
-}
-
-fun calculateDistance(point1: Point, point2: Point): Double {
-  val R = 6371.0 // Radius of the Earth in kilometers
-  val latDistance = Math.toRadians(point2.latitude - point1.latitude)
-  val lonDistance = Math.toRadians(point2.longitude - point1.longitude)
-
-  val a =
-      sin(latDistance / 2) * sin(latDistance / 2) +
-          cos(Math.toRadians(point1.latitude)) *
-              cos(Math.toRadians(point2.latitude)) *
-              sin(lonDistance / 2) *
-              sin(lonDistance / 2)
-
-  val c = 2 * atan2(sqrt(a), sqrt(1 - a))
-  return R * c // Distance in kilometers
 }

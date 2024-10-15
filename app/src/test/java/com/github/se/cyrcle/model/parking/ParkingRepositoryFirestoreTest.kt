@@ -9,6 +9,7 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
+import com.mapbox.geojson.Point
 import junit.framework.TestCase.fail
 import org.junit.Before
 import org.junit.Test
@@ -39,7 +40,7 @@ class ParkingRepositoryFirestoreTest {
           uid = "1",
           optName = "Parking",
           optDescription = null,
-          location = Location(Point(46.518, 6.545)),
+          location = Location(Point.fromLngLat(6.545, 46.518), null, null, null, null),
           images = listOf(imageUrl),
           capacity = ParkingCapacity.LARGE,
           rackType = ParkingRackType.U_RACK,
@@ -162,8 +163,8 @@ class ParkingRepositoryFirestoreTest {
 
     // Call the method under test
     parkingRepositoryFirestore.getParkingsBetween(
-        start = Point(46.5, 6.5),
-        end = Point(46.6, 6.6),
+        start = Point.fromLngLat(6.5, 46.5),
+        end = Point.fromLngLat(6.6, 46.6),
         onSuccess = { parkings ->
           // Assert that the returned list contains the expected Parking object
           assert(parkings.size == 1)
@@ -195,7 +196,7 @@ class ParkingRepositoryFirestoreTest {
 
     // Call the method under test
     parkingRepositoryFirestore.getKClosestParkings(
-        location = Point(46.5, 6.5),
+        location = Point.fromLngLat(6.5, 46.5),
         k = 1,
         onSuccess = { parkings ->
           // Assert that the returned list contains the expected Parking object
@@ -235,4 +236,40 @@ class ParkingRepositoryFirestoreTest {
 
     verify(mockDocumentReference).delete()
   }
+
+  /*
+  // This test is commented out because the serializeParking and deserializeParking methods are
+  // private
+  private val parking2 =
+      Parking(
+          uid = "2",
+          optName = "Parking",
+          optDescription = null,
+          location =
+              Location(
+                  Point.fromLngLat(6.545, 46.518),
+                  Point.fromLngLat(6.546, 46.518),
+                  Point.fromLngLat(6.546, 46.519),
+                  Point.fromLngLat(6.545, 46.519)),
+          images = listOf(imageUrl),
+          capacity = ParkingCapacity.LARGE,
+          rackType = ParkingRackType.U_RACK,
+          protection = ParkingProtection.COVERED,
+          price = 0.0,
+          hasSecurity = true)
+
+  @Test
+  fun serializeParking_and_deserializeParking() {
+    val serializedParking = parkingRepositoryFirestore.serializeParking(parking)
+    val deserializedParking = parkingRepositoryFirestore.deserializeParking(serializedParking)
+
+    assert(parking == deserializedParking)
+
+    val serializedParking2 = parkingRepositoryFirestore.serializeParking(parking2)
+    val deserializedParking2 = parkingRepositoryFirestore.deserializeParking(serializedParking2)
+
+    assert(parking2 == deserializedParking2)
+  }
+
+   */
 }

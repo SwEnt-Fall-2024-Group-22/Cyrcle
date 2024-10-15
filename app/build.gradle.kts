@@ -176,6 +176,9 @@ dependencies {
             implementation ("com.mapbox.extension:maps-compose:11.7.0")
             implementation("com.mapbox.maps:android:11.7.0")
 
+            // Turf for MapBox
+            implementation (libs.mapbox.sdk.turf)
+
             // Coil
             implementation(libs.coil.compose)
 
