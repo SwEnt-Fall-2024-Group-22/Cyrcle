@@ -93,6 +93,7 @@ fun MapScreen(
                 val topRightCorner = mapView.mapboxMap.getBounds().bounds.northeast
                 val bottomLeftCorner = mapView.mapboxMap.getBounds().bounds.southwest
 
+                // Load the red marker image and resized it to fit the map
                 val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.red_marker)
                 val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 100, 150, false)
 
@@ -109,6 +110,9 @@ fun MapScreen(
                                   parking.location.center.latitude()))
                           .withIconImage(resizedBitmap)
                     }
+
+                // This is a test code snippet that can uncommented for testing purposes as per the
+                // PR description
 
                 //                val parking1 = Point.fromLngLat(6.566, 46.519)
                 //                val parking2 = Point.fromLngLat(6.500,46.500)

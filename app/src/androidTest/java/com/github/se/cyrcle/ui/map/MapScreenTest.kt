@@ -39,6 +39,12 @@ class MapScreenTest : TestCase() {
     `when`(mockNavigation.currentRoute()).thenReturn(Screen.MAP)
   }
 
+  /**
+   * Test to verify that the map screen and its components are displayed correctly.
+   *
+   * This test sets the content to the `MapScreen` and checks if the map screen, bottom navigation
+   * bar, zoom controls, and add button are displayed.
+   */
   @Test
   fun testMapIsDisplayed() {
     composeTestRule.setContent { MapScreen(mockNavigation, parkingViewModel = parkingViewModel) }
@@ -54,6 +60,12 @@ class MapScreenTest : TestCase() {
     composeTestRule.onNodeWithTag("AddButton").assertIsDisplayed()
   }
 
+  /**
+   * Test to verify that the internal state of the zoom level decreases correctly.
+   *
+   * This test sets the content to the `MapScreen` with an initial zoom level state, performs zoom
+   * out actions, and asserts that the state value matches the minimum zoom level.
+   */
   @Test
   fun testInternalStateOut() {
 
@@ -72,6 +84,12 @@ class MapScreenTest : TestCase() {
     assert(state.value == minZoom)
   }
 
+  /**
+   * Test to verify that the internal state of the zoom level increases correctly.
+   *
+   * This test sets the content to the `MapScreen` with an initial zoom level state, performs zoom
+   * in actions, and asserts that the state value matches the maximum zoom level.
+   */
   @Test
   fun testInternalStateIn() {
 
