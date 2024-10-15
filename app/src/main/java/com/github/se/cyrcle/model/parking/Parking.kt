@@ -31,31 +31,30 @@ data class Parking(
 )
 
 /** Enum class representing the capacity of a parking spot. */
-enum class ParkingCapacity {
-  XSMALL, // less than 10 spots
-  SMALL, // 10-25 spots
-  MEDIUM, // 26-50 spots
-  LARGE, // 51-100 spots
-  XLARGE // more than 100 spots
+enum class ParkingCapacity(val description: String) {
+  XSMALL("Less than 10 spots"),
+  SMALL("10-25 spots"),
+  MEDIUM("26-50 spots"),
+  LARGE("51-100 spots"),
+  XLARGE("More than 100 spots")
 }
 
 /** Enum class representing the type of rack in a parking spot. */
-enum class ParkingRackType {
-  TWO_TIER,
-  U_RACK,
-  VERTICAL,
-  WAVE,
-  WALL_BUTTERFLY,
-  POST_AND_RING,
-  GRID,
-  OTHER
+enum class ParkingRackType(val description: String) {
+  TWO_TIER("Two-tier rack"),
+  U_RACK("U-Rack"),
+  VERTICAL("Vertical rack"),
+  WAVE("Wave rack"),
+  WALL_BUTTERFLY("Wall butterfly rack"),
+  POST_AND_RING("Post and ring rack"),
+  GRID("Grid rack"),
+  OTHER("Other type of rack")
 }
 
-/** Enum class representing the protection of a parking spot from the weather. */
-enum class ParkingProtection {
-  INDOOR,
-  COVERED,
-  NONE
+enum class ParkingProtection(val description: String) {
+  INDOOR("Indoor"),
+  COVERED("Covered"),
+  NONE("Exposed")
 }
 
 data class Location(
