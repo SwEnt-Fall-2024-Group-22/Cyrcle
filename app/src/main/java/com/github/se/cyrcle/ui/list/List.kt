@@ -176,8 +176,7 @@ fun FilterHeader(
                   items(ParkingProtection.entries) { protection ->
                     Button(
                         onClick = { onProtectionSelected(protection) },
-                        modifier =
-                            Modifier.padding(2.dp).testTag("ProtectionButton_${protection.name}"),
+                        modifier = Modifier.padding(2.dp).testTag("ProtectionFilterItem"),
                         colors =
                             ButtonDefaults.buttonColors(
                                 containerColor =
@@ -198,11 +197,10 @@ fun FilterHeader(
             LazyRow(
                 modifier = Modifier.fillMaxWidth().testTag("RackTypeFilter"),
                 horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                  items(ParkingRackType.values().toList()) { rackType ->
+                  items(ParkingRackType.entries) { rackType ->
                     Button(
                         onClick = { onRackTypeSelected(rackType) },
-                        modifier =
-                            Modifier.padding(2.dp).testTag("RackTypeButton_${rackType.name}"),
+                        modifier = Modifier.padding(2.dp).testTag("RackTypeFilterItem"),
                         colors =
                             ButtonDefaults.buttonColors(
                                 containerColor =
@@ -223,11 +221,10 @@ fun FilterHeader(
             LazyRow(
                 modifier = Modifier.fillMaxWidth().testTag("CapacityFilter"),
                 horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                  items(ParkingCapacity.values().toList()) { capacity ->
+                  items(ParkingCapacity.entries) { capacity ->
                     Button(
                         onClick = { onCapacitySelected(capacity) },
-                        modifier =
-                            Modifier.padding(2.dp).testTag("CapacityButton_${capacity.name}"),
+                        modifier = Modifier.padding(2.dp).testTag("CapacityFilterItem"),
                         colors =
                             ButtonDefaults.buttonColors(
                                 containerColor =
@@ -257,7 +254,8 @@ fun FilterSection(
             Modifier.clickable(onClick = onToggle)
                 .padding(8.dp)
                 .background(Color.LightGray)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .testTag(title),
         color = Color.Black)
 
     if (isExpanded) {
@@ -309,7 +307,7 @@ fun SpotCard(
                     text = criterion,
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.Gray,
-                    modifier = Modifier.testTag("MatchedCriterion_$criterion"))
+                    modifier = Modifier.testTag("MatchedCriterionItem"))
               }
             }
           }
