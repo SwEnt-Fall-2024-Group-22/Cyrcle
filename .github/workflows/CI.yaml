@@ -120,12 +120,16 @@ jobs:
 
       - name: Debug step
         run: |
+          echo "PWD"
           pwd
+          echo "LS local"
           ls -la
-          ls -la build/
-          ls -la build/test-results
-#          ls -la build/test-results
-#          ls -la build/test-results/binary
+          echo "LS APP/"
+          ls -la app/
+          echo "LS APP/BUILD/"
+          ls -la app/build/
+          echo "LS APP/BUILD/TEST-RESULTS
+          ls -la app/build/test-results
 
       # Upload the various reports to sonar
       - name: Upload report to SonarCloud
