@@ -77,13 +77,13 @@ android {
     testCoverage {
         jacocoVersion = "0.8.8"
     }
-    /*compileOptions {
+    compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
         jvmTarget = "11"
-    }*/
+    }
 
     buildFeatures {
         compose = true
