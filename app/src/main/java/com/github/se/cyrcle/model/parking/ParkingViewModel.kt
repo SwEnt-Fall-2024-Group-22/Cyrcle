@@ -33,6 +33,11 @@ class ParkingViewModel(
   private val _selectedParking = MutableStateFlow<Parking?>(null)
   val selectedParking: StateFlow<Parking?> = _selectedParking
 
+  // TODO: Replace with actual location
+  init {
+    parkingRepository.onSignIn { getKClosestParkings(Point.fromLngLat(6.9, 46.69), 5) }
+  }
+
   /**
    * Fetches the image URL from the cloud storage, This function as to be called after retrieving
    * the path from the Firestore database.

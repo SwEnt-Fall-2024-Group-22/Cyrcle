@@ -89,9 +89,9 @@ class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRep
       onFailure: (Exception) -> Unit
   ) {
     // variables for radius search
-    val initialRadius = 0.01
+    val initialRadius = 0.3
     val maxRadius = 0.5
-    val step = 0.01
+    val step = 0.2
 
     var currentRadius = initialRadius
     var parkings = emptyList<Parking>()
