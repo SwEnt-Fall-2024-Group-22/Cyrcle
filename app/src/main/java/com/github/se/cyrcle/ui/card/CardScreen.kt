@@ -32,7 +32,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
-import com.github.se.cyrcle.ui.theme.Cerulean
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
 @Composable
@@ -53,7 +52,7 @@ fun CardScreen(
                   text = "Description of ${selectedParking.optName?: "Parking"}",
                   fontSize = 20.sp,
                   fontWeight = FontWeight.Bold,
-                  color = Color.White,
+                  color = MaterialTheme.colorScheme.secondary,
                   modifier = Modifier.testTag("TopAppBarTitle")) // Test tag for title
             })
       }) {
@@ -164,7 +163,8 @@ fun CardScreen(
                                           "ShowInMapButton"), // Test tag for Show in Map button
                               colors =
                                   ButtonDefaults.buttonColors(
-                                      containerColor = Cerulean, contentColor = Color.White)) {
+                                      containerColor = MaterialTheme.colorScheme.primary,
+                                      contentColor = MaterialTheme.colorScheme.secondary)) {
                                 Text(text = "Show in Map")
                               }
 
@@ -176,7 +176,8 @@ fun CardScreen(
                                       .testTag("AddReviewButton"), // Test tag for Add Review button
                               colors =
                                   ButtonDefaults.buttonColors(
-                                      containerColor = Cerulean, contentColor = Color.White)) {
+                                      containerColor = MaterialTheme.colorScheme.primary,
+                                      contentColor = MaterialTheme.colorScheme.secondary)) {
                                 Text(text = "Add A Review")
                               }
 
@@ -187,7 +188,8 @@ fun CardScreen(
                                       .testTag("ReportButton"), // Test tag for Report button
                               colors =
                                   ButtonDefaults.buttonColors(
-                                      containerColor = Red, contentColor = Color.White)) {
+                                      containerColor = Red,
+                                      contentColor = MaterialTheme.colorScheme.secondary)) {
                                 Text(text = "Report")
                               }
                         }
