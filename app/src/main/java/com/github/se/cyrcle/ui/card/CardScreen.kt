@@ -14,11 +14,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,110 +28,29 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.github.se.cyrcle.model.parking.Location
-import com.github.se.cyrcle.model.parking.Parking
-import com.github.se.cyrcle.model.parking.ParkingCapacity
-import com.github.se.cyrcle.model.parking.ParkingProtection
-import com.github.se.cyrcle.model.parking.ParkingRackType
+import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.Cerulean
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
-import com.mapbox.geojson.Point
 
-// Function to convert ParkingProtection enum to human-readable string
-fun convertProtectionToString(protection: ParkingProtection): String {
-  return when (protection) {
-    ParkingProtection.INDOOR -> "Indoor protection"
-    ParkingProtection.COVERED -> "Covered protection"
-    ParkingProtection.NONE -> "No protection"
-  }
-}
-
-// Function to convert ParkingRackType enum to human-readable string
-fun convertRackToString(rackType: ParkingRackType): String {
-  return when (rackType) {
-    ParkingRackType.TWO_TIER -> "Two-tier rack"
-    ParkingRackType.U_RACK -> "U-Rack"
-    ParkingRackType.VERTICAL -> "Vertical rack"
-    ParkingRackType.WAVE -> "Wave rack"
-    ParkingRackType.WALL_BUTTERFLY -> "Wall butterfly rack"
-    ParkingRackType.POST_AND_RING -> "Post and ring rack"
-    ParkingRackType.GRID -> "Grid rack"
-    ParkingRackType.OTHER -> "Unidentified Rack"
-  }
-}
-
-// Function to convert ParkingCapacity enum to human-readable string
-fun convertCapacityToString(capacity: ParkingCapacity): String {
-  return when (capacity) {
-    ParkingCapacity.XSMALL -> "Less than 10 spots"
-    ParkingCapacity.SMALL -> "10-25 spots"
-    ParkingCapacity.MEDIUM -> "26-50 spots"
-    ParkingCapacity.LARGE -> "51-100 spots"
-    ParkingCapacity.XLARGE -> "More than 100 spots"
-  }
-}
-
-// Sample parking spot data for demonstration
-val parking1 =
-    Parking(
-        "Test_spot_1",
-        null,
-        null,
-        Location(Point.fromLngLat(6.6, 46.2)),
-        listOf(
-            "https://upload.wikimedia.org/wikipedia/commons/7/78/%22G%C3%A4nsemarkt%22_in_Amance_-_panoramio.jpg",
-            "https://upload.wikimedia.org/wikipedia/commons/7/78/%22G%C3%A4nsemarkt%22_in_Amance_-_panoramio.jpg",
-        ),
-        ParkingCapacity.LARGE,
-        ParkingRackType.TWO_TIER,
-        ParkingProtection.COVERED,
-        0.0,
-        true)
-
-// Another parking spot example
-val parking2 =
-    Parking(
-        "Test_spot_2",
-        null,
-        null,
-        Location(Point.fromLngLat(6.7, 46.3)),
-        listOf(
-            "https://upload.wikimedia.org/wikipedia/commons/6/6b/Bicycle_parking_at_Alewife_station%2C_August_2001.jpg"), // Corrected URL
-        ParkingCapacity.SMALL,
-        ParkingRackType.TWO_TIER,
-        ParkingProtection.COVERED,
-        0.0,
-        true)
-
-// Third parking spot example
-val parking3 =
-    Parking(
-        "Test_spot_3",
-        null,
-        null,
-        Location(Point.fromLngLat(7.1, 47.1)),
-        listOf(
-            "https://upload.wikimedia.org/wikipedia/commons/6/6b/Bicycle_parking_at_Alewife_station%2C_August_2001.jpg"), // Corrected URL
-        ParkingCapacity.LARGE,
-        ParkingRackType.TWO_TIER,
-        ParkingProtection.COVERED,
-        0.0,
-        true)
-
-// Main UI Composable function to display card with parking information
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
-fun CardScreen(navigationActions: NavigationActions, curParking: Parking = parking1) {
-  // Scaffold provides the structure for the screen with a TopAppBar
+fun CardScreen(
+    navigationActions: NavigationActions,
+    parkingViewModel: ParkingViewModel = viewModel(factory = ParkingViewModel.Factory)
+) {
+  val selectedParking =
+      parkingViewModel.selectedParking.collectAsState().value
+          ?: return Text(text = "No parking selected. Should not happen")
+
   Scaffold(
       topBar = {
         TopAppBar(
             navigationActions,
             title = {
               Text(
-                  text = "Description of ${curParking.uid}",
+                  text = "Description of ${selectedParking.optName?: "Parking"}",
                   fontSize = 20.sp,
                   fontWeight = FontWeight.Bold,
                   color = Color.White,
@@ -157,13 +76,14 @@ fun CardScreen(navigationActions: NavigationActions, curParking: Parking = parki
                                 .padding(8.dp)
                                 .testTag("ParkingImagesRow"), // Test tag for image row
                         horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                          items(curParking.images.size) { index ->
+                          items(selectedParking.images.size) { index ->
                             AsyncImage(
-                                model = curParking.images[index],
+                                model = selectedParking.images[index],
                                 contentDescription = "Image $index",
                                 modifier =
                                     Modifier.size(200.dp)
                                         .padding(2.dp)
+                                        .fillMaxWidth()
                                         .testTag("ParkingImage$index"), // Test tag for each image
                                 contentScale = ContentScale.Crop)
                           }
@@ -185,13 +105,13 @@ fun CardScreen(navigationActions: NavigationActions, curParking: Parking = parki
                                 Column(modifier = Modifier.weight(1f).testTag("CapacityColumn")) {
                                   Text(text = "Capacity:", fontWeight = FontWeight.Bold)
                                   Text(
-                                      text = convertCapacityToString(curParking.capacity),
+                                      text = selectedParking.capacity.description,
                                       color = Color.Gray)
                                 }
                                 Column(modifier = Modifier.weight(1f).testTag("RackTypeColumn")) {
                                   Text(text = "Rack Type:", fontWeight = FontWeight.Bold)
                                   Text(
-                                      text = convertRackToString(curParking.rackType),
+                                      text = selectedParking.rackType.description,
                                       color = Color.Gray)
                                 }
                               }
@@ -203,15 +123,15 @@ fun CardScreen(navigationActions: NavigationActions, curParking: Parking = parki
                                 Column(modifier = Modifier.weight(1f).testTag("ProtectionColumn")) {
                                   Text(text = "Protection:", fontWeight = FontWeight.Bold)
                                   Text(
-                                      text = convertProtectionToString(curParking.protection),
+                                      text = selectedParking.protection.description,
                                       color = Color.Gray)
                                 }
                                 Column(modifier = Modifier.weight(1f).testTag("PriceColumn")) {
                                   Text(text = "Price:", fontWeight = FontWeight.Bold)
-                                  val freeOrNot =
-                                      if (curParking.price == 0.0) "Free"
-                                      else curParking.price.toString()
-                                  Text(text = freeOrNot, color = Color.Gray)
+                                  val price = selectedParking.price
+                                  Text(
+                                      text = if (price == 0.0) "Free" else "$price",
+                                      color = Color.Gray)
                                 }
                               }
 
@@ -221,8 +141,9 @@ fun CardScreen(navigationActions: NavigationActions, curParking: Parking = parki
                               horizontalArrangement = Arrangement.SpaceBetween) {
                                 Column(modifier = Modifier.weight(1f).testTag("SecurityColumn")) {
                                   Text(text = "Security Present:", fontWeight = FontWeight.Bold)
-                                  val yesOrNo = if (curParking.hasSecurity) "Yes" else "No"
-                                  Text(text = yesOrNo, color = Color.Gray)
+                                  Text(
+                                      text = if (selectedParking.hasSecurity) "Yes" else "No",
+                                      color = Color.Gray)
                                 }
                               }
                         }
