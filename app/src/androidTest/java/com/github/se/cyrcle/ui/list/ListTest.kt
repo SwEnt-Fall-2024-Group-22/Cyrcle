@@ -11,35 +11,40 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.navigation.NavHostController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.model.parking.*
 import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.github.se.cyrcle.ui.navigation.Screen
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
 
 @RunWith(AndroidJUnit4::class)
 class ListTest {
 
   @get:Rule val composeTestRule = createComposeRule()
-
-  private lateinit var navHostController: NavHostController
+  private lateinit var parkingRepository: ParkingRepository
+  private lateinit var imageRepository: ImageRepository
+  private lateinit var parkingViewModel: ParkingViewModel
   private lateinit var navigationActions: NavigationActions
 
   @Before
   fun setUp() {
-    // Set up the test environment for the Compose UI test
-    navHostController = mock(NavHostController::class.java)
-    navigationActions = NavigationActions(navHostController)
+    parkingRepository = mock(ParkingRepository::class.java)
+    navigationActions = mock(NavigationActions::class.java)
+    imageRepository = mock(ImageRepository::class.java)
+    parkingViewModel = ParkingViewModel(imageRepository, parkingRepository)
+
+    `when`(navigationActions.currentRoute()).thenReturn(Screen.LIST)
   }
 
   @Test
   fun testSpotCardIsDisplayed() {
     composeTestRule.setContent {
-      SpotCard(navigationActions, TestInstancesParking.parking1, 0.0, emptyList())
+      SpotCard(navigationActions, parkingViewModel, TestInstancesParking.parking1, 0.0, emptyList())
     }
 
     composeTestRule.onNodeWithTag("SpotCard_Unnamed", useUnmergedTree = true).assertIsDisplayed()
