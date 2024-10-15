@@ -2,6 +2,7 @@ package com.github.se.cyrcle.ui.map
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,10 +30,12 @@ import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraBoundsOptions
+import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.extension.compose.DisposableMapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.maps.extension.compose.style.MapStyle
+import com.mapbox.maps.extension.style.projection.generated.getProjection
 import com.mapbox.maps.plugin.annotation.AnnotationConfig
 import com.mapbox.maps.plugin.annotation.AnnotationSourceOptions
 import com.mapbox.maps.plugin.annotation.ClusterOptions
@@ -90,8 +93,26 @@ fun MapScreen(
                             annotationSourceOptions =
                                 AnnotationSourceOptions(clusterOptions = ClusterOptions())))
 
-                val topRightCorner = mapView.mapboxMap.getBounds().bounds.northeast
-                val bottomLeftCorner = mapView.mapboxMap.getBounds().bounds.southwest
+                  // Retrieve viewport dimensions
+                  var viewportWidth = mapView.width
+                  var viewportHeight = mapView.height
+
+                  var centerPixel = mapView.mapboxMap.pixelForCoordinate(mapView.mapboxMap.cameraState.center)
+
+                  var topRightCorner = mapView.mapboxMap.coordinateForPixel(
+                        ScreenCoordinate(
+                              centerPixel.x + viewportWidth / 2,
+                              centerPixel.y - viewportHeight / 2
+                          )
+                      )
+
+
+                  var bottomLeftCorner =mapView.mapboxMap.coordinateForPixel(
+                      ScreenCoordinate(
+                          centerPixel.x - viewportWidth / 2,
+                          centerPixel.y + viewportHeight / 2
+                      )
+                  )
 
                 // Load the red marker image and resized it to fit the map
                 val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.red_marker)
@@ -104,10 +125,7 @@ fun MapScreen(
                 val pointAnnotationOptions =
                     listOfParkings.value.map { parking ->
                       PointAnnotationOptions()
-                          .withPoint(
-                              Point.fromLngLat(
-                                  parking.location.center.longitude(),
-                                  parking.location.center.latitude()))
+                          .withPoint(parking.location.center)
                           .withIconImage(resizedBitmap)
                     }
 
@@ -134,12 +152,38 @@ fun MapScreen(
                 // Add a camera change listener to detect zoom changes
                 val cameraChangeListener = OnCameraChangeListener {
                   state.value = mapView.mapboxMap.cameraState.zoom
+
+                    viewportWidth = mapView.width
+                    viewportHeight = mapView.height
+
+                    centerPixel = mapView.mapboxMap.pixelForCoordinate(mapView.mapboxMap.cameraState.center)
+
+                    topRightCorner = mapView.mapboxMap.coordinateForPixel(
+                        ScreenCoordinate(
+                            centerPixel.x + viewportWidth / 2,
+                            centerPixel.y - viewportHeight / 2
+                        )
+                    )
+
+
+                    bottomLeftCorner =mapView.mapboxMap.coordinateForPixel(
+                        ScreenCoordinate(
+                            centerPixel.x - viewportWidth / 2,
+                            centerPixel.y + viewportHeight / 2
+                        )
+                    )
+
+                    parkingViewModel.getParkingsInRect(bottomLeftCorner, topRightCorner)
+
+
                 }
                 mapView.mapboxMap.addOnCameraChangeListener(cameraChangeListener)
 
-                onDispose { annotationManager.deleteAll() }
+                onDispose { annotationManager.deleteAll()
+                    mapView.mapboxMap.removeOnCameraChangeListener(cameraChangeListener)
+                }}
               }
-            }
+
 
         Column(
             Modifier.padding(padding).fillMaxHeight(),
