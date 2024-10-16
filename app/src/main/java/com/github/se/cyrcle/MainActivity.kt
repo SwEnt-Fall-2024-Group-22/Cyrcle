@@ -39,6 +39,7 @@ class MainActivity : ComponentActivity() {
     val navController = rememberNavController()
     val navigationActions = NavigationActions(navController)
     val db = Firebase.firestore
+    db.disableNetwork()
     val parkingRepository = ParkingRepositoryFirestore(db)
     val imageRepository = ImageRepositoryCloudStorage(auth)
     val parkingViewModel = ParkingViewModel(imageRepository, parkingRepository)

@@ -77,10 +77,31 @@ class ParkingViewModel(
     _selectedParking.value = parking
   }
 
+  /**
+   * Retrieves parkings within a rectangle defined by two opposite corners, regardless of their
+   * order.
+   *
+   * @param startPos the first corner of the rectangle
+   * @param endPos the opposite corner of the rectangle
+   */
   fun getParkingsInRect(startPos: Point, endPos: Point) {
+    if (startPos.latitude() == endPos.latitude() || startPos.longitude() == endPos.longitude()) {
+      Log.e("ParkingViewModel", "Invalid rectangle")
+      return
+    }
+    val bottomLeft =
+        Point.fromLngLat(
+            minOf(startPos.longitude(), endPos.longitude()),
+            minOf(startPos.latitude(), endPos.latitude()))
+    val topRight =
+        Point.fromLngLat(
+            maxOf(startPos.longitude(), endPos.longitude()),
+            maxOf(startPos.latitude(), endPos.latitude()))
+
+    Log.d("ParkingViewModel", "Getting parkings between $startPos and $endPos")
     parkingRepository.getParkingsBetween(
-        startPos,
-        endPos,
+        bottomLeft,
+        topRight,
         { _rectParkings.value = it },
         { Log.e("ParkingViewModel", "Error getting parkings: $it") })
   }
