@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.ui.map.overlay.AddButton
 import com.github.se.cyrcle.ui.map.overlay.ZoomControls
@@ -122,7 +123,7 @@ fun MapScreen(
                 parkingViewModel.getParkingsInRect(bottomLeftCorner, topRightCorner)
 
                 // Create PointAnnotationOptions for each parking
-                val pointAnnotationOptions =
+                var pointAnnotationOptions =
                     listOfParkings.value.map { parking ->
                       PointAnnotationOptions()
                           .withPoint(parking.location.center)
@@ -175,7 +176,23 @@ fun MapScreen(
 
                     parkingViewModel.getParkingsInRect(bottomLeftCorner, topRightCorner)
 
+                    pointAnnotationOptions =
+                        listOfParkings.value.map { parking ->
+                            PointAnnotationOptions()
+                                .withPoint(parking.location.center)
+                                .withIconImage(resizedBitmap)
+                        }
 
+                    annotationManager.deleteAll()
+
+                    // Add annotations to the annotation manager and display them on the map
+                    pointAnnotationOptions.forEach { annotationManager.create(it) }
+
+
+                    Log.e("Parking", listOfParkings.value.size.toString())
+                    Log.e("Markers", pointAnnotationOptions.size.toString())
+                    Log.e("TopRightCorner", topRightCorner.toString())
+                    Log.e("BottomLeftCorner", bottomLeftCorner.toString())
                 }
                 mapView.mapboxMap.addOnCameraChangeListener(cameraChangeListener)
 
