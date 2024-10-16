@@ -2,12 +2,32 @@ package com.github.se.cyrcle.ui.list
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -15,12 +35,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.github.se.cyrcle.model.parking.*
+import com.github.se.cyrcle.model.parking.Parking
+import com.github.se.cyrcle.model.parking.ParkingCapacity
+import com.github.se.cyrcle.model.parking.ParkingProtection
+import com.github.se.cyrcle.model.parking.ParkingRackType
+import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
-import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMeasurement
 
 @Composable
@@ -28,8 +52,6 @@ fun SpotListScreen(
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel = viewModel(factory = ParkingViewModel.Factory),
 ) {
-  // TODO: Use the user's location instead of a hardcoded reference point
-  val referencePoint = Point.fromLngLat(6.9, 46.69)
   val parkingSpots = parkingViewModel.kClosestParkings.collectAsState().value
 
   var selectedProtection by remember { mutableStateOf<Set<ParkingProtection>>(emptySet()) }
@@ -39,7 +61,10 @@ fun SpotListScreen(
   val sortedFilteredParkingSpots =
       parkingSpots
           .map { parking ->
-            parking to TurfMeasurement.distance(referencePoint, parking.location.center)
+            // TODO: Use the user's location instead of a hardcoded reference point
+            parking to
+                TurfMeasurement.distance(
+                    TestInstancesParking.referencePoint, parking.location.center)
           }
           .sortedWith(
               compareByDescending<Pair<Parking, Double>> { (parking, _) ->
@@ -59,7 +84,11 @@ fun SpotListScreen(
             selectedItem = Screen.LIST)
       }) { innerPadding ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(innerPadding).padding(bottom = 16.dp),
+            modifier =
+                Modifier.fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(bottom = 16.dp)
+                    .testTag("SpotListColumn"),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)) {
               item {
@@ -259,7 +288,7 @@ fun SpotCard(
                     parkingViewModel.selectParking(parking)
                     navigationActions.navigateTo(Screen.CARD)
                   })
-              .testTag("SpotCard_${parking.optName ?: "Unnamed"}"),
+              .testTag("SpotListItem"),
       colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary),
       shape = MaterialTheme.shapes.medium,
       elevation = CardDefaults.cardElevation(8.dp)) {

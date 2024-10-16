@@ -4,6 +4,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertAll
 import androidx.compose.ui.test.assertAny
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasClickAction
@@ -13,36 +14,53 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.navigation.NavHostController
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.github.se.cyrcle.model.parking.*
+import com.github.se.cyrcle.model.parking.ImageRepository
+import com.github.se.cyrcle.model.parking.Parking
+import com.github.se.cyrcle.model.parking.ParkingCapacity
+import com.github.se.cyrcle.model.parking.ParkingProtection
+import com.github.se.cyrcle.model.parking.ParkingRackType
+import com.github.se.cyrcle.model.parking.ParkingRepository
+import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.github.se.cyrcle.ui.navigation.Screen
 import com.mapbox.turf.TurfMeasurement
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.mock
+import org.mockito.Mock
+import org.mockito.Mockito.`when`
+import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
+import org.mockito.kotlin.verify
 
 @RunWith(AndroidJUnit4::class)
 class ListTest {
 
   @get:Rule val composeTestRule = createComposeRule()
 
-  private lateinit var navHostController: NavHostController
-  private lateinit var navigationActions: NavigationActions
+  @Mock private lateinit var mockParkingRepository: ParkingRepository
+  @Mock private lateinit var mockImageRepository: ImageRepository
+  @Mock private lateinit var mockNavigationActions: NavigationActions
+  private lateinit var parkingViewModel: ParkingViewModel
 
   @Before
   fun setUp() {
     // Set up the test environment for the Compose UI test
-    navHostController = mock(NavHostController::class.java)
-    navigationActions = NavigationActions(navHostController)
+    MockitoAnnotations.openMocks(this)
+    parkingViewModel = ParkingViewModel(mockImageRepository, mockParkingRepository)
+
+    `when`(mockNavigationActions.currentRoute()).thenReturn(Screen.LIST)
   }
 
   @Test
   fun testSpotCardIsDisplayed() {
     composeTestRule.setContent {
-      SpotCard(navigationActions, TestInstancesParking.parking1, 0.0, emptyList())
+      SpotCard(
+          mockNavigationActions, parkingViewModel, TestInstancesParking.parking1, 0.0, emptyList())
     }
 
     composeTestRule.onNodeWithTag("SpotListItem", useUnmergedTree = true).assertIsDisplayed()
@@ -58,6 +76,23 @@ class ListTest {
         .onNodeWithTag("ParkingPrice", useUnmergedTree = true)
         .assertIsDisplayed()
         .assertTextEquals("${TestInstancesParking.parking1.price} $")
+  }
+
+  @Test
+  fun testSpotCardIsClickable() {
+    composeTestRule.setContent {
+      SpotCard(
+          mockNavigationActions, parkingViewModel, TestInstancesParking.parking2, 0.0, emptyList())
+    }
+
+    composeTestRule
+        .onNodeWithTag("SpotListItem", useUnmergedTree = true)
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+
+    verify(mockNavigationActions).navigateTo(Screen.CARD)
+    assertEquals(TestInstancesParking.parking2, parkingViewModel.selectedParking.value)
   }
 
   @Test
@@ -140,9 +175,7 @@ class ListTest {
         .onAllNodesWithTag("ProtectionFilterItem")
         .assertCountEquals(ParkingProtection.entries.size)
         .assertAll(hasClickAction())
-    composeTestRule
-        .onAllNodesWithTag("ProtectionFilterItem")[0]
-        .performClick()
+    composeTestRule.onAllNodesWithTag("ProtectionFilterItem")[0].performClick()
     assert(selectedProtection.contains(ParkingProtection.entries[0]))
   }
 
@@ -174,9 +207,7 @@ class ListTest {
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("RackTypeFilter"))
     composeTestRule.onNodeWithTag("RackTypeFilter").assertIsDisplayed()
     composeTestRule.onAllNodesWithTag("RackTypeFilterItem").assertAll(hasClickAction())
-    composeTestRule
-          .onAllNodesWithTag("RackTypeFilterItem")[0]
-          .performClick()
+    composeTestRule.onAllNodesWithTag("RackTypeFilterItem")[0].performClick()
     assert(selectedRackType.contains(ParkingRackType.entries[0]))
   }
 
@@ -208,23 +239,29 @@ class ListTest {
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("CapacityFilter"))
     composeTestRule.onNodeWithTag("CapacityFilter").assertIsDisplayed()
     composeTestRule.onAllNodesWithTag("CapacityFilterItem").assertAll(hasClickAction())
-    composeTestRule
-          .onAllNodesWithTag("CapacityFilterItem")[0]
-          .performClick()
+    composeTestRule.onAllNodesWithTag("CapacityFilterItem")[0].performClick()
     assert(selectedCapacities.contains(ParkingCapacity.entries[0]))
   }
 
   @OptIn(ExperimentalTestApi::class)
   @Test
   fun testCardScreenListsParkings() {
-    composeTestRule.setContent {
-      SpotListScreen(navigationActions, listOf(TestInstancesParking.parking1))
+    val testParking = TestInstancesParking.parking1
+
+    // Prepare to populate the parking list
+    `when`(mockParkingRepository.getKClosestParkings(any(), any(), any(), any())).then {
+      it.getArgument<(List<Parking>) -> Unit>(2)(listOf(testParking))
     }
+
+    // Force list update
+    parkingViewModel.getKClosestParkings(TestInstancesParking.referencePoint, 1)
+
+    composeTestRule.setContent { SpotListScreen(mockNavigationActions, parkingViewModel) }
 
     // Check that the list is displayed
     composeTestRule.onNodeWithTag("SpotListColumn").assertIsDisplayed()
     composeTestRule
-        .onAllNodesWithTag("SpotListItem")
+        .onAllNodesWithTag("SpotListItem", useUnmergedTree = true)
         .assertCountEquals(1)
         .assertAll(hasClickAction())
 
@@ -232,7 +269,7 @@ class ListTest {
     composeTestRule
         .onNodeWithTag("ParkingName", useUnmergedTree = true)
         .assertIsDisplayed()
-        .assertTextEquals(TestInstancesParking.parking1.optName ?: "Unnamed Parking")
+        .assertTextEquals(testParking.optName ?: "Unnamed Parking")
 
     // Check that the parking distance is displayed
     composeTestRule
@@ -242,13 +279,13 @@ class ListTest {
             String.format(
                 "%.2f km",
                 TurfMeasurement.distance(
-                    referencePoint1, TestInstancesParking.parking1.location.center)))
+                    TestInstancesParking.referencePoint, testParking.location.center)))
 
     // Check that the parking price is displayed
     composeTestRule
         .onNodeWithTag("ParkingPrice", useUnmergedTree = true)
         .assertIsDisplayed()
-        .assertTextEquals("${TestInstancesParking.parking1.price} $")
+        .assertTextEquals("${testParking.price} $")
 
     // Select all 3 criteria
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
@@ -258,7 +295,7 @@ class ListTest {
     composeTestRule.onNodeWithTag("Protection", useUnmergedTree = true).performClick()
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("ProtectionFilter"))
     composeTestRule
-        .onAllNodesWithTag("ProtectionFilterItem")[TestInstancesParking.parking1.protection.ordinal]
+        .onAllNodesWithTag("ProtectionFilterItem")[testParking.protection.ordinal]
         .performClick()
     composeTestRule.onNodeWithTag("Protection").performClick()
 
@@ -267,7 +304,7 @@ class ListTest {
     composeTestRule.onNodeWithTag("Rack Type", useUnmergedTree = true).performClick()
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("RackTypeFilter"))
     composeTestRule
-        .onAllNodesWithTag("RackTypeFilterItem")[TestInstancesParking.parking1.rackType.ordinal]
+        .onAllNodesWithTag("RackTypeFilterItem")[testParking.rackType.ordinal]
         .performClick()
     composeTestRule.onNodeWithTag("Rack Type").performClick()
 
@@ -276,7 +313,7 @@ class ListTest {
     composeTestRule.onNodeWithTag("Capacity", useUnmergedTree = true).performClick()
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("CapacityFilter"))
     composeTestRule
-        .onAllNodesWithTag("CapacityFilterItem")[TestInstancesParking.parking1.capacity.ordinal]
+        .onAllNodesWithTag("CapacityFilterItem")[testParking.capacity.ordinal]
         .performClick()
 
     // Store filters away
@@ -288,8 +325,8 @@ class ListTest {
     composeTestRule
         .onAllNodesWithTag("MatchedCriterionItem", useUnmergedTree = true)
         .assertCountEquals(3)
-        .assertAny(hasText("Protection: ${TestInstancesParking.parking1.protection}"))
-        .assertAny(hasText("Rack Type: ${TestInstancesParking.parking1.rackType}"))
-        .assertAny(hasText("Capacity: ${TestInstancesParking.parking1.capacity}"))
+        .assertAny(hasText("Protection: ${testParking.protection.description}"))
+        .assertAny(hasText("Rack Type: ${testParking.rackType.description}"))
+        .assertAny(hasText("Capacity: ${testParking.capacity.description}"))
   }
 }
