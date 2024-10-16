@@ -72,7 +72,7 @@ class MainActivity : ComponentActivity() {
           startDestination = Screen.MAP,
           route = Route.MAP,
       ) {
-        composable(Screen.MAP) { MapScreen(navigationActions) }
+        composable(Screen.MAP) { MapScreen(navigationActions, parkingViewModel) }
       }
     }
   }
