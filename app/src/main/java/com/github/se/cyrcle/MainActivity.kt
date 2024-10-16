@@ -46,6 +46,9 @@ class MainActivity : ComponentActivity() {
   fun CyrcleApp() {
     val navController = rememberNavController()
     val navigationActions = NavigationActions(navController)
+    val firebase = ParkingRepositoryFirestore(Firebase.firestore)
+    val firebase2 = ImageRepositoryCloudStorage(auth)
+    val parkingViewModel = ParkingViewModel(firebase2, firebase)
 
     val db = Firebase.firestore
     val parkingRepository = ParkingRepositoryFirestore(db)
@@ -72,7 +75,7 @@ class MainActivity : ComponentActivity() {
           startDestination = Screen.MAP,
           route = Route.MAP,
       ) {
-        composable(Screen.MAP) { MapScreen(navigationActions) }
+        composable(Screen.MAP) { MapScreen(navigationActions, parkingViewModel) }
       }
     }
   }
