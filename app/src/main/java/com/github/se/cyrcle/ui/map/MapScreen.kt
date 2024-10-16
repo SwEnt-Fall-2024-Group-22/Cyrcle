@@ -181,7 +181,7 @@ fun MapScreen(
               Row(
                   Modifier.padding(top = 16.dp).fillMaxWidth(),
                   horizontalArrangement = Arrangement.Start) {
-                    AddButton { println("Add button clicked") }
+                    AddButton { navigationActions.navigateTo(Route.ADD_SPOTS) }
                   }
             }
       }
