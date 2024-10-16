@@ -107,7 +107,7 @@ class ButtonTest {
     composeTestRule.setContent {
       Scaffold(
           floatingActionButton = {
-            ExtendedFloatingActionButton(Icons.Filled.Add, "A", { a++ }, "Extend")
+            ExtendedFloatingActionButton(Icons.Filled.Add, "A", { a++ }, text="Extended", testTag = tag)
           }) { innerPadding ->
             Column(
                 modifier = Modifier.padding(innerPadding),

@@ -21,7 +21,6 @@ import org.mockito.Mockito.mock
 
 @RunWith(AndroidJUnit4::class)
 class NavigationActionsTest {
-
   @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var navigationDestination: NavDestination
@@ -37,11 +36,11 @@ class NavigationActionsTest {
 
   @Test
   fun displayBottomNavigationBar() {
-    val testTag = "BottamNavigationBar"
+    val testTag = "BottomNavigationBar"
     composeTestRule.setContent {
       Scaffold(
           bottomBar = {
-            BottomNavigationBar({}, LIST_TOP_LEVEL_DESTINATION, Route.AUTH, testTag = testTag)
+            BottomNavigationBar(navigationActions, selectedItem=Route.AUTH, testTag = testTag)
           }) { innerPadding ->
             Column(modifier = Modifier.padding(innerPadding)) {}
           }
