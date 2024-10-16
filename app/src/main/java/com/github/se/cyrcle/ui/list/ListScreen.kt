@@ -256,8 +256,8 @@ fun SpotCard(
               .padding(4.dp)
               .clickable(
                   onClick = {
-                    navigationActions.navigateTo(Screen.CARD)
                     parkingViewModel.selectParking(parking)
+                    navigationActions.navigateTo(Screen.CARD)
                   })
               .testTag("SpotCard_${parking.optName ?: "Unnamed"}"),
       colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary),
