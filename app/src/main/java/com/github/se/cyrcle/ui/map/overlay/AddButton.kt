@@ -26,7 +26,7 @@ fun AddButton(onClick: () -> Unit) {
           modifier =
               Modifier.size(48.dp)
                   .background(color = MaterialTheme.colorScheme.primary, shape = CircleShape)
-                  .testTag("AddButton")) {
+                  .testTag("addButton")) {
             Icon(Icons.Default.Add, contentDescription = "Add", tint = Color.White)
           }
     }

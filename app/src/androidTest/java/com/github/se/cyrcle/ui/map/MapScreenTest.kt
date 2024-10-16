@@ -57,7 +57,7 @@ class MapScreenTest : TestCase() {
     composeTestRule.onNodeWithTag("ZoomControlsOut").assertIsDisplayed()
 
     // Assert that the add button is displayed
-    composeTestRule.onNodeWithTag("AddButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("addButton").assertIsDisplayed()
   }
 
   /**
