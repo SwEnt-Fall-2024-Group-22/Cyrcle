@@ -52,7 +52,7 @@ fun SpotListScreen(
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel = viewModel(factory = ParkingViewModel.Factory),
 ) {
-  val parkingSpots = parkingViewModel.kClosestParkings.collectAsState().value
+  val parkingSpots by parkingViewModel.kClosestParkings.collectAsState()
 
   var selectedProtection by remember { mutableStateOf<Set<ParkingProtection>>(emptySet()) }
   var selectedRackTypes by remember { mutableStateOf<Set<ParkingRackType>>(emptySet()) }

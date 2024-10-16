@@ -45,6 +45,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.Firebase
 import com.google.firebase.auth.AuthResult
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
 import kotlinx.coroutines.launch
@@ -98,6 +99,12 @@ fun SignInScreen(navigationActions: NavigationActions) {
           // Authenticate With Google Button
           GoogleSignInButton(
               onSignInClick = {
+                // Do not launch the intent if the user is already signed in (for tests)
+                if (FirebaseAuth.getInstance().currentUser != null) {
+                  navigationActions.navigateTo(TopLevelDestinations.MAP)
+                  return@GoogleSignInButton
+                }
+
                 val gso =
                     GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                         .requestIdToken(token)
