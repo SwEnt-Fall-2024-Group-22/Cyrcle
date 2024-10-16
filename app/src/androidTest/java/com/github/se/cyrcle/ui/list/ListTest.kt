@@ -12,8 +12,11 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.model.parking.ImageRepository
 import com.github.se.cyrcle.model.parking.Parking
@@ -175,7 +178,7 @@ class ListTest {
         .onAllNodesWithTag("ProtectionFilterItem")
         .assertCountEquals(ParkingProtection.entries.size)
         .assertAll(hasClickAction())
-    composeTestRule.onAllNodesWithTag("ProtectionFilterItem")[0].performClick()
+    composeTestRule.onAllNodesWithTag("ProtectionFilterItem").onFirst().performClick()
     assert(selectedProtection.contains(ParkingProtection.entries[0]))
   }
 
@@ -207,7 +210,7 @@ class ListTest {
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("RackTypeFilter"))
     composeTestRule.onNodeWithTag("RackTypeFilter").assertIsDisplayed()
     composeTestRule.onAllNodesWithTag("RackTypeFilterItem").assertAll(hasClickAction())
-    composeTestRule.onAllNodesWithTag("RackTypeFilterItem")[0].performClick()
+    composeTestRule.onAllNodesWithTag("RackTypeFilterItem").onFirst().performClick()
     assert(selectedRackType.contains(ParkingRackType.entries[0]))
   }
 
@@ -239,7 +242,7 @@ class ListTest {
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("CapacityFilter"))
     composeTestRule.onNodeWithTag("CapacityFilter").assertIsDisplayed()
     composeTestRule.onAllNodesWithTag("CapacityFilterItem").assertAll(hasClickAction())
-    composeTestRule.onAllNodesWithTag("CapacityFilterItem")[0].performClick()
+    composeTestRule.onAllNodesWithTag("CapacityFilterItem").onFirst().performClick()
     assert(selectedCapacities.contains(ParkingCapacity.entries[0]))
   }
 
@@ -294,27 +297,36 @@ class ListTest {
     composeTestRule.waitUntilAtLeastOneExists(hasTestTag("Protection"))
     composeTestRule.onNodeWithTag("Protection", useUnmergedTree = true).performClick()
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("ProtectionFilter"))
+
     composeTestRule
-        .onAllNodesWithTag("ProtectionFilterItem")[testParking.protection.ordinal]
+        .onNodeWithTag("ProtectionFilter")
+        .performScrollToIndex(testParking.protection.ordinal)
+    composeTestRule
+        .onNodeWithText(testParking.protection.name)
+        .assertHasClickAction()
         .performClick()
-    composeTestRule.onNodeWithTag("Protection").performClick()
 
     // Select Rack Type
     composeTestRule.waitUntilAtLeastOneExists(hasTestTag("Rack Type"))
     composeTestRule.onNodeWithTag("Rack Type", useUnmergedTree = true).performClick()
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("RackTypeFilter"))
+
     composeTestRule
-        .onAllNodesWithTag("RackTypeFilterItem")[testParking.rackType.ordinal]
-        .performClick()
-    composeTestRule.onNodeWithTag("Rack Type").performClick()
+        .onNodeWithTag("RackTypeFilter")
+        .performScrollToIndex(testParking.rackType.ordinal)
+    composeTestRule.onNodeWithText(testParking.rackType.name).assertHasClickAction().performClick()
+
+    composeTestRule.onNodeWithTag("Rack Type", useUnmergedTree = true).performClick()
 
     // Select Capacity
     composeTestRule.waitUntilAtLeastOneExists(hasTestTag("Capacity"))
     composeTestRule.onNodeWithTag("Capacity", useUnmergedTree = true).performClick()
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("CapacityFilter"))
+
     composeTestRule
-        .onAllNodesWithTag("CapacityFilterItem")[testParking.capacity.ordinal]
-        .performClick()
+        .onNodeWithTag("CapacityFilter")
+        .performScrollToIndex(testParking.capacity.ordinal)
+    composeTestRule.onNodeWithText(testParking.capacity.name).assertHasClickAction().performClick()
 
     // Store filters away
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
