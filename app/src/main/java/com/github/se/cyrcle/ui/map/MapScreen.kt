@@ -2,7 +2,6 @@ package com.github.se.cyrcle.ui.map
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,7 +20,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
-import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.ui.map.overlay.AddButton
 import com.github.se.cyrcle.ui.map.overlay.ZoomControls
@@ -36,7 +34,6 @@ import com.mapbox.maps.extension.compose.DisposableMapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.maps.extension.compose.style.MapStyle
-import com.mapbox.maps.extension.style.projection.generated.getProjection
 import com.mapbox.maps.plugin.annotation.AnnotationConfig
 import com.mapbox.maps.plugin.annotation.AnnotationSourceOptions
 import com.mapbox.maps.plugin.annotation.ClusterOptions
@@ -94,26 +91,22 @@ fun MapScreen(
                             annotationSourceOptions =
                                 AnnotationSourceOptions(clusterOptions = ClusterOptions())))
 
-                  // Retrieve viewport dimensions
-                  var viewportWidth = mapView.width
-                  var viewportHeight = mapView.height
+                // Retrieve viewport dimensions
+                var viewportWidth = mapView.width
+                var viewportHeight = mapView.height
 
-                  var centerPixel = mapView.mapboxMap.pixelForCoordinate(mapView.mapboxMap.cameraState.center)
+                var centerPixel =
+                    mapView.mapboxMap.pixelForCoordinate(mapView.mapboxMap.cameraState.center)
 
-                  var topRightCorner = mapView.mapboxMap.coordinateForPixel(
+                var topRightCorner =
+                    mapView.mapboxMap.coordinateForPixel(
                         ScreenCoordinate(
-                              centerPixel.x + viewportWidth / 2,
-                              centerPixel.y - viewportHeight / 2
-                          )
-                      )
+                            centerPixel.x + viewportWidth / 2, centerPixel.y - viewportHeight / 2))
 
-
-                  var bottomLeftCorner =mapView.mapboxMap.coordinateForPixel(
-                      ScreenCoordinate(
-                          centerPixel.x - viewportWidth / 2,
-                          centerPixel.y + viewportHeight / 2
-                      )
-                  )
+                var bottomLeftCorner =
+                    mapView.mapboxMap.coordinateForPixel(
+                        ScreenCoordinate(
+                            centerPixel.x - viewportWidth / 2, centerPixel.y + viewportHeight / 2))
 
                 // Load the red marker image and resized it to fit the map
                 val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.red_marker)
@@ -154,53 +147,48 @@ fun MapScreen(
                 val cameraChangeListener = OnCameraChangeListener {
                   state.value = mapView.mapboxMap.cameraState.zoom
 
-                    viewportWidth = mapView.width
-                    viewportHeight = mapView.height
+                  viewportWidth = mapView.width
+                  viewportHeight = mapView.height
 
-                    centerPixel = mapView.mapboxMap.pixelForCoordinate(mapView.mapboxMap.cameraState.center)
+                  centerPixel =
+                      mapView.mapboxMap.pixelForCoordinate(mapView.mapboxMap.cameraState.center)
 
-                    topRightCorner = mapView.mapboxMap.coordinateForPixel(
-                        ScreenCoordinate(
-                            centerPixel.x + viewportWidth / 2,
-                            centerPixel.y - viewportHeight / 2
-                        )
-                    )
+                  topRightCorner =
+                      mapView.mapboxMap.coordinateForPixel(
+                          ScreenCoordinate(
+                              centerPixel.x + viewportWidth / 2,
+                              centerPixel.y - viewportHeight / 2))
 
+                  bottomLeftCorner =
+                      mapView.mapboxMap.coordinateForPixel(
+                          ScreenCoordinate(
+                              centerPixel.x - viewportWidth / 2,
+                              centerPixel.y + viewportHeight / 2))
 
-                    bottomLeftCorner =mapView.mapboxMap.coordinateForPixel(
-                        ScreenCoordinate(
-                            centerPixel.x - viewportWidth / 2,
-                            centerPixel.y + viewportHeight / 2
-                        )
-                    )
+                  parkingViewModel.getParkingsInRect(bottomLeftCorner, topRightCorner)
 
-                    parkingViewModel.getParkingsInRect(bottomLeftCorner, topRightCorner)
+                  // Create PointAnnotationOptions for each parking
+                  pointAnnotationOptions =
+                      listOfParkings.value.map { parking ->
+                        PointAnnotationOptions()
+                            .withPoint(parking.location.center)
+                            .withIconImage(resizedBitmap)
+                      }
 
-                    pointAnnotationOptions =
-                        listOfParkings.value.map { parking ->
-                            PointAnnotationOptions()
-                                .withPoint(parking.location.center)
-                                .withIconImage(resizedBitmap)
-                        }
+                  // Clear all annotations from the annotation manager to avoid duplicates
+                  annotationManager.deleteAll()
 
-                    annotationManager.deleteAll()
-
-                    // Add annotations to the annotation manager and display them on the map
-                    pointAnnotationOptions.forEach { annotationManager.create(it) }
-
-
-                    Log.e("Parking", listOfParkings.value.size.toString())
-                    Log.e("Markers", pointAnnotationOptions.size.toString())
-                    Log.e("TopRightCorner", topRightCorner.toString())
-                    Log.e("BottomLeftCorner", bottomLeftCorner.toString())
+                  // Add annotations to the annotation manager and display them on the map
+                  pointAnnotationOptions.forEach { annotationManager.create(it) }
                 }
                 mapView.mapboxMap.addOnCameraChangeListener(cameraChangeListener)
 
-                onDispose { annotationManager.deleteAll()
-                    mapView.mapboxMap.removeOnCameraChangeListener(cameraChangeListener)
-                }}
+                onDispose {
+                  annotationManager.deleteAll()
+                  mapView.mapboxMap.removeOnCameraChangeListener(cameraChangeListener)
+                }
               }
-
+            }
 
         Column(
             Modifier.padding(padding).fillMaxHeight(),
