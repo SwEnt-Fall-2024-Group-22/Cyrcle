@@ -81,7 +81,7 @@ fun MapScreen(
 
                 // Set camera bounds options
                 val cameraBoundsOptions =
-                    CameraBoundsOptions.Builder().minZoom(8.0).maxZoom(18.0).build()
+                    CameraBoundsOptions.Builder().minZoom(minZoom).maxZoom(maxZoom).build()
                 mapView.mapboxMap.setBounds(cameraBoundsOptions)
 
                 // Create annotation manager
