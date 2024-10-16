@@ -16,7 +16,11 @@ import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.CyrcleTheme
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
+import com.google.firebase.firestore.firestoreSettings
+import com.google.firebase.firestore.memoryCacheSettings
+import com.google.firebase.firestore.persistentCacheSettings
 
 class MainActivity : ComponentActivity() {
   private lateinit var auth: FirebaseAuth
@@ -31,15 +35,22 @@ class MainActivity : ComponentActivity() {
       auth.signOut()
     }
 
-    setContent { CyrcleTheme { Surface(modifier = Modifier.fillMaxSize()) { CyrcleApp() } } }
+    val settings = firestoreSettings {
+      // Use memory cache
+      setLocalCacheSettings(memoryCacheSettings {})
+      // Use persistent disk cache (default)
+      setLocalCacheSettings(persistentCacheSettings {})
+    }
+    val db = Firebase.firestore
+    db.firestoreSettings = settings
+
+    setContent { CyrcleTheme { Surface(modifier = Modifier.fillMaxSize()) { CyrcleApp(db) } } }
   }
 
   @Composable
-  fun CyrcleApp() {
+  fun CyrcleApp(db: FirebaseFirestore = Firebase.firestore) {
     val navController = rememberNavController()
     val navigationActions = NavigationActions(navController)
-    val db = Firebase.firestore
-    db.disableNetwork()
     val parkingRepository = ParkingRepositoryFirestore(db)
     val imageRepository = ImageRepositoryCloudStorage(auth)
     val parkingViewModel = ParkingViewModel(imageRepository, parkingRepository)
