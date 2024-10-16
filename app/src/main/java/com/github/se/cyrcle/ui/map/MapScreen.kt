@@ -92,14 +92,15 @@ fun MapScreen(
                             annotationSourceOptions =
                                 AnnotationSourceOptions(clusterOptions = ClusterOptions())))
 
-                  var PairScreenCoordinate = getScreenCoordinateFromPoint(mapView)
+                var PairScreenCoordinate = getScreenCoordinateFromPoint(mapView)
 
                 // Load the red marker image and resized it to fit the map
                 val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.red_marker)
                 val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 100, 150, false)
 
                 // Get parkings in the current view
-                  parkingViewModel.getParkingsInRect(PairScreenCoordinate.second, PairScreenCoordinate.first)
+                parkingViewModel.getParkingsInRect(
+                    PairScreenCoordinate.second, PairScreenCoordinate.first)
 
                 // Create PointAnnotationOptions for each parking
                 var pointAnnotationOptions =
@@ -135,7 +136,8 @@ fun MapScreen(
 
                   PairScreenCoordinate = getScreenCoordinateFromPoint(mapView)
 
-                  parkingViewModel.getParkingsInRect(PairScreenCoordinate.second, PairScreenCoordinate.first)
+                  parkingViewModel.getParkingsInRect(
+                      PairScreenCoordinate.second, PairScreenCoordinate.first)
 
                   // Create PointAnnotationOptions for each parking
                   pointAnnotationOptions =
@@ -193,22 +195,19 @@ fun MapScreen(
  */
 fun getScreenCoordinateFromPoint(mapView: MapView): Pair<Point, Point> {
 
-    // Retrieve viewport dimensions
-    var viewportWidth = mapView.width
-    var viewportHeight = mapView.height
+  // Retrieve viewport dimensions
+  var viewportWidth = mapView.width
+  var viewportHeight = mapView.height
 
-    var centerPixel =
-        mapView.mapboxMap.pixelForCoordinate(mapView.mapboxMap.cameraState.center)
+  var centerPixel = mapView.mapboxMap.pixelForCoordinate(mapView.mapboxMap.cameraState.center)
 
-    var topRightCorner =
-        mapView.mapboxMap.coordinateForPixel(
-            ScreenCoordinate(
-                centerPixel.x + viewportWidth / 2, centerPixel.y - viewportHeight / 2))
+  var topRightCorner =
+      mapView.mapboxMap.coordinateForPixel(
+          ScreenCoordinate(centerPixel.x + viewportWidth / 2, centerPixel.y - viewportHeight / 2))
 
-    var bottomLeftCorner =
-        mapView.mapboxMap.coordinateForPixel(
-            ScreenCoordinate(
-                centerPixel.x - viewportWidth / 2, centerPixel.y + viewportHeight / 2))
+  var bottomLeftCorner =
+      mapView.mapboxMap.coordinateForPixel(
+          ScreenCoordinate(centerPixel.x - viewportWidth / 2, centerPixel.y + viewportHeight / 2))
 
-    return Pair(topRightCorner, bottomLeftCorner)
+  return Pair(topRightCorner, bottomLeftCorner)
 }
