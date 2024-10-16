@@ -22,7 +22,6 @@ import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 
-
 class ReviewViewModelTest {
 
   private lateinit var reviewViewModel: ReviewViewModel
@@ -233,6 +232,4 @@ class ReviewViewModelTest {
     // Assert that the failure callback was not called
     assertFalse("Failure callback was called", isFailureCalled)
   }
-
-
 }
