@@ -64,7 +64,7 @@ fun BottomBarAdd(navigationActions: NavigationActions) {
           horizontalArrangement = Arrangement.SpaceBetween,
           verticalAlignment = Alignment.CenterVertically) {
             Button(
-                { navigationActions.goBack() },
+                { navigationActions.navigateTo(Screen.MAP) },
                 modifier = Modifier.testTag("cancelButton"),
                 colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
                   Text(

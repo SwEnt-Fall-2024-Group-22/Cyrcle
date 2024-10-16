@@ -1,7 +1,7 @@
-// MapScreenToAddScreenTest.kt
 package com.github.se.cyrcle.ui.add
 
 import CyrcleNavHost
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
@@ -14,8 +14,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.ui.map.MapScreen
 import com.github.se.cyrcle.ui.navigation.NavigationActions
-import com.github.se.cyrcle.ui.navigation.Screen
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,16 +24,22 @@ import org.junit.runner.RunWith
 class AddScreensNavigationTest {
   @get:Rule val composeTestRule = createComposeRule()
 
+  @Composable
+  fun setUp(): Pair<NavigationActions, ParkingViewModel> {
+    val navController = rememberNavController()
+    val navigationActions = NavigationActions(navController)
+    val parkingViewModel: ParkingViewModel = viewModel(factory = ParkingViewModel.Factory)
+    CyrcleNavHost(navigationActions, navController, parkingViewModel)
+    return Pair(navigationActions, parkingViewModel)
+  }
+
   @OptIn(ExperimentalTestApi::class)
   @Test
   fun testAddButtonNavigatesToLocationPicker() {
 
     composeTestRule.setContent {
-      val navController = rememberNavController()
-      val navigationActions = NavigationActions(navController)
-      val parkingViewModel: ParkingViewModel = viewModel(factory = ParkingViewModel.Factory)
-      CyrcleNavHost(navigationActions, navController, parkingViewModel)
-      navigationActions.navigateTo(Screen.MAP)
+      val (navigationActions, parkingViewModel) = setUp()
+      MapScreen(navigationActions, parkingViewModel)
     }
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("addButton"))
     // Perform click on the add button
@@ -48,11 +54,8 @@ class AddScreensNavigationTest {
   fun testNavigationToAttribute() {
 
     composeTestRule.setContent {
-      val navController = rememberNavController()
-      val navigationActions = NavigationActions(navController)
-      val parkingViewModel: ParkingViewModel = viewModel(factory = ParkingViewModel.Factory)
-      CyrcleNavHost(navigationActions, navController, parkingViewModel)
-      navigationActions.navigateTo(Screen.LOCATION_PICKER)
+      val (navigationActions, parkingViewModel) = setUp()
+      LocationPicker(navigationActions, parkingViewModel)
     }
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("nextButton"))
     // Perform click on the add button
@@ -70,7 +73,7 @@ class AddScreensNavigationTest {
       val navigationActions = NavigationActions(navController)
       val parkingViewModel: ParkingViewModel = viewModel(factory = ParkingViewModel.Factory)
       CyrcleNavHost(navigationActions, navController, parkingViewModel)
-      navigationActions.navigateTo(Screen.ATTRIBUTES_PICKER)
+      AttributesPicker(navigationActions, parkingViewModel)
     }
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("submitButton"))
     // Perform click on the add button
@@ -84,11 +87,8 @@ class AddScreensNavigationTest {
   @Test
   fun testCancel() {
     composeTestRule.setContent {
-      val navController = rememberNavController()
-      val navigationActions = NavigationActions(navController)
-      val parkingViewModel: ParkingViewModel = viewModel(factory = ParkingViewModel.Factory)
-      CyrcleNavHost(navigationActions, navController, parkingViewModel)
-      navigationActions.navigateTo(Screen.ATTRIBUTES_PICKER)
+      val (navigationActions, parkingViewModel) = setUp()
+      AttributesPicker(navigationActions, parkingViewModel)
     }
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("cancelButton"))
     // Perform click on the add button
@@ -102,17 +102,12 @@ class AddScreensNavigationTest {
   @Test
   fun testCancel2() {
     composeTestRule.setContent {
-      val navController = rememberNavController()
-      val navigationActions = NavigationActions(navController)
-      val parkingViewModel: ParkingViewModel = viewModel(factory = ParkingViewModel.Factory)
-      CyrcleNavHost(navigationActions, navController, parkingViewModel)
-      navigationActions.navigateTo(Screen.MAP)
+      val (navigationActions, parkingViewModel) = setUp()
+      LocationPicker(navigationActions, parkingViewModel)
     }
-    composeTestRule.onNodeWithTag("addButton").performClick()
-    composeTestRule.waitUntilExactlyOneExists(hasTestTag("cancelButton"))
-    // Perform click on the add button
+    composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("cancelButton").performClick()
-    composeTestRule.waitUntilAtLeastOneExists(hasTestTag("MapScreen"))
+    composeTestRule.waitUntilExactlyOneExists((hasTestTag("MapScreen")))
     composeTestRule.onNodeWithTag("MapScreen").assertExists().assertIsDisplayed()
   }
 }
