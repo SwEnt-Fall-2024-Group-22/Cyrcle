@@ -3,10 +3,6 @@ package com.github.se.cyrcle.model.review
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.github.se.cyrcle.model.parking.ImageRepositoryCloudStorage
-import com.github.se.cyrcle.model.parking.ParkingRepositoryFirestore
-import com.github.se.cyrcle.model.parking.ParkingViewModel
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -38,10 +34,7 @@ class ReviewViewModel(val reviewRepository: ReviewRepository) : ViewModel() {
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ParkingViewModel(
-                ImageRepositoryCloudStorage(FirebaseAuth.getInstance()),
-                ParkingRepositoryFirestore(FirebaseFirestore.getInstance()))
-                as T
+            return ReviewViewModel(ReviewRepositoryFirestore(FirebaseFirestore.getInstance())) as T
           }
         }
   }
