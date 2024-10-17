@@ -147,14 +147,7 @@ android {
 
 
 
-sonar {
-    properties {
-        property("sonar.host.url", "https://sonarcloud.io")
-        property("sonar.organization","swent-fall-2024-group-22")
-        property("sonar.projectKey", "SwEnt-Fall-2024-Group-22_Cyrcle")
-        property("sonar.projectName","Cyrcle")
-    }
-}
+sonar {}
 
 // When a library is used both by robolectric and connected tests, use this function
 fun DependencyHandlerScope.globalTestImplementation(dep: Any) {
