@@ -82,6 +82,7 @@ fun MapScreen(
             style = { MapStyle("mapbox://styles/seanprz/cm27wh9ff00jl01r21jz3hcb1") }) {
               DisposableMapEffect { mapView ->
 
+                // Lock rotations of the map
                 mapView.gestures.getGesturesManager().rotateGestureDetector.isEnabled = false
 
                 // Set camera bounds options
