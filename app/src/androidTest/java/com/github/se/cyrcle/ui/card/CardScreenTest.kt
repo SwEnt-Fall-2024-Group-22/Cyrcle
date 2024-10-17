@@ -1,7 +1,12 @@
 package com.github.se.cyrcle.ui.card
 
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onChildAt
+import androidx.compose.ui.test.onChildren
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.model.parking.ImageRepository
 import com.github.se.cyrcle.model.parking.ParkingRepository

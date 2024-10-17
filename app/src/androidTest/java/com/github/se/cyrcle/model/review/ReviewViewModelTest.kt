@@ -5,9 +5,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.firestoreSettings
-import com.google.firebase.firestore.memoryCacheSettings
-import com.google.firebase.firestore.persistentCacheSettings
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.runBlocking
@@ -34,11 +31,6 @@ class ReviewViewModelTest {
     FirebaseApp.initializeApp(context)
 
     val db = FirebaseFirestore.getInstance()
-    val settings = firestoreSettings {
-      setLocalCacheSettings(memoryCacheSettings {})
-      setLocalCacheSettings(persistentCacheSettings {})
-    }
-    db.firestoreSettings = settings
     db.disableNetwork().await()
 
     reviewRepositoryFirestore = ReviewRepositoryFirestore(db)

@@ -1,9 +1,7 @@
 package com.github.se.cyrcle.model.parking
 
-import androidx.test.core.app.ApplicationProvider
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.android.gms.tasks.Tasks
-import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
@@ -14,15 +12,15 @@ import junit.framework.TestCase.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.timeout
 import org.mockito.kotlin.verify
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(JUnit4::class)
 class ParkingRepositoryFirestoreTest {
   @Mock private lateinit var mockFirestore: FirebaseFirestore
   @Mock private lateinit var mockDocumentReference: DocumentReference
@@ -51,10 +49,6 @@ class ParkingRepositoryFirestoreTest {
   @Before
   fun setUp() {
     MockitoAnnotations.openMocks(this)
-
-    if (FirebaseApp.getApps(ApplicationProvider.getApplicationContext()).isEmpty()) {
-      FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
-    }
 
     parkingRepositoryFirestore = ParkingRepositoryFirestore(mockFirestore)
 

@@ -55,7 +55,8 @@ fun CardScreen(
                   color = MaterialTheme.colorScheme.secondary,
                   modifier = Modifier.testTag("TopAppBarTitle")) // Test tag for title
             })
-      }) {
+      },
+      modifier = Modifier.testTag("CardScreen")) {
         Box(
             modifier =
                 Modifier.fillMaxSize()
@@ -66,8 +67,6 @@ fun CardScreen(
                   modifier = Modifier.fillMaxSize().padding(it),
                   horizontalAlignment = Alignment.CenterHorizontally,
                   verticalArrangement = Arrangement.SpaceBetween) {
-                    Spacer(modifier = Modifier.height(16.dp))
-
                     // Display a row of images using LazyRow
                     LazyRow(
                         modifier =
@@ -80,15 +79,13 @@ fun CardScreen(
                                 model = selectedParking.images[index],
                                 contentDescription = "Image $index",
                                 modifier =
-                                    Modifier.size(200.dp)
+                                    Modifier.size(170.dp)
                                         .padding(2.dp)
                                         .fillMaxWidth()
                                         .testTag("ParkingImage$index"), // Test tag for each image
                                 contentScale = ContentScale.Crop)
                           }
                         }
-
-                    Spacer(modifier = Modifier.height(16.dp))
 
                     // Column for parking info such as capacity, rack type, protection, etc.
                     Column(
@@ -158,7 +155,7 @@ fun CardScreen(
                               onClick = { /* Handle Return to Map */},
                               modifier =
                                   Modifier.fillMaxWidth()
-                                      .height(60.dp)
+                                      .height(40.dp)
                                       .testTag(
                                           "ShowInMapButton"), // Test tag for Show in Map button
                               colors =
@@ -172,7 +169,7 @@ fun CardScreen(
                               onClick = {},
                               modifier =
                                   Modifier.fillMaxWidth()
-                                      .height(60.dp)
+                                      .height(40.dp)
                                       .testTag("AddReviewButton"), // Test tag for Add Review button
                               colors =
                                   ButtonDefaults.buttonColors(
@@ -184,7 +181,7 @@ fun CardScreen(
                           Button(
                               onClick = {},
                               modifier =
-                                  Modifier.height(40.dp)
+                                  Modifier.height(30.dp)
                                       .testTag("ReportButton"), // Test tag for Report button
                               colors =
                                   ButtonDefaults.buttonColors(
