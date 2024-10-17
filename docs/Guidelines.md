@@ -102,50 +102,50 @@ people in this project
   git push -f origin MY_BRANCH
   ```
 
-  - **Multiple people working on a branch**\
-    That's a bad idea. Best is to further subdivide the branch into two branches, and to merge/rebase
-    them from time to time, while communicating about it (recall only the `main` branch is protected 
-    and hence accidents can happen). To avoid the maximum conflict, you should work on different 
-    files. The ideal way would be to create empty functions in your files, then to branch, and to
-    finally merge everything together, but that can be quite hard as function signatures may change.\
-    Here is a example graph of what should happen.
-    ```mermaid
-    ---
-    config:
-    theme: neutral
-    fontFamily: helvetica
-    ---
-    flowchart TB
-    main{main} -...-> main_end{main}
-    main --> fa((c))
+- **Multiple people working on a branch**\
+  That's a bad idea. Best is to further subdivide the branch into two branches, and to merge/rebase
+  them from time to time, while communicating about it (recall only the `main` branch is protected 
+  and hence accidents can happen). To avoid the maximum conflict, you should work on different 
+  files. The ideal way would be to create empty functions in your files, then to branch, and to
+  finally merge everything together, but that can be quite hard as function signatures may change.\
+  Here is a example graph of what should happen.
+  ```mermaid
+  ---
+  config:
+  theme: neutral
+  fontFamily: helvetica
+  ---
+  flowchart TB
+  main{main} -...-> main_end{main}
+  main --> fa((c))
     
-    subgraph feature-A-2
-    fa2((c)) ==> fa2A((c)) ==> fa2B((c)) ==> fa2C((c)) ==> fa2end((c))
-    end
-    fa ==> fa2
+  subgraph feature-A-2
+  fa2((c)) ==> fa2A((c)) ==> fa2B((c)) ==> fa2C((c)) ==> fa2end((c))
+  end
+  fa ==> fa2
     
-    subgraph feature-A
-    fa((c)) --> faA((c)) --> faB((c)) --> faC((c)) --> faD((c)) --> fa_end((c))
-    end
+  subgraph feature-A
+  fa((c)) --> faA((c)) --> faB((c)) --> faC((c)) --> faD((c)) --> fa_end((c))
+  end
     
-    subgraph feature-A-1
-    fa1((c)) ==> fa1A((c)) ==> fa1B((c)) ==> fa1C((c)) ==> fa1end((c))
-    end
-    fa ==> fa1
+  subgraph feature-A-1
+  fa1((c)) ==> fa1A((c)) ==> fa1B((c)) ==> fa1C((c)) ==> fa1end((c))
+  end
+  fa ==> fa1
     
-    fa_end ==Pull request==> main_end
-    fa1end ==> fa_end
-    fa2end ==> fa_end
+  fa_end ==Pull request==> main_end
+  fa1end ==> fa_end
+  fa2end ==> fa_end
     
-    fa2 -.merge.-> faA
-    fa1A -.-> faB
-    fa2B -.-> faC
-    fa1C -.-> faD
-    ```
-    Of course, only merges are shown in this graph, but be assured that `rebase` is also allowed
-    here. If this helps you, the branch `feature-A` can be seen as un unprotected `main` (without
-    protection), so be sure that the communication between the multiple workers is efficient so that
-    no one `-f` his/her way into it.
+  fa2 -.merge.-> faA
+  fa1A -.-> faB
+  fa2B -.-> faC
+  fa1C -.-> faD
+  ```
+  Of course, only merges are shown in this graph, but be assured that `rebase` is also allowed
+  here. If this helps you, the branch `feature-A` can be seen as un unprotected `main` (without
+  protection), so be sure that the communication between the multiple workers is efficient so that
+  no one `-f` his/her way into it.
 
 ## GitHub
 
