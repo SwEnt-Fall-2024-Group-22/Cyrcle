@@ -12,6 +12,8 @@ import androidx.navigation.compose.rememberNavController
 import com.github.se.cyrcle.model.parking.ImageRepositoryCloudStorage
 import com.github.se.cyrcle.model.parking.ParkingRepositoryFirestore
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.review.ReviewRepositoryFirestore
+import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.CyrcleTheme
 import com.google.firebase.Firebase
@@ -52,8 +54,10 @@ class MainActivity : ComponentActivity() {
     val navController = rememberNavController()
     val navigationActions = NavigationActions(navController)
     val parkingRepository = ParkingRepositoryFirestore(db)
+    val reviewRepository = ReviewRepositoryFirestore(db)
     val imageRepository = ImageRepositoryCloudStorage(auth)
     val parkingViewModel = ParkingViewModel(imageRepository, parkingRepository)
-    CyrcleNavHost(navigationActions, navController, parkingViewModel)
+    val reviewViewModel = ReviewViewModel(reviewRepository)
+    CyrcleNavHost(navigationActions, navController, parkingViewModel, reviewViewModel)
   }
 }

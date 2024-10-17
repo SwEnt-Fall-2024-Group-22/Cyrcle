@@ -11,7 +11,6 @@ object Route {
   const val AUTH = "Auth"
   const val LIST = "List"
   const val MAP = "Map"
-  const val CARD = "Card"
   const val ADD_SPOTS = "Add Spots"
 }
 
@@ -20,6 +19,7 @@ object Screen {
   const val LIST = "List Screen"
   const val MAP = "Map Screen"
   const val CARD = "Card Screen"
+  const val REVIEW = "Review Screen"
   const val LOCATION_PICKER = "Location Picker"
   const val ATTRIBUTES_PICKER = "Attributes Picker"
 }
