@@ -3,14 +3,13 @@ package com.github.se.cyrcle.model.user
 data class User(
     val userId: String,
     val username: String = "",
-    val firstName: String? = null,
-    val lastName: String? = null,
+    val firstName: String = "",
+    val lastName: String = "",
     val email: String = "",
-    val profilePictureUrl: String? = null,
-    val homeAddress: String? = null,
+    val profilePictureUrl: String = "",
+    val homeAddress: String = "",
     val favoriteParkingSpots: List<String> = emptyList(),
-    // TODO For some reason these break my serialization/
-    // deserialization and i dont have the time to fix it :
+    // TODO For some reason these break my serialization/deserialization and i dont have the time to fix it :
     // val lastKnownLocation: Location? = null,
     // val lastLoginTime: Timestamp? = null,
     // val accountCreationDate: Timestamp? = null,
