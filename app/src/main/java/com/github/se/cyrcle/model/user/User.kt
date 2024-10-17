@@ -9,7 +9,8 @@ data class User(
     val profilePictureUrl: String = "",
     val homeAddress: String = "",
     val favoriteParkingSpots: List<String> = emptyList(),
-    // TODO For some reason these break my serialization/deserialization and i dont have the time to fix it :
+    // TODO For some reason these break my serialization/deserialization and I dont have the time to
+    // fix it :
     // val lastKnownLocation: Location? = null,
     // val lastLoginTime: Timestamp? = null,
     // val accountCreationDate: Timestamp? = null,
