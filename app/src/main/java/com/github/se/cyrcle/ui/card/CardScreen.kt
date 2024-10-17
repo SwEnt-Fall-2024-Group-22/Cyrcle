@@ -32,6 +32,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
 @Composable
@@ -166,7 +167,7 @@ fun CardScreen(
                               }
 
                           Button(
-                              onClick = {},
+                              onClick = { navigationActions.navigateTo(Screen.REVIEW) },
                               modifier =
                                   Modifier.fillMaxWidth()
                                       .height(40.dp)

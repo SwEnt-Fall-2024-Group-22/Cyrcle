@@ -14,6 +14,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.ui.map.MapScreen
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import org.junit.Rule
@@ -25,12 +26,13 @@ class AddScreensNavigationTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   @Composable
-  fun setUp(): Pair<NavigationActions, ParkingViewModel> {
+  fun setUp(): Triple<NavigationActions, ParkingViewModel, ReviewViewModel> {
     val navController = rememberNavController()
     val navigationActions = NavigationActions(navController)
     val parkingViewModel: ParkingViewModel = viewModel(factory = ParkingViewModel.Factory)
-    CyrcleNavHost(navigationActions, navController, parkingViewModel)
-    return Pair(navigationActions, parkingViewModel)
+    val reviewViewModel: ReviewViewModel = viewModel(factory = ReviewViewModel.Factory)
+    CyrcleNavHost(navigationActions, navController, parkingViewModel, reviewViewModel)
+    return Triple(navigationActions, parkingViewModel, reviewViewModel)
   }
 
   @OptIn(ExperimentalTestApi::class)
@@ -72,7 +74,8 @@ class AddScreensNavigationTest {
       val navController = rememberNavController()
       val navigationActions = NavigationActions(navController)
       val parkingViewModel: ParkingViewModel = viewModel(factory = ParkingViewModel.Factory)
-      CyrcleNavHost(navigationActions, navController, parkingViewModel)
+      val reviewViewModel: ReviewViewModel = viewModel(factory = ReviewViewModel.Factory)
+      CyrcleNavHost(navigationActions, navController, parkingViewModel, reviewViewModel)
       AttributesPicker(navigationActions, parkingViewModel)
     }
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("submitButton"))
