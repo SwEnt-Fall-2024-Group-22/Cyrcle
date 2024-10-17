@@ -171,6 +171,39 @@ people in this project
   2. In the general review, precise failed results (if any) of unit tests, and the result of your UI
     test (don't forget to mention your Emulator model)
 
+### Release mechanism
+
+A `release` branch, "parallel" to the `main` one, will trigger, on merge, the creation of a build 
+artifact, as well as a `.zip` of the current code version.
+By parallel, it is understood that the branch is a copy (although simplified with the squashed 
+commits) of the other, with no other upstream (because that would violate the history linearity) or 
+downstream (because there no use for that). 
+
+```mermaid
+---
+config:
+theme: neutral
+fontFamily: helvetica
+---
+flowchart TB
+initC(initial commit)
+subgraph main 
+    c1(c) -.Feature Dev.-> c2(c) --> c3(c) -.-> c4(c) --> c5(c) -.-> c6(c) --> c7(c) -.-> c8(c)
+end
+
+subgraph release
+    M1(M1) ---> M2(M2) ---> M3(M3) ---> BOA(BoA)
+end
+
+initC --> c1
+initC --> M1
+
+c2 --PR+Squash--> M1
+c4 --> M2
+c6 --> M3
+c8 --> BOA
+```
+
 ## Inside the code
 
 Android Studio, as it is based on JetBrains IDE, support comment highlights for specified strings 
