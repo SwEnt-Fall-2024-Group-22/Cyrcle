@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.sp
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
-import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
