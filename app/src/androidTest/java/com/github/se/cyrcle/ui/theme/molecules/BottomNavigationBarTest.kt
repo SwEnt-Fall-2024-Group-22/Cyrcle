@@ -40,7 +40,7 @@ class NavigationActionsTest {
     composeTestRule.setContent {
       Scaffold(
           bottomBar = {
-            BottomNavigationBar(navigationActions, selectedItem=Route.AUTH, testTag = testTag)
+            BottomNavigationBar(navigationActions, selectedItem = Route.AUTH, testTag = testTag)
           }) { innerPadding ->
             Column(modifier = Modifier.padding(innerPadding)) {}
           }

@@ -6,12 +6,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-//val Black = Color(0xFF000000)
-//val White = Color(0xFFFFFFFF)
+// val Black = Color(0xFF000000)
+// val White = Color(0xFFFFFFFF)
 val Cerulean = Color(0xFF22799B)
 val LightBlue = Color(0xFFD1E7F8)
-//val Cyan = Color(0xFF80DEF3)
-//val NormalBlue = Color(0xFF00D0FF)
+// val Cyan = Color(0xFF80DEF3)
+// val NormalBlue = Color(0xFF00D0FF)
 val DarkBlue = Color(0xFF00A1FF)
 val Madder = Color(0xFF9B2228)
 val GoldenBrown = Color(0xFF9B6C22)

@@ -10,37 +10,36 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-
 @RunWith(AndroidJUnit4::class)
 class InputTest {
 
-    @get:Rule val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
-    @Test
-    fun displayInputText() {
-        val tag = "InputText"
+  @Test
+  fun displayInputText() {
+    val tag = "InputText"
 
-        val expected = "A"
+    val expected = "A"
 
-        var text = "" // by remember { mutableStateOf("A") }
-        composeTestRule.setContent { InputText(
-            "Test",
-            onValueChange = { newText -> text = newText },
-            testTag = tag
-            ) }
-
-        composeTestRule.onNodeWithTag(tag)
-            .assertIsDisplayed()
-            .performTextInput(expected) // return Unit, can't chain further
-        assertEquals(expected, text)
+    var text = "" // by remember { mutableStateOf("A") }
+    composeTestRule.setContent {
+      InputText("Test", onValueChange = { newText -> text = newText }, testTag = tag)
     }
 
-    @Test
-    fun inputTextDefaultArg() {
-        composeTestRule.setContent { InputText(
-            "Test",
-            onValueChange = {},
-        ) }
+    composeTestRule
+        .onNodeWithTag(tag)
+        .assertIsDisplayed()
+        .performTextInput(expected)
+    assertEquals(expected, text)
+  }
 
+  @Test
+  fun inputTextDefaultArg() {
+    composeTestRule.setContent {
+      InputText(
+          "Test",
+          onValueChange = {},
+      )
     }
+  }
 }
