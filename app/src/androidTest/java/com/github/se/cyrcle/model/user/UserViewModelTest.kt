@@ -1,15 +1,14 @@
+package com.github.se.cyrcle.model.user
+
+import UserViewModel
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import com.github.se.cyrcle.model.user.User
-import com.github.se.cyrcle.model.user.UserRepositoryFirestore
-import com.github.se.cyrcle.model.user.user1
 import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Before
