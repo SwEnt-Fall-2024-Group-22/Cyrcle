@@ -151,6 +151,8 @@ people in this project
 
 ### Pull Request
 
+#### Creation of a Pull Request
+
 - If the PR only contains one commit (some quick fix), it can be left as is
 - For a consequent PR, please set all the fields on the right of the screen
   - 2 reviewers
@@ -159,6 +161,29 @@ people in this project
   - The project (Cyrcle), with a status if any
   - The current milestone
   - Issues linked with the PR.
+
+It is allowed to create the PR as soon as you are working on a task, as you can set it as "draft"
+(Draft Pull Request), and the reviewers will be notified only once you open it as a "real" Pull
+Request.
+
+#### Pull Request Requirements
+
+Be sure that your code is in a "near perfection state". It has to follow the requirements
+- Unit and Android tests all pass (Verified by GitHub Actions)
+- 80% Code coverage at a minimum (Verified by GitHub Actions)
+- Introduce minimal work for later, you will learn that "small work for later" is often transformed
+  into "Lot of work for later" (Merge conflicts, design changes, ...)
+
+**NOTE** : Some tests (especially those calling API and/or tricky UI tests) might fail randomly. If that
+is the case, simply re-run the job until successful result.
+
+#### Ending a Pull Request etiquette
+
+- The deadline for submitting a PR for review is **Thursday 21h00**
+- The deadline for merging the PR into `main` is **Thursday 23h00**, so that there is still time to
+  debug in worst case.
+- The assignee (the creator of the PR) is the only one able to merge it if no bypass is has been set
+up.
 
 ### Review Process
 
