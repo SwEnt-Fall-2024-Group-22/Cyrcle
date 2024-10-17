@@ -1,6 +1,5 @@
 package com.github.se.cyrcle
 
-import android.util.Log
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
@@ -9,17 +8,12 @@ import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.github.se.cyrcle.model.parking.ParkingRepositoryFirestore
-import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
-import com.google.firebase.Firebase
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.firestore
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.tasks.await
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -30,40 +24,105 @@ class MainActivityTest {
 
   @get:Rule val composeTestRule = createAndroidComposeRule<MainActivity>()
 
+  private lateinit var authRobot: AuthScreenRobot
+  private lateinit var mapRobot: MapScreenRobot
+  private lateinit var listRobot: ListScreenRobot
+  private lateinit var cardRobot: CardScreenRobot
+
   @Before
-  fun setUp() = runBlocking {
+  fun setUp() {
 
-    // Activate cache and disable network
-    val db = Firebase.firestore
-    db.disableNetwork().await()
+    // TODO inject a fake database for testing
+    // Currently, the test uses the real database
 
-    // Add some parking into the cache
-    val parkingRepositoryFirestore = ParkingRepositoryFirestore(db)
-    parkingRepositoryFirestore.addParking(TestInstancesParking.parking1, {}, {})
-    parkingRepositoryFirestore.addParking(TestInstancesParking.parking2, {}, {})
-    parkingRepositoryFirestore.addParking(TestInstancesParking.parking3, {}, {})
-  }
-
-  fun printParkings() {
-    val parkingRepositoryFirestore = ParkingRepositoryFirestore(Firebase.firestore)
-    parkingRepositoryFirestore.getParkings(
-        { list -> list.forEach { Log.e("ENDTOEND", "$it") } }, { Log.e("ENDTOEND", "Failed") })
+    authRobot = AuthScreenRobot(composeTestRule)
+    mapRobot = MapScreenRobot(composeTestRule)
+    listRobot = ListScreenRobot(composeTestRule)
+    cardRobot = CardScreenRobot(composeTestRule)
   }
 
   @Test
-  fun reviewCardDisplaysWell() = runBlocking {
-    with(AuthScreenRobot(composeTestRule)) {
-      printParkings()
-      assertAuthScreen()
-      printParkings()
-      performSignIn()
-      printParkings()
+  fun reviewCardDisplaysWell() {
+    authRobot.assertAuthScreen()
+    authRobot.performSignIn()
+
+    mapRobot.assertMapScreen()
+    mapRobot.toList()
+
+    listRobot.assertListScreen()
+    listRobot.toCard(0)
+
+    cardRobot.assertCardScreen()
+  }
+
+  private class CardScreenRobot(val composeTestRule: ComposeTestRule) {
+    fun assertCardScreen() {
+      composeTestRule.onNodeWithTag("TopAppBar").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("RowCapacityRack").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("RowProtectionPrice").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("RowSecurity").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("ButtonsColumn").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("ShowInMapButton").assertIsDisplayed().assertHasClickAction()
+      composeTestRule.onNodeWithTag("AddReviewButton").assertIsDisplayed().assertHasClickAction()
+      composeTestRule.onNodeWithTag("ReportButton").assertIsDisplayed().assertHasClickAction()
     }
 
-    with(MapScreenRobot(composeTestRule)) { toList() }
+    @OptIn(ExperimentalTestApi::class)
+    fun goBack() {
+      composeTestRule
+          .onNodeWithTag("GoBackButton")
+          .assertIsDisplayed()
+          .assertHasClickAction()
+          .performClick()
+      composeTestRule.waitUntilAtLeastOneExists(
+          hasTestTag("SpotListScreen").or(hasTestTag("MapScreen")))
+    }
+  }
+
+  private class ListScreenRobot(val composeTestRule: ComposeTestRule) {
+
+    @OptIn(ExperimentalTestApi::class)
+    fun toCard(index: Int) {
+      composeTestRule.onNodeWithTag("SpotListColumn").performScrollToIndex(index)
+      composeTestRule
+          .onNodeWithTag("SpotListColumn")
+          .onChildAt(index + 1)
+          .assertIsDisplayed()
+          .assertHasClickAction()
+          .performClick()
+
+      composeTestRule.waitUntilExactlyOneExists(hasTestTag("CardScreen"))
+    }
+
+    fun assertListScreen() {
+      composeTestRule.onNodeWithTag("BottomNavigationBar").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("SpotListColumn").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("ShowFiltersButton").assertIsDisplayed().assertHasClickAction()
+
+      // TODO check that the cards are displayed
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    fun toMap() {
+      composeTestRule
+          .onNodeWithTag(TopLevelDestinations.MAP.textId)
+          .assertHasClickAction()
+          .performClick()
+
+      composeTestRule.waitUntilExactlyOneExists(hasTestTag("MapScreen"))
+    }
   }
 
   private class MapScreenRobot(val composeTestRule: ComposeTestRule) {
+
+    fun assertMapScreen() {
+      composeTestRule.onNodeWithTag("MapScreen").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("addButton").assertIsDisplayed().assertHasClickAction()
+      composeTestRule.onNodeWithTag("ZoomControlsIn").assertIsDisplayed().assertHasClickAction()
+      composeTestRule.onNodeWithTag("ZoomControlsOut").assertIsDisplayed().assertHasClickAction()
+      composeTestRule.onNodeWithTag("BottomNavigationBar").assertIsDisplayed()
+    }
+
     @OptIn(ExperimentalTestApi::class)
     fun toList() {
       composeTestRule
@@ -72,32 +131,31 @@ class MainActivityTest {
           .performClick()
 
       composeTestRule.waitUntilExactlyOneExists(hasTestTag("SpotListColumn"))
-      Thread.sleep(100)
     }
   }
 
   private class AuthScreenRobot(val composeTestRule: ComposeTestRule) {
 
     fun assertAuthScreen() {
-      composeTestRule.onNodeWithTag("loginScreen").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("LoginScreen").assertIsDisplayed()
       composeTestRule
-          .onNodeWithTag("loginTitle")
+          .onNodeWithTag("LoginTitle")
           .assertIsDisplayed()
           .assertTextEquals("Welcome to Cyrcle")
       composeTestRule
-          .onNodeWithTag("loginButton")
+          .onNodeWithTag("AnonymousLoginButton")
+          .assertIsDisplayed()
+          .assertHasClickAction()
+      composeTestRule
+          .onNodeWithTag("GoogleLoginButton")
           .assertIsDisplayed()
           .assertHasClickAction()
           .assertTextContains("Sign in with Google")
     }
 
     @OptIn(ExperimentalTestApi::class)
-    suspend fun performSignIn() {
-      val user = FirebaseAuth.getInstance().signInAnonymously().await()
-
-      Log.wtf("ENDTOEND", "user $user")
-
-      composeTestRule.onNodeWithTag("loginButton").performClick()
+    fun performSignIn() {
+      composeTestRule.onNodeWithTag("AnonymousLoginButton").performClick()
 
       composeTestRule.waitUntilExactlyOneExists(hasTestTag("MapScreen"))
     }

@@ -45,20 +45,23 @@ class LoginTest {
   }
 
   @Test
-  fun titleAndButtonAreCorrectlyDisplayed() {
+  fun titleAndButtonsAreCorrectlyDisplayed() {
     composeTestRule.activity.setContent { SignInScreen(navigationActions) }
-    composeTestRule.onNodeWithTag("loginTitle").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("loginTitle").assertTextEquals("Welcome to Cyrcle")
+    composeTestRule
+        .onNodeWithTag("LoginTitle")
+        .assertIsDisplayed()
+        .assertTextEquals("Welcome to Cyrcle")
 
-    composeTestRule.onNodeWithTag("loginButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("loginButton").assertHasClickAction()
+    composeTestRule.onNodeWithTag("GoogleLoginButton").assertIsDisplayed().assertHasClickAction()
+
+    composeTestRule.onNodeWithTag("AnonymousLoginButton").assertIsDisplayed().assertHasClickAction()
   }
 
   @Test
   fun googleSignInReturnsValidActivityResult() {
     composeTestRule.activity.setContent { SignInScreen(navigationActions) }
 
-    composeTestRule.onNodeWithTag("loginButton").performClick()
+    composeTestRule.onNodeWithTag("GoogleLoginButton").performClick()
     composeTestRule.waitForIdle()
     // assert that an Intent resolving to Google Mobile Services has been sent (for sign-in)
     intended(toPackage("com.google.android.gms"))

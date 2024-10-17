@@ -4,9 +4,6 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.firestoreSettings
-import com.google.firebase.firestore.memoryCacheSettings
-import com.google.firebase.firestore.persistentCacheSettings
 import com.mapbox.geojson.Point
 import java.util.concurrent.CountDownLatch
 import kotlinx.coroutines.runBlocking
@@ -26,13 +23,6 @@ class ParkingRepositoryFirestoreTest {
     FirebaseApp.initializeApp(context)
 
     val db = FirebaseFirestore.getInstance()
-    val settings = firestoreSettings {
-      // Use memory cache
-      setLocalCacheSettings(memoryCacheSettings {})
-      // Use persistent disk cache (default)
-      setLocalCacheSettings(persistentCacheSettings {})
-    }
-    db.firestoreSettings = settings
     db.disableNetwork().await()
 
     parkingRepositoryFirestore = ParkingRepositoryFirestore(db)

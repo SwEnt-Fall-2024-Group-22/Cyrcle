@@ -40,6 +40,8 @@ import androidx.compose.ui.unit.sp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
+import com.github.se.cyrcle.ui.theme.ColorScheme
+import com.github.se.cyrcle.ui.theme.getButtonColors
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -49,6 +51,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 
 @Composable
@@ -71,7 +74,7 @@ fun SignInScreen(navigationActions: NavigationActions) {
   // The main container for the screen
   // A surface container using the 'background' color from the theme
   Scaffold(
-      modifier = Modifier.fillMaxSize().testTag("loginScreen"),
+      modifier = Modifier.fillMaxSize().testTag("LoginScreen"),
       content = { padding ->
         Column(
             modifier = Modifier.fillMaxSize().padding(padding),
@@ -80,7 +83,7 @@ fun SignInScreen(navigationActions: NavigationActions) {
         ) {
           // Welcome Text
           Text(
-              modifier = Modifier.testTag("loginTitle"),
+              modifier = Modifier.testTag("LoginTitle"),
               text = "Welcome to Cyrcle",
               style =
                   MaterialTheme.typography.headlineLarge.copy(fontSize = 57.sp, lineHeight = 64.sp),
@@ -92,19 +95,29 @@ fun SignInScreen(navigationActions: NavigationActions) {
           Image(
               painter = painterResource(id = R.drawable.app_logo),
               contentDescription = "App Logo",
-              modifier = Modifier.size(350.dp))
+              modifier = Modifier.size(275.dp))
 
-          Spacer(modifier = Modifier.height(48.dp))
+          Spacer(modifier = Modifier.height(20.dp))
+
+          // Anonymous Login Button
+          Button(
+              onClick = {
+                runBlocking { FirebaseAuth.getInstance().signInAnonymously().await() }
+                navigationActions.navigateTo(TopLevelDestinations.MAP)
+              },
+              colors = getButtonColors(ColorScheme.SECONDARY),
+              shape = RoundedCornerShape(50),
+              border = BorderStroke(1.dp, Color.LightGray),
+              modifier =
+                  Modifier.padding(16.dp)
+                      .height(48.dp) // Adjust height as needed
+                      .testTag("AnonymousLoginButton")) {
+                Text(text = "Continue as Guest", fontWeight = FontWeight.Medium)
+              }
 
           // Authenticate With Google Button
           GoogleSignInButton(
               onSignInClick = {
-                // Do not launch the intent if the user is already signed in (for tests)
-                if (FirebaseAuth.getInstance().currentUser != null) {
-                  navigationActions.navigateTo(TopLevelDestinations.MAP)
-                  return@GoogleSignInButton
-                }
-
                 val gso =
                     GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                         .requestIdToken(token)
@@ -127,7 +140,7 @@ fun GoogleSignInButton(onSignInClick: () -> Unit) {
       modifier =
           Modifier.padding(16.dp)
               .height(48.dp) // Adjust height as needed
-              .testTag("loginButton")) {
+              .testTag("GoogleLoginButton")) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,

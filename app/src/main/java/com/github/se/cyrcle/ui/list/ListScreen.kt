@@ -77,6 +77,7 @@ fun SpotListScreen(
                   .thenBy { (_, distance) -> distance })
 
   Scaffold(
+      modifier = Modifier.testTag("SpotListScreen"),
       bottomBar = {
         BottomNavigationBar(
             onTabSelect = { navigationActions.navigateTo(it) },

@@ -55,7 +55,8 @@ fun CardScreen(
                   color = MaterialTheme.colorScheme.secondary,
                   modifier = Modifier.testTag("TopAppBarTitle")) // Test tag for title
             })
-      }) {
+      },
+      modifier = Modifier.testTag("CardScreen")) {
         Box(
             modifier =
                 Modifier.fillMaxSize()
