@@ -99,6 +99,18 @@ fun SignInScreen(navigationActions: NavigationActions) {
 
           Spacer(modifier = Modifier.height(20.dp))
 
+          // Authenticate With Google Button
+          GoogleSignInButton(
+              onSignInClick = {
+                val gso =
+                    GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestIdToken(token)
+                        .requestEmail()
+                        .build()
+                val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                launcher.launch(googleSignInClient.signInIntent)
+              })
+
           // Anonymous Login Button
           Button(
               onClick = {
@@ -114,18 +126,6 @@ fun SignInScreen(navigationActions: NavigationActions) {
                       .testTag("AnonymousLoginButton")) {
                 Text(text = "Continue as Guest", fontWeight = FontWeight.Medium)
               }
-
-          // Authenticate With Google Button
-          GoogleSignInButton(
-              onSignInClick = {
-                val gso =
-                    GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestIdToken(token)
-                        .requestEmail()
-                        .build()
-                val googleSignInClient = GoogleSignIn.getClient(context, gso)
-                launcher.launch(googleSignInClient.signInIntent)
-              })
         }
       })
 }
