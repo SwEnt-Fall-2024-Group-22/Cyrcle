@@ -125,8 +125,11 @@ fun MapScreen(
                       currentBottomLeft, currentTopRight, loadedBottomLeft, loadedTopRight)) {
                     Log.d("MapScreen", "Loading parkings in new view")
                     // Get the buffered coordinates for loading parkings
-                    loadedBottomLeft = getScreenCorners(mapView, useBuffer = true).first
-                    loadedTopRight = getScreenCorners(mapView, useBuffer = true).second
+
+                    val loadedCorners = getScreenCorners(mapView, useBuffer = true)
+                    loadedBottomLeft = loadedCorners.first
+                    loadedTopRight = loadedCorners.second
+
                     parkingViewModel.getParkingsInRect(loadedBottomLeft, loadedTopRight)
 
                     // Create PointAnnotationOptions for each parking
@@ -178,7 +181,16 @@ fun MapScreen(
       }
 }
 
-fun inBounds(
+/**
+ * Check if the current view is within the loaded view.
+ *
+ * @param currentBottomLeft the bottom left corner of the current view
+ * @param currentTopRight the top right corner of the current view
+ * @param loadedBottomLeft the bottom left corner of the loaded view
+ * @param loadedTopRight the top right corner of the loaded view
+ * @return true if the current view is within the loaded view, false otherwise
+ */
+private fun inBounds(
     currentBottomLeft: Point,
     currentTopRight: Point,
     loadedBottomLeft: Point,
@@ -200,7 +212,7 @@ fun inBounds(
  * @param useBuffer whether to use a buffer to get the corners
  * @return a pair of the bottom left and top right corners of the screen
  */
-fun getScreenCorners(mapView: MapView, useBuffer: Boolean = true): Pair<Point, Point> {
+private fun getScreenCorners(mapView: MapView, useBuffer: Boolean = true): Pair<Point, Point> {
   // Retrieve viewport dimensions
   val viewportWidth = mapView.width
   val viewportHeight = mapView.height
