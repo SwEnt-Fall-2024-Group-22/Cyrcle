@@ -7,6 +7,8 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.ktfmt)
     alias(libs.plugins.gms)
+    alias(libs.plugins.sonar)
+    id("jacoco")
 
 }
 
@@ -145,6 +147,17 @@ android {
 
 
 
+sonar {
+    properties {
+        property("sonar.host.url", "https://sonarcloud.io")
+    }
+}
+
+// When a library is used both by robolectric and connected tests, use this function
+fun DependencyHandlerScope.globalTestImplementation(dep: Any) {
+    androidTestImplementation(dep)
+    testImplementation(dep)
+}
 
 dependencies {
 
