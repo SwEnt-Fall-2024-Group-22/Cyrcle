@@ -249,57 +249,52 @@ class ReviewViewModelTest {
     assertFalse("Success callback was called in failure scenario", isSuccessCalled)
   }
 
-    @Test
-    fun getReviewsByOwnerSuccessTest() = runBlocking {
-        val countDownLatch = CountDownLatch(1)
-        var isSuccessCalled = false
+  @Test
+  fun getReviewsByOwnerSuccessTest() = runBlocking {
+    val countDownLatch = CountDownLatch(1)
+    var isSuccessCalled = false
 
-        // Simulate a success scenario
-        reviewViewModel.reviewRepository.getReviewsByOwner(
-            owner = "user1",
-            onSuccess = { reviews ->
-                // Assert the success callback is triggered with valid review data
-                assertNotNull(reviews)
-                assertTrue(reviews.isNotEmpty())
-                assertEquals("user1", reviews[0].owner)
-                isSuccessCalled = true
-                countDownLatch.countDown()
-            },
-            onFailure = { fail("This should not fail") }
-        )
+    // Simulate a success scenario
+    reviewViewModel.reviewRepository.getReviewsByOwner(
+        owner = "user1",
+        onSuccess = { reviews ->
+          // Assert the success callback is triggered with valid review data
+          assertNotNull(reviews)
+          assertTrue(reviews.isNotEmpty())
+          assertEquals("user1", reviews[0].owner)
+          isSuccessCalled = true
+          countDownLatch.countDown()
+        },
+        onFailure = { fail("This should not fail") })
 
-        // Wait for the Firestore operation to complete
-        countDownLatch.await(1, TimeUnit.SECONDS)
+    // Wait for the Firestore operation to complete
+    countDownLatch.await(1, TimeUnit.SECONDS)
 
-        // Assert that the success callback was called
-        assertTrue("Success callback was not called", isSuccessCalled)
-    }
+    // Assert that the success callback was called
+    assertTrue("Success callback was not called", isSuccessCalled)
+  }
 
-    @Test
-    fun getReviewByIdSuccessTest() = runBlocking {
-        val countDownLatch = CountDownLatch(1)
-        var isSuccessCalled = false
+  @Test
+  fun getReviewByIdSuccessTest() = runBlocking {
+    val countDownLatch = CountDownLatch(1)
+    var isSuccessCalled = false
 
+    // Simulate a success scenario
+    reviewViewModel.reviewRepository.getReviewById(
+        id = "1",
+        onSuccess = { review ->
+          // Assert the success callback is triggered with valid review data
+          assertNotNull(review)
+          assertEquals("1", review.uid)
+          isSuccessCalled = true
+          countDownLatch.countDown()
+        },
+        onFailure = { fail("This should not fail") })
 
-        // Simulate a success scenario
-        reviewViewModel.reviewRepository.getReviewById(
-            id = "1",
-            onSuccess = { review ->
-                // Assert the success callback is triggered with valid review data
-                assertNotNull(review)
-                assertEquals("1", review.uid)
-                isSuccessCalled = true
-                countDownLatch.countDown()
-            },
-            onFailure = { fail("This should not fail") }
-        )
+    // Wait for the Firestore operation to complete
+    countDownLatch.await(1, TimeUnit.SECONDS)
 
-        // Wait for the Firestore operation to complete
-        countDownLatch.await(1, TimeUnit.SECONDS)
-
-        // Assert that the success callback was called
-        assertTrue("Success callback was not called", isSuccessCalled)
-    }
-
-
+    // Assert that the success callback was called
+    assertTrue("Success callback was not called", isSuccessCalled)
+  }
 }
