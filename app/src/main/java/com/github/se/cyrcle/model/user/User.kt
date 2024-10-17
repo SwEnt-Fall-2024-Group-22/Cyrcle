@@ -1,7 +1,7 @@
 package com.github.se.cyrcle.model.user
 
 data class User(
-    val userId: String = "",
+    val userId: String,
     val username: String = "",
     val firstName: String? = null,
     val lastName: String? = null,
