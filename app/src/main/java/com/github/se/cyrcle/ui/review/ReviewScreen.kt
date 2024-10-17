@@ -108,7 +108,7 @@ fun ReviewScreen(
               Button(
                   onClick = {
                     Toast.makeText(context, "Review Added!", Toast.LENGTH_SHORT).show()
-                    navigationActions.navigateTo(Screen.CARD)
+                    navigationActions.goBack()
                   },
                   modifier =
                       Modifier.fillMaxWidth()
