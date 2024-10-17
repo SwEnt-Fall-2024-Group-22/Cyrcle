@@ -43,6 +43,7 @@ import com.mapbox.maps.plugin.annotation.annotations
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.maps.plugin.delegates.listeners.OnCameraChangeListener
+import com.mapbox.maps.plugin.gestures.gestures
 
 const val defaultZoom = 16.0
 const val maxZoom = 18.0
@@ -80,6 +81,8 @@ fun MapScreen(
             mapViewportState = mapViewportState,
             style = { MapStyle("mapbox://styles/seanprz/cm27wh9ff00jl01r21jz3hcb1") }) {
               DisposableMapEffect { mapView ->
+
+                mapView.gestures.getGesturesManager().rotateGestureDetector.isEnabled = false
 
                 // Set camera bounds options
                 val cameraBoundsOptions =
@@ -220,7 +223,7 @@ private fun getScreenCorners(mapView: MapView, useBuffer: Boolean = true): Pair<
   val centerPixel = mapView.mapboxMap.pixelForCoordinate(mapView.mapboxMap.cameraState.center)
 
   // Calculate the multiplier for the buffer
-  val multiplier = if (useBuffer) 2.0 else 1.0
+  val multiplier = if (useBuffer) 3.0 else 1.0
 
   val bottomLeftCorner =
       mapView.mapboxMap.coordinateForPixel(
