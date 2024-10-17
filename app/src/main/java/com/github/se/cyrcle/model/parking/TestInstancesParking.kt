@@ -3,6 +3,9 @@ package com.github.se.cyrcle.model.parking
 import com.mapbox.geojson.Point
 
 object TestInstancesParking {
+
+  val referencePoint = Point.fromLngLat(6.9, 46.69)
+
   val parking1 =
       Parking(
           "Test_spot_1",

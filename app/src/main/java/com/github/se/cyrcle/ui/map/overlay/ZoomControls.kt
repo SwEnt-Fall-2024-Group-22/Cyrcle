@@ -1,7 +1,6 @@
 package com.github.se.cyrcle.ui.map.overlay
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
@@ -26,17 +25,16 @@ fun ZoomControls(onZoomIn: () -> Unit, onZoomOut: () -> Unit) {
         modifier =
             Modifier.padding(15.dp)
                 .background(Color.Black.copy(alpha = 0.70f), shape = RoundedCornerShape(8.dp))
-                .sizeIn(maxWidth = 35.dp)) {
-          Box(modifier = Modifier.testTag("ZoomControlsIn")) {
-            IconButton(onClick = onZoomIn) {
-              Icon(Icons.Default.Add, contentDescription = "Zoom In", tint = Color.White)
-            }
+                .sizeIn(maxWidth = 35.dp)
+                .testTag("ZoomControls")) {
+          IconButton(onClick = onZoomIn, modifier = Modifier.testTag("ZoomControlsIn")) {
+            Icon(Icons.Default.Add, contentDescription = "Zoom In", tint = Color.White)
           }
+
           HorizontalDivider(thickness = 1.dp, color = Color.Gray)
-          Box(modifier = Modifier.testTag("ZoomControlsOut")) {
-            IconButton(onClick = onZoomOut) {
-              Icon(Icons.Default.Remove, contentDescription = "Zoom Out", tint = Color.White)
-            }
+
+          IconButton(onClick = onZoomOut, modifier = Modifier.testTag("ZoomControlsOut")) {
+            Icon(Icons.Default.Remove, contentDescription = "Zoom Out", tint = Color.White)
           }
         }
   }
