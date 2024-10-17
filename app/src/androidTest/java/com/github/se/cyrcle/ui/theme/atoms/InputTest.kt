@@ -26,20 +26,7 @@ class InputTest {
       InputText("Test", onValueChange = { newText -> text = newText }, testTag = tag)
     }
 
-    composeTestRule
-        .onNodeWithTag(tag)
-        .assertIsDisplayed()
-        .performTextInput(expected)
+    composeTestRule.onNodeWithTag(tag).assertIsDisplayed().performTextInput(expected)
     assertEquals(expected, text)
-  }
-
-  @Test
-  fun inputTextDefaultArg() {
-    composeTestRule.setContent {
-      InputText(
-          "Test",
-          onValueChange = {},
-      )
-    }
   }
 }

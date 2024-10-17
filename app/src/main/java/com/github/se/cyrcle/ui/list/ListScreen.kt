@@ -77,11 +77,8 @@ fun SpotListScreen(
 
   Scaffold(
       modifier = Modifier.testTag("SpotListScreen"),
-      bottomBar = {
-        BottomNavigationBar(
-            navigationActions,
-            selectedItem = Screen.LIST)
-      }) { innerPadding ->
+      bottomBar = { BottomNavigationBar(navigationActions, selectedItem = Screen.LIST) }) {
+          innerPadding ->
         LazyColumn(
             modifier =
                 Modifier.fillMaxSize()
