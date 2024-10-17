@@ -83,6 +83,7 @@ class MainActivityTest {
 
     @OptIn(ExperimentalTestApi::class)
     fun toCard(index: Int) {
+      composeTestRule.waitUntilAtLeastOneExists(hasTestTag("SpotListItem"))
       composeTestRule.onNodeWithTag("SpotListColumn").performScrollToIndex(index)
       composeTestRule
           .onNodeWithTag("SpotListColumn")
