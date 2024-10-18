@@ -41,7 +41,6 @@ import com.github.se.cyrcle.model.parking.ParkingProtection
 import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
-import com.github.se.cyrcle.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
@@ -78,12 +77,8 @@ fun SpotListScreen(
 
   Scaffold(
       modifier = Modifier.testTag("SpotListScreen"),
-      bottomBar = {
-        BottomNavigationBar(
-            onTabSelect = { navigationActions.navigateTo(it) },
-            tabList = LIST_TOP_LEVEL_DESTINATION,
-            selectedItem = Screen.LIST)
-      }) { innerPadding ->
+      bottomBar = { BottomNavigationBar(navigationActions, selectedItem = Screen.LIST) }) {
+          innerPadding ->
         LazyColumn(
             modifier =
                 Modifier.fillMaxSize()

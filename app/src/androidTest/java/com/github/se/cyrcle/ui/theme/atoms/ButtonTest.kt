@@ -25,24 +25,24 @@ class ButtonTest {
 
   @Test
   fun displayPrimaryButton() {
-    val tag = "PrimaryButton"
+    val defaultTag = "PrimaryButton"
     var a = 1
-    composeTestRule.setContent { Button("Button", { a++ }, testTag = tag) }
+    composeTestRule.setContent { Button("Button", { a++ }) }
 
     composeTestRule.onNodeWithTag("PrimaryButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag(tag).performClick()
+    composeTestRule.onNodeWithTag("${defaultTag}Text", true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(defaultTag).performClick()
     assertEquals(a, 2)
   }
 
   @Test
   fun displaySmallFloatingActionButton() {
-    val tag = "SmallFab"
+    val defaultTag = "SmallFab"
     var a = 1
     composeTestRule.setContent {
       Scaffold(
-          floatingActionButton = {
-            SmallFloatingActionButton(Icons.Filled.Add, "A", { a++ }, testTag = tag)
-          }) { innerPadding ->
+          floatingActionButton = { SmallFloatingActionButton(Icons.Filled.Add, "", { a++ }) }) {
+              innerPadding ->
             Column(
                 modifier = Modifier.padding(innerPadding),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -50,43 +50,42 @@ class ButtonTest {
           }
     }
 
-    composeTestRule.onNodeWithTag(tag).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(defaultTag).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${defaultTag}Icon", true).assertIsDisplayed()
 
-    composeTestRule.onNodeWithTag(tag).performClick()
+    composeTestRule.onNodeWithTag(defaultTag).performClick()
     assertEquals(a, 2)
   }
 
   @Test
   fun displayFloatingActionButton() {
-    val tag = "Fab"
+    val defaultTag = "Fab"
     var a = 1
     composeTestRule.setContent {
-      Scaffold(
-          floatingActionButton = {
-            FloatingActionButton(Icons.Filled.Add, "A", { a++ }, testTag = tag)
-          }) { innerPadding ->
-            Column(
-                modifier = Modifier.padding(innerPadding),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {}
-          }
+      Scaffold(floatingActionButton = { FloatingActionButton(Icons.Filled.Add, "", { a++ }) }) {
+          innerPadding ->
+        Column(
+            modifier = Modifier.padding(innerPadding),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {}
+      }
     }
 
-    composeTestRule.onNodeWithTag(tag).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(defaultTag).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${defaultTag}Icon", true).assertIsDisplayed()
 
-    composeTestRule.onNodeWithTag(tag).performClick()
+    composeTestRule.onNodeWithTag(defaultTag).performClick()
     assertEquals(a, 2)
   }
 
   @Test
   fun displayLargeFloatingActionButton() {
-    val tag = "LargeFab"
+    val defaultTag = "LargeFab"
     var a = 1
     composeTestRule.setContent {
       Scaffold(
-          floatingActionButton = {
-            LargeFloatingActionButton(Icons.Filled.Add, "A", { a++ }, testTag = tag)
-          }) { innerPadding ->
+          floatingActionButton = { LargeFloatingActionButton(Icons.Filled.Add, "", { a++ }) }) {
+              innerPadding ->
             Column(
                 modifier = Modifier.padding(innerPadding),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -94,20 +93,21 @@ class ButtonTest {
           }
     }
 
-    composeTestRule.onNodeWithTag(tag).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(defaultTag).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${defaultTag}Icon", true).assertIsDisplayed()
 
-    composeTestRule.onNodeWithTag(tag).performClick()
+    composeTestRule.onNodeWithTag(defaultTag).performClick()
     assertEquals(a, 2)
   }
 
   @Test
   fun displayExtendedFloatingActionButton() {
-    val tag = "ExtendedFab"
+    val defaultTag = "ExtendedFab"
     var a = 1
     composeTestRule.setContent {
       Scaffold(
           floatingActionButton = {
-            ExtendedFloatingActionButton(Icons.Filled.Add, "A", { a++ }, "Extend")
+            ExtendedFloatingActionButton(Icons.Filled.Add, "A", { a++ }, text = "Extended")
           }) { innerPadding ->
             Column(
                 modifier = Modifier.padding(innerPadding),
@@ -116,9 +116,11 @@ class ButtonTest {
           }
     }
 
-    composeTestRule.onNodeWithTag(tag).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(defaultTag).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${defaultTag}Icon", true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${defaultTag}Text", true).assertIsDisplayed()
 
-    composeTestRule.onNodeWithTag(tag).performClick()
+    composeTestRule.onNodeWithTag(defaultTag).performClick()
     assertEquals(a, 2)
   }
 }

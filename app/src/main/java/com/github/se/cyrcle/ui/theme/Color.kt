@@ -10,49 +10,55 @@ val Black = Color(0xFF000000)
 val White = Color(0xFFFFFFFF)
 val Cerulean = Color(0xFF22799B)
 val LightBlue = Color(0xFFD1E7F8)
-val Cyan = Color(0xFF80DEF3)
-val NormalBlue = Color(0xFF00D0FF)
-val DarkBlue = Color(0xFF00A1FF)
 
-/** A class containing the "levels" of colors for an element. */
-enum class ColorScheme {
+/** A class containing the choice of color for an element. */
+enum class ColorLevel {
   PRIMARY,
-  SECONDARY
+  SECONDARY,
+  TERTIARY,
+  ERROR
 }
 
 /**
  * Get the color for a container from a ColorScheme.
  *
- * @param colorScheme The chosen ColorScheme
+ * @param colorLevel The chosen ColorScheme
+ * @return The container color from the `colorScheme`.
  */
 @Composable
-fun getContainerColor(colorScheme: ColorScheme): Color {
-  return when (colorScheme) {
-    ColorScheme.PRIMARY -> MaterialTheme.colorScheme.primaryContainer
-    ColorScheme.SECONDARY -> MaterialTheme.colorScheme.secondaryContainer
+fun getContainerColor(colorLevel: ColorLevel): Color {
+  return when (colorLevel) {
+    ColorLevel.PRIMARY -> MaterialTheme.colorScheme.primaryContainer
+    ColorLevel.SECONDARY -> MaterialTheme.colorScheme.secondaryContainer
+    ColorLevel.TERTIARY -> MaterialTheme.colorScheme.tertiaryContainer
+    ColorLevel.ERROR -> MaterialTheme.colorScheme.errorContainer
   }
 }
 
 /**
  * Get the color for a content from a ColorScheme.
  *
- * @param colorScheme The chosen ColorScheme
+ * @param colorLevel The chosen ColorScheme
+ * @return The base color from the `colorScheme`.
  */
 @Composable
-fun getContentColor(colorScheme: ColorScheme): Color {
-  return when (colorScheme) {
-    ColorScheme.PRIMARY -> MaterialTheme.colorScheme.primary
-    ColorScheme.SECONDARY -> MaterialTheme.colorScheme.secondary
+fun getContentColor(colorLevel: ColorLevel): Color {
+  return when (colorLevel) {
+    ColorLevel.PRIMARY -> MaterialTheme.colorScheme.primary
+    ColorLevel.SECONDARY -> MaterialTheme.colorScheme.secondary
+    ColorLevel.TERTIARY -> MaterialTheme.colorScheme.tertiary
+    ColorLevel.ERROR -> MaterialTheme.colorScheme.error
   }
 }
 
 /**
  * Get the colors for a button from a ColorScheme.
  *
- * @param colorScheme The chosen ColorScheme
+ * @param colorLevel The chosen ColorScheme
+ * @return The `ButtonColors` from the `colorScheme`
  */
 @Composable
-fun getButtonColors(colorScheme: ColorScheme): ButtonColors {
+fun getButtonColors(colorLevel: ColorLevel): ButtonColors {
   return ButtonDefaults.buttonColors(
-      containerColor = getContainerColor(colorScheme), contentColor = getContentColor(colorScheme))
+      containerColor = getContainerColor(colorLevel), contentColor = getContentColor(colorLevel))
 }
