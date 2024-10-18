@@ -1,9 +1,16 @@
 name: Release Workflow
 
 on:
-  push:
-    branches:
-      - release
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: 'Version Name (e.g., M1)'
+        required: true
+        default: 'Mx'
+      version_code:
+        description: 'Version Code (e.g., 1.0.0)'
+        required: true
+        default: '1.0.0'
 
 jobs:
   build:
@@ -39,19 +46,21 @@ jobs:
           distribution: "temurin"
           java-version: "17"
 
-      - name: Build APK
+      - name: Build with Gradle
+        run: ./gradlew assembleDebug
+        env:
+          VERSION_NAME: ${{ github.event.inputs.version_name }}
+          VERSION_CODE: ${{ github.event.inputs.version_code }}
+      
+      - name: Find APK
+        run: find . -name "*.apk" -type f
+        
+      - name: Rename APK
         run: |
-          ./gradlew assembleRelease
-          mv app/build/outputs/apk/release/*.apk .
-
-      - name: Create ZIP of Source Code
-        run: |
-          zip -r source_code.zip . -x '*.git*' -x 'app/build/*' -x '.gradle/*' -x 'app/gradle/*' -x 'gradlew*' -x 'gradle/wrapper/*' -x '.github/workflows/*' -x 'local.properties' -x 'app/google-services.json' -x 'app/src/main/res/values/mapbox_access_token.xml'
-
-      - name: Upload APK and ZIP
-        uses: actions/upload-artifact@v4
+          mv app/build/outputs/apk/debug/*.apk app/build/outputs/apk/debug/app-release-${{ github.event.inputs.version_name }}-${{ github.event.inputs.version_code }}.apk
+  
+      - name: Upload renamed APK
+        uses: actions/upload-artifact@v3
         with:
-          name: release-artifacts
-          path: |
-            *.apk
-            source_code.zip
+          name: app-release-${{ github.event.inputs.version_name }}-${{ github.event.inputs.version_code }}
+          path: app/build/outputs/apk/debug/app-release-${{ github.event.inputs.version_name }}-${{ github.event.inputs.version_code }}.apk
