@@ -27,7 +27,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.github.se.cyrcle.model.parking.ParkingViewModel
@@ -46,16 +45,7 @@ fun CardScreen(
 
   Scaffold(
       topBar = {
-        TopAppBar(
-            navigationActions,
-            title = {
-              Text(
-                  text = "Description of ${selectedParking.optName?: "Parking"}",
-                  fontSize = 20.sp,
-                  fontWeight = FontWeight.Bold,
-                  color = MaterialTheme.colorScheme.secondary,
-                  modifier = Modifier.testTag("TopAppBarTitle")) // Test tag for title
-            })
+        TopAppBar(navigationActions, "Description of ${selectedParking.optName?: "Parking"}")
       },
       modifier = Modifier.testTag("CardScreen")) {
         Box(

@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.sp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
-import com.github.se.cyrcle.ui.theme.ColorScheme
+import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.getButtonColors
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -117,7 +117,7 @@ fun SignInScreen(navigationActions: NavigationActions) {
                 runBlocking { FirebaseAuth.getInstance().signInAnonymously().await() }
                 navigationActions.navigateTo(TopLevelDestinations.MAP)
               },
-              colors = getButtonColors(ColorScheme.SECONDARY),
+              colors = getButtonColors(ColorLevel.SECONDARY),
               shape = RoundedCornerShape(50),
               border = BorderStroke(1.dp, Color.LightGray),
               modifier =

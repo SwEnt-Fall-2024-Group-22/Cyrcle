@@ -24,7 +24,6 @@ import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.ui.map.overlay.AddButton
 import com.github.se.cyrcle.ui.map.overlay.ZoomControls
-import com.github.se.cyrcle.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
@@ -69,120 +68,113 @@ fun MapScreen(
 
   val context = LocalContext.current
 
-  Scaffold(
-      bottomBar = {
-        BottomNavigationBar(
-            onTabSelect = { navigationActions.navigateTo(it) },
-            tabList = LIST_TOP_LEVEL_DESTINATION,
-            selectedItem = Route.MAP)
-      }) { padding ->
-        MapboxMap(
-            Modifier.fillMaxSize().padding(padding).testTag("MapScreen"),
-            mapViewportState = mapViewportState,
-            style = { MapStyle("mapbox://styles/seanprz/cm27wh9ff00jl01r21jz3hcb1") }) {
-              DisposableMapEffect { mapView ->
+  Scaffold(bottomBar = { BottomNavigationBar(navigationActions, selectedItem = Route.MAP) }) {
+      padding ->
+    MapboxMap(
+        Modifier.fillMaxSize().padding(padding).testTag("MapScreen"),
+        mapViewportState = mapViewportState,
+        style = { MapStyle("mapbox://styles/seanprz/cm27wh9ff00jl01r21jz3hcb1") }) {
+          DisposableMapEffect { mapView ->
 
-                // Lock rotations of the map
-                mapView.gestures.getGesturesManager().rotateGestureDetector.isEnabled = false
+            // Lock rotations of the map
+            mapView.gestures.getGesturesManager().rotateGestureDetector.isEnabled = false
 
-                // Set camera bounds options
-                val cameraBoundsOptions =
-                    CameraBoundsOptions.Builder().minZoom(minZoom).maxZoom(maxZoom).build()
-                mapView.mapboxMap.setBounds(cameraBoundsOptions)
+            // Set camera bounds options
+            val cameraBoundsOptions =
+                CameraBoundsOptions.Builder().minZoom(minZoom).maxZoom(maxZoom).build()
+            mapView.mapboxMap.setBounds(cameraBoundsOptions)
 
-                // Create annotation manager
-                val annotationManager =
-                    mapView.annotations.createPointAnnotationManager(
-                        AnnotationConfig(
-                            annotationSourceOptions =
-                                AnnotationSourceOptions(clusterOptions = ClusterOptions())))
+            // Create annotation manager
+            val annotationManager =
+                mapView.annotations.createPointAnnotationManager(
+                    AnnotationConfig(
+                        annotationSourceOptions =
+                            AnnotationSourceOptions(clusterOptions = ClusterOptions())))
 
-                var (loadedBottomLeft, loadedTopRight) = getScreenCorners(mapView, useBuffer = true)
+            var (loadedBottomLeft, loadedTopRight) = getScreenCorners(mapView, useBuffer = true)
 
-                // Load the red marker image and resized it to fit the map
-                val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.red_marker)
-                val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 100, 150, false)
+            // Load the red marker image and resized it to fit the map
+            val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.red_marker)
+            val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 100, 150, false)
 
-                // Get parkings in the current view
+            // Get parkings in the current view
+            parkingViewModel.getParkingsInRect(loadedBottomLeft, loadedTopRight)
+
+            // Create PointAnnotationOptions for each parking
+            var pointAnnotationOptions =
+                listOfParkings.value.map { parking ->
+                  PointAnnotationOptions()
+                      .withPoint(parking.location.center)
+                      .withIconImage(resizedBitmap)
+                }
+
+            // Add annotations to the annotation manager and display them on the map
+            pointAnnotationOptions.forEach { annotationManager.create(it) }
+
+            // Add a camera change listener to detect zoom changes
+            val cameraChangeListener = OnCameraChangeListener {
+              state.value = mapView.mapboxMap.cameraState.zoom
+
+              // Get the top right and bottom left coordinates of the current view only when
+              // what the user sees is outside the screen
+              val (currentBottomLeft, currentTopRight) =
+                  getScreenCorners(mapView, useBuffer = false)
+              if (!inBounds(currentBottomLeft, currentTopRight, loadedBottomLeft, loadedTopRight)) {
+                Log.d("MapScreen", "Loading parkings in new view")
+                // Get the buffered coordinates for loading parkings
+
+                val loadedCorners = getScreenCorners(mapView, useBuffer = true)
+                loadedBottomLeft = loadedCorners.first
+                loadedTopRight = loadedCorners.second
+
                 parkingViewModel.getParkingsInRect(loadedBottomLeft, loadedTopRight)
 
                 // Create PointAnnotationOptions for each parking
-                var pointAnnotationOptions =
+                pointAnnotationOptions =
                     listOfParkings.value.map { parking ->
                       PointAnnotationOptions()
                           .withPoint(parking.location.center)
                           .withIconImage(resizedBitmap)
                     }
 
+                // Clear all annotations from the annotation manager to avoid duplicates
+                annotationManager.deleteAll()
+
                 // Add annotations to the annotation manager and display them on the map
                 pointAnnotationOptions.forEach { annotationManager.create(it) }
-
-                // Add a camera change listener to detect zoom changes
-                val cameraChangeListener = OnCameraChangeListener {
-                  state.value = mapView.mapboxMap.cameraState.zoom
-
-                  // Get the top right and bottom left coordinates of the current view only when
-                  // what the user sees is outside the screen
-                  val (currentBottomLeft, currentTopRight) =
-                      getScreenCorners(mapView, useBuffer = false)
-                  if (!inBounds(
-                      currentBottomLeft, currentTopRight, loadedBottomLeft, loadedTopRight)) {
-                    Log.d("MapScreen", "Loading parkings in new view")
-                    // Get the buffered coordinates for loading parkings
-
-                    val loadedCorners = getScreenCorners(mapView, useBuffer = true)
-                    loadedBottomLeft = loadedCorners.first
-                    loadedTopRight = loadedCorners.second
-
-                    parkingViewModel.getParkingsInRect(loadedBottomLeft, loadedTopRight)
-
-                    // Create PointAnnotationOptions for each parking
-                    pointAnnotationOptions =
-                        listOfParkings.value.map { parking ->
-                          PointAnnotationOptions()
-                              .withPoint(parking.location.center)
-                              .withIconImage(resizedBitmap)
-                        }
-
-                    // Clear all annotations from the annotation manager to avoid duplicates
-                    annotationManager.deleteAll()
-
-                    // Add annotations to the annotation manager and display them on the map
-                    pointAnnotationOptions.forEach { annotationManager.create(it) }
-                  }
-                }
-                mapView.mapboxMap.addOnCameraChangeListener(cameraChangeListener)
-
-                onDispose {
-                  annotationManager.deleteAll()
-                  mapView.mapboxMap.removeOnCameraChangeListener(cameraChangeListener)
-                }
               }
             }
+            mapView.mapboxMap.addOnCameraChangeListener(cameraChangeListener)
 
-        Column(
-            Modifier.padding(padding).fillMaxHeight(),
-            verticalArrangement = Arrangement.SpaceBetween) {
-              Row(Modifier.padding(16.dp).fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                ZoomControls(
-                    onZoomIn = {
-                      mapViewportState.setCameraOptions {
-                        zoom(mapViewportState.cameraState!!.zoom + 1.0)
-                      }
-                    },
-                    onZoomOut = {
-                      mapViewportState.setCameraOptions {
-                        zoom(mapViewportState.cameraState!!.zoom - 1.0)
-                      }
-                    })
-              }
-              Row(
-                  Modifier.padding(top = 16.dp).fillMaxWidth(),
-                  horizontalArrangement = Arrangement.Start) {
-                    AddButton { navigationActions.navigateTo(Route.ADD_SPOTS) }
-                  }
+            onDispose {
+              annotationManager.deleteAll()
+              mapView.mapboxMap.removeOnCameraChangeListener(cameraChangeListener)
             }
-      }
+          }
+        }
+
+    Column(
+        Modifier.padding(padding).fillMaxHeight(), verticalArrangement = Arrangement.SpaceBetween) {
+          Row(Modifier.padding(16.dp).fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            ZoomControls(
+                onZoomIn = {
+                  mapViewportState.setCameraOptions {
+                    zoom(mapViewportState.cameraState!!.zoom + 1.0)
+                  }
+                },
+                onZoomOut = {
+                  mapViewportState.setCameraOptions {
+                    zoom(mapViewportState.cameraState!!.zoom - 1.0)
+                  }
+                })
+          }
+          Row(
+              Modifier.padding(top = 16.dp).fillMaxWidth(),
+              horizontalArrangement = Arrangement.Start) {
+                AddButton { navigationActions.navigateTo(Route.ADD_SPOTS) }
+              }
+        }
+  }
 }
 
 /**
