@@ -30,7 +30,7 @@ class ButtonTest {
     composeTestRule.setContent { Button("Button", { a++ }) }
 
     composeTestRule.onNodeWithTag("PrimaryButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("${defaultTag}Text").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${defaultTag}Text", true).assertIsDisplayed()
     composeTestRule.onNodeWithTag(defaultTag).performClick()
     assertEquals(a, 2)
   }
@@ -51,7 +51,7 @@ class ButtonTest {
     }
 
     composeTestRule.onNodeWithTag(defaultTag).assertIsDisplayed()
-    composeTestRule.onNodeWithTag("${defaultTag}Icon").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${defaultTag}Icon", true).assertIsDisplayed()
 
     composeTestRule.onNodeWithTag(defaultTag).performClick()
     assertEquals(a, 2)
@@ -72,7 +72,7 @@ class ButtonTest {
     }
 
     composeTestRule.onNodeWithTag(defaultTag).assertIsDisplayed()
-    composeTestRule.onNodeWithTag("${defaultTag}Icon").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${defaultTag}Icon", true).assertIsDisplayed()
 
     composeTestRule.onNodeWithTag(defaultTag).performClick()
     assertEquals(a, 2)
@@ -94,7 +94,7 @@ class ButtonTest {
     }
 
     composeTestRule.onNodeWithTag(defaultTag).assertIsDisplayed()
-    composeTestRule.onNodeWithTag("${defaultTag}Icon").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${defaultTag}Icon", true).assertIsDisplayed()
 
     composeTestRule.onNodeWithTag(defaultTag).performClick()
     assertEquals(a, 2)
@@ -117,8 +117,8 @@ class ButtonTest {
     }
 
     composeTestRule.onNodeWithTag(defaultTag).assertIsDisplayed()
-    composeTestRule.onNodeWithTag("${defaultTag}Icon").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("${defaultTag}Text").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${defaultTag}Icon", true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${defaultTag}Text", true).assertIsDisplayed()
 
     composeTestRule.onNodeWithTag(defaultTag).performClick()
     assertEquals(a, 2)
