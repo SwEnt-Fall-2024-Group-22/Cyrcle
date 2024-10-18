@@ -36,19 +36,20 @@ class NavigationActionsTest {
 
   @Test
   fun displayBottomNavigationBar() {
-    val testTag = "BottomNavigationBar"
+    val defaultTag = "BottomNavigationBar"
     composeTestRule.setContent {
-      Scaffold(
-          bottomBar = {
-            BottomNavigationBar(navigationActions, selectedItem = Route.AUTH, testTag = testTag)
-          }) { innerPadding ->
-            Column(modifier = Modifier.padding(innerPadding)) {}
-          }
+      Scaffold(bottomBar = { BottomNavigationBar(navigationActions, selectedItem = Route.AUTH) }) {
+          innerPadding ->
+        Column(modifier = Modifier.padding(innerPadding)) {}
+      }
     }
 
-    composeTestRule.onNodeWithTag(testTag).assertIsDisplayed()
-    for (topLevelDestination in LIST_TOP_LEVEL_DESTINATION) composeTestRule
-        .onNodeWithTag(topLevelDestination.textId)
-        .assertIsDisplayed()
+    composeTestRule.onNodeWithTag(defaultTag).assertIsDisplayed()
+
+    for (topLevelDestination in LIST_TOP_LEVEL_DESTINATION) {
+      composeTestRule.onNodeWithTag(topLevelDestination.textId).assertIsDisplayed()
+      composeTestRule.onNodeWithTag("${topLevelDestination.textId}Text", true).assertIsDisplayed()
+      composeTestRule.onNodeWithTag("${topLevelDestination.textId}Icon", true).assertIsDisplayed()
+    }
   }
 }

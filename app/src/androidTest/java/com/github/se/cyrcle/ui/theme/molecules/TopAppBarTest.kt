@@ -33,24 +33,26 @@ class TopAppBarTest {
 
   @Test
   fun displayTopAppBar() {
-    val testTag = "TopAppBar"
+    val defaultTag = "TopAppBar"
     val title = "Title"
     composeTestRule.setContent {
-      Scaffold(topBar = { TopAppBar(navigationActions, testTag = testTag, title = title) }) {
-          innerPadding ->
+      Scaffold(topBar = { TopAppBar(navigationActions, title) }) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {}
       }
     }
 
     // Top App Bar
-    composeTestRule.onNodeWithTag(testTag).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(defaultTag).assertIsDisplayed()
 
     // Title
-    composeTestRule.onNodeWithTag("${testTag}Title").assertIsDisplayed().assertTextEquals(title)
+    composeTestRule
+        .onNodeWithTag("${defaultTag}Title", true)
+        .assertIsDisplayed()
+        .assertTextEquals(title)
 
     // Go Back Button
     composeTestRule
-        .onNodeWithTag("${testTag}GoBackButton")
+        .onNodeWithTag("${defaultTag}GoBackButton", true)
         .assertIsDisplayed()
         .assertHasClickAction()
   }

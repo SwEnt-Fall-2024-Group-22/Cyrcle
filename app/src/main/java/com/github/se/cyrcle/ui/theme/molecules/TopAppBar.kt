@@ -20,7 +20,13 @@ import androidx.compose.ui.unit.sp
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.LightBlue
 
-/** TODO */
+/**
+ * Create a themed bottom navigation bar, with simplified arguments.
+ *
+ * @param navigationActions The `NavigationActions` used in the application.
+ * @param title The text that will be shown.
+ * @param testTag The test tag of the object. Each item has its own tag : `tab.textId`.
+ */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun TopAppBar(navigationActions: NavigationActions, title: String, testTag: String = "TopAppBar") {

@@ -38,7 +38,7 @@ fun InputText(
       value,
       onValueChange = onValueChange,
       modifier = modifier.testTag(testTag),
-      label = { Text(label) },
+      label = { Text(label, Modifier.testTag("${testTag}Text")) },
       singleLine = singleLine,
       maxLines = maxLines,
       minLines = minLines,

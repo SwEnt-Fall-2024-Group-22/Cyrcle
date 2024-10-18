@@ -20,9 +20,9 @@ import com.github.se.cyrcle.ui.navigation.TopLevelDestination
 /**
  * Create a themed bottom navigation bar, with simplified arguments.
  *
- * @param onTabSelect
- * @param tabList
- * @param selectedItem
+ * @param onTabSelect A lambda to execute when any tab is clicked.
+ * @param tabList The list of tab to display.
+ * @param selectedItem The current selected tab, given by `Route.SCREEN_NAME`.
  * @param testTag The test tag of the object. Each item has its own tag : `tab.textId`.
  */
 @Composable
@@ -40,8 +40,13 @@ fun BottomNavigationBar(
         tabList.forEach { tab ->
           BottomNavigationItem(
               // OPTIMIZATION Find a way to add some contentDescription
-              icon = { Icon(tab.icon, contentDescription = tab.textId) },
-              label = { Text(tab.textId) },
+              icon = {
+                Icon(
+                    tab.icon,
+                    contentDescription = tab.textId,
+                    Modifier.testTag("${tab.textId}Icon"))
+              },
+              label = { Text(tab.textId, Modifier.testTag("${tab.textId}Text")) },
               selected = tab.route == selectedItem,
               onClick = { onTabSelect(tab) },
               modifier = Modifier.clip(RoundedCornerShape(50.dp)).testTag(tab.textId))

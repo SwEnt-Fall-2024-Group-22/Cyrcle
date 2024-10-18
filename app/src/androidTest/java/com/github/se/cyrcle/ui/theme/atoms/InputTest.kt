@@ -17,16 +17,18 @@ class InputTest {
 
   @Test
   fun displayInputText() {
-    val tag = "InputText"
+    val defaultTag = "InputText"
 
-    val expected = "A"
+    val expected = "Some text"
 
     var text = "" // by remember { mutableStateOf("A") }
-    composeTestRule.setContent {
-      InputText("Test", onValueChange = { newText -> text = newText }, testTag = tag)
-    }
+    composeTestRule.setContent { InputText("Test", onValueChange = { newText -> text = newText }) }
 
-    composeTestRule.onNodeWithTag(tag).assertIsDisplayed().performTextInput(expected)
+    composeTestRule.onNodeWithTag(defaultTag).assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag("${defaultTag}Text", true).assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag(defaultTag).performTextInput(expected)
     assertEquals(expected, text)
   }
 }

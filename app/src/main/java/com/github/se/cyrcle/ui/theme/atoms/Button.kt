@@ -40,7 +40,7 @@ fun SmallFloatingActionButton(
       modifier = modifier.testTag(testTag),
       containerColor = getContainerColor(colorLevel),
       contentColor = getContentColor(colorLevel)) {
-        Icon(icon, contentDescription)
+        Icon(icon, contentDescription, Modifier.testTag("${testTag}Icon"))
       }
 }
 
@@ -68,7 +68,7 @@ fun FloatingActionButton(
       modifier = modifier.testTag(testTag),
       containerColor = getContainerColor(colorLevel),
       contentColor = getContentColor(colorLevel)) {
-        Icon(icon, contentDescription)
+        Icon(icon, contentDescription, Modifier.testTag("${testTag}Icon"))
       }
 }
 
@@ -96,7 +96,7 @@ fun LargeFloatingActionButton(
       modifier = modifier.testTag(testTag),
       containerColor = getContainerColor(colorLevel),
       contentColor = getContentColor(colorLevel)) {
-        Icon(icon, contentDescription)
+        Icon(icon, contentDescription, Modifier.testTag("${testTag}Icon"))
       }
 }
 
@@ -124,8 +124,8 @@ fun ExtendedFloatingActionButton(
   ExtendedFloatingActionButton(
       onClick = { onClick() },
       modifier = modifier.testTag(testTag),
-      icon = { Icon(icon, contentDescription) },
-      text = { Text(text) },
+      icon = { Icon(icon, contentDescription, Modifier.testTag("${testTag}Icon")) },
+      text = { Text(text, Modifier.testTag("${testTag}Text")) },
       containerColor = getContainerColor(colorLevel),
       contentColor = getContentColor(colorLevel))
 }
@@ -151,6 +151,6 @@ fun Button(
       onClick = { onClick() },
       modifier = modifier.testTag(testTag),
       colors = getButtonColors(colorLevel)) {
-        Text(text)
+        Text(text, Modifier.testTag("${testTag}Text"))
       }
 }
