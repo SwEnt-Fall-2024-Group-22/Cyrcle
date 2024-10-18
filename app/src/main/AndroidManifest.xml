@@ -29,4 +29,8 @@
 
     </application>
 
+    <!-- Permission of MapBox to access Coarse Location of the user -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+
 </manifest>
