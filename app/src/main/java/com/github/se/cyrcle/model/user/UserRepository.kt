@@ -19,14 +19,6 @@ interface UserRepository {
   fun getUserById(userId: String, onSuccess: (User) -> Unit, onFailure: (Exception) -> Unit)
 
   /**
-   * Get all users
-   *
-   * @param onSuccess a callback that is called when the users are retrieved
-   * @param onFailure a callback that is called when an error occurs
-   */
-  fun getAllUsers(onSuccess: (List<User>) -> Unit, onFailure: (Exception) -> Unit)
-
-  /**
    * Add a user
    *
    * @param user the user to add
@@ -80,47 +72,4 @@ interface UserRepository {
       onSuccess: (Location?) -> Unit,
       onFailure: (Exception) -> Unit
   ) */
-
-  /**
-   * Add a preferred location for the user
-   *
-   * @param userId the identifier of the user
-   * @param parking the location to add
-   * @param onSuccess a callback that is called when the location is added
-   * @param onFailure a callback that is called when an error occurs
-   */
-  fun addFavoriteParking(
-      userId: String,
-      parkingId: String,
-      onSuccess: () -> Unit,
-      onFailure: (Exception) -> Unit
-  )
-
-  /**
-   * Remove a preferred location for the user
-   *
-   * @param userId the identifier of the user
-   * @param parking the location to remove
-   * @param onSuccess a callback that is called when the location is removed
-   * @param onFailure a callback that is called when an error occurs
-   */
-  fun removeFavoriteParking(
-      userId: String,
-      parkingId: String,
-      onSuccess: () -> Unit,
-      onFailure: (Exception) -> Unit
-  )
-
-  /**
-   * Get user's preferred locations
-   *
-   * @param userId the identifier of the user
-   * @param onSuccess a callback that is called when the preferred locations are retrieved
-   * @param onFailure a callback that is called when an error occurs
-   */
-  fun getFavoriteParkings(
-      userId: String,
-      onSuccess: (List<String>) -> Unit,
-      onFailure: (Exception) -> Unit
-  )
 }

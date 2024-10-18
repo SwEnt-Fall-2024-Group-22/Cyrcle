@@ -1,3 +1,4 @@
+/*
 package com.github.se.cyrcle.ui.theme.atoms
 
 import androidx.compose.material3.Button
@@ -131,3 +132,4 @@ enum class CheckBoxDisposition {
 fun CheckBoxes(labels: List<String>, onValueChange: (String) -> Unit, colorScheme: ColorScheme) {
   TODO()
 }
+*/

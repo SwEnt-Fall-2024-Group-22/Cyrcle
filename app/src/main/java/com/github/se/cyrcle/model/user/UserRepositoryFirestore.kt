@@ -37,10 +37,6 @@ class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepositor
         .addOnFailureListener { onFailure(it) }
   }
 
-  override fun getAllUsers(onSuccess: (List<User>) -> Unit, onFailure: (Exception) -> Unit) {
-    TODO("Not yet implemented")
-  }
-
   override fun addUser(user: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     db.collection(collectionPath)
         .document(user.userId)
@@ -120,71 +116,6 @@ class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepositor
         }
         .addOnFailureListener { onFailure(it) }
   } */
-  override fun addFavoriteParking(
-      userId: String,
-      parkingId: String,
-      onSuccess: () -> Unit,
-      onFailure: (Exception) -> Unit
-  ) {
-    /*db.collection(collectionPath)
-    .document(userId)
-    .get()
-    .addOnSuccessListener { document ->
-      val user = document.toObject(User::class.java)
-      val updatedFavorites = user?.favoriteParkingSpots?.toMutableList() ?: mutableListOf()
-      updatedFavorites.add(parkingId)
-      db.collection(collectionPath)
-          .document(userId)
-          .update("favoriteParkingSpots", updatedFavorites)
-          .addOnSuccessListener { onSuccess() }
-          .addOnFailureListener { onFailure(it) }
-    }
-    .addOnFailureListener { onFailure(it) }
-    */
-    TODO("To fix due to serialization issues")
-  }
-
-  override fun removeFavoriteParking(
-      userId: String,
-      parkingId: String,
-      onSuccess: () -> Unit,
-      onFailure: (Exception) -> Unit
-  ) {
-    /*
-    db.collection(collectionPath)
-        .document(userId)
-        .get()
-        .addOnSuccessListener { document ->
-          val user = document.toObject(User::class.java)
-          val updatedFavorites = user?.favoriteParkingSpots?.toMutableList() ?: mutableListOf()
-          updatedFavorites.removeIf { it == parkingId } // nto sure
-          db.collection(collectionPath)
-              .document(userId)
-              .update("favoriteParkingSpots", updatedFavorites)
-              .addOnSuccessListener { onSuccess() }
-              .addOnFailureListener { onFailure(it) }
-        }
-        .addOnFailureListener { onFailure(it) }
-      */
-    TODO("To fix due to serialization issues")
-  }
-
-  override fun getFavoriteParkings(
-      userId: String,
-      onSuccess: (List<String>) -> Unit,
-      onFailure: (Exception) -> Unit
-  ) {
-    /*db.collection(collectionPath)
-    .document(userId)
-    .get()
-    .addOnSuccessListener { document ->
-      val user = document.toObject(User::class.java)
-      onSuccess(user?.favoriteParkingSpots ?: emptyList())
-    }
-    .addOnFailureListener { onFailure(it) }
-    */
-    TODO("To fix due to serialization issues")
-  }
 
   // TODO(I expect someone to change ParkingRepositoryFirestore
   // by adding a contributorId on addParking and updateParking.
