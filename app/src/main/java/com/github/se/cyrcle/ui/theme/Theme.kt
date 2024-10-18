@@ -24,11 +24,11 @@ onSurface = Color(0xFF1C1B1F),
 
 @Composable
 fun CyrcleTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-    val colorScheme =
-        if (darkTheme) {
-            DarkColorScheme
-        } else {
-            LightColorScheme
-        }
-    MaterialTheme(colorScheme = colorScheme, typography = Typography, content = content)
+  val colorScheme =
+      if (darkTheme) {
+        DarkColorScheme
+      } else {
+        LightColorScheme
+      }
+  MaterialTheme(colorScheme = colorScheme, typography = Typography, content = content)
 }
