@@ -44,7 +44,7 @@ class UserViewModelTest {
   fun fetchUserById_updates_selectedUser_on_success() = runTest {
     // Act: Fetch a user by ID (make sure the user exists in Firestore)
     userViewModel.fetchUserById("user1")
-
+    Thread.sleep(500)
     // Assert: Check if the user is updated correctly in the StateFlow
     val fetchedUser = userViewModel.user.first()
     assertNotNull(fetchedUser)
@@ -86,7 +86,7 @@ class UserViewModelTest {
   fun deleteUserById_removes_user_from_firestore() = runTest {
     // Act: Delete a user by ID
     userViewModel.deleteUserById("user1")
-
+    Thread.sleep(500)
     // Fetch the user to ensure it was deleted
     userViewModel.fetchUserById("user1")
     val fetchedUser = userViewModel.user.first()
