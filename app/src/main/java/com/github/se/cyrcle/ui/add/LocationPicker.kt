@@ -37,11 +37,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.map.MapViewModel
-import com.github.se.cyrcle.model.parking.Location
-import com.github.se.cyrcle.model.parking.Parking
-import com.github.se.cyrcle.model.parking.ParkingCapacity
-import com.github.se.cyrcle.model.parking.ParkingProtection
-import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
@@ -80,19 +75,7 @@ fun LocationPicker(
         style = { MapStyle("mapbox://styles/seanprz/cm27wh9ff00jl01r21jz3hcb1") },
         modifier = Modifier.testTag("LocationPickerScreen"),
         onMapLongClickListener = { point ->
-          val parking =
-              Parking(
-                  uid = "Selected",
-                  location = Location(point),
-                  capacity = ParkingCapacity.SMALL,
-                  hasSecurity = false,
-                  price = 0.0,
-                  images = emptyList(),
-                  optDescription = null,
-                  optName = null,
-                  protection = ParkingProtection.NONE,
-                  rackType = ParkingRackType.U_RACK)
-          parkingViewModel.selectParking(parking)
+          mapViewModel.updateSelectedPoint(point)
           true
         }) {
           DisposableMapEffect { mapView ->
@@ -100,17 +83,17 @@ fun LocationPicker(
             onDispose { annotationManager!!.deleteAll() }
           }
         }
-    val selectedParking by parkingViewModel.selectedParking.collectAsState()
-    LaunchedEffect(selectedParking) {
+    val selectedPoint by mapViewModel.selectedPoint.collectAsState()
+    LaunchedEffect(selectedPoint) {
       val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.red_marker)
       val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 100, 150, false)
 
       annotationManager?.deleteAll()
-      if (selectedParking != null) {
+      if (selectedPoint != null) {
         annotationManager?.create(
             PointAnnotationOptions()
                 .withIconOffset(listOf(0.0, -25.0))
-                .withPoint(selectedParking!!.location.center)
+                .withPoint(selectedPoint!!)
                 .withIconSize(1.0)
                 .withIconImage(resizedBitmap))
       }
