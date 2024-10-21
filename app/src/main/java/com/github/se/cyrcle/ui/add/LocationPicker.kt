@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
@@ -37,13 +38,18 @@ import com.mapbox.maps.extension.compose.style.MapStyle
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun LocationPicker(navigationActions: NavigationActions, parkingViewModel: ParkingViewModel) {
+fun LocationPicker(
+    navigationActions: NavigationActions,
+    parkingViewModel: ParkingViewModel,
+    mapViewModel: MapViewModel = MapViewModel()
+) {
   val mapViewportState = rememberMapViewportState {
     setCameraOptions {
-      zoom(16.0)
-      center(Point.fromLngLat(6.566, 46.519))
-      pitch(0.0)
-      bearing(0.0)
+      val camPos = mapViewModel.cameraPosition.value!!
+      center(camPos.center)
+      zoom(camPos.zoom)
+      bearing(camPos.bearing)
+      pitch(camPos.pitch)
     }
   }
 

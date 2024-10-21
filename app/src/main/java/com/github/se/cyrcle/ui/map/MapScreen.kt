@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.ui.map.overlay.AddButton
 import com.github.se.cyrcle.ui.map.overlay.ZoomControls
@@ -52,6 +53,7 @@ const val minZoom = 8.0
 fun MapScreen(
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel,
+    mapViewModel: MapViewModel = MapViewModel(),
     state: MutableState<Double> = remember { mutableDoubleStateOf(defaultZoom) }
 ) {
 
@@ -171,7 +173,10 @@ fun MapScreen(
           Row(
               Modifier.padding(top = 16.dp).fillMaxWidth(),
               horizontalArrangement = Arrangement.Start) {
-                AddButton { navigationActions.navigateTo(Route.ADD_SPOTS) }
+                AddButton {
+                  navigationActions.navigateTo(Route.ADD_SPOTS)
+                  mapViewModel.updateCameraPosition(mapViewportState.cameraState!!)
+                }
               }
         }
   }
