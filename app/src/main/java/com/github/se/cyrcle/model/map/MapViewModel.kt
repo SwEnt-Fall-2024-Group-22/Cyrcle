@@ -15,8 +15,15 @@ class MapViewModel : ViewModel() {
           CameraState(Point.fromLngLat(0.0, 0.0), EdgeInsets(0.0, 0.0, 0.0, 0.0), 0.0, 0.0, 0.0))
   val cameraPosition: StateFlow<CameraState?> = _cameraPosition
 
+  private val _selectedPoint = MutableStateFlow<Point?>(null)
+  val selectedPoint: StateFlow<Point?> = _selectedPoint
+
   fun updateCameraPosition(cameraPosition: CameraState) {
     _cameraPosition.value = cameraPosition
+  }
+
+  fun updateSelectedPoint(point: Point) {
+    _selectedPoint.value = point
   }
   // create factory (imported from bootcamp)
   companion object {
