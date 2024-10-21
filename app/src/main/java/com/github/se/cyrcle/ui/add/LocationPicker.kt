@@ -1,6 +1,8 @@
 package com.github.se.cyrcle.ui.add
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,22 +20,40 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.map.MapViewModel
+import com.github.se.cyrcle.model.parking.Location
+import com.github.se.cyrcle.model.parking.Parking
+import com.github.se.cyrcle.model.parking.ParkingCapacity
+import com.github.se.cyrcle.model.parking.ParkingProtection
+import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.CyrcleTheme
+import com.mapbox.maps.extension.compose.DisposableMapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.maps.extension.compose.style.MapStyle
+import com.mapbox.maps.plugin.annotation.annotations
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
+import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -42,6 +62,8 @@ fun LocationPicker(
     parkingViewModel: ParkingViewModel,
     mapViewModel: MapViewModel = MapViewModel()
 ) {
+  var annotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
+  val context = LocalContext.current
   val mapViewportState = rememberMapViewportState {
     setCameraOptions {
       val camPos = mapViewModel.cameraPosition.value!!
@@ -56,7 +78,43 @@ fun LocationPicker(
     MapboxMap(
         mapViewportState = mapViewportState,
         style = { MapStyle("mapbox://styles/seanprz/cm27wh9ff00jl01r21jz3hcb1") },
-        modifier = Modifier.testTag("LocationPickerScreen"))
+        modifier = Modifier.testTag("LocationPickerScreen"),
+        onMapLongClickListener = { point ->
+          val parking =
+              Parking(
+                  uid = "Selected",
+                  location = Location(point),
+                  capacity = ParkingCapacity.SMALL,
+                  hasSecurity = false,
+                  price = 0.0,
+                  images = emptyList(),
+                  optDescription = null,
+                  optName = null,
+                  protection = ParkingProtection.NONE,
+                  rackType = ParkingRackType.U_RACK)
+          parkingViewModel.selectParking(parking)
+          true
+        }) {
+          DisposableMapEffect { mapView ->
+            annotationManager = mapView.annotations.createPointAnnotationManager()
+            onDispose { annotationManager!!.deleteAll() }
+          }
+        }
+    val selectedParking by parkingViewModel.selectedParking.collectAsState()
+    LaunchedEffect(selectedParking) {
+      val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.red_marker)
+      val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 100, 150, false)
+
+      annotationManager?.deleteAll()
+      if (selectedParking != null) {
+        annotationManager?.create(
+            PointAnnotationOptions()
+                .withIconOffset(listOf(0.0, -25.0))
+                .withPoint(selectedParking!!.location.center)
+                .withIconSize(1.0)
+                .withIconImage(resizedBitmap))
+      }
+    }
   }
 }
 
