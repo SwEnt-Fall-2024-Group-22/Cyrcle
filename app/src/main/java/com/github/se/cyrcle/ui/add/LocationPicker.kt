@@ -70,40 +70,45 @@ fun LocationPicker(
     }
   }
 
-  Scaffold(bottomBar = { BottomBarAdd(navigationActions) }, topBar = { TopBarAdd() }) { padding ->
-    MapboxMap(
-        mapViewportState = mapViewportState,
-        style = { MapStyle("mapbox://styles/seanprz/cm27wh9ff00jl01r21jz3hcb1") },
-        modifier = Modifier.testTag("LocationPickerScreen"),
-        onMapLongClickListener = { point ->
-          mapViewModel.updateSelectedPoint(point)
-          true
-        }) {
-          DisposableMapEffect { mapView ->
-            annotationManager = mapView.annotations.createPointAnnotationManager()
-            onDispose { annotationManager!!.deleteAll() }
+  Scaffold(
+      bottomBar = { BottomBarAdd(navigationActions, mapViewModel) }, topBar = { TopBarAdd() }) {
+          padding ->
+        MapboxMap(
+            mapViewportState = mapViewportState,
+            style = { MapStyle("mapbox://styles/seanprz/cm27wh9ff00jl01r21jz3hcb1") },
+            modifier = Modifier.testTag("LocationPickerScreen"),
+            onMapLongClickListener = { point ->
+              mapViewModel.updateSelectedPoint(point)
+              true
+            }) {
+              DisposableMapEffect { mapView ->
+                annotationManager = mapView.annotations.createPointAnnotationManager()
+                onDispose { annotationManager!!.deleteAll() }
+              }
+            }
+        val selectedPoint by mapViewModel.selectedPoint.collectAsState()
+        LaunchedEffect(selectedPoint) {
+          val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.red_marker)
+          val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 100, 150, false)
+
+          annotationManager?.deleteAll()
+          if (selectedPoint != null) {
+            annotationManager?.create(
+                PointAnnotationOptions()
+                    .withIconOffset(listOf(0.0, -25.0))
+                    .withPoint(selectedPoint!!)
+                    .withIconSize(1.0)
+                    .withIconImage(resizedBitmap))
           }
         }
-    val selectedPoint by mapViewModel.selectedPoint.collectAsState()
-    LaunchedEffect(selectedPoint) {
-      val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.red_marker)
-      val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 100, 150, false)
-
-      annotationManager?.deleteAll()
-      if (selectedPoint != null) {
-        annotationManager?.create(
-            PointAnnotationOptions()
-                .withIconOffset(listOf(0.0, -25.0))
-                .withPoint(selectedPoint!!)
-                .withIconSize(1.0)
-                .withIconImage(resizedBitmap))
       }
-    }
-  }
 }
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun BottomBarAdd(navigationActions: NavigationActions) {
+fun BottomBarAdd(navigationActions: NavigationActions, mapViewModel: MapViewModel) {
+  val selectedPoint by mapViewModel.selectedPoint.collectAsState()
+
   CyrcleTheme {
     Box(Modifier.background(Color.White)) {
       Row(
@@ -122,22 +127,36 @@ fun BottomBarAdd(navigationActions: NavigationActions) {
                       fontWeight = FontWeight.Bold,
                       textAlign = TextAlign.Center)
                 }
-
             VerticalDivider(
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.height(32.dp).width(1.dp),
                 thickness = 2.dp)
-            Button(
-                { navigationActions.navigateTo(Screen.ATTRIBUTES_PICKER) },
-                modifier = Modifier.testTag("nextButton"),
-                colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
-                  Text(
-                      "Next",
-                      modifier = Modifier.width(100.dp),
-                      color = MaterialTheme.colorScheme.primary,
-                      fontWeight = FontWeight.Bold,
-                      textAlign = TextAlign.Center)
-                }
+
+            if (selectedPoint != null) {
+              Button(
+                  { navigationActions.navigateTo(Screen.ATTRIBUTES_PICKER) },
+                  modifier = Modifier.testTag("nextButton"),
+                  colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
+                    Text(
+                        "Next",
+                        modifier = Modifier.width(100.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center)
+                  }
+            } else {
+              Button(
+                  {},
+                  modifier = Modifier.testTag("nextButton"),
+                  colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
+                    Text(
+                        "Next",
+                        modifier = Modifier.width(100.dp),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center)
+                  }
+            }
           }
     }
   }
