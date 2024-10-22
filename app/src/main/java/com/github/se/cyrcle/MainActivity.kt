@@ -9,6 +9,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ImageRepositoryCloudStorage
 import com.github.se.cyrcle.model.parking.ParkingRepositoryFirestore
 import com.github.se.cyrcle.model.parking.ParkingViewModel
@@ -58,6 +59,7 @@ class MainActivity : ComponentActivity() {
     val imageRepository = ImageRepositoryCloudStorage(auth)
     val parkingViewModel = ParkingViewModel(imageRepository, parkingRepository)
     val reviewViewModel = ReviewViewModel(reviewRepository)
-    CyrcleNavHost(navigationActions, navController, parkingViewModel, reviewViewModel)
+    val mapViewModel = MapViewModel()
+    CyrcleNavHost(navigationActions, navController, parkingViewModel, reviewViewModel, mapViewModel)
   }
 }
