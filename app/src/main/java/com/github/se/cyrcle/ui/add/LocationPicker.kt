@@ -57,6 +57,7 @@ fun LocationPicker(
     parkingViewModel: ParkingViewModel,
     mapViewModel: MapViewModel = MapViewModel()
 ) {
+  LaunchedEffect(Unit) { mapViewModel.updateSelectedPoint(null) }
   var annotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
   val context = LocalContext.current
   val mapViewportState = rememberMapViewportState {

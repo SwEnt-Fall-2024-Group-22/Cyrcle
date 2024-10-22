@@ -22,7 +22,7 @@ class MapViewModel : ViewModel() {
     _cameraPosition.value = cameraPosition
   }
 
-  fun updateSelectedPoint(point: Point) {
+  fun updateSelectedPoint(point: Point?) {
     _selectedPoint.value = point
   }
   // create factory (imported from bootcamp)
