@@ -59,6 +59,24 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
         .addOnFailureListener { onFailure(it) }
   }
 
+  override fun getParkingsByListOfIds(
+      ids: List<String>,
+      onSuccess: (List<Parking>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    db.collection(collectionPath)
+        .whereIn("uid", ids)
+        .get()
+        .addOnSuccessListener { querySnapshot ->
+          val parkings =
+              querySnapshot.documents.mapNotNull { document ->
+                document.data?.let { deserializeParking(it) }
+              }
+          onSuccess(parkings)
+        }
+        .addOnFailureListener { onFailure(it) }
+  }
+
   override fun getParkingsBetween(
       start: Point,
       end: Point,
