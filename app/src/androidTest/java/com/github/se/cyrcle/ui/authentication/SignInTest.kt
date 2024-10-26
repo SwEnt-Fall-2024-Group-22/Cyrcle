@@ -11,19 +11,22 @@ import androidx.navigation.NavHostController
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.matcher.IntentMatchers.toPackage
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.MainActivity
 import com.github.se.cyrcle.ui.navigation.NavigationActions
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 
-@RunWith(AndroidJUnit4::class)
+@HiltAndroidTest
 class LoginTest {
-  @get:Rule val composeTestRule = createAndroidComposeRule<MainActivity>()
+
+  @get:Rule(order = 0) val hiltRule = HiltAndroidRule(this)
+
+  @get:Rule(order = 1) val composeTestRule = createAndroidComposeRule<MainActivity>()
 
   private lateinit var navigationHost: NavHostController
   private lateinit var navigationActions: NavigationActions

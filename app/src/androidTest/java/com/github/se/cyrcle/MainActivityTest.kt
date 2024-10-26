@@ -12,17 +12,23 @@ import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
+import javax.inject.Inject
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
-@RunWith(AndroidJUnit4::class)
+@HiltAndroidTest
 class MainActivityTest {
 
-  @get:Rule val composeTestRule = createAndroidComposeRule<MainActivity>()
+  @get:Rule(order = 0) val hiltRule = HiltAndroidRule(this)
+
+  @get:Rule(order = 1) val composeTestRule = createAndroidComposeRule<MainActivity>()
+
+  @Inject lateinit var parkingRepository: ParkingRepository
 
   private lateinit var authRobot: AuthScreenRobot
   private lateinit var mapRobot: MapScreenRobot
@@ -32,8 +38,7 @@ class MainActivityTest {
   @Before
   fun setUp() {
 
-    // TODO inject a fake database for testing
-    // Currently, the test uses the real database
+    hiltRule.inject()
 
     authRobot = AuthScreenRobot(composeTestRule)
     mapRobot = MapScreenRobot(composeTestRule)

@@ -36,7 +36,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.github.se.cyrcle.di.HiltTestRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -251,10 +251,10 @@ dependencies {
 
 
     androidTestImplementation("com.google.dagger:hilt-android-testing:2.52")
-    kaptAndroidTest("com.google.dagger:hilt-compiler:2.52")
+    kaptAndroidTest("com.google.dagger:hilt-android-compiler:2.52")
 
     testImplementation("com.google.dagger:hilt-android-testing:2.52")
-    kaptTest("com.google.dagger:hilt-compiler:2.52")
+    kaptTest("com.google.dagger:hilt-android-compiler:2.52")
 
 }
 
