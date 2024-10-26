@@ -2,7 +2,6 @@ package com.github.se.cyrcle.model.user
 
 object UserTestInstances {
 
-  // Mock Users
   val user1 =
       User(
           userId = "user1",
@@ -11,13 +10,13 @@ object UserTestInstances {
           lastName = "Doe",
           email = "john.doe@example.com",
           profilePictureUrl = "https://example.com/profile/john_doe.jpg",
-          homeAddress = "123 Main St, New York, NY",
-          favoriteParkingSpots = listOf("mockParking1", "mockParking2"),
-          // lastKnownLocation = mockLocation1,
+          favoriteParkings = listOf("Test_spot_1", "Test_spot_2"),
+          // homeAddress = "123 Main St, New York, NY",
           // lastLoginTime = Timestamp(0,0), // Now using Timestamp
           // accountCreationDate = Timestamp(0,0),
-          numberOfContributedSpots = 5,
-          userReputationScore = 120)
+          // numberOfContributedSpots = 5,
+          // userReputationScore = 120
+      )
 
   val newUser =
       User(
@@ -27,9 +26,8 @@ object UserTestInstances {
           lastName = "User",
           email = "newuser@example.com",
           profilePictureUrl = "",
-          homeAddress = "123 Main St",
-          favoriteParkingSpots = emptyList(),
-          // lastKnownLocation = Location(Point.fromLngLat(0.0, 0.0)),
+          favoriteParkings = emptyList(),
+          // homeAddress = "123 Main St",
           // lastLoginTime = Timestamp(0,0),
           // accountCreationDate = Timestamp(0,0)
       )
@@ -38,14 +36,13 @@ object UserTestInstances {
   val updatedUser =
       User(
           userId = "usr",
-          username = "updaed_user",
+          username = "updated_user",
           firstName = "Updated",
           lastName = "User",
           email = "updateduser@example.com",
           profilePictureUrl = "https://example.com/profile.png",
-          homeAddress = "456 Updated St",
-          favoriteParkingSpots = emptyList(),
-          // lastKnownLocation = Location(Point.fromLngLat(0.0, 0.0)),
+          favoriteParkings = emptyList(),
+          // homeAddress = "456 Updated St",
           // lastLoginTime = Timestamp(0,0),
           // accountCreationDate = Timestamp(0,0)
       )
