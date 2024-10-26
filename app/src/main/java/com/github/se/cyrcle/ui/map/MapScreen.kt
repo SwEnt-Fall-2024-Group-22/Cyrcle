@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.ui.map.overlay.AddButton
 import com.github.se.cyrcle.ui.map.overlay.ZoomControls
@@ -28,6 +29,7 @@ import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.mapbox.geojson.Point
+import com.mapbox.geojson.Polygon
 import com.mapbox.maps.CameraBoundsOptions
 import com.mapbox.maps.MapView
 import com.mapbox.maps.ScreenCoordinate
@@ -40,6 +42,8 @@ import com.mapbox.maps.plugin.annotation.AnnotationSourceOptions
 import com.mapbox.maps.plugin.annotation.ClusterOptions
 import com.mapbox.maps.plugin.annotation.annotations
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
+import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationManager
+import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.maps.plugin.delegates.listeners.OnCameraChangeListener
 import com.mapbox.maps.plugin.gestures.gestures
@@ -231,4 +235,33 @@ private fun getScreenCorners(mapView: MapView, useBuffer: Boolean = true): Pair<
               centerPixel.y - (viewportHeight * multiplier)))
 
   return Pair(bottomLeftCorner, topRightCorner)
+}
+
+/**
+ * Draw the rectangles on the map
+ *
+ * @param polygonAnnotationManager the polygon annotation manager
+ * @param parkingList the list of parkings to draw
+ */
+fun drawRectangles(
+    polygonAnnotationManager: PolygonAnnotationManager?,
+    locationList: List<Location>
+) {
+  polygonAnnotationManager?.deleteAll()
+  locationList.map { location ->
+    val topLeft = location.topLeft
+    val topRight = location.topRight
+    val bottomLeft = location.bottomLeft
+    val bottomRight = location.bottomRight
+    if (topLeft != null && topRight != null && bottomLeft != null && bottomRight != null) {
+      val polygon =
+          Polygon.fromLngLats(listOf(listOf(topLeft, topRight, bottomRight, bottomLeft, topLeft)))
+      val polygonAnnotationOptions =
+          PolygonAnnotationOptions()
+              .withGeometry(polygon)
+              .withFillColor("#22799B")
+              .withFillOpacity(0.7)
+      polygonAnnotationManager?.create(polygonAnnotationOptions)
+    }
+  }
 }

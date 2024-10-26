@@ -117,6 +117,10 @@ class ParkingViewModel(
         { Log.e("ParkingViewModel", "Error getting parkings: $it") })
   }
 
+  fun getNewUid(): String {
+    return parkingRepository.getNewUid()
+  }
+
   // create factory (imported from bootcamp)
   companion object {
     val Factory: ViewModelProvider.Factory =

@@ -1,4 +1,4 @@
-package com.github.se.cyrcle.ui.add.location.overlay
+package com.github.se.cyrcle.ui.addParking.location.overlay
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
