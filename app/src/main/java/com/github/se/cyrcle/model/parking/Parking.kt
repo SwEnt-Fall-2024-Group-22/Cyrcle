@@ -30,8 +30,11 @@ data class Parking(
     // TODO: Add list of reviews when implemented
 )
 
+interface ParkingAttribute {
+  val description: String
+}
 /** Enum class representing the capacity of a parking spot. */
-enum class ParkingCapacity(val description: String) {
+enum class ParkingCapacity(override val description: String) : ParkingAttribute {
   XSMALL("Less than 10 spots"),
   SMALL("10-25 spots"),
   MEDIUM("26-50 spots"),
@@ -40,7 +43,7 @@ enum class ParkingCapacity(val description: String) {
 }
 
 /** Enum class representing the type of rack in a parking spot. */
-enum class ParkingRackType(val description: String) {
+enum class ParkingRackType(override val description: String) : ParkingAttribute {
   TWO_TIER("Two-tier rack"),
   U_RACK("U-Rack"),
   VERTICAL("Vertical rack"),
@@ -51,7 +54,7 @@ enum class ParkingRackType(val description: String) {
   OTHER("Other type of rack")
 }
 
-enum class ParkingProtection(val description: String) {
+enum class ParkingProtection(override val description: String) : ParkingAttribute {
   INDOOR("Indoor"),
   COVERED("Covered"),
   NONE("Exposed")
@@ -67,8 +70,8 @@ data class Location(
   constructor(
       topLeft: Point,
       topRight: Point,
-      bottomLeft: Point,
-      bottomRight: Point
+      bottomRight: Point,
+      bottomLeft: Point
   ) : this(
       Point.fromLngLat(
           (topLeft.longitude() + bottomRight.longitude()) / 2,
@@ -79,4 +82,8 @@ data class Location(
       bottomRight)
 
   constructor(center: Point) : this(center, null, null, null, null)
+
+  constructor(
+      listPoints: List<Point>
+  ) : this(listPoints[0], listPoints[1], listPoints[2], listPoints[3])
 }

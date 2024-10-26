@@ -13,26 +13,39 @@ import androidx.compose.ui.test.performClick
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.se.cyrcle.model.map.MapViewModel
+import com.github.se.cyrcle.model.parking.ImageRepository
+import com.github.se.cyrcle.model.parking.Location
+import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.review.ReviewViewModel
+import com.github.se.cyrcle.ui.add.location.LocationPicker
 import com.github.se.cyrcle.ui.map.MapScreen
 import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.mapbox.geojson.Point
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.Mockito.`when`
+import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidJUnit4::class)
 class AddScreensNavigationTest {
   @get:Rule val composeTestRule = createComposeRule()
 
+  @Mock lateinit var mockedParkingRepository: ParkingRepository
+  @Mock lateinit var mockedImageRepository: ImageRepository
+
   @Composable
-  fun setUp(): Triple<NavigationActions, ParkingViewModel, ReviewViewModel> {
+  fun setUp(): List<Any> {
     val navController = rememberNavController()
     val navigationActions = NavigationActions(navController)
     val parkingViewModel: ParkingViewModel = viewModel(factory = ParkingViewModel.Factory)
     val reviewViewModel: ReviewViewModel = viewModel(factory = ReviewViewModel.Factory)
-    CyrcleNavHost(navigationActions, navController, parkingViewModel, reviewViewModel)
-    return Triple(navigationActions, parkingViewModel, reviewViewModel)
+    val mapViewModel: MapViewModel = viewModel(factory = MapViewModel.Factory)
+    CyrcleNavHost(navigationActions, navController, parkingViewModel, reviewViewModel, mapViewModel)
+    return listOf<Any>(navigationActions, parkingViewModel, reviewViewModel, mapViewModel)
   }
 
   @OptIn(ExperimentalTestApi::class)
@@ -40,7 +53,10 @@ class AddScreensNavigationTest {
   fun testAddButtonNavigatesToLocationPicker() {
 
     composeTestRule.setContent {
-      val (navigationActions, parkingViewModel) = setUp()
+      val list = setUp()
+      val navigationActions = list[0] as NavigationActions
+      val parkingViewModel = list[1] as ParkingViewModel
+      val mapViewModel = list[3] as MapViewModel
       MapScreen(navigationActions, parkingViewModel)
     }
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("addButton"))
@@ -56,26 +72,35 @@ class AddScreensNavigationTest {
   fun testNavigationToAttribute() {
 
     composeTestRule.setContent {
-      val (navigationActions, parkingViewModel) = setUp()
-      LocationPicker(navigationActions, parkingViewModel)
+      val list = setUp()
+      val navigationActions = list[0] as NavigationActions
+      val mapViewModel = list[3] as MapViewModel
+      LocationPicker(navigationActions, mapViewModel)
     }
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("nextButton"))
     // Perform click on the add button
     composeTestRule.onNodeWithTag("nextButton").performClick()
+    // check that we're still on the same screen
+    composeTestRule.waitUntilAtLeastOneExists(hasTestTag("LocationPickerScreen"))
+    composeTestRule.onNodeWithTag("LocationPickerScreen").assertExists().assertIsDisplayed()
 
+    // Perform Click on the next button
+    composeTestRule.onNodeWithTag("nextButton").performClick()
     composeTestRule.waitUntilAtLeastOneExists(hasTestTag("AttributesPickerScreen"))
-    composeTestRule.onNodeWithTag("AttributesPickerScreen").assertExists().assertIsDisplayed()
+    composeTestRule.onNodeWithTag("AttributesPickerScreen").assertExists().isDisplayed()
   }
 
   @OptIn(ExperimentalTestApi::class)
   @Test
   fun testSubmit() {
+    MockitoAnnotations.openMocks(this)
+    `when`(mockedParkingRepository.getNewUid()).thenReturn("newUid")
     composeTestRule.setContent {
-      val navController = rememberNavController()
-      val navigationActions = NavigationActions(navController)
-      val parkingViewModel: ParkingViewModel = viewModel(factory = ParkingViewModel.Factory)
-      val reviewViewModel: ReviewViewModel = viewModel(factory = ReviewViewModel.Factory)
-      CyrcleNavHost(navigationActions, navController, parkingViewModel, reviewViewModel)
+      val list = setUp()
+      val navigationActions = list[0] as NavigationActions
+      val parkingViewModel = ParkingViewModel(mockedImageRepository, mockedParkingRepository)
+      val mapViewModel = list[3] as MapViewModel
+      mapViewModel.updateLocation(Location(Point.fromLngLat(0.0, 0.0)))
       AttributesPicker(navigationActions, parkingViewModel)
     }
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("submitButton"))
@@ -90,9 +115,14 @@ class AddScreensNavigationTest {
   @Test
   fun testCancel() {
     composeTestRule.setContent {
-      val (navigationActions, parkingViewModel) = setUp()
+      val list = setUp()
+      val navigationActions = list[0] as NavigationActions
+      val parkingViewModel = list[1] as ParkingViewModel
+      val mapViewModel = list[3] as MapViewModel
+      mapViewModel.updateLocation(Location(Point.fromLngLat(0.0, 0.0)))
       AttributesPicker(navigationActions, parkingViewModel)
     }
+
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("cancelButton"))
     // Perform click on the add button
     composeTestRule.onNodeWithTag("cancelButton").performClick()
@@ -105,8 +135,11 @@ class AddScreensNavigationTest {
   @Test
   fun testCancel2() {
     composeTestRule.setContent {
-      val (navigationActions, parkingViewModel) = setUp()
-      LocationPicker(navigationActions, parkingViewModel)
+      val list = setUp()
+      val navigationActions = list[0] as NavigationActions
+      val parkingViewModel = list[1] as ParkingViewModel
+      val mapViewModel = list[3] as MapViewModel
+      LocationPicker(navigationActions, mapViewModel)
     }
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("cancelButton").performClick()
