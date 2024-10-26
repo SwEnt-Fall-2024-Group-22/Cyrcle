@@ -7,9 +7,11 @@ import com.google.gson.*
 import com.google.gson.reflect.TypeToken
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMeasurement
+import javax.inject.Inject
 import java.lang.reflect.Type
 
-class ParkingRepositoryFirestore(private val db: FirebaseFirestore) : ParkingRepository {
+class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFirestore) :
+    ParkingRepository {
 
   private val collectionPath = "parkings"
 

@@ -6,8 +6,10 @@ import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import javax.inject.Inject
 
-class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepository {
+class UserRepositoryFirestore @Inject constructor(private val db: FirebaseFirestore) :
+    UserRepository {
 
   private val collectionPath = "users"
 
