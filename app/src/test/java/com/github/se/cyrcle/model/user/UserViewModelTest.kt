@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.model.user
 
-import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -14,8 +13,8 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class UserViewModelTest {
 
-  @Mock private lateinit var userViewModel: UserViewModel
   @Mock private lateinit var userRepositoryFirestore: UserRepositoryFirestore
+  private lateinit var userViewModel: UserViewModel
 
   @Before
   fun setUp() {
@@ -39,7 +38,7 @@ class UserViewModelTest {
   }
 
   @Test
-  fun getUserByIdTest() = runBlocking {
+  fun getUserByIdTest() {
     userViewModel.getUserById("user1")
 
     // Check if the user was fetched from the repository

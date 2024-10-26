@@ -25,7 +25,6 @@ class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
    * Gets a user by ID from the Firestore database and sets it as the current user.
    *
    * @param userId the ID of the user to get
-   * @return the user with the given ID
    */
   fun getUserById(userId: String) {
     userRepository.getUserById(
