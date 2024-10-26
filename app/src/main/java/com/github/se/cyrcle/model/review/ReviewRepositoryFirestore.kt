@@ -5,8 +5,10 @@ import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import javax.inject.Inject
 
-class ReviewRepositoryFirestore(private val db: FirebaseFirestore) : ReviewRepository {
+class ReviewRepositoryFirestore @Inject constructor(private val db: FirebaseFirestore) :
+    ReviewRepository {
 
   private val collectionPath = "reviews"
 
