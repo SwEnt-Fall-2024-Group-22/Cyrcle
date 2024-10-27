@@ -1,9 +1,11 @@
 package com.github.se.cyrcle.di
 
+import com.github.se.cyrcle.di.mocks.MockAddressRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReviewRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
+import com.github.se.cyrcle.model.address.AddressRepository
 import com.github.se.cyrcle.model.parking.ImageRepository
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.review.ReviewRepository
@@ -39,4 +41,11 @@ abstract class MockRepoModule {
   @Singleton
   /** Binds the [MockUserRepository] implementation to the [UserRepository] interface. */
   abstract fun bindUserRepository(mockUserRepositoryFirestore: MockUserRepository): UserRepository
+
+  @Binds
+  @Singleton
+  /** Binds the [MockAddressRepository] implementation to the [AddressRepository] interface. */
+  abstract fun bindAddressRepository(
+      mockAddressRepository: MockAddressRepository
+  ): AddressRepository
 }

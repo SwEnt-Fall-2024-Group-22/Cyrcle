@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import com.github.se.cyrcle.model.address.AddressRepository
 import com.github.se.cyrcle.model.parking.ImageRepository
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
@@ -29,6 +30,8 @@ class MainActivity : ComponentActivity() {
   @Inject lateinit var imageRepository: ImageRepository
 
   @Inject lateinit var userRepository: UserRepository
+
+  @Inject lateinit var addressRepository: AddressRepository
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)

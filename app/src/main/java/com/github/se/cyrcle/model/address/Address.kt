@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.model.address
 
-import android.util.Log
 import com.google.gson.annotations.SerializedName
 
 /**
@@ -76,12 +75,6 @@ data class Address(
     // they are present.
     val fieldPriorities =
         listOf(publicName, house, road, cityBlock, neighbourhood, hamlet, suburb, city)
-
-    // We filter out empty fields and take the first three non-empty fields
-    val nonemptyFields = fieldPriorities.filter { it.isNotEmpty() }
-    Log.d("Address", "nonemptyFields: $nonemptyFields")
-    val relevantFields = nonemptyFields.take(3)
-    Log.d("Address", "relevantFields: $relevantFields")
     return fieldPriorities.filter { it.isNotEmpty() }.take(3).joinToString(", ")
   }
 }

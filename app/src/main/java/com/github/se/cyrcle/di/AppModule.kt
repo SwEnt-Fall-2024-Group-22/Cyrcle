@@ -10,6 +10,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+import okhttp3.OkHttpClient
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -48,5 +49,15 @@ object AppModule {
       auth.signOut()
     }
     return auth
+  }
+
+  @Provides
+  @Singleton
+  /**
+   * Instantiates an instance of the OkHttpClient with the correct settings for the whole lifetime
+   * of the run.
+   */
+  fun provideOkHttpClient(): OkHttpClient {
+    return OkHttpClient()
   }
 }
