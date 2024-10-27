@@ -1,5 +1,7 @@
 package com.github.se.cyrcle.di
 
+import com.github.se.cyrcle.model.address.AddressRepository
+import com.github.se.cyrcle.model.address.AddressRepositoryNominatim
 import com.github.se.cyrcle.model.parking.ImageRepository
 import com.github.se.cyrcle.model.parking.ImageRepositoryCloudStorage
 import com.github.se.cyrcle.model.parking.ParkingRepository
@@ -43,4 +45,11 @@ abstract class RepoModule {
   @Singleton
   /** Binds the [UserRepositoryFirestore] implementation to the [UserRepository] interface. */
   abstract fun bindUserRepository(userRepositoryFirestore: UserRepositoryFirestore): UserRepository
+
+  @Binds
+  @Singleton
+  /** Binds the [AddressRepositoryNominatim] implementation to the [AddressRepository] interface. */
+  abstract fun bindAddressRepository(
+      addressRepositoryNominatim: AddressRepositoryNominatim
+  ): AddressRepository
 }
