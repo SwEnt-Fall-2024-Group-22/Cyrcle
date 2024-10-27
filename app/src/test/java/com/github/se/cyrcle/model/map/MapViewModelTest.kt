@@ -1,21 +1,24 @@
 package com.github.se.cyrcle.model.map
 
-import android.annotation.SuppressLint
 import com.github.se.cyrcle.model.map.MapViewModel.LocationPickerState
 import com.github.se.cyrcle.model.parking.Location
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraState
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.ScreenCoordinate
+import org.junit.Before
 import org.junit.Test
 
 class MapViewModelTest {
+  private lateinit var mapViewModel: MapViewModel
 
-  @SuppressLint("StateFlowValueCalledInComposition")
+  @Before
+  fun setUp() {
+    mapViewModel = MapViewModel()
+  }
+
   @Test
   fun mapViewModelTestCameraState() {
-    val mapViewModel = MapViewModel()
-
     val cameraState =
         CameraState(
             Point.fromLngLat(6.566, 46.519), EdgeInsets(0.0, 0.0, 0.0, 0.0), 17.0, 10.0, 10.0)
@@ -39,7 +42,6 @@ class MapViewModelTest {
 
   @Test
   fun mapViewModelTestLocationPickerState() {
-    val mapViewModel = MapViewModel()
     assert(mapViewModel.locationPickerState.value == LocationPickerState.NONE_SET)
 
     mapViewModel.updateLocationPickerState(LocationPickerState.TOP_LEFT_SET)
@@ -54,7 +56,6 @@ class MapViewModelTest {
 
   @Test
   fun mapViewModelTestSelectedLocation() {
-    val mapViewModel = MapViewModel()
     assert(mapViewModel.selectedLocation.value == null)
 
     val location = Location(Point.fromLngLat(6.566, 46.519))
@@ -64,7 +65,6 @@ class MapViewModelTest {
 
   @Test
   fun mapViewModelTestScreenCoordinates() {
-    val mapViewModel = MapViewModel()
     assert(mapViewModel.screenCoordinates.value.isEmpty())
 
     val screenCoordinates = listOf(ScreenCoordinate(10.0, 10.0))
