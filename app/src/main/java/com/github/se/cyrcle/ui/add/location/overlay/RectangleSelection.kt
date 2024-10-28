@@ -21,7 +21,6 @@ import com.github.se.cyrcle.model.map.MapViewModel
 import com.mapbox.maps.ScreenCoordinate
 
 /** This composable is used to draw a rectangle on the map to select a region. */
-
 @Composable
 fun RectangleSelection(mapViewModel: MapViewModel, paddingValues: PaddingValues) {
   val locationPickerState by mapViewModel.locationPickerState.collectAsState()
@@ -82,7 +81,6 @@ fun RectangleSelection(mapViewModel: MapViewModel, paddingValues: PaddingValues)
                 Text("Unlock Map")
               }
             })
-
       }
     }
   }

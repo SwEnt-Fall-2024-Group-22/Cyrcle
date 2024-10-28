@@ -22,8 +22,6 @@ import com.mapbox.maps.MapView
 import com.mapbox.maps.extension.compose.DisposableMapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
 
-import com.mapbox.maps.plugin.gestures.gestures
-
 @Composable
 fun LocationPicker(
     navigationActions: NavigationActions,
@@ -54,7 +52,6 @@ fun LocationPicker(
         Crosshair(mapViewModel, padding)
       }
   LaunchedEffect(locationPickerState) {
-
     if (locationPickerState == LocationPickerState.RECTANGLE_SET) {
       val screenCoordsList = mapViewModel.screenCoordinates.value
       val pointsList = mapView.value?.mapboxMap?.coordinatesForPixels(screenCoordsList)!!

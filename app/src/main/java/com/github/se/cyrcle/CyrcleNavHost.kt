@@ -6,7 +6,6 @@ import androidx.navigation.navigation
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.review.ReviewViewModel
-
 import com.github.se.cyrcle.ui.add.attributes.AttributesPicker
 import com.github.se.cyrcle.ui.add.location.LocationPicker
 import com.github.se.cyrcle.ui.authentication.SignInScreen
@@ -49,7 +48,7 @@ fun CyrcleNavHost(
         startDestination = Screen.MAP,
         route = Route.MAP,
     ) {
-      composable(Screen.MAP) { MapScreen(navigationActions, parkingViewModel) }
+      composable(Screen.MAP) { MapScreen(navigationActions, parkingViewModel, mapViewModel) }
     }
     navigation(startDestination = Screen.LOCATION_PICKER, route = Route.ADD_SPOTS) {
       composable(Screen.LOCATION_PICKER) { LocationPicker(navigationActions, mapViewModel) }

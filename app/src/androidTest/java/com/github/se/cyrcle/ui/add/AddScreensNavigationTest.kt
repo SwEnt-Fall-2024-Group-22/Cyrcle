@@ -58,7 +58,7 @@ class AddScreensNavigationTest {
       val navigationActions = list[0] as NavigationActions
       val parkingViewModel = list[1] as ParkingViewModel
       val mapViewModel = list[3] as MapViewModel
-      MapScreen(navigationActions, parkingViewModel)
+      MapScreen(navigationActions, parkingViewModel, mapViewModel)
     }
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("addButton"))
     // Perform click on the add button

@@ -50,80 +50,80 @@ fun MapScreen(
     mapViewModel: MapViewModel = MapViewModel(),
 ) {
 
-    val listOfParkings by parkingViewModel.rectParkings.collectAsState()
-    var polygonAnnotationManager by remember { mutableStateOf<PolygonAnnotationManager?>(null) }
-    val mapViewportState = MapConfig.createMapViewPortStateFromViewModel(mapViewModel)
+  val listOfParkings by parkingViewModel.rectParkings.collectAsState()
+  var polygonAnnotationManager by remember { mutableStateOf<PolygonAnnotationManager?>(null) }
+  val mapViewportState = MapConfig.createMapViewPortStateFromViewModel(mapViewModel)
 
-    Scaffold(bottomBar = { BottomNavigationBar(navigationActions, selectedItem = Route.MAP) }) {
-            padding ->
-        MapboxMap(
-            Modifier.fillMaxSize().padding(padding).testTag("MapScreen"),
-            mapViewportState = mapViewportState,
-            style = { MapConfig.DefaultStyle() }) {
-            DisposableMapEffect { mapView ->
+  Scaffold(bottomBar = { BottomNavigationBar(navigationActions, selectedItem = Route.MAP) }) {
+      padding ->
+    MapboxMap(
+        Modifier.fillMaxSize().padding(padding).testTag("MapScreen"),
+        mapViewportState = mapViewportState,
+        style = { MapConfig.DefaultStyle() }) {
+          DisposableMapEffect { mapView ->
 
-                // Lock rotations of the map
-                mapView.gestures.getGesturesManager().rotateGestureDetector.isEnabled = false
-                // Set camera bounds options
-                val cameraBoundsOptions =
-                    CameraBoundsOptions.Builder().minZoom(minZoom).maxZoom(maxZoom).build()
-                mapView.mapboxMap.setBounds(cameraBoundsOptions)
+            // Lock rotations of the map
+            mapView.gestures.getGesturesManager().rotateGestureDetector.isEnabled = false
+            // Set camera bounds options
+            val cameraBoundsOptions =
+                CameraBoundsOptions.Builder().minZoom(minZoom).maxZoom(maxZoom).build()
+            mapView.mapboxMap.setBounds(cameraBoundsOptions)
 
-                // Create polygon annotation manager
-                polygonAnnotationManager = mapView.annotations.createPolygonAnnotationManager()
-                drawRectangles(polygonAnnotationManager, listOfParkings.map { it.location })
-                var (loadedBottomLeft, loadedTopRight) = getScreenCorners(mapView, useBuffer = true)
+            // Create polygon annotation manager
+            polygonAnnotationManager = mapView.annotations.createPolygonAnnotationManager()
+            drawRectangles(polygonAnnotationManager, listOfParkings.map { it.location })
+            var (loadedBottomLeft, loadedTopRight) = getScreenCorners(mapView, useBuffer = true)
 
-                // Get parkings in the current view
+            // Get parkings in the current view
+            parkingViewModel.getParkingsInRect(loadedBottomLeft, loadedTopRight)
+
+            // Add a camera change listener to detect zoom changes
+            val cameraChangeListener = CameraChangedCallback {
+              // Get the top right and bottom left coordinates of the current view only when
+              // what the user sees is outside the screen
+              val (currentBottomLeft, currentTopRight) =
+                  getScreenCorners(mapView, useBuffer = false)
+              if (!inBounds(currentBottomLeft, currentTopRight, loadedBottomLeft, loadedTopRight)) {
+                // Get the buffered coordinates for loading parkings
+                val loadedCorners = getScreenCorners(mapView, useBuffer = true)
+                loadedBottomLeft = loadedCorners.first
+                loadedTopRight = loadedCorners.second
                 parkingViewModel.getParkingsInRect(loadedBottomLeft, loadedTopRight)
-
-                // Add a camera change listener to detect zoom changes
-                val cameraChangeListener = CameraChangedCallback {
-                    // Get the top right and bottom left coordinates of the current view only when
-                    // what the user sees is outside the screen
-                    val (currentBottomLeft, currentTopRight) =
-                        getScreenCorners(mapView, useBuffer = false)
-                    if (!inBounds(currentBottomLeft, currentTopRight, loadedBottomLeft, loadedTopRight)) {
-                        // Get the buffered coordinates for loading parkings
-                        val loadedCorners = getScreenCorners(mapView, useBuffer = true)
-                        loadedBottomLeft = loadedCorners.first
-                        loadedTopRight = loadedCorners.second
-                        parkingViewModel.getParkingsInRect(loadedBottomLeft, loadedTopRight)
-                    }
-                }
-                mapView.mapboxMap.subscribeCameraChanged(cameraChangeListener)
-                onDispose { polygonAnnotationManager?.deleteAll() }
+              }
             }
+            mapView.mapboxMap.subscribeCameraChanged(cameraChangeListener)
+            onDispose { polygonAnnotationManager?.deleteAll() }
+          }
         }
 
-        Column(
-            Modifier.padding(padding).fillMaxHeight(), verticalArrangement = Arrangement.SpaceBetween) {
-            Row(Modifier.padding(16.dp).fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                ZoomControls(
-                    onZoomIn = {
-                        mapViewportState.setCameraOptions {
-                            zoom(mapViewportState.cameraState!!.zoom + 1.0)
-                        }
-                    },
-                    onZoomOut = {
-                        mapViewportState.setCameraOptions {
-                            zoom(mapViewportState.cameraState!!.zoom - 1.0)
-                        }
-                    })
-            }
-            Row(
-                Modifier.padding(top = 16.dp).fillMaxWidth(),
-                horizontalArrangement = Arrangement.Start) {
+    Column(
+        Modifier.padding(padding).fillMaxHeight(), verticalArrangement = Arrangement.SpaceBetween) {
+          Row(Modifier.padding(16.dp).fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            ZoomControls(
+                onZoomIn = {
+                  mapViewportState.setCameraOptions {
+                    zoom(mapViewportState.cameraState!!.zoom + 1.0)
+                  }
+                },
+                onZoomOut = {
+                  mapViewportState.setCameraOptions {
+                    zoom(mapViewportState.cameraState!!.zoom - 1.0)
+                  }
+                })
+          }
+          Row(
+              Modifier.padding(top = 16.dp).fillMaxWidth(),
+              horizontalArrangement = Arrangement.Start) {
                 AddButton {
-                    navigationActions.navigateTo(Route.ADD_SPOTS)
-                    mapViewModel.updateCameraPosition(mapViewportState.cameraState!!)
+                  navigationActions.navigateTo(Route.ADD_SPOTS)
+                  mapViewModel.updateCameraPosition(mapViewportState.cameraState!!)
                 }
-            }
+              }
         }
-    }
-    LaunchedEffect(listOfParkings) {
-        drawRectangles(polygonAnnotationManager, listOfParkings.map { it.location })
-    }
+  }
+  LaunchedEffect(listOfParkings) {
+    drawRectangles(polygonAnnotationManager, listOfParkings.map { it.location })
+  }
 }
 /**
  * Check if the current view is within the loaded view.
@@ -140,10 +140,10 @@ private fun inBounds(
     loadedBottomLeft: Point,
     loadedTopRight: Point
 ): Boolean {
-    return currentBottomLeft.latitude() >= loadedBottomLeft.latitude() &&
-            currentBottomLeft.longitude() >= loadedBottomLeft.longitude() &&
-            currentTopRight.latitude() <= loadedTopRight.latitude() &&
-            currentTopRight.longitude() <= loadedTopRight.longitude()
+  return currentBottomLeft.latitude() >= loadedBottomLeft.latitude() &&
+      currentBottomLeft.longitude() >= loadedBottomLeft.longitude() &&
+      currentTopRight.latitude() <= loadedTopRight.latitude() &&
+      currentTopRight.longitude() <= loadedTopRight.longitude()
 }
 
 /**
@@ -157,28 +157,28 @@ private fun inBounds(
  * @return a pair of the bottom left and top right corners of the screen
  */
 private fun getScreenCorners(mapView: MapView, useBuffer: Boolean = true): Pair<Point, Point> {
-    // Retrieve viewport dimensions
-    val viewportWidth = mapView.width
-    val viewportHeight = mapView.height
+  // Retrieve viewport dimensions
+  val viewportWidth = mapView.width
+  val viewportHeight = mapView.height
 
-    val centerPixel = mapView.mapboxMap.pixelForCoordinate(mapView.mapboxMap.cameraState.center)
+  val centerPixel = mapView.mapboxMap.pixelForCoordinate(mapView.mapboxMap.cameraState.center)
 
-    // Calculate the multiplier for the buffer
-    val multiplier = if (useBuffer) 3.0 else 1.0
+  // Calculate the multiplier for the buffer
+  val multiplier = if (useBuffer) 3.0 else 1.0
 
-    val bottomLeftCorner =
-        mapView.mapboxMap.coordinateForPixel(
-            ScreenCoordinate(
-                centerPixel.x - (viewportWidth * multiplier),
-                centerPixel.y + (viewportHeight * multiplier)))
+  val bottomLeftCorner =
+      mapView.mapboxMap.coordinateForPixel(
+          ScreenCoordinate(
+              centerPixel.x - (viewportWidth * multiplier),
+              centerPixel.y + (viewportHeight * multiplier)))
 
-    val topRightCorner =
-        mapView.mapboxMap.coordinateForPixel(
-            ScreenCoordinate(
-                centerPixel.x + (viewportWidth * multiplier),
-                centerPixel.y - (viewportHeight * multiplier)))
+  val topRightCorner =
+      mapView.mapboxMap.coordinateForPixel(
+          ScreenCoordinate(
+              centerPixel.x + (viewportWidth * multiplier),
+              centerPixel.y - (viewportHeight * multiplier)))
 
-    return Pair(bottomLeftCorner, topRightCorner)
+  return Pair(bottomLeftCorner, topRightCorner)
 }
 
 /**
@@ -187,25 +187,25 @@ private fun getScreenCorners(mapView: MapView, useBuffer: Boolean = true): Pair<
  * @param polygonAnnotationManager the polygon annotation manager
  * @param locationList the list of parkings location to draw
  */
- fun drawRectangles(
+fun drawRectangles(
     polygonAnnotationManager: PolygonAnnotationManager?,
     locationList: List<Location>
 ) {
-    polygonAnnotationManager?.deleteAll()
-    locationList.map { location ->
-        val topLeft = location.topLeft
-        val topRight = location.topRight
-        val bottomLeft = location.bottomLeft
-        val bottomRight = location.bottomRight
-        if (topLeft != null && topRight != null && bottomLeft != null && bottomRight != null) {
-            val polygon =
-                Polygon.fromLngLats(listOf(listOf(topLeft, topRight, bottomRight, bottomLeft, topLeft)))
-            val polygonAnnotationOptions =
-                PolygonAnnotationOptions()
-                    .withGeometry(polygon)
-                    .withFillColor("#22799B")
-                    .withFillOpacity(0.7)
-            polygonAnnotationManager?.create(polygonAnnotationOptions)
-        }
+  polygonAnnotationManager?.deleteAll()
+  locationList.map { location ->
+    val topLeft = location.topLeft
+    val topRight = location.topRight
+    val bottomLeft = location.bottomLeft
+    val bottomRight = location.bottomRight
+    if (topLeft != null && topRight != null && bottomLeft != null && bottomRight != null) {
+      val polygon =
+          Polygon.fromLngLats(listOf(listOf(topLeft, topRight, bottomRight, bottomLeft, topLeft)))
+      val polygonAnnotationOptions =
+          PolygonAnnotationOptions()
+              .withGeometry(polygon)
+              .withFillColor("#22799B")
+              .withFillOpacity(0.7)
+      polygonAnnotationManager?.create(polygonAnnotationOptions)
     }
+  }
 }
