@@ -159,8 +159,6 @@ dependencies {
 
     // ----------       UI Testing    ------------
     androidTestImplementation(composeBom)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.espresso.intents)
     androidTestImplementation(libs.androidx.ui.test.junit4)
     androidTestImplementation(libs.mockito.android)
