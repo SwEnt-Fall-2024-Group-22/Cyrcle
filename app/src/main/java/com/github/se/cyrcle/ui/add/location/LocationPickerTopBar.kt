@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.map.MapViewModel.LocationPickerState
@@ -31,22 +32,24 @@ fun LocationPickerTopBar(mapViewModel: MapViewModel) {
           Modifier.fillMaxWidth().wrapContentHeight().padding(16.dp).background(Color.White),
           horizontalArrangement = Arrangement.SpaceAround,
           verticalAlignment = Alignment.CenterVertically) {
-            Column {
+            Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
               Text(
                   "Where is the Parking ?",
+                  textAlign = TextAlign.Center,
                   color = MaterialTheme.colorScheme.primary,
                   fontSize = MaterialTheme.typography.headlineLarge.fontSize,
                   fontFamily = MaterialTheme.typography.bodyLarge.fontFamily,
-                  modifier = Modifier.padding(start = 16.dp),
                   fontWeight = FontWeight.Bold)
               if (locationPickerState == LocationPickerState.NONE_SET) {
                 Text(
-                    "Set the top-left corner of the parking",
-                    color = MaterialTheme.colorScheme.tertiary)
+                    "Set the top-left corner of the parking, by placing it under the crosshair below",
+                    color = MaterialTheme.colorScheme.tertiary,
+                    textAlign = TextAlign.Center)
               } else if (locationPickerState == LocationPickerState.TOP_LEFT_SET) {
                 Text(
-                    "Set the bottom-right corner of the parking",
-                    color = MaterialTheme.colorScheme.tertiary)
+                    "Set the bottom-right corner of the parking, by dragging on the screen",
+                    color = MaterialTheme.colorScheme.tertiary,
+                    textAlign = TextAlign.Center)
               }
             }
           }

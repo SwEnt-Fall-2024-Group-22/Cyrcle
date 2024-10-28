@@ -16,6 +16,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.mapbox.maps.ScreenCoordinate
 
@@ -68,12 +69,18 @@ fun RectangleSelection(mapViewModel: MapViewModel, paddingValues: PaddingValues)
         }
     Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
       Row(
-          horizontalArrangement = Arrangement.Center,
-          modifier = Modifier.fillMaxSize(),
+          horizontalArrangement = Arrangement.End,
+          modifier = Modifier.fillMaxSize().padding(end = 55.dp),
       ) {
         androidx.compose.material3.Button(
             onClick = { mapGesturesEnabled.value = !mapGesturesEnabled.value },
-            content = { Text("Toggle Rotation") })
+            content = {
+              if (mapGesturesEnabled.value) {
+                Text("Lock Map ")
+              } else {
+                Text("Unlock Map")
+              }
+            })
       }
     }
   }
