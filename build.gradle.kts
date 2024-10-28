@@ -5,6 +5,5 @@ plugins {
     alias(libs.plugins.ktfmt) apply false
     alias(libs.plugins.gms) apply false
 
-    id("com.google.dagger.hilt.android") version "2.52" apply false
-
+    alias(libs.plugins.hilt) apply false
 }

@@ -5,14 +5,6 @@ import java.util.Properties
 rootProject.name = "cyrcle"
 include(":app")
 
-// Load the API key from local.properties
-val localProperties = Properties()
-val localPropertiesFile = settings.rootDir.resolve("local.properties")
-if (localPropertiesFile.exists()) {
-    localProperties.load(FileInputStream(localPropertiesFile))
-}
-
-
 pluginManagement {
     repositories {
         google {
@@ -26,6 +18,14 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
+// Load the API key from local.properties
+val localProperties = Properties()
+val localPropertiesFile = settings.rootDir.resolve("local.properties")
+if (localPropertiesFile.exists())
+    localProperties.load(FileInputStream(localPropertiesFile))
+
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
@@ -42,5 +42,4 @@ dependencyResolutionManagement {
             authentication.create<BasicAuthentication>("basic")
         }
     }
-
 }
