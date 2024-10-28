@@ -21,13 +21,13 @@ import com.github.se.cyrcle.ui.navigation.Screen
 import com.mapbox.maps.MapView
 import com.mapbox.maps.extension.compose.DisposableMapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
-import com.mapbox.maps.plugin.gestures.gestures
 
 @Composable
 fun LocationPicker(
     navigationActions: NavigationActions,
     mapViewModel: MapViewModel = MapViewModel()
 ) {
+  // Reset the location and location picker state when the screen is launched
   LaunchedEffect(Unit) {
     mapViewModel.updateLocation(null)
     mapViewModel.updateLocationPickerState(LocationPickerState.NONE_SET)
@@ -51,13 +51,7 @@ fun LocationPicker(
         RectangleSelection(mapViewModel, padding)
         Crosshair(mapViewModel, padding)
       }
-
   LaunchedEffect(locationPickerState) {
-    val gestureEnabled = locationPickerState == LocationPickerState.NONE_SET
-    mapView.value?.gestures?.scrollEnabled = gestureEnabled
-    mapView.value?.gestures?.pinchToZoomEnabled = gestureEnabled
-    mapView.value?.gestures?.pitchEnabled = gestureEnabled
-
     if (locationPickerState == LocationPickerState.RECTANGLE_SET) {
       val screenCoordsList = mapViewModel.screenCoordinates.value
       val pointsList = mapView.value?.mapboxMap?.coordinatesForPixels(screenCoordsList)!!
