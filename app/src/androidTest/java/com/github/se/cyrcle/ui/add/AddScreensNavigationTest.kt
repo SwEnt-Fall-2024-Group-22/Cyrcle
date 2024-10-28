@@ -19,6 +19,7 @@ import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.review.ReviewViewModel
+import com.github.se.cyrcle.ui.add.attributes.AttributesPicker
 import com.github.se.cyrcle.ui.add.location.LocationPicker
 import com.github.se.cyrcle.ui.map.MapScreen
 import com.github.se.cyrcle.ui.navigation.NavigationActions
@@ -101,7 +102,7 @@ class AddScreensNavigationTest {
       val parkingViewModel = ParkingViewModel(mockedImageRepository, mockedParkingRepository)
       val mapViewModel = list[3] as MapViewModel
       mapViewModel.updateLocation(Location(Point.fromLngLat(0.0, 0.0)))
-      AttributesPicker(navigationActions, parkingViewModel)
+      AttributesPicker(navigationActions, parkingViewModel, mapViewModel)
     }
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("submitButton"))
     // Perform click on the add button
@@ -120,7 +121,7 @@ class AddScreensNavigationTest {
       val parkingViewModel = list[1] as ParkingViewModel
       val mapViewModel = list[3] as MapViewModel
       mapViewModel.updateLocation(Location(Point.fromLngLat(0.0, 0.0)))
-      AttributesPicker(navigationActions, parkingViewModel)
+      AttributesPicker(navigationActions, parkingViewModel, mapViewModel)
     }
 
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("cancelButton"))

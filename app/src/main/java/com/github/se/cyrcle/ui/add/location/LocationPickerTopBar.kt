@@ -50,6 +50,7 @@ fun LocationPickerTopBar(mapViewModel: MapViewModel) {
                     "Set the bottom-right corner of the parking, by dragging on the screen",
                     color = MaterialTheme.colorScheme.tertiary,
                     textAlign = TextAlign.Center)
+
               }
             }
           }
