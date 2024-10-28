@@ -10,12 +10,7 @@ gms = "4.4.2"
 hilt = "2.52"
 
 # Firebase
-firebaseAuth = "23.0.0"
-firebaseAuthKtx = "23.0.0"
-firebaseDatabaseKtx = "21.0.0"
-firebaseFirestore = "25.1.0"
-firebaseUiAuth = "8.0.0"
-firebaseStorageKtx = "21.0.1"
+firebaseBom = "33.5.1"
 
 # OkHTTP
 okhttp = "4.12.0"
@@ -34,8 +29,7 @@ appcompat = "1.6.1"
 material = "1.12.0"
 materialCompose = "1.4.2"
 composeBom = "2024.02.02"
-composeActivity = "1.8.2"
-composeViewModel = "2.7.0"
+composeNavigation = "2.8.3"
 lifecycleRuntimeKtx = "2.7.0"
 
 playServicesAuth = "21.2.0"
@@ -75,19 +69,18 @@ compose-ui = { group = "androidx.compose.ui", name = "ui" }
 compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 compose-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 compose-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
-compose-activity = { group = "androidx.activity", name = "activity-compose", version.ref = "composeActivity" }
-compose-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "composeViewModel" }
+compose-activity = { group = "androidx.activity", name = "activity-compose" }
+compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "composeNavigation" }
+compose-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose" }
 compose-test-junit = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 compose-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 
-firebase-auth = { module = "com.google.firebase:firebase-auth", version.ref = "firebaseAuth" }
-firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
-firebase-database-ktx = { module = "com.google.firebase:firebase-database-ktx", version.ref = "firebaseDatabaseKtx" }
-firebase-firestore = { module = "com.google.firebase:firebase-firestore", version.ref = "firebaseFirestore" }
-firebase-ui-auth = { module = "com.firebaseui:firebase-ui-auth", version.ref = "firebaseUiAuth" }
-firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx", version.ref = "firebaseStorageKtx" }
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom"}
+firebase-auth = { group = "com.google.firebase" , name = "firebase-auth" }
+firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
+firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx" }
 
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 

@@ -147,6 +147,7 @@ dependencies {
     implementation(libs.compose.material3)
     // Integration with activities
     implementation(libs.compose.activity)
+    implementation(libs.compose.navigation)
     // Integration with ViewModels
     implementation(libs.compose.viewmodel)
     // Android Studio Preview support
@@ -174,12 +175,11 @@ dependencies {
     testImplementation(libs.mockito.kotlin)
 
     // ---------------- Firebase  ------------------
+    val firebaseBom = platform(libs.firebase.bom)
+    implementation(firebaseBom)
     implementation(libs.firebase.auth)
-    implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.storage.ktx)
-    implementation(libs.firebase.database.ktx)
-    implementation(libs.firebase.ui.auth)
 
     // ---------------- OkHTTP ------------------
     implementation(libs.okhttp)
@@ -190,17 +190,13 @@ dependencies {
     // ---------------- COIL ------------------
     implementation(libs.coil.compose)
 
-    // ------------         Hilt      --------------
+    // ------------     Hilt      --------------
     implementation(libs.hilt.android)
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     kapt(libs.hilt.compiler)
-    kapt("androidx.hilt:hilt-compiler:1.0.0")
 
+    globalTestImplementation(libs.hilt.android.testing)
 
-    androidTestImplementation(libs.hilt.android.testing)
     kaptAndroidTest(libs.hilt.android.compiler)
-
-    testImplementation(libs.hilt.android.testing)
     kaptTest(libs.hilt.android.compiler)
 
     // ---------------- MapBox ------------------
