@@ -1,37 +1,26 @@
-import java.io.FileInputStream
 import java.util.Properties
 
 plugins {
-    jacoco
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.ktfmt)
     alias(libs.plugins.gms)
+    alias(libs.plugins.sonar)
+    id("jacoco")
 
-    // HILT
     id("kotlin-kapt")
-    id("com.google.dagger.hilt.android")
-
+    alias(libs.plugins.hilt)
 }
 
 android {
     namespace = "com.github.se.cyrcle"
     compileSdk = 34
 
-
-    // Load the API key from local.properties
-    val localProperties = Properties()
-    val localPropertiesFile = rootProject.file("local.properties")
-    if (localPropertiesFile.exists()) {
-        localProperties.load(FileInputStream(localPropertiesFile))
-    }
-
-    val mapsApiKey: String = localProperties.getProperty("MAPS_API_KEY") ?: ""
-
+    initLocalProps()
 
     defaultConfig {
         applicationId = "com.github.se.cyrcle"
-        minSdk = 29
+        minSdk = 28
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -40,29 +29,7 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-        manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
     }
-
-    // This block was added to read the mapbox_access_token from local.properties and write mapbox_access_token.xml
-    if (localPropertiesFile.exists()) {
-        localProperties.load(localPropertiesFile.inputStream())
-    }
-
-    val mapboxAccessToken = localProperties.getProperty("MAPBOX_ACCESS_TOKEN")
-    if (mapboxAccessToken != null) {
-        val mapboxAccessTokenXmlFile = file("src/main/res/values/mapbox_access_token.xml")
-        val mapboxAccessTokenXmlContent = """
-            <?xml version="1.0" encoding="utf-8"?>
-            <resources xmlns:tools="http://schemas.android.com/tools">
-                <string name="mapbox_access_token" translatable="false" tools:ignore="UnusedResources">$mapboxAccessToken</string>
-            </resources>
-        """.trimIndent()
-
-        mapboxAccessTokenXmlFile.writeText(mapboxAccessTokenXmlContent)
-    } else {
-        throw GradleException("mapbox_access_token not found in local.properties")
-    }
-
 
     buildTypes {
         release {
@@ -71,59 +38,45 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             )
         }
+
         debug {
             enableUnitTestCoverage = true
             enableAndroidTestCoverage = true
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+
+    testCoverage {
+        jacocoVersion = "0.8.8"
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
+
     buildFeatures {
         compose = true
     }
+
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
     }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
-            merges += "META-INF/LICENSE.md"
-            merges += "META-INF/LICENSE-notice.md"
-            excludes += "META-INF/LICENSE-notice.md"
-            excludes += "META-INF/LICENSE.md"
-            excludes += "META-INF/LICENSE"
-            excludes += "META-INF/LICENSE.txt"
-            excludes += "META-INF/NOTICE"
-            excludes += "META-INF/NOTICE.txt"
         }
     }
 
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
-
             isReturnDefaultValues = true
         }
-        packaging {
-            jniLibs {
-                useLegacyPackaging = true
-            }
-        }
-    }
-
-
-    buildFeatures {
-        compose = true
-        buildConfig = true
-    }
-
-    kotlinOptions {
-        jvmTarget = "11"
     }
 
     // Robolectric needs to be run only in debug. But its tests are placed in the shared source set (test)
@@ -143,125 +96,116 @@ android {
         res.setSrcDirs(emptyList<File>())
         resources.setSrcDirs(emptyList<File>())
     }
-
-
 }
 
+sonar {
+    properties {
+        property("sonar.projectKey", "gf_android-sample")
+        property("sonar.projectName", "Android-Sample")
+        property("sonar.organization", "gabrielfleischer")
+        property("sonar.host.url", "https://sonarcloud.io")
+        // Comma-separated paths to the various directories containing the *.xml JUnit report files. Each path may be absolute or relative to the project base directory.
+        property("sonar.junit.reportPaths", "${project.layout.buildDirectory.get()}/test-results/testDebugunitTest/")
+        // Paths to xml files with Android Lint issues. If the main flavor is changed, this file will have to be changed too.
+        property("sonar.androidLint.reportPaths", "${project.layout.buildDirectory.get()}/reports/lint-results-debug.xml")
+        // Paths to JaCoCo XML coverage report files.
+        property("sonar.coverage.jacoco.xmlReportPaths", "${project.layout.buildDirectory.get()}/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
+    }
+}
 
-
+// When a library is used both by robolectric and connected tests, use this function
+fun DependencyHandlerScope.globalTestImplementation(dep: Any) {
+    androidTestImplementation(dep)
+    testImplementation(dep)
+}
 
 dependencies {
-
-    // Core
-    implementation(libs.core.ktx)
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.fragment.ktx)
-    implementation(libs.kotlinx.serialization.json)
-
-    // Jetpack Compose UI
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.material)
-    implementation(libs.androidx.material3)
-    implementation(libs.androidx.navigation.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    testImplementation(libs.test.core.ktx)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.material)
+    implementation(libs.androidx.material.compose)
+    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+
+    // ------------- Jetpack Compose ------------------
+    val composeBom = platform(libs.compose.bom)
+    implementation(composeBom)
+
+    implementation(libs.compose.ui)
+    implementation(libs.compose.ui.graphics)
+    // Material Design 3
+    implementation(libs.compose.material3)
+    // Integration with activities
+    implementation(libs.compose.activity)
+    implementation(libs.compose.navigation)
+    // Integration with ViewModels
+    implementation(libs.compose.viewmodel)
+    // Android Studio Preview support
+    implementation(libs.compose.preview)
+    debugImplementation(libs.compose.tooling)
 
 
-    // MapBox API
-    implementation("com.mapbox.extension:maps-compose:11.7.0")
-    implementation("com.mapbox.maps:android:11.7.0")
+    // ---------------------------------------------------
+    // -------------------  PLUGINS  ---------------------
+    // ---------------------------------------------------
 
-    // Turf for MapBox
-    implementation (libs.mapbox.sdk.turf)
-
-    // Coil
-    implementation(libs.coil.compose)
-
-    // Navigation
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.navigation.fragment.ktx)
-    implementation(libs.androidx.navigation.ui.ktx)
-
-    // Google Service and Maps
-    implementation(libs.play.services.maps)
-    implementation(libs.maps.compose)
-    implementation(libs.maps.compose.utils)
+    // ---------------- Firebase  ------------------
+    implementation(libs.google.services)
     implementation(libs.play.services.auth)
 
-    // add material icons
-    implementation(libs.androidx.material.icons.extended)
-    // Firebase
-    implementation(libs.firebase.database.ktx)
-    implementation(libs.firebase.firestore)
-    implementation(libs.firebase.ui.auth)
-    implementation(libs.firebase.auth.ktx)
+    val firebaseBom = platform(libs.firebase.bom)
+    implementation(firebaseBom)
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
     implementation(libs.firebase.storage.ktx)
-    // Networking with OkHttp
+
+    // ---------------- OkHTTP ------------------
     implementation(libs.okhttp)
 
-    // GSON
+    // ---------------- GSON ------------------
     implementation(libs.gson)
 
-    // Testing Unit
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.mockk)
-    androidTestImplementation(libs.mockk.android)
-    androidTestImplementation(libs.mockk.agent)
-    testImplementation(libs.json)
+    // ---------------- COIL ------------------
+    implementation(libs.coil.compose)
 
-    // Test UI
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+    // ------------     Hilt      --------------
+    kapt(libs.hilt.compiler)
+    implementation(libs.hilt.android)
+
+    // ---------------- MapBox ------------------
+    implementation(libs.mapbox.compose)
+    implementation(libs.mapbox.android)
+    implementation(libs.mapbox.sdk.turf)
+
+    // ---------------------------------------------------
+    // -------------------  TESTING  ---------------------
+    // ---------------------------------------------------
+    globalTestImplementation(composeBom)
+    globalTestImplementation(libs.androidx.junit)
+    globalTestImplementation(libs.androidx.espresso.core)
+
+    globalTestImplementation(libs.hilt.android.testing)
+    globalTestImplementation(libs.mockito.kotlin)
+
+    globalTestImplementation(libs.compose.test.junit)
+    debugImplementation(libs.compose.test.manifest)
+
+    // ----------       UI Testing    ------------
+    kaptAndroidTest(libs.hilt.android.compiler)
     androidTestImplementation(libs.androidx.espresso.intents)
     androidTestImplementation(libs.androidx.ui.test.junit4)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    testImplementation(libs.mockito.core)
-    testImplementation(libs.mockito.inline)
-    testImplementation(libs.mockito.kotlin)
     androidTestImplementation(libs.mockito.android)
-    androidTestImplementation(libs.mockito.kotlin)
+
+    // ----------       Unit Tests    ------------
+    kaptTest(libs.hilt.android.compiler)
+    testImplementation(libs.junit)
     testImplementation(libs.robolectric)
-    androidTestImplementation(libs.kaspresso) {
-        exclude(group = "com.google.protobuf", module = "protobuf-lite")
-    }
-    androidTestImplementation(libs.kaspresso.allure.support) {
-        exclude(group = "com.google.protobuf", module = "protobuf-lite")
-    }
-    androidTestImplementation(libs.kaspresso.compose.support) {
-        exclude(group = "com.google.protobuf", module = "protobuf-lite")
-    }
-
-    testImplementation(libs.kotlinx.coroutines.test)
-
-    // Hilt
-    implementation("com.google.dagger:hilt-android:2.52")
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-    kapt("com.google.dagger:hilt-compiler:2.52")
-    kapt("androidx.hilt:hilt-compiler:1.0.0")
-
-
-    androidTestImplementation("com.google.dagger:hilt-android-testing:2.52")
-    kaptAndroidTest("com.google.dagger:hilt-android-compiler:2.52")
-
-    testImplementation("com.google.dagger:hilt-android-testing:2.52")
-    kaptTest("com.google.dagger:hilt-android-compiler:2.52")
+    testImplementation(libs.mockk)
+    testImplementation(libs.mockk.agent)
+    testImplementation(libs.mockk.android)
+    testImplementation(libs.mockito.inline)
 
 }
-
-kapt {
-    correctErrorTypes = true
-}
-
 
 tasks.withType<Test> {
     // Configure Jacoco for each tests
@@ -286,23 +230,43 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         "**/Manifest*.*",
         "**/*Test*.*",
         "android/**/*.*",
-        "**/sigchecks/**",
-        "**/preview/**"
     )
-    val debugTree = fileTree("${layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
+
+    val debugTree = fileTree("${project.layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
         exclude(fileFilter)
     }
-    val mainSrc = "${project.projectDir}/src/main/java"
 
+    val mainSrc = "${project.layout.projectDirectory}/src/main/java"
     sourceDirectories.setFrom(files(mainSrc))
     classDirectories.setFrom(files(debugTree))
-    executionData.setFrom(fileTree(layout.buildDirectory.get()) {
+    executionData.setFrom(fileTree(project.layout.buildDirectory.get()) {
         include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
         include("outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec")
     })
 }
 
+fun initLocalProps(): Properties {
+
+    val localProperties = Properties()
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists())
+        localProperties.load(localPropertiesFile.inputStream())
 
 
+    val mapboxAccessToken = localProperties.getProperty("MAPBOX_ACCESS_TOKEN")
+    if (mapboxAccessToken != null) {
+        val mapboxAccessTokenXmlFile = file("src/main/res/values/mapbox_access_token.xml")
+        val mapboxAccessTokenXmlContent = """
+            <?xml version="1.0" encoding="utf-8"?>
+            <resources xmlns:tools="http://schemas.android.com/tools">
+                <string name="mapbox_access_token" translatable="false" tools:ignore="UnusedResources">$mapboxAccessToken</string>
+            </resources>
+        """.trimIndent()
 
+        mapboxAccessTokenXmlFile.writeText(mapboxAccessTokenXmlContent)
+    } else {
+        throw GradleException("mapbox_access_token not found in local.properties")
+    }
 
+    return localProperties
+}
