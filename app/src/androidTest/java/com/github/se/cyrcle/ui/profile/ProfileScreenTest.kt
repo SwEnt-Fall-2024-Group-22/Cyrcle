@@ -14,8 +14,6 @@ class ProfileScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
 
-
-
   @Test
   fun testProfileScreenDisplaysUserInfo() {
     val user =
@@ -99,40 +97,34 @@ class ProfileScreenTest {
     composeTestRule.onNodeWithTag("UsernameField").assertExists()
   }
 
+  @Test
+  fun testSaveChangesButton() {
+    val testUser =
+        User(
+            userId = "12345",
+            username = "eggsampluser",
+            firstName = "Eggsam",
+            lastName = "P.LU. Sir",
+            email = "eggsampleruser@epfl.ch",
+            profilePictureUrl = "",
+            favoriteParkings = listOf("Parking A", "Parking B", "Parking C"))
+    composeTestRule.setContent { ProfileScreen(testUser) }
 
+    // Enter edit mode
+    composeTestRule.onNodeWithTag("ModifyButton").performClick()
 
-    @Test
-    fun testSaveChangesButton() {
-        val testUser =
-            User(
-                userId = "12345",
-                username = "eggsampluser",
-                firstName = "Eggsam",
-                lastName = "P.LU. Sir",
-                email = "eggsampleruser@epfl.ch",
-                profilePictureUrl = "",
-                favoriteParkings = listOf("Parking A", "Parking B", "Parking C"))
-        composeTestRule.setContent { ProfileScreen(testUser) }
+    // Modify fields
+    composeTestRule.onNodeWithTag("FirstNameField").performTextInput("NewName")
+    composeTestRule.onNodeWithTag("LastNameField").performTextInput("NewLastName")
+    composeTestRule.onNodeWithTag("UsernameField").performTextInput("newusername")
 
-        // Enter edit mode
-        composeTestRule.onNodeWithTag("ModifyButton").performClick()
+    // Save changes
+    composeTestRule.onNodeWithTag("SaveButton").performClick()
 
-        // Modify fields
-        composeTestRule.onNodeWithTag("FirstNameField")
-            .performTextInput("NewName")
-        composeTestRule.onNodeWithTag("LastNameField")
-            .performTextInput("NewLastName")
-        composeTestRule.onNodeWithTag("UsernameField")
-            .performTextInput("newusername")
-
-        // Save changes
-        composeTestRule.onNodeWithTag("SaveButton").performClick()
-
-        // Verify display mode is active
-        composeTestRule.onNodeWithTag("ModifyButton").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("FirstNameField").assertDoesNotExist()
-        composeTestRule.onNodeWithTag("SaveButton").assertDoesNotExist()
-        composeTestRule.onNodeWithTag("CancelButton").assertDoesNotExist()
-    }
-
+    // Verify display mode is active
+    composeTestRule.onNodeWithTag("ModifyButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("FirstNameField").assertDoesNotExist()
+    composeTestRule.onNodeWithTag("SaveButton").assertDoesNotExist()
+    composeTestRule.onNodeWithTag("CancelButton").assertDoesNotExist()
+  }
 }
