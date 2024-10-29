@@ -10,18 +10,16 @@ plugins {
 
     id("kotlin-kapt")
     alias(libs.plugins.hilt)
-
 }
 
 android {
     namespace = "com.github.se.cyrcle"
     compileSdk = 34
 
-    val localProperties = initLocalProps()
-
+    initLocalProps()
 
     defaultConfig {
-        applicationId =  "com.github.se.cyrcle"
+        applicationId = "com.github.se.cyrcle"
         minSdk = 28
         targetSdk = 34
         versionCode = 1
@@ -31,15 +29,13 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-        manifestPlaceholders["MAPS_API_KEY"] = localProperties.getProperty("MAPS_API_KEY") ?: ""
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             )
         }
 
@@ -130,16 +126,10 @@ dependencies {
     implementation(libs.androidx.material.compose)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    testImplementation(libs.junit)
-    globalTestImplementation(libs.androidx.junit)
-    globalTestImplementation(libs.androidx.espresso.core)
-
-    implementation(libs.play.services.auth)
 
     // ------------- Jetpack Compose ------------------
     val composeBom = platform(libs.compose.bom)
     implementation(composeBom)
-    globalTestImplementation(composeBom)
 
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
@@ -153,26 +143,16 @@ dependencies {
     // Android Studio Preview support
     implementation(libs.compose.preview)
     debugImplementation(libs.compose.tooling)
-    // UI Tests
-    globalTestImplementation(libs.compose.test.junit)
-    debugImplementation(libs.compose.test.manifest)
 
-    // ----------       UI Testing    ------------
-    androidTestImplementation(composeBom)
-    androidTestImplementation(libs.androidx.espresso.intents)
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    androidTestImplementation(libs.mockito.android)
-    androidTestImplementation(libs.mockito.kotlin)
 
-    // ----------       Unit Tests    ------------
-    testImplementation(libs.robolectric)
-    testImplementation(libs.mockk)
-    testImplementation(libs.mockk.agent)
-    testImplementation(libs.mockk.android)
-    testImplementation(libs.mockito.inline)
-    testImplementation(libs.mockito.kotlin)
+    // ---------------------------------------------------
+    // -------------------  PLUGINS  ---------------------
+    // ---------------------------------------------------
 
     // ---------------- Firebase  ------------------
+    implementation(libs.google.services)
+    implementation(libs.play.services.auth)
+
     val firebaseBom = platform(libs.firebase.bom)
     implementation(firebaseBom)
     implementation(libs.firebase.auth)
@@ -189,18 +169,41 @@ dependencies {
     implementation(libs.coil.compose)
 
     // ------------     Hilt      --------------
-    implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
-
-    globalTestImplementation(libs.hilt.android.testing)
-
-    kaptAndroidTest(libs.hilt.android.compiler)
-    kaptTest(libs.hilt.android.compiler)
+    implementation(libs.hilt.android)
 
     // ---------------- MapBox ------------------
     implementation(libs.mapbox.compose)
     implementation(libs.mapbox.android)
     implementation(libs.mapbox.sdk.turf)
+
+    // ---------------------------------------------------
+    // -------------------  TESTING  ---------------------
+    // ---------------------------------------------------
+    globalTestImplementation(composeBom)
+    globalTestImplementation(libs.androidx.junit)
+    globalTestImplementation(libs.androidx.espresso.core)
+
+    globalTestImplementation(libs.hilt.android.testing)
+    globalTestImplementation(libs.mockito.kotlin)
+
+    globalTestImplementation(libs.compose.test.junit)
+    debugImplementation(libs.compose.test.manifest)
+
+    // ----------       UI Testing    ------------
+    kaptAndroidTest(libs.hilt.android.compiler)
+    androidTestImplementation(libs.androidx.espresso.intents)
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(libs.mockito.android)
+
+    // ----------       Unit Tests    ------------
+    kaptTest(libs.hilt.android.compiler)
+    testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.mockk)
+    testImplementation(libs.mockk.agent)
+    testImplementation(libs.mockk.android)
+    testImplementation(libs.mockito.inline)
 
 }
 
