@@ -28,6 +28,10 @@ android {
 
     val mapsApiKey: String = localProperties.getProperty("MAPS_API_KEY") ?: ""
 
+    buildFeatures {
+        viewBinding = true
+    }
+
 
     defaultConfig {
         applicationId = "com.github.se.cyrcle"
