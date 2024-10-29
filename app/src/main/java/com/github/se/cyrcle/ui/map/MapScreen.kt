@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import android.view.View
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -78,7 +79,7 @@ fun MapScreen(
     }
   }
 
-  val cancelables = remember<List<Cancelable>> { emptyList() }.toMutableList()
+  var cancelables = remember<List<Cancelable>> { emptyList() }.toMutableList()
 
   val context = LocalContext.current
 
@@ -138,8 +139,15 @@ fun MapScreen(
                       textNativeView.text = "Custom text here"
                     }
                   }
-                  cancelables += mapView.mapboxMap.subscribeMapIdle(listener)
+                  cancelables.forEach(Cancelable::cancel)
+                  cancelables = listOf(mapView.mapboxMap.subscribeMapIdle(listener)).toMutableList()
                   true
+                })
+
+            mapView.setOnClickListener(
+                View.OnClickListener {
+                  cancelables.forEach(Cancelable::cancel)
+                  viewAnnotationManager.removeAllViewAnnotations()
                 })
 
             var (loadedBottomLeft, loadedTopRight) = getScreenCorners(mapView, useBuffer = true)
