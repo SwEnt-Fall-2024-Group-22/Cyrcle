@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
-import android.view.View
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -79,7 +78,9 @@ fun MapScreen(
     }
   }
 
-  var cancelables = remember<List<Cancelable>> { emptyList() }.toMutableList()
+  var removeViewAnnotation = remember { true }
+
+  var cancelables = remember<List<Cancelable>> { mutableListOf() }
 
   val context = LocalContext.current
 
@@ -110,6 +111,8 @@ fun MapScreen(
 
             annotationManager.addClickListener(
                 OnPointAnnotationClickListener {
+                  removeViewAnnotation = false
+                  viewAnnotationManager.removeAllViewAnnotations()
                   if (mapViewportState.cameraState?.center != it.point) {
                     mapViewportState.setCameraOptions { center(it.point) }
                   }
@@ -138,16 +141,11 @@ fun MapScreen(
                     ItemCalloutViewBinding.bind(viewAnnotation).apply {
                       textNativeView.text = "Custom text here"
                     }
+                    removeViewAnnotation = true
                   }
                   cancelables.forEach(Cancelable::cancel)
-                  cancelables = listOf(mapView.mapboxMap.subscribeMapIdle(listener)).toMutableList()
+                  cancelables = mutableListOf(mapView.mapboxMap.subscribeMapIdle(listener))
                   true
-                })
-
-            mapView.setOnClickListener(
-                View.OnClickListener {
-                  cancelables.forEach(Cancelable::cancel)
-                  viewAnnotationManager.removeAllViewAnnotations()
                 })
 
             var (loadedBottomLeft, loadedTopRight) = getScreenCorners(mapView, useBuffer = true)
@@ -172,7 +170,10 @@ fun MapScreen(
 
             // Add a camera change listener to detect zoom changes
             val cameraChangeListener = OnCameraChangeListener {
-              viewAnnotationManager.removeAllViewAnnotations()
+              if (removeViewAnnotation) {
+                viewAnnotationManager.removeAllViewAnnotations()
+                cancelables.forEach(Cancelable::cancel)
+              }
 
               state.value = mapView.mapboxMap.cameraState.zoom
 
