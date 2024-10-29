@@ -113,6 +113,8 @@ fun MapScreen(
                 OnPointAnnotationClickListener {
                   removeViewAnnotation = false
                   viewAnnotationManager.removeAllViewAnnotations()
+
+                  // recenter the camera on the marker if it is not the case already
                   if (mapViewportState.cameraState?.center != it.point) {
                     mapViewportState.setCameraOptions { center(it.point) }
                   }
@@ -138,6 +140,7 @@ fun MapScreen(
                                   }
                                 })
 
+                    // Set the text of the view annotation
                     ItemCalloutViewBinding.bind(viewAnnotation).apply {
                       textNativeView.text = "Custom text here"
                     }
@@ -170,6 +173,8 @@ fun MapScreen(
 
             // Add a camera change listener to detect zoom changes
             val cameraChangeListener = OnCameraChangeListener {
+
+              // Remove the view annotation if the user moves the map
               if (removeViewAnnotation) {
                 viewAnnotationManager.removeAllViewAnnotations()
                 cancelables.forEach(Cancelable::cancel)
