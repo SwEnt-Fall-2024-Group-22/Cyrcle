@@ -12,6 +12,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class ProfileScreenTest {
 
+
   @get:Rule val composeTestRule = createComposeRule()
 
   @Test
