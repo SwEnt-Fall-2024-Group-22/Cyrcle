@@ -9,7 +9,7 @@ import javax.inject.Inject
 
 class MockParkingRepository @Inject constructor() : ParkingRepository {
   private var uid = 0
-  private val parkings = mutableListOf<Parking>(TestInstancesParking.parking1)
+  private val parkings = mutableListOf(TestInstancesParking.parking1)
 
   override fun getNewUid(): String {
     return (uid++).toString()
@@ -19,7 +19,7 @@ class MockParkingRepository @Inject constructor() : ParkingRepository {
     onSuccess()
   }
 
-  override fun getParkings(onSuccess: (List<Parking>) -> Unit, onFailure: (Exception) -> Unit) {
+  override fun getAllParkings(onSuccess: (List<Parking>) -> Unit, onFailure: (Exception) -> Unit) {
     if (parkings.none { it.uid == "" }) onSuccess(parkings)
     else onFailure(Exception("Error getting parkings"))
   }
@@ -97,5 +97,14 @@ class MockParkingRepository @Inject constructor() : ParkingRepository {
       parkings.remove(parkings.find { it.uid == id })
       onSuccess()
     }
+  }
+
+  override fun getParkingsByListOfIds(
+      ids: List<String>,
+      onSuccess: (List<Parking>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    if (ids.any { it == "" }) onFailure(Exception("Error getting parkings"))
+    else onSuccess(parkings.filter { it.uid in ids })
   }
 }

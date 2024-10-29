@@ -18,14 +18,14 @@ import org.robolectric.RobolectricTestRunner
 class ParkingViewModelTest {
 
   @Mock private lateinit var parkingViewModel: ParkingViewModel
-  @Mock private lateinit var parkingRepositoryFirestore: ParkingRepositoryFirestore
+  @Mock private lateinit var parkingRepository: ParkingRepository
   @Mock private lateinit var imageRepository: ImageRepository
 
   @Before
   fun setUp() {
     MockitoAnnotations.openMocks(this)
 
-    parkingViewModel = ParkingViewModel(imageRepository, parkingRepositoryFirestore)
+    parkingViewModel = ParkingViewModel(imageRepository, parkingRepository)
   }
 
   @Test
@@ -33,7 +33,7 @@ class ParkingViewModelTest {
     parkingViewModel.addParking(TestInstancesParking.parking1)
 
     // Check if the parking was added to the repository
-    verify(parkingRepositoryFirestore).addParking(eq(TestInstancesParking.parking1), any(), any())
+    verify(parkingRepository).addParking(eq(TestInstancesParking.parking1), any(), any())
   }
 
   @Test
@@ -52,7 +52,7 @@ class ParkingViewModelTest {
 
   @Test
   fun getParkingsBetweenTest() {
-    `when`(parkingRepositoryFirestore.getParkingsBetween(any(), any(), any(), any())).then {
+    `when`(parkingRepository.getParkingsBetween(any(), any(), any(), any())).then {
       it.getArgument<(List<Parking>) -> Unit>(2)(
           listOf(TestInstancesParking.parking1, TestInstancesParking.parking2))
     }
@@ -69,7 +69,7 @@ class ParkingViewModelTest {
 
   @Test
   fun getParkingLocationKIs0() {
-    `when`(parkingRepositoryFirestore.getKClosestParkings(any(), any(), any(), any())).then {
+    `when`(parkingRepository.getKClosestParkings(any(), any(), any(), any())).then {
       it.getArgument<(List<Parking>) -> Unit>(2)(emptyList())
     }
 
@@ -82,7 +82,7 @@ class ParkingViewModelTest {
 
   @Test
   fun getParkingLocationKIs1() {
-    `when`(parkingRepositoryFirestore.getKClosestParkings(any(), any(), any(), any())).then {
+    `when`(parkingRepository.getKClosestParkings(any(), any(), any(), any())).then {
       it.getArgument<(List<Parking>) -> Unit>(2)(listOf(TestInstancesParking.parking3))
     }
 

@@ -23,7 +23,7 @@ interface ParkingRepository {
    * @param onSuccess a callback that is called when the parkings are retrieved
    * @param onFailure a callback that is called when an error occurs
    */
-  fun getParkings(onSuccess: (List<Parking>) -> Unit, onFailure: (Exception) -> Unit)
+  fun getAllParkings(onSuccess: (List<Parking>) -> Unit, onFailure: (Exception) -> Unit)
 
   /**
    * Get a parking by its identifier
