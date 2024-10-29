@@ -12,17 +12,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.databinding.ItemCalloutViewBinding
+import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.Location
+import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.ui.map.overlay.AddButton
 import com.github.se.cyrcle.ui.map.overlay.ZoomControls
@@ -39,18 +43,17 @@ import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.ViewAnnotationAnchor
 import com.mapbox.maps.extension.compose.DisposableMapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
-import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
-import com.mapbox.maps.extension.compose.style.MapStyle
+import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.plugin.annotation.AnnotationConfig
 import com.mapbox.maps.plugin.annotation.AnnotationSourceOptions
 import com.mapbox.maps.plugin.annotation.ClusterOptions
 import com.mapbox.maps.plugin.annotation.annotations
 import com.mapbox.maps.plugin.annotation.generated.OnPointAnnotationClickListener
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
-import com.mapbox.maps.plugin.delegates.listeners.OnCameraChangeListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.viewannotation.annotatedLayerFeature
 import com.mapbox.maps.viewannotation.annotationAnchor
@@ -66,32 +69,28 @@ const val LAYER_ID = "0128"
 fun MapScreen(
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel,
-    state: MutableState<Double> = remember { mutableDoubleStateOf(defaultZoom) }
+    mapViewModel: MapViewModel
 ) {
 
-  val listOfParkings = parkingViewModel.rectParkings.collectAsState()
-
-  val mapViewportState = rememberMapViewportState {
-    setCameraOptions {
-      zoom(defaultZoom)
-      center(Point.fromLngLat(6.566, 46.519))
-      pitch(0.0)
-      bearing(0.0)
-    }
-  }
-
+  val listOfParkings by parkingViewModel.rectParkings.collectAsState()
+  val mapViewportState = MapConfig.createMapViewPortStateFromViewModel(mapViewModel)
   var removeViewAnnotation = remember { true }
-
   var cancelables = remember<List<Cancelable>> { mutableListOf() }
+  var pointAnnotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
 
-  val context = LocalContext.current
+  val bitmap = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.red_marker)
+  val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 100, 150, false)
+  // Draw markers on the map when the list of parkings changes
+  LaunchedEffect(listOfParkings) {
+    drawMarkers(pointAnnotationManager, listOfParkings, resizedBitmap)
+  }
 
   Scaffold(bottomBar = { BottomNavigationBar(navigationActions, selectedItem = Route.MAP) }) {
       padding ->
     MapboxMap(
         Modifier.fillMaxSize().padding(padding).testTag("MapScreen"),
         mapViewportState = mapViewportState,
-        style = { MapStyle("mapbox://styles/seanprz/cm27wh9ff00jl01r21jz3hcb1") }) {
+        style = { MapConfig.DefaultStyle() }) {
           DisposableMapEffect { mapView ->
             val viewAnnotationManager = mapView.viewAnnotationManager
 
@@ -104,14 +103,14 @@ fun MapScreen(
             mapView.mapboxMap.setBounds(cameraBoundsOptions)
 
             // Create annotation manager
-            val annotationManager =
+            pointAnnotationManager =
                 mapView.annotations.createPointAnnotationManager(
                     AnnotationConfig(
                         annotationSourceOptions =
                             AnnotationSourceOptions(clusterOptions = ClusterOptions()),
                         layerId = LAYER_ID))
 
-            annotationManager.addClickListener(
+            pointAnnotationManager?.addClickListener(
                 OnPointAnnotationClickListener {
                   removeViewAnnotation = false
                   viewAnnotationManager.removeAllViewAnnotations()
@@ -153,69 +152,41 @@ fun MapScreen(
 
             var (loadedBottomLeft, loadedTopRight) = getScreenCorners(mapView, useBuffer = true)
 
-            // Load the red marker image and resized it to fit the map
-            val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.red_marker)
-            val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 100, 150, false)
-
             // Get parkings in the current view
             parkingViewModel.getParkingsInRect(loadedBottomLeft, loadedTopRight)
+            // Add a camera change listener to detect zoom changes
+            val cameraCancelable =
+                mapView.mapboxMap.subscribeCameraChanged {
+                  // Remove the view annotation if the user moves the map
+                  if (removeViewAnnotation) {
+                    viewAnnotationManager.removeAllViewAnnotations()
+                    cancelables.forEach(Cancelable::cancel)
+                  }
 
-            // Create PointAnnotationOptions for each parking
-            var pointAnnotationOptions =
-                listOfParkings.value.map { parking ->
-                  PointAnnotationOptions()
-                      .withPoint(parking.location.center)
-                      .withIconImage(resizedBitmap)
+                  // Get the top right and bottom left coordinates of the current view only when
+                  // what the user sees is outside the screen
+                  val (currentBottomLeft, currentTopRight) =
+                      getScreenCorners(mapView, useBuffer = false)
+                  if (!inBounds(
+                      currentBottomLeft, currentTopRight, loadedBottomLeft, loadedTopRight)) {
+                    Log.d("MapScreen", "Loading parkings in new view")
+                    // Get the buffered coordinates for loading parkings
+
+                    val loadedCorners = getScreenCorners(mapView, useBuffer = true)
+                    loadedBottomLeft = loadedCorners.first
+                    loadedTopRight = loadedCorners.second
+
+                    parkingViewModel.getParkingsInRect(loadedBottomLeft, loadedTopRight)
+
+                    // Create PointAnnotationOptions for each parking
+                    drawMarkers(pointAnnotationManager, listOfParkings, resizedBitmap)
+                  }
                 }
 
-            // Add annotations to the annotation manager and display them on the map
-            pointAnnotationOptions.forEach { annotationManager.create(it) }
-
-            // Add a camera change listener to detect zoom changes
-            val cameraChangeListener = OnCameraChangeListener {
-
-              // Remove the view annotation if the user moves the map
-              if (removeViewAnnotation) {
-                viewAnnotationManager.removeAllViewAnnotations()
-                cancelables.forEach(Cancelable::cancel)
-              }
-
-              state.value = mapView.mapboxMap.cameraState.zoom
-
-              // Get the top right and bottom left coordinates of the current view only when
-              // what the user sees is outside the screen
-              val (currentBottomLeft, currentTopRight) =
-                  getScreenCorners(mapView, useBuffer = false)
-              if (!inBounds(currentBottomLeft, currentTopRight, loadedBottomLeft, loadedTopRight)) {
-                Log.d("MapScreen", "Loading parkings in new view")
-                // Get the buffered coordinates for loading parkings
-
-                val loadedCorners = getScreenCorners(mapView, useBuffer = true)
-                loadedBottomLeft = loadedCorners.first
-                loadedTopRight = loadedCorners.second
-
-                parkingViewModel.getParkingsInRect(loadedBottomLeft, loadedTopRight)
-
-                // Create PointAnnotationOptions for each parking
-                pointAnnotationOptions =
-                    listOfParkings.value.map { parking ->
-                      PointAnnotationOptions()
-                          .withPoint(parking.location.center)
-                          .withIconImage(resizedBitmap)
-                    }
-
-                // Clear all annotations from the annotation manager to avoid duplicates
-                annotationManager.deleteAll()
-
-                // Add annotations to the annotation manager and display them on the map
-                pointAnnotationOptions.forEach { annotationManager.create(it) }
-              }
-            }
-            mapView.mapboxMap.addOnCameraChangeListener(cameraChangeListener)
-
             onDispose {
-              annotationManager.deleteAll()
-              mapView.mapboxMap.removeOnCameraChangeListener(cameraChangeListener)
+              pointAnnotationManager?.deleteAll()
+              cancelables.forEach(Cancelable::cancel)
+              cameraCancelable.cancel()
             }
           }
         }
@@ -238,7 +209,10 @@ fun MapScreen(
           Row(
               Modifier.padding(top = 16.dp).fillMaxWidth(),
               horizontalArrangement = Arrangement.Start) {
-                AddButton { navigationActions.navigateTo(Route.ADD_SPOTS) }
+                AddButton {
+                  mapViewModel.updateCameraPosition(mapViewportState.cameraState!!)
+                  navigationActions.navigateTo(Route.ADD_SPOTS)
+                }
               }
         }
   }
@@ -304,7 +278,7 @@ private fun getScreenCorners(mapView: MapView, useBuffer: Boolean = true): Pair<
  * Draw the rectangles on the map
  *
  * @param polygonAnnotationManager the polygon annotation manager
- * @param parkingList the list of parkings to draw
+ * @param locationList the list of locations to draw
  */
 fun drawRectangles(
     polygonAnnotationManager: PolygonAnnotationManager?,
@@ -326,5 +300,27 @@ fun drawRectangles(
               .withFillOpacity(0.7)
       polygonAnnotationManager?.create(polygonAnnotationOptions)
     }
+  }
+}
+/**
+ * Draw markers on the map.
+ *
+ * @param pointAnnotationManager the PointAnnotationManager to draw the markers on
+ * @param parkingList the list of parkings to draw
+ * @param bitmap the bitmap to use for the markers
+ */
+private fun drawMarkers(
+    pointAnnotationManager: PointAnnotationManager?,
+    parkingList: List<Parking>,
+    bitmap: Bitmap,
+) {
+  pointAnnotationManager?.deleteAll()
+  parkingList.forEach {
+    pointAnnotationManager?.create(
+        PointAnnotationOptions()
+            .withPoint(it.location.center)
+            .withIconImage(bitmap)
+            .withIconAnchor(IconAnchor.BOTTOM)
+            .withIconOffset(listOf(0.0, bitmap.height / 12.0)))
   }
 }
