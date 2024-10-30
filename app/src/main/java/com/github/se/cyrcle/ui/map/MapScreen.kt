@@ -34,7 +34,9 @@ import com.github.se.cyrcle.ui.map.overlay.AddButton
 import com.github.se.cyrcle.ui.map.overlay.ZoomControls
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
+import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
+import com.google.gson.Gson
 import com.mapbox.common.Cancelable
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.Polygon
@@ -78,15 +80,19 @@ fun MapScreen(
   val listOfParkings by parkingViewModel.rectParkings.collectAsState()
   val mapViewportState = MapConfig.createMapViewPortStateFromViewModel(mapViewModel)
   var removeViewAnnotation = remember { true }
-  var cancelables = remember<List<Cancelable>> { mutableListOf() }
+  var cancelables = remember<Cancelable> { Cancelable({}) }
   var pointAnnotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
 
   val bitmap = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.red_marker)
   val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 100, 150, false)
   // Draw markers on the map when the list of parkings changes
-  LaunchedEffect(listOfParkings) {
+  LaunchedEffect(listOfParkings, pointAnnotationManager) {
     drawMarkers(pointAnnotationManager, listOfParkings, resizedBitmap)
   }
+
+  // initialize the Gson object that will deserialize and serialize the parking to bind it
+  // to the marker
+  val gson = Gson()
 
   Scaffold(bottomBar = { BottomNavigationBar(navigationActions, selectedItem = Route.MAP) }) {
       padding ->
@@ -121,6 +127,10 @@ fun MapScreen(
                   // recenter the camera on the marker if it is not the case already
                   mapViewportState.setCameraOptions { center(it.point) }
 
+                  // get the data from the PointAnnotation and deserialize it
+                  val parkingData = it.getData()?.asJsonObject
+                  val parkingDeserialized = gson.fromJson(parkingData, Parking::class.java)
+
                   val pointAnnotation = it
 
                   val listener = MapIdleCallback {
@@ -142,14 +152,19 @@ fun MapScreen(
                                   }
                                 })
 
-                    // Set the text of the view annotation
+                    // Set the text and the button of the view annotation
                     ItemCalloutViewBinding.bind(viewAnnotation).apply {
-                      textNativeView.text = "Custom text here"
+                      textNativeView.text =
+                          "Capacity is ${parkingDeserialized.capacity.description}"
+                      selectButton.setOnClickListener {
+                        parkingViewModel.selectParking(parkingDeserialized)
+                        navigationActions.navigateTo(Screen.CARD)
+                      }
                     }
                     removeViewAnnotation = true
                   }
-                  cancelables.forEach(Cancelable::cancel)
-                  cancelables = mutableListOf(mapView.mapboxMap.subscribeMapIdle(listener))
+                  cancelables.cancel()
+                  cancelables = mapView.mapboxMap.subscribeMapIdle(listener)
                   true
                 })
 
@@ -166,7 +181,7 @@ fun MapScreen(
                   // Remove the view annotation if the user moves the map
                   if (removeViewAnnotation) {
                     viewAnnotationManager.removeAllViewAnnotations()
-                    cancelables.forEach(Cancelable::cancel)
+                    cancelables.cancel()
                   }
 
                   // Get the top right and bottom left coordinates of the current view only when
@@ -191,7 +206,7 @@ fun MapScreen(
 
             onDispose {
               pointAnnotationManager?.deleteAll()
-              cancelables.forEach(Cancelable::cancel)
+              cancelables.cancel()
               cameraCancelable.cancel()
             }
           }
@@ -327,6 +342,7 @@ private fun drawMarkers(
             .withPoint(it.location.center)
             .withIconImage(bitmap)
             .withIconAnchor(IconAnchor.BOTTOM)
-            .withIconOffset(listOf(0.0, bitmap.height / 12.0)))
+            .withIconOffset(listOf(0.0, bitmap.height / 12.0))
+            .withData(Gson().toJsonTree(it)))
   }
 }
