@@ -86,7 +86,7 @@ fun MapScreen(
   val bitmap = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.red_marker)
   val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 100, 150, false)
   // Draw markers on the map when the list of parkings changes
-  LaunchedEffect(listOfParkings) {
+  LaunchedEffect(listOfParkings, pointAnnotationManager) {
     drawMarkers(pointAnnotationManager, listOfParkings, resizedBitmap)
   }
 
