@@ -80,7 +80,7 @@ fun MapScreen(
   val listOfParkings by parkingViewModel.rectParkings.collectAsState()
   val mapViewportState = MapConfig.createMapViewPortStateFromViewModel(mapViewModel)
   var removeViewAnnotation = remember { true }
-  var cancelables = remember<List<Cancelable>> { mutableListOf() }
+  var cancelables = remember<Cancelable> { Cancelable({}) }
   var pointAnnotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
 
   val bitmap = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.red_marker)
@@ -90,6 +90,10 @@ fun MapScreen(
     drawMarkers(pointAnnotationManager, listOfParkings, resizedBitmap)
   }
 
+  // initialize the Gson object that will deserialize and serialize the parking to bind it
+  // to the marker
+  val gson = Gson()
+
   Scaffold(bottomBar = { BottomNavigationBar(navigationActions, selectedItem = Route.MAP) }) {
       padding ->
     MapboxMap(
@@ -98,10 +102,6 @@ fun MapScreen(
         style = { MapConfig.DefaultStyle() }) {
           DisposableMapEffect { mapView ->
             val viewAnnotationManager = mapView.viewAnnotationManager
-
-            // initialize the Gson object that will deserialize and serialize the parking to bind it
-            // to the marker
-            val gson = Gson()
 
             // Lock rotations of the map
             mapView.gestures.getGesturesManager().rotateGestureDetector.isEnabled = false
@@ -129,7 +129,7 @@ fun MapScreen(
 
                   // get the data from the PointAnnotation and deserialize it
                   val parkingData = it.getData()?.asJsonObject
-                  val parking_deserialized = gson.fromJson(parkingData, Parking::class.java)
+                  val parkingDeserialized = gson.fromJson(parkingData, Parking::class.java)
 
                   val pointAnnotation = it
 
@@ -155,16 +155,16 @@ fun MapScreen(
                     // Set the text and the button of the view annotation
                     ItemCalloutViewBinding.bind(viewAnnotation).apply {
                       textNativeView.text =
-                          "Capacity is ${parking_deserialized.capacity.description}"
+                          "Capacity is ${parkingDeserialized.capacity.description}"
                       selectButton.setOnClickListener {
-                        parkingViewModel.selectParking(parking_deserialized)
+                        parkingViewModel.selectParking(parkingDeserialized)
                         navigationActions.navigateTo(Screen.CARD)
                       }
                     }
                     removeViewAnnotation = true
                   }
-                  cancelables.forEach(Cancelable::cancel)
-                  cancelables = mutableListOf(mapView.mapboxMap.subscribeMapIdle(listener))
+                  cancelables.cancel()
+                  cancelables = mapView.mapboxMap.subscribeMapIdle(listener)
                   true
                 })
 
@@ -181,7 +181,7 @@ fun MapScreen(
                   // Remove the view annotation if the user moves the map
                   if (removeViewAnnotation) {
                     viewAnnotationManager.removeAllViewAnnotations()
-                    cancelables.forEach(Cancelable::cancel)
+                    cancelables.cancel()
                   }
 
                   // Get the top right and bottom left coordinates of the current view only when
@@ -206,7 +206,7 @@ fun MapScreen(
 
             onDispose {
               pointAnnotationManager?.deleteAll()
-              cancelables.forEach(Cancelable::cancel)
+              cancelables.cancel()
               cameraCancelable.cancel()
             }
           }
