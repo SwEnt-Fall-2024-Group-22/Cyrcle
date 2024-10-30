@@ -34,33 +34,33 @@ data class Parking(
 )
 
 interface ParkingAttribute {
-    val description: String
+  val description: String
 }
 /** Enum class representing the capacity of a parking spot. */
 enum class ParkingCapacity(override val description: String) : ParkingAttribute {
-    XSMALL("Less than 10 spots"),
-    SMALL("10-25 spots"),
-    MEDIUM("26-50 spots"),
-    LARGE("51-100 spots"),
-    XLARGE("More than 100 spots")
+  XSMALL("Less than 10 spots"),
+  SMALL("10-25 spots"),
+  MEDIUM("26-50 spots"),
+  LARGE("51-100 spots"),
+  XLARGE("More than 100 spots")
 }
 
 /** Enum class representing the type of rack in a parking spot. */
 enum class ParkingRackType(override val description: String) : ParkingAttribute {
-    TWO_TIER("Two-tier rack"),
-    U_RACK("U-Rack"),
-    VERTICAL("Vertical rack"),
-    WAVE("Wave rack"),
-    WALL_BUTTERFLY("Wall butterfly rack"),
-    POST_AND_RING("Post and ring rack"),
-    GRID("Grid rack"),
-    OTHER("Other type of rack")
+  TWO_TIER("Two-tier rack"),
+  U_RACK("U-Rack"),
+  VERTICAL("Vertical rack"),
+  WAVE("Wave rack"),
+  WALL_BUTTERFLY("Wall butterfly rack"),
+  POST_AND_RING("Post and ring rack"),
+  GRID("Grid rack"),
+  OTHER("Other type of rack")
 }
 
 enum class ParkingProtection(override val description: String) : ParkingAttribute {
-    INDOOR("Indoor"),
-    COVERED("Covered"),
-    NONE("Exposed")
+  INDOOR("Indoor"),
+  COVERED("Covered"),
+  NONE("Exposed")
 }
 
 data class Location(
@@ -70,23 +70,23 @@ data class Location(
     val bottomLeft: Point?,
     val bottomRight: Point?,
 ) {
-    constructor(
-        topLeft: Point,
-        topRight: Point,
-        bottomRight: Point,
-        bottomLeft: Point
-    ) : this(
-        Point.fromLngLat(
-            (topLeft.longitude() + bottomRight.longitude()) / 2,
-            (topLeft.latitude() + bottomRight.latitude()) / 2),
-        topLeft,
-        topRight,
-        bottomLeft,
-        bottomRight)
+  constructor(
+      topLeft: Point,
+      topRight: Point,
+      bottomRight: Point,
+      bottomLeft: Point
+  ) : this(
+      Point.fromLngLat(
+          (topLeft.longitude() + bottomRight.longitude()) / 2,
+          (topLeft.latitude() + bottomRight.latitude()) / 2),
+      topLeft,
+      topRight,
+      bottomLeft,
+      bottomRight)
 
-    constructor(center: Point) : this(center, null, null, null, null)
+  constructor(center: Point) : this(center, null, null, null, null)
 
-    constructor(
-        listPoints: List<Point>
-    ) : this(listPoints[0], listPoints[1], listPoints[2], listPoints[3])
+  constructor(
+      listPoints: List<Point>
+  ) : this(listPoints[0], listPoints[1], listPoints[2], listPoints[3])
 }

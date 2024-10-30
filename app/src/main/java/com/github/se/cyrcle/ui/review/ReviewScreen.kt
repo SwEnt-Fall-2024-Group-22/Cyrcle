@@ -47,43 +47,44 @@ fun ReviewScreen(
     parkingViewModel: ParkingViewModel,
     reviewViewModel: ReviewViewModel
 ) {
-    var sliderValue by remember { mutableStateOf(0f) }
-    var textValue by remember { mutableStateOf("") }
+  var sliderValue by remember { mutableStateOf(0f) }
+  var textValue by remember { mutableStateOf("") }
 
-    val context = LocalContext.current // Get the current context
+  val context = LocalContext.current // Get the current context
 
-    var selectedParking = parkingViewModel.selectedParking.collectAsState().value
-        ?: return Text(text = "No parking selected. Should not happen")
+  var selectedParking =
+      parkingViewModel.selectedParking.collectAsState().value
+          ?: return Text(text = "No parking selected. Should not happen")
 
-    Scaffold(topBar = { TopAppBar(navigationActions = navigationActions, "Add Your Review") }) {
-            paddingValues ->
-        Column(
-            modifier = Modifier.fillMaxSize().padding(paddingValues).padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center) {
-            // Stars reflecting the slider value (supports half stars)
-            Row(
-                modifier = Modifier.padding(8.dp).testTag("StarsRow"),
-                verticalAlignment = Alignment.CenterVertically) {
+  Scaffold(topBar = { TopAppBar(navigationActions = navigationActions, "Add Your Review") }) {
+      paddingValues ->
+    Column(
+        modifier = Modifier.fillMaxSize().padding(paddingValues).padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center) {
+          // Stars reflecting the slider value (supports half stars)
+          Row(
+              modifier = Modifier.padding(8.dp).testTag("StarsRow"),
+              verticalAlignment = Alignment.CenterVertically) {
                 for (i in 1..5) {
-                    val starIcon =
-                        when {
-                            i <= sliderValue -> Icons.Filled.Star // Full star
-                            i - 0.5f == sliderValue -> Icons.Filled.StarHalf // Half star
-                            else -> Icons.Filled.StarBorder // Empty star
-                        }
-                    Icon(
-                        imageVector = starIcon,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(40.dp).testTag("Star$i"))
+                  val starIcon =
+                      when {
+                        i <= sliderValue -> Icons.Filled.Star // Full star
+                        i - 0.5f == sliderValue -> Icons.Filled.StarHalf // Half star
+                        else -> Icons.Filled.StarBorder // Empty star
+                      }
+                  Icon(
+                      imageVector = starIcon,
+                      contentDescription = null,
+                      tint = MaterialTheme.colorScheme.primary,
+                      modifier = Modifier.size(40.dp).testTag("Star$i"))
                 }
-            }
+              }
 
-            // Display the experience text based on the slider value
-            Text(
-                text =
-                when (sliderValue) {
+          // Display the experience text based on the slider value
+          Text(
+              text =
+                  when (sliderValue) {
                     in 0f..1f -> "Terrible experience!"
                     in 1f..2f -> "Bad experience :("
                     in 2f..3f -> "Poor experience :/"
@@ -91,48 +92,54 @@ fun ReviewScreen(
                     in 3.5f..4f -> "Good experience!"
                     in 4.5f..5f -> "Great experience!"
                     else -> ""
-                },
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(top = 8.dp).testTag("ExperienceText"))
+                  },
+              style = MaterialTheme.typography.bodyLarge,
+              modifier = Modifier.padding(top = 8.dp).testTag("ExperienceText"))
 
-            // Slider with step granularity of 0.5
-            Text(text = "Rating: $sliderValue", style = MaterialTheme.typography.bodyLarge)
-            Slider(
-                value = sliderValue,
-                onValueChange = { newValue -> sliderValue = newValue },
-                valueRange = 0f..5f,
-                steps = 9, // Steps for granularity of 0.5 between 0 and 5
-                modifier = Modifier.padding(16.dp).testTag("Slider"))
+          // Slider with step granularity of 0.5
+          Text(text = "Rating: $sliderValue", style = MaterialTheme.typography.bodyLarge)
+          Slider(
+              value = sliderValue,
+              onValueChange = { newValue -> sliderValue = newValue },
+              valueRange = 0f..5f,
+              steps = 9, // Steps for granularity of 0.5 between 0 and 5
+              modifier = Modifier.padding(16.dp).testTag("Slider"))
 
-            Spacer(modifier = Modifier.height(16.dp))
+          Spacer(modifier = Modifier.height(16.dp))
 
-            // OutlinedTextField for text input
-            OutlinedTextField(
-                value = textValue,
-                onValueChange = { newText -> textValue = newText },
-                label = { Text("Write your review") },
-                modifier = Modifier.fillMaxWidth().testTag("ReviewInput"))
+          // OutlinedTextField for text input
+          OutlinedTextField(
+              value = textValue,
+              onValueChange = { newText -> textValue = newText },
+              label = { Text("Write your review") },
+              modifier = Modifier.fillMaxWidth().testTag("ReviewInput"))
 
-            Spacer(modifier = Modifier.height(16.dp))
+          Spacer(modifier = Modifier.height(16.dp))
 
-            // Add Review Button
-            Button(
-                onClick = {
-                    Toast.makeText(context, "Review Added!", Toast.LENGTH_SHORT).show()
-                    reviewViewModel.addReview(Review(owner = "default", text=textValue, parking = selectedParking.uid, rating = sliderValue.toDouble(), uid = reviewViewModel.getNewUid().toString()))
-                    parkingViewModel.updateReviewScore(sliderValue.toDouble(),selectedParking)
-                    navigationActions.goBack()
-                },
-                modifier =
-                Modifier.fillMaxWidth()
-                    .height(60.dp)
-                    .testTag("AddReviewButton"), // Test tag for Add Review button
-                colors =
-                ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.secondary)) {
+          // Add Review Button
+          Button(
+              onClick = {
+                Toast.makeText(context, "Review Added!", Toast.LENGTH_SHORT).show()
+                reviewViewModel.addReview(
+                    Review(
+                        owner = "default",
+                        text = textValue,
+                        parking = selectedParking.uid,
+                        rating = sliderValue.toDouble(),
+                        uid = reviewViewModel.getNewUid().toString()))
+                parkingViewModel.updateReviewScore(sliderValue.toDouble(), selectedParking)
+                navigationActions.goBack()
+              },
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .height(60.dp)
+                      .testTag("AddReviewButton"), // Test tag for Add Review button
+              colors =
+                  ButtonDefaults.buttonColors(
+                      containerColor = MaterialTheme.colorScheme.primary,
+                      contentColor = MaterialTheme.colorScheme.secondary)) {
                 Text(text = "Save my Review")
-            }
+              }
         }
-    }
+  }
 }
