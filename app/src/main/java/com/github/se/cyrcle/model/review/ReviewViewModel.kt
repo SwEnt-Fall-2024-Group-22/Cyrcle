@@ -23,19 +23,23 @@ class ReviewViewModel(val reviewRepository: ReviewRepository) : ViewModel() {
     reviewRepository.addReview(review, {}, { Log.e("ReviewViewModel", "Error adding review", it) })
   }
 
+  fun getNewUid() : String {
+    return reviewRepository.getNewUid()
+  }
+
   fun updateReview(review: Review) {
     reviewRepository.updateReview(
-        review, {}, { Log.e("ReviewViewModel", "Error adding review", it) })
+      review, {}, { Log.e("ReviewViewModel", "Error adding review", it) })
   }
 
   // create factory (imported from bootcamp)
   companion object {
     val Factory: ViewModelProvider.Factory =
-        object : ViewModelProvider.Factory {
-          @Suppress("UNCHECKED_CAST")
-          override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ReviewViewModel(ReviewRepositoryFirestore(FirebaseFirestore.getInstance())) as T
-          }
+      object : ViewModelProvider.Factory {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+          return ReviewViewModel(ReviewRepositoryFirestore(FirebaseFirestore.getInstance())) as T
         }
+      }
   }
 }
