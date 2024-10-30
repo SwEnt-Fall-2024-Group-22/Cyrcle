@@ -48,7 +48,7 @@ fun CyrcleNavHost(
         startDestination = Screen.MAP,
         route = Route.MAP,
     ) {
-      composable(Screen.MAP) { MapScreen(navigationActions, parkingViewModel) }
+      composable(Screen.MAP) { MapScreen(navigationActions, parkingViewModel, mapViewModel) }
     }
     navigation(startDestination = Screen.LOCATION_PICKER, route = Route.ADD_SPOTS) {
       composable(Screen.LOCATION_PICKER) { LocationPicker(navigationActions, mapViewModel) }
