@@ -34,7 +34,9 @@ import com.github.se.cyrcle.ui.map.overlay.AddButton
 import com.github.se.cyrcle.ui.map.overlay.ZoomControls
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
+import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
+import com.google.gson.Gson
 import com.mapbox.common.Cancelable
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.Polygon
@@ -97,6 +99,10 @@ fun MapScreen(
           DisposableMapEffect { mapView ->
             val viewAnnotationManager = mapView.viewAnnotationManager
 
+            // initialize the Gson object that will deserialize and serialize the parking to bind it
+            // to the marker
+            val gson = Gson()
+
             // Lock rotations of the map
             mapView.gestures.getGesturesManager().rotateGestureDetector.isEnabled = false
 
@@ -121,6 +127,10 @@ fun MapScreen(
                   // recenter the camera on the marker if it is not the case already
                   mapViewportState.setCameraOptions { center(it.point) }
 
+                  // get the data from the PointAnnotation and deserialize it
+                  val parkingData = it.getData()?.asJsonObject
+                  val parking_deserialized = gson.fromJson(parkingData, Parking::class.java)
+
                   val pointAnnotation = it
 
                   val listener = MapIdleCallback {
@@ -142,9 +152,14 @@ fun MapScreen(
                                   }
                                 })
 
-                    // Set the text of the view annotation
+                    // Set the text and the button of the view annotation
                     ItemCalloutViewBinding.bind(viewAnnotation).apply {
-                      textNativeView.text = "Custom text here"
+                      textNativeView.text =
+                          "Capacity is ${parking_deserialized.capacity.description}"
+                      selectButton.setOnClickListener {
+                        parkingViewModel.selectParking(parking_deserialized)
+                        navigationActions.navigateTo(Screen.CARD)
+                      }
                     }
                     removeViewAnnotation = true
                   }
@@ -327,6 +342,7 @@ private fun drawMarkers(
             .withPoint(it.location.center)
             .withIconImage(bitmap)
             .withIconAnchor(IconAnchor.BOTTOM)
-            .withIconOffset(listOf(0.0, bitmap.height / 12.0)))
+            .withIconOffset(listOf(0.0, bitmap.height / 12.0))
+            .withData(Gson().toJsonTree(it)))
   }
 }
