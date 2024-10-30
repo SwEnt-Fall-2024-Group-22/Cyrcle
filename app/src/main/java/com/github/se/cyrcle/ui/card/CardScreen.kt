@@ -132,7 +132,14 @@ fun CardScreen(
                                       text = if (selectedParking.hasSecurity) "Yes" else "No",
                                       color = Color.Gray)
                                 }
+                              Column(modifier = Modifier.weight(1f).testTag("AverageRatingColumn")) {
+                                  Text(text = "Current Rating", fontWeight = FontWeight.Bold)
+                                  Text(
+                                      text = selectedParking.avgScore.toString(),
+                                      color = Color.Gray)
                               }
+                              }
+
                         }
 
                     // Column for action buttons like "Show in Map", "Add A Review", and "Report"
