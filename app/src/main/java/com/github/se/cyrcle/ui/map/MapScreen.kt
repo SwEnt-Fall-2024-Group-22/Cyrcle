@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.map
 
-import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
@@ -114,7 +113,7 @@ fun MapScreen(
                   viewAnnotationManager.removeAllViewAnnotations()
 
                   // recenter the camera on the marker if it is not the case already
-                    mapViewportState.setCameraOptions { center(it.point) }
+                  mapViewportState.setCameraOptions { center(it.point) }
 
                   val pointAnnotation = it
 
