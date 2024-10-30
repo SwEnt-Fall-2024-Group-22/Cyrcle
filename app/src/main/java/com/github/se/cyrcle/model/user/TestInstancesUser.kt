@@ -1,6 +1,6 @@
 package com.github.se.cyrcle.model.user
 
-object UserTestInstances {
+object TestInstancesUser {
 
   val user1 =
       User(

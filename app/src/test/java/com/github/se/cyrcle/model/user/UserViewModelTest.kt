@@ -24,17 +24,17 @@ class UserViewModelTest {
 
   @Test
   fun addUserTest() {
-    userViewModel.addUser(UserTestInstances.user1)
+    userViewModel.addUser(TestInstancesUser.user1)
     // Check if the user was added to the repository
-    verify(userRepositoryFirestore).addUser(eq(UserTestInstances.user1), any(), any())
+    verify(userRepositoryFirestore).addUser(eq(TestInstancesUser.user1), any(), any())
   }
 
   @Test
   fun setCurrentUserTest() {
-    userViewModel.setCurrentUser(UserTestInstances.user1)
+    userViewModel.setCurrentUser(TestInstancesUser.user1)
 
     // Check if the user returned is the correct one
-    assert(userViewModel.currentUser.value == UserTestInstances.user1)
+    assert(userViewModel.currentUser.value == TestInstancesUser.user1)
   }
 
   @Test
@@ -47,16 +47,16 @@ class UserViewModelTest {
 
   @Test
   fun updateUserTest() {
-    userViewModel.updateUser(UserTestInstances.user1)
+    userViewModel.updateUser(TestInstancesUser.user1)
 
     // Check if the user was updated in the repository
-    verify(userRepositoryFirestore).updateUser(eq(UserTestInstances.user1), any(), any())
+    verify(userRepositoryFirestore).updateUser(eq(TestInstancesUser.user1), any(), any())
   }
 
   @Test
   fun addFavoriteParkingToSelectedUserTest() {
     // Set the current user and add a favorite parking to the user
-    val user = UserTestInstances.user1
+    val user = TestInstancesUser.user1
     userViewModel.setCurrentUser(user)
     userViewModel.addFavoriteParkingToSelectedUser("Test_spot_3")
 
@@ -73,7 +73,7 @@ class UserViewModelTest {
   @Test
   fun removeFavoriteParkingFromSelectedUserTest() {
     // Set the current user and remove a favorite parking from the user
-    val user = UserTestInstances.user1
+    val user = TestInstancesUser.user1
     userViewModel.setCurrentUser(user)
     userViewModel.removeFavoriteParkingFromSelectedUser("Test_spot_1")
 
