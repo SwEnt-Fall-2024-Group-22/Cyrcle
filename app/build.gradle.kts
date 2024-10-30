@@ -16,7 +16,13 @@ android {
     namespace = "com.github.se.cyrcle"
     compileSdk = 34
 
+    buildFeatures {
+        viewBinding = true
+    }
+
+
     initLocalProps()
+
 
     defaultConfig {
         applicationId = "com.github.se.cyrcle"

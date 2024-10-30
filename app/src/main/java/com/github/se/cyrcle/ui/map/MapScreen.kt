@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.databinding.ItemCalloutViewBinding
 import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.ui.map.overlay.AddButton
@@ -28,11 +29,14 @@ import com.github.se.cyrcle.ui.map.overlay.ZoomControls
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
+import com.mapbox.common.Cancelable
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.Polygon
 import com.mapbox.maps.CameraBoundsOptions
+import com.mapbox.maps.MapIdleCallback
 import com.mapbox.maps.MapView
 import com.mapbox.maps.ScreenCoordinate
+import com.mapbox.maps.ViewAnnotationAnchor
 import com.mapbox.maps.extension.compose.DisposableMapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
@@ -41,16 +45,22 @@ import com.mapbox.maps.plugin.annotation.AnnotationConfig
 import com.mapbox.maps.plugin.annotation.AnnotationSourceOptions
 import com.mapbox.maps.plugin.annotation.ClusterOptions
 import com.mapbox.maps.plugin.annotation.annotations
+import com.mapbox.maps.plugin.annotation.generated.OnPointAnnotationClickListener
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.maps.plugin.delegates.listeners.OnCameraChangeListener
 import com.mapbox.maps.plugin.gestures.gestures
+import com.mapbox.maps.viewannotation.annotatedLayerFeature
+import com.mapbox.maps.viewannotation.annotationAnchor
+import com.mapbox.maps.viewannotation.geometry
+import com.mapbox.maps.viewannotation.viewAnnotationOptions
 
 const val defaultZoom = 16.0
 const val maxZoom = 18.0
 const val minZoom = 8.0
+const val LAYER_ID = "0128"
 
 @Composable
 fun MapScreen(
@@ -70,6 +80,10 @@ fun MapScreen(
     }
   }
 
+  var removeViewAnnotation = remember { true }
+
+  var cancelables = remember<List<Cancelable>> { mutableListOf() }
+
   val context = LocalContext.current
 
   Scaffold(bottomBar = { BottomNavigationBar(navigationActions, selectedItem = Route.MAP) }) {
@@ -79,6 +93,7 @@ fun MapScreen(
         mapViewportState = mapViewportState,
         style = { MapStyle("mapbox://styles/seanprz/cm27wh9ff00jl01r21jz3hcb1") }) {
           DisposableMapEffect { mapView ->
+            val viewAnnotationManager = mapView.viewAnnotationManager
 
             // Lock rotations of the map
             mapView.gestures.getGesturesManager().rotateGestureDetector.isEnabled = false
@@ -93,7 +108,48 @@ fun MapScreen(
                 mapView.annotations.createPointAnnotationManager(
                     AnnotationConfig(
                         annotationSourceOptions =
-                            AnnotationSourceOptions(clusterOptions = ClusterOptions())))
+                            AnnotationSourceOptions(clusterOptions = ClusterOptions()),
+                        layerId = LAYER_ID))
+
+            annotationManager.addClickListener(
+                OnPointAnnotationClickListener {
+                  removeViewAnnotation = false
+                  viewAnnotationManager.removeAllViewAnnotations()
+
+                  // recenter the camera on the marker if it is not the case already
+                  mapViewportState.setCameraOptions { center(it.point) }
+
+                  val pointAnnotation = it
+
+                  val listener = MapIdleCallback {
+
+                    // Add the new view annotation
+                    val viewAnnotation =
+                        viewAnnotationManager.addViewAnnotation(
+                            resId = R.layout.item_callout_view,
+                            options =
+                                viewAnnotationOptions {
+                                  annotatedLayerFeature(LAYER_ID) {
+                                    featureId(pointAnnotation.id)
+                                    geometry(pointAnnotation.geometry)
+                                    annotationAnchor {
+                                      anchor(ViewAnnotationAnchor.BOTTOM)
+                                      offsetY(
+                                          (pointAnnotation.iconImageBitmap?.height!!.toDouble()))
+                                    }
+                                  }
+                                })
+
+                    // Set the text of the view annotation
+                    ItemCalloutViewBinding.bind(viewAnnotation).apply {
+                      textNativeView.text = "Custom text here"
+                    }
+                    removeViewAnnotation = true
+                  }
+                  cancelables.forEach(Cancelable::cancel)
+                  cancelables = mutableListOf(mapView.mapboxMap.subscribeMapIdle(listener))
+                  true
+                })
 
             var (loadedBottomLeft, loadedTopRight) = getScreenCorners(mapView, useBuffer = true)
 
@@ -117,6 +173,13 @@ fun MapScreen(
 
             // Add a camera change listener to detect zoom changes
             val cameraChangeListener = OnCameraChangeListener {
+
+              // Remove the view annotation if the user moves the map
+              if (removeViewAnnotation) {
+                viewAnnotationManager.removeAllViewAnnotations()
+                cancelables.forEach(Cancelable::cancel)
+              }
+
               state.value = mapView.mapboxMap.cameraState.zoom
 
               // Get the top right and bottom left coordinates of the current view only when
