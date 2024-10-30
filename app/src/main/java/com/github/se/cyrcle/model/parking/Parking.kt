@@ -15,6 +15,8 @@ import com.mapbox.geojson.Point
  * @property protection Protection of the parking spot from the weather.
  * @property price Price of the parking spot. The price is in the currency of the country where the
  *   parking spot is located. 0 if the parking spot is free.
+ * @property nbReviews Number of Reviews for this Parking spot as of now.
+ * @property avgScore Average Review Score for this Parking spot as of now.
  */
 data class Parking(
     val uid: String,
@@ -26,8 +28,9 @@ data class Parking(
     val rackType: ParkingRackType,
     val protection: ParkingProtection,
     val price: Double,
-    val hasSecurity: Boolean
-    // TODO: Add list of reviews when implemented
+    val hasSecurity: Boolean,
+    var nbReviews: Int,
+    var avgScore: Double
 )
 
 interface ParkingAttribute {

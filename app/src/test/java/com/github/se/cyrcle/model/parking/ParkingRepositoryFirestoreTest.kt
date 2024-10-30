@@ -44,7 +44,9 @@ class ParkingRepositoryFirestoreTest {
           rackType = ParkingRackType.U_RACK,
           protection = ParkingProtection.COVERED,
           price = 0.0,
-          hasSecurity = true)
+          hasSecurity = true,
+          avgScore = 3.4,
+          nbReviews = 0)
 
   @Before
   fun setUp() {

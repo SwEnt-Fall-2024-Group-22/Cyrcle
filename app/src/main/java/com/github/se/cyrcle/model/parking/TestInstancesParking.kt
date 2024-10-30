@@ -18,7 +18,9 @@ object TestInstancesParking {
           ParkingRackType.TWO_TIER,
           ParkingProtection.COVERED,
           0.0,
-          true)
+          true,
+          0,
+          0.0)
   val parking2 =
       Parking(
           "Test_spot_2",
@@ -32,7 +34,9 @@ object TestInstancesParking {
           ParkingRackType.TWO_TIER,
           ParkingProtection.COVERED,
           0.0,
-          true)
+          true,
+          0,
+          0.0)
   val parking3 =
       Parking(
           "Test_spot_3",
@@ -45,5 +49,7 @@ object TestInstancesParking {
           ParkingRackType.TWO_TIER,
           ParkingProtection.COVERED,
           0.0,
-          true)
+          true,
+          0,
+          0.0)
 }
