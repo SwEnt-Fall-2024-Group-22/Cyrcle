@@ -13,8 +13,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -69,7 +71,8 @@ const val LAYER_ID = "0128"
 fun MapScreen(
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel,
-    mapViewModel: MapViewModel
+    mapViewModel: MapViewModel,
+    zoomState: MutableState<Double> = remember { mutableDoubleStateOf(defaultZoom) }
 ) {
 
   val listOfParkings by parkingViewModel.rectParkings.collectAsState()
@@ -157,6 +160,9 @@ fun MapScreen(
             // Add a camera change listener to detect zoom changes
             val cameraCancelable =
                 mapView.mapboxMap.subscribeCameraChanged {
+                  // store the zoom level
+                  zoomState.value = mapView.mapboxMap.cameraState.zoom
+
                   // Remove the view annotation if the user moves the map
                   if (removeViewAnnotation) {
                     viewAnnotationManager.removeAllViewAnnotations()
