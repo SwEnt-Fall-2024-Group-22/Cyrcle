@@ -23,6 +23,10 @@ class ReviewViewModel(val reviewRepository: ReviewRepository) : ViewModel() {
     reviewRepository.addReview(review, {}, { Log.e("ReviewViewModel", "Error adding review", it) })
   }
 
+  fun getNewUid() : String {
+    return reviewRepository.getNewUid()
+  }
+
   fun updateReview(review: Review) {
     reviewRepository.updateReview(
         review, {}, { Log.e("ReviewViewModel", "Error adding review", it) })
