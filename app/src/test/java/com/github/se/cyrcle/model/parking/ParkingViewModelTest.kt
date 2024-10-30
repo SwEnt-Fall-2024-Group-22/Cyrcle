@@ -94,4 +94,11 @@ class ParkingViewModelTest {
     assert(parkingsReturned.size == 1)
     assert(parkingsReturned[0] == TestInstancesParking.parking3)
   }
+
+  @Test
+  fun updateReviewScoreTest() {
+    val parking = TestInstancesParking.parking2
+    parkingViewModel.updateReviewScore(5.0, parking)
+    assert(parking.avgScore == 5.0)
+  }
 }
