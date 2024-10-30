@@ -45,8 +45,7 @@ class ParkingRepositoryFirestoreTest {
           protection = ParkingProtection.COVERED,
           price = 0.0,
           hasSecurity = true,
-          avgScore = 3.4,
-          nbReviews = 0)
+          avgScore = 3.4)
 
   @Before
   fun setUp() {

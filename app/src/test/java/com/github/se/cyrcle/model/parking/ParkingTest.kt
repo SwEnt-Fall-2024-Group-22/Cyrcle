@@ -23,9 +23,7 @@ class ParkingsTest {
             rackType = ParkingRackType.U_RACK,
             protection = ParkingProtection.COVERED,
             price = 0.0,
-            hasSecurity = true,
-            nbReviews = 0,
-            avgScore = 0.0)
+            hasSecurity = true)
 
     assertEquals("1", parking.uid)
     assertEquals("Parking", parking.optName)
@@ -52,9 +50,7 @@ class ParkingsTest {
             rackType = ParkingRackType.U_RACK,
             protection = ParkingProtection.COVERED,
             price = 0.0,
-            hasSecurity = true,
-            nbReviews = 0,
-            avgScore = 0.0)
+            hasSecurity = true)
 
     val parking2 =
         Parking(
@@ -67,9 +63,7 @@ class ParkingsTest {
             rackType = ParkingRackType.U_RACK,
             protection = ParkingProtection.COVERED,
             price = 0.0,
-            hasSecurity = true,
-            nbReviews = 0,
-            avgScore = 0.0)
+            hasSecurity = true)
 
     assertEquals(parking1, parking2)
     assertEquals(parking1.hashCode(), parking2.hashCode())
