@@ -1,4 +1,4 @@
-package com.github.se.cyrcle.ui.add.location
+package com.github.se.cyrcle.ui.addParking.location
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -13,8 +13,8 @@ import androidx.compose.ui.platform.testTag
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.map.MapViewModel.LocationPickerState
 import com.github.se.cyrcle.model.parking.Location
-import com.github.se.cyrcle.ui.add.location.overlay.Crosshair
-import com.github.se.cyrcle.ui.add.location.overlay.RectangleSelection
+import com.github.se.cyrcle.ui.addParking.location.overlay.Crosshair
+import com.github.se.cyrcle.ui.addParking.location.overlay.RectangleSelection
 import com.github.se.cyrcle.ui.map.MapConfig
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
