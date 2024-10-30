@@ -28,8 +28,8 @@ import com.github.se.cyrcle.ui.navigation.TopLevelDestination
 @Composable
 fun BottomNavigationBar(
     navigationActions: NavigationActions,
-    onTabSelect: (TopLevelDestination) -> Unit = { navigationActions.navigateTo(it) },
     tabList: List<TopLevelDestination> = LIST_TOP_LEVEL_DESTINATION,
+    onTabSelect: (TopLevelDestination) -> Unit = { navigationActions.navigateTo(it) },
     selectedItem: String,
     testTag: String = "BottomNavigationBar"
 ) {
