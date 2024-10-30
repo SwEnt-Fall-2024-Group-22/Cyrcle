@@ -121,9 +121,7 @@ class ReviewRepositoryFirestoreTest {
     `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
 
     reviewRepositoryFirestore.updateReview(
-        review,
-        onSuccess = { },
-        onFailure = { fail("Expected success but got failure") })
+        review, onSuccess = {}, onFailure = { fail("Expected success but got failure") })
 
     verify(mockDocumentReference).set(any())
   }
