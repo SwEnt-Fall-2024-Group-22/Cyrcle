@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingAttribute
@@ -64,13 +65,13 @@ import com.mapbox.maps.plugin.gestures.generated.GesturesSettings
 fun AttributesPicker(
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel,
-    mapViewModel: MapViewModel
+    mapViewModel: MapViewModel,
+    addressViewModel: AddressViewModel
 ) {
   val location = mapViewModel.selectedLocation.collectAsState().value!!
-  val title = remember {
-    mutableStateOf(
-        "${("%.2f").format(location.center.longitude())}, ${("%.3f").format(location.center.latitude())}")
-  }
+  addressViewModel.search(location.center)
+  val suggestedAddress = addressViewModel.address.collectAsState().value
+  val title = remember { mutableStateOf(suggestedAddress.displayRelevantFields()) }
   val description = remember { mutableStateOf("") }
   val rackType = remember { mutableStateOf<ParkingAttribute>(ParkingRackType.TWO_TIER) }
   val capacity = remember { mutableStateOf<ParkingAttribute>(ParkingCapacity.XSMALL) }
