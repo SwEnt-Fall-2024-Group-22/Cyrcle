@@ -59,7 +59,6 @@ const val maxZoom = 18.0
 const val minZoom = 8.0
 const val LAYER_ID = "0128"
 
-@SuppressLint("ResourceType", "SetTextI18n")
 @Composable
 fun MapScreen(
     navigationActions: NavigationActions,
@@ -115,9 +114,7 @@ fun MapScreen(
                   viewAnnotationManager.removeAllViewAnnotations()
 
                   // recenter the camera on the marker if it is not the case already
-                  if (mapViewportState.cameraState?.center != it.point) {
                     mapViewportState.setCameraOptions { center(it.point) }
-                  }
 
                   val pointAnnotation = it
 
