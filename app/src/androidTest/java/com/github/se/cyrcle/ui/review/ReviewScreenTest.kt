@@ -41,9 +41,8 @@ class ReviewScreenTest {
   private val parkingViewModel = ParkingViewModel(mockImageRepository, mockParkingRepository)
   private val reviewViewModel = ReviewViewModel(mockReviewRepository)
 
-
   @Before
-  fun setUp(){
+  fun setUp() {
     parkingViewModel.selectParking(TestInstancesParking.parking1)
     reviewViewModel.addReview(TestInstancesReview.review1)
   }
@@ -108,7 +107,5 @@ class ReviewScreenTest {
 
     // Click Add Review button
     composeTestRule.onNodeWithTag("AddReviewButton").performClick()
-
-
   }
 }

@@ -52,9 +52,9 @@ fun ReviewScreen(
 
   val context = LocalContext.current // Get the current context
 
-    val selectedParking =
-        parkingViewModel.selectedParking.collectAsState().value
-            ?: return Text(text = "No parking selected. Should not happen")
+  val selectedParking =
+      parkingViewModel.selectedParking.collectAsState().value
+          ?: return Text(text = "No parking selected. Should not happen")
 
   Scaffold(topBar = { TopAppBar(navigationActions = navigationActions, "Add Your Review") }) {
       paddingValues ->
