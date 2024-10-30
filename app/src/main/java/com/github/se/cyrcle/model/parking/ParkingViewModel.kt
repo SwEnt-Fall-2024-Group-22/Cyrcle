@@ -121,6 +121,11 @@ class ParkingViewModel(
     return parkingRepository.getNewUid()
   }
 
+  fun updateReviewScore(newScore: Double, parking: Parking) {
+    parking.avgScore = ((parking.avgScore * parking.nbReviews) + newScore) / (parking.nbReviews + 1)
+    parking.nbReviews += 1
+  }
+
   // create factory (imported from bootcamp)
   companion object {
     val Factory: ViewModelProvider.Factory =

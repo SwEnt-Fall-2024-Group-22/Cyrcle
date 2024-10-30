@@ -94,4 +94,11 @@ class ParkingViewModelTest {
     assert(parkingsReturned.size == 1)
     assert(parkingsReturned[0] == TestInstancesParking.parking3)
   }
+
+  @Test
+  fun updateReviewScoreTest() {
+    val parkingCopy = TestInstancesParking.parking1.copy()
+    parkingViewModel.updateReviewScore(newScore = 5.0, parkingCopy)
+    assert(parkingCopy.avgScore == 5.0)
+  }
 }

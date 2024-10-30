@@ -89,7 +89,9 @@ fun AttributesPicker(
             location = location,
             images = listOf(),
             price = 0.0,
-            uid = parkingViewModel.getNewUid())
+            uid = parkingViewModel.getNewUid(),
+            nbReviews = 0,
+            avgScore = 0.0)
     parkingViewModel.addParking(parking)
     navigationActions.navigateTo(TopLevelDestinations.MAP)
   }
