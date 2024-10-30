@@ -6,20 +6,19 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.se.cyrcle.di.mocks.MockImageRepository
+import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.model.map.MapViewModel
-import com.github.se.cyrcle.model.parking.ImageRepositoryCloudStorage
-import com.github.se.cyrcle.model.parking.ParkingRepositoryFirestore
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
+
 
 @RunWith(AndroidJUnit4::class)
 class MapScreenTest {
@@ -33,8 +32,8 @@ class MapScreenTest {
   @Before
   fun setUp() {
     mockNavigation = mock(NavigationActions::class.java)
-    val imageRepository = ImageRepositoryCloudStorage(FirebaseAuth.getInstance())
-    val parkingRepository = ParkingRepositoryFirestore(FirebaseFirestore.getInstance())
+    val imageRepository = MockImageRepository()
+    val parkingRepository = MockParkingRepository()
     parkingViewModel = ParkingViewModel(imageRepository, parkingRepository)
     mapViewModel = MapViewModel()
     `when`(mockNavigation.currentRoute()).thenReturn(Screen.MAP)
