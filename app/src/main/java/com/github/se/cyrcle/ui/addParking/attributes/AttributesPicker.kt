@@ -18,6 +18,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -68,15 +69,17 @@ fun AttributesPicker(
     mapViewModel: MapViewModel,
     addressViewModel: AddressViewModel
 ) {
-  val location = mapViewModel.selectedLocation.collectAsState().value!!
-  addressViewModel.search(location.center)
-  val suggestedAddress = addressViewModel.address.collectAsState().value
-  val title = remember { mutableStateOf(suggestedAddress.displayRelevantFields()) }
+  val title = remember { mutableStateOf("") }
   val description = remember { mutableStateOf("") }
   val rackType = remember { mutableStateOf<ParkingAttribute>(ParkingRackType.TWO_TIER) }
   val capacity = remember { mutableStateOf<ParkingAttribute>(ParkingCapacity.XSMALL) }
   val protection = remember { mutableStateOf<ParkingAttribute>(ParkingProtection.INDOOR) }
   val hasSecurity = remember { mutableStateOf(false) }
+
+  val location = mapViewModel.selectedLocation.collectAsState().value!!
+  LaunchedEffect(location) { addressViewModel.search(location.center) }
+  val suggestedAddress = addressViewModel.address.collectAsState().value
+  LaunchedEffect(suggestedAddress) { title.value = suggestedAddress.displayRelevantFields() }
 
   fun onSubmit() {
     val parking =
