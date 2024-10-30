@@ -13,15 +13,19 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.model.parking.ImageRepository
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.model.review.ReviewRepository
 import com.github.se.cyrcle.model.review.ReviewViewModel
+import com.github.se.cyrcle.model.review.TestInstancesReview
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.doNothing
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class ReviewScreenTest {
@@ -36,6 +40,13 @@ class ReviewScreenTest {
   private val mockReviewRepository = mock(ReviewRepository::class.java)
   private val parkingViewModel = ParkingViewModel(mockImageRepository, mockParkingRepository)
   private val reviewViewModel = ReviewViewModel(mockReviewRepository)
+
+
+  @Before
+  fun setUp(){
+    parkingViewModel.selectParking(TestInstancesParking.parking1)
+    reviewViewModel.addReview(TestInstancesReview.review1)
+  }
 
   @Test
   fun reviewScreen_hasTopAppBar() {
@@ -90,6 +101,7 @@ class ReviewScreenTest {
     composeTestRule.setContent {
       ReviewScreen(mockNavigationActions, parkingViewModel, reviewViewModel)
     }
+    whenever(mockReviewRepository.getNewUid()).thenReturn("mockUid")
 
     // Enter a review
     composeTestRule.onNodeWithTag("ReviewInput").performTextInput("Great parking!")
@@ -97,7 +109,6 @@ class ReviewScreenTest {
     // Click Add Review button
     composeTestRule.onNodeWithTag("AddReviewButton").performClick()
 
-    // Assert that navigation was triggered
-    // This can be extended with proper validation using Mockito
+
   }
 }

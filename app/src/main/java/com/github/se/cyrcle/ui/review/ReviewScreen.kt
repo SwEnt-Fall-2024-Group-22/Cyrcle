@@ -52,9 +52,9 @@ fun ReviewScreen(
 
   val context = LocalContext.current // Get the current context
 
-  var selectedParking =
-      parkingViewModel.selectedParking.collectAsState().value
-          ?: return Text(text = "No parking selected. Should not happen")
+    val selectedParking =
+        parkingViewModel.selectedParking.collectAsState().value
+            ?: return Text(text = "No parking selected. Should not happen")
 
   Scaffold(topBar = { TopAppBar(navigationActions = navigationActions, "Add Your Review") }) {
       paddingValues ->
@@ -126,7 +126,7 @@ fun ReviewScreen(
                         text = textValue,
                         parking = selectedParking.uid,
                         rating = sliderValue.toDouble(),
-                        uid = reviewViewModel.getNewUid().toString()))
+                        uid = reviewViewModel.getNewUid()))
                 parkingViewModel.updateReviewScore(sliderValue.toDouble(), selectedParking)
                 navigationActions.goBack()
               },
