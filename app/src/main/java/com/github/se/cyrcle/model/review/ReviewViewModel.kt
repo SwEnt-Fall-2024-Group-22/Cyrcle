@@ -13,8 +13,8 @@ class ReviewViewModel(val reviewRepository: ReviewRepository) : ViewModel() {
   private val _selectedReview = MutableStateFlow<Review?>(null)
   val selectedReview: StateFlow<Review?> = _selectedReview
 
-  private val _parkingReviews = MutableStateFlow<List<Review?>>(emptyList())
-  val parkingReviews: StateFlow<List<Review?>> = _parkingReviews
+  private val _parkingReviews = MutableStateFlow<List<Review>>(emptyList())
+  val parkingReviews: StateFlow<List<Review>> = _parkingReviews
 
   private val _userReviews = MutableStateFlow<List<Review?>>(emptyList())
   val userReviews: StateFlow<List<Review?>> = _userReviews
@@ -30,6 +30,13 @@ class ReviewViewModel(val reviewRepository: ReviewRepository) : ViewModel() {
   fun updateReview(review: Review) {
     reviewRepository.updateReview(
         review, {}, { Log.e("ReviewViewModel", "Error adding review", it) })
+  }
+
+  fun getReviewsByParking(parking: String) {
+    reviewRepository.getReviewByParking(
+        parking,
+        { reviews -> _parkingReviews.value = reviews },
+        { Log.e("ReviewViewModel", "Error getting reviews", it) })
   }
 
   // create factory (imported from bootcamp)
