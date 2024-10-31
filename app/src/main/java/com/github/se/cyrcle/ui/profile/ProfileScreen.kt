@@ -26,12 +26,11 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
-import com.github.se.cyrcle.ui.card.Location
-import com.github.se.cyrcle.ui.card.Parking
-import com.github.se.cyrcle.ui.card.ParkingCapacity
-import com.github.se.cyrcle.ui.card.ParkingProtection
-import com.github.se.cyrcle.ui.card.ParkingRackType
-import com.github.se.cyrcle.ui.card.Point
+import com.github.se.cyrcle.model.parking.Location
+import com.github.se.cyrcle.model.parking.Parking
+import com.github.se.cyrcle.model.parking.ParkingCapacity
+import com.github.se.cyrcle.model.parking.ParkingProtection
+import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
@@ -39,9 +38,11 @@ import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.InputText
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
+import com.mapbox.geojson.Point
 
 @Composable
 fun ProfileScreen(navigationActions: NavigationActions) {
+
   var isEditing by remember { mutableStateOf(false) }
   var firstName by remember { mutableStateOf("John") }
   var lastName by remember { mutableStateOf("Doe") }
@@ -54,7 +55,7 @@ fun ProfileScreen(navigationActions: NavigationActions) {
                 uid = "1",
                 optName = "Parking Central",
                 optDescription = null,
-                location = Location(Point(1.0, 1.0)),
+                location = Location(Point.fromLngLat(1.0, 1.0)),
                 images = emptyList(),
                 capacity = ParkingCapacity.MEDIUM,
                 rackType = ParkingRackType.U_RACK,
@@ -65,7 +66,7 @@ fun ProfileScreen(navigationActions: NavigationActions) {
                 uid = "2",
                 optName = "Parking Station",
                 optDescription = null,
-                location = Location(Point(2.0, 2.0)),
+                location = Location(Point.fromLngLat(1.1, 1.1)),
                 images = emptyList(),
                 capacity = ParkingCapacity.SMALL,
                 rackType = ParkingRackType.WALL_BUTTERFLY,
@@ -76,7 +77,7 @@ fun ProfileScreen(navigationActions: NavigationActions) {
                 uid = "3",
                 optName = "Parking Mall",
                 optDescription = null,
-                location = Location(Point(3.0, 3.0)),
+                location = Location(Point.fromLngLat(1.2, 1.2)),
                 images = emptyList(),
                 capacity = ParkingCapacity.LARGE,
                 rackType = ParkingRackType.GRID,
