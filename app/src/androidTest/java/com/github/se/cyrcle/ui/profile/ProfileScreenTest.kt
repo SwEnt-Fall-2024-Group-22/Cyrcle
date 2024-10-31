@@ -2,29 +2,29 @@ package com.github.se.cyrcle.ui.profile
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavHostController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.ui.navigation.NavigationActions
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
 
 @RunWith(AndroidJUnit4::class)
 class ProfileScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
+  private lateinit var mockNavController: NavHostController
 
-  private fun setupProfileScreen() {
-    composeTestRule.setContent {
-      val navController = rememberNavController()
-      val navigationActions = NavigationActions(navController)
-      ProfileScreen(navigationActions = navigationActions)
-    }
+  @Before
+  fun setupProfileScreen() {
+    mockNavController = mock(NavHostController::class.java)
+    val navigationActions = NavigationActions(mockNavController)
+    composeTestRule.setContent { ProfileScreen(navigationActions = navigationActions) }
   }
 
   @Test
   fun testInitialDisplayMode() {
-    setupProfileScreen()
-
     composeTestRule.waitUntil(timeoutMillis = 5000) {
       composeTestRule.onAllNodesWithTag("ProfileImage").fetchSemanticsNodes().isNotEmpty()
     }
@@ -40,8 +40,6 @@ class ProfileScreenTest {
 
   @Test
   fun testEditModeTransition() {
-    setupProfileScreen()
-
     composeTestRule.waitUntil(timeoutMillis = 5000) {
       composeTestRule.onAllNodesWithTag("EditButton").fetchSemanticsNodes().isNotEmpty()
     }
@@ -63,8 +61,6 @@ class ProfileScreenTest {
 
   @Test
   fun testCancelEditMode() {
-    setupProfileScreen()
-
     composeTestRule.waitUntil(timeoutMillis = 5000) {
       composeTestRule.onAllNodesWithTag("EditButton").fetchSemanticsNodes().isNotEmpty()
     }
@@ -102,8 +98,6 @@ class ProfileScreenTest {
 
   @Test
   fun testSaveChanges() {
-    setupProfileScreen()
-
     composeTestRule.waitUntil(timeoutMillis = 5000) {
       composeTestRule.onAllNodesWithTag("EditButton").fetchSemanticsNodes().isNotEmpty()
     }
@@ -135,8 +129,6 @@ class ProfileScreenTest {
 
   @Test
   fun testFavoriteParkingsSection() {
-    setupProfileScreen()
-
     composeTestRule.waitUntil(timeoutMillis = 5000) {
       composeTestRule.onAllNodesWithTag("FavoriteParkingsTitle").fetchSemanticsNodes().isNotEmpty()
     }
@@ -150,8 +142,6 @@ class ProfileScreenTest {
 
   @Test
   fun testProfileImageInteraction() {
-    setupProfileScreen()
-
     composeTestRule.waitUntil(timeoutMillis = 5000) {
       composeTestRule.onAllNodesWithTag("ProfileImage").fetchSemanticsNodes().isNotEmpty()
     }
