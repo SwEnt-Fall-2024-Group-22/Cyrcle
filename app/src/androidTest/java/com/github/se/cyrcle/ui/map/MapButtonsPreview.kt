@@ -1,4 +1,4 @@
-package com.github.se.cyrcle.ui.map.overlay.preview
+package com.github.se.cyrcle.ui.map
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
