@@ -279,4 +279,5 @@ fun initLocalProps(): Properties {
     } else {
         throw GradleException("mapbox_access_token not found in local.properties")
     }
+    return localProperties
 }
