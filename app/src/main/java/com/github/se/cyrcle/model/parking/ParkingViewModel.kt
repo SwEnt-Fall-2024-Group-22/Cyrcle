@@ -121,6 +121,21 @@ class ParkingViewModel(
     return parkingRepository.getNewUid()
   }
 
+  /**
+   * updates the Review Score of the Parking passed as arguemnt with the score of the new review
+   * score The average score is given w/ two decimal places.
+   *
+   * @param newScore: score of the new review to add
+   * @param parking: Parking to update (selectedParking by default, should never be null)
+   */
+  fun updateReviewScore(newScore: Double, parking: Parking = selectedParking.value!!) {
+    parking.avgScore =
+        (100 * ((parking.avgScore * parking.nbReviews) + newScore) / (parking.nbReviews + 1))
+            .toInt() / 100.00
+    parking.nbReviews += 1
+    parkingRepository.updateParking(parking, {}, {})
+  }
+
   // create factory (imported from bootcamp)
   companion object {
     val Factory: ViewModelProvider.Factory =
