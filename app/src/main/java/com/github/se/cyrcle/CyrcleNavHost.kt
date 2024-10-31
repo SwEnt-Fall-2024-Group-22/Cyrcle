@@ -29,48 +29,48 @@ fun CyrcleNavHost(
     mapViewModel: MapViewModel,
     addressViewModel: AddressViewModel,
 ) {
-    NavHost(navController = navController, startDestination = Route.AUTH) {
-        navigation(
-            startDestination = Screen.AUTH,
-            route = Route.AUTH,
-        ) {
-            composable(Screen.AUTH) { SignInScreen(navigationActions) }
-        }
-
-        navigation(
-            startDestination = Screen.LIST,
-            route = Route.LIST,
-        ) {
-            composable(Screen.LIST) { SpotListScreen(navigationActions, parkingViewModel) }
-            composable(Screen.CARD) { CardScreen(navigationActions, parkingViewModel) }
-            composable(Screen.REVIEW) {
-                ReviewScreen(navigationActions, parkingViewModel, reviewViewModel)
-            }
-            composable(Screen.ALL_REVIEWS){
-                AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel)
-            }
-        }
-
-        navigation(
-            startDestination = Screen.MAP,
-            route = Route.MAP,
-        ) {
-            composable(Screen.MAP) { MapScreen(navigationActions, parkingViewModel, mapViewModel) }
-        }
-
-        navigation(startDestination = Screen.LOCATION_PICKER, route = Route.ADD_SPOTS) {
-            composable(Screen.LOCATION_PICKER) { LocationPicker(navigationActions, mapViewModel) }
-            composable(Screen.ATTRIBUTES_PICKER) {
-                AttributesPicker(navigationActions, parkingViewModel, mapViewModel, addressViewModel)
-            }
-        }
-
-        // Add this new navigation block for Profile
-        navigation(
-            startDestination = Screen.PROFILE,
-            route = Route.PROFILE,
-        ) {
-            composable(Screen.PROFILE) { ProfileScreen(navigationActions) }
-        }
+  NavHost(navController = navController, startDestination = Route.AUTH) {
+    navigation(
+        startDestination = Screen.AUTH,
+        route = Route.AUTH,
+    ) {
+      composable(Screen.AUTH) { SignInScreen(navigationActions) }
     }
+
+    navigation(
+        startDestination = Screen.LIST,
+        route = Route.LIST,
+    ) {
+      composable(Screen.LIST) { SpotListScreen(navigationActions, parkingViewModel) }
+      composable(Screen.CARD) { CardScreen(navigationActions, parkingViewModel) }
+      composable(Screen.REVIEW) {
+        ReviewScreen(navigationActions, parkingViewModel, reviewViewModel)
+      }
+      composable(Screen.ALL_REVIEWS) {
+        AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel)
+      }
+    }
+
+    navigation(
+        startDestination = Screen.MAP,
+        route = Route.MAP,
+    ) {
+      composable(Screen.MAP) { MapScreen(navigationActions, parkingViewModel, mapViewModel) }
+    }
+
+    navigation(startDestination = Screen.LOCATION_PICKER, route = Route.ADD_SPOTS) {
+      composable(Screen.LOCATION_PICKER) { LocationPicker(navigationActions, mapViewModel) }
+      composable(Screen.ATTRIBUTES_PICKER) {
+        AttributesPicker(navigationActions, parkingViewModel, mapViewModel, addressViewModel)
+      }
+    }
+
+    // Add this new navigation block for Profile
+    navigation(
+        startDestination = Screen.PROFILE,
+        route = Route.PROFILE,
+    ) {
+      composable(Screen.PROFILE) { ProfileScreen(navigationActions) }
+    }
+  }
 }

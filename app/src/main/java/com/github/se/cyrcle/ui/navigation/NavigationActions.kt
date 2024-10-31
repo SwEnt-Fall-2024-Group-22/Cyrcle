@@ -40,17 +40,17 @@ data class TopLevelDestination(val route: String, val icon: ImageVector, val tex
 /** Object containing the top level destinations in the app. */
 object TopLevelDestinations {
   val LIST =
-    TopLevelDestination(route = Route.LIST, icon = Icons.Outlined.Menu, textId = Route.LIST)
+      TopLevelDestination(route = Route.LIST, icon = Icons.Outlined.Menu, textId = Route.LIST)
   val MAP =
-    TopLevelDestination(route = Route.MAP, icon = Icons.Outlined.LocationOn, textId = Route.MAP)
+      TopLevelDestination(route = Route.MAP, icon = Icons.Outlined.LocationOn, textId = Route.MAP)
   val PROFILE =
-    TopLevelDestination(
-      route = Route.PROFILE, icon = Icons.Outlined.Person, textId = Route.PROFILE)
+      TopLevelDestination(
+          route = Route.PROFILE, icon = Icons.Outlined.Person, textId = Route.PROFILE)
 }
 
 /** List of top level destinations in the app. */
 val LIST_TOP_LEVEL_DESTINATION =
-  listOf(TopLevelDestinations.MAP, TopLevelDestinations.LIST, TopLevelDestinations.PROFILE)
+    listOf(TopLevelDestinations.MAP, TopLevelDestinations.LIST, TopLevelDestinations.PROFILE)
 
 /** Adapter class for navigating between screens in the app. */
 open class NavigationActions(private val navController: NavHostController) {
