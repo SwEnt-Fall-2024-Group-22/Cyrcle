@@ -129,9 +129,9 @@ fun ReviewScreen(
                         owner = "default",
                         text = textValue,
                         parking = selectedParking.uid,
-                        rating = sliderValue.toDouble(),
+                        rating = sliderToValue,
                         uid = reviewViewModel.getNewUid()))
-                parkingViewModel.updateReviewScore(sliderValue.toDouble(), selectedParking)
+                parkingViewModel.updateReviewScore(sliderToValue, selectedParking)
                 navigationActions.goBack()
               },
               modifier =
