@@ -30,7 +30,7 @@ data class Parking(
     val price: Double,
     val hasSecurity: Boolean,
     var nbReviews: Int = 0,
-    var avgScore: Double = 0.0
+    var avgScore: Double = 1.0
 )
 
 interface ParkingAttribute {

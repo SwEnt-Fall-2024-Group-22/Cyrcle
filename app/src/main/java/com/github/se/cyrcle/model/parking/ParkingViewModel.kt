@@ -133,6 +133,7 @@ class ParkingViewModel(
         (100 * ((parking.avgScore * parking.nbReviews) + newScore) / (parking.nbReviews + 1))
             .toInt() / 100.00
     parking.nbReviews += 1
+    parkingRepository.updateParking(parking, {}, {})
   }
 
   // create factory (imported from bootcamp)
