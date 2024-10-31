@@ -277,7 +277,7 @@ private fun ProfileImage(
 }
 
 @Composable
-fun FavoriteParkingsSection(
+private fun FavoriteParkingsSection(
     favoriteParkings: List<Parking>,
     onFavoritesUpdated: (List<Parking>) -> Unit
 ) {
