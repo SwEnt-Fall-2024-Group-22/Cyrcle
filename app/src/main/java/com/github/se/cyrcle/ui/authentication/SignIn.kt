@@ -93,7 +93,7 @@ fun SignInScreen(navigationActions: NavigationActions) {
 
           // App Logo Image
           Image(
-              painter = painterResource(id = R.drawable.app_logo),
+              painter = painterResource(id = R.drawable.app_logo_name),
               contentDescription = "App Logo",
               modifier = Modifier.size(275.dp))
 
