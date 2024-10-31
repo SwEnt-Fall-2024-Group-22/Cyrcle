@@ -16,10 +16,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.github.se.cyrcle.model.parking.ParkingAttribute
 import com.github.se.cyrcle.model.parking.ParkingProtection
 
 /**
@@ -33,11 +33,12 @@ import com.github.se.cyrcle.model.parking.ParkingProtection
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DynamicSelectTextField(
-    options: List<ParkingAttribute>,
-    selectedValue: MutableState<ParkingAttribute>,
+fun <T> EnumDropDown(
+    options: List<T>,
+    selectedValue: MutableState<T>,
     label: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    testTag: String = "EnumDropDown"
 ) {
   var expanded by remember { mutableStateOf(false) }
   ExposedDropdownMenuBox(
@@ -46,21 +47,27 @@ fun DynamicSelectTextField(
       modifier = modifier.padding(10.dp)) {
         OutlinedTextField(
             readOnly = true,
-            value = selectedValue.value.description,
+            value = selectedValue.value.toString(),
             onValueChange = {},
-            label = { Text(text = label) },
+            label = { Text(text = label, Modifier.testTag("${testTag}Label")) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             colors = OutlinedTextFieldDefaults.colors(),
-            modifier = Modifier.menuAnchor().fillMaxWidth())
+            modifier = Modifier.menuAnchor().fillMaxWidth().testTag(testTag))
 
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-          options.forEach { option: ParkingAttribute ->
+          options.withIndex().forEach { (i, option: T) ->
             DropdownMenuItem(
-                text = { Text(text = option.description, textAlign = TextAlign.Center) },
+                text = {
+                  Text(
+                      text = option.toString(),
+                      textAlign = TextAlign.Center,
+                      modifier = Modifier.testTag("${testTag}${i}Text"))
+                },
                 onClick = {
                   expanded = false
                   selectedValue.value = option
-                })
+                },
+                Modifier.testTag("${testTag}${i}Item"))
           }
         }
       }
@@ -68,8 +75,8 @@ fun DynamicSelectTextField(
 
 @Preview
 @Composable
-fun EnumDropdownInputPreview() {
-  DynamicSelectTextField(
+fun EnumDropDownInputPreview() {
+  EnumDropDown(
       options = ParkingProtection.entries.toList(),
       remember { mutableStateOf(ParkingProtection.NONE) },
       label = "Protection",

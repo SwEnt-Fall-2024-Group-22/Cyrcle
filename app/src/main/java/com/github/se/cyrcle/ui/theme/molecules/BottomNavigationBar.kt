@@ -21,7 +21,8 @@ import com.github.se.cyrcle.ui.navigation.TopLevelDestination
 import com.github.se.cyrcle.ui.theme.Black
 
 /**
- * Create a themed bottom navigation bar, with simplified arguments.
+ * Create a themed bottom navigation bar, with simplified arguments. The name isn't correct anymore,
+ * because it was updated to Material 3 (which isn't the same).
  *
  * @param onTabSelect A lambda to execute when any tab is clicked.
  * @param tabList The list of tab to display.
@@ -34,7 +35,7 @@ fun BottomNavigationBar(
     tabList: List<TopLevelDestination> = LIST_TOP_LEVEL_DESTINATION,
     onTabSelect: (TopLevelDestination) -> Unit = { navigationActions.navigateTo(it) },
     selectedItem: String,
-    testTag: String = "BottomNavigationBar"
+    testTag: String = "NavigationBar"
 ) {
   NavigationBar(
       modifier = Modifier.testTag(testTag).fillMaxWidth().height(60.dp),

@@ -29,7 +29,7 @@ fun BooleanRadioButton(
     testTag: String = "BooleanRadioButton"
 ) {
   Column(Modifier.testTag(testTag)) {
-    Text(text = question, Modifier.testTag("{testTag}Question"))
+    Text(text = question, Modifier.testTag("${testTag}Question"))
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
@@ -38,14 +38,14 @@ fun BooleanRadioButton(
               selected = state.value,
               onClick = { state.value = true },
               modifier = Modifier.padding(2.dp),
-              testTag = "{testTag}YesRadioButton")
-          Text(text = "Yes", Modifier.testTag("{testTag}YesText"))
+              testTag = "${testTag}YesRadioButton")
+          Text(text = "Yes", Modifier.testTag("${testTag}YesText"))
           RadioButton(
               selected = !state.value,
               onClick = { state.value = false },
               modifier = Modifier.padding(start = 20.dp),
-              testTag = "{testTag}NoRadioButton")
-          Text(text = "No", Modifier.testTag("{testTag}NoText"))
+              testTag = "${testTag}NoRadioButton")
+          Text(text = "No", Modifier.testTag("${testTag}NoText"))
         }
   }
 }

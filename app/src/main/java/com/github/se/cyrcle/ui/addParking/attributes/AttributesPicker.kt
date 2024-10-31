@@ -50,7 +50,7 @@ import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import com.github.se.cyrcle.ui.theme.atoms.InputText
 import com.github.se.cyrcle.ui.theme.molecules.BooleanRadioButton
-import com.github.se.cyrcle.ui.theme.molecules.DynamicSelectTextField
+import com.github.se.cyrcle.ui.theme.molecules.EnumDropDown
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.compose.DisposableMapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
@@ -109,17 +109,17 @@ fun AttributesPicker(
                   label = "Title",
                   modifier = Modifier.fillMaxWidth().padding(10.dp),
               )
-              DynamicSelectTextField(
+              EnumDropDown(
                   options = ParkingProtection.entries.toList(),
                   selectedValue = protection,
                   label = "How protected from the weather is the spot?",
               )
-              DynamicSelectTextField(
+              EnumDropDown(
                   options = ParkingCapacity.entries.toList(),
                   selectedValue = capacity,
                   label = "How many bikes can we park ?",
               )
-              DynamicSelectTextField(
+              EnumDropDown(
                   options = ParkingRackType.entries.toList(),
                   selectedValue = rackType,
                   label = "Which type of rack is in the parking spot?",

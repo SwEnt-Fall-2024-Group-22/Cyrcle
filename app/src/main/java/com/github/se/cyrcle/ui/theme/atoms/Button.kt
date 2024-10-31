@@ -148,7 +148,7 @@ fun Button(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     colorLevel: ColorLevel = ColorLevel.PRIMARY,
-    testTag: String = "PrimaryButton"
+    testTag: String = "Button"
 ) {
   Button(
       onClick = { onClick() },
@@ -158,7 +158,16 @@ fun Button(
       }
 }
 
-/** TODO */
+/**
+ * Create a themed radio button, with simplified arguments. This should be only used inside a
+ * `BooleanRadioButton`
+ *
+ * @param selected
+ * @param onClick
+ * @param modifier Chained modifier. `.testTag` will be overwritten, use the `testTag` for this.
+ * @param colorLevel The color scheme of the object.
+ * @param testTag The test tag of the object.
+ */
 @Composable
 fun RadioButton(
     selected: Boolean,

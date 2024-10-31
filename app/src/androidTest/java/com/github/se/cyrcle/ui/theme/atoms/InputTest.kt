@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.theme.atoms
 
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -17,18 +18,25 @@ class InputTest {
 
   @Test
   fun displayInputText() {
-    val defaultTag = "InputText"
-
+    val tagD = "InputText"
+    val tag1 = "InputText1"
     val expected = "Some text"
+    var text = ""
 
-    var text = "" // by remember { mutableStateOf("A") }
-    composeTestRule.setContent { InputText("Test", onValueChange = { newText -> text = newText }) }
+    composeTestRule.setContent {
+      InputText("Test", onValueChange = { newText -> text = newText })
+      InputText("Test", Modifier, { newText -> text = newText }, text, false, 2, 1, tag1)
+    }
 
-    composeTestRule.onNodeWithTag(defaultTag).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(tagD).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${tagD}Text", true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(tagD).performTextInput(expected)
+    assertEquals(expected, text)
 
-    composeTestRule.onNodeWithTag("${defaultTag}Text", true).assertIsDisplayed()
-
-    composeTestRule.onNodeWithTag(defaultTag).performTextInput(expected)
+    text = ""
+    composeTestRule.onNodeWithTag(tag1).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${tag1}Text", true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(tag1).performTextInput(expected)
     assertEquals(expected, text)
   }
 }

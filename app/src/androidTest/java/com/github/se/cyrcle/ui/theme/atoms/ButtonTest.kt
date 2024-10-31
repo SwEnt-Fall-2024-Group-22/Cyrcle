@@ -1,18 +1,15 @@
 package com.github.se.cyrcle.ui.theme.atoms
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.se.cyrcle.ui.theme.ColorLevel
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -24,103 +21,138 @@ class ButtonTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   @Test
-  fun displayPrimaryButton() {
-    val defaultTag = "PrimaryButton"
+  fun displayButton() {
+    val tagD = "Button"
+    val tag1 = "Button1"
     var a = 1
-    composeTestRule.setContent { Button("Button", { a++ }) }
+    composeTestRule.setContent {
+      Button("Button", { a++ })
+      Button("Button", { a++ }, Modifier, ColorLevel.PRIMARY, tag1)
+    }
 
-    composeTestRule.onNodeWithTag("PrimaryButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("${defaultTag}Text", true).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(defaultTag).performClick()
+    composeTestRule.onNodeWithTag(tagD).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${tagD}Text", true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(tagD).performClick()
     assertEquals(a, 2)
+
+    composeTestRule.onNodeWithTag(tag1).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${tag1}Text", true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(tag1).performClick()
+    assertEquals(a, 3)
   }
 
   @Test
   fun displaySmallFloatingActionButton() {
-    val defaultTag = "SmallFab"
+    val tagD = "SmallFab"
+    val tag1 = "SmallFab1"
     var a = 1
     composeTestRule.setContent {
-      Scaffold(
-          floatingActionButton = { SmallFloatingActionButton(Icons.Filled.Add, "", { a++ }) }) {
-              innerPadding ->
-            Column(
-                modifier = Modifier.padding(innerPadding),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {}
-          }
+      Row {
+        SmallFloatingActionButton(Icons.Filled.Add, "", { a++ })
+        SmallFloatingActionButton(Icons.Filled.Add, "", { a++ }, Modifier, ColorLevel.PRIMARY, tag1)
+      }
     }
 
-    composeTestRule.onNodeWithTag(defaultTag).assertIsDisplayed()
-    composeTestRule.onNodeWithTag("${defaultTag}Icon", true).assertIsDisplayed()
-
-    composeTestRule.onNodeWithTag(defaultTag).performClick()
+    composeTestRule.onNodeWithTag(tagD).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${tagD}Icon", true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(tagD).performClick()
     assertEquals(a, 2)
+
+    composeTestRule.onNodeWithTag(tag1).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${tag1}Icon", true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(tag1).performClick()
+    assertEquals(a, 3)
   }
 
   @Test
   fun displayFloatingActionButton() {
-    val defaultTag = "Fab"
+    val tagD = "Fab"
+    val tag1 = "Fab1"
     var a = 1
     composeTestRule.setContent {
-      Scaffold(floatingActionButton = { FloatingActionButton(Icons.Filled.Add, "", { a++ }) }) {
-          innerPadding ->
-        Column(
-            modifier = Modifier.padding(innerPadding),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {}
+      Row {
+        FloatingActionButton(Icons.Filled.Add, "", { a++ })
+        FloatingActionButton(Icons.Filled.Add, "", { a++ }, Modifier, ColorLevel.PRIMARY, tag1)
       }
     }
 
-    composeTestRule.onNodeWithTag(defaultTag).assertIsDisplayed()
-    composeTestRule.onNodeWithTag("${defaultTag}Icon", true).assertIsDisplayed()
-
-    composeTestRule.onNodeWithTag(defaultTag).performClick()
+    composeTestRule.onNodeWithTag(tagD).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${tagD}Icon", true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(tagD).performClick()
     assertEquals(a, 2)
+
+    composeTestRule.onNodeWithTag(tag1).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${tag1}Icon", true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(tag1).performClick()
+    assertEquals(a, 3)
   }
 
   @Test
   fun displayLargeFloatingActionButton() {
-    val defaultTag = "LargeFab"
+    val tagD = "LargeFab"
+    val tag1 = "LargeFab1"
     var a = 1
     composeTestRule.setContent {
-      Scaffold(
-          floatingActionButton = { LargeFloatingActionButton(Icons.Filled.Add, "", { a++ }) }) {
-              innerPadding ->
-            Column(
-                modifier = Modifier.padding(innerPadding),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {}
-          }
+      Row {
+        LargeFloatingActionButton(Icons.Filled.Add, "", { a++ })
+        LargeFloatingActionButton(Icons.Filled.Add, "", { a++ }, Modifier, ColorLevel.PRIMARY, tag1)
+      }
     }
 
-    composeTestRule.onNodeWithTag(defaultTag).assertIsDisplayed()
-    composeTestRule.onNodeWithTag("${defaultTag}Icon", true).assertIsDisplayed()
-
-    composeTestRule.onNodeWithTag(defaultTag).performClick()
+    composeTestRule.onNodeWithTag(tagD).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${tagD}Icon", true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(tagD).performClick()
     assertEquals(a, 2)
+
+    composeTestRule.onNodeWithTag(tag1).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${tag1}Icon", true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(tag1).performClick()
+    assertEquals(a, 3)
   }
 
   @Test
   fun displayExtendedFloatingActionButton() {
-    val defaultTag = "ExtendedFab"
+    val tagD = "ExtendedFab"
+    val tag1 = "ExtendedFab1"
     var a = 1
     composeTestRule.setContent {
-      Scaffold(
-          floatingActionButton = {
-            ExtendedFloatingActionButton(Icons.Filled.Add, "A", { a++ }, text = "Extended")
-          }) { innerPadding ->
-            Column(
-                modifier = Modifier.padding(innerPadding),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {}
-          }
+      Row {
+        ExtendedFloatingActionButton(Icons.Filled.Add, "", { a++ }, text = "Extended")
+        ExtendedFloatingActionButton(
+            Icons.Filled.Add, "", { a++ }, Modifier, "Extended", ColorLevel.PRIMARY, tag1)
+      }
     }
 
-    composeTestRule.onNodeWithTag(defaultTag).assertIsDisplayed()
-    composeTestRule.onNodeWithTag("${defaultTag}Icon", true).assertIsDisplayed()
-    composeTestRule.onNodeWithTag("${defaultTag}Text", true).assertIsDisplayed()
-
-    composeTestRule.onNodeWithTag(defaultTag).performClick()
+    composeTestRule.onNodeWithTag(tagD).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${tagD}Icon", true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(tagD).performClick()
     assertEquals(a, 2)
+
+    composeTestRule.onNodeWithTag(tag1).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${tag1}Icon", true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(tag1).performClick()
+    assertEquals(a, 3)
+  }
+
+  @Test
+  fun displayRadioButton() {
+    val tagD = "RadioButton"
+    val tag1 = "RadioButton1"
+    var a = false
+    var b = false
+    composeTestRule.setContent {
+      Row {
+        RadioButton(a, { a = true })
+        RadioButton(b, { b = true }, Modifier, ColorLevel.PRIMARY, tag1)
+      }
+    }
+
+    composeTestRule.onNodeWithTag(tagD, true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(tagD, true).performClick()
+    assertEquals(a, true)
+
+    composeTestRule.onNodeWithTag(tag1).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(tag1).performClick()
+    assertEquals(b, true)
   }
 }

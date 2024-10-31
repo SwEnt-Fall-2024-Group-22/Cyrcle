@@ -28,22 +28,28 @@ class ThemeTest {
   }
 
   @Test
-  fun disabledColorTest() {
+  fun disabledColorTestLight() {
     composeTestRule.setContent { ColoredSquare(disabledColor(), LightColorScheme) }
     composeTestRule.onNodeWithTag("TestTag").assertIsDisplayed()
     // No test for checking the color
+  }
 
+  @Test
+  fun disableColorTestDark() {
     composeTestRule.setContent { ColoredSquare(disabledColor(), DarkColorScheme) }
     composeTestRule.onNodeWithTag("TestTag").assertIsDisplayed()
     // No test for checking the color
   }
 
   @Test
-  fun defaultOnColorFromLuminance() {
+  fun defaultOnColorFromHighLuminance() {
     composeTestRule.setContent { ColoredSquare(defaultOnColorFromLuminance(White)) }
     composeTestRule.onNodeWithTag("TestTag").assertIsDisplayed()
     // No test for checking the color (should be Black)
+  }
 
+  @Test
+  fun defaultOnColorFromLowLuminance() {
     composeTestRule.setContent { ColoredSquare(defaultOnColorFromLuminance(Black)) }
     composeTestRule.onNodeWithTag("TestTag").assertIsDisplayed()
     // No test for checking the color (should be White)
