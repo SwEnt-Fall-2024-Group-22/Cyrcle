@@ -136,7 +136,7 @@ fun CardScreen(
                                     modifier = Modifier.weight(1f).testTag("AverageRatingColumn")) {
                                       Text(text = "Current Rating", fontWeight = FontWeight.Bold)
                                       Text(
-                                          text = selectedParking.avgScore.toString(),
+                                          text = if (selectedParking.nbReviews == 0) "No reviews yet" else selectedParking.avgScore.toString(),
                                           color = Color.Gray)
                                     }
                               }
