@@ -140,6 +140,29 @@ fun CardScreen(
                                               if (selectedParking.nbReviews == 0) "No reviews yet"
                                               else selectedParking.avgScore.toString(),
                                           color = Color.Gray)
+
+                                      Spacer(
+                                          modifier =
+                                              Modifier.height(
+                                                  8.dp)) // Space between rating and button
+
+                                      Button(
+                                          onClick = {
+                                            navigationActions.navigateTo(Screen.ALL_REVIEWS)
+                                          },
+                                          modifier =
+                                              Modifier.fillMaxWidth()
+                                                  .testTag(
+                                                      "SeeAllReviewsButton"), // Test tag for See
+                                          // All Reviews button
+                                          colors =
+                                              ButtonDefaults.buttonColors(
+                                                  containerColor =
+                                                      MaterialTheme.colorScheme.primary,
+                                                  contentColor =
+                                                      MaterialTheme.colorScheme.secondary)) {
+                                            Text(text = "See All Reviews")
+                                          }
                                     }
                               }
                         }
