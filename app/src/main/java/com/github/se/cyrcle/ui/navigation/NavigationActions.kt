@@ -22,6 +22,7 @@ object Screen {
   const val REVIEW = "Review Screen"
   const val LOCATION_PICKER = "Location Picker"
   const val ATTRIBUTES_PICKER = "Attributes Picker"
+  const val ALL_REVIEWS_SCREEN = "All Reviews"
 }
 
 /**

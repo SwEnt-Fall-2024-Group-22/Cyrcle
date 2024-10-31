@@ -8,6 +8,8 @@ import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.se.cyrcle.di.mocks.MockImageRepository
+import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.model.parking.ImageRepository
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
@@ -32,9 +34,9 @@ class CardScreenTest {
 
   @Before
   fun setUp() {
-    parkingRepository = mock(ParkingRepository::class.java)
+    parkingRepository = MockParkingRepository()
     navigationActions = mock(NavigationActions::class.java)
-    imageRepository = mock(ImageRepository::class.java)
+    imageRepository = MockImageRepository()
     parkingViewModel = ParkingViewModel(imageRepository, parkingRepository)
 
     `when`(navigationActions.currentRoute()).thenReturn(Screen.CARD)
