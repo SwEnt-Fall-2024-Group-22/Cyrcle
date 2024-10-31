@@ -146,6 +146,7 @@ fun CardScreen(
                                                   8.dp)) // Space between rating and button
 
                                       Button(
+                                          text = "See All Reviews",
                                           onClick = {
                                             navigationActions.navigateTo(Screen.ALL_REVIEWS)
                                           },
@@ -154,14 +155,7 @@ fun CardScreen(
                                                   .testTag(
                                                       "SeeAllReviewsButton"), // Test tag for See
                                           // All Reviews button
-                                          colors =
-                                              ButtonDefaults.buttonColors(
-                                                  containerColor =
-                                                      MaterialTheme.colorScheme.primary,
-                                                  contentColor =
-                                                      MaterialTheme.colorScheme.secondary)) {
-                                            Text(text = "See All Reviews")
-                                          }
+                                          colorLevel = ColorLevel.PRIMARY)
                                     }
                               }
                         }
