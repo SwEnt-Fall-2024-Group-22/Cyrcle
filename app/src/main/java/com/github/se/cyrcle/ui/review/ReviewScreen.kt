@@ -97,7 +97,9 @@ fun ReviewScreen(
               modifier = Modifier.padding(top = 8.dp).testTag("ExperienceText"))
 
           // Slider with step granularity of 0.5
-          Text(text = "Rating: ${sliderValue.toDouble()}", style = MaterialTheme.typography.bodyLarge)
+          Text(
+              text = "Rating: ${sliderValue.toDouble()}",
+              style = MaterialTheme.typography.bodyLarge)
           Slider(
               value = sliderValue,
               onValueChange = { newValue -> sliderValue = newValue },
