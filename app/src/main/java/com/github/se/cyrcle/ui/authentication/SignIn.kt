@@ -23,7 +23,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -34,14 +33,15 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import com.github.se.cyrcle.ui.theme.ColorLevel
+import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.getButtonColors
+import com.github.se.cyrcle.ui.theme.googleSignInButtonStyle
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -83,12 +83,11 @@ fun SignInScreen(navigationActions: NavigationActions) {
         ) {
           // Welcome Text
           Text(
-              modifier = Modifier.testTag("LoginTitle"),
               text = "Welcome to Cyrcle",
               style =
-                  MaterialTheme.typography.headlineLarge.copy(fontSize = 57.sp, lineHeight = 64.sp),
-              fontWeight = FontWeight.Bold,
-              textAlign = TextAlign.Center)
+                  MaterialTheme.typography.headlineLarge.copy(
+                      fontWeight = FontWeight.Bold, fontSize = 57.sp, lineHeight = 64.sp),
+              testTag = "LoginTitle")
           Spacer(modifier = Modifier.height(16.dp))
 
           // App Logo Image
@@ -124,7 +123,7 @@ fun SignInScreen(navigationActions: NavigationActions) {
                   Modifier.padding(16.dp)
                       .height(48.dp) // Adjust height as needed
                       .testTag("AnonymousLoginButton")) {
-                Text(text = "Continue as Guest", fontWeight = FontWeight.Medium)
+                Text(text = "Continue as Guest")
               }
         }
       })
@@ -154,10 +153,7 @@ fun GoogleSignInButton(onSignInClick: () -> Unit) {
 
               // Text on Sign-In button
               Text(
-                  text = "Sign in with Google",
-                  color = Color.Gray,
-                  fontSize = 16.sp,
-                  fontWeight = FontWeight.Medium)
+                  text = "Sign in with Google", color = Color.Gray, style = googleSignInButtonStyle)
             }
       }
 }
