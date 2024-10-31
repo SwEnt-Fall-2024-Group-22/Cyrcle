@@ -41,7 +41,7 @@ import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 @Composable
 fun ColorSchemePreviewPreview() {
   // CHANGE THIS TO PREVIEW ANOTHER THEME
-  val cs = DarkColorScheme
+  val cs = LightColorScheme // { DarkColorScheme, LightColorScheme }
 
   val mutableBoolToFill = remember { mutableStateOf(true) }
   MaterialTheme(colorScheme = cs) {
