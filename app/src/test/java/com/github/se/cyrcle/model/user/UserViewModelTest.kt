@@ -1,9 +1,13 @@
 package com.github.se.cyrcle.model.user
 
+import com.github.se.cyrcle.model.parking.Parking
+import com.github.se.cyrcle.model.parking.ParkingRepository
+import com.github.se.cyrcle.model.parking.TestInstancesParking
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -13,20 +17,21 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class UserViewModelTest {
 
-  @Mock private lateinit var userRepositoryFirestore: UserRepositoryFirestore
+  @Mock private lateinit var userRepository: UserRepository
+  @Mock private lateinit var parkingRepository: ParkingRepository
   private lateinit var userViewModel: UserViewModel
 
   @Before
   fun setUp() {
     MockitoAnnotations.openMocks(this)
-    userViewModel = UserViewModel(userRepositoryFirestore)
+    userViewModel = UserViewModel(userRepository, parkingRepository)
   }
 
   @Test
   fun addUserTest() {
     userViewModel.addUser(TestInstancesUser.user1)
     // Check if the user was added to the repository
-    verify(userRepositoryFirestore).addUser(eq(TestInstancesUser.user1), any(), any())
+    verify(userRepository).addUser(eq(TestInstancesUser.user1), any(), any())
   }
 
   @Test
@@ -42,7 +47,7 @@ class UserViewModelTest {
     userViewModel.getUserById("user1")
 
     // Check if the user was fetched from the repository
-    verify(userRepositoryFirestore).getUserById(eq("user1"), any(), any())
+    verify(userRepository).getUserById(eq("user1"), any(), any())
   }
 
   @Test
@@ -50,7 +55,7 @@ class UserViewModelTest {
     userViewModel.updateUser(TestInstancesUser.user1)
 
     // Check if the user was updated in the repository
-    verify(userRepositoryFirestore).updateUser(eq(TestInstancesUser.user1), any(), any())
+    verify(userRepository).updateUser(eq(TestInstancesUser.user1), any(), any())
   }
 
   @Test
@@ -64,10 +69,36 @@ class UserViewModelTest {
     val updatedUser = user.copy(favoriteParkings = user.favoriteParkings + "Test_spot_3")
 
     // Check if the favorite parking was added to the selected user
-    verify(userRepositoryFirestore).updateUser(eq(updatedUser), any(), any())
+    verify(userRepository).updateUser(eq(updatedUser), any(), any())
 
     // Check if the selected user is the updated user
     assert(userViewModel.currentUser.value == updatedUser)
+  }
+
+  @Test
+  fun getUserFavoriteParkingsTest() {
+    // Set the current user
+    userViewModel.setCurrentUser(TestInstancesUser.user1)
+    userViewModel.getSelectedUserFavoriteParking()
+    // Check if the favorite parkings were fetched from the repository
+    verify(parkingRepository)
+        .getParkingsByListOfIds(eq(TestInstancesUser.user1.favoriteParkings.toList()), any(), any())
+  }
+
+  @Test
+  fun getFavoriteParkingsSetsState() {
+    // Set the current user
+    `when`(parkingRepository.getParkingsByListOfIds(any(), any(), any())).thenAnswer { invocation ->
+      val onSuccess = invocation.arguments[1] as (List<Parking>) -> Unit
+      onSuccess(listOf(TestInstancesParking.parking1, TestInstancesParking.parking2))
+    }
+
+    userViewModel.setCurrentUser(TestInstancesUser.user1)
+    userViewModel.getSelectedUserFavoriteParking()
+    userViewModel.favoriteParkings.value.let {
+      assert(it.contains(TestInstancesParking.parking1))
+      assert(it.contains(TestInstancesParking.parking2))
+    }
   }
 
   @Test
@@ -81,7 +112,7 @@ class UserViewModelTest {
     val updatedUser = user.copy(favoriteParkings = user.favoriteParkings - "Test_spot_1")
 
     // Check if the favorite parking was removed from the selected user
-    verify(userRepositoryFirestore).updateUser(eq(updatedUser), any(), any())
+    verify(userRepository).updateUser(eq(updatedUser), any(), any())
 
     // Check if the selected user is the updated user
     assert(userViewModel.currentUser.value == updatedUser)

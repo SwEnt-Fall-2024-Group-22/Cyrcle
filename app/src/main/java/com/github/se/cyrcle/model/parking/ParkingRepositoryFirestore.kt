@@ -27,7 +27,7 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
     return db.collection(collectionPath).document().id
   }
 
-  override fun getParkings(onSuccess: (List<Parking>) -> Unit, onFailure: (Exception) -> Unit) {
+  override fun getAllParkings(onSuccess: (List<Parking>) -> Unit, onFailure: (Exception) -> Unit) {
     db.collection(collectionPath)
         .get()
         .addOnSuccessListener { querySnapshot ->
@@ -55,6 +55,28 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
           } else {
             onFailure(Exception("Parking not found"))
           }
+        }
+        .addOnFailureListener { onFailure(it) }
+  }
+
+  override fun getParkingsByListOfIds(
+      ids: List<String>,
+      onSuccess: (List<Parking>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    if (ids.isEmpty()) {
+      onSuccess(emptyList())
+      return
+    }
+    db.collection(collectionPath)
+        .whereIn("uid", ids)
+        .get()
+        .addOnSuccessListener { querySnapshot ->
+          val parkings =
+              querySnapshot.documents.mapNotNull { document ->
+                document.data?.let { deserializeParking(it) }
+              }
+          onSuccess(parkings)
         }
         .addOnFailureListener { onFailure(it) }
   }
