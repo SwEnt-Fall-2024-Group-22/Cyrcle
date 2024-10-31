@@ -26,11 +26,8 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
-import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.model.parking.Parking
-import com.github.se.cyrcle.model.parking.ParkingCapacity
-import com.github.se.cyrcle.model.parking.ParkingProtection
-import com.github.se.cyrcle.model.parking.ParkingRackType
+import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
@@ -38,7 +35,6 @@ import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.InputText
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
-import com.mapbox.geojson.Point
 
 @Composable
 fun ProfileScreen(navigationActions: NavigationActions) {
@@ -51,39 +47,9 @@ fun ProfileScreen(navigationActions: NavigationActions) {
   var favoriteParkings by remember {
     mutableStateOf(
         listOf(
-            Parking(
-                uid = "1",
-                optName = "Parking Central",
-                optDescription = null,
-                location = Location(Point.fromLngLat(1.0, 1.0)),
-                images = emptyList(),
-                capacity = ParkingCapacity.MEDIUM,
-                rackType = ParkingRackType.U_RACK,
-                protection = ParkingProtection.NONE,
-                price = 0.0,
-                hasSecurity = false),
-            Parking(
-                uid = "2",
-                optName = "Parking Station",
-                optDescription = null,
-                location = Location(Point.fromLngLat(1.1, 1.1)),
-                images = emptyList(),
-                capacity = ParkingCapacity.SMALL,
-                rackType = ParkingRackType.WALL_BUTTERFLY,
-                protection = ParkingProtection.COVERED,
-                price = 2.5,
-                hasSecurity = true),
-            Parking(
-                uid = "3",
-                optName = "Parking Mall",
-                optDescription = null,
-                location = Location(Point.fromLngLat(1.2, 1.2)),
-                images = emptyList(),
-                capacity = ParkingCapacity.LARGE,
-                rackType = ParkingRackType.GRID,
-                protection = ParkingProtection.INDOOR,
-                price = 1.0,
-                hasSecurity = true)))
+            TestInstancesParking.parking1,
+            TestInstancesParking.parking2,
+            TestInstancesParking.parking3))
   }
 
   var originalFirstName by remember { mutableStateOf(firstName) }
