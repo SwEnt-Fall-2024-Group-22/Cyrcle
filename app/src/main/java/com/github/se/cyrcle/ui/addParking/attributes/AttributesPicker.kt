@@ -18,6 +18,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -35,6 +36,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingAttribute
@@ -64,18 +66,20 @@ import com.mapbox.maps.plugin.gestures.generated.GesturesSettings
 fun AttributesPicker(
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel,
-    mapViewModel: MapViewModel
+    mapViewModel: MapViewModel,
+    addressViewModel: AddressViewModel
 ) {
-  val location = mapViewModel.selectedLocation.collectAsState().value!!
-  val title = remember {
-    mutableStateOf(
-        "${("%.2f").format(location.center.longitude())}, ${("%.3f").format(location.center.latitude())}")
-  }
+  val title = remember { mutableStateOf("") }
   val description = remember { mutableStateOf("") }
   val rackType = remember { mutableStateOf<ParkingAttribute>(ParkingRackType.TWO_TIER) }
   val capacity = remember { mutableStateOf<ParkingAttribute>(ParkingCapacity.XSMALL) }
   val protection = remember { mutableStateOf<ParkingAttribute>(ParkingProtection.INDOOR) }
   val hasSecurity = remember { mutableStateOf(false) }
+
+  val location = mapViewModel.selectedLocation.collectAsState().value!!
+  LaunchedEffect(location) { addressViewModel.search(location.center) }
+  val suggestedAddress = addressViewModel.address.collectAsState().value
+  LaunchedEffect(suggestedAddress) { title.value = suggestedAddress.displayRelevantFields() }
 
   fun onSubmit() {
     val parking =

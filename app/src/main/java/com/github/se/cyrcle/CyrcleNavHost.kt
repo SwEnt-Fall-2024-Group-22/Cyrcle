@@ -3,6 +3,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.review.ReviewViewModel
@@ -23,7 +24,8 @@ fun CyrcleNavHost(
     navController: NavHostController,
     parkingViewModel: ParkingViewModel,
     reviewViewModel: ReviewViewModel,
-    mapViewModel: MapViewModel
+    mapViewModel: MapViewModel,
+    addressViewModel: AddressViewModel,
 ) {
   NavHost(navController = navController, startDestination = Route.AUTH) {
     navigation(
@@ -53,7 +55,7 @@ fun CyrcleNavHost(
     navigation(startDestination = Screen.LOCATION_PICKER, route = Route.ADD_SPOTS) {
       composable(Screen.LOCATION_PICKER) { LocationPicker(navigationActions, mapViewModel) }
       composable(Screen.ATTRIBUTES_PICKER) {
-        AttributesPicker(navigationActions, parkingViewModel, mapViewModel)
+        AttributesPicker(navigationActions, parkingViewModel, mapViewModel, addressViewModel)
       }
     }
   }

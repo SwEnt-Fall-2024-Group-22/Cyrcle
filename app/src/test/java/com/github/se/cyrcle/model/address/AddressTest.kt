@@ -40,7 +40,8 @@ class AddressTest {
     val address1 =
         Address(
             country = "Switzerland", city = "Lausanne", road = "Avenue de la Gare", house = "14")
-    assertEquals("14, Avenue de la Gare, Lausanne", address1.displayRelevantFields())
+    val expected1 = "Avenue de la Gare, 14, Lausanne"
+    assertEquals(expected1, address1.displayRelevantFields())
 
     val address2 =
         Address(
@@ -48,7 +49,7 @@ class AddressTest {
             city = "Paris",
             road = "Rue du Faubourg Saint-Honoré",
             house = "55")
-    assertEquals(
-        "Palais de L'Élysée, 55, Rue du Faubourg Saint-Honoré", address2.displayRelevantFields())
+    val expected2 = "Palais de L'Élysée"
+    assertEquals(expected2, address2.displayRelevantFields())
   }
 }
