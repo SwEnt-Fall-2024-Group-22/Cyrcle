@@ -3,6 +3,7 @@ package com.github.se.cyrcle.ui.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -12,6 +13,7 @@ object Route {
   const val LIST = "List"
   const val MAP = "Map"
   const val ADD_SPOTS = "Add Spots"
+  const val PROFILE = "Profile"
 }
 
 object Screen {
@@ -22,6 +24,7 @@ object Screen {
   const val REVIEW = "Review Screen"
   const val LOCATION_PICKER = "Location Picker"
   const val ATTRIBUTES_PICKER = "Attributes Picker"
+  const val PROFILE = "Profile Screen"
 }
 
 /**
@@ -39,10 +42,14 @@ object TopLevelDestinations {
       TopLevelDestination(route = Route.LIST, icon = Icons.Outlined.Menu, textId = Route.LIST)
   val MAP =
       TopLevelDestination(route = Route.MAP, icon = Icons.Outlined.LocationOn, textId = Route.MAP)
+  val PROFILE =
+      TopLevelDestination(
+          route = Route.PROFILE, icon = Icons.Outlined.Person, textId = Route.PROFILE)
 }
 
 /** List of top level destinations in the app. */
-val LIST_TOP_LEVEL_DESTINATION = listOf(TopLevelDestinations.MAP, TopLevelDestinations.LIST)
+val LIST_TOP_LEVEL_DESTINATION =
+    listOf(TopLevelDestinations.MAP, TopLevelDestinations.LIST, TopLevelDestinations.PROFILE)
 
 /** Adapter class for navigating between screens in the app. */
 open class NavigationActions(private val navController: NavHostController) {
@@ -56,10 +63,10 @@ open class NavigationActions(private val navController: NavHostController) {
    */
   open fun navigateTo(destination: TopLevelDestination) {
     navController.navigate(destination.route) {
-      // Pop up to the start destination of the graph to
-      // avoid building up a large stack of destinations
-      // on the back stack as users select items
       popUpTo(navController.graph.findStartDestination().id) {
+        // Pop up to the start destination of the graph to
+        // avoid building up a large stack of destinations
+        // on the back stack as users select items
         saveState = true
         inclusive = true
       }

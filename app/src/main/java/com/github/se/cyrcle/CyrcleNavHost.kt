@@ -16,6 +16,7 @@ import com.github.se.cyrcle.ui.map.MapScreen
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
+import com.github.se.cyrcle.ui.profile.ProfileScreen
 import com.github.se.cyrcle.ui.review.ReviewScreen
 
 @Composable
@@ -52,11 +53,20 @@ fun CyrcleNavHost(
     ) {
       composable(Screen.MAP) { MapScreen(navigationActions, parkingViewModel, mapViewModel) }
     }
+
     navigation(startDestination = Screen.LOCATION_PICKER, route = Route.ADD_SPOTS) {
       composable(Screen.LOCATION_PICKER) { LocationPicker(navigationActions, mapViewModel) }
       composable(Screen.ATTRIBUTES_PICKER) {
         AttributesPicker(navigationActions, parkingViewModel, mapViewModel, addressViewModel)
       }
+    }
+
+    // Add this new navigation block for Profile
+    navigation(
+        startDestination = Screen.PROFILE,
+        route = Route.PROFILE,
+    ) {
+      composable(Screen.PROFILE) { ProfileScreen(navigationActions) }
     }
   }
 }
