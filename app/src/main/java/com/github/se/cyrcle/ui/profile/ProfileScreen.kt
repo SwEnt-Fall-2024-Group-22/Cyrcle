@@ -202,9 +202,7 @@ private fun DisplayProfileContent(
       testTag = "DisplayFirstName")
 
   Text(
-      text = lastName,
-      style = MaterialTheme.typography.headlineMedium,
-      testTag ="DisplayLastName")
+      text = lastName, style = MaterialTheme.typography.headlineMedium, testTag = "DisplayLastName")
 
   Spacer(modifier = Modifier.height(16.dp))
 
@@ -217,9 +215,7 @@ private fun DisplayProfileContent(
   Spacer(modifier = Modifier.height(8.dp))
 
   Text(
-      text = "@$username",
-      style = MaterialTheme.typography.bodyMedium,
-      testTag ="DisplayUsername")
+      text = "@$username", style = MaterialTheme.typography.bodyMedium, testTag = "DisplayUsername")
 
   Spacer(modifier = Modifier.height(16.dp))
 
