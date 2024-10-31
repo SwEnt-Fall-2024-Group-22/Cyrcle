@@ -40,10 +40,10 @@ import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.InputText
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 
-
-
 @Composable
-fun ProfileScreen(navigationActions: NavigationActions) {
+fun ProfileScreen(
+    navigationActions: NavigationActions
+) {
     var isEditing by remember { mutableStateOf(false) }
     var firstName by remember { mutableStateOf("John") }
     var lastName by remember { mutableStateOf("Doe") }
@@ -162,11 +162,12 @@ fun ProfileScreen(navigationActions: NavigationActions) {
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                FavoriteParkingsSection(favoriteParkings.map { it.optName ?: "" }) { newFavorites ->
-                    favoriteParkings = favoriteParkings.filter { parking ->
-                        newFavorites.contains(parking.optName)
+                FavoriteParkingsSection(
+                    favoriteParkings = favoriteParkings,
+                    onFavoritesUpdated = { newFavorites ->
+                        favoriteParkings = newFavorites
                     }
-                }
+                )
             }
         }
     }
@@ -347,8 +348,8 @@ private fun ProfileImage(
 
 @Composable
 private fun FavoriteParkingsSection(
-    favoriteParkings: List<String>,
-    onFavoritesUpdated: (List<String>) -> Unit
+    favoriteParkings: List<Parking>,
+    onFavoritesUpdated: (List<Parking>) -> Unit
 ) {
     Text(
         text = "Favorite Parkings",
@@ -388,7 +389,7 @@ private fun FavoriteParkingsSection(
 
 @Composable
 private fun FavoriteParkingCard(
-    parking: String,
+    parking: Parking,
     index: Int,
     onRemove: () -> Unit
 ) {
@@ -402,7 +403,7 @@ private fun FavoriteParkingCard(
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Text(
-                text = parking,
+                text = parking.optName ?: "", // Display only the optName property
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
                     .align(Alignment.Center)
@@ -431,7 +432,7 @@ private fun FavoriteParkingCard(
         AlertDialog(
             onDismissRequest = { showConfirmDialog = false },
             title = { Text("Remove favorite") },
-            text = { Text("Are you sure you want to remove $parking from your favorites?") },
+            text = { Text("Are you sure you want to remove ${parking.optName} from your favorites?") },
             confirmButton = {
                 TextButton(
                     onClick = {
