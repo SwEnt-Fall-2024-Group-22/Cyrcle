@@ -43,7 +43,7 @@ jobs:
           distribution: "temurin"
           java-version: "17"
 
-      # Caching is a very useful part of a CI, as a workflow is executed in a clean environment every time,
+      # Cachng is a very useful part of a CI, as a workflow is executed in a clean environment every time,
       # this means that one would need to re-download and re-process gradle files for every run. Which is very time consuming.
       # To avoid that, we cache the the gradle folder to reuse it later.
       - name: Gradle cache
