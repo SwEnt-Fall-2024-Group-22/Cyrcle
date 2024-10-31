@@ -148,7 +148,7 @@ fun CardScreen(
 
                                       Button(
                                           onClick = {
-                                            navigationActions.navigateTo(Screen.ALL_REVIEWS_SCREEN)
+                                            navigationActions.navigateTo(Screen.ALL_REVIEWS)
                                           },
                                           modifier =
                                               Modifier.fillMaxWidth()

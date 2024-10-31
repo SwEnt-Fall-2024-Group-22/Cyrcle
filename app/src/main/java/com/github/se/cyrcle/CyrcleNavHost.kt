@@ -9,7 +9,6 @@ import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.ui.addParking.attributes.AttributesPicker
 import com.github.se.cyrcle.ui.addParking.location.LocationPicker
-import com.github.se.cyrcle.ui.review.AllReviewsScreen
 import com.github.se.cyrcle.ui.authentication.SignInScreen
 import com.github.se.cyrcle.ui.card.CardScreen
 import com.github.se.cyrcle.ui.list.SpotListScreen
@@ -18,6 +17,7 @@ import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.profile.ProfileScreen
+import com.github.se.cyrcle.ui.review.AllReviewsScreen
 import com.github.se.cyrcle.ui.review.ReviewScreen
 
 @Composable
@@ -29,48 +29,48 @@ fun CyrcleNavHost(
     mapViewModel: MapViewModel,
     addressViewModel: AddressViewModel,
 ) {
-  NavHost(navController = navController, startDestination = Route.AUTH) {
-    navigation(
-        startDestination = Screen.AUTH,
-        route = Route.AUTH,
-    ) {
-      composable(Screen.AUTH) { SignInScreen(navigationActions) }
-    }
+    NavHost(navController = navController, startDestination = Route.AUTH) {
+        navigation(
+            startDestination = Screen.AUTH,
+            route = Route.AUTH,
+        ) {
+            composable(Screen.AUTH) { SignInScreen(navigationActions) }
+        }
 
-    navigation(
-        startDestination = Screen.LIST,
-        route = Route.LIST,
-    ) {
-      composable(Screen.LIST) { SpotListScreen(navigationActions, parkingViewModel) }
-      composable(Screen.CARD) { CardScreen(navigationActions, parkingViewModel) }
-      composable(Screen.ALL_REVIEWS_SCREEN) {
-        AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel)
-      }
-      composable(Screen.REVIEW) {
-        ReviewScreen(navigationActions, parkingViewModel, reviewViewModel)
-      }
-    }
+        navigation(
+            startDestination = Screen.LIST,
+            route = Route.LIST,
+        ) {
+            composable(Screen.LIST) { SpotListScreen(navigationActions, parkingViewModel) }
+            composable(Screen.CARD) { CardScreen(navigationActions, parkingViewModel) }
+            composable(Screen.REVIEW) {
+                ReviewScreen(navigationActions, parkingViewModel, reviewViewModel)
+            }
+            composable(Screen.ALL_REVIEWS){
+                AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel)
+            }
+        }
 
-    navigation(
-        startDestination = Screen.MAP,
-        route = Route.MAP,
-    ) {
-      composable(Screen.MAP) { MapScreen(navigationActions, parkingViewModel, mapViewModel) }
-    }
+        navigation(
+            startDestination = Screen.MAP,
+            route = Route.MAP,
+        ) {
+            composable(Screen.MAP) { MapScreen(navigationActions, parkingViewModel, mapViewModel) }
+        }
 
-    navigation(startDestination = Screen.LOCATION_PICKER, route = Route.ADD_SPOTS) {
-      composable(Screen.LOCATION_PICKER) { LocationPicker(navigationActions, mapViewModel) }
-      composable(Screen.ATTRIBUTES_PICKER) {
-        AttributesPicker(navigationActions, parkingViewModel, mapViewModel, addressViewModel)
-      }
-    }
+        navigation(startDestination = Screen.LOCATION_PICKER, route = Route.ADD_SPOTS) {
+            composable(Screen.LOCATION_PICKER) { LocationPicker(navigationActions, mapViewModel) }
+            composable(Screen.ATTRIBUTES_PICKER) {
+                AttributesPicker(navigationActions, parkingViewModel, mapViewModel, addressViewModel)
+            }
+        }
 
-    // Add this new navigation block for Profile
-    navigation(
-        startDestination = Screen.PROFILE,
-        route = Route.PROFILE,
-    ) {
-      composable(Screen.PROFILE) { ProfileScreen(navigationActions) }
+        // Add this new navigation block for Profile
+        navigation(
+            startDestination = Screen.PROFILE,
+            route = Route.PROFILE,
+        ) {
+            composable(Screen.PROFILE) { ProfileScreen(navigationActions) }
+        }
     }
-  }
 }
