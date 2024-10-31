@@ -29,7 +29,7 @@ class UserRepositoryFirestoreTest {
 
   private lateinit var userRepositoryFirestore: UserRepositoryFirestore
 
-  private val user = UserTestInstances.user1
+  private val user = TestInstancesUser.user1
 
   @Before
   fun setUp() {

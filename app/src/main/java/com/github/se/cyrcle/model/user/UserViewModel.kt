@@ -3,11 +3,17 @@ package com.github.se.cyrcle.model.user
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.github.se.cyrcle.model.parking.Parking
+import com.github.se.cyrcle.model.parking.ParkingRepository
+import com.github.se.cyrcle.model.parking.ParkingRepositoryFirestore
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
+class UserViewModel(
+    private val userRepository: UserRepository,
+    private val parkingRepository: ParkingRepository
+) : ViewModel() {
 
   private val _currentUser = MutableStateFlow<User?>(null)
   val currentUser: StateFlow<User?> = _currentUser
@@ -20,6 +26,9 @@ class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
   fun setCurrentUser(user: User) {
     _currentUser.value = user
   }
+
+  private val _favoriteParkings = MutableStateFlow<List<Parking>>(emptyList())
+  val favoriteParkings: StateFlow<List<Parking>> = _favoriteParkings
 
   /**
    * Gets a user by ID from the Firestore database and sets it as the current user.
@@ -98,24 +107,25 @@ class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
     }
   }
 
-  /*
-  fun getFavoriteParkings(userId: String, onResult: (List<String>) -> Unit) {
-      userRepository.getFavoriteParkings(
-          userId,
-          onSuccess = { parkingIds -> onResult(parkingIds) },
-          onFailure = { exception ->
-            Log.e("com.github.se.cyrcle.model.user.UserViewModel", "Failed to get favorite parkings for user: $userId", exception)
-            onResult(emptyList())
-          })
+  /** Gets the favorite parkings of the current user and sets them in the favorite parkings state */
+  fun getSelectedUserFavoriteParking() {
+    parkingRepository.getParkingsByListOfIds(
+        currentUser.value!!.favoriteParkings,
+        onSuccess = { _favoriteParkings.value = it },
+        onFailure = { exception ->
+          Log.e("UserViewModel", "Failed to fetch favorite parkings of current user", exception)
+        })
   }
-   */
 
   companion object {
     val Factory: ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return UserViewModel(UserRepositoryFirestore(FirebaseFirestore.getInstance())) as T
+            return UserViewModel(
+                UserRepositoryFirestore(FirebaseFirestore.getInstance()),
+                ParkingRepositoryFirestore(FirebaseFirestore.getInstance()))
+                as T
           }
         }
   }

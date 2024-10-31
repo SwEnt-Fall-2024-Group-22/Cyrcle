@@ -9,6 +9,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.github.se.cyrcle.model.address.AddressRepository
+import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ImageRepository
 import com.github.se.cyrcle.model.parking.ParkingRepository
@@ -40,6 +41,7 @@ class MainActivity : ComponentActivity() {
     val reviewViewModel = ReviewViewModel(reviewRepository)
     val parkingViewModel = ParkingViewModel(imageRepository, parkingRepository)
     val mapViewModel = MapViewModel()
+    val addressViewModel = AddressViewModel(addressRepository)
     setContent {
       CyrcleTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
@@ -47,7 +49,12 @@ class MainActivity : ComponentActivity() {
           val navigationActions = NavigationActions(navController)
 
           CyrcleNavHost(
-              navigationActions, navController, parkingViewModel, reviewViewModel, mapViewModel)
+              navigationActions,
+              navController,
+              parkingViewModel,
+              reviewViewModel,
+              mapViewModel,
+              addressViewModel)
         }
       }
     }

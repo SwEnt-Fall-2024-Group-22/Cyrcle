@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.model.address
 
+import android.util.Log
 import com.google.gson.annotations.SerializedName
 
 /**
@@ -66,15 +67,33 @@ data class Address(
     @SerializedName("continent") val continent: String = ""
 ) {
   /**
-   * Among the fields of the address, we choose the most relevant ones to display.
+   * Among the fields of the address, we choose the most relevant ones to display. The order of the
+   * fields is important. We choose not to display some fields at all, even if they are present.
    *
    * @return The most relevant fields of the address.
    */
   fun displayRelevantFields(): String {
-    // The order of the fields is important. We choose not to display some fields at all, even if
-    // they are present.
     val fieldPriorities =
-        listOf(publicName, house, road, cityBlock, neighbourhood, hamlet, suburb, city)
-    return fieldPriorities.filter { it.isNotEmpty() }.take(3).joinToString(", ")
+        listOf(publicName, road, house, cityBlock, neighbourhood, hamlet, suburb, city)
+    return shortenString(fieldPriorities.filter { it.isNotEmpty() }.take(3).joinToString(", "), 32)
+  }
+
+  /**
+   * If the string is longer than length. Shorten the string by removing everything after the last
+   * comma
+   *
+   * @param string the string to shorten
+   * @param length the maximum length of the string
+   */
+  private fun shortenString(string: String, length: Int): String {
+    Log.d("Address", "Shortening string $string to length $length")
+    if (string.length <= length) {
+      return string
+    }
+    val lastComma = string.lastIndexOf(",")
+    if (lastComma == -1) {
+      return string
+    }
+    return shortenString(string.substring(0, lastComma), length)
   }
 }

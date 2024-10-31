@@ -6,13 +6,12 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.github.se.cyrcle.model.parking.ImageRepositoryCloudStorage
-import com.github.se.cyrcle.model.parking.ParkingRepositoryFirestore
+import com.github.se.cyrcle.di.mocks.MockImageRepository
+import com.github.se.cyrcle.di.mocks.MockParkingRepository
+import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -27,14 +26,15 @@ class MapScreenTest {
 
   private lateinit var mockNavigation: NavigationActions
   private lateinit var parkingViewModel: ParkingViewModel
+  private lateinit var mapViewModel: MapViewModel
 
   @Before
   fun setUp() {
     mockNavigation = mock(NavigationActions::class.java)
-    val imageRepository = ImageRepositoryCloudStorage(FirebaseAuth.getInstance())
-    val parkingRepository = ParkingRepositoryFirestore(FirebaseFirestore.getInstance())
+    val imageRepository = MockImageRepository()
+    val parkingRepository = MockParkingRepository()
     parkingViewModel = ParkingViewModel(imageRepository, parkingRepository)
-
+    mapViewModel = MapViewModel()
     `when`(mockNavigation.currentRoute()).thenReturn(Screen.MAP)
   }
 
@@ -46,7 +46,7 @@ class MapScreenTest {
    */
   @Test
   fun testMapIsDisplayed() {
-    composeTestRule.setContent { MapScreen(mockNavigation, parkingViewModel = parkingViewModel) }
+    composeTestRule.setContent { MapScreen(mockNavigation, parkingViewModel, mapViewModel) }
 
     composeTestRule.onNodeWithTag("MapScreen").assertIsDisplayed()
     composeTestRule.onNodeWithTag("BottomNavigationBar").assertIsDisplayed()
@@ -71,8 +71,7 @@ class MapScreenTest {
     val state = mutableStateOf(defaultZoom)
 
     composeTestRule.setContent {
-      MapScreen(
-          navigationActions = mockNavigation, parkingViewModel = parkingViewModel, state = state)
+      MapScreen(navigationActions = mockNavigation, parkingViewModel, mapViewModel, state)
     }
 
     for (i in 0..(defaultZoom - minZoom).toInt()) {
@@ -95,8 +94,7 @@ class MapScreenTest {
     val state = mutableStateOf(defaultZoom)
 
     composeTestRule.setContent {
-      MapScreen(
-          navigationActions = mockNavigation, parkingViewModel = parkingViewModel, state = state)
+      MapScreen(navigationActions = mockNavigation, parkingViewModel, mapViewModel, state)
     }
 
     for (i in 0..(maxZoom - defaultZoom).toInt()) {

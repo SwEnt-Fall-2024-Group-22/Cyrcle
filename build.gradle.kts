@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid) apply false
     alias(libs.plugins.ktfmt) apply false
     alias(libs.plugins.gms) apply false
+    
     alias(libs.plugins.hilt) apply false
     alias(libs.plugins.sonar)
 }

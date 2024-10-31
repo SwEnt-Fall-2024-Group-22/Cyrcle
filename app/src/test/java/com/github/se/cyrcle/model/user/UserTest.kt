@@ -7,7 +7,7 @@ import org.junit.Test
 class UserTest {
   @Test
   fun testConstructor() {
-    val user = UserTestInstances.user1
+    val user = TestInstancesUser.user1
     assertEquals("user1", user.userId)
     assertEquals("john_doe", user.username)
     assertEquals("John", user.firstName)
@@ -19,10 +19,10 @@ class UserTest {
 
   @Test
   fun testEqualsAndHashCode() {
-    val user1 = UserTestInstances.user1
-    val copyUser1 = UserTestInstances.user1
-    val newUser = UserTestInstances.newUser
-    UserTestInstances.updatedUser
+    val user1 = TestInstancesUser.user1
+    val copyUser1 = TestInstancesUser.user1
+    val newUser = TestInstancesUser.newUser
+    TestInstancesUser.updatedUser
     assertEquals(user1, copyUser1)
     assertNotEquals(user1, newUser)
     assertEquals(user1.hashCode(), copyUser1.hashCode())

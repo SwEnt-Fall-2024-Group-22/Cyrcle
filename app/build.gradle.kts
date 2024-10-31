@@ -16,6 +16,12 @@ android {
     namespace = "com.github.se.cyrcle"
     compileSdk = 34
 
+
+    buildFeatures {
+        viewBinding = true
+    }
+
+
     initLocalProps()
 
     defaultConfig {
@@ -259,7 +265,6 @@ fun initLocalProps(): Properties {
     if (localPropertiesFile.exists())
         localProperties.load(localPropertiesFile.inputStream())
 
-
     val mapboxAccessToken = localProperties.getProperty("MAPBOX_ACCESS_TOKEN")
     if (mapboxAccessToken != null) {
         val mapboxAccessTokenXmlFile = file("src/main/res/values/mapbox_access_token.xml")
@@ -274,6 +279,4 @@ fun initLocalProps(): Properties {
     } else {
         throw GradleException("mapbox_access_token not found in local.properties")
     }
-
-    return localProperties
 }

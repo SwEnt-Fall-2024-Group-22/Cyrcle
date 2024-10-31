@@ -24,6 +24,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,6 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.review.Review
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
@@ -49,6 +51,10 @@ fun ReviewScreen(
   var textValue by remember { mutableStateOf("") }
 
   val context = LocalContext.current // Get the current context
+
+  val selectedParking =
+      parkingViewModel.selectedParking.collectAsState().value
+          ?: return Text(text = "No parking selected. Should not happen")
 
   Scaffold(topBar = { TopAppBar(navigationActions = navigationActions, "Add Your Review") }) {
       paddingValues ->
@@ -91,7 +97,9 @@ fun ReviewScreen(
               modifier = Modifier.padding(top = 8.dp).testTag("ExperienceText"))
 
           // Slider with step granularity of 0.5
-          Text(text = "Rating: $sliderValue", style = MaterialTheme.typography.bodyLarge)
+          Text(
+              text = "Rating: ${sliderValue.toDouble()}",
+              style = MaterialTheme.typography.bodyLarge)
           Slider(
               value = sliderValue,
               onValueChange = { newValue -> sliderValue = newValue },
@@ -114,6 +122,16 @@ fun ReviewScreen(
           Button(
               onClick = {
                 Toast.makeText(context, "Review Added!", Toast.LENGTH_SHORT).show()
+                // to avoid problematic castings
+                val sliderToValue = (sliderValue * 100).toInt() / 100.0
+                reviewViewModel.addReview(
+                    Review(
+                        owner = "default",
+                        text = textValue,
+                        parking = selectedParking.uid,
+                        rating = sliderToValue,
+                        uid = reviewViewModel.getNewUid()))
+                parkingViewModel.updateReviewScore(sliderToValue, selectedParking)
                 navigationActions.goBack()
               },
               modifier =

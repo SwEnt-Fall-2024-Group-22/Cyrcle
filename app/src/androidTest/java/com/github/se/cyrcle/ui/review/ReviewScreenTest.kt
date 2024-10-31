@@ -10,13 +10,16 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeRight
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.github.se.cyrcle.model.parking.ImageRepository
-import com.github.se.cyrcle.model.parking.ParkingRepository
+import com.github.se.cyrcle.di.mocks.MockImageRepository
+import com.github.se.cyrcle.di.mocks.MockParkingRepository
+import com.github.se.cyrcle.di.mocks.MockReviewRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
-import com.github.se.cyrcle.model.review.ReviewRepository
+import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.model.review.ReviewViewModel
+import com.github.se.cyrcle.model.review.TestInstancesReview
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -31,11 +34,17 @@ class ReviewScreenTest {
   // Mock dependencies
   private val mockNavigationActions = mock(NavigationActions::class.java)
 
-  private val mockParkingRepository = mock(ParkingRepository::class.java)
-  private val mockImageRepository = mock(ImageRepository::class.java)
-  private val mockReviewRepository = mock(ReviewRepository::class.java)
+  private val mockParkingRepository = MockParkingRepository()
+  private val mockImageRepository = MockImageRepository()
+  private val mockReviewRepository = MockReviewRepository()
   private val parkingViewModel = ParkingViewModel(mockImageRepository, mockParkingRepository)
   private val reviewViewModel = ReviewViewModel(mockReviewRepository)
+
+  @Before
+  fun setUp() {
+    parkingViewModel.selectParking(TestInstancesParking.parking1)
+    reviewViewModel.addReview(TestInstancesReview.review1)
+  }
 
   @Test
   fun reviewScreen_hasTopAppBar() {
@@ -90,14 +99,10 @@ class ReviewScreenTest {
     composeTestRule.setContent {
       ReviewScreen(mockNavigationActions, parkingViewModel, reviewViewModel)
     }
-
     // Enter a review
     composeTestRule.onNodeWithTag("ReviewInput").performTextInput("Great parking!")
 
     // Click Add Review button
     composeTestRule.onNodeWithTag("AddReviewButton").performClick()
-
-    // Assert that navigation was triggered
-    // This can be extended with proper validation using Mockito
   }
 }

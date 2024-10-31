@@ -132,6 +132,15 @@ fun CardScreen(
                                       text = if (selectedParking.hasSecurity) "Yes" else "No",
                                       color = Color.Gray)
                                 }
+                                Column(
+                                    modifier = Modifier.weight(1f).testTag("AverageRatingColumn")) {
+                                      Text(text = "Current Rating", fontWeight = FontWeight.Bold)
+                                      Text(
+                                          text =
+                                              if (selectedParking.nbReviews == 0) "No reviews yet"
+                                              else selectedParking.avgScore.toString(),
+                                          color = Color.Gray)
+                                    }
                               }
                         }
 

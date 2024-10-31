@@ -80,7 +80,7 @@ class ParkingRepositoryFirestoreTest {
     `when`(mockDocumentSnapshot.toObject(Parking::class.java)).thenReturn(parking)
 
     // Call the method under test
-    parkingRepositoryFirestore.getParkings(
+    parkingRepositoryFirestore.getAllParkings(
         onSuccess = { parkings ->
           // Assert that the returned list contains the expected Parking object
           assert(parkings.size == 1)
@@ -105,7 +105,7 @@ class ParkingRepositoryFirestoreTest {
     `when`(mockCollectionReference.get()).thenReturn(taskCompletionSource.task)
 
     // Call the method under test
-    parkingRepositoryFirestore.getParkings(
+    parkingRepositoryFirestore.getAllParkings(
         onSuccess = { fail("Expected failure but got success") }, onFailure = { assert(true) })
 
     // Complete the task to trigger the addOnCompleteListener with an exception
@@ -136,6 +136,42 @@ class ParkingRepositoryFirestoreTest {
         onFailure = { assert(true) })
 
     verify(timeout(100)) { mockDocumentReference.get() }
+  }
+
+  @Test
+  fun getParkingsByListOfIds_returnsCorrectValues() {
+    // Create a TaskCompletionSource to manually complete the task
+    val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
+
+    // Ensure that mockParkingQuerySnapshot is properly initialized and mocked
+    `when`(mockCollectionReference.get()).thenReturn(taskCompletionSource.task)
+
+    // Ensure the QuerySnapshot returns a list of mock DocumentSnapshots
+    `when`(mockParkingQuerySnapshot.documents).thenReturn(listOf(mockDocumentSnapshot))
+
+    // Ensure that the DocumentSnapshot returns the expected Parking object
+    `when`(mockDocumentSnapshot.toObject(Parking::class.java)).thenReturn(parking)
+
+    // Mock the CollectionReference to return Parking objects with the given IDs
+    `when`(mockCollectionReference.whereIn(any<String>(), any()))
+        .thenReturn(mockCollectionReference)
+
+    // Call the method under test
+    parkingRepositoryFirestore.getParkingsByListOfIds(
+        listOf(parking.uid),
+        onSuccess = { parkings ->
+          // Assert that the returned list contains the expected Parking object
+          assert(parkings.size == 1)
+          assert(parkings[0] == parking)
+        },
+        onFailure = { fail("Expected success but got failure") })
+
+    // Complete the task to trigger the addOnCompleteListener
+    taskCompletionSource.setResult(mockParkingQuerySnapshot)
+
+    // Verify that the 'documents' field was accessed
+    verify(timeout(100)) { mockParkingQuerySnapshot.documents }
+    verify(timeout(100)) { mockDocumentSnapshot.toObject(Parking::class.java) }
   }
 
   @Test
