@@ -8,11 +8,8 @@ import androidx.compose.ui.graphics.Color
 
 val Black = Color(0xFF000000)
 val White = Color(0xFFFFFFFF)
-val LightBlue = Color(0xFFD1E7F8)
 val Red = Color(0xFFFF0000)
 val DarkRed = Color(0xFFAA0000)
-// val Green = Color(0xFF00FF00)
-// val DarkGreen = Color(0xFF00AA00)
 val Blue = Color(0xFF0000FF)
 val DarkBlue = Color(0xFF0000AA)
 
@@ -34,7 +31,12 @@ val DarkCeruleanTint = Color(0xFF34A5D2)
 val DarkMadder = Color(0xFF851D22)
 val DarkGoldenBrown = Color(0xFF855D1D)
 
-/** TODO */
+/**
+ * Invert a color, without changing its alpha channel.
+ *
+ * @param color The color to inverse
+ * @return The color with all but the alpha one inverted.
+ */
 fun invertColor(color: Color): Color {
   val r = 255 - (color.red * 255).toInt()
   val g = 255 - (color.green * 255).toInt()

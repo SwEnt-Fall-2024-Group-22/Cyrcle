@@ -12,9 +12,9 @@ const val primaryContainerAlphaModifier = 0.75f
 const val surfaceContainerAlphaModifier = 0.75f
 
 /**
- *  Return a default OnColor (for text and/or icon), based on the system theme.
+ * Return a default OnColor (for text and/or icon), based on the system theme.
  *
- *  @return A light color if the system is in light theme, or a dark one otherwise.
+ * @return A light color if the system is in light theme, or a dark one otherwise.
  */
 @Composable
 fun defaultOnColor(): Color {
@@ -75,9 +75,9 @@ val LightColorScheme =
         surfaceContainerHigh = CeruleanHigh.copy(alpha = surfaceContainerAlphaModifier),
         surfaceContainerHighest = CeruleanHighest.copy(alpha = surfaceContainerAlphaModifier),
         // Others
-        scrim = White, // Semi-transparent overlay color // TODO
-        outline = White, // TODO
-        outlineVariant = White // TODO
+        scrim = White, // Semi-transparent overlay color // Unused
+        outline = White, // Unused
+        outlineVariant = White // Unused
         )
 
 val DarkColorScheme =
@@ -123,13 +123,14 @@ val DarkColorScheme =
         surfaceContainerHigh = DarkCeruleanHigh.copy(alpha = surfaceContainerAlphaModifier),
         surfaceContainerHighest = DarkCeruleanHighest.copy(alpha = surfaceContainerAlphaModifier),
         // Others
-        scrim = White, // Semi-transparent overlay color // TODO
-        outline = White, // TODO
-        outlineVariant = White // TODO
+        scrim = White, // Semi-transparent overlay color // Unused
+        outline = White, // Unused
+        outlineVariant = White // Unused
         )
 
 /**
  * Return a themed color, depending on the system theme.
+ *
  * @return A themed color.
  */
 @Composable
@@ -137,9 +138,7 @@ fun disabledColor(): Color {
   return if (isSystemInDarkTheme()) Color.DarkGray else Color.LightGray
 }
 
-/**
- * Generate the theme of the application.
- */
+/** Generate the theme of the application. */
 @Composable
 fun CyrcleTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
