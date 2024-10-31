@@ -10,6 +10,9 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeRight
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.se.cyrcle.di.mocks.MockImageRepository
+import com.github.se.cyrcle.di.mocks.MockParkingRepository
+import com.github.se.cyrcle.di.mocks.MockReviewRepository
 import com.github.se.cyrcle.model.parking.ImageRepository
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
@@ -35,9 +38,9 @@ class ReviewScreenTest {
   // Mock dependencies
   private val mockNavigationActions = mock(NavigationActions::class.java)
 
-  private val mockParkingRepository = mock(ParkingRepository::class.java)
-  private val mockImageRepository = mock(ImageRepository::class.java)
-  private val mockReviewRepository = mock(ReviewRepository::class.java)
+  private val mockParkingRepository = MockParkingRepository()
+  private val mockImageRepository = MockImageRepository()
+  private val mockReviewRepository = MockReviewRepository()
   private val parkingViewModel = ParkingViewModel(mockImageRepository, mockParkingRepository)
   private val reviewViewModel = ReviewViewModel(mockReviewRepository)
 
