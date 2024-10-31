@@ -26,6 +26,12 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
+import com.github.se.cyrcle.ui.card.Location
+import com.github.se.cyrcle.ui.card.Parking
+import com.github.se.cyrcle.ui.card.ParkingCapacity
+import com.github.se.cyrcle.ui.card.ParkingProtection
+import com.github.se.cyrcle.ui.card.ParkingRackType
+import com.github.se.cyrcle.ui.card.Point
 import com.github.se.cyrcle.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
@@ -33,6 +39,8 @@ import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.InputText
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
+
+
 
 @Composable
 fun ProfileScreen(navigationActions: NavigationActions) {
@@ -44,11 +52,42 @@ fun ProfileScreen(navigationActions: NavigationActions) {
     var favoriteParkings by remember {
         mutableStateOf(
             listOf(
-                "Parking Central",
-                "Parking Station",
-                "Parking Mall",
-                "Parking Airport",
-                "Parking Downtown"
+                Parking(
+                    uid = "1",
+                    optName = "Parking Central",
+                    optDescription = null,
+                    location = Location(Point(1.0, 1.0)),
+                    images = emptyList(),
+                    capacity = ParkingCapacity.MEDIUM,
+                    rackType = ParkingRackType.U_RACK,
+                    protection = ParkingProtection.NONE,
+                    price = 0.0,
+                    hasSecurity = false
+                ),
+                Parking(
+                    uid = "2",
+                    optName = "Parking Station",
+                    optDescription = null,
+                    location = Location(Point(2.0, 2.0)),
+                    images = emptyList(),
+                    capacity = ParkingCapacity.SMALL,
+                    rackType = ParkingRackType.WALL_BUTTERFLY,
+                    protection = ParkingProtection.COVERED,
+                    price = 2.5,
+                    hasSecurity = true
+                ),
+                Parking(
+                    uid = "3",
+                    optName = "Parking Mall",
+                    optDescription = null,
+                    location = Location(Point(3.0, 3.0)),
+                    images = emptyList(),
+                    capacity = ParkingCapacity.LARGE,
+                    rackType = ParkingRackType.GRID,
+                    protection = ParkingProtection.INDOOR,
+                    price = 1.0,
+                    hasSecurity = true
+                )
             )
         )
     }
@@ -123,8 +162,10 @@ fun ProfileScreen(navigationActions: NavigationActions) {
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                FavoriteParkingsSection(favoriteParkings) { newFavorites ->
-                    favoriteParkings = newFavorites
+                FavoriteParkingsSection(favoriteParkings.map { it.optName ?: "" }) { newFavorites ->
+                    favoriteParkings = favoriteParkings.filter { parking ->
+                        newFavorites.contains(parking.optName)
+                    }
                 }
             }
         }
