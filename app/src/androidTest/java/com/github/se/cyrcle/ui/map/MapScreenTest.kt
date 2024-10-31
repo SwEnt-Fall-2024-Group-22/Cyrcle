@@ -49,7 +49,7 @@ class MapScreenTest {
     composeTestRule.setContent { MapScreen(mockNavigation, parkingViewModel, mapViewModel) }
 
     composeTestRule.onNodeWithTag("MapScreen").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("BottomNavigationBar").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("NavigationBar").assertIsDisplayed()
 
     // Assert that the zoom controls are displayed
     composeTestRule.onNodeWithTag("ZoomControlsIn").assertIsDisplayed()

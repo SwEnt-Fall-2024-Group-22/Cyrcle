@@ -5,6 +5,8 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFloatingActionButton
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -12,9 +14,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import com.github.se.cyrcle.ui.theme.ColorLevel
+import com.github.se.cyrcle.ui.theme.disabledColor
 import com.github.se.cyrcle.ui.theme.getButtonColors
-import com.github.se.cyrcle.ui.theme.getContainerColor
-import com.github.se.cyrcle.ui.theme.getContentColor
+import com.github.se.cyrcle.ui.theme.getColor
+import com.github.se.cyrcle.ui.theme.getOnColor
 
 /**
  * Create a themed small floating action button, with simplified arguments.
@@ -38,8 +41,8 @@ fun SmallFloatingActionButton(
   SmallFloatingActionButton(
       onClick = { onClick() },
       modifier = modifier.testTag(testTag),
-      containerColor = getContainerColor(colorLevel),
-      contentColor = getContentColor(colorLevel)) {
+      containerColor = getColor(colorLevel),
+      contentColor = getOnColor(colorLevel)) {
         Icon(icon, contentDescription, Modifier.testTag("${testTag}Icon"))
       }
 }
@@ -66,8 +69,8 @@ fun FloatingActionButton(
   FloatingActionButton(
       onClick = { onClick() },
       modifier = modifier.testTag(testTag),
-      containerColor = getContainerColor(colorLevel),
-      contentColor = getContentColor(colorLevel)) {
+      containerColor = getColor(colorLevel),
+      contentColor = getOnColor(colorLevel)) {
         Icon(icon, contentDescription, Modifier.testTag("${testTag}Icon"))
       }
 }
@@ -94,8 +97,8 @@ fun LargeFloatingActionButton(
   LargeFloatingActionButton(
       onClick = { onClick() },
       modifier = modifier.testTag(testTag),
-      containerColor = getContainerColor(colorLevel),
-      contentColor = getContentColor(colorLevel)) {
+      containerColor = getColor(colorLevel),
+      contentColor = getOnColor(colorLevel)) {
         Icon(icon, contentDescription, Modifier.testTag("${testTag}Icon"))
       }
 }
@@ -126,8 +129,8 @@ fun ExtendedFloatingActionButton(
       modifier = modifier.testTag(testTag),
       icon = { Icon(icon, contentDescription, Modifier.testTag("${testTag}Icon")) },
       text = { Text(text, Modifier.testTag("${testTag}Text")) },
-      containerColor = getContainerColor(colorLevel),
-      contentColor = getContentColor(colorLevel))
+      containerColor = getColor(colorLevel),
+      contentColor = getOnColor(colorLevel))
 }
 
 /**
@@ -145,7 +148,7 @@ fun Button(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     colorLevel: ColorLevel = ColorLevel.PRIMARY,
-    testTag: String = "PrimaryButton"
+    testTag: String = "Button"
 ) {
   Button(
       onClick = { onClick() },
@@ -153,4 +156,31 @@ fun Button(
       colors = getButtonColors(colorLevel)) {
         Text(text, Modifier.testTag("${testTag}Text"))
       }
+}
+
+/**
+ * Create a themed radio button, with simplified arguments. This should be only used inside a
+ * `BooleanRadioButton`
+ *
+ * @param selected
+ * @param onClick
+ * @param modifier Chained modifier. `.testTag` will be overwritten, use the `testTag` for this.
+ * @param colorLevel The color scheme of the object.
+ * @param testTag The test tag of the object.
+ */
+@Composable
+fun RadioButton(
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    colorLevel: ColorLevel = ColorLevel.PRIMARY,
+    testTag: String = "RadioButton"
+) {
+  RadioButton(
+      selected = selected,
+      onClick = onClick,
+      modifier = modifier.testTag(testTag),
+      colors =
+          RadioButtonDefaults.colors(
+              selectedColor = getColor(colorLevel), unselectedColor = disabledColor()))
 }

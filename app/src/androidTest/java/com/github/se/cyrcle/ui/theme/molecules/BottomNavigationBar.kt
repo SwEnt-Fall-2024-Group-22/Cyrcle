@@ -35,8 +35,8 @@ class NavigationActionsTest {
   }
 
   @Test
-  fun displayBottomNavigationBar() {
-    val defaultTag = "BottomNavigationBar"
+  fun displayDefaultBottomNavigationBar() {
+    val tagD = "NavigationBar"
     composeTestRule.setContent {
       Scaffold(bottomBar = { BottomNavigationBar(navigationActions, selectedItem = Route.AUTH) }) {
           innerPadding ->
@@ -44,10 +44,34 @@ class NavigationActionsTest {
       }
     }
 
-    composeTestRule.onNodeWithTag(defaultTag).assertIsDisplayed()
-
+    composeTestRule.onNodeWithTag(tagD, true).assertIsDisplayed()
     for (topLevelDestination in LIST_TOP_LEVEL_DESTINATION) {
-      composeTestRule.onNodeWithTag(topLevelDestination.textId).assertIsDisplayed()
+      composeTestRule.onNodeWithTag(topLevelDestination.textId, true).assertIsDisplayed()
+      composeTestRule.onNodeWithTag("${topLevelDestination.textId}Text", true).assertIsDisplayed()
+      composeTestRule.onNodeWithTag("${topLevelDestination.textId}Icon", true).assertIsDisplayed()
+    }
+  }
+
+  @Test
+  fun displayBottomNavigationBar() {
+    val tag1 = "NavigationBar1"
+    composeTestRule.setContent {
+      Scaffold(
+          bottomBar = {
+            BottomNavigationBar(
+                navigationActions,
+                LIST_TOP_LEVEL_DESTINATION,
+                { navigationActions.navigateTo(it) },
+                Route.AUTH,
+                tag1)
+          }) { innerPadding ->
+            Column(modifier = Modifier.padding(innerPadding)) {}
+          }
+    }
+
+    composeTestRule.onNodeWithTag(tag1, true).assertIsDisplayed()
+    for (topLevelDestination in LIST_TOP_LEVEL_DESTINATION) {
+      composeTestRule.onNodeWithTag(topLevelDestination.textId, true).assertIsDisplayed()
       composeTestRule.onNodeWithTag("${topLevelDestination.textId}Text", true).assertIsDisplayed()
       composeTestRule.onNodeWithTag("${topLevelDestination.textId}Icon", true).assertIsDisplayed()
     }

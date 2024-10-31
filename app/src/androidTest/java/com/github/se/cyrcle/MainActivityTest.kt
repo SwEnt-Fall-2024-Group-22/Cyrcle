@@ -101,7 +101,7 @@ class MainActivityTest {
     }
 
     fun assertListScreen() {
-      composeTestRule.onNodeWithTag("BottomNavigationBar").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("NavigationBar").assertIsDisplayed()
       composeTestRule.onNodeWithTag("SpotListColumn").assertIsDisplayed()
       composeTestRule.onNodeWithTag("ShowFiltersButton").assertIsDisplayed().assertHasClickAction()
 
@@ -126,7 +126,7 @@ class MainActivityTest {
       composeTestRule.onNodeWithTag("addButton").assertIsDisplayed().assertHasClickAction()
       composeTestRule.onNodeWithTag("ZoomControlsIn").assertIsDisplayed().assertHasClickAction()
       composeTestRule.onNodeWithTag("ZoomControlsOut").assertIsDisplayed().assertHasClickAction()
-      composeTestRule.onNodeWithTag("BottomNavigationBar").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("NavigationBar").assertIsDisplayed()
     }
 
     @OptIn(ExperimentalTestApi::class)

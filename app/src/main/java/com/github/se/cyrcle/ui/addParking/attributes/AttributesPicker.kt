@@ -48,10 +48,9 @@ import com.github.se.cyrcle.ui.map.MapConfig
 import com.github.se.cyrcle.ui.map.drawRectangles
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
-import com.github.se.cyrcle.ui.theme.CyrcleTheme
 import com.github.se.cyrcle.ui.theme.atoms.InputText
 import com.github.se.cyrcle.ui.theme.molecules.BooleanRadioButton
-import com.github.se.cyrcle.ui.theme.molecules.DynamicSelectTextField
+import com.github.se.cyrcle.ui.theme.molecules.EnumDropDown
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.compose.DisposableMapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
@@ -110,17 +109,17 @@ fun AttributesPicker(
                   label = "Title",
                   modifier = Modifier.fillMaxWidth().padding(10.dp),
               )
-              DynamicSelectTextField(
+              EnumDropDown(
                   options = ParkingProtection.entries.toList(),
                   selectedValue = protection,
                   label = "How protected from the weather is the spot?",
               )
-              DynamicSelectTextField(
+              EnumDropDown(
                   options = ParkingCapacity.entries.toList(),
                   selectedValue = capacity,
                   label = "How many bikes can we park ?",
               )
-              DynamicSelectTextField(
+              EnumDropDown(
                   options = ParkingRackType.entries.toList(),
                   selectedValue = rackType,
                   label = "Which type of rack is in the parking spot?",
@@ -143,40 +142,38 @@ fun AttributesPicker(
 
 @Composable
 fun BottomBarAddAttr(navigationActions: NavigationActions, onSubmit: () -> Unit) {
-  CyrcleTheme {
-    Box(Modifier.background(Color.White)) {
-      Row(
-          Modifier.fillMaxWidth().wrapContentHeight().padding(16.dp).background(Color.White),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically) {
-            Button(
-                { navigationActions.navigateTo(TopLevelDestinations.MAP) },
-                modifier = Modifier.testTag("cancelButton"),
-                colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
-                  Text(
-                      "Cancel",
-                      color = MaterialTheme.colorScheme.primary,
-                      fontFamily = MaterialTheme.typography.bodyLarge.fontFamily,
-                      fontWeight = FontWeight.Bold,
-                      textAlign = TextAlign.Center)
-                }
+  Box(Modifier.background(Color.White)) {
+    Row(
+        Modifier.fillMaxWidth().wrapContentHeight().padding(16.dp).background(Color.White),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically) {
+          Button(
+              { navigationActions.navigateTo(TopLevelDestinations.MAP) },
+              modifier = Modifier.testTag("cancelButton"),
+              colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
+                Text(
+                    "Cancel",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontFamily = MaterialTheme.typography.bodyLarge.fontFamily,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center)
+              }
 
-            VerticalDivider(
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.height(32.dp).width(1.dp),
-                thickness = 2.dp)
-            Button(
-                onClick = { onSubmit() },
-                modifier = Modifier.testTag("submitButton"),
-                colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
-                  Text(
-                      "Submit",
-                      color = MaterialTheme.colorScheme.primary,
-                      fontWeight = FontWeight.Bold,
-                      textAlign = TextAlign.Center)
-                }
-          }
-    }
+          VerticalDivider(
+              color = MaterialTheme.colorScheme.primary,
+              modifier = Modifier.height(32.dp).width(1.dp),
+              thickness = 2.dp)
+          Button(
+              onClick = { onSubmit() },
+              modifier = Modifier.testTag("submitButton"),
+              colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
+                Text(
+                    "Submit",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center)
+              }
+        }
   }
 }
 
