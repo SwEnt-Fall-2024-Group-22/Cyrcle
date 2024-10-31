@@ -1,130 +1,173 @@
 package com.github.se.cyrcle.ui.profile
 
-import ProfileScreen
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.github.se.cyrcle.model.user.User
+import com.github.se.cyrcle.ui.navigation.NavigationActions
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class ProfileScreenTest {
+    @get:Rule
+    val composeTestRule = createComposeRule()
 
-  @get:Rule val composeTestRule = createComposeRule()
-
-  @Test
-  fun testProfileScreenDisplaysUserInfo() {
-    val user =
-        User(
-            userId = "12345",
-            username = "eggsampluser",
-            firstName = "Eggsam",
-            lastName = "P.LU. Sir",
-            email = "eggsampleruser@epfl.ch",
-            profilePictureUrl = "",
-            favoriteParkings = listOf("Parking A", "Parking B", "Parking C"))
-
-    composeTestRule.setContent { ProfileScreen(user) }
-
-    composeTestRule.waitUntil(timeoutMillis = 5000) {
-      composeTestRule.onAllNodesWithTag("ProfilePicture").fetchSemanticsNodes().isNotEmpty()
+    private fun setupProfileScreen() {
+        composeTestRule.setContent {
+            val navController = rememberNavController()
+            val navigationActions = NavigationActions(navController)
+            ProfileScreen(navigationActions = navigationActions)
+        }
     }
 
-    composeTestRule.onNodeWithTag("UserNameDisplay").assertTextContains("Eggsam P.LU. Sir")
-    composeTestRule.onNodeWithTag("UserHandleDisplay").assertTextContains("@eggsampluser")
-    composeTestRule.onNodeWithTag("ParkingItem_0").assertTextContains("Parking A")
-  }
+    @Test
+    fun testInitialDisplayMode() {
+        setupProfileScreen()
 
-  @Test
-  fun testToggleFavoriteParking() {
-    val user =
-        User(
-            userId = "12345",
-            username = "eggsampluser",
-            firstName = "Eggsam",
-            lastName = "P.LU. Sir",
-            email = "eggsampleruser@epfl.ch",
-            profilePictureUrl = "",
-            favoriteParkings = listOf("Parking A", "Parking B"))
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithTag("ProfileImage").fetchSemanticsNodes().isNotEmpty()
+        }
 
-    composeTestRule.setContent { ProfileScreen(user) }
-
-    // Ensure the list of favorite parkings is displayed
-    composeTestRule.waitUntil(timeoutMillis = 5000) {
-      composeTestRule.onAllNodesWithTag("FavoriteParkingList").fetchSemanticsNodes().isNotEmpty()
+        // Verify initial display mode elements
+        composeTestRule.onNodeWithTag("ProfileImage").assertExists()
+        composeTestRule.onNodeWithTag("EditButton").assertExists()
+        composeTestRule.onNodeWithTag("DisplayFirstName").assertExists()
+        composeTestRule.onNodeWithTag("DisplayLastName").assertExists()
+        composeTestRule.onNodeWithTag("DisplayUsername").assertExists()
+        composeTestRule.onNodeWithTag("FavoriteParkingsTitle").assertExists()
     }
 
-    // Initial state: filled star for first parking
-    composeTestRule.onNodeWithTag("FavoriteToggle_0").assertIsDisplayed()
+    @Test
+    fun testEditModeTransition() {
+        setupProfileScreen()
 
-    // Perform click to toggle to empty star
-    composeTestRule.onNodeWithTag("FavoriteToggle_0").performClick()
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithTag("EditButton").fetchSemanticsNodes().isNotEmpty()
+        }
 
-    // Check if the first star is empty now
-    composeTestRule.onNodeWithTag("FavoriteToggle_0").assertIsDisplayed()
+        // Enter edit mode
+        composeTestRule.onNodeWithTag("EditButton").performClick()
 
-    // Perform click to toggle back to filled star
-    composeTestRule.onNodeWithTag("FavoriteToggle_0").performClick()
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithTag("SaveButton").fetchSemanticsNodes().isNotEmpty()
+        }
 
-    // Check if the first star is filled again
-    composeTestRule.onNodeWithTag("FavoriteToggle_0").assertIsDisplayed()
-  }
-
-  @Test
-  fun testEditModeSwitch() {
-    val user =
-        User(
-            userId = "12345",
-            username = "eggsampluser",
-            firstName = "Eggsam",
-            lastName = "P.LU. Sir",
-            email = "eggsampleruser@epfl.ch",
-            profilePictureUrl = "",
-            favoriteParkings = listOf("Parking A", "Parking B"))
-
-    composeTestRule.setContent { ProfileScreen(user) }
-
-    composeTestRule.onNodeWithTag("ModifyButton").performClick()
-
-    composeTestRule.waitUntil(timeoutMillis = 5000) {
-      composeTestRule.onAllNodesWithTag("FirstNameField").fetchSemanticsNodes().isNotEmpty()
+        // Verify edit mode elements
+        composeTestRule.onNodeWithTag("FirstNameField").assertExists()
+        composeTestRule.onNodeWithTag("LastNameField").assertExists()
+        composeTestRule.onNodeWithTag("UsernameField").assertExists()
+        composeTestRule.onNodeWithTag("SaveButton").assertExists()
+        composeTestRule.onNodeWithTag("CancelButton").assertExists()
     }
 
-    composeTestRule.onNodeWithTag("FirstNameField").assertExists()
-    composeTestRule.onNodeWithTag("LastNameField").assertExists()
-    composeTestRule.onNodeWithTag("UsernameField").assertExists()
-  }
+    @Test
+    fun testCancelEditMode() {
+        setupProfileScreen()
 
-  @Test
-  fun testSaveChangesButton() {
-    val testUser =
-        User(
-            userId = "12345",
-            username = "eggsampluser",
-            firstName = "Eggsam",
-            lastName = "P.LU. Sir",
-            email = "eggsampleruser@epfl.ch",
-            profilePictureUrl = "",
-            favoriteParkings = listOf("Parking A", "Parking B", "Parking C"))
-    composeTestRule.setContent { ProfileScreen(testUser) }
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithTag("EditButton").fetchSemanticsNodes().isNotEmpty()
+        }
 
-    // Enter edit mode
-    composeTestRule.onNodeWithTag("ModifyButton").performClick()
+        // Enter edit mode
+        composeTestRule.onNodeWithTag("EditButton").performClick()
 
-    // Modify fields
-    composeTestRule.onNodeWithTag("FirstNameField").performTextInput("NewName")
-    composeTestRule.onNodeWithTag("LastNameField").performTextInput("NewLastName")
-    composeTestRule.onNodeWithTag("UsernameField").performTextInput("newusername")
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithTag("FirstNameField").fetchSemanticsNodes().isNotEmpty()
+        }
 
-    // Save changes
-    composeTestRule.onNodeWithTag("SaveButton").performClick()
+        // Clear existing text and modify fields
+        composeTestRule.onNodeWithTag("FirstNameField").performTextClearance()
+        composeTestRule.onNodeWithTag("FirstNameField").performTextInput("New")
 
-    // Verify display mode is active
-    composeTestRule.onNodeWithTag("ModifyButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("FirstNameField").assertDoesNotExist()
-    composeTestRule.onNodeWithTag("SaveButton").assertDoesNotExist()
-    composeTestRule.onNodeWithTag("CancelButton").assertDoesNotExist()
-  }
+        composeTestRule.onNodeWithTag("LastNameField").performTextClearance()
+        composeTestRule.onNodeWithTag("LastNameField").performTextInput("Name")
+
+        composeTestRule.onNodeWithTag("UsernameField").performTextClearance()
+        composeTestRule.onNodeWithTag("UsernameField").performTextInput("newuser")
+
+        // Cancel edit mode
+        composeTestRule.onNodeWithTag("CancelButton").performClick()
+
+        // Add a small delay to ensure state updates
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithTag("DisplayFirstName").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        // Verify return to display mode with unchanged values
+        composeTestRule.onNodeWithTag("DisplayFirstName").assertTextEquals("John")
+        composeTestRule.onNodeWithTag("DisplayLastName").assertTextEquals("Doe")
+        composeTestRule.onNodeWithTag("DisplayUsername").assertTextEquals("@johndoe")
+    }
+
+    @Test
+    fun testSaveChanges() {
+        setupProfileScreen()
+
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithTag("EditButton").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        // Enter edit mode
+        composeTestRule.onNodeWithTag("EditButton").performClick()
+
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithTag("FirstNameField").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        // Modify fields
+        composeTestRule.onNodeWithTag("FirstNameField").performTextReplacement("Jane")
+        composeTestRule.onNodeWithTag("LastNameField").performTextReplacement("Smith")
+        composeTestRule.onNodeWithTag("UsernameField").performTextReplacement("janesmith")
+
+        // Save changes
+        composeTestRule.onNodeWithTag("SaveButton").performClick()
+
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithTag("DisplayFirstName").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        // Verify updated values in display mode
+        composeTestRule.onNodeWithTag("DisplayFirstName").assertTextEquals("Jane")
+        composeTestRule.onNodeWithTag("DisplayLastName").assertTextEquals("Smith")
+        composeTestRule.onNodeWithTag("DisplayUsername").assertTextEquals("@janesmith")
+    }
+
+    @Test
+    fun testFavoriteParkingsSection() {
+        setupProfileScreen()
+
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithTag("FavoriteParkingsTitle").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        // Check favorite parkings section exists
+        composeTestRule.onNodeWithTag("FavoriteParkingsTitle").assertExists()
+
+        // If no favorites, verify empty state message
+        composeTestRule.onNodeWithTag("NoFavoritesMessage").assertExists()
+    }
+
+    @Test
+    fun testProfileImageInteraction() {
+        setupProfileScreen()
+
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithTag("ProfileImage").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        // Verify profile image exists
+        composeTestRule.onNodeWithTag("ProfileImage").assertExists()
+
+        // Enter edit mode
+        composeTestRule.onNodeWithTag("EditButton").performClick()
+
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithTag("ProfileImage").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        // Verify profile image is clickable in edit mode
+        composeTestRule.onNodeWithTag("ProfileImage").assertHasClickAction()
+    }
 }
