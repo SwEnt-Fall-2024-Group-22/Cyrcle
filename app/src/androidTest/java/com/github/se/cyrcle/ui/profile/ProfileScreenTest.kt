@@ -128,7 +128,7 @@ class ProfileScreenTest {
   }
 
   @Test
-  fun testFavoriteParkingsSection() {
+  fun testFavoriteParkingsSectionWithHardcodedParkings() {
     composeTestRule.waitUntil(timeoutMillis = 5000) {
       composeTestRule.onAllNodesWithTag("FavoriteParkingsTitle").fetchSemanticsNodes().isNotEmpty()
     }
@@ -136,8 +136,12 @@ class ProfileScreenTest {
     // Check favorite parkings section exists
     composeTestRule.onNodeWithTag("FavoriteParkingsTitle").assertExists()
 
-    // If no favorites, verify empty state message
-    composeTestRule.onNodeWithTag("NoFavoritesMessage").assertExists()
+    // Verify the favorite parking items
+    composeTestRule.onNodeWithTag("FavoriteParkingList").assertExists()
+    composeTestRule
+        .onAllNodesWithTag("ParkingItem_")
+        .assertAll(hasTextExactly("Parking Central", "Parking Station", "Parking Mall"))
+    composeTestRule.onAllNodesWithTag("FavoriteToggle_").assertAll(isToggleable())
   }
 
   @Test
@@ -158,5 +162,54 @@ class ProfileScreenTest {
 
     // Verify profile image is clickable in edit mode
     composeTestRule.onNodeWithTag("ProfileImage").assertHasClickAction()
+  }
+
+  @Test
+  fun testRemoveFavoriteParking() {
+    // Wait for favorite parkings to be displayed
+    composeTestRule.waitUntil(timeoutMillis = 5000) {
+      composeTestRule.onAllNodesWithTag("FavoriteToggle_0").fetchSemanticsNodes().isNotEmpty()
+    }
+
+    // Click remove favorite button
+    composeTestRule.onNodeWithTag("FavoriteToggle_0").performClick()
+
+    // Verify dialog appears
+    composeTestRule.onNodeWithText("Remove favorite").assertExists()
+    composeTestRule.onNodeWithText("Remove").assertExists()
+    composeTestRule.onNodeWithText("Cancel").assertExists()
+
+    // Confirm removal
+    composeTestRule.onNodeWithText("Remove").performClick()
+
+    // Verify parking was removed
+    composeTestRule.onNodeWithText("Parking Central").assertDoesNotExist()
+  }
+
+  @Test
+  fun testInputFieldValidation() {
+    // Enter edit mode
+    composeTestRule.onNodeWithTag("EditButton").performClick()
+
+    composeTestRule.waitUntil(timeoutMillis = 5000) {
+      composeTestRule.onAllNodesWithTag("FirstNameField").fetchSemanticsNodes().isNotEmpty()
+    }
+
+    // Test empty fields
+    composeTestRule.onNodeWithTag("FirstNameField").performTextClearance()
+    composeTestRule.onNodeWithTag("LastNameField").performTextClearance()
+    composeTestRule.onNodeWithTag("UsernameField").performTextClearance()
+
+    // Test maximum length inputs
+    val longInput = "a".repeat(50)
+    composeTestRule.onNodeWithTag("FirstNameField").performTextInput(longInput)
+    composeTestRule.onNodeWithTag("LastNameField").performTextInput(longInput)
+    composeTestRule.onNodeWithTag("UsernameField").performTextInput(longInput)
+
+    // Save changes
+    composeTestRule.onNodeWithTag("SaveButton").performClick()
+
+    // Verify the values were saved (or validation messages appeared if implemented)
+    composeTestRule.onNodeWithTag("DisplayFirstName").assertExists()
   }
 }

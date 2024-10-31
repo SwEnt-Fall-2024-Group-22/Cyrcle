@@ -26,6 +26,8 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
+import com.github.se.cyrcle.model.parking.Parking
+import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
@@ -36,12 +38,19 @@ import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 
 @Composable
 fun ProfileScreen(navigationActions: NavigationActions) {
+
   var isEditing by remember { mutableStateOf(false) }
   var firstName by remember { mutableStateOf("John") }
   var lastName by remember { mutableStateOf("Doe") }
   var username by remember { mutableStateOf("johndoe") }
   var profilePictureUrl by remember { mutableStateOf("") }
-  var favoriteParkings by remember { mutableStateOf(emptyList<String>()) }
+  var favoriteParkings by remember {
+    mutableStateOf(
+        listOf(
+            TestInstancesParking.parking1,
+            TestInstancesParking.parking2,
+            TestInstancesParking.parking3))
+  }
 
   var originalFirstName by remember { mutableStateOf(firstName) }
   var originalLastName by remember { mutableStateOf(lastName) }
@@ -105,12 +114,12 @@ fun ProfileScreen(navigationActions: NavigationActions) {
                       originalProfilePictureUrl = profilePictureUrl
                       isEditing = true
                     })
-              }
 
-              Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-              FavoriteParkingsSection(favoriteParkings) { newFavorites ->
-                favoriteParkings = newFavorites
+                FavoriteParkingsSection(
+                    favoriteParkings = favoriteParkings,
+                    onFavoritesUpdated = { newFavorites -> favoriteParkings = newFavorites })
               }
             }
       }
@@ -221,14 +230,6 @@ private fun ProfileImage(
     isEditable: Boolean,
     modifier: Modifier = Modifier
 ) {
-  val context = LocalContext.current
-  val painter =
-      rememberAsyncImagePainter(
-          ImageRequest.Builder(context)
-              .data(if (url.isNotBlank()) url else null)
-              .apply { transformations(CircleCropTransformation()) }
-              .build())
-
   Box(
       modifier =
           modifier.then(if (isEditable) Modifier.clickable(onClick = onClick) else Modifier)) {
@@ -247,7 +248,12 @@ private fun ProfileImage(
               }
         } else {
           Image(
-              painter = painter,
+              painter =
+                  rememberAsyncImagePainter(
+                      ImageRequest.Builder(LocalContext.current)
+                          .data(url)
+                          .apply { transformations(CircleCropTransformation()) }
+                          .build()),
               contentDescription = "Profile Picture",
               modifier = Modifier.size(120.dp).clip(CircleShape),
               contentScale = ContentScale.Crop)
@@ -272,8 +278,8 @@ private fun ProfileImage(
 
 @Composable
 private fun FavoriteParkingsSection(
-    favoriteParkings: List<String>,
-    onFavoritesUpdated: (List<String>) -> Unit
+    favoriteParkings: List<Parking>,
+    onFavoritesUpdated: (List<Parking>) -> Unit
 ) {
   Text(
       text = "Favorite Parkings",
@@ -306,19 +312,21 @@ private fun FavoriteParkingsSection(
 }
 
 @Composable
-private fun FavoriteParkingCard(parking: String, index: Int, onRemove: () -> Unit) {
+private fun FavoriteParkingCard(parking: Parking, index: Int, onRemove: () -> Unit) {
+  var showConfirmDialog by remember { mutableStateOf(false) }
+
   Card(
       modifier = Modifier.size(120.dp).padding(8.dp),
       shape = MaterialTheme.shapes.medium,
   ) {
     Box(modifier = Modifier.fillMaxSize()) {
       Text(
-          text = parking,
+          text = parking.optName ?: "", // Display only the optName property
           style = MaterialTheme.typography.bodySmall,
           modifier = Modifier.align(Alignment.Center).padding(8.dp).testTag("ParkingItem_$index"))
 
       IconButton(
-          onClick = onRemove,
+          onClick = { showConfirmDialog = true },
           modifier =
               Modifier.align(Alignment.TopEnd).size(32.dp).testTag("FavoriteToggle_$index")) {
             Icon(
@@ -328,5 +336,22 @@ private fun FavoriteParkingCard(parking: String, index: Int, onRemove: () -> Uni
                 modifier = Modifier.size(20.dp))
           }
     }
+  }
+
+  if (showConfirmDialog) {
+    AlertDialog(
+        onDismissRequest = { showConfirmDialog = false },
+        title = { Text("Remove favorite") },
+        text = { Text("Are you sure you want to remove ${parking.optName} from your favorites?") },
+        confirmButton = {
+          TextButton(
+              onClick = {
+                onRemove()
+                showConfirmDialog = false
+              }) {
+                Text("Remove")
+              }
+        },
+        dismissButton = { TextButton(onClick = { showConfirmDialog = false }) { Text("Cancel") } })
   }
 }
