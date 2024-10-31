@@ -34,25 +34,20 @@ import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.InputText
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 
-// TODO: add some requirements to be able to save changes, such as having a non empty text field.
-
 @Composable
 fun ProfileScreen(navigationActions: NavigationActions) {
-  // Current values
   var isEditing by remember { mutableStateOf(false) }
   var firstName by remember { mutableStateOf("John") }
   var lastName by remember { mutableStateOf("Doe") }
   var username by remember { mutableStateOf("johndoe") }
   var profilePictureUrl by remember { mutableStateOf("") }
-  var favoriteParkings by remember { mutableStateOf(ArrayList<String>()) }
+  var favoriteParkings by remember { mutableStateOf(emptyList<String>()) }
 
-  // Store original values for cancellation
   var originalFirstName by remember { mutableStateOf(firstName) }
   var originalLastName by remember { mutableStateOf(lastName) }
   var originalUsername by remember { mutableStateOf(username) }
   var originalProfilePictureUrl by remember { mutableStateOf(profilePictureUrl) }
 
-  val context = LocalContext.current
   val imagePickerLauncher =
       rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let { profilePictureUrl = it.toString() }
@@ -84,7 +79,6 @@ fun ProfileScreen(navigationActions: NavigationActions) {
                     onUsernameChange = { username = it },
                     onImageClick = { imagePickerLauncher.launch("image/*") },
                     onSave = {
-                      // Update original values when saving
                       originalFirstName = firstName
                       originalLastName = lastName
                       originalUsername = username
@@ -92,7 +86,6 @@ fun ProfileScreen(navigationActions: NavigationActions) {
                       isEditing = false
                     },
                     onCancel = {
-                      // Restore original values when canceling
                       firstName = originalFirstName
                       lastName = originalLastName
                       username = originalUsername
@@ -106,7 +99,6 @@ fun ProfileScreen(navigationActions: NavigationActions) {
                     username = username,
                     profilePictureUrl = profilePictureUrl,
                     onEditClick = {
-                      // Store original values when entering edit mode
                       originalFirstName = firstName
                       originalLastName = lastName
                       originalUsername = username
@@ -280,8 +272,8 @@ private fun ProfileImage(
 
 @Composable
 private fun FavoriteParkingsSection(
-    favoriteParkings: ArrayList<String>,
-    onFavoritesUpdated: (ArrayList<String>) -> Unit
+    favoriteParkings: List<String>,
+    onFavoritesUpdated: (List<String>) -> Unit
 ) {
   Text(
       text = "Favorite Parkings",
@@ -304,7 +296,7 @@ private fun FavoriteParkingsSection(
                 parking = parking,
                 index = index,
                 onRemove = {
-                  val updatedList = ArrayList(favoriteParkings)
+                  val updatedList = favoriteParkings.toMutableList()
                   updatedList.removeAt(index)
                   onFavoritesUpdated(updatedList)
                 })

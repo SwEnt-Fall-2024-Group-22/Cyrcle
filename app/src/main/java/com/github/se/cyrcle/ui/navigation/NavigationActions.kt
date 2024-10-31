@@ -51,7 +51,6 @@ object TopLevelDestinations {
 val LIST_TOP_LEVEL_DESTINATION =
     listOf(TopLevelDestinations.MAP, TopLevelDestinations.LIST, TopLevelDestinations.PROFILE)
 
-
 /** Adapter class for navigating between screens in the app. */
 open class NavigationActions(private val navController: NavHostController) {
 
