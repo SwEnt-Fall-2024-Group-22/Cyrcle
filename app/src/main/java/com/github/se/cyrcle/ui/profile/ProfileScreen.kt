@@ -13,7 +13,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,6 +40,7 @@ import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.InputText
+import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 
 @Composable
@@ -192,12 +199,12 @@ private fun DisplayProfileContent(
   Text(
       text = firstName,
       style = MaterialTheme.typography.headlineMedium,
-      modifier = Modifier.testTag("DisplayFirstName"))
+      testTag = "DisplayFirstName")
 
   Text(
       text = lastName,
       style = MaterialTheme.typography.headlineMedium,
-      modifier = Modifier.testTag("DisplayLastName"))
+      testTag ="DisplayLastName")
 
   Spacer(modifier = Modifier.height(16.dp))
 
@@ -212,7 +219,7 @@ private fun DisplayProfileContent(
   Text(
       text = "@$username",
       style = MaterialTheme.typography.bodyMedium,
-      modifier = Modifier.testTag("DisplayUsername"))
+      testTag ="DisplayUsername")
 
   Spacer(modifier = Modifier.height(16.dp))
 
