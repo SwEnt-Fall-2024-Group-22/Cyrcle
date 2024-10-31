@@ -128,7 +128,7 @@ class ProfileScreenTest {
   }
 
   @Test
-  fun testFavoriteParkingsSection() {
+  fun testFavoriteParkingsSectionWithHardcodedParkings() {
     composeTestRule.waitUntil(timeoutMillis = 5000) {
       composeTestRule.onAllNodesWithTag("FavoriteParkingsTitle").fetchSemanticsNodes().isNotEmpty()
     }
@@ -136,8 +136,12 @@ class ProfileScreenTest {
     // Check favorite parkings section exists
     composeTestRule.onNodeWithTag("FavoriteParkingsTitle").assertExists()
 
-    // If no favorites, verify empty state message
-    composeTestRule.onNodeWithTag("NoFavoritesMessage").assertExists()
+    // Verify the favorite parking items
+    composeTestRule.onNodeWithTag("FavoriteParkingList").assertExists()
+    composeTestRule
+        .onAllNodesWithTag("ParkingItem_")
+        .assertAll(hasTextExactly("Parking Central", "Parking Station", "Parking Mall"))
+    composeTestRule.onAllNodesWithTag("FavoriteToggle_").assertAll(isToggleable())
   }
 
   @Test

@@ -41,86 +41,76 @@ import com.github.se.cyrcle.ui.theme.atoms.InputText
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 
 @Composable
-fun ProfileScreen(
-    navigationActions: NavigationActions
-) {
-    var isEditing by remember { mutableStateOf(false) }
-    var firstName by remember { mutableStateOf("John") }
-    var lastName by remember { mutableStateOf("Doe") }
-    var username by remember { mutableStateOf("johndoe") }
-    var profilePictureUrl by remember { mutableStateOf("") }
-    var favoriteParkings by remember {
-        mutableStateOf(
-            listOf(
-                Parking(
-                    uid = "1",
-                    optName = "Parking Central",
-                    optDescription = null,
-                    location = Location(Point(1.0, 1.0)),
-                    images = emptyList(),
-                    capacity = ParkingCapacity.MEDIUM,
-                    rackType = ParkingRackType.U_RACK,
-                    protection = ParkingProtection.NONE,
-                    price = 0.0,
-                    hasSecurity = false
-                ),
-                Parking(
-                    uid = "2",
-                    optName = "Parking Station",
-                    optDescription = null,
-                    location = Location(Point(2.0, 2.0)),
-                    images = emptyList(),
-                    capacity = ParkingCapacity.SMALL,
-                    rackType = ParkingRackType.WALL_BUTTERFLY,
-                    protection = ParkingProtection.COVERED,
-                    price = 2.5,
-                    hasSecurity = true
-                ),
-                Parking(
-                    uid = "3",
-                    optName = "Parking Mall",
-                    optDescription = null,
-                    location = Location(Point(3.0, 3.0)),
-                    images = emptyList(),
-                    capacity = ParkingCapacity.LARGE,
-                    rackType = ParkingRackType.GRID,
-                    protection = ParkingProtection.INDOOR,
-                    price = 1.0,
-                    hasSecurity = true
-                )
-            )
-        )
-    }
+fun ProfileScreen(navigationActions: NavigationActions) {
+  var isEditing by remember { mutableStateOf(false) }
+  var firstName by remember { mutableStateOf("John") }
+  var lastName by remember { mutableStateOf("Doe") }
+  var username by remember { mutableStateOf("johndoe") }
+  var profilePictureUrl by remember { mutableStateOf("") }
+  var favoriteParkings by remember {
+    mutableStateOf(
+        listOf(
+            Parking(
+                uid = "1",
+                optName = "Parking Central",
+                optDescription = null,
+                location = Location(Point(1.0, 1.0)),
+                images = emptyList(),
+                capacity = ParkingCapacity.MEDIUM,
+                rackType = ParkingRackType.U_RACK,
+                protection = ParkingProtection.NONE,
+                price = 0.0,
+                hasSecurity = false),
+            Parking(
+                uid = "2",
+                optName = "Parking Station",
+                optDescription = null,
+                location = Location(Point(2.0, 2.0)),
+                images = emptyList(),
+                capacity = ParkingCapacity.SMALL,
+                rackType = ParkingRackType.WALL_BUTTERFLY,
+                protection = ParkingProtection.COVERED,
+                price = 2.5,
+                hasSecurity = true),
+            Parking(
+                uid = "3",
+                optName = "Parking Mall",
+                optDescription = null,
+                location = Location(Point(3.0, 3.0)),
+                images = emptyList(),
+                capacity = ParkingCapacity.LARGE,
+                rackType = ParkingRackType.GRID,
+                protection = ParkingProtection.INDOOR,
+                price = 1.0,
+                hasSecurity = true)))
+  }
 
-    var originalFirstName by remember { mutableStateOf(firstName) }
-    var originalLastName by remember { mutableStateOf(lastName) }
-    var originalUsername by remember { mutableStateOf(username) }
-    var originalProfilePictureUrl by remember { mutableStateOf(profilePictureUrl) }
+  var originalFirstName by remember { mutableStateOf(firstName) }
+  var originalLastName by remember { mutableStateOf(lastName) }
+  var originalUsername by remember { mutableStateOf(username) }
+  var originalProfilePictureUrl by remember { mutableStateOf(profilePictureUrl) }
 
-    val imagePickerLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            uri?.let { profilePictureUrl = it.toString() }
-        }
+  val imagePickerLauncher =
+      rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let { profilePictureUrl = it.toString() }
+      }
 
-    Scaffold(
-        modifier = Modifier.testTag("ProfileScreen"),
-        bottomBar = {
-            BottomNavigationBar(
-                navigationActions = navigationActions,
-                tabList = LIST_TOP_LEVEL_DESTINATION,
-                selectedItem = Route.PROFILE
-            )
-        }
-    ) { innerPadding ->
+  Scaffold(
+      modifier = Modifier.testTag("ProfileScreen"),
+      bottomBar = {
+        BottomNavigationBar(
+            navigationActions = navigationActions,
+            tabList = LIST_TOP_LEVEL_DESTINATION,
+            selectedItem = Route.PROFILE)
+      }) { innerPadding ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(16.dp)
-                .testTag("ProfileContent"),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            if (isEditing) {
+            modifier =
+                Modifier.fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(16.dp)
+                    .testTag("ProfileContent"),
+            horizontalAlignment = Alignment.CenterHorizontally) {
+              if (isEditing) {
                 EditProfileContent(
                     firstName = firstName,
                     lastName = lastName,
@@ -131,46 +121,41 @@ fun ProfileScreen(
                     onUsernameChange = { username = it },
                     onImageClick = { imagePickerLauncher.launch("image/*") },
                     onSave = {
-                        originalFirstName = firstName
-                        originalLastName = lastName
-                        originalUsername = username
-                        originalProfilePictureUrl = profilePictureUrl
-                        isEditing = false
+                      originalFirstName = firstName
+                      originalLastName = lastName
+                      originalUsername = username
+                      originalProfilePictureUrl = profilePictureUrl
+                      isEditing = false
                     },
                     onCancel = {
-                        firstName = originalFirstName
-                        lastName = originalLastName
-                        username = originalUsername
-                        profilePictureUrl = originalProfilePictureUrl
-                        isEditing = false
-                    }
-                )
-            } else {
+                      firstName = originalFirstName
+                      lastName = originalLastName
+                      username = originalUsername
+                      profilePictureUrl = originalProfilePictureUrl
+                      isEditing = false
+                    })
+              } else {
                 DisplayProfileContent(
                     firstName = firstName,
                     lastName = lastName,
                     username = username,
                     profilePictureUrl = profilePictureUrl,
                     onEditClick = {
-                        originalFirstName = firstName
-                        originalLastName = lastName
-                        originalUsername = username
-                        originalProfilePictureUrl = profilePictureUrl
-                        isEditing = true
-                    }
-                )
+                      originalFirstName = firstName
+                      originalLastName = lastName
+                      originalUsername = username
+                      originalProfilePictureUrl = profilePictureUrl
+                      isEditing = true
+                    })
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 FavoriteParkingsSection(
                     favoriteParkings = favoriteParkings,
-                    onFavoritesUpdated = { newFavorites ->
-                        favoriteParkings = newFavorites
-                    }
-                )
+                    onFavoritesUpdated = { newFavorites -> favoriteParkings = newFavorites })
+              }
             }
-        }
-    }
+      }
 }
 
 @Composable
@@ -186,57 +171,47 @@ private fun EditProfileContent(
     onSave: () -> Unit,
     onCancel: () -> Unit
 ) {
-    ProfileImage(
-        url = profilePictureUrl,
-        onClick = onImageClick,
-        isEditable = true,
-        modifier = Modifier.testTag("ProfileImage")
-    )
+  ProfileImage(
+      url = profilePictureUrl,
+      onClick = onImageClick,
+      isEditable = true,
+      modifier = Modifier.testTag("ProfileImage"))
 
-    Spacer(modifier = Modifier.height(24.dp))
+  Spacer(modifier = Modifier.height(24.dp))
 
-    InputText(
-        value = firstName,
-        onValueChange = onFirstNameChange,
-        label = "First Name",
-        testTag = "FirstNameField"
-    )
+  InputText(
+      value = firstName,
+      onValueChange = onFirstNameChange,
+      label = "First Name",
+      testTag = "FirstNameField")
 
-    Spacer(modifier = Modifier.height(8.dp))
+  Spacer(modifier = Modifier.height(8.dp))
 
-    InputText(
-        value = lastName,
-        onValueChange = onLastNameChange,
-        label = "Last Name",
-        testTag = "LastNameField"
-    )
+  InputText(
+      value = lastName,
+      onValueChange = onLastNameChange,
+      label = "Last Name",
+      testTag = "LastNameField")
 
-    Spacer(modifier = Modifier.height(8.dp))
+  Spacer(modifier = Modifier.height(8.dp))
 
-    InputText(
-        value = username,
-        onValueChange = onUsernameChange,
-        label = "Username",
-        testTag = "UsernameField"
-    )
+  InputText(
+      value = username,
+      onValueChange = onUsernameChange,
+      label = "Username",
+      testTag = "UsernameField")
 
-    Spacer(modifier = Modifier.height(16.dp))
+  Spacer(modifier = Modifier.height(16.dp))
 
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Button(
-            text = "Save",
-            onClick = onSave,
-            colorLevel = ColorLevel.PRIMARY,
-            testTag = "SaveButton"
-        )
+  Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Button(text = "Save", onClick = onSave, colorLevel = ColorLevel.PRIMARY, testTag = "SaveButton")
 
-        Button(
-            text = "Cancel",
-            onClick = onCancel,
-            colorLevel = ColorLevel.SECONDARY,
-            testTag = "CancelButton"
-        )
-    }
+    Button(
+        text = "Cancel",
+        onClick = onCancel,
+        colorLevel = ColorLevel.SECONDARY,
+        testTag = "CancelButton")
+  }
 }
 
 @Composable
@@ -247,43 +222,38 @@ private fun DisplayProfileContent(
     profilePictureUrl: String,
     onEditClick: () -> Unit
 ) {
-    Text(
-        text = firstName,
-        style = MaterialTheme.typography.headlineMedium,
-        modifier = Modifier.testTag("DisplayFirstName")
-    )
+  Text(
+      text = firstName,
+      style = MaterialTheme.typography.headlineMedium,
+      modifier = Modifier.testTag("DisplayFirstName"))
 
-    Text(
-        text = lastName,
-        style = MaterialTheme.typography.headlineMedium,
-        modifier = Modifier.testTag("DisplayLastName")
-    )
+  Text(
+      text = lastName,
+      style = MaterialTheme.typography.headlineMedium,
+      modifier = Modifier.testTag("DisplayLastName"))
 
-    Spacer(modifier = Modifier.height(16.dp))
+  Spacer(modifier = Modifier.height(16.dp))
 
-    ProfileImage(
-        url = profilePictureUrl,
-        onClick = {},
-        isEditable = false,
-        modifier = Modifier.testTag("ProfileImage")
-    )
+  ProfileImage(
+      url = profilePictureUrl,
+      onClick = {},
+      isEditable = false,
+      modifier = Modifier.testTag("ProfileImage"))
 
-    Spacer(modifier = Modifier.height(8.dp))
+  Spacer(modifier = Modifier.height(8.dp))
 
-    Text(
-        text = "@$username",
-        style = MaterialTheme.typography.bodyMedium,
-        modifier = Modifier.testTag("DisplayUsername")
-    )
+  Text(
+      text = "@$username",
+      style = MaterialTheme.typography.bodyMedium,
+      modifier = Modifier.testTag("DisplayUsername"))
 
-    Spacer(modifier = Modifier.height(16.dp))
+  Spacer(modifier = Modifier.height(16.dp))
 
-    Button(
-        text = "Modify Profile",
-        onClick = onEditClick,
-        colorLevel = ColorLevel.TERTIARY,
-        testTag = "EditButton"
-    )
+  Button(
+      text = "Modify Profile",
+      onClick = onEditClick,
+      colorLevel = ColorLevel.TERTIARY,
+      testTag = "EditButton")
 }
 
 @Composable
@@ -293,163 +263,128 @@ private fun ProfileImage(
     isEditable: Boolean,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier.then(if (isEditable) Modifier.clickable(onClick = onClick) else Modifier)
-    ) {
+  Box(
+      modifier =
+          modifier.then(if (isEditable) Modifier.clickable(onClick = onClick) else Modifier)) {
         if (url.isBlank()) {
-            Box(
-                modifier = Modifier
-                    .size(120.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer),
-                contentAlignment = Alignment.Center
-            ) {
+          Box(
+              modifier =
+                  Modifier.size(120.dp)
+                      .clip(CircleShape)
+                      .background(MaterialTheme.colorScheme.primaryContainer),
+              contentAlignment = Alignment.Center) {
                 Icon(
                     imageVector = Icons.Filled.Person,
                     contentDescription = "Default Profile Picture",
                     modifier = Modifier.size(60.dp),
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer)
+              }
         } else {
-            Image(
-                painter = rememberAsyncImagePainter(
-                    ImageRequest.Builder(LocalContext.current)
-                        .data(url)
-                        .apply { transformations(CircleCropTransformation()) }
-                        .build()
-                ),
-                contentDescription = "Profile Picture",
-                modifier = Modifier
-                    .size(120.dp)
-                    .clip(CircleShape),
-                contentScale = ContentScale.Crop
-            )
+          Image(
+              painter =
+                  rememberAsyncImagePainter(
+                      ImageRequest.Builder(LocalContext.current)
+                          .data(url)
+                          .apply { transformations(CircleCropTransformation()) }
+                          .build()),
+              contentDescription = "Profile Picture",
+              modifier = Modifier.size(120.dp).clip(CircleShape),
+              contentScale = ContentScale.Crop)
         }
 
         if (isEditable) {
-            Box(
-                modifier = Modifier
-                    .size(120.dp)
-                    .clip(CircleShape)
-                    .background(Color.Black.copy(alpha = 0.3f)),
-                contentAlignment = Alignment.Center
-            ) {
+          Box(
+              modifier =
+                  Modifier.size(120.dp)
+                      .clip(CircleShape)
+                      .background(Color.Black.copy(alpha = 0.3f)),
+              contentAlignment = Alignment.Center) {
                 Icon(
                     imageVector = Icons.Filled.Edit,
                     contentDescription = "Edit Profile Picture",
                     tint = Color.White,
-                    modifier = Modifier.size(40.dp)
-                )
-            }
+                    modifier = Modifier.size(40.dp))
+              }
         }
-    }
+      }
 }
 
 @Composable
-private fun FavoriteParkingsSection(
+fun FavoriteParkingsSection(
     favoriteParkings: List<Parking>,
     onFavoritesUpdated: (List<Parking>) -> Unit
 ) {
+  Text(
+      text = "Favorite Parkings",
+      style = MaterialTheme.typography.titleLarge,
+      modifier = Modifier.testTag("FavoriteParkingsTitle"))
+
+  Spacer(modifier = Modifier.height(16.dp))
+
+  if (favoriteParkings.isEmpty()) {
     Text(
-        text = "Favorite Parkings",
-        style = MaterialTheme.typography.titleLarge,
-        modifier = Modifier.testTag("FavoriteParkingsTitle")
-    )
-
-    Spacer(modifier = Modifier.height(16.dp))
-
-    if (favoriteParkings.isEmpty()) {
-        Text(
-            text = "No favorite parkings yet",
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.testTag("NoFavoritesMessage")
-        )
-    } else {
-        LazyRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("FavoriteParkingList"),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            itemsIndexed(favoriteParkings) { index, parking ->
-                FavoriteParkingCard(
-                    parking = parking,
-                    index = index,
-                    onRemove = {
-                        val updatedList = favoriteParkings.toMutableList()
-                        updatedList.removeAt(index)
-                        onFavoritesUpdated(updatedList)
-                    }
-                )
-            }
+        text = "No favorite parkings yet",
+        style = MaterialTheme.typography.bodyMedium,
+        modifier = Modifier.testTag("NoFavoritesMessage"))
+  } else {
+    LazyRow(
+        modifier = Modifier.fillMaxWidth().testTag("FavoriteParkingList"),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+          itemsIndexed(favoriteParkings) { index, parking ->
+            FavoriteParkingCard(
+                parking = parking,
+                index = index,
+                onRemove = {
+                  val updatedList = favoriteParkings.toMutableList()
+                  updatedList.removeAt(index)
+                  onFavoritesUpdated(updatedList)
+                })
+          }
         }
-    }
+  }
 }
 
 @Composable
-private fun FavoriteParkingCard(
-    parking: Parking,
-    index: Int,
-    onRemove: () -> Unit
-) {
-    var showConfirmDialog by remember { mutableStateOf(false) }
+private fun FavoriteParkingCard(parking: Parking, index: Int, onRemove: () -> Unit) {
+  var showConfirmDialog by remember { mutableStateOf(false) }
 
-    Card(
-        modifier = Modifier
-            .size(120.dp)
-            .padding(8.dp),
-        shape = MaterialTheme.shapes.medium,
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Text(
-                text = parking.optName ?: "", // Display only the optName property
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .padding(8.dp)
-                    .testTag("ParkingItem_$index")
-            )
+  Card(
+      modifier = Modifier.size(120.dp).padding(8.dp),
+      shape = MaterialTheme.shapes.medium,
+  ) {
+    Box(modifier = Modifier.fillMaxSize()) {
+      Text(
+          text = parking.optName ?: "", // Display only the optName property
+          style = MaterialTheme.typography.bodySmall,
+          modifier = Modifier.align(Alignment.Center).padding(8.dp).testTag("ParkingItem_$index"))
 
-            IconButton(
-                onClick = { showConfirmDialog = true },
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .size(32.dp)
-                    .testTag("FavoriteToggle_$index")
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Star,
-                    contentDescription = "Remove from Favorites",
-                    tint = Color(0xFFFFD700),
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        }
+      IconButton(
+          onClick = { showConfirmDialog = true },
+          modifier =
+              Modifier.align(Alignment.TopEnd).size(32.dp).testTag("FavoriteToggle_$index")) {
+            Icon(
+                imageVector = Icons.Filled.Star,
+                contentDescription = "Remove from Favorites",
+                tint = Color(0xFFFFD700),
+                modifier = Modifier.size(20.dp))
+          }
     }
+  }
 
-    if (showConfirmDialog) {
-        AlertDialog(
-            onDismissRequest = { showConfirmDialog = false },
-            title = { Text("Remove favorite") },
-            text = { Text("Are you sure you want to remove ${parking.optName} from your favorites?") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onRemove()
-                        showConfirmDialog = false
-                    }
-                ) {
-                    Text("Remove")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { showConfirmDialog = false }
-                ) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
+  if (showConfirmDialog) {
+    AlertDialog(
+        onDismissRequest = { showConfirmDialog = false },
+        title = { Text("Remove favorite") },
+        text = { Text("Are you sure you want to remove ${parking.optName} from your favorites?") },
+        confirmButton = {
+          TextButton(
+              onClick = {
+                onRemove()
+                showConfirmDialog = false
+              }) {
+                Text("Remove")
+              }
+        },
+        dismissButton = { TextButton(onClick = { showConfirmDialog = false }) { Text("Cancel") } })
+  }
 }
