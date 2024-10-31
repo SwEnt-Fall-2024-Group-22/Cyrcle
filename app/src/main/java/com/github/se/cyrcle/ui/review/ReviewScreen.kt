@@ -14,15 +14,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.StarHalf
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -38,9 +34,11 @@ import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.review.Review
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.github.se.cyrcle.ui.theme.ColorLevel
+import com.github.se.cyrcle.ui.theme.atoms.Button
+import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReviewScreen(
     navigationActions: NavigationActions,
@@ -94,7 +92,8 @@ fun ReviewScreen(
                     else -> ""
                   },
               style = MaterialTheme.typography.bodyLarge,
-              modifier = Modifier.padding(top = 8.dp).testTag("ExperienceText"))
+              modifier = Modifier.padding(top = 8.dp),
+              testTag = "ExperienceText")
 
           // Slider with step granularity of 0.5
           Text(
@@ -120,6 +119,7 @@ fun ReviewScreen(
 
           // Add Review Button
           Button(
+              text = "Save my Review",
               onClick = {
                 Toast.makeText(context, "Review Added!", Toast.LENGTH_SHORT).show()
                 // to avoid problematic castings
@@ -134,16 +134,9 @@ fun ReviewScreen(
                 parkingViewModel.updateReviewScore(sliderToValue, selectedParking)
                 navigationActions.goBack()
               },
-              modifier =
-                  Modifier.fillMaxWidth()
-                      .height(60.dp)
-                      .testTag("AddReviewButton"), // Test tag for Add Review button
-              colors =
-                  ButtonDefaults.buttonColors(
-                      containerColor = MaterialTheme.colorScheme.primary,
-                      contentColor = MaterialTheme.colorScheme.secondary)) {
-                Text(text = "Save my Review")
-              }
+              modifier = Modifier.fillMaxWidth().height(60.dp),
+              colorLevel = ColorLevel.PRIMARY,
+              testTag = "AddReviewButton")
         }
   }
 }

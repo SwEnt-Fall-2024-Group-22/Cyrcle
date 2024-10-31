@@ -3,6 +3,7 @@ package com.github.se.cyrcle.ui.theme.atoms
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -24,10 +25,11 @@ class ButtonTest {
   fun displayButton() {
     val tagD = "Button"
     val tag1 = "Button1"
+    val disabled = mutableStateOf(false)
     var a = 1
     composeTestRule.setContent {
       Button("Button", { a++ })
-      Button("Button", { a++ }, Modifier, ColorLevel.PRIMARY, tag1)
+      Button("Button", { a++ }, Modifier, ColorLevel.PRIMARY, disabled, tag1)
     }
 
     composeTestRule.onNodeWithTag(tagD).assertIsDisplayed()

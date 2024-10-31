@@ -15,13 +15,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -42,7 +39,11 @@ import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
+import com.github.se.cyrcle.ui.theme.ColorLevel
+import com.github.se.cyrcle.ui.theme.atoms.Button
+import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.mapbox.turf.TurfMeasurement
 
@@ -77,7 +78,7 @@ fun SpotListScreen(
 
   Scaffold(
       modifier = Modifier.testTag("SpotListScreen"),
-      bottomBar = { BottomNavigationBar(navigationActions, selectedItem = Screen.LIST) }) {
+      bottomBar = { BottomNavigationBar(navigationActions, selectedItem = Route.LIST) }) {
           innerPadding ->
         LazyColumn(
             modifier =
@@ -155,11 +156,11 @@ fun FilterHeader(
 
   Column(modifier = Modifier.padding(16.dp)) {
     Button(
+        text = if (showFilters) "Hide Filters" else "Show Filters",
         onClick = { showFilters = !showFilters },
-        modifier = Modifier.fillMaxWidth().testTag("ShowFiltersButton"),
-        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)) {
-          Text(if (showFilters) "Hide Filters" else "Show Filters")
-        }
+        modifier = Modifier.fillMaxWidth(),
+        colorLevel = ColorLevel.PRIMARY,
+        testTag = "ShowFiltersButton")
 
     if (showFilters) {
       Spacer(modifier = Modifier.height(8.dp))
@@ -173,16 +174,13 @@ fun FilterHeader(
                 horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                   items(ParkingProtection.entries) { protection ->
                     Button(
+                        text = protection.name,
                         onClick = { onProtectionSelected(protection) },
-                        modifier = Modifier.padding(2.dp).testTag("ProtectionFilterItem"),
-                        colors =
-                            ButtonDefaults.buttonColors(
-                                containerColor =
-                                    if (selectedProtection.contains(protection))
-                                        MaterialTheme.colorScheme.primary
-                                    else Color.LightGray)) {
-                          Text(protection.name)
-                        }
+                        modifier = Modifier.padding(2.dp),
+                        colorLevel = ColorLevel.PRIMARY,
+                        disabled =
+                            remember { mutableStateOf(selectedProtection.contains(protection)) },
+                        testTag = "ProtectionFilterItem")
                   }
                 }
           }
@@ -198,16 +196,13 @@ fun FilterHeader(
                 horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                   items(ParkingRackType.entries) { rackType ->
                     Button(
+                        text = rackType.name,
                         onClick = { onRackTypeSelected(rackType) },
-                        modifier = Modifier.padding(2.dp).testTag("RackTypeFilterItem"),
-                        colors =
-                            ButtonDefaults.buttonColors(
-                                containerColor =
-                                    if (selectedRackTypes.contains(rackType))
-                                        MaterialTheme.colorScheme.primary
-                                    else Color.LightGray)) {
-                          Text(rackType.name)
-                        }
+                        modifier = Modifier.padding(2.dp),
+                        colorLevel = ColorLevel.PRIMARY,
+                        disabled =
+                            remember { mutableStateOf(selectedRackTypes.contains(rackType)) },
+                        testTag = "RackTypeFilterItem")
                   }
                 }
           }
@@ -223,16 +218,13 @@ fun FilterHeader(
                 horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                   items(ParkingCapacity.entries) { capacity ->
                     Button(
+                        text = capacity.name,
                         onClick = { onCapacitySelected(capacity) },
-                        modifier = Modifier.padding(2.dp).testTag("CapacityFilterItem"),
-                        colors =
-                            ButtonDefaults.buttonColors(
-                                containerColor =
-                                    if (selectedCapacities.contains(capacity))
-                                        MaterialTheme.colorScheme.primary
-                                    else Color.LightGray)) {
-                          Text(capacity.name)
-                        }
+                        modifier = Modifier.padding(2.dp),
+                        colorLevel = ColorLevel.PRIMARY,
+                        disabled =
+                            remember { mutableStateOf(selectedCapacities.contains(capacity)) },
+                        testTag = "CapacityFilterItem")
                   }
                 }
           }
@@ -255,9 +247,9 @@ fun FilterSection(
             Modifier.clickable(onClick = onToggle)
                 .padding(8.dp)
                 .background(Color.LightGray)
-                .fillMaxWidth()
-                .testTag(title),
-        color = MaterialTheme.colorScheme.tertiary)
+                .fillMaxWidth(),
+        color = MaterialTheme.colorScheme.tertiary,
+        testTag = title)
 
     if (isExpanded) {
       content()
@@ -298,12 +290,12 @@ fun SpotCard(
                       text = parking.optName ?: "Unnamed Parking",
                       style = MaterialTheme.typography.titleLarge,
                       color = MaterialTheme.colorScheme.secondary,
-                      modifier = Modifier.testTag("ParkingName"))
+                      testTag = "ParkingName")
                   Text(
                       text = String.format("%.2f km", distance),
                       style = MaterialTheme.typography.bodySmall,
                       color = MaterialTheme.colorScheme.secondary,
-                      modifier = Modifier.testTag("ParkingDistance"))
+                      testTag = "ParkingDistance")
                 }
 
             if (matchedCriteria.isNotEmpty()) {
@@ -313,7 +305,7 @@ fun SpotCard(
                     text = criterion,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.testTag("MatchedCriterionItem"))
+                    testTag = "MatchedCriterionItem")
               }
             }
           }
@@ -322,7 +314,8 @@ fun SpotCard(
               text = "${parking.price} $",
               style = MaterialTheme.typography.labelSmall,
               color = MaterialTheme.colorScheme.secondary,
-              modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp).testTag("ParkingPrice"))
+              modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
+              testTag = "ParkingPrice")
         }
       }
 }

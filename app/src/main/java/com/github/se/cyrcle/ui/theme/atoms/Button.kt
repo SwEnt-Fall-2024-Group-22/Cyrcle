@@ -8,8 +8,9 @@ import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.SmallFloatingActionButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
@@ -140,6 +141,7 @@ fun ExtendedFloatingActionButton(
  * @param onClick
  * @param modifier Chained modifier. `.testTag` will be overwritten, use the `testTag` for this.
  * @param colorLevel The color scheme of the object.
+ * @param disabled If the button should be disabled (the onClick won't be triggered)
  * @param testTag The test tag of the object.
  */
 @Composable
@@ -148,10 +150,11 @@ fun Button(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     colorLevel: ColorLevel = ColorLevel.PRIMARY,
+    disabled: MutableState<Boolean> = mutableStateOf(false),
     testTag: String = "Button"
 ) {
   Button(
-      onClick = { onClick() },
+      onClick = { if (!disabled.value) onClick() },
       modifier = modifier.testTag(testTag),
       colors = getButtonColors(colorLevel)) {
         Text(text, Modifier.testTag("${testTag}Text"))
