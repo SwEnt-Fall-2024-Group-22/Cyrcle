@@ -120,6 +120,8 @@ fun ReviewScreen(
           Button(
               onClick = {
                 Toast.makeText(context, "Review Added!", Toast.LENGTH_SHORT).show()
+                // to avoid problematic castings
+                val sliderToValue = (sliderValue * 100).toInt() / 100.0
                 reviewViewModel.addReview(
                     Review(
                         owner = "default",

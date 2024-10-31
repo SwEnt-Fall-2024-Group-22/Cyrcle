@@ -25,7 +25,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.doNothing
-import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class ReviewScreenTest {
@@ -100,8 +99,6 @@ class ReviewScreenTest {
     composeTestRule.setContent {
       ReviewScreen(mockNavigationActions, parkingViewModel, reviewViewModel)
     }
-    whenever(mockReviewRepository.getNewUid()).thenReturn("mockUid")
-
     // Enter a review
     composeTestRule.onNodeWithTag("ReviewInput").performTextInput("Great parking!")
 
