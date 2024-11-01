@@ -17,6 +17,3 @@ Todo
   - GitHub Actions
 - Design 
   - Figma
-
-## Link
-[Figma](https://www.figma.com/design/glKpOCnBOjzx8mTTJUkyqH/Cyrcle?node-id=4-2&t=axZO6k6pPJuiWDin-1)
