@@ -23,6 +23,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -52,8 +53,8 @@ import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
-import com.github.se.cyrcle.ui.theme.ColorLevel
-import com.github.se.cyrcle.ui.theme.atoms.Button
+import com.github.se.cyrcle.ui.theme.Cerulean
+import com.github.se.cyrcle.ui.theme.White
 import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
@@ -91,11 +92,17 @@ fun SpotListScreen(
     }
   }
 
+  LaunchedEffect(selectedProtection, selectedProtection, selectedCapacities, onlyWithCCTV) {
+    Log.d("ListScreen", "selectedProtection: $selectedProtection")
+    Log.d("ListScreen", "selectedRackTypes: $selectedRackTypes")
+    Log.d("ListScreen", "selectedCapacities: $selectedCapacities")
+    Log.d("ListScreen", "Filtered parking spots: $filteredParkingSpots")
+  }
+
   Scaffold(
       modifier = Modifier.testTag("SpotListScreen"),
       bottomBar = { BottomNavigationBar(navigationActions, selectedItem = Route.LIST) }) {
           innerPadding ->
-        Log.d("ListScreen", "2. Filtered parking spots: $filteredParkingSpots")
         Column(
             modifier =
                 Modifier.fillMaxSize()
@@ -159,7 +166,7 @@ fun FilterHeader(
           onClick = { showFilters = !showFilters },
           icon = if (showFilters) Icons.Default.Close else Icons.Default.FilterList,
           contentDescription = "Filter",
-      )
+          testTag = "ShowFiltersButton")
     }
 
     if (showFilters) {
@@ -167,35 +174,57 @@ fun FilterHeader(
           title = "Protection",
           isExpanded = showProtectionOptions,
           onToggle = { showProtectionOptions = !showProtectionOptions }) {
-            FilterOptions(
-                options = ParkingProtection.entries.toTypedArray(),
-                onOptionSelected = onAttributeSelected,
-                selectedOptions = selectedProtection,
-                getDescription = { it.description },
-                testTag = "ProtectionFilter")
+            LazyRow(
+                modifier = Modifier.fillMaxWidth().testTag("ProtectionFilter"),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                  items(ParkingProtection.entries.toTypedArray()) { option ->
+                    ToggleButton(
+                        text = option.description,
+                        onclick = { onAttributeSelected(option) },
+                        activated = selectedProtection.contains(option),
+                        modifier = Modifier.padding(2.dp),
+                        testTag = "ProtectionFilterItem")
+                  }
+                }
           }
+
       FilterSection(
           title = "Rack Type",
           isExpanded = showRackTypeOptions,
           onToggle = { showRackTypeOptions = !showRackTypeOptions }) {
-            FilterOptions(
-                options = ParkingRackType.entries.toTypedArray(),
-                onOptionSelected = onAttributeSelected,
-                selectedOptions = selectedRackTypes,
-                getDescription = { it.description },
-                testTag = "RackTypeFilter")
+            LazyRow(
+                modifier = Modifier.fillMaxWidth().testTag("RackTypeFilter"),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                  items(ParkingRackType.entries.toTypedArray()) { option ->
+                    ToggleButton(
+                        text = option.description,
+                        onclick = { onAttributeSelected(option) },
+                        activated = selectedRackTypes.contains(option),
+                        modifier = Modifier.padding(2.dp),
+                        testTag = "RackTypeFilterItem")
+                  }
+                }
           }
+
       FilterSection(
           title = "Capacity",
           isExpanded = showCapacityOptions,
           onToggle = { showCapacityOptions = !showCapacityOptions }) {
-            FilterOptions(
-                options = ParkingCapacity.entries.toTypedArray(),
-                onOptionSelected = onAttributeSelected,
-                selectedOptions = selectedCapacities,
-                getDescription = { it.description },
-                testTag = "CapacityFilter")
+            LazyRow(
+                modifier = Modifier.fillMaxWidth().testTag("CapacityFilter"),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                  items(ParkingCapacity.entries.toTypedArray()) { option ->
+                    ToggleButton(
+                        text = option.description,
+                        onclick = { onAttributeSelected(option) },
+                        activated = selectedCapacities.contains(option),
+                        modifier = Modifier.padding(2.dp),
+                        testTag = "CapacityFilterItem")
+                  }
+                }
           }
+
+      // CCTV filter with checkbox
       Row(
           modifier = Modifier.fillMaxWidth().padding(8.dp),
           verticalAlignment = Alignment.CenterVertically) {
@@ -236,29 +265,6 @@ fun FilterSection(
 
         if (isExpanded) {
           content()
-        }
-      }
-}
-
-@Composable
-fun <T : Enum<T>> FilterOptions(
-    options: Array<T>,
-    onOptionSelected: (T) -> Unit,
-    selectedOptions: Set<T>,
-    getDescription: (T) -> String,
-    testTag: String
-) {
-  LazyRow(
-      modifier = Modifier.fillMaxWidth().testTag(testTag),
-      horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        items(options) { option ->
-          Button(
-              text = getDescription(option),
-              onClick = { onOptionSelected(option) },
-              modifier = Modifier.padding(2.dp),
-              colorLevel = ColorLevel.PRIMARY,
-              disabled = remember { mutableStateOf(selectedOptions.contains(option)) },
-              testTag = "${testTag}Item")
         }
       }
 }
@@ -333,13 +339,6 @@ fun SpotCard(
                   testTag = "ParkingNoReviews")
             }
           }
-
-          Text(
-              text = "${parking.price} $",
-              style = MaterialTheme.typography.labelSmall,
-              color = MaterialTheme.colorScheme.secondary,
-              modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
-              testTag = "ParkingPrice")
         }
       }
 }
@@ -350,4 +349,24 @@ private fun <T> toggleSelection(set: Set<T>, item: T): Set<T> {
   } else {
     set + item
   }
+}
+
+// Hardcoded. To be deleted and usages replaced with corresponding atom
+@Composable
+fun ToggleButton(
+    text: String,
+    onclick: () -> Unit = {},
+    activated: Boolean = true,
+    modifier: Modifier,
+    testTag: String = "ToggleButton"
+) {
+  androidx.compose.material3.Button(
+      onClick = onclick,
+      modifier = modifier.testTag(testTag),
+      colors =
+          if (activated)
+              ButtonDefaults.buttonColors(containerColor = Cerulean, contentColor = White)
+          else ButtonDefaults.buttonColors(containerColor = Color.Gray, contentColor = White)) {
+        Text(text, Modifier.testTag("${testTag}Text"))
+      }
 }

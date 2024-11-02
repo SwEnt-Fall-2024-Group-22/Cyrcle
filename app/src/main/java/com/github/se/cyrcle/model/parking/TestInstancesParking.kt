@@ -19,7 +19,9 @@ object TestInstancesParking {
           ParkingRackType.TWO_TIER,
           ParkingProtection.COVERED,
           0.0,
-          true)
+          true,
+          2,
+          3.0)
   val parking2 =
       Parking(
           "Test_spot_2",

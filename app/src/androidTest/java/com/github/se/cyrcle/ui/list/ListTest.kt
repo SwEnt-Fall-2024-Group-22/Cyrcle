@@ -2,14 +2,13 @@ package com.github.se.cyrcle.ui.list
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertAll
-import androidx.compose.ui.test.assertAny
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onFirst
@@ -62,8 +61,7 @@ class ListTest {
   @Test
   fun testSpotCardIsDisplayed() {
     composeTestRule.setContent {
-      SpotCard(
-          mockNavigationActions, parkingViewModel, TestInstancesParking.parking1, 0.0, emptyList())
+      SpotCard(mockNavigationActions, parkingViewModel, TestInstancesParking.parking1, 0.0)
     }
 
     composeTestRule.onNodeWithTag("SpotListItem", useUnmergedTree = true).assertIsDisplayed()
@@ -74,18 +72,20 @@ class ListTest {
     composeTestRule
         .onNodeWithTag("ParkingDistance", useUnmergedTree = true)
         .assertIsDisplayed()
-        .assertTextEquals(String.format("%.2f km", 0.0))
+        .assertTextEquals(String.format("%.0f m", 0.0))
+
+    composeTestRule.onNodeWithTag("ParkingRating", useUnmergedTree = true).assertIsDisplayed()
     composeTestRule
-        .onNodeWithTag("ParkingPrice", useUnmergedTree = true)
+        .onNodeWithTag("ParkingNbReviews", useUnmergedTree = true)
         .assertIsDisplayed()
-        .assertTextEquals("${TestInstancesParking.parking1.price} $")
+        .assertTextEquals("(2 reviews)")
+    composeTestRule.onNodeWithTag("ParkingNoReviews", useUnmergedTree = true).assertIsNotDisplayed()
   }
 
   @Test
   fun testSpotCardIsClickable() {
     composeTestRule.setContent {
-      SpotCard(
-          mockNavigationActions, parkingViewModel, TestInstancesParking.parking2, 0.0, emptyList())
+      SpotCard(mockNavigationActions, parkingViewModel, TestInstancesParking.parking2, 0.0)
     }
 
     composeTestRule
@@ -93,6 +93,10 @@ class ListTest {
         .assertIsDisplayed()
         .assertHasClickAction()
         .performClick()
+
+    composeTestRule.onNodeWithTag("ParkingNoReviews", useUnmergedTree = true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("ParkingNbReviews", useUnmergedTree = true).assertIsNotDisplayed()
+    composeTestRule.onNodeWithTag("ParkingRating", useUnmergedTree = true).assertIsNotDisplayed()
 
     verify(mockNavigationActions).navigateTo(Screen.CARD)
     assertEquals(TestInstancesParking.parking2, parkingViewModel.selectedParking.value)
@@ -104,18 +108,15 @@ class ListTest {
     composeTestRule.setContent {
       FilterHeader(
           selectedProtection = emptySet(),
-          onProtectionSelected = {},
           selectedRackTypes = emptySet(),
-          onRackTypeSelected = {},
           selectedCapacities = emptySet(),
-          onCapacitySelected = {})
+          onAttributeSelected = {},
+          onlyWithCCTV = false,
+          onCCTVCheckedChange = {})
     }
 
     // Act & Assert
-    composeTestRule
-        .onNodeWithTag("ShowFiltersButton")
-        .assertIsDisplayed()
-        .assertTextEquals("Show Filters")
+    composeTestRule.onNodeWithTag("ShowFiltersButton").assertIsDisplayed().assertHasClickAction()
   }
 
   @Test
@@ -125,26 +126,20 @@ class ListTest {
     composeTestRule.setContent {
       FilterHeader(
           selectedProtection = emptySet(),
-          onProtectionSelected = {},
           selectedRackTypes = emptySet(),
-          onRackTypeSelected = {},
           selectedCapacities = emptySet(),
-          onCapacitySelected = {})
+          onAttributeSelected = {},
+          onlyWithCCTV = false,
+          onCCTVCheckedChange = {})
     }
 
     // Act: Click to show filters
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("ShowFiltersButton"))
 
-    // Assert: Check that the button text changed
-    composeTestRule.onNodeWithTag("ShowFiltersButton").assertTextEquals("Hide Filters")
-
     // Act: Click to hide filters
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("ShowFiltersButton"))
-
-    // Assert: Check that the button text reverted
-    composeTestRule.onNodeWithTag("ShowFiltersButton").assertTextEquals("Show Filters")
   }
 
   @Test
@@ -155,11 +150,15 @@ class ListTest {
     composeTestRule.setContent {
       FilterHeader(
           selectedProtection = selectedProtection,
-          onProtectionSelected = { selectedProtection.add(it) },
           selectedRackTypes = emptySet(),
-          onRackTypeSelected = {},
           selectedCapacities = emptySet(),
-          onCapacitySelected = {})
+          onAttributeSelected = {
+            when (it) {
+              is ParkingProtection -> selectedProtection.add(it)
+            }
+          },
+          onlyWithCCTV = false,
+          onCCTVCheckedChange = {})
     }
 
     // Act: Click to show filters
@@ -190,11 +189,15 @@ class ListTest {
     composeTestRule.setContent {
       FilterHeader(
           selectedProtection = emptySet(),
-          onProtectionSelected = {},
           selectedRackTypes = selectedRackType,
-          onRackTypeSelected = { selectedRackType.add(it) },
           selectedCapacities = emptySet(),
-          onCapacitySelected = {})
+          onAttributeSelected = {
+            when (it) {
+              is ParkingRackType -> selectedRackType.add(it)
+            }
+          },
+          onlyWithCCTV = false,
+          onCCTVCheckedChange = {})
     }
 
     // Act: Click to show filters
@@ -222,11 +225,15 @@ class ListTest {
     composeTestRule.setContent {
       FilterHeader(
           selectedProtection = emptySet(),
-          onProtectionSelected = {},
           selectedRackTypes = emptySet(),
-          onRackTypeSelected = {},
           selectedCapacities = selectedCapacities,
-          onCapacitySelected = { selectedCapacities.add(it) })
+          onAttributeSelected = {
+            when (it) {
+              is ParkingCapacity -> selectedCapacities.add(it)
+            }
+          },
+          onlyWithCCTV = false,
+          onCCTVCheckedChange = {})
     }
 
     // Act: Click to show filters
@@ -282,13 +289,7 @@ class ListTest {
             String.format(
                 "%.2f km",
                 TurfMeasurement.distance(
-                    TestInstancesParking.referencePoint, testParking.location.center)))
-
-    // Check that the parking price is displayed
-    composeTestRule
-        .onNodeWithTag("ParkingPrice", useUnmergedTree = true)
-        .assertIsDisplayed()
-        .assertTextEquals("${testParking.price} $")
+                    TestInstancesParking.EPFLCenter, testParking.location.center)))
 
     // Select all 3 criteria
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
@@ -301,10 +302,7 @@ class ListTest {
     composeTestRule
         .onNodeWithTag("ProtectionFilter")
         .performScrollToIndex(testParking.protection.ordinal)
-    composeTestRule
-        .onNodeWithText(testParking.protection.name)
-        .assertHasClickAction()
-        .performClick()
+    composeTestRule.onNodeWithText(testParking.protection.description).performClick()
 
     // Select Rack Type
     composeTestRule.waitUntilAtLeastOneExists(hasTestTag("Rack Type"))
@@ -314,7 +312,10 @@ class ListTest {
     composeTestRule
         .onNodeWithTag("RackTypeFilter")
         .performScrollToIndex(testParking.rackType.ordinal)
-    composeTestRule.onNodeWithText(testParking.rackType.name).assertHasClickAction().performClick()
+    composeTestRule
+        .onNodeWithText(testParking.rackType.description)
+        .assertHasClickAction()
+        .performClick()
 
     composeTestRule.onNodeWithTag("Rack Type", useUnmergedTree = true).performClick()
 
@@ -326,19 +327,14 @@ class ListTest {
     composeTestRule
         .onNodeWithTag("CapacityFilter")
         .performScrollToIndex(testParking.capacity.ordinal)
-    composeTestRule.onNodeWithText(testParking.capacity.name).assertHasClickAction().performClick()
+    composeTestRule
+        .onNodeWithText(testParking.capacity.description)
+        .assertHasClickAction()
+        .performClick()
 
     // Store filters away
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
     composeTestRule.waitUntilAtLeastOneExists(hasTestTag("SpotListItem"))
     composeTestRule.onAllNodesWithTag("SpotListItem").assertCountEquals(1)
-
-    // Check that the parking protection match is displayed
-    composeTestRule
-        .onAllNodesWithTag("MatchedCriterionItem", useUnmergedTree = true)
-        .assertCountEquals(3)
-        .assertAny(hasText("Protection: ${testParking.protection.description}"))
-        .assertAny(hasText("Rack Type: ${testParking.rackType.description}"))
-        .assertAny(hasText("Capacity: ${testParking.capacity.description}"))
   }
 }
