@@ -1,6 +1,7 @@
 package com.github.se.cyrcle.ui.list
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
@@ -28,6 +30,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,7 +40,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.se.cyrcle.model.parking.Parking
@@ -64,6 +66,7 @@ fun SpotListScreen(
 ) {
 
   val referencePoint = TestInstancesParking.EPFLCenter
+  val numberOfNewParkings = 10
 
   val parkingSpots by parkingViewModel.kClosestParkings.collectAsState()
 
@@ -81,10 +84,18 @@ fun SpotListScreen(
             (!onlyWithCCTV || parking.hasSecurity)
       }
 
+  // Fetch initial parkings if the list is empty
+  LaunchedEffect(parkingSpots) {
+    if (parkingSpots.isEmpty()) {
+      parkingViewModel.getKClosestParkings(referencePoint, numberOfNewParkings)
+    }
+  }
+
   Scaffold(
       modifier = Modifier.testTag("SpotListScreen"),
       bottomBar = { BottomNavigationBar(navigationActions, selectedItem = Route.LIST) }) {
           innerPadding ->
+        Log.d("ListScreen", "2. Filtered parking spots: $filteredParkingSpots")
         Column(
             modifier =
                 Modifier.fillMaxSize()
@@ -107,13 +118,21 @@ fun SpotListScreen(
                   },
                   onlyWithCCTV = onlyWithCCTV,
                   onCCTVCheckedChange = { onlyWithCCTV = it })
+
+              val listState = rememberLazyListState()
               LazyColumn(
+                  state = listState,
                   contentPadding = PaddingValues(16.dp),
                   verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(items = filteredParkingSpots) { parking ->
                       val distance =
                           TurfMeasurement.distance(referencePoint, parking.location.center)
                       SpotCard(navigationActions, parkingViewModel, parking, distance)
+                      Log.d("ListScreen", "Filtered parking spots: $filteredParkingSpots")
+                      if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1) {
+                        parkingViewModel.getKClosestParkings(
+                            referencePoint, numberOfNewParkings + filteredParkingSpots.size)
+                      }
                     }
                   }
             }
@@ -272,14 +291,13 @@ fun SpotCard(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween) {
-                  androidx.compose.material3.Text(
-                      text = parking.optName ?: "Unnamed Parking",
+                  Text(
+                      text =
+                          parking.optName?.let { if (it.length > 35) it.take(32) + "..." else it }
+                              ?: "Unnamed Parking",
                       style = MaterialTheme.typography.bodyLarge,
                       color = MaterialTheme.colorScheme.onSurface,
-                      maxLines = 1,
-                      overflow = TextOverflow.Ellipsis,
-                      modifier = Modifier.testTag("ParkingName"),
-                  )
+                      testTag = "ParkingName")
                   Text(
                       text =
                           if (distance < 1) String.format("%.0f m", distance * 1000)
