@@ -81,6 +81,7 @@ fun MapScreen(
   val mapViewportState = MapConfig.createMapViewPortStateFromViewModel(mapViewModel)
   var removeViewAnnotation = remember { true }
   var cancelables = remember<Cancelable> { Cancelable({}) }
+  var listener: MapIdleCallback? = null
   var pointAnnotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
 
   val bitmap = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.red_marker)
@@ -133,7 +134,9 @@ fun MapScreen(
 
                   val pointAnnotation = it
 
-                  val listener = MapIdleCallback {
+                  listener = null
+
+                  listener = MapIdleCallback {
 
                     // Add the new view annotation
                     val viewAnnotation =
@@ -164,7 +167,7 @@ fun MapScreen(
                     removeViewAnnotation = true
                   }
                   cancelables.cancel()
-                  cancelables = mapView.mapboxMap.subscribeMapIdle(listener)
+                  cancelables = mapView.mapboxMap.subscribeMapIdle(listener!!)
                   true
                 })
 
