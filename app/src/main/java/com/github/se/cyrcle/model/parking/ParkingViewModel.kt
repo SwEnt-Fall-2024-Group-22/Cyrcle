@@ -118,8 +118,7 @@ class ParkingViewModel(
           tile.topRight,
           { parkings ->
             tilesToParking.value[tile] = parkings
-            _rectParkings.value +=
-                tilesToParking.value.filter { it.key in tilesToDisplay }.values.flatten()
+            _rectParkings.value += parkings
           },
           { Log.e("ParkingViewModel", "-- Error getting parkings: $it") })
     }
