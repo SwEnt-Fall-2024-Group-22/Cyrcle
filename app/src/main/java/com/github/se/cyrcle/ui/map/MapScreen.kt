@@ -81,7 +81,7 @@ fun MapScreen(
   val mapViewportState = MapConfig.createMapViewPortStateFromViewModel(mapViewModel)
   var removeViewAnnotation = remember { true }
   var cancelables = remember<Cancelable> { Cancelable({}) }
-  var listener: MapIdleCallback? = null
+  var listener = remember<MapIdleCallback?> { null }
   var pointAnnotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
 
   val bitmap = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.red_marker)
@@ -133,8 +133,6 @@ fun MapScreen(
                   val parkingDeserialized = gson.fromJson(parkingData, Parking::class.java)
 
                   val pointAnnotation = it
-
-                  listener = null
 
                   listener = MapIdleCallback {
 
