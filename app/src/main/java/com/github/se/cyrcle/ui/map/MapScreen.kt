@@ -67,7 +67,7 @@ import com.mapbox.maps.viewannotation.viewAnnotationOptions
 const val defaultZoom = 16.0
 const val maxZoom = 18.0
 const val minZoom = 8.0
-const val thresholdDisplayZoom = 14.0
+const val thresholdDisplayZoom = 13.0
 const val LAYER_ID = "0128"
 
 @Composable
@@ -169,7 +169,7 @@ fun MapScreen(
                   true
                 })
 
-            var (loadedBottomLeft, loadedTopRight) = getScreenCorners(mapView, useBuffer = true)
+            val (loadedBottomLeft, loadedTopRight) = getScreenCorners(mapView)
 
             // Get parkings in the current view
             parkingViewModel.getParkingsInRect(loadedBottomLeft, loadedTopRight)
@@ -187,24 +187,11 @@ fun MapScreen(
 
                   // Get the top right and bottom left coordinates of the current view only when
                   // what the user sees is outside the screen
-                  val (currentBottomLeft, currentTopRight) =
-                      getScreenCorners(mapView, useBuffer = false)
-                  if (!inBounds(
-                      currentBottomLeft, currentTopRight, loadedBottomLeft, loadedTopRight)) {
-                    Log.d("MapScreen", "Loading parkings in new view")
-                    // Get the buffered coordinates for loading parkings
+                  val (currentBottomLeft, currentTopRight) = getScreenCorners(mapView)
 
-                    val loadedCorners = getScreenCorners(mapView, useBuffer = true)
-                    loadedBottomLeft = loadedCorners.first
-                    loadedTopRight = loadedCorners.second
-
-                    // Temporary fix to avoid loading too much parkings when zoomed out
-                    if (mapView.mapboxMap.cameraState.zoom > thresholdDisplayZoom) {
-                      parkingViewModel.getParkingsInRect(loadedBottomLeft, loadedTopRight)
-                    }
-
-                    // Create PointAnnotationOptions for each parking
-                    drawMarkers(pointAnnotationManager, listOfParkings, resizedBitmap)
+                  // Temporary fix to avoid loading too much parkings when zoomed out
+                  if (mapView.mapboxMap.cameraState.zoom > thresholdDisplayZoom) {
+                    parkingViewModel.getParkingsInRect(currentBottomLeft, currentTopRight)
                   }
                 }
 
@@ -244,37 +231,15 @@ fun MapScreen(
 }
 
 /**
- * Check if the current view is within the loaded view.
- *
- * @param currentBottomLeft the bottom left corner of the current view
- * @param currentTopRight the top right corner of the current view
- * @param loadedBottomLeft the bottom left corner of the loaded view
- * @param loadedTopRight the top right corner of the loaded view
- * @return true if the current view is within the loaded view, false otherwise
- */
-private fun inBounds(
-    currentBottomLeft: Point,
-    currentTopRight: Point,
-    loadedBottomLeft: Point,
-    loadedTopRight: Point
-): Boolean {
-  return currentBottomLeft.latitude() >= loadedBottomLeft.latitude() &&
-      currentBottomLeft.longitude() >= loadedBottomLeft.longitude() &&
-      currentTopRight.latitude() <= loadedTopRight.latitude() &&
-      currentTopRight.longitude() <= loadedTopRight.longitude()
-}
-
-/**
  * Get the bottom left and top right corners of the screen in latitude and longitude coordinates.
  * The corners are calculated based on the center of the screen and the viewport dimensions. If
  * useBuffer is true, the corners are calculated with a buffer of 2x the viewport dimensions. This
  * is useful for loading parkings that are not yet visible on the screen.
  *
  * @param mapView the MapView to get the screen corners from
- * @param useBuffer whether to use a buffer to get the corners
  * @return a pair of the bottom left and top right corners of the screen
  */
-private fun getScreenCorners(mapView: MapView, useBuffer: Boolean = true): Pair<Point, Point> {
+private fun getScreenCorners(mapView: MapView): Pair<Point, Point> {
   // Retrieve viewport dimensions
   val viewportWidth = mapView.width
   val viewportHeight = mapView.height
@@ -282,7 +247,7 @@ private fun getScreenCorners(mapView: MapView, useBuffer: Boolean = true): Pair<
   val centerPixel = mapView.mapboxMap.pixelForCoordinate(mapView.mapboxMap.cameraState.center)
 
   // Calculate the multiplier for the buffer
-  val multiplier = if (useBuffer) 3.0 else 1.0
+  val multiplier = 3.0
 
   val bottomLeftCorner =
       mapView.mapboxMap.coordinateForPixel(
