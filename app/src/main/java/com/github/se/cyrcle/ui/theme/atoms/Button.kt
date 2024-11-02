@@ -1,6 +1,7 @@
 package com.github.se.cyrcle.ui.theme.atoms
 
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -19,6 +20,7 @@ import com.github.se.cyrcle.ui.theme.disabledColor
 import com.github.se.cyrcle.ui.theme.getButtonColors
 import com.github.se.cyrcle.ui.theme.getColor
 import com.github.se.cyrcle.ui.theme.getOnColor
+import com.github.se.cyrcle.ui.theme.onDisabledColor
 
 /**
  * Create a themed small floating action button, with simplified arguments.
@@ -158,6 +160,34 @@ fun Button(
       modifier = modifier.testTag(testTag),
       colors = getButtonColors(colorLevel),
       enabled = !disabled.value) {
+        Text(text, Modifier.testTag("${testTag}Text"))
+      }
+}
+
+/**
+ * Create a themed toggle button, with simplified arguments.
+ *
+ * @param value The mutable boolean that this toggle represent and modify.
+ * @param modifier Chained modifier. `.testTag` will be overwritten, use the `testTag` for this.
+ * @param colorLevel The color scheme of the object.
+ * @param testTag The test tag of the object.
+ */
+@Composable
+fun ToggleButton(
+    text: String,
+    value: MutableState<Boolean>,
+    modifier: Modifier = Modifier,
+    colorLevel: ColorLevel = ColorLevel.PRIMARY,
+    testTag: String = "ToggleButton"
+) {
+  Button(
+      onClick = { value.value = !value.value },
+      modifier = modifier.testTag(testTag),
+      colors =
+          if (value.value) getButtonColors(colorLevel)
+          else
+              ButtonDefaults.buttonColors(
+                  containerColor = disabledColor(), contentColor = onDisabledColor())) {
         Text(text, Modifier.testTag("${testTag}Text"))
       }
 }
