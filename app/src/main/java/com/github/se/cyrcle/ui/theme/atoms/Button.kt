@@ -177,11 +177,12 @@ fun ToggleButton(
     text: String,
     value: MutableState<Boolean>,
     modifier: Modifier = Modifier,
+    onClick: () -> Unit = { value.value = !value.value },
     colorLevel: ColorLevel = ColorLevel.PRIMARY,
     testTag: String = "ToggleButton"
 ) {
   Button(
-      onClick = { value.value = !value.value },
+      onClick = onClick,
       modifier = modifier.testTag(testTag),
       colors =
           if (value.value) getButtonColors(colorLevel)

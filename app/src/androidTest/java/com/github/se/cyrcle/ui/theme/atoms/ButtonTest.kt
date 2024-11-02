@@ -57,7 +57,8 @@ class ButtonTest {
     val value = mutableStateOf(true)
     composeTestRule.setContent {
       ToggleButton("Button", value)
-      ToggleButton("Button", value, Modifier, ColorLevel.PRIMARY, tag1)
+      ToggleButton(
+          "Button", value, Modifier, { value.value = !value.value }, ColorLevel.PRIMARY, tag1)
     }
 
     composeTestRule.onNodeWithTag(tagD).assertIsDisplayed()
