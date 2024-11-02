@@ -129,13 +129,23 @@ val DarkColorScheme =
         )
 
 /**
- * Return a themed color, depending on the system theme.
+ * Return a themed disabledColor, depending on the system theme.
  *
  * @return A themed color.
  */
 @Composable
 fun disabledColor(): Color {
   return if (isSystemInDarkTheme()) Color.DarkGray else Color.LightGray
+}
+
+/**
+ * Return a themed onDisabled color, depending on the system theme.
+ *
+ * @return A themed color.
+ */
+@Composable
+fun onDisabledColor(): Color {
+  return if (isSystemInDarkTheme()) Color.LightGray else Color.DarkGray
 }
 
 /** Generate the theme of the application. */

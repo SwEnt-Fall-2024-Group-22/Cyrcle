@@ -35,12 +35,18 @@ class ButtonTest {
     composeTestRule.onNodeWithTag(tagD).assertIsDisplayed()
     composeTestRule.onNodeWithTag("${tagD}Text", true).assertIsDisplayed()
     composeTestRule.onNodeWithTag(tagD).performClick()
-    assertEquals(a, 2)
+    assertEquals(2, a)
+    disabled.value = true
+    composeTestRule.onNodeWithTag(tagD).performClick() // Shouldn't trigger onClick
+    assertEquals(2, a)
 
     composeTestRule.onNodeWithTag(tag1).assertIsDisplayed()
     composeTestRule.onNodeWithTag("${tag1}Text", true).assertIsDisplayed()
     composeTestRule.onNodeWithTag(tag1).performClick()
-    assertEquals(a, 3)
+    assertEquals(3, a)
+    disabled.value = true
+    composeTestRule.onNodeWithTag(tag1).performClick() // Shouldn't trigger onClick
+    assertEquals(3, a)
   }
 
   @Test

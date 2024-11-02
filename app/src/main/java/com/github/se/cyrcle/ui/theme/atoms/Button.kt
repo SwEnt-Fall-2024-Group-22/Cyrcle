@@ -156,7 +156,8 @@ fun Button(
   Button(
       onClick = { if (!disabled.value) onClick() },
       modifier = modifier.testTag(testTag),
-      colors = getButtonColors(colorLevel)) {
+      colors = getButtonColors(colorLevel),
+      enabled = !disabled.value) {
         Text(text, Modifier.testTag("${testTag}Text"))
       }
 }

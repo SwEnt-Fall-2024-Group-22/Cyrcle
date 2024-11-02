@@ -125,5 +125,8 @@ fun getOnContainerColor(colorLevel: ColorLevel): Color {
 @Composable
 fun getButtonColors(colorLevel: ColorLevel): ButtonColors {
   return ButtonDefaults.buttonColors(
-      containerColor = getColor(colorLevel), contentColor = getOnColor(colorLevel))
+      containerColor = getColor(colorLevel),
+      contentColor = getOnColor(colorLevel),
+      disabledContainerColor = disabledColor(),
+      disabledContentColor = onDisabledColor())
 }
