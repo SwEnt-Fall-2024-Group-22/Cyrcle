@@ -36,7 +36,8 @@ class ParkingViewModel(
   // List of tiles to display
   private var tilesToDisplay: Set<Tile> = emptySet()
   // Map a tile to the parkings that are in it.
-  private val tilesToParking = MutableStateFlow<LinkedHashMap<Tile, List<Parking>>>(linkedMapOf())
+  private val tilesToParking =
+      MutableStateFlow<LinkedHashMap<Tile, List<Parking>>>(LinkedHashMap(10, 1f, true))
 
   init {
     // TODO: Replace with actual location
