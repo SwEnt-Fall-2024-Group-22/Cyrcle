@@ -33,6 +33,9 @@ class ParkingViewModel(
   private val _selectedParking = MutableStateFlow<Parking?>(null)
   val selectedParking: StateFlow<Parking?> = _selectedParking
 
+  // List of tiles that have been queried
+  private val loadedTiles = mutableListOf<Tile>()
+
   // TODO: Replace with actual location
   init {
     parkingRepository.onSignIn { getKClosestParkings(Point.fromLngLat(6.9, 46.69), 5) }
@@ -98,12 +101,23 @@ class ParkingViewModel(
             maxOf(startPos.longitude(), endPos.longitude()),
             maxOf(startPos.latitude(), endPos.latitude()))
 
-    Log.d("ParkingViewModel", "Getting parkings between $startPos and $endPos")
-    parkingRepository.getParkingsBetween(
-        bottomLeft,
-        topRight,
-        { _rectParkings.value = it },
-        { Log.e("ParkingViewModel", "Error getting parkings: $it") })
+    // Get all tiles that are in the rectangle
+    val requestedTiles = Tile.getAllTilesInRectangle(bottomLeft, topRight)
+    requestedTiles.forEach {
+      Log.d("ParkingViewModel", "Requesting Tile: $it")
+      if (loadedTiles.contains(it)) {
+        Log.d("ParkingViewModel", " - Tile Already loaded")
+      } else {
+        Log.d("ParkingViewModel", " - Loading new Tile...")
+        parkingRepository.getParkingsBetween(
+            it.bottomLeft,
+            it.topRight,
+            { _rectParkings.value += it },
+            { Log.e("ParkingViewModel", "-- Error getting parkings: $it") })
+      }
+    }
+    // Add all requested tiles to the loaded tiles
+    loadedTiles.addAll(requestedTiles)
   }
 
   fun getKClosestParkings(

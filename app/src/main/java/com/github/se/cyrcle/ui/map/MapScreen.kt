@@ -67,6 +67,7 @@ import com.mapbox.maps.viewannotation.viewAnnotationOptions
 const val defaultZoom = 16.0
 const val maxZoom = 18.0
 const val minZoom = 8.0
+const val thresholdDisplayZoom = 14.0
 const val LAYER_ID = "0128"
 
 @Composable
@@ -197,7 +198,10 @@ fun MapScreen(
                     loadedBottomLeft = loadedCorners.first
                     loadedTopRight = loadedCorners.second
 
-                    parkingViewModel.getParkingsInRect(loadedBottomLeft, loadedTopRight)
+                    // Temporary fix to avoid loading too much parkings when zoomed out
+                    if (mapView.mapboxMap.cameraState.zoom > thresholdDisplayZoom) {
+                      parkingViewModel.getParkingsInRect(loadedBottomLeft, loadedTopRight)
+                    }
 
                     // Create PointAnnotationOptions for each parking
                     drawMarkers(pointAnnotationManager, listOfParkings, resizedBitmap)
