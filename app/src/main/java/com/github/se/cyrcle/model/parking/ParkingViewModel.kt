@@ -33,11 +33,13 @@ class ParkingViewModel(
   private val _selectedParking = MutableStateFlow<Parking?>(null)
   val selectedParking: StateFlow<Parking?> = _selectedParking
 
-  // List of tiles that have been queried
-  private val loadedTiles = mutableListOf<Tile>()
+  // List of tiles to display
+  private var tilesToDisplay: Set<Tile> = emptySet()
+  // Map a tile to the parkings that are in it.
+  private val tilesToParking = MutableStateFlow<LinkedHashMap<Tile, List<Parking>>>(linkedMapOf())
 
-  // TODO: Replace with actual location
   init {
+    // TODO: Replace with actual location
     parkingRepository.onSignIn { getKClosestParkings(Point.fromLngLat(6.9, 46.69), 5) }
   }
 
@@ -102,22 +104,20 @@ class ParkingViewModel(
             maxOf(startPos.latitude(), endPos.latitude()))
 
     // Get all tiles that are in the rectangle
-    val requestedTiles = Tile.getAllTilesInRectangle(bottomLeft, topRight)
-    requestedTiles.forEach {
-      Log.d("ParkingViewModel", "Requesting Tile: $it")
-      if (loadedTiles.contains(it)) {
-        Log.d("ParkingViewModel", " - Tile Already loaded")
-      } else {
-        Log.d("ParkingViewModel", " - Loading new Tile...")
-        parkingRepository.getParkingsBetween(
-            it.bottomLeft,
-            it.topRight,
-            { _rectParkings.value += it },
-            { Log.e("ParkingViewModel", "-- Error getting parkings: $it") })
-      }
-    }
-    // Add all requested tiles to the loaded tiles
-    loadedTiles.addAll(requestedTiles)
+    tilesToDisplay = Tile.getAllTilesInRectangle(bottomLeft, topRight)
+    tilesToDisplay
+        .filterNot { tilesToParking.value.containsKey(it) }
+        .forEach { tile ->
+          parkingRepository.getParkingsBetween(
+              tile.bottomLeft,
+              tile.topRight,
+              { parkings ->
+                tilesToParking.value[tile] = parkings
+                _rectParkings.value =
+                    tilesToParking.value.filter { it.key in tilesToDisplay }.values.flatten()
+              },
+              { Log.e("ParkingViewModel", "-- Error getting parkings: $it") })
+        }
   }
 
   fun getKClosestParkings(

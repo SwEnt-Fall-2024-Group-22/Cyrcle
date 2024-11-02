@@ -35,8 +35,8 @@ data class Tile(val bottomLeft: Point, val topRight: Point) {
      * @param topRight the top right corner of the rectangle
      * @return a list of all the tiles in the rectangle
      */
-    fun getAllTilesInRectangle(bottomLeft: Point, topRight: Point): List<Tile> {
-      val tiles = mutableListOf<Tile>()
+    fun getAllTilesInRectangle(bottomLeft: Point, topRight: Point): Set<Tile> {
+      val tiles = mutableSetOf<Tile>()
       for (x in
           (bottomLeft.longitude() / TILE_SIZE).toInt()..(topRight.longitude() / TILE_SIZE)
                   .toInt()) {
