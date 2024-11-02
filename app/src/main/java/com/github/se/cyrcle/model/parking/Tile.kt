@@ -19,12 +19,12 @@ data class Tile(val bottomLeft: Point, val topRight: Point) {
     private fun roundTiles(tile: Tile): Tile {
       val roundedBotomLeft =
           Point.fromLngLat(
-              (tile.bottomLeft.latitude() * 100).toInt() / 100.0,
-              (tile.bottomLeft.longitude() * 100).toInt() / 100.0)
+              (tile.bottomLeft.longitude() * 100).toInt() / 100.0,
+              (tile.bottomLeft.latitude() * 100).toInt() / 100.0)
       val roundedTopRight =
           Point.fromLngLat(
-              (tile.topRight.latitude() * 100).toInt() / 100.0,
-              (tile.topRight.longitude() * 100).toInt() / 100.0)
+              (tile.topRight.longitude() * 100).toInt() / 100.0,
+              (tile.topRight.latitude() * 100).toInt() / 100.0)
       return Tile(roundedBotomLeft, roundedTopRight)
     }
 
