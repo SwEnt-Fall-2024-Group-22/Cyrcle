@@ -55,9 +55,11 @@ jobs:
           LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
           MAPBOX_ACCESS_TOKEN: ${{ secrets.MAPBOX_ACCESS_TOKEN }}
           MAPBOX_DOWNLOADS_TOKEN: ${{ secrets.MAPBOX_DOWNLOADS_TOKEN }}
+          KEYSTORE: ${{ secrets.KEYSTORE }}
         run: |
           echo "$GOOGLE_SERVICES" | base64 --decode > ./app/google-services.json
           echo "$LOCAL_PROPERTIES" | base64 --decode > ./local.properties
+          echo "$KEYSTORE" | base64 --decode > ./app/keystore.jks
 
       # Cache the Emulator, if the cache does not hit, create the emulator
       - name: AVD cache
@@ -95,6 +97,9 @@ jobs:
         run: |
           # To run the CI with debug information, add --info
           ./gradlew assemble lint --parallel --build-cache
+        env:
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
 
       # Run Unit tests
       - name: Run unit tests

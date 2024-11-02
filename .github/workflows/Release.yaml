@@ -36,9 +36,12 @@ jobs:
           LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
           MAPBOX_ACCESS_TOKEN: ${{ secrets.MAPBOX_ACCESS_TOKEN }}
           MAPBOX_DOWNLOADS_TOKEN: ${{ secrets.MAPBOX_DOWNLOADS_TOKEN }}
+          KEYSTORE: ${{ secrets.KEYSTORE }}
+
         run: |
           echo "$GOOGLE_SERVICES" | base64 --decode > ./app/google-services.json
           echo "$LOCAL_PROPERTIES" | base64 --decode > ./local.properties
+          echo "$KEYSTORE" | base64 --decode > ./app/keystore.jks
 
       - name: Setup JDK
         uses: actions/setup-java@v4
@@ -47,20 +50,22 @@ jobs:
           java-version: "17"
 
       - name: Build with Gradle
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleRelease
         env:
           VERSION_NAME: ${{ github.event.inputs.version_name }}
           VERSION_CODE: ${{ github.event.inputs.version_code }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
       
       - name: Find APK
         run: find . -name "*.apk" -type f
         
       - name: Rename APK
         run: |
-          mv app/build/outputs/apk/debug/*.apk app/build/outputs/apk/debug/app-release-${{ github.event.inputs.version_name }}-${{ github.event.inputs.version_code }}.apk
+          mv app/build/outputs/apk/release/*.apk app/build/outputs/apk/release/app-release-${{ github.event.inputs.version_name }}-${{ github.event.inputs.version_code }}.apk
   
       - name: Upload renamed APK
         uses: actions/upload-artifact@v3
         with:
           name: app-release-${{ github.event.inputs.version_name }}-${{ github.event.inputs.version_code }}
-          path: app/build/outputs/apk/debug/app-release-${{ github.event.inputs.version_name }}-${{ github.event.inputs.version_code }}.apk
+          path: app/build/outputs/apk/release/app-release-${{ github.event.inputs.version_name }}-${{ github.event.inputs.version_code }}.apk
