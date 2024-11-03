@@ -108,7 +108,7 @@ fun SpotListScreen(
                 Modifier.fillMaxSize()
                     .padding(innerPadding)
                     .padding(bottom = 16.dp)
-                    .testTag("SpotListColumn")) {
+                    ) {
               FilterHeader(
                   selectedProtection = selectedProtection,
                   selectedRackTypes = selectedRackTypes,
@@ -130,7 +130,9 @@ fun SpotListScreen(
               LazyColumn(
                   state = listState,
                   contentPadding = PaddingValues(16.dp),
-                  verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                  verticalArrangement = Arrangement.spacedBy(8.dp),
+                  modifier = Modifier.testTag("SpotListColumn")
+                ) {
                     items(items = filteredParkingSpots) { parking ->
                       val distance =
                           TurfMeasurement.distance(referencePoint, parking.location.center)
