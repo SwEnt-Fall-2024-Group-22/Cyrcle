@@ -92,7 +92,7 @@ class MainActivityTest {
       composeTestRule.onNodeWithTag("SpotListColumn").performScrollToIndex(index)
       composeTestRule
           .onNodeWithTag("SpotListColumn")
-          .onChildAt(index + 1)
+          .onChildAt(index)
           .assertIsDisplayed()
           .assertHasClickAction()
           .performClick()

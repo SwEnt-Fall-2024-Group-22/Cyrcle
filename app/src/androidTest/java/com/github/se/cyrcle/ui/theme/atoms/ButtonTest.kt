@@ -57,8 +57,7 @@ class ButtonTest {
     val value = mutableStateOf(true)
     composeTestRule.setContent {
       ToggleButton("Button", value)
-      ToggleButton(
-          "Button", value, Modifier, { value.value = !value.value }, ColorLevel.PRIMARY, tag1)
+      ToggleButton("Button", value, Modifier, ColorLevel.PRIMARY, tag1)
     }
 
     composeTestRule.onNodeWithTag(tagD).assertIsDisplayed()
@@ -74,6 +73,32 @@ class ButtonTest {
     assertEquals(false, value.value)
     composeTestRule.onNodeWithTag(tag1).performClick() // Turn back to true
     assertEquals(true, value.value)
+  }
+
+  @Test
+  fun displayToggleButtonOverload() {
+    val tagD = "ToggleButton"
+    val tag1 = "ToggleButton1"
+    val mutableState = mutableStateOf(true)
+    val function = { mutableState.value = !mutableState.value }
+    composeTestRule.setContent {
+      ToggleButton("Button", mutableState.value, function)
+      ToggleButton("Button", mutableState.value, function, Modifier, ColorLevel.PRIMARY, tag1)
+    }
+
+    composeTestRule.onNodeWithTag(tagD).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${tagD}Text", true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(tagD).performClick() // Turn to false
+    assertEquals(false, mutableState.value)
+    composeTestRule.onNodeWithTag(tagD).performClick() // Turn back to true
+    assertEquals(true, mutableState.value)
+
+    composeTestRule.onNodeWithTag(tag1).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${tag1}Text", true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(tag1).performClick() // Turn to false
+    assertEquals(false, mutableState.value)
+    composeTestRule.onNodeWithTag(tag1).performClick() // Turn back to true
+    assertEquals(true, mutableState.value)
   }
 
   @Test

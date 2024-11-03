@@ -1,6 +1,8 @@
 package com.github.se.cyrcle.ui.list
 
+import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,14 +14,22 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,12 +37,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.se.cyrcle.model.parking.Parking
+import com.github.se.cyrcle.model.parking.ParkingAttribute
 import com.github.se.cyrcle.model.parking.ParkingCapacity
 import com.github.se.cyrcle.model.parking.ParkingProtection
 import com.github.se.cyrcle.model.parking.ParkingRackType
@@ -41,113 +51,102 @@ import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
-import com.github.se.cyrcle.ui.theme.ColorLevel
-import com.github.se.cyrcle.ui.theme.atoms.Button
+import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
+import com.github.se.cyrcle.ui.theme.atoms.ToggleButton
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.mapbox.turf.TurfMeasurement
+import java.util.Locale
 
 @Composable
 fun SpotListScreen(
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel = viewModel(factory = ParkingViewModel.Factory),
 ) {
+
+  val referencePoint = TestInstancesParking.EPFLCenter
+  val numberOfNewParkings = 10
+
   val parkingSpots by parkingViewModel.kClosestParkings.collectAsState()
 
   var selectedProtection by remember { mutableStateOf<Set<ParkingProtection>>(emptySet()) }
   var selectedRackTypes by remember { mutableStateOf<Set<ParkingRackType>>(emptySet()) }
   var selectedCapacities by remember { mutableStateOf<Set<ParkingCapacity>>(emptySet()) }
+  var onlyWithCCTV by remember { mutableStateOf(false) }
 
-  val sortedFilteredParkingSpots =
-      parkingSpots
-          .map { parking ->
-            // TODO: Use the user's location instead of a hardcoded reference point
-            parking to
-                TurfMeasurement.distance(
-                    TestInstancesParking.referencePoint, parking.location.center)
-          }
-          .sortedWith(
-              compareByDescending<Pair<Parking, Double>> { (parking, _) ->
-                    listOf(
-                            selectedProtection.contains(parking.protection),
-                            selectedRackTypes.contains(parking.rackType),
-                            selectedCapacities.contains(parking.capacity))
-                        .count { it }
-                  }
-                  .thenBy { (_, distance) -> distance })
+  // Filter the parking spots based on the selected attributes
+  val filteredParkingSpots =
+      parkingSpots.filter { parking ->
+        (selectedProtection.isEmpty() || selectedProtection.contains(parking.protection)) &&
+            (selectedRackTypes.isEmpty() || selectedRackTypes.contains(parking.rackType)) &&
+            (selectedCapacities.isEmpty() || selectedCapacities.contains(parking.capacity)) &&
+            (!onlyWithCCTV || parking.hasSecurity)
+      }
+
+  // Fetch initial parkings if the list is empty
+  LaunchedEffect(parkingSpots) {
+    if (parkingSpots.isEmpty()) {
+      parkingViewModel.getKClosestParkings(referencePoint, numberOfNewParkings)
+    }
+  }
+
+  LaunchedEffect(selectedProtection, selectedProtection, selectedCapacities, onlyWithCCTV) {
+    Log.d("ListScreen", "selectedProtection: $selectedProtection")
+    Log.d("ListScreen", "selectedRackTypes: $selectedRackTypes")
+    Log.d("ListScreen", "selectedCapacities: $selectedCapacities")
+    Log.d("ListScreen", "Filtered parking spots: $filteredParkingSpots")
+  }
 
   Scaffold(
       modifier = Modifier.testTag("SpotListScreen"),
       bottomBar = { BottomNavigationBar(navigationActions, selectedItem = Route.LIST) }) {
           innerPadding ->
-        LazyColumn(
-            modifier =
-                Modifier.fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(bottom = 16.dp)
-                    .testTag("SpotListColumn"),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)) {
-              item {
-                FilterHeader(
-                    selectedProtection = selectedProtection,
-                    onProtectionSelected = { protection ->
-                      selectedProtection =
-                          if (selectedProtection.contains(protection)) {
-                            selectedProtection - protection
-                          } else {
-                            selectedProtection + protection
-                          }
-                    },
-                    selectedRackTypes = selectedRackTypes,
-                    onRackTypeSelected = { rackType ->
-                      selectedRackTypes =
-                          if (selectedRackTypes.contains(rackType)) {
-                            selectedRackTypes - rackType
-                          } else {
-                            selectedRackTypes + rackType
-                          }
-                    },
-                    selectedCapacities = selectedCapacities,
-                    onCapacitySelected = { capacity ->
-                      selectedCapacities =
-                          if (selectedCapacities.contains(capacity)) {
-                            selectedCapacities - capacity
-                          } else {
-                            selectedCapacities + capacity
-                          }
-                    })
-              }
-              items(sortedFilteredParkingSpots) { (parking, distance) ->
-                val matchedCriteria = mutableListOf<String>()
+        Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(bottom = 16.dp)) {
+          FilterHeader(
+              selectedProtection = selectedProtection,
+              selectedRackTypes = selectedRackTypes,
+              selectedCapacities = selectedCapacities,
+              onAttributeSelected = { attribute ->
+                when (attribute) {
+                  is ParkingProtection ->
+                      selectedProtection = toggleSelection(selectedProtection, attribute)
+                  is ParkingRackType ->
+                      selectedRackTypes = toggleSelection(selectedRackTypes, attribute)
+                  is ParkingCapacity ->
+                      selectedCapacities = toggleSelection(selectedCapacities, attribute)
+                }
+              },
+              onlyWithCCTV = onlyWithCCTV,
+              onCCTVCheckedChange = { onlyWithCCTV = it })
 
-                if (selectedProtection.isNotEmpty() &&
-                    selectedProtection.contains(parking.protection)) {
-                  matchedCriteria.add("Protection: ${parking.protection.description}")
+          val listState = rememberLazyListState()
+          LazyColumn(
+              state = listState,
+              contentPadding = PaddingValues(16.dp),
+              verticalArrangement = Arrangement.spacedBy(8.dp),
+              modifier = Modifier.testTag("SpotListColumn")) {
+                items(items = filteredParkingSpots) { parking ->
+                  val distance = TurfMeasurement.distance(referencePoint, parking.location.center)
+                  SpotCard(navigationActions, parkingViewModel, parking, distance)
+                  Log.d("ListScreen", "Filtered parking spots: $filteredParkingSpots")
+                  if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1) {
+                    parkingViewModel.getKClosestParkings(
+                        referencePoint, numberOfNewParkings + filteredParkingSpots.size)
+                  }
                 }
-                if (selectedRackTypes.isNotEmpty() &&
-                    selectedRackTypes.contains(parking.rackType)) {
-                  matchedCriteria.add("Rack Type: ${parking.rackType.description}")
-                }
-                if (selectedCapacities.isNotEmpty() &&
-                    selectedCapacities.contains(parking.capacity)) {
-                  matchedCriteria.add("Capacity: ${parking.capacity.description}")
-                }
-
-                SpotCard(navigationActions, parkingViewModel, parking, distance, matchedCriteria)
               }
-            }
+        }
       }
 }
 
 @Composable
 fun FilterHeader(
     selectedProtection: Set<ParkingProtection>,
-    onProtectionSelected: (ParkingProtection) -> Unit,
     selectedRackTypes: Set<ParkingRackType>,
-    onRackTypeSelected: (ParkingRackType) -> Unit,
     selectedCapacities: Set<ParkingCapacity>,
-    onCapacitySelected: (ParkingCapacity) -> Unit
+    onAttributeSelected: (ParkingAttribute) -> Unit,
+    onlyWithCCTV: Boolean,
+    onCCTVCheckedChange: (Boolean) -> Unit
 ) {
   var showProtectionOptions by remember { mutableStateOf(false) }
   var showRackTypeOptions by remember { mutableStateOf(false) }
@@ -155,16 +154,15 @@ fun FilterHeader(
   var showFilters by remember { mutableStateOf(false) }
 
   Column(modifier = Modifier.padding(16.dp)) {
-    Button(
-        text = if (showFilters) "Hide Filters" else "Show Filters",
-        onClick = { showFilters = !showFilters },
-        modifier = Modifier.fillMaxWidth(),
-        colorLevel = ColorLevel.PRIMARY,
-        testTag = "ShowFiltersButton")
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+      SmallFloatingActionButton(
+          onClick = { showFilters = !showFilters },
+          icon = if (showFilters) Icons.Default.Close else Icons.Default.FilterList,
+          contentDescription = "Filter",
+          testTag = "ShowFiltersButton")
+    }
 
     if (showFilters) {
-      Spacer(modifier = Modifier.height(8.dp))
-
       FilterSection(
           title = "Protection",
           isExpanded = showProtectionOptions,
@@ -172,20 +170,16 @@ fun FilterHeader(
             LazyRow(
                 modifier = Modifier.fillMaxWidth().testTag("ProtectionFilter"),
                 horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                  items(ParkingProtection.entries) { protection ->
-                    Button(
-                        text = protection.name,
-                        onClick = { onProtectionSelected(protection) },
+                  items(ParkingProtection.entries.toTypedArray()) { option ->
+                    ToggleButton(
+                        text = option.description,
+                        onClick = { onAttributeSelected(option) },
+                        value = selectedProtection.contains(option),
                         modifier = Modifier.padding(2.dp),
-                        colorLevel = ColorLevel.PRIMARY,
-                        disabled =
-                            remember { mutableStateOf(selectedProtection.contains(protection)) },
                         testTag = "ProtectionFilterItem")
                   }
                 }
           }
-
-      Spacer(modifier = Modifier.height(8.dp))
 
       FilterSection(
           title = "Rack Type",
@@ -194,20 +188,16 @@ fun FilterHeader(
             LazyRow(
                 modifier = Modifier.fillMaxWidth().testTag("RackTypeFilter"),
                 horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                  items(ParkingRackType.entries) { rackType ->
-                    Button(
-                        text = rackType.name,
-                        onClick = { onRackTypeSelected(rackType) },
+                  items(ParkingRackType.entries.toTypedArray()) { option ->
+                    ToggleButton(
+                        text = option.description,
+                        onClick = { onAttributeSelected(option) },
+                        value = selectedRackTypes.contains(option),
                         modifier = Modifier.padding(2.dp),
-                        colorLevel = ColorLevel.PRIMARY,
-                        disabled =
-                            remember { mutableStateOf(selectedRackTypes.contains(rackType)) },
                         testTag = "RackTypeFilterItem")
                   }
                 }
           }
-
-      Spacer(modifier = Modifier.height(8.dp))
 
       FilterSection(
           title = "Capacity",
@@ -216,17 +206,31 @@ fun FilterHeader(
             LazyRow(
                 modifier = Modifier.fillMaxWidth().testTag("CapacityFilter"),
                 horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                  items(ParkingCapacity.entries) { capacity ->
-                    Button(
-                        text = capacity.name,
-                        onClick = { onCapacitySelected(capacity) },
+                  items(ParkingCapacity.entries.toTypedArray()) { option ->
+                    ToggleButton(
+                        text = option.description,
+                        onClick = { onAttributeSelected(option) },
+                        value = selectedCapacities.contains(option),
                         modifier = Modifier.padding(2.dp),
-                        colorLevel = ColorLevel.PRIMARY,
-                        disabled =
-                            remember { mutableStateOf(selectedCapacities.contains(capacity)) },
                         testTag = "CapacityFilterItem")
                   }
                 }
+          }
+
+      // CCTV filter with checkbox
+      Row(
+          modifier = Modifier.fillMaxWidth().padding(8.dp),
+          verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(
+                checked = onlyWithCCTV,
+                onCheckedChange = onCCTVCheckedChange,
+                modifier = Modifier.testTag("CCTVCheckbox"))
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = "Only display parkings with CCTV camera",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.testTag("CCTVCheckboxLabel"))
           }
     }
   }
@@ -239,22 +243,23 @@ fun FilterSection(
     onToggle: () -> Unit,
     content: @Composable () -> Unit
 ) {
-  Column {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleMedium,
-        modifier =
-            Modifier.clickable(onClick = onToggle)
-                .padding(8.dp)
-                .background(Color.LightGray)
-                .fillMaxWidth(),
-        color = MaterialTheme.colorScheme.tertiary,
-        testTag = title)
+  Column(
+      modifier =
+          Modifier.padding(8.dp)
+              .border(1.dp, Color.Gray, shape = MaterialTheme.shapes.medium)
+              .background(MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.medium)
+              .padding(8.dp)) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.clickable(onClick = onToggle).padding(8.dp).fillMaxWidth(),
+            color = MaterialTheme.colorScheme.primary,
+            testTag = title)
 
-    if (isExpanded) {
-      content()
-    }
-  }
+        if (isExpanded) {
+          content()
+        }
+      }
 }
 
 @Composable
@@ -262,14 +267,14 @@ fun SpotCard(
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel,
     parking: Parking,
-    distance: Double,
-    matchedCriteria: List<String>
+    distance: Double
 ) {
+  // make a line between the card and the next one
+  HorizontalDivider(modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.surface)
   Card(
       modifier =
           Modifier.fillMaxWidth()
               .height(120.dp)
-              .shadow(8.dp, shape = MaterialTheme.shapes.medium)
               .padding(4.dp)
               .clickable(
                   onClick = {
@@ -277,9 +282,7 @@ fun SpotCard(
                     navigationActions.navigateTo(Screen.CARD)
                   })
               .testTag("SpotListItem"),
-      colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary),
-      shape = MaterialTheme.shapes.medium,
-      elevation = CardDefaults.cardElevation(8.dp)) {
+      colors = CardDefaults.cardColors(containerColor = Color.Transparent)) {
         Box(modifier = Modifier.fillMaxSize()) {
           Column(modifier = Modifier.fillMaxSize().padding(16.dp).testTag("SpotCardContent")) {
             Row(
@@ -287,35 +290,56 @@ fun SpotCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween) {
                   Text(
-                      text = parking.optName ?: "Unnamed Parking",
-                      style = MaterialTheme.typography.titleLarge,
-                      color = MaterialTheme.colorScheme.secondary,
+                      text =
+                          parking.optName?.let { if (it.length > 35) it.take(32) + "..." else it }
+                              ?: "Unnamed Parking",
+                      style = MaterialTheme.typography.bodyLarge,
+                      color = MaterialTheme.colorScheme.onSurface,
                       testTag = "ParkingName")
                   Text(
-                      text = String.format("%.2f km", distance),
+                      text =
+                          if (distance < 1)
+                              String.format(Locale.getDefault(), "%.0f m", distance * 1000)
+                          else String.format(Locale.getDefault(), "%.2f km", distance),
                       style = MaterialTheme.typography.bodySmall,
-                      color = MaterialTheme.colorScheme.secondary,
+                      color = MaterialTheme.colorScheme.onSurface,
                       testTag = "ParkingDistance")
                 }
 
-            if (matchedCriteria.isNotEmpty()) {
-              Spacer(modifier = Modifier.height(4.dp))
-              matchedCriteria.forEach { criterion ->
+            // Rating
+            Spacer(modifier = Modifier.height(4.dp))
+            if (parking.nbReviews > 0) {
+              Row {
                 Text(
-                    text = criterion,
+                    text = "Rating: ${parking.avgScore}", // TODO: Replace with star composable
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.secondary,
-                    testTag = "MatchedCriterionItem")
+                    color = MaterialTheme.colorScheme.onSurface,
+                    testTag = "ParkingRating")
+                // Number of reviews
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text =
+                        "(${parking.nbReviews} review" + if (parking.nbReviews > 1) "s)" else ")",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+                    testTag = "ParkingNbReviews")
               }
+            } else {
+              Text(
+                  text = "No reviews yet",
+                  style = MaterialTheme.typography.bodySmall,
+                  color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+                  testTag = "ParkingNoReviews")
             }
           }
-
-          Text(
-              text = "${parking.price} $",
-              style = MaterialTheme.typography.labelSmall,
-              color = MaterialTheme.colorScheme.secondary,
-              modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
-              testTag = "ParkingPrice")
         }
       }
+}
+
+private fun <T> toggleSelection(set: Set<T>, item: T): Set<T> {
+  return if (set.contains(item)) {
+    set - item
+  } else {
+    set + item
+  }
 }
