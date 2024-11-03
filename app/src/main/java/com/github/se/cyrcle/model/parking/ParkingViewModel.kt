@@ -71,7 +71,12 @@ class ParkingViewModel(
    */
   fun addParking(parking: Parking) {
     parkingRepository.addParking(
-        parking, {}, { Log.e("ParkingViewModel", "Error adding parking", it) })
+        parking,
+        {
+          val tile = Tile.getTileFromPoint(parking.location.center)
+          tilesToParking.value[tile] = tilesToParking.value[tile]?.plus(parking) ?: listOf(parking)
+        },
+        { Log.e("ParkingViewModel", "Error adding parking", it) })
   }
 
   /**

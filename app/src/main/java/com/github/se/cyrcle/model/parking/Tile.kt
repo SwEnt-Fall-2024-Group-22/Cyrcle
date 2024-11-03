@@ -52,5 +52,20 @@ data class Tile(val bottomLeft: Point, val topRight: Point) {
       }
       return tiles
     }
+
+    /**
+     * Returns the tile that contains the given point.
+     *
+     * @param point the point to search for
+     * @return the tile that contains the point
+     */
+    fun getTileFromPoint(point: Point): Tile {
+      val x = (point.longitude() / TILE_SIZE).toInt()
+      val y = (point.latitude() / TILE_SIZE).toInt()
+      return roundTiles(
+          Tile(
+              Point.fromLngLat(x * TILE_SIZE, y * TILE_SIZE),
+              Point.fromLngLat((x + 1) * TILE_SIZE, (y + 1) * TILE_SIZE)))
+    }
   }
 }

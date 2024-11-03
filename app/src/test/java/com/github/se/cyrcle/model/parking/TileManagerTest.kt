@@ -21,4 +21,13 @@ class TileManagerTest {
         )
     assert(tiles2.size == 4)
   }
+
+  @Test
+  fun getTileFromPointTest() {
+    val tile =
+        Tile.getTileFromPoint(
+            Point.fromLngLat(6.05, 46.05),
+        )
+    assert(tile == Tile(Point.fromLngLat(6.0, 46.0), Point.fromLngLat(6.1, 46.1)))
+  }
 }
