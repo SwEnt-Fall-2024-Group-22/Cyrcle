@@ -92,9 +92,9 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
       return
     }
     db.collection(collectionPath)
-        .whereGreaterThanOrEqualTo("location.center.latitude", start.latitude())
+        .whereGreaterThan("location.center.latitude", start.latitude())
         .whereLessThanOrEqualTo("location.center.latitude", end.latitude())
-        .whereGreaterThanOrEqualTo("location.center.longitude", start.longitude())
+        .whereGreaterThan("location.center.longitude", start.longitude())
         .whereLessThanOrEqualTo("location.center.longitude", end.longitude())
         .get()
         .addOnSuccessListener { querySnapshot ->
