@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.list
 
-import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -57,6 +56,7 @@ import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.atoms.ToggleButton
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.mapbox.turf.TurfMeasurement
+import java.util.Locale
 
 @Composable
 fun SpotListScreen(
@@ -262,7 +262,6 @@ fun FilterSection(
       }
 }
 
-@SuppressLint("DefaultLocale")
 @Composable
 fun SpotCard(
     navigationActions: NavigationActions,
@@ -299,8 +298,9 @@ fun SpotCard(
                       testTag = "ParkingName")
                   Text(
                       text =
-                          if (distance < 1) String.format("%.0f m", distance * 1000)
-                          else String.format("%.2f km", distance),
+                          if (distance < 1)
+                              String.format(Locale.getDefault(), "%.0f m", distance * 1000)
+                          else String.format(Locale.getDefault(), "%.2f km", distance),
                       style = MaterialTheme.typography.bodySmall,
                       color = MaterialTheme.colorScheme.onSurface,
                       testTag = "ParkingDistance")

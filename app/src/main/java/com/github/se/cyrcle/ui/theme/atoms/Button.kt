@@ -165,7 +165,9 @@ fun Button(
 }
 
 /**
- * Create a themed toggle button, with simplified arguments.
+ * Create a themed toggle button, with simplified arguments. This button will change the value of
+ * the mutable boolean when clicked. Also, the color of the button will change based on the value of
+ * the boolean (true = enabled, false = disabled).
  *
  * @param value The mutable boolean that this toggle represent and modify.
  * @param modifier Chained modifier. `.testTag` will be overwritten, use the `testTag` for this.
@@ -195,6 +197,7 @@ fun ToggleButton(
 /**
  * Create a themed toggle button. This overload offers more flexibility.
  *
+ * @param text The text to display.
  * @param value The boolean that this toggle represent.
  * @param onClick The function describing what should happen on click.
  * @param modifier Chained modifier. `.testTag` will be overwritten, use the `testTag` for this.
