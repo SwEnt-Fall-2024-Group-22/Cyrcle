@@ -23,7 +23,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -53,10 +52,9 @@ import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
-import com.github.se.cyrcle.ui.theme.Cerulean
-import com.github.se.cyrcle.ui.theme.White
 import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
+import com.github.se.cyrcle.ui.theme.atoms.ToggleButton
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.mapbox.turf.TurfMeasurement
 
@@ -103,48 +101,41 @@ fun SpotListScreen(
       modifier = Modifier.testTag("SpotListScreen"),
       bottomBar = { BottomNavigationBar(navigationActions, selectedItem = Route.LIST) }) {
           innerPadding ->
-        Column(
-            modifier =
-                Modifier.fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(bottom = 16.dp)
-                    ) {
-              FilterHeader(
-                  selectedProtection = selectedProtection,
-                  selectedRackTypes = selectedRackTypes,
-                  selectedCapacities = selectedCapacities,
-                  onAttributeSelected = { attribute ->
-                    when (attribute) {
-                      is ParkingProtection ->
-                          selectedProtection = toggleSelection(selectedProtection, attribute)
-                      is ParkingRackType ->
-                          selectedRackTypes = toggleSelection(selectedRackTypes, attribute)
-                      is ParkingCapacity ->
-                          selectedCapacities = toggleSelection(selectedCapacities, attribute)
-                    }
-                  },
-                  onlyWithCCTV = onlyWithCCTV,
-                  onCCTVCheckedChange = { onlyWithCCTV = it })
+        Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(bottom = 16.dp)) {
+          FilterHeader(
+              selectedProtection = selectedProtection,
+              selectedRackTypes = selectedRackTypes,
+              selectedCapacities = selectedCapacities,
+              onAttributeSelected = { attribute ->
+                when (attribute) {
+                  is ParkingProtection ->
+                      selectedProtection = toggleSelection(selectedProtection, attribute)
+                  is ParkingRackType ->
+                      selectedRackTypes = toggleSelection(selectedRackTypes, attribute)
+                  is ParkingCapacity ->
+                      selectedCapacities = toggleSelection(selectedCapacities, attribute)
+                }
+              },
+              onlyWithCCTV = onlyWithCCTV,
+              onCCTVCheckedChange = { onlyWithCCTV = it })
 
-              val listState = rememberLazyListState()
-              LazyColumn(
-                  state = listState,
-                  contentPadding = PaddingValues(16.dp),
-                  verticalArrangement = Arrangement.spacedBy(8.dp),
-                  modifier = Modifier.testTag("SpotListColumn")
-                ) {
-                    items(items = filteredParkingSpots) { parking ->
-                      val distance =
-                          TurfMeasurement.distance(referencePoint, parking.location.center)
-                      SpotCard(navigationActions, parkingViewModel, parking, distance)
-                      Log.d("ListScreen", "Filtered parking spots: $filteredParkingSpots")
-                      if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1) {
-                        parkingViewModel.getKClosestParkings(
-                            referencePoint, numberOfNewParkings + filteredParkingSpots.size)
-                      }
-                    }
+          val listState = rememberLazyListState()
+          LazyColumn(
+              state = listState,
+              contentPadding = PaddingValues(16.dp),
+              verticalArrangement = Arrangement.spacedBy(8.dp),
+              modifier = Modifier.testTag("SpotListColumn")) {
+                items(items = filteredParkingSpots) { parking ->
+                  val distance = TurfMeasurement.distance(referencePoint, parking.location.center)
+                  SpotCard(navigationActions, parkingViewModel, parking, distance)
+                  Log.d("ListScreen", "Filtered parking spots: $filteredParkingSpots")
+                  if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1) {
+                    parkingViewModel.getKClosestParkings(
+                        referencePoint, numberOfNewParkings + filteredParkingSpots.size)
                   }
-            }
+                }
+              }
+        }
       }
 }
 
@@ -182,8 +173,8 @@ fun FilterHeader(
                   items(ParkingProtection.entries.toTypedArray()) { option ->
                     ToggleButton(
                         text = option.description,
-                        onclick = { onAttributeSelected(option) },
-                        activated = selectedProtection.contains(option),
+                        onClick = { onAttributeSelected(option) },
+                        value = selectedProtection.contains(option),
                         modifier = Modifier.padding(2.dp),
                         testTag = "ProtectionFilterItem")
                   }
@@ -200,8 +191,8 @@ fun FilterHeader(
                   items(ParkingRackType.entries.toTypedArray()) { option ->
                     ToggleButton(
                         text = option.description,
-                        onclick = { onAttributeSelected(option) },
-                        activated = selectedRackTypes.contains(option),
+                        onClick = { onAttributeSelected(option) },
+                        value = selectedRackTypes.contains(option),
                         modifier = Modifier.padding(2.dp),
                         testTag = "RackTypeFilterItem")
                   }
@@ -218,8 +209,8 @@ fun FilterHeader(
                   items(ParkingCapacity.entries.toTypedArray()) { option ->
                     ToggleButton(
                         text = option.description,
-                        onclick = { onAttributeSelected(option) },
-                        activated = selectedCapacities.contains(option),
+                        onClick = { onAttributeSelected(option) },
+                        value = selectedCapacities.contains(option),
                         modifier = Modifier.padding(2.dp),
                         testTag = "CapacityFilterItem")
                   }
@@ -351,24 +342,4 @@ private fun <T> toggleSelection(set: Set<T>, item: T): Set<T> {
   } else {
     set + item
   }
-}
-
-// Hardcoded. To be deleted and usages replaced with corresponding atom
-@Composable
-fun ToggleButton(
-    text: String,
-    onclick: () -> Unit = {},
-    activated: Boolean = true,
-    modifier: Modifier,
-    testTag: String = "ToggleButton"
-) {
-  androidx.compose.material3.Button(
-      onClick = onclick,
-      modifier = modifier.testTag(testTag),
-      colors =
-          if (activated)
-              ButtonDefaults.buttonColors(containerColor = Cerulean, contentColor = White)
-          else ButtonDefaults.buttonColors(containerColor = Color.Gray, contentColor = White)) {
-        Text(text, Modifier.testTag("${testTag}Text"))
-      }
 }

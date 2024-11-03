@@ -177,7 +177,36 @@ fun ToggleButton(
     text: String,
     value: MutableState<Boolean>,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit = { value.value = !value.value },
+    colorLevel: ColorLevel = ColorLevel.PRIMARY,
+    testTag: String = "ToggleButton"
+) {
+  Button(
+      onClick = { value.value = !value.value },
+      modifier = modifier.testTag(testTag),
+      colors =
+          if (value.value) getButtonColors(colorLevel)
+          else
+              ButtonDefaults.buttonColors(
+                  containerColor = disabledColor(), contentColor = onDisabledColor())) {
+        Text(text, Modifier.testTag("${testTag}Text"))
+      }
+}
+
+/**
+ * Create a themed toggle button. This overload offers more flexibility.
+ *
+ * @param value The boolean that this toggle represent.
+ * @param onClick The function describing what should happen on click.
+ * @param modifier Chained modifier. `.testTag` will be overwritten, use the `testTag` for this.
+ * @param colorLevel The color scheme of the object.
+ * @param testTag The test tag of the object.
+ */
+@Composable
+fun ToggleButton(
+    text: String,
+    value: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
     colorLevel: ColorLevel = ColorLevel.PRIMARY,
     testTag: String = "ToggleButton"
 ) {
@@ -185,7 +214,7 @@ fun ToggleButton(
       onClick = onClick,
       modifier = modifier.testTag(testTag),
       colors =
-          if (value.value) getButtonColors(colorLevel)
+          if (value) getButtonColors(colorLevel)
           else
               ButtonDefaults.buttonColors(
                   containerColor = disabledColor(), contentColor = onDisabledColor())) {
