@@ -33,8 +33,14 @@ class ParkingViewModel(
   private val _selectedParking = MutableStateFlow<Parking?>(null)
   val selectedParking: StateFlow<Parking?> = _selectedParking
 
-  // TODO: Replace with actual location
+  // List of tiles to display
+  private var tilesToDisplay: Set<Tile> = emptySet()
+  // Map a tile to the parkings that are in it.
+  private val tilesToParking =
+      MutableStateFlow<LinkedHashMap<Tile, List<Parking>>>(LinkedHashMap(10, 1f, true))
+
   init {
+    // TODO: Replace with actual location
     parkingRepository.onSignIn { getKClosestParkings(Point.fromLngLat(6.9, 46.69), 5) }
   }
 
@@ -85,6 +91,8 @@ class ParkingViewModel(
    * @param endPos the opposite corner of the rectangle
    */
   fun getParkingsInRect(startPos: Point, endPos: Point) {
+    // flush the list of parkings
+    _rectParkings.value = emptyList()
     if (startPos.latitude() == endPos.latitude() || startPos.longitude() == endPos.longitude()) {
       Log.e("ParkingViewModel", "Invalid rectangle")
       return
@@ -97,13 +105,23 @@ class ParkingViewModel(
         Point.fromLngLat(
             maxOf(startPos.longitude(), endPos.longitude()),
             maxOf(startPos.latitude(), endPos.latitude()))
-
-    Log.d("ParkingViewModel", "Getting parkings between $startPos and $endPos")
-    parkingRepository.getParkingsBetween(
-        bottomLeft,
-        topRight,
-        { _rectParkings.value = it },
-        { Log.e("ParkingViewModel", "Error getting parkings: $it") })
+    // Get all tiles that are in the rectangle
+    tilesToDisplay = Tile.getAllTilesInRectangle(bottomLeft, topRight)
+    tilesToDisplay.forEach { tile ->
+      if (tilesToParking.value.containsKey(tile)) {
+        _rectParkings.value += tilesToParking.value[tile]!!
+        return@forEach // Skip to the next tile if already fetched
+      }
+      tilesToParking.value[tile] = emptyList() // Avoid querying the same tile multiple times
+      parkingRepository.getParkingsBetween(
+          tile.bottomLeft,
+          tile.topRight,
+          { parkings ->
+            tilesToParking.value[tile] = parkings
+            _rectParkings.value += parkings
+          },
+          { Log.e("ParkingViewModel", "-- Error getting parkings: $it") })
+    }
   }
 
   fun getKClosestParkings(

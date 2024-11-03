@@ -58,7 +58,7 @@ class ParkingViewModelTest {
     }
 
     // Get parkings between the two points
-    parkingViewModel.getParkingsInRect(Point.fromLngLat(6.0, 46.0), Point.fromLngLat(7.0, 47.0))
+    parkingViewModel.getParkingsInRect(Point.fromLngLat(6.0, 46.0), Point.fromLngLat(6.05, 46.05))
 
     // Check if the parkings returned are the correct ones
     val parkingsReturned = parkingViewModel.rectParkings.value
