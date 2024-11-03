@@ -2,6 +2,8 @@ package com.github.se.cyrcle.model.user
 
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.android.gms.tasks.Tasks
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
@@ -22,6 +24,8 @@ import org.mockito.kotlin.verify
 @RunWith(JUnit4::class)
 class UserRepositoryFirestoreTest {
   @Mock private lateinit var mockFirestore: FirebaseFirestore
+  @Mock private lateinit var mockFirebaseAuth: FirebaseAuth
+  @Mock private lateinit var mockFirebaseUser: FirebaseUser
   @Mock private lateinit var mockDocumentReference: DocumentReference
   @Mock private lateinit var mockCollectionReference: CollectionReference
   @Mock private lateinit var mockDocumentSnapshot: DocumentSnapshot
@@ -34,7 +38,7 @@ class UserRepositoryFirestoreTest {
   @Before
   fun setUp() {
     MockitoAnnotations.openMocks(this)
-    userRepositoryFirestore = UserRepositoryFirestore(mockFirestore)
+    userRepositoryFirestore = UserRepositoryFirestore(mockFirestore, mockFirebaseAuth)
 
     `when`(mockFirestore.collection(any())).thenReturn(mockCollectionReference)
     `when`(mockCollectionReference.document(any())).thenReturn(mockDocumentReference)
@@ -43,9 +47,10 @@ class UserRepositoryFirestoreTest {
 
   @Test
   fun getNewUid() {
-    `when`(mockDocumentReference.id).thenReturn("1")
-    val uid = userRepositoryFirestore.getNewUid()
-    verify(mockDocumentReference).id
+    `when`(mockFirebaseAuth.currentUser).thenReturn(mockFirebaseUser)
+    `when`(mockFirebaseUser.uid).thenReturn("1")
+    val uid = userRepositoryFirestore.getUid()
+    verify(mockFirebaseUser).uid
     assert(uid == "1")
   }
 

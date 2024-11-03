@@ -2,14 +2,16 @@ package com.github.se.cyrcle.model.user
 
 import android.util.Log
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import javax.inject.Inject
 
-class UserRepositoryFirestore @Inject constructor(private val db: FirebaseFirestore) :
-    UserRepository {
+class UserRepositoryFirestore
+@Inject
+constructor(private val db: FirebaseFirestore, private val auth: FirebaseAuth) : UserRepository {
 
   private val collectionPath = "users"
 
@@ -41,7 +43,7 @@ class UserRepositoryFirestore @Inject constructor(private val db: FirebaseFirest
   }
 
   override fun getUid(): String {
-    val uid = Firebase.auth.currentUser?.uid ?: ""
+    val uid = auth.currentUser?.uid ?: ""
     if (uid.isEmpty()) throw Exception("User not signed in")
     return uid
   }

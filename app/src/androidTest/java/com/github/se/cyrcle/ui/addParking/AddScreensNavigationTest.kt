@@ -20,6 +20,7 @@ import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.review.ReviewViewModel
+import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.addParking.attributes.AttributesPicker
 import com.github.se.cyrcle.ui.addParking.location.LocationPicker
 import com.github.se.cyrcle.ui.map.MapScreen
@@ -46,12 +47,14 @@ class AddScreensNavigationTest {
     val parkingViewModel: ParkingViewModel = viewModel(factory = ParkingViewModel.Factory)
     val reviewViewModel: ReviewViewModel = viewModel(factory = ReviewViewModel.Factory)
     val mapViewModel: MapViewModel = viewModel(factory = MapViewModel.Factory)
+    val userViewModel: UserViewModel = viewModel(factory = UserViewModel.Factory)
     val addressViewModel: AddressViewModel = viewModel(factory = AddressViewModel.Factory)
     CyrcleNavHost(
         navigationActions,
         navController,
         parkingViewModel,
         reviewViewModel,
+        userViewModel,
         mapViewModel,
         addressViewModel)
     return listOf<Any>(
