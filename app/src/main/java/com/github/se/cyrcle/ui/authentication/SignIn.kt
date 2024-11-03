@@ -36,6 +36,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.model.user.User
+import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import com.github.se.cyrcle.ui.theme.ColorLevel
@@ -55,7 +57,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 
 @Composable
-fun SignInScreen(navigationActions: NavigationActions) {
+fun SignInScreen(navigationActions: NavigationActions, userViewModel: UserViewModel) {
   val context = LocalContext.current
   val token = stringResource(R.string.default_web_client_id)
 
@@ -64,6 +66,14 @@ fun SignInScreen(navigationActions: NavigationActions) {
           onAuthComplete = { result ->
             Log.d("Cyrcle", "User signed in: ${result.user?.displayName}")
             Toast.makeText(context, "Login successful!", Toast.LENGTH_LONG).show()
+
+            val user =
+                User(
+                    userId = result.user?.uid ?: "",
+                    username = result.user?.displayName ?: "",
+                    email = result.user?.email ?: "")
+
+            userViewModel.setCurrentUser(user)
             navigationActions.navigateTo(TopLevelDestinations.MAP)
           },
           onAuthError = {

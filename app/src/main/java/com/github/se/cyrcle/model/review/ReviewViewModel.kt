@@ -7,7 +7,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-class ReviewViewModel(val reviewRepository: ReviewRepository) : ViewModel() {
+class ReviewViewModel(private val reviewRepository: ReviewRepository) : ViewModel() {
 
   /** Selected parking to review/edit */
   private val _selectedReview = MutableStateFlow<Review?>(null)
