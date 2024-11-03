@@ -8,8 +8,10 @@ import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingRepositoryFirestore
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 
 class UserViewModel(
     private val userRepository: UserRepository,
@@ -18,6 +20,9 @@ class UserViewModel(
 
   private val _currentUser = MutableStateFlow<User?>(null)
   val currentUser: StateFlow<User?> = _currentUser
+
+  val isSignedIn: Flow<Boolean>
+    get() = currentUser.map { it != null }
 
   /**
    * Sets the current user.

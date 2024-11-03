@@ -2,13 +2,11 @@ package com.github.se.cyrcle.ui.map
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -19,7 +17,9 @@ import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
@@ -29,11 +29,13 @@ import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
-import com.github.se.cyrcle.ui.map.overlay.AddButton
+import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.map.overlay.ZoomControls
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
+import com.github.se.cyrcle.ui.theme.ColorLevel
+import com.github.se.cyrcle.ui.theme.atoms.IconButton
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.google.gson.Gson
 import com.mapbox.common.Cancelable
@@ -73,17 +75,20 @@ const val LAYER_ID = "0128"
 fun MapScreen(
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel,
+    userViewModel: UserViewModel,
     mapViewModel: MapViewModel,
     zoomState: MutableState<Double> = remember { mutableDoubleStateOf(defaultZoom) }
 ) {
 
   val listOfParkings by parkingViewModel.rectParkings.collectAsState()
+  val enableParkingAddition by userViewModel.isSignedIn.collectAsState(false)
+
   val mapViewportState = MapConfig.createMapViewPortStateFromViewModel(mapViewModel)
   var removeViewAnnotation = remember { true }
-  var cancelables = remember<Cancelable> { Cancelable({}) }
+  var cancelables = remember { Cancelable {} }
   var listener = remember<MapIdleCallback?> { null }
   var pointAnnotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
-  val selectedParking = parkingViewModel.selectedParking.collectAsState().value
+  val selectedParking by parkingViewModel.selectedParking.collectAsState()
 
   val bitmap = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.red_marker)
   val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 100, 150, false)
@@ -204,30 +209,32 @@ fun MapScreen(
           }
         }
 
-    Column(
-        Modifier.padding(padding).fillMaxHeight(), verticalArrangement = Arrangement.SpaceBetween) {
-          Row(Modifier.padding(16.dp).fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-            ZoomControls(
-                onZoomIn = {
-                  mapViewportState.setCameraOptions {
-                    zoom(mapViewportState.cameraState!!.zoom + 1.0)
-                  }
-                },
-                onZoomOut = {
-                  mapViewportState.setCameraOptions {
-                    zoom(mapViewportState.cameraState!!.zoom - 1.0)
-                  }
-                })
-          }
-          Row(
-              Modifier.padding(top = 16.dp).fillMaxWidth(),
-              horizontalArrangement = Arrangement.Start) {
-                AddButton {
-                  mapViewModel.updateCameraPosition(mapViewportState.cameraState!!)
-                  navigationActions.navigateTo(Route.ADD_SPOTS)
-                }
-              }
-        }
+    // ======================= OVERLAY =======================
+    Box(modifier = Modifier.padding(padding).fillMaxSize()) {
+      ZoomControls(
+          modifier = Modifier.align(Alignment.TopEnd),
+          onZoomIn = {
+            mapViewportState.setCameraOptions { zoom(mapViewportState.cameraState!!.zoom + 1.0) }
+          },
+          onZoomOut = {
+            mapViewportState.setCameraOptions { zoom(mapViewportState.cameraState!!.zoom - 1.0) }
+          })
+
+      IconButton(
+          icon = Icons.Default.Add,
+          contentDescription = "Add parking spots",
+          modifier =
+              Modifier.align(Alignment.BottomStart)
+                  .scale(1.2f)
+                  .padding(bottom = 25.dp, start = 16.dp),
+          onClick = {
+            mapViewModel.updateCameraPosition(mapViewportState.cameraState!!)
+            navigationActions.navigateTo(Route.ADD_SPOTS)
+          },
+          enabled = enableParkingAddition,
+          colorLevel = ColorLevel.PRIMARY,
+          testTag = "addButton")
+    }
   }
 }
 

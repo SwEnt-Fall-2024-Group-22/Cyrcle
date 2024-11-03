@@ -11,6 +11,7 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -19,6 +20,7 @@ import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.disabledColor
 import com.github.se.cyrcle.ui.theme.getButtonColors
 import com.github.se.cyrcle.ui.theme.getColor
+import com.github.se.cyrcle.ui.theme.getIconButtonColors
 import com.github.se.cyrcle.ui.theme.getOnColor
 import com.github.se.cyrcle.ui.theme.onDisabledColor
 
@@ -152,7 +154,7 @@ fun Button(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     colorLevel: ColorLevel = ColorLevel.PRIMARY,
-    disabled: MutableState<Boolean> = mutableStateOf(false),
+    disabled: State<Boolean> = mutableStateOf(false),
     testTag: String = "Button"
 ) {
   Button(
@@ -222,6 +224,28 @@ fun ToggleButton(
               ButtonDefaults.buttonColors(
                   containerColor = disabledColor(), contentColor = onDisabledColor())) {
         Text(text, Modifier.testTag("${testTag}Text"))
+      }
+}
+
+@Composable
+fun IconButton(
+    icon: ImageVector,
+    contentDescription: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    colorLevel: ColorLevel = ColorLevel.PRIMARY,
+    testTag: String = "IconButton"
+) {
+  androidx.compose.material3.IconButton(
+      modifier = modifier.testTag(testTag),
+      onClick = onClick,
+      enabled = enabled,
+      colors = getIconButtonColors(colorLevel)) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            modifier = Modifier.testTag("${testTag}Icon"))
       }
 }
 

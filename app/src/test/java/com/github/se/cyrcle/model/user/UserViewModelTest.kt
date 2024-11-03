@@ -3,6 +3,8 @@ package com.github.se.cyrcle.model.user
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.TestInstancesParking
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -25,6 +27,13 @@ class UserViewModelTest {
   fun setUp() {
     MockitoAnnotations.openMocks(this)
     userViewModel = UserViewModel(userRepository, parkingRepository)
+  }
+
+  @Test
+  fun userSignedIn() = runBlocking {
+    assert(!userViewModel.isSignedIn.first())
+    userViewModel.setCurrentUser(TestInstancesUser.user1)
+    assert(userViewModel.isSignedIn.first())
   }
 
   @Test

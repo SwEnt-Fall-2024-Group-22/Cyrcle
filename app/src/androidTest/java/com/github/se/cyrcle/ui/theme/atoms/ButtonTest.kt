@@ -195,6 +195,29 @@ class ButtonTest {
   }
 
   @Test
+  fun displayIconButton() {
+    val tagD = "IconButton"
+    val tag1 = "IconButton1"
+    var a = 1
+    composeTestRule.setContent {
+      Row {
+        IconButton(Icons.Filled.Add, "na", { a++ })
+        IconButton(Icons.Filled.Add, "na", { a++ }, Modifier, false, ColorLevel.PRIMARY, tag1)
+      }
+    }
+
+    composeTestRule.onNodeWithTag(tagD).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${tagD}Icon", true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(tagD).performClick()
+    assertEquals(a, 2)
+
+    composeTestRule.onNodeWithTag(tag1).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${tag1}Icon", true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(tag1).performClick()
+    assertEquals(a, 2)
+  }
+
+  @Test
   fun displayRadioButton() {
     val tagD = "RadioButton"
     val tag1 = "RadioButton1"

@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.ColorLevel
@@ -32,15 +33,19 @@ import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.bold
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
+import kotlinx.coroutines.flow.map
 
 @Composable
 fun CardScreen(
     navigationActions: NavigationActions,
-    parkingViewModel: ParkingViewModel = viewModel(factory = ParkingViewModel.Factory)
+    parkingViewModel: ParkingViewModel = viewModel(factory = ParkingViewModel.Factory),
+    userViewModel: UserViewModel = viewModel(factory = UserViewModel.Factory)
 ) {
   val selectedParking =
       parkingViewModel.selectedParking.collectAsState().value
           ?: return Text(text = "No parking selected. Should not happen")
+
+  val userSignedOut = userViewModel.currentUser.map { it == null }.collectAsState(true)
 
   Scaffold(
       topBar = {
@@ -179,6 +184,7 @@ fun CardScreen(
                               onClick = { navigationActions.navigateTo(Screen.REVIEW) },
                               modifier = Modifier.fillMaxWidth().height(40.dp),
                               colorLevel = ColorLevel.PRIMARY,
+                              disabled = userSignedOut,
                               testTag = "AddReviewButton")
 
                           Button(

@@ -2,6 +2,8 @@ package com.github.se.cyrcle.ui.theme
 
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -125,6 +127,21 @@ fun getOnContainerColor(colorLevel: ColorLevel): Color {
 @Composable
 fun getButtonColors(colorLevel: ColorLevel): ButtonColors {
   return ButtonDefaults.buttonColors(
+      containerColor = getColor(colorLevel),
+      contentColor = getOnColor(colorLevel),
+      disabledContainerColor = disabledColor(),
+      disabledContentColor = onDisabledColor())
+}
+
+/**
+ * Get the colors for a button from a ColorScheme.
+ *
+ * @param colorLevel The chosen ColorScheme
+ * @return The `ButtonColors` from the `colorScheme`
+ */
+@Composable
+fun getIconButtonColors(colorLevel: ColorLevel): IconButtonColors {
+  return IconButtonDefaults.iconButtonColors(
       containerColor = getColor(colorLevel),
       contentColor = getOnColor(colorLevel),
       disabledContainerColor = disabledColor(),
