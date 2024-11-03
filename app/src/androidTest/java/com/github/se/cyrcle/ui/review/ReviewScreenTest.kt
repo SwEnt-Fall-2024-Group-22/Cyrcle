@@ -13,10 +13,16 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReviewRepository
+import com.github.se.cyrcle.di.mocks.MockUserRepository
+import com.github.se.cyrcle.model.parking.ImageRepository
+import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
+import com.github.se.cyrcle.model.review.ReviewRepository
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.review.TestInstancesReview
+import com.github.se.cyrcle.model.user.UserRepository
+import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
 import org.junit.Before
@@ -32,16 +38,30 @@ class ReviewScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   // Mock dependencies
-  private val mockNavigationActions = mock(NavigationActions::class.java)
+  private lateinit var mockNavigationActions: NavigationActions
 
-  private val mockParkingRepository = MockParkingRepository()
-  private val mockImageRepository = MockImageRepository()
-  private val mockReviewRepository = MockReviewRepository()
-  private val parkingViewModel = ParkingViewModel(mockImageRepository, mockParkingRepository)
-  private val reviewViewModel = ReviewViewModel(mockReviewRepository)
+  private lateinit var mockParkingRepository: ParkingRepository
+  private lateinit var mockImageRepository: ImageRepository
+  private lateinit var mockReviewRepository: ReviewRepository
+  private lateinit var mockUserRepository: UserRepository
+
+  private lateinit var parkingViewModel: ParkingViewModel
+  private lateinit var reviewViewModel: ReviewViewModel
+  private lateinit var userViewModel: UserViewModel
 
   @Before
   fun setUp() {
+    mockNavigationActions = mock(NavigationActions::class.java)
+
+    mockImageRepository = MockImageRepository()
+    mockUserRepository = MockUserRepository()
+    mockParkingRepository = MockParkingRepository()
+    mockReviewRepository = MockReviewRepository()
+
+    userViewModel = UserViewModel(mockUserRepository, mockParkingRepository)
+    parkingViewModel = ParkingViewModel(mockImageRepository, mockParkingRepository)
+    reviewViewModel = ReviewViewModel(mockReviewRepository)
+
     parkingViewModel.selectParking(TestInstancesParking.parking1)
     reviewViewModel.addReview(TestInstancesReview.review1)
   }
@@ -49,7 +69,7 @@ class ReviewScreenTest {
   @Test
   fun reviewScreen_hasTopAppBar() {
     composeTestRule.setContent {
-      ReviewScreen(mockNavigationActions, parkingViewModel, reviewViewModel)
+      ReviewScreen(mockNavigationActions, parkingViewModel, reviewViewModel, userViewModel)
     }
 
     composeTestRule
@@ -61,7 +81,7 @@ class ReviewScreenTest {
   @Test
   fun reviewScreen_sliderChanges() {
     composeTestRule.setContent {
-      ReviewScreen(mockNavigationActions, parkingViewModel, reviewViewModel)
+      ReviewScreen(mockNavigationActions, parkingViewModel, reviewViewModel, userViewModel)
     }
 
     // Assert initial value of the slider
@@ -77,7 +97,7 @@ class ReviewScreenTest {
   @Test
   fun reviewScreen_starsReflectSliderValue() {
     composeTestRule.setContent {
-      ReviewScreen(mockNavigationActions, parkingViewModel, reviewViewModel)
+      ReviewScreen(mockNavigationActions, parkingViewModel, reviewViewModel, userViewModel)
     }
 
     // Test initial stars (all empty)
@@ -97,7 +117,7 @@ class ReviewScreenTest {
     doNothing().`when`(mockNavigationActions).navigateTo(Screen.CARD)
 
     composeTestRule.setContent {
-      ReviewScreen(mockNavigationActions, parkingViewModel, reviewViewModel)
+      ReviewScreen(mockNavigationActions, parkingViewModel, reviewViewModel, userViewModel)
     }
     // Enter a review
     composeTestRule.onNodeWithTag("ReviewInput").performTextInput("Great parking!")

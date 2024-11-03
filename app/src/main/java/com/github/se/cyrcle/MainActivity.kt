@@ -17,6 +17,7 @@ import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.review.ReviewRepository
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.UserRepository
+import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.CyrcleTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -39,6 +40,7 @@ class MainActivity : ComponentActivity() {
     super.onCreate(savedInstanceState)
 
     val reviewViewModel = ReviewViewModel(reviewRepository)
+    val userViewModel = UserViewModel(userRepository, parkingRepository)
     val parkingViewModel = ParkingViewModel(imageRepository, parkingRepository)
     val mapViewModel = MapViewModel()
     val addressViewModel = AddressViewModel(addressRepository)
@@ -53,6 +55,7 @@ class MainActivity : ComponentActivity() {
               navController,
               parkingViewModel,
               reviewViewModel,
+              userViewModel,
               mapViewModel,
               addressViewModel)
         }

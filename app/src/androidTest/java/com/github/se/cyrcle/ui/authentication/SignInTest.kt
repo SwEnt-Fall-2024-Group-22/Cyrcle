@@ -12,6 +12,9 @@ import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.matcher.IntentMatchers.toPackage
 import com.github.se.cyrcle.MainActivity
+import com.github.se.cyrcle.model.parking.ParkingRepository
+import com.github.se.cyrcle.model.user.UserRepository
+import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -19,7 +22,8 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mockito.mock
+import org.mockito.Mock
+import org.mockito.MockitoAnnotations
 
 @HiltAndroidTest
 class LoginTest {
@@ -28,16 +32,21 @@ class LoginTest {
 
   @get:Rule(order = 1) val composeTestRule = createAndroidComposeRule<MainActivity>()
 
-  private lateinit var navigationHost: NavHostController
+  @Mock lateinit var navigationHost: NavHostController
+  @Mock lateinit var userRepository: UserRepository
+  @Mock lateinit var parkingRepository: ParkingRepository
+
   private lateinit var navigationActions: NavigationActions
+  private lateinit var userViewModel: UserViewModel
 
   // The IntentsTestRule is not reliable.
 
   @Before
   fun setUp() {
     Intents.init()
+    MockitoAnnotations.openMocks(this)
 
-    navigationHost = mock(NavHostController::class.java)
+    userViewModel = UserViewModel(userRepository, parkingRepository)
     navigationActions = NavigationActions(navigationHost)
   }
 
@@ -49,7 +58,7 @@ class LoginTest {
 
   @Test
   fun titleAndButtonsAreCorrectlyDisplayed() {
-    composeTestRule.activity.setContent { SignInScreen(navigationActions) }
+    composeTestRule.activity.setContent { SignInScreen(navigationActions, userViewModel) }
     composeTestRule
         .onNodeWithTag("LoginTitle")
         .assertIsDisplayed()
@@ -62,7 +71,7 @@ class LoginTest {
 
   @Test
   fun googleSignInReturnsValidActivityResult() {
-    composeTestRule.activity.setContent { SignInScreen(navigationActions) }
+    composeTestRule.activity.setContent { SignInScreen(navigationActions, userViewModel) }
 
     composeTestRule.onNodeWithTag("GoogleLoginButton").performClick()
     composeTestRule.waitForIdle()

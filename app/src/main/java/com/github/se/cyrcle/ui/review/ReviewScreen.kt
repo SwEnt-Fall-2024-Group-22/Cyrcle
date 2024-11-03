@@ -22,6 +22,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -33,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.review.Review
 import com.github.se.cyrcle.model.review.ReviewViewModel
+import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.Button
@@ -43,9 +45,10 @@ import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 fun ReviewScreen(
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel,
-    reviewViewModel: ReviewViewModel
+    reviewViewModel: ReviewViewModel,
+    userViewModel: UserViewModel
 ) {
-  var sliderValue by remember { mutableStateOf(0f) }
+  var sliderValue by remember { mutableFloatStateOf(0f) }
   var textValue by remember { mutableStateOf("") }
 
   val context = LocalContext.current // Get the current context
@@ -126,7 +129,7 @@ fun ReviewScreen(
                 val sliderToValue = (sliderValue * 100).toInt() / 100.0
                 reviewViewModel.addReview(
                     Review(
-                        owner = "default",
+                        owner = userViewModel.currentUser.value?.userId ?: "default",
                         text = textValue,
                         parking = selectedParking.uid,
                         rating = sliderToValue,
