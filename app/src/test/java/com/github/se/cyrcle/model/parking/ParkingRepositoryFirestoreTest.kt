@@ -183,7 +183,7 @@ class ParkingRepositoryFirestoreTest {
     `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockParkingQuerySnapshot))
 
     // Mock the QuerySnapshot to return the expected Parking object
-    `when`(mockCollectionReference.whereGreaterThanOrEqualTo(any<String>(), any()))
+    `when`(mockCollectionReference.whereGreaterThan(any<String>(), any()))
         .thenReturn(mockCollectionReference)
     `when`(mockCollectionReference.whereLessThanOrEqualTo(any<String>(), any()))
         .thenReturn(mockCollectionReference)
@@ -219,14 +219,14 @@ class ParkingRepositoryFirestoreTest {
     `when`(mockParkingQuerySnapshot.documents).thenReturn(listOf(mockDocumentSnapshot))
 
     // Mock the QuerySnapshot to return the expected Parking object
-    `when`(mockCollectionReference.whereGreaterThanOrEqualTo(any<String>(), any()))
+    `when`(mockCollectionReference.whereGreaterThan(any<String>(), any()))
         .thenReturn(mockCollectionReference)
     `when`(mockCollectionReference.whereLessThanOrEqualTo(any<String>(), any()))
         .thenReturn(mockCollectionReference)
 
     // Call the method under test
     parkingRepositoryFirestore.getKClosestParkings(
-        location = Point.fromLngLat(6.5, 46.5),
+        location = Point.fromLngLat(6.45, 46.45),
         k = 1,
         onSuccess = { parkings ->
           // Assert that the returned list contains the expected Parking object
