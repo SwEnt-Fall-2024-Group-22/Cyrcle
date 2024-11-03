@@ -40,8 +40,10 @@ class UserRepositoryFirestore @Inject constructor(private val db: FirebaseFirest
         .addOnFailureListener { onFailure(it) }
   }
 
-  override fun getNewUid(): String {
-    return db.collection(collectionPath).document().id
+  override fun getUid(): String {
+    val uid = Firebase.auth.currentUser?.uid ?: ""
+    if (uid.isEmpty()) throw Exception("User not signed in")
+    return uid
   }
 
   override fun getAllUsers(onSuccess: (List<User>) -> Unit, onFailure: (Exception) -> Unit) {

@@ -10,11 +10,11 @@ interface UserRepository {
   fun onSignIn(onSuccess: () -> Unit)
 
   /**
-   * Get a new unique identifier for a parking
+   * Get a a unique identifier for a user
    *
-   * @return a new unique identifier for a parking
+   * @return A UID linked to the user's signed in account
    */
-  fun getNewUid(): String
+  fun getUid(): String
 
   /**
    * Get a user by their identifier

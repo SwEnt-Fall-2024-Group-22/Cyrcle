@@ -12,7 +12,7 @@ class MockUserRepository @Inject constructor() : UserRepository {
     onSuccess()
   }
 
-  override fun getNewUid(): String {
+  override fun getUid(): String {
     return (uid++).toString()
   }
 
