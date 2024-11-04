@@ -34,7 +34,6 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.github.se.cyrcle.model.parking.Parking
-import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.cyrcle.ui.navigation.NavigationActions
@@ -46,39 +45,37 @@ import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 
 @Composable
-fun ProfileScreen(navigationActions: NavigationActions,
-                  userViewModel: UserViewModel = viewModel(factory = UserViewModel.Factory)) {
+fun ProfileScreen(navigationActions: NavigationActions, userViewModel: UserViewModel = viewModel(factory = UserViewModel.Factory)) {
 
     val userState by userViewModel.currentUser.collectAsState()
-    //val favoriteParkingsState by userViewModel.favoriteParkings.collectAsState()
-
     var isEditing by remember { mutableStateOf(false) }
     var firstName by remember { mutableStateOf(userState?.firstName ?: "") }
     var lastName by remember { mutableStateOf(userState?.lastName ?: "") }
     var username by remember { mutableStateOf(userState?.username ?: "") }
     var profilePictureUrl by remember { mutableStateOf(userState?.profilePictureUrl ?: "") }
 
+
     val imagePickerLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             uri?.let { profilePictureUrl = it.toString() }
         }
 
-  Scaffold(
-      modifier = Modifier.testTag("ProfileScreen"),
-      bottomBar = {
-        BottomNavigationBar(
-            navigationActions = navigationActions,
-            tabList = LIST_TOP_LEVEL_DESTINATION,
-            selectedItem = Route.PROFILE)
-      }) { innerPadding ->
+    Scaffold(
+        modifier = Modifier.testTag("ProfileScreen"),
+        bottomBar = {
+            BottomNavigationBar(
+                navigationActions = navigationActions,
+                tabList = LIST_TOP_LEVEL_DESTINATION,
+                selectedItem = Route.PROFILE)
+        }) { innerPadding ->
         Column(
             modifier =
-                Modifier.fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(16.dp)
-                    .testTag("ProfileContent"),
+            Modifier.fillMaxSize()
+                .padding(innerPadding)
+                .padding(16.dp)
+                .testTag("ProfileContent"),
             horizontalAlignment = Alignment.CenterHorizontally) {
-              if (isEditing) {
+            if (isEditing) {
                 EditProfileContent(
                     firstName = firstName,
                     lastName = lastName,
@@ -106,25 +103,23 @@ fun ProfileScreen(navigationActions: NavigationActions,
                         profilePictureUrl = userState?.profilePictureUrl ?: ""
                         isEditing = false
                     })
-              } else {
-                  DisplayProfileContent(
-                      firstName = firstName,
-                      lastName = lastName,
-                      username = username,
-                      profilePictureUrl = profilePictureUrl,
-                      onEditClick = {
-                          isEditing = true
-                      }
-                  )
+            } else {
+                DisplayProfileContent(
+                    firstName = firstName,
+                    lastName = lastName,
+                    username = username,
+                    profilePictureUrl = profilePictureUrl,
+                    onEditClick = {
+                        isEditing = true
+                    }
+                )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                /*FavoriteParkingsSection(
-                    favoriteParkings = favoriteParkings,
-                    onFavoritesUpdated = { newFavorites -> favoriteParkings = newFavorites })*/
-              }
+                FavoriteParkingsSection(userViewModel)
             }
-      }
+        }
+    }
 }
 
 @Composable
@@ -140,47 +135,47 @@ private fun EditProfileContent(
     onSave: () -> Unit,
     onCancel: () -> Unit
 ) {
-  ProfileImage(
-      url = profilePictureUrl,
-      onClick = onImageClick,
-      isEditable = true,
-      modifier = Modifier.testTag("ProfileImage"))
+    ProfileImage(
+        url = profilePictureUrl,
+        onClick = onImageClick,
+        isEditable = true,
+        modifier = Modifier.testTag("ProfileImage"))
 
-  Spacer(modifier = Modifier.height(24.dp))
+    Spacer(modifier = Modifier.height(24.dp))
 
-  InputText(
-      value = firstName,
-      onValueChange = onFirstNameChange,
-      label = "First Name",
-      testTag = "FirstNameField")
+    InputText(
+        value = firstName,
+        onValueChange = onFirstNameChange,
+        label = "First Name",
+        testTag = "FirstNameField")
 
-  Spacer(modifier = Modifier.height(8.dp))
+    Spacer(modifier = Modifier.height(8.dp))
 
-  InputText(
-      value = lastName,
-      onValueChange = onLastNameChange,
-      label = "Last Name",
-      testTag = "LastNameField")
+    InputText(
+        value = lastName,
+        onValueChange = onLastNameChange,
+        label = "Last Name",
+        testTag = "LastNameField")
 
-  Spacer(modifier = Modifier.height(8.dp))
+    Spacer(modifier = Modifier.height(8.dp))
 
-  InputText(
-      value = username,
-      onValueChange = onUsernameChange,
-      label = "Username",
-      testTag = "UsernameField")
+    InputText(
+        value = username,
+        onValueChange = onUsernameChange,
+        label = "Username",
+        testTag = "UsernameField")
 
-  Spacer(modifier = Modifier.height(16.dp))
+    Spacer(modifier = Modifier.height(16.dp))
 
-  Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-    Button(text = "Save", onClick = onSave, colorLevel = ColorLevel.PRIMARY, testTag = "SaveButton")
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Button(text = "Save", onClick = onSave, colorLevel = ColorLevel.PRIMARY, testTag = "SaveButton")
 
-    Button(
-        text = "Cancel",
-        onClick = onCancel,
-        colorLevel = ColorLevel.SECONDARY,
-        testTag = "CancelButton")
-  }
+        Button(
+            text = "Cancel",
+            onClick = onCancel,
+            colorLevel = ColorLevel.SECONDARY,
+            testTag = "CancelButton")
+    }
 }
 
 @Composable
@@ -191,34 +186,34 @@ private fun DisplayProfileContent(
     profilePictureUrl: String,
     onEditClick: () -> Unit
 ) {
-  Text(
-      text = firstName,
-      style = MaterialTheme.typography.headlineMedium,
-      testTag = "DisplayFirstName")
+    Text(
+        text = firstName,
+        style = MaterialTheme.typography.headlineMedium,
+        testTag = "DisplayFirstName")
 
-  Text(
-      text = lastName, style = MaterialTheme.typography.headlineMedium, testTag = "DisplayLastName")
+    Text(
+        text = lastName, style = MaterialTheme.typography.headlineMedium, testTag = "DisplayLastName")
 
-  Spacer(modifier = Modifier.height(16.dp))
+    Spacer(modifier = Modifier.height(16.dp))
 
-  ProfileImage(
-      url = profilePictureUrl,
-      onClick = {},
-      isEditable = false,
-      modifier = Modifier.testTag("ProfileImage"))
+    ProfileImage(
+        url = profilePictureUrl,
+        onClick = {},
+        isEditable = false,
+        modifier = Modifier.testTag("ProfileImage"))
 
-  Spacer(modifier = Modifier.height(8.dp))
+    Spacer(modifier = Modifier.height(8.dp))
 
-  Text(
-      text = "@$username", style = MaterialTheme.typography.bodyMedium, testTag = "DisplayUsername")
+    Text(
+        text = "@$username", style = MaterialTheme.typography.bodyMedium, testTag = "DisplayUsername")
 
-  Spacer(modifier = Modifier.height(16.dp))
+    Spacer(modifier = Modifier.height(16.dp))
 
-  Button(
-      text = "Modify Profile",
-      onClick = onEditClick,
-      colorLevel = ColorLevel.TERTIARY,
-      testTag = "EditButton")
+    Button(
+        text = "Modify Profile",
+        onClick = onEditClick,
+        colorLevel = ColorLevel.TERTIARY,
+        testTag = "EditButton")
 }
 
 @Composable
@@ -228,129 +223,138 @@ private fun ProfileImage(
     isEditable: Boolean,
     modifier: Modifier = Modifier
 ) {
-  Box(
-      modifier =
-          modifier.then(if (isEditable) Modifier.clickable(onClick = onClick) else Modifier)) {
+    Box(
+        modifier =
+        modifier.then(if (isEditable) Modifier.clickable(onClick = onClick) else Modifier)) {
         if (url.isBlank()) {
-          Box(
-              modifier =
-                  Modifier.size(120.dp)
-                      .clip(CircleShape)
-                      .background(MaterialTheme.colorScheme.primaryContainer),
-              contentAlignment = Alignment.Center) {
+            Box(
+                modifier =
+                Modifier.size(120.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center) {
                 Icon(
                     imageVector = Icons.Filled.Person,
                     contentDescription = "Default Profile Picture",
                     modifier = Modifier.size(60.dp),
                     tint = MaterialTheme.colorScheme.onPrimaryContainer)
-              }
+            }
         } else {
-          Image(
-              painter =
-                  rememberAsyncImagePainter(
-                      ImageRequest.Builder(LocalContext.current)
-                          .data(url)
-                          .apply { transformations(CircleCropTransformation()) }
-                          .build()),
-              contentDescription = "Profile Picture",
-              modifier = Modifier.size(120.dp).clip(CircleShape),
-              contentScale = ContentScale.Crop)
+            Image(
+                painter =
+                rememberAsyncImagePainter(
+                    ImageRequest.Builder(LocalContext.current)
+                        .data(url)
+                        .apply { transformations(CircleCropTransformation()) }
+                        .build()),
+                contentDescription = "Profile Picture",
+                modifier = Modifier.size(120.dp).clip(CircleShape),
+                contentScale = ContentScale.Crop)
         }
 
         if (isEditable) {
-          Box(
-              modifier =
-                  Modifier.size(120.dp)
-                      .clip(CircleShape)
-                      .background(Color.Black.copy(alpha = 0.3f)),
-              contentAlignment = Alignment.Center) {
+            Box(
+                modifier =
+                Modifier.size(120.dp)
+                    .clip(CircleShape)
+                    .background(Color.Black.copy(alpha = 0.3f)),
+                contentAlignment = Alignment.Center) {
                 Icon(
                     imageVector = Icons.Filled.Edit,
                     contentDescription = "Edit Profile Picture",
                     tint = Color.White,
                     modifier = Modifier.size(40.dp))
-              }
+            }
         }
-      }
+    }
 }
-/*
+
 @Composable
-private fun FavoriteParkingsSection(
-    favoriteParkings: List<Parking>,
-    onFavoritesUpdated: (List<Parking>) -> Unit
-) {
-  Text(
-      text = "Favorite Parkings",
-      style = MaterialTheme.typography.titleLarge,
-      modifier = Modifier.testTag("FavoriteParkingsTitle"))
+private fun FavoriteParkingsSection(userViewModel: UserViewModel) {
+    val favoriteParkings = userViewModel.favoriteParkings.collectAsState().value
 
-  Spacer(modifier = Modifier.height(16.dp))
+    LaunchedEffect(Unit) {
+        userViewModel.getSelectedUserFavoriteParking()
+    }
 
-  if (favoriteParkings.isEmpty()) {
     Text(
-        text = "No favorite parkings yet",
-        style = MaterialTheme.typography.bodyMedium,
-        modifier = Modifier.testTag("NoFavoritesMessage"))
-  } else {
-    LazyRow(
-        modifier = Modifier.fillMaxWidth().testTag("FavoriteParkingList"),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-          itemsIndexed(favoriteParkings) { index, parking ->
-            FavoriteParkingCard(
-                parking = parking,
-                index = index,
-                onRemove = {
-                  val updatedList = favoriteParkings.toMutableList()
-                  updatedList.removeAt(index)
-                  onFavoritesUpdated(updatedList)
-                })
-          }
+        text = "Favorite Parkings",
+        style = MaterialTheme.typography.titleLarge,
+        modifier = Modifier.testTag("FavoriteParkingsTitle")
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    if (favoriteParkings.isEmpty()) {
+        Text(
+            text = "No favorite parkings yet",
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.testTag("NoFavoritesMessage")
+        )
+    } else {
+        LazyRow(
+            modifier = Modifier.fillMaxWidth().testTag("FavoriteParkingList"),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            itemsIndexed(favoriteParkings) { index, parking ->
+                FavoriteParkingCard(
+                    parking = parking,
+                    index = index,
+                    onRemove = {
+                        userViewModel.removeFavoriteParkingFromSelectedUser(parking.uid)
+                        userViewModel.getSelectedUserFavoriteParking() // gotta call this cuz the UserViewModel is poorly implemented and doesnt change the favoriteParkings itself
+                    }
+                )
+            }
         }
-  }
+    }
 }
 
 @Composable
 private fun FavoriteParkingCard(parking: Parking, index: Int, onRemove: () -> Unit) {
-  var showConfirmDialog by remember { mutableStateOf(false) }
+    var showConfirmDialog by remember { mutableStateOf(false) }
 
-  Card(
-      modifier = Modifier.size(120.dp).padding(8.dp),
-      shape = MaterialTheme.shapes.medium,
-  ) {
-    Box(modifier = Modifier.fillMaxSize()) {
-      Text(
-          text = parking.optName ?: "", // Display only the optName property
-          style = MaterialTheme.typography.bodySmall,
-          modifier = Modifier.align(Alignment.Center).padding(8.dp).testTag("ParkingItem_$index"))
+    Card(
+        modifier = Modifier.size(120.dp).padding(8.dp),
+        shape = MaterialTheme.shapes.medium
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Text(
+                text = parking.optName ?: "", // Display only the optName property
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.align(Alignment.Center).padding(8.dp).testTag("ParkingItem_$index")
+            )
 
-      IconButton(
-          onClick = { showConfirmDialog = true },
-          modifier =
-              Modifier.align(Alignment.TopEnd).size(32.dp).testTag("FavoriteToggle_$index")) {
-            Icon(
-                imageVector = Icons.Filled.Star,
-                contentDescription = "Remove from Favorites",
-                tint = Color(0xFFFFD700),
-                modifier = Modifier.size(20.dp))
-          }
+            IconButton(
+                onClick = { showConfirmDialog = true },
+                modifier = Modifier.align(Alignment.TopEnd).size(32.dp).testTag("FavoriteToggle_$index")
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Star,
+                    contentDescription = "Remove from Favorites",
+                    tint = Color(0xFFFFD700),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
     }
-  }
 
-  if (showConfirmDialog) {
-    AlertDialog(
-        onDismissRequest = { showConfirmDialog = false },
-        title = { Text("Remove favorite") },
-        text = { Text("Are you sure you want to remove ${parking.optName} from your favorites?") },
-        confirmButton = {
-          TextButton(
-              onClick = {
-                onRemove()
-                showConfirmDialog = false
-              }) {
-                Text("Remove")
-              }
-        },
-        dismissButton = { TextButton(onClick = { showConfirmDialog = false }) { Text("Cancel") } })
-  }
+    if (showConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showConfirmDialog = false },
+            title = { Text("Remove favorite") },
+            text = { Text("Are you sure you want to remove ${parking.optName} from your favorites?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onRemove()
+                        showConfirmDialog = false
+                    }
+                ) {
+                    Text("Remove")
+                }
+            },
+            dismissButton = { TextButton(onClick = { showConfirmDialog = false }) { Text("Cancel") } }
+        )
+    }
 }
-*/
