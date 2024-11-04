@@ -21,8 +21,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
@@ -41,13 +43,16 @@ fun CardScreen(
 ) {
   val selectedParking =
       parkingViewModel.selectedParking.collectAsState().value
-          ?: return Text(text = "No parking selected. Should not happen")
+          ?: return Text(stringResource(R.string.no_selected_parking_error))
 
   val userSignedIn = userViewModel.isSignedIn.collectAsState(false)
 
   Scaffold(
       topBar = {
-        TopAppBar(navigationActions, "Description of ${selectedParking.optName?: "Parking"}")
+        TopAppBar(
+            navigationActions,
+            stringResource(R.string.card_screen_description)
+                .format(selectedParking.optName ?: stringResource(R.string.default_parking_name)))
       },
       modifier = Modifier.testTag("CardScreen")) { padding ->
         Box(
@@ -92,13 +97,17 @@ fun CardScreen(
                               modifier = Modifier.fillMaxWidth().testTag("RowCapacityRack"),
                               horizontalArrangement = Arrangement.SpaceBetween) {
                                 Column(modifier = Modifier.weight(1f).testTag("CapacityColumn")) {
-                                  Text(text = "Capacity:", style = bold)
+                                  Text(
+                                      text = stringResource(R.string.card_screen_capacity),
+                                      style = bold)
                                   Text(
                                       text = selectedParking.capacity.description,
                                       color = Color.Gray)
                                 }
                                 Column(modifier = Modifier.weight(1f).testTag("RackTypeColumn")) {
-                                  Text(text = "Rack Type:", style = bold)
+                                  Text(
+                                      text = stringResource(R.string.card_screen_rack_type),
+                                      style = bold)
                                   Text(
                                       text = selectedParking.rackType.description,
                                       color = Color.Gray)
@@ -110,13 +119,17 @@ fun CardScreen(
                               modifier = Modifier.fillMaxWidth().testTag("RowProtectionPrice"),
                               horizontalArrangement = Arrangement.SpaceBetween) {
                                 Column(modifier = Modifier.weight(1f).testTag("ProtectionColumn")) {
-                                  Text(text = "Protection:", style = bold)
+                                  Text(
+                                      text = stringResource(R.string.card_screen_protection),
+                                      style = bold)
                                   Text(
                                       text = selectedParking.protection.description,
                                       color = Color.Gray)
                                 }
                                 Column(modifier = Modifier.weight(1f).testTag("PriceColumn")) {
-                                  Text(text = "Price:", style = bold)
+                                  Text(
+                                      text = stringResource(R.string.card_screen_price),
+                                      style = bold)
                                   val price = selectedParking.price
                                   Text(
                                       text = if (price == 0.0) "Free" else "$price",
@@ -129,17 +142,25 @@ fun CardScreen(
                               modifier = Modifier.fillMaxWidth().testTag("RowSecurity"),
                               horizontalArrangement = Arrangement.SpaceBetween) {
                                 Column(modifier = Modifier.weight(1f).testTag("SecurityColumn")) {
-                                  Text(text = "Security Present:", style = bold)
                                   Text(
-                                      text = if (selectedParking.hasSecurity) "Yes" else "No",
+                                      text = stringResource(R.string.card_screen_surveillance),
+                                      style = bold)
+                                  Text(
+                                      text =
+                                          if (selectedParking.hasSecurity)
+                                              stringResource(R.string.yes)
+                                          else stringResource(R.string.no),
                                       color = Color.Gray)
                                 }
                                 Column(
                                     modifier = Modifier.weight(1f).testTag("AverageRatingColumn")) {
-                                      Text(text = "Current Rating", style = bold)
+                                      Text(
+                                          text = stringResource(R.string.card_screen_rating),
+                                          style = bold)
                                       Text(
                                           text =
-                                              if (selectedParking.nbReviews == 0) "No reviews yet"
+                                              if (selectedParking.nbReviews == 0)
+                                                  stringResource(R.string.card_screen_no_reviews)
                                               else selectedParking.avgScore.toString(),
                                           color = Color.Gray)
 
@@ -149,7 +170,7 @@ fun CardScreen(
                                                   8.dp)) // Space between rating and button
 
                                       Button(
-                                          text = "See All Reviews",
+                                          text = stringResource(R.string.card_screen_see_review),
                                           onClick = {
                                             navigationActions.navigateTo(Screen.ALL_REVIEWS)
                                           },
@@ -171,14 +192,14 @@ fun CardScreen(
                                 .testTag("ButtonsColumn"), // Test tag for buttons column
                         verticalArrangement = Arrangement.spacedBy(16.dp)) {
                           Button(
-                              text = "Show in Map",
+                              text = stringResource(R.string.card_screen_show_map),
                               onClick = { /* Handle Return to Map */},
                               modifier = Modifier.fillMaxWidth().height(40.dp),
                               colorLevel = ColorLevel.PRIMARY,
                               testTag = "ShowInMapButton")
 
                           Button(
-                              text = "Add A Review",
+                              text = stringResource(R.string.card_screen_add_review),
                               onClick = { navigationActions.navigateTo(Screen.REVIEW) },
                               modifier = Modifier.fillMaxWidth().height(40.dp),
                               colorLevel = ColorLevel.PRIMARY,
@@ -186,7 +207,7 @@ fun CardScreen(
                               testTag = "AddReviewButton")
 
                           Button(
-                              text = "Report",
+                              text = stringResource(R.string.card_screen_report),
                               onClick = {},
                               modifier = Modifier.height(40.dp),
                               colorLevel = ColorLevel.ERROR,

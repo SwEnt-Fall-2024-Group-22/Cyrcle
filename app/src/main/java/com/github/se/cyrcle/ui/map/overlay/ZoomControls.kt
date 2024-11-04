@@ -15,7 +15,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.github.se.cyrcle.R.*
 
 @Composable
 fun ZoomControls(modifier: Modifier = Modifier, onZoomIn: () -> Unit, onZoomOut: () -> Unit) {
@@ -27,13 +29,19 @@ fun ZoomControls(modifier: Modifier = Modifier, onZoomIn: () -> Unit, onZoomOut:
               .sizeIn(maxWidth = 35.dp)
               .testTag("ZoomControls")) {
         IconButton(onClick = onZoomIn, modifier = Modifier.testTag("ZoomControlsIn")) {
-          Icon(Icons.Default.Add, contentDescription = "Zoom In", tint = Color.White)
+          Icon(
+              Icons.Default.Add,
+              contentDescription = stringResource(string.zoom_in),
+              tint = Color.White)
         }
 
         HorizontalDivider(thickness = 1.dp, color = Color.Gray)
 
         IconButton(onClick = onZoomOut, modifier = Modifier.testTag("ZoomControlsOut")) {
-          Icon(Icons.Default.Remove, contentDescription = "Zoom Out", tint = Color.White)
+          Icon(
+              Icons.Default.Remove,
+              contentDescription = stringResource(string.zoom_out),
+              tint = Color.White)
         }
       }
 }

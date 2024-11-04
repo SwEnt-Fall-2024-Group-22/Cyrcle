@@ -15,8 +15,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.map.MapViewModel.LocationPickerState
 import com.github.se.cyrcle.ui.theme.Typography
@@ -32,17 +34,17 @@ fun LocationPickerTopBar(mapViewModel: MapViewModel) {
         verticalAlignment = Alignment.CenterVertically) {
           Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                "Where is the Parking ?",
+                stringResource(R.string.location_picker_top_bar_where),
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.primary,
                 style = Typography.bodyLarge)
             if (locationPickerState == LocationPickerState.NONE_SET) {
               Text(
-                  "Set the top-left corner of the parking, by placing it under the crosshair below",
+                  stringResource(R.string.location_picker_top_bar_select_top_left),
                   color = MaterialTheme.colorScheme.tertiary)
             } else if (locationPickerState == LocationPickerState.TOP_LEFT_SET) {
               Text(
-                  "Set the bottom-right corner of the parking, by dragging on the screen",
+                  stringResource(R.string.location_picker_top_bar_select_bottom_right),
                   color = MaterialTheme.colorScheme.tertiary)
             }
           }

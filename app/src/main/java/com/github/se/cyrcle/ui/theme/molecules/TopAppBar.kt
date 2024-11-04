@@ -13,6 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import com.github.se.cyrcle.R
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.Typography
 
@@ -46,7 +48,9 @@ fun TopAppBar(navigationActions: NavigationActions, title: String, testTag: Stri
         IconButton(
             onClick = { navigationActions.goBack() },
             modifier = Modifier.testTag("${testTag}GoBackButton")) {
-              Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "GoBack")
+              Icon(
+                  Icons.AutoMirrored.Filled.ArrowBack,
+                  contentDescription = stringResource(R.string.top_app_bar_go_back))
             }
       })
 }

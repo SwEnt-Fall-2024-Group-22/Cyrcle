@@ -25,8 +25,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
@@ -48,7 +50,10 @@ fun AllReviewsScreen(
 
   Scaffold(
       topBar = {
-        TopAppBar(navigationActions, "All Reviews For ${selectedParking.optName ?: "Parking"}")
+        TopAppBar(
+            navigationActions,
+            stringResource(R.string.all_review_title)
+                .format(selectedParking.optName ?: stringResource(R.string.default_parking_name)))
       },
       modifier = Modifier.testTag("AllReviewsScreen")) {
         Box(
@@ -82,14 +87,18 @@ fun AllReviewsScreen(
                                           .clickable { setSelectedCardIndex(-1) }) {
                                     Column {
                                       Text(
-                                          text = "Rating: ${curReview.rating}",
+                                          text =
+                                              stringResource(R.string.all_review_rating)
+                                                  .format(curReview.rating),
                                           fontWeight = FontWeight.Bold,
                                           color = MaterialTheme.colorScheme.primary,
                                           style = MaterialTheme.typography.titleLarge,
                                           modifier = Modifier.testTag("ExpandedReviewRating$index"))
                                       Spacer(modifier = Modifier.height(4.dp))
                                       Text(
-                                          text = "Text: ${curReview.text}",
+                                          text =
+                                              stringResource(R.string.all_review_text)
+                                                  .format(curReview.text),
                                           color = MaterialTheme.colorScheme.onSecondaryContainer,
                                           style = MaterialTheme.typography.bodyMedium,
                                           modifier = Modifier.testTag("ExpandedReviewText$index"))
@@ -116,14 +125,18 @@ fun AllReviewsScreen(
                                                 .padding(16.dp)
                                                 .testTag("ReviewCardContent$index")) {
                                           Text(
-                                              text = "Rating: ${curReview.rating}",
+                                              text =
+                                                  stringResource(R.string.all_review_rating)
+                                                      .format(curReview.rating),
                                               fontWeight = FontWeight.Bold,
                                               color = MaterialTheme.colorScheme.primary,
                                               style = MaterialTheme.typography.titleLarge,
                                               modifier = Modifier.testTag("ReviewRating$index"))
                                           Spacer(modifier = Modifier.height(4.dp))
                                           Text(
-                                              text = "Text: ${curReview.text}",
+                                              text =
+                                                  stringResource(R.string.all_review_text)
+                                                      .format(curReview.text),
                                               color =
                                                   MaterialTheme.colorScheme.onSecondaryContainer,
                                               style = MaterialTheme.typography.bodySmall,

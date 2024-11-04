@@ -33,9 +33,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.Parking
@@ -106,31 +108,32 @@ fun AttributesPicker(
               InputText(
                   value = title.value,
                   onValueChange = { title.value = it },
-                  label = "Title",
+                  label = stringResource(R.string.attributes_picker_title_label),
                   modifier = Modifier.fillMaxWidth().padding(10.dp),
               )
               EnumDropDown(
                   options = ParkingProtection.entries.toList(),
                   selectedValue = protection,
-                  label = "How protected from the weather is the spot?",
+                  label = stringResource(R.string.attributes_picker_capacity_label),
               )
               EnumDropDown(
                   options = ParkingCapacity.entries.toList(),
                   selectedValue = capacity,
-                  label = "How many bikes can we park ?",
+                  label = stringResource(R.string.attributes_picker_protection_label),
               )
               EnumDropDown(
                   options = ParkingRackType.entries.toList(),
                   selectedValue = rackType,
-                  label = "Which type of rack is in the parking spot?",
+                  label = stringResource(R.string.attributes_picker_rack_type_label),
               )
               Spacer(modifier = Modifier.height(16.dp))
               BooleanRadioButton(
-                  question = "Is the parking spot under camera surveillance ?", hasSecurity)
+                  question = stringResource(R.string.attributes_picker_has_surveillance_question),
+                  hasSecurity)
               Spacer(modifier = Modifier.height(16.dp))
               InputText(
                   value = description.value,
-                  label = "Description (Optional)",
+                  label = stringResource(R.string.attributes_picker_description_label),
                   onValueChange = { description.value = it },
                   singleLine = false,
                   minLines = 3,
@@ -152,7 +155,7 @@ fun BottomBarAddAttr(navigationActions: NavigationActions, onSubmit: () -> Unit)
               modifier = Modifier.testTag("cancelButton"),
               colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
                 Text(
-                    "Cancel",
+                    stringResource(R.string.attributes_picker_bottom_bar_cancel_button),
                     color = MaterialTheme.colorScheme.primary,
                     fontFamily = MaterialTheme.typography.bodyLarge.fontFamily,
                     fontWeight = FontWeight.Bold,
@@ -168,7 +171,7 @@ fun BottomBarAddAttr(navigationActions: NavigationActions, onSubmit: () -> Unit)
               modifier = Modifier.testTag("submitButton"),
               colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
                 Text(
-                    "Submit",
+                    stringResource(R.string.attributes_picker_bottom_bar_submit_button),
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center)
@@ -235,7 +238,7 @@ fun AttributePickerTopBar(mapViewModel: MapViewModel, title: MutableState<String
                                     Color.White.copy(alpha = 0.3f)))))
         Column {
           Text(
-              "New Parking Spot",
+              stringResource(R.string.attributes_picker_top_bar_new_parking_spot),
               style = MaterialTheme.typography.titleLarge,
               color = MaterialTheme.colorScheme.primary,
               fontFamily = MaterialTheme.typography.bodyLarge.fontFamily,
@@ -249,7 +252,7 @@ fun AttributePickerTopBar(mapViewModel: MapViewModel, title: MutableState<String
               fontWeight = FontWeight.Bold,
               modifier = Modifier.padding(start = 8.dp))
           Text(
-              "Set the attributes of the parking spot",
+              stringResource(R.string.attributes_picker_top_bar_set_attributes),
               Modifier.padding(top = 0.dp, start = 8.dp, bottom = 16.dp),
               color = MaterialTheme.colorScheme.tertiary,
               fontFamily = MaterialTheme.typography.bodyLarge.fontFamily,

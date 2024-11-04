@@ -2,7 +2,113 @@
     <string name="app_name">Cyrcle</string>
     <string name="default_web_client_id">836297757379-3rvkggdu23fdvnof5nko2lablc993e0u.apps.googleusercontent.com</string>
 
+    <!-- Common section -->
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="no_selected_parking_error">No parking selected. Should not happen</string>
+    <string name="default_parking_name">Parking</string>
+    <string name="distance_km">%.2f km</string>
+    <string name="distance_m">%.0f m</string>
+
+    <!-- Attributes Picker -->
+    <string name="attributes_picker_title_label">Title</string>
+    <string name="attributes_picker_protection_label">How protected from the weather is the spot?</string>
+    <string name="attributes_picker_capacity_label">How many bikes can we park?</string>
+    <string name="attributes_picker_rack_type_label">Which type of rack is in the parking spot?</string>
+    <string name="attributes_picker_has_surveillance_question">Is the parking spot under camera surveillance ?</string>
+    <string name="attributes_picker_description_label">Description (Optional)</string>
+    <!-- Attributes Picker > BottomBarAddAttr -->
+    <string name="attributes_picker_bottom_bar_cancel_button">Cancel</string>
+    <string name="attributes_picker_bottom_bar_submit_button">Submit</string>
+    <!-- Attributes Picker > TopBarAddAttr -->
+    <string name="attributes_picker_top_bar_new_parking_spot">New Parking Spot</string>
+    <string name="attributes_picker_top_bar_set_attributes">Set the attributes of the parking spot</string>
+
+    <!-- Rectangle Selection -->
+    <string name="rectangle_selection_lock_map">Lock Map</string>
+    <string name="rectangle_selection_unlock_map">Unlock Map</string>
+    <!-- Location Picker Bottom Bar -->
+    <string name="location_picker_bottom_bar_cancel_button">Cancel</string>
+    <string name="location_picker_bottom_bar_next_button">Next</string>
+    <!-- Location Picker Top Bar -->
+    <string name="location_picker_top_bar_where">Where is the Parking ?</string>
+    <string name="location_picker_top_bar_select_top_left">Set the top-left corner of the parking, by placing it under the crosshair below</string>
+    <string name="location_picker_top_bar_select_bottom_right">Set the bottom-right corner of the parking, by dragging on the screen</string>
+
+    <!-- Sign In -->
+    <string name="sign_in_welcome">Welcome to Cyrcle</string>
+    <string name="sign_in_successful_toast">Login successful!</string>
+    <string name="sign_in_failed_toast">Login failed!</string>
+    <string name="sign_in_guest_button">Continue as Guest</string>
+    <string name="sign_in_google_button">Sign in with Google</string>
+
+    <!-- Card Screen -->
+    <string name="card_screen_description">Description of %s</string>
+    <string name="card_screen_capacity">Capacity:</string>
+    <string name="card_screen_rack_type">Rack Type:</string>
+    <string name="card_screen_protection">Protection:</string>
+    <string name="card_screen_price">Price:</string>
+    <string name="card_screen_surveillance">Surveillance Present::</string>
+    <string name="card_screen_rating">Current Rating</string>
+    <string name="card_screen_no_reviews">No reviews yet</string>
+    <string name="card_screen_see_review">See All Reviews</string>
+    <string name="card_screen_show_map">Show in Map</string>
+    <string name="card_screen_add_review">Add A Review</string>
+    <string name="card_screen_report">Report</string>
+
+    <!-- List Screen -->
+    <string name="list_screen_protection">Protection</string>
+    <string name="list_screen_hide_filters">Hide Filters</string>
+    <string name="list_screen_show_filters">Show Filters</string>
+    <string name="list_screen_rack_type">Rack Type</string>
+    <string name="list_screen_capacity">Capacity</string>
+    <string name="list_screen_price">%.2f $</string>
+
+    <!-- Zoom Controls -->
+    <string name="zoom_in">Zoom In</string>
+    <string name="zoom_out">Zoom Out</string>
+
+    <!-- Map Screen -->
+    <string name="map_screen_capacity">Capacity is %s</string>
+
     <!-- Create Profile Screen -->
     <string name="profile_screen_title">Create your profile</string>
+    <!-- View Profile Screen -->
+    <string name="view_profile_screen_first_name_label">First Name</string>
+    <string name="view_profile_screen_last_name_label">Last Name</string>
+    <string name="view_profile_screen_username_label">Username</string>
+    <string name="view_profile_screen_save_button">Save</string>
+    <string name="view_profile_screen_cancel_button">Cancel</string>
+    <string name="view_profile_screen_modify_profile_button">Cancel</string>
+    <string name="view_profile_screen_default_profile_picture">Default Profile Picture</string>
+    <string name="view_profile_screen_profile_picture">Profile Picture</string>
+    <string name="view_profile_screen_edit_profile_picture">Edit Profile Picture</string>
+    <string name="view_profile_screen_favorite_parking_title">Favorite Parkings</string>
+    <string name="view_profile_screen_no_favorite_parking">No favorite parking</string>
+    <string name="view_profile_screen_remove_from_favorite">Remove from Favorites</string>
+    <string name="view_profile_screen_remove_favorite_dialog_title">Remove favorites</string>
+    <string name="view_profile_screen_remove_favorite_dialog_message">Are you sure you want to remove %s from your favorites?</string>
+    <string name="view_profile_screen_remove_favorite_dialog_action_button">Remove</string>
+    <string name="view_profile_screen_remove_favorite_dialog_cancel_button">Cancel</string>
 
+    <!-- All Reviews Screen -->
+    <string name="all_review_title">All Reviews For %s</string>
+    <string name="all_review_rating">Rating: %.1f</string>
+    <string name="all_review_text">Text: %s</string>
+
+    <!-- Review Screen -->
+    <string name="review_screen_title">Add Your Review</string>
+    <string name="review_screen_terrible_review">Terrible experience :(</string>
+    <string name="review_screen_bad_review">Bad experience :/</string>
+    <string name="review_screen_average_review">Average experience :|</string>
+    <string name="review_screen_good_review">Good experience :)</string>
+    <string name="review_screen_great_review">Great experience :D</string>
+    <string name="review_screen_rating">Rating: %.1f</string>
+    <string name="review_screen_write_review_label">Write your review</string>
+    <string name="review_screen_submit_button">Save my Review</string>
+    <string name="review_screen_submit_button_toast">Review Added!</string>
+    <string name="review_screen_default_review_owner">default</string>
+
+    <!-- TopAppBar -->
+    <string name="top_app_bar_go_back">Go Back</string>
 </resources>

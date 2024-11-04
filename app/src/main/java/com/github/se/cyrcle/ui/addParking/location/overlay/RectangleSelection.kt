@@ -15,7 +15,9 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.mapbox.maps.ScreenCoordinate
@@ -76,9 +78,9 @@ fun RectangleSelection(mapViewModel: MapViewModel, paddingValues: PaddingValues)
             onClick = { mapGesturesEnabled.value = !mapGesturesEnabled.value },
             content = {
               if (mapGesturesEnabled.value) {
-                Text("Lock Map ")
+                Text(stringResource(R.string.rectangle_selection_lock_map))
               } else {
-                Text("Unlock Map")
+                Text(stringResource(R.string.rectangle_selection_unlock_map))
               }
             })
       }

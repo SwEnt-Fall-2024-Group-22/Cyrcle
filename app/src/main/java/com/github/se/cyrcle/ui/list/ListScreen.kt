@@ -39,8 +39,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingAttribute
 import com.github.se.cyrcle.model.parking.ParkingCapacity
@@ -164,7 +166,7 @@ fun FilterHeader(
 
     if (showFilters) {
       FilterSection(
-          title = "Protection",
+          title = stringResource(R.string.list_screen_protection),
           isExpanded = showProtectionOptions,
           onToggle = { showProtectionOptions = !showProtectionOptions }) {
             LazyRow(
@@ -182,7 +184,7 @@ fun FilterHeader(
           }
 
       FilterSection(
-          title = "Rack Type",
+          title = stringResource(R.string.list_screen_rack_type),
           isExpanded = showRackTypeOptions,
           onToggle = { showRackTypeOptions = !showRackTypeOptions }) {
             LazyRow(
@@ -200,7 +202,7 @@ fun FilterHeader(
           }
 
       FilterSection(
-          title = "Capacity",
+          title = stringResource(R.string.list_screen_capacity),
           isExpanded = showCapacityOptions,
           onToggle = { showCapacityOptions = !showCapacityOptions }) {
             LazyRow(
@@ -292,15 +294,15 @@ fun SpotCard(
                   Text(
                       text =
                           parking.optName?.let { if (it.length > 35) it.take(32) + "..." else it }
-                              ?: "Unnamed Parking",
+                              ?: stringResource(R.string.default_parking_name),
                       style = MaterialTheme.typography.bodyLarge,
                       color = MaterialTheme.colorScheme.onSurface,
                       testTag = "ParkingName")
                   Text(
                       text =
                           if (distance < 1)
-                              String.format(Locale.getDefault(), "%.0f m", distance * 1000)
-                          else String.format(Locale.getDefault(), "%.2f km", distance),
+                              stringResource(R.string.distance_m).format(distance * 1000)
+                          else stringResource(R.string.distance_km).format(distance),
                       style = MaterialTheme.typography.bodySmall,
                       color = MaterialTheme.colorScheme.onSurface,
                       testTag = "ParkingDistance")
@@ -311,7 +313,7 @@ fun SpotCard(
             if (parking.nbReviews > 0) {
               Row {
                 Text(
-                    text = "Rating: ${parking.avgScore}", // TODO: Replace with star composable
+                    text = stringResource(R.string.list_screen_rating).format(parking.avgScore), // TODO: Replace with star composable
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface,
                     testTag = "ParkingRating")
@@ -326,7 +328,7 @@ fun SpotCard(
               }
             } else {
               Text(
-                  text = "No reviews yet",
+                  text = stringResource(R.string.no_review),
                   style = MaterialTheme.typography.bodySmall,
                   color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
                   testTag = "ParkingNoReviews")
