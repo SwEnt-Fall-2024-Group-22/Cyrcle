@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.addParking
 
-import CyrcleNavHost
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
@@ -13,6 +12,7 @@ import androidx.compose.ui.test.performClick
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.se.cyrcle.CyrcleNavHost
 import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ImageRepository
@@ -20,6 +20,7 @@ import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.review.ReviewViewModel
+import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.addParking.attributes.AttributesPicker
 import com.github.se.cyrcle.ui.addParking.location.LocationPicker
@@ -58,7 +59,12 @@ class AddScreensNavigationTest {
         mapViewModel,
         addressViewModel)
     return listOf<Any>(
-        navigationActions, parkingViewModel, reviewViewModel, mapViewModel, addressViewModel)
+        navigationActions,
+        parkingViewModel,
+        reviewViewModel,
+        userViewModel,
+        mapViewModel,
+        addressViewModel)
   }
 
   @OptIn(ExperimentalTestApi::class)
@@ -69,8 +75,11 @@ class AddScreensNavigationTest {
       val list = setUp()
       val navigationActions = list[0] as NavigationActions
       val parkingViewModel = list[1] as ParkingViewModel
-      val mapViewModel = list[3] as MapViewModel
-      MapScreen(navigationActions, parkingViewModel, mapViewModel)
+      val userViewModel = list[3] as UserViewModel
+      val mapViewModel = list[4] as MapViewModel
+
+      userViewModel.setCurrentUser(User(userId = "default", username = "sayMyName", email = ""))
+      MapScreen(navigationActions, parkingViewModel, userViewModel, mapViewModel)
     }
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("addButton"))
     // Perform click on the add button
@@ -87,7 +96,7 @@ class AddScreensNavigationTest {
     composeTestRule.setContent {
       val list = setUp()
       val navigationActions = list[0] as NavigationActions
-      val mapViewModel = list[3] as MapViewModel
+      val mapViewModel = list[4] as MapViewModel
       LocationPicker(navigationActions, mapViewModel)
     }
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("nextButton"))
@@ -112,8 +121,8 @@ class AddScreensNavigationTest {
       val list = setUp()
       val navigationActions = list[0] as NavigationActions
       val parkingViewModel = ParkingViewModel(mockedImageRepository, mockedParkingRepository)
-      val mapViewModel = list[3] as MapViewModel
-      val addressViewModel = list[4] as AddressViewModel
+      val mapViewModel = list[4] as MapViewModel
+      val addressViewModel = list[5] as AddressViewModel
       mapViewModel.updateLocation(Location(Point.fromLngLat(0.0, 0.0)))
       AttributesPicker(navigationActions, parkingViewModel, mapViewModel, addressViewModel)
     }
@@ -132,8 +141,8 @@ class AddScreensNavigationTest {
       val list = setUp()
       val navigationActions = list[0] as NavigationActions
       val parkingViewModel = list[1] as ParkingViewModel
-      val mapViewModel = list[3] as MapViewModel
-      val addressViewModel = list[4] as AddressViewModel
+      val mapViewModel = list[4] as MapViewModel
+      val addressViewModel = list[5] as AddressViewModel
       mapViewModel.updateLocation(Location(Point.fromLngLat(0.0, 0.0)))
       AttributesPicker(navigationActions, parkingViewModel, mapViewModel, addressViewModel)
     }
@@ -152,8 +161,7 @@ class AddScreensNavigationTest {
     composeTestRule.setContent {
       val list = setUp()
       val navigationActions = list[0] as NavigationActions
-      val parkingViewModel = list[1] as ParkingViewModel
-      val mapViewModel = list[3] as MapViewModel
+      val mapViewModel = list[4] as MapViewModel
       LocationPicker(navigationActions, mapViewModel)
     }
     composeTestRule.waitForIdle()

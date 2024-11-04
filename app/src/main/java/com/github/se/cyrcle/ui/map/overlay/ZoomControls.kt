@@ -18,10 +18,11 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun ZoomControls(onZoomIn: () -> Unit, onZoomOut: () -> Unit) {
+fun ZoomControls(modifier: Modifier = Modifier, onZoomIn: () -> Unit, onZoomOut: () -> Unit) {
   Column(
       modifier =
-          Modifier.padding(15.dp)
+          modifier
+              .padding(15.dp)
               .background(Color.Black.copy(alpha = 0.70f), shape = RoundedCornerShape(8.dp))
               .sizeIn(maxWidth = 35.dp)
               .testTag("ZoomControls")) {

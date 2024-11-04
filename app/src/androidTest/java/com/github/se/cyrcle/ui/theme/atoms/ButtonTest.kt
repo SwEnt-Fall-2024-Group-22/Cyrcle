@@ -25,27 +25,27 @@ class ButtonTest {
   fun displayButton() {
     val tagD = "Button"
     val tag1 = "Button1"
-    val disabled = mutableStateOf(false)
+    val enabled = mutableStateOf(true)
     var a = 1
     composeTestRule.setContent {
       Button("Button", { a++ })
-      Button("Button", { a++ }, Modifier, ColorLevel.PRIMARY, disabled, tag1)
+      Button("Button", { a++ }, Modifier, ColorLevel.PRIMARY, enabled, tag1)
     }
 
     composeTestRule.onNodeWithTag(tagD).assertIsDisplayed()
     composeTestRule.onNodeWithTag("${tagD}Text", true).assertIsDisplayed()
     composeTestRule.onNodeWithTag(tagD).performClick()
     assertEquals(2, a)
-    disabled.value = true
+    enabled.value = false
     composeTestRule.onNodeWithTag(tagD).performClick() // Shouldn't trigger onClick
     assertEquals(2, a)
 
-    disabled.value = false
+    enabled.value = true
     composeTestRule.onNodeWithTag(tag1).assertIsDisplayed()
     composeTestRule.onNodeWithTag("${tag1}Text", true).assertIsDisplayed()
     composeTestRule.onNodeWithTag(tag1).performClick()
     assertEquals(3, a)
-    disabled.value = true
+    enabled.value = false
     composeTestRule.onNodeWithTag(tag1).performClick() // Shouldn't trigger onClick
     assertEquals(3, a)
   }
@@ -192,6 +192,29 @@ class ButtonTest {
     composeTestRule.onNodeWithTag("${tag1}Icon", true).assertIsDisplayed()
     composeTestRule.onNodeWithTag(tag1).performClick()
     assertEquals(a, 3)
+  }
+
+  @Test
+  fun displayIconButton() {
+    val tagD = "IconButton"
+    val tag1 = "IconButton1"
+    var a = 1
+    composeTestRule.setContent {
+      Row {
+        IconButton(Icons.Filled.Add, "na", { a++ })
+        IconButton(Icons.Filled.Add, "na", { a++ }, Modifier, false, ColorLevel.PRIMARY, tag1)
+      }
+    }
+
+    composeTestRule.onNodeWithTag(tagD).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${tagD}Icon", true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(tagD).performClick()
+    assertEquals(a, 2)
+
+    composeTestRule.onNodeWithTag(tag1).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("${tag1}Icon", true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(tag1).performClick()
+    assertEquals(a, 2)
   }
 
   @Test

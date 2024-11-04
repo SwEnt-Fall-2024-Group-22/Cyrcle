@@ -11,6 +11,7 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -19,6 +20,7 @@ import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.disabledColor
 import com.github.se.cyrcle.ui.theme.getButtonColors
 import com.github.se.cyrcle.ui.theme.getColor
+import com.github.se.cyrcle.ui.theme.getIconButtonColors
 import com.github.se.cyrcle.ui.theme.getOnColor
 import com.github.se.cyrcle.ui.theme.onDisabledColor
 
@@ -143,7 +145,7 @@ fun ExtendedFloatingActionButton(
  * @param onClick
  * @param modifier Chained modifier. `.testTag` will be overwritten, use the `testTag` for this.
  * @param colorLevel The color scheme of the object.
- * @param disabled If the button should be disabled (the onClick won't be triggered)
+ * @param enabled If the button should be enabled (the onClick won't be triggered)
  * @param testTag The test tag of the object.
  */
 @Composable
@@ -152,14 +154,14 @@ fun Button(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     colorLevel: ColorLevel = ColorLevel.PRIMARY,
-    disabled: MutableState<Boolean> = mutableStateOf(false),
+    enabled: State<Boolean> = mutableStateOf(true),
     testTag: String = "Button"
 ) {
   Button(
-      onClick = { if (!disabled.value) onClick() },
+      onClick = { if (enabled.value) onClick() },
       modifier = modifier.testTag(testTag),
       colors = getButtonColors(colorLevel),
-      enabled = !disabled.value) {
+      enabled = enabled.value) {
         Text(text, Modifier.testTag("${testTag}Text"))
       }
 }
@@ -222,6 +224,28 @@ fun ToggleButton(
               ButtonDefaults.buttonColors(
                   containerColor = disabledColor(), contentColor = onDisabledColor())) {
         Text(text, Modifier.testTag("${testTag}Text"))
+      }
+}
+
+@Composable
+fun IconButton(
+    icon: ImageVector,
+    contentDescription: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    colorLevel: ColorLevel = ColorLevel.PRIMARY,
+    testTag: String = "IconButton"
+) {
+  androidx.compose.material3.IconButton(
+      modifier = modifier.testTag(testTag),
+      onClick = onClick,
+      enabled = enabled,
+      colors = getIconButtonColors(colorLevel)) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            modifier = Modifier.testTag("${testTag}Icon"))
       }
 }
 
