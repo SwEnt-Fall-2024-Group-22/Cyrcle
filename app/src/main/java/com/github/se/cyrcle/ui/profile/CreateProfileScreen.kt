@@ -8,16 +8,20 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
 @Composable
-fun CreateProfile(navigationActions: NavigationActions, userViewModel: UserViewModel) {
+fun CreateProfileScreen(navigationActions: NavigationActions, userViewModel: UserViewModel) {
+  val screenTitle = stringResource(R.string.profile_screen_title)
+
   Scaffold(
       modifier = Modifier.fillMaxSize().testTag("CreateProfileScreen"),
-      topBar = { TopAppBar(navigationActions, "Create Profile") }) { padding ->
+      topBar = { TopAppBar(navigationActions, screenTitle) }) { padding ->
         Column(
             modifier = Modifier.fillMaxSize().padding(padding),
             verticalArrangement = Arrangement.Center) {

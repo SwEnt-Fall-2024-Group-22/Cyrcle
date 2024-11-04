@@ -70,7 +70,7 @@ fun ViewProfileScreen(navigationActions: NavigationActions) {
       }
 
   Scaffold(
-      modifier = Modifier.testTag("ProfileScreen"),
+      modifier = Modifier.testTag("ViewProfileScreen"),
       bottomBar = {
         BottomNavigationBar(
             navigationActions = navigationActions,

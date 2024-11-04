@@ -22,7 +22,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
@@ -38,20 +37,20 @@ import kotlinx.coroutines.flow.map
 @Composable
 fun CardScreen(
     navigationActions: NavigationActions,
-    parkingViewModel: ParkingViewModel = viewModel(factory = ParkingViewModel.Factory),
-    userViewModel: UserViewModel = viewModel(factory = UserViewModel.Factory)
+    parkingViewModel: ParkingViewModel,
+    userViewModel: UserViewModel
 ) {
   val selectedParking =
       parkingViewModel.selectedParking.collectAsState().value
           ?: return Text(text = "No parking selected. Should not happen")
 
-  val userSignedOut = userViewModel.currentUser.map { it == null }.collectAsState(true)
+  val userSignedOut = userViewModel.isSignedIn.map { !it }.collectAsState(false)
 
   Scaffold(
       topBar = {
         TopAppBar(navigationActions, "Description of ${selectedParking.optName?: "Parking"}")
       },
-      modifier = Modifier.testTag("CardScreen")) {
+      modifier = Modifier.testTag("CardScreen")) { padding ->
         Box(
             modifier =
                 Modifier.fillMaxSize()
@@ -59,7 +58,7 @@ fun CardScreen(
                     .testTag("CardScreenBox") // Test tag for main container
             ) {
               Column(
-                  modifier = Modifier.fillMaxSize().padding(it),
+                  modifier = Modifier.fillMaxSize().padding(padding),
                   horizontalAlignment = Alignment.CenterHorizontally,
                   verticalArrangement = Arrangement.SpaceBetween) {
                     // Display a row of images using LazyRow

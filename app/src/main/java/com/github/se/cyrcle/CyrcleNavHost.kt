@@ -1,3 +1,5 @@
+package com.github.se.cyrcle
+
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -44,7 +46,7 @@ fun CyrcleNavHost(
         route = Route.LIST,
     ) {
       composable(Screen.LIST) { SpotListScreen(navigationActions, parkingViewModel) }
-      composable(Screen.CARD) { CardScreen(navigationActions, parkingViewModel) }
+      composable(Screen.CARD) { CardScreen(navigationActions, parkingViewModel, userViewModel) }
       composable(Screen.REVIEW) {
         ReviewScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
       }

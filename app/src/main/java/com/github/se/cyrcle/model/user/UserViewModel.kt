@@ -29,7 +29,7 @@ class UserViewModel(
    *
    * @param user the user to set as the current user
    */
-  fun setCurrentUser(user: User) {
+  fun setCurrentUser(user: User?) {
     _currentUser.value = user
   }
 
