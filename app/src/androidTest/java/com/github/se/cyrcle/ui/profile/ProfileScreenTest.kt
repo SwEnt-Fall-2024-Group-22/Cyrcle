@@ -20,7 +20,7 @@ class ProfileScreenTest {
   fun setupProfileScreen() {
     mockNavController = mock(NavHostController::class.java)
     val navigationActions = NavigationActions(mockNavController)
-    composeTestRule.setContent { ProfileScreen(navigationActions = navigationActions) }
+    composeTestRule.setContent { ViewProfileScreen(navigationActions = navigationActions) }
   }
 
   @Test

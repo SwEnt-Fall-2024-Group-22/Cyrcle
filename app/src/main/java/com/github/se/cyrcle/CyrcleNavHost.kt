@@ -74,7 +74,7 @@ fun CyrcleNavHost(
         startDestination = Screen.PROFILE,
         route = Route.PROFILE,
     ) {
-      composable(Screen.PROFILE) { ProfileScreen(navigationActions) }
+      composable(Screen.PROFILE) { ProfileScreen(navigationActions, userViewModel) }
     }
   }
 }
