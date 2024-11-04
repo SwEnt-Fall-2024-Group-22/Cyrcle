@@ -26,257 +26,255 @@ import org.mockito.Mockito.mock
 @RunWith(AndroidJUnit4::class)
 class ProfileScreenMock {
 
-    @get:Rule val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
-    private lateinit var mockNavigationActions: NavigationActions
-    private lateinit var mockUserRepository: MockUserRepository
-    private lateinit var mockParkingRepository: MockParkingRepository
-    private lateinit var mockImageRepository: MockImageRepository
+  private lateinit var mockNavigationActions: NavigationActions
+  private lateinit var mockUserRepository: MockUserRepository
+  private lateinit var mockParkingRepository: MockParkingRepository
+  private lateinit var mockImageRepository: MockImageRepository
 
-    private lateinit var userViewModel: UserViewModel
-    private lateinit var parkingViewModel: ParkingViewModel
+  private lateinit var userViewModel: UserViewModel
+  private lateinit var parkingViewModel: ParkingViewModel
 
+  @Before
+  fun setUp() {
+    mockNavigationActions = mock(NavigationActions::class.java)
+    mockUserRepository = MockUserRepository()
+    mockParkingRepository = MockParkingRepository()
+    mockImageRepository = MockImageRepository()
 
-    @Before
-    fun setUp() {
-        mockNavigationActions = mock(NavigationActions::class.java)
-        mockUserRepository = MockUserRepository()
-        mockParkingRepository = MockParkingRepository()
-        mockImageRepository = MockImageRepository()
-
-        val user = User(
+    val user =
+        User(
             userId = "1",
             username = "janesmith",
             firstName = "Jane",
             lastName = "Smith",
             email = "jane.smith@example.com",
-            profilePictureUrl = "http://example.com/jane.jpg"
-        )
+            profilePictureUrl = "http://example.com/jane.jpg")
 
+    userViewModel = UserViewModel(mockUserRepository, mockParkingRepository)
+    parkingViewModel = ParkingViewModel(mockImageRepository, mockParkingRepository)
 
-        userViewModel = UserViewModel(mockUserRepository, mockParkingRepository)
-        parkingViewModel = ParkingViewModel(mockImageRepository, mockParkingRepository)
+    userViewModel.addUser(user)
 
+    // parking1 already added by whoever created parkingviewmodelmock on instanciation
+    parkingViewModel.addParking(TestInstancesParking.parking2)
+    parkingViewModel.addParking(TestInstancesParking.parking3)
 
-        userViewModel.addUser(user)
+    // Fetch the user
+    userViewModel.getUserById("1")
 
-        // parking1 already added by whoever created parkingviewmodelmock on instanciation
-        parkingViewModel.addParking(TestInstancesParking.parking2)
-        parkingViewModel.addParking(TestInstancesParking.parking3)
+    // Add favorite parkings
+    userViewModel.addFavoriteParkingToSelectedUser(TestInstancesParking.parking1.uid)
+    userViewModel.addFavoriteParkingToSelectedUser(TestInstancesParking.parking2.uid)
+    userViewModel.addFavoriteParkingToSelectedUser(TestInstancesParking.parking3.uid)
+    // Fetch favorite parkings
+    userViewModel.getSelectedUserFavoriteParking()
 
-        // Fetch the user
-        userViewModel.getUserById("1")
-
-        // Add favorite parkings
-        userViewModel.addFavoriteParkingToSelectedUser(TestInstancesParking.parking1.uid)
-        userViewModel.addFavoriteParkingToSelectedUser(TestInstancesParking.parking2.uid)
-        userViewModel.addFavoriteParkingToSelectedUser(TestInstancesParking.parking3.uid)
-        // Fetch favorite parkings
-        userViewModel.getSelectedUserFavoriteParking()
-
-        composeTestRule.setContent {
-            ProfileScreen(
-                navigationActions = mockNavigationActions,
-                userViewModel = userViewModel
-            )
-        }
+    composeTestRule.setContent {
+      ProfileScreen(navigationActions = mockNavigationActions, userViewModel = userViewModel)
     }
+  }
 
-    @Test
-    fun testUserSetupAndFavoriteParkings() {
-        composeTestRule.waitForIdle()
+  @Test
+  fun testUserSetupAndFavoriteParkings() {
+    composeTestRule.waitForIdle()
 
-        // Verify user details
-        assert(userViewModel.currentUser.value?.userId == "1")
+    // Verify user details
+    assert(userViewModel.currentUser.value?.userId == "1")
 
-        // Verify favorite parkings
-        assert(userViewModel.favoriteParkings.value.size == 3)
-        assert(userViewModel.favoriteParkings.value.containsAll(listOf(
-            TestInstancesParking.parking1,
-            TestInstancesParking.parking2,
-            TestInstancesParking.parking3
-        )))
-    }
+    // Verify favorite parkings
+    assert(userViewModel.favoriteParkings.value.size == 3)
+    assert(
+        userViewModel.favoriteParkings.value.containsAll(
+            listOf(
+                TestInstancesParking.parking1,
+                TestInstancesParking.parking2,
+                TestInstancesParking.parking3)))
+  }
 
-    @Test
-    fun testInitialDisplayMode() {
-        composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithTag("ProfileImage").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("EditButton").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("DisplayFirstName").assertTextEquals("Jane")
-        composeTestRule.onNodeWithTag("DisplayLastName").assertTextEquals("Smith")
-        composeTestRule.onNodeWithTag("DisplayUsername").assertTextEquals("@janesmith")
-    }
+  @Test
+  fun testInitialDisplayMode() {
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("ProfileImage").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("EditButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("DisplayFirstName").assertTextEquals("Jane")
+    composeTestRule.onNodeWithTag("DisplayLastName").assertTextEquals("Smith")
+    composeTestRule.onNodeWithTag("DisplayUsername").assertTextEquals("@janesmith")
+  }
 
-    @Test
-    fun testEditModeTransition() {
-        composeTestRule.waitForIdle()
+  @Test
+  fun testEditModeTransition() {
+    composeTestRule.waitForIdle()
 
-        composeTestRule.onNodeWithTag("EditButton").performClick()
-        composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("EditButton").performClick()
+    composeTestRule.waitForIdle()
 
-        composeTestRule.onNodeWithTag("ProfileImage").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("EditButton").assertIsNotDisplayed()
-        composeTestRule.onNodeWithTag("FirstNameField").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("LastNameField").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("UsernameField").assertIsDisplayed()
-    }
+    composeTestRule.onNodeWithTag("ProfileImage").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("EditButton").assertIsNotDisplayed()
+    composeTestRule.onNodeWithTag("FirstNameField").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("LastNameField").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("UsernameField").assertIsDisplayed()
+  }
 
-    @Test
-    fun testSaveChanges() {
-        composeTestRule.waitForIdle()
+  @Test
+  fun testSaveChanges() {
+    composeTestRule.waitForIdle()
 
-        composeTestRule.onNodeWithTag("EditButton").performClick()
-        composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("EditButton").performClick()
+    composeTestRule.waitForIdle()
 
-        composeTestRule.onNodeWithTag("FirstNameField").performTextReplacement("Alice")
-        composeTestRule.onNodeWithTag("LastNameField").performTextReplacement("Johnson")
-        composeTestRule.onNodeWithTag("UsernameField").performTextReplacement("alicejohnson")
-        composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("FirstNameField").performTextReplacement("Alice")
+    composeTestRule.onNodeWithTag("LastNameField").performTextReplacement("Johnson")
+    composeTestRule.onNodeWithTag("UsernameField").performTextReplacement("alicejohnson")
+    composeTestRule.waitForIdle()
 
-        composeTestRule.onNodeWithTag("SaveButton").performClick()
-        composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("SaveButton").performClick()
+    composeTestRule.waitForIdle()
 
-        composeTestRule.onNodeWithTag("ProfileImage").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("EditButton").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("DisplayFirstName").assertTextEquals("Alice")
-        composeTestRule.onNodeWithTag("DisplayLastName").assertTextEquals("Johnson")
-        composeTestRule.onNodeWithTag("DisplayUsername").assertTextEquals("@alicejohnson")
-    }
+    composeTestRule.onNodeWithTag("ProfileImage").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("EditButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("DisplayFirstName").assertTextEquals("Alice")
+    composeTestRule.onNodeWithTag("DisplayLastName").assertTextEquals("Johnson")
+    composeTestRule.onNodeWithTag("DisplayUsername").assertTextEquals("@alicejohnson")
+  }
 
-    @Test
-    fun testCancelEditMode() {
-        composeTestRule.waitForIdle()
+  @Test
+  fun testCancelEditMode() {
+    composeTestRule.waitForIdle()
 
-        composeTestRule.onNodeWithTag("EditButton").performClick()
-        composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("EditButton").performClick()
+    composeTestRule.waitForIdle()
 
-        composeTestRule.onNodeWithTag("FirstNameField").performTextReplacement("Alice")
-        composeTestRule.onNodeWithTag("LastNameField").performTextReplacement("Johnson")
-        composeTestRule.onNodeWithTag("UsernameField").performTextReplacement("@alicejohnson")
-        composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("FirstNameField").performTextReplacement("Alice")
+    composeTestRule.onNodeWithTag("LastNameField").performTextReplacement("Johnson")
+    composeTestRule.onNodeWithTag("UsernameField").performTextReplacement("@alicejohnson")
+    composeTestRule.waitForIdle()
 
-        composeTestRule.onNodeWithTag("CancelButton").performClick()
-        composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("CancelButton").performClick()
+    composeTestRule.waitForIdle()
 
-        composeTestRule.onNodeWithTag("ProfileImage").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("EditButton").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("DisplayFirstName").assertTextEquals("Jane")
-        composeTestRule.onNodeWithTag("DisplayLastName").assertTextEquals("Smith")
-        composeTestRule.onNodeWithTag("DisplayUsername").assertTextEquals("@janesmith")
-    }
+    composeTestRule.onNodeWithTag("ProfileImage").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("EditButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("DisplayFirstName").assertTextEquals("Jane")
+    composeTestRule.onNodeWithTag("DisplayLastName").assertTextEquals("Smith")
+    composeTestRule.onNodeWithTag("DisplayUsername").assertTextEquals("@janesmith")
+  }
 
-    @Test
-    fun testCantChangeProfilePicture() {
-        // Dont enter edit mode
-        composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithTag("ProfileImage").assertHasNoClickAction()
-    }
+  @Test
+  fun testCantChangeProfilePicture() {
+    // Dont enter edit mode
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("ProfileImage").assertHasNoClickAction()
+  }
 
-    @Test
-    fun testChangeProfilePicture() {
-        // Enter edit mode
-        composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithTag("EditButton").performClick()
-        composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithTag("ProfileImage").assertHasClickAction()
-    }
+  @Test
+  fun testChangeProfilePicture() {
+    // Enter edit mode
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("EditButton").performClick()
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("ProfileImage").assertHasClickAction()
+  }
 
-    @Test
-    fun testFavoriteParkingsDisplay() {
-        composeTestRule.waitForIdle()
+  @Test
+  fun testFavoriteParkingsDisplay() {
+    composeTestRule.waitForIdle()
 
-        composeTestRule.onNodeWithTag("FavoriteParkingsTitle").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("FavoriteParkingsTitle").assertIsDisplayed()
 
-        composeTestRule.onNodeWithTag("FavoriteParkingList").onChildren().assertCountEquals(3)
-        composeTestRule.onNodeWithTag("ParkingItem_0").assertTextContains("Rue de la paix")
-        composeTestRule.onNodeWithTag("ParkingItem_1").assertTextContains("Rude épais")
-        composeTestRule.onNodeWithTag("ParkingItem_2").assertTextContains("Rue du pet")
-    }
+    composeTestRule.onNodeWithTag("FavoriteParkingList").onChildren().assertCountEquals(3)
+    composeTestRule.onNodeWithTag("ParkingItem_0").assertTextContains("Rue de la paix")
+    composeTestRule.onNodeWithTag("ParkingItem_1").assertTextContains("Rude épais")
+    composeTestRule.onNodeWithTag("ParkingItem_2").assertTextContains("Rue du pet")
+  }
 
-    @Test
-    fun testStarIconClickDisplaysConfirmationDialog() {
-        composeTestRule.waitForIdle()
+  @Test
+  fun testStarIconClickDisplaysConfirmationDialog() {
+    composeTestRule.waitForIdle()
 
-        composeTestRule.onNodeWithTag("FavoriteToggle_0").performClick()
-        composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("FavoriteToggle_0").performClick()
+    composeTestRule.waitForIdle()
 
-        composeTestRule.onNodeWithText("Remove favorite").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Are you sure you want to remove Rue de la paix from your favorites?").assertIsDisplayed()
-    }
+    composeTestRule.onNodeWithText("Remove favorite").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithText("Are you sure you want to remove Rue de la paix from your favorites?")
+        .assertIsDisplayed()
+  }
 
-    @Test
-    fun testConfirmRemoveFavoriteParking() {
-        composeTestRule.waitForIdle()
+  @Test
+  fun testConfirmRemoveFavoriteParking() {
+    composeTestRule.waitForIdle()
 
-        // Click the star icon to show the confirmation dialog
-        composeTestRule.onNodeWithTag("FavoriteToggle_0").performClick()
-        composeTestRule.waitForIdle()
+    // Click the star icon to show the confirmation dialog
+    composeTestRule.onNodeWithTag("FavoriteToggle_0").performClick()
+    composeTestRule.waitForIdle()
 
-        // Confirm removal
-        composeTestRule.onNodeWithText("Remove").performClick()
-        composeTestRule.waitForIdle()
+    // Confirm removal
+    composeTestRule.onNodeWithText("Remove").performClick()
+    composeTestRule.waitForIdle()
 
-        // Verify the specific parking is removed from favorites
-        composeTestRule.onNodeWithText("Rue de la paix").assertDoesNotExist()
-    }
+    // Verify the specific parking is removed from favorites
+    composeTestRule.onNodeWithText("Rue de la paix").assertDoesNotExist()
+  }
 
-    @Test
-    fun testCancelRemoveFavoriteParking() {
-        composeTestRule.waitForIdle()
+  @Test
+  fun testCancelRemoveFavoriteParking() {
+    composeTestRule.waitForIdle()
 
-        // Click the star icon to show the confirmation dialog
-        composeTestRule.onNodeWithTag("FavoriteToggle_0").performClick()
-        composeTestRule.waitForIdle()
+    // Click the star icon to show the confirmation dialog
+    composeTestRule.onNodeWithTag("FavoriteToggle_0").performClick()
+    composeTestRule.waitForIdle()
 
-        // Cancel removal
-        composeTestRule.onNodeWithText("Cancel").performClick()
-        composeTestRule.waitForIdle()
+    // Cancel removal
+    composeTestRule.onNodeWithText("Cancel").performClick()
+    composeTestRule.waitForIdle()
 
-        // Verify the specific parking is still in favorites
-        composeTestRule.onNodeWithText("Rue de la paix").assertIsDisplayed()
-    }
+    // Verify the specific parking is still in favorites
+    composeTestRule.onNodeWithText("Rue de la paix").assertIsDisplayed()
+  }
 
-    @Test
-    fun testRemoveAllFavoriteParkings() {
-        composeTestRule.waitForIdle()
+  @Test
+  fun testRemoveAllFavoriteParkings() {
+    composeTestRule.waitForIdle()
 
-        // Remove the first parking
-        composeTestRule.onNodeWithTag("FavoriteToggle_0").performClick()
-        composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithText("Remove").performClick()
-        composeTestRule.waitForIdle()
+    // Remove the first parking
+    composeTestRule.onNodeWithTag("FavoriteToggle_0").performClick()
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithText("Remove").performClick()
+    composeTestRule.waitForIdle()
 
-        // Remove the second parking
-        composeTestRule.onNodeWithTag("FavoriteToggle_0").performClick()
-        composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithText("Remove").performClick()
-        composeTestRule.waitForIdle()
+    // Remove the second parking
+    composeTestRule.onNodeWithTag("FavoriteToggle_0").performClick()
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithText("Remove").performClick()
+    composeTestRule.waitForIdle()
 
-        // Remove the third parking
-        composeTestRule.onNodeWithTag("FavoriteToggle_0").performClick()
-        composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithText("Remove").performClick()
-        composeTestRule.waitForIdle()
+    // Remove the third parking
+    composeTestRule.onNodeWithTag("FavoriteToggle_0").performClick()
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithText("Remove").performClick()
+    composeTestRule.waitForIdle()
 
-        composeTestRule.onNodeWithTag("NoFavoritesMessage").assertIsDisplayed()
-    }
+    composeTestRule.onNodeWithTag("NoFavoritesMessage").assertIsDisplayed()
+  }
 
-    @Test
-    fun testFavoriteToggleNotClickableWhileEditing() {
-        composeTestRule.waitForIdle()
+  @Test
+  fun testFavoriteToggleNotClickableWhileEditing() {
+    composeTestRule.waitForIdle()
 
-        composeTestRule.onNodeWithTag("EditButton").performClick()
-        composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("EditButton").performClick()
+    composeTestRule.waitForIdle()
 
-        composeTestRule.onNodeWithTag("FavoriteToggle_0").assertIsNotDisplayed()
-    }
+    composeTestRule.onNodeWithTag("FavoriteToggle_0").assertIsNotDisplayed()
+  }
 
-    @Test
-    fun testAddParkingAndScrollFavorites() {
-        composeTestRule.waitForIdle()
+  @Test
+  fun testAddParkingAndScrollFavorites() {
+    composeTestRule.waitForIdle()
 
-        val parking4 = Parking(
+    val parking4 =
+        Parking(
             "Test_spot_4",
             "Roulade P",
             "Wazzup beijing",
@@ -289,18 +287,17 @@ class ProfileScreenMock {
             0.0,
             true)
 
-        parkingViewModel.addParking(parking4)
-        userViewModel.addFavoriteParkingToSelectedUser(parking4.uid)
-        userViewModel.getSelectedUserFavoriteParking()
+    parkingViewModel.addParking(parking4)
+    userViewModel.addFavoriteParkingToSelectedUser(parking4.uid)
+    userViewModel.getSelectedUserFavoriteParking()
 
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("FavoriteToggle_3").assertDoesNotExist()
 
-        composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithTag("FavoriteToggle_3").assertDoesNotExist()
-
-        composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithTag("FavoriteParkingList")
-            .performScrollToNode(hasTestTag("FavoriteToggle_3"))
-        composeTestRule.onNodeWithTag("FavoriteToggle_3").assertIsDisplayed()
-
-    }
+    composeTestRule.waitForIdle()
+    composeTestRule
+        .onNodeWithTag("FavoriteParkingList")
+        .performScrollToNode(hasTestTag("FavoriteToggle_3"))
+    composeTestRule.onNodeWithTag("FavoriteToggle_3").assertIsDisplayed()
+  }
 }
