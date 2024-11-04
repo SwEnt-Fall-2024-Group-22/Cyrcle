@@ -68,9 +68,9 @@ fun SpotListScreen(
 ) {
 
   val referencePoint = TestInstancesParking.EPFLCenter
-  val numberOfNewParkings = 10
+  var radius = 100.0
 
-  val parkingSpots by parkingViewModel.kClosestParkings.collectAsState()
+  val parkingSpots by parkingViewModel.closestParkings.collectAsState()
 
   var selectedProtection by remember { mutableStateOf<Set<ParkingProtection>>(emptySet()) }
   var selectedRackTypes by remember { mutableStateOf<Set<ParkingRackType>>(emptySet()) }
@@ -89,7 +89,7 @@ fun SpotListScreen(
   // Fetch initial parkings if the list is empty
   LaunchedEffect(parkingSpots) {
     if (parkingSpots.isEmpty()) {
-      parkingViewModel.getKClosestParkings(referencePoint, numberOfNewParkings)
+      parkingViewModel.getParkingsInRadius(referencePoint, radius)
     }
   }
 
@@ -133,8 +133,9 @@ fun SpotListScreen(
                   SpotCard(navigationActions, parkingViewModel, parking, distance)
                   Log.d("ListScreen", "Filtered parking spots: $filteredParkingSpots")
                   if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1) {
-                    parkingViewModel.getKClosestParkings(
-                        referencePoint, numberOfNewParkings + filteredParkingSpots.size)
+                    // This incremental solution could be improved to be dynamic and with a limit
+                    radius += 100.0
+                    parkingViewModel.getParkingsInRadius(referencePoint, radius)
                   }
                 }
               }

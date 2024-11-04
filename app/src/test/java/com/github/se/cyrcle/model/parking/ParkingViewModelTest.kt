@@ -68,34 +68,6 @@ class ParkingViewModelTest {
   }
 
   @Test
-  fun getParkingLocationKIs0() {
-    `when`(parkingRepository.getKClosestParkings(any(), any(), any(), any())).then {
-      it.getArgument<(List<Parking>) -> Unit>(2)(emptyList())
-    }
-
-    // Get the two closest parkings to the location
-    parkingViewModel.getKClosestParkings(Point.fromLngLat(7.1, 47.1), 0)
-
-    // Check if the parkings returned are the correct ones
-    assert(parkingViewModel.kClosestParkings.value.isEmpty())
-  }
-
-  @Test
-  fun getParkingLocationKIs1() {
-    `when`(parkingRepository.getKClosestParkings(any(), any(), any(), any())).then {
-      it.getArgument<(List<Parking>) -> Unit>(2)(listOf(TestInstancesParking.parking3))
-    }
-
-    // Get the two closest parkings to the location
-    parkingViewModel.getKClosestParkings(Point.fromLngLat(7.1, 47.1), 1)
-
-    // Check if the parkings returned are the correct ones
-    val parkingsReturned = parkingViewModel.kClosestParkings.value
-    assert(parkingsReturned.size == 1)
-    assert(parkingsReturned[0] == TestInstancesParking.parking3)
-  }
-
-  @Test
   fun updateReviewScoreTest() {
     val parking = TestInstancesParking.parking2
     parkingViewModel.updateReviewScore(5.0, parking)

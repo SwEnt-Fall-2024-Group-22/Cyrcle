@@ -6,7 +6,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.*
 import com.google.gson.reflect.TypeToken
 import com.mapbox.geojson.Point
-import com.mapbox.turf.TurfMeasurement
 import java.lang.reflect.Type
 import javax.inject.Inject
 
@@ -105,49 +104,6 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
           onSuccess(parkings)
         }
         .addOnFailureListener { e -> onFailure(e) }
-  }
-
-  override fun getKClosestParkings(
-      location: Point,
-      k: Int,
-      onSuccess: (List<Parking>) -> Unit,
-      onFailure: (Exception) -> Unit
-  ) {
-    // variables for radius search
-    val initialRadius = 0.3
-    val maxRadius = 0.5
-    val step = 0.2
-
-    var currentRadius = initialRadius
-    var parkings = emptyList<Parking>()
-
-    fun getMoreParkings() {
-      getParkingsBetween(
-          Point.fromLngLat(
-              location.longitude() - currentRadius, location.latitude() - currentRadius),
-          Point.fromLngLat(
-              location.longitude() + currentRadius, location.latitude() + currentRadius),
-          { newParkings ->
-            parkings = (parkings + newParkings).distinctBy { it.uid }
-            if (parkings.size < k && currentRadius < maxRadius) {
-              currentRadius += step
-              getMoreParkings()
-            } else {
-              onSuccess(
-                  parkings
-                      .sortedBy {
-                        TurfMeasurement.distance(
-                            location,
-                            Point.fromLngLat(
-                                it.location.center.longitude(), it.location.center.latitude()))
-                      }
-                      .take(k))
-            }
-          },
-          onFailure)
-    }
-
-    getMoreParkings()
   }
 
   override fun addParking(parking: Parking, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {

@@ -25,8 +25,10 @@ import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
+import com.github.se.cyrcle.model.parking.Tile
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
+import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMeasurement
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -37,6 +39,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 
 @RunWith(AndroidJUnit4::class)
@@ -253,12 +256,20 @@ class ListScreenTest {
     val testParking = TestInstancesParking.parking1
 
     // Prepare to populate the parking list
-    `when`(mockParkingRepository.getKClosestParkings(any(), any(), any(), any())).then {
-      it.getArgument<(List<Parking>) -> Unit>(2)(listOf(testParking))
+    `when`(mockParkingRepository.getParkingsBetween(any(), any(), any(), any())).then {
+      println(it.getArgument<Point>(0).toString())
+      it.getArgument<(List<Parking>) -> Unit>(2)(emptyList())
     }
+    `when`(
+            mockParkingRepository.getParkingsBetween(
+                eq(Tile.getTileFromPoint(TestInstancesParking.referencePoint).bottomLeft),
+                any(),
+                any(),
+                any()))
+        .then { it.getArgument<(List<Parking>) -> Unit>(2)(listOf(testParking)) }
 
     // Force list update
-    parkingViewModel.getKClosestParkings(TestInstancesParking.referencePoint, 1)
+    parkingViewModel.getParkingsInRadius(TestInstancesParking.referencePoint, 2.0)
 
     composeTestRule.setContent { SpotListScreen(mockNavigationActions, parkingViewModel) }
 

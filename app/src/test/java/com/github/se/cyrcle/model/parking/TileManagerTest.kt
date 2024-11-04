@@ -30,4 +30,18 @@ class TileManagerTest {
         )
     assert(tile == Tile(Point.fromLngLat(6.0, 46.0), Point.fromLngLat(6.1, 46.1)))
   }
+  // Note : This Test only works if the tile size is 0.1
+  @Test
+  fun getAllTilesInCircleTest() {
+    val tiles = Tile.getAllTilesInCircle(Point.fromLngLat(6.05, 46.05), 5.0)
+    assert(tiles.size == 1)
+    assert(tiles.contains(Tile(Point.fromLngLat(6.0, 46.0), Point.fromLngLat(6.1, 46.1))))
+
+    val tiles2 = Tile.getAllTilesInCircle(Point.fromLngLat(6.5, 46.5), 5.0)
+    assert(tiles2.size == 4)
+    assert(tiles2.contains(Tile(Point.fromLngLat(6.4, 46.4), Point.fromLngLat(6.5, 46.5))))
+    assert(tiles2.contains(Tile(Point.fromLngLat(6.5, 46.4), Point.fromLngLat(6.6, 46.5))))
+    assert(tiles2.contains(Tile(Point.fromLngLat(6.4, 46.5), Point.fromLngLat(6.5, 46.6))))
+    assert(tiles2.contains(Tile(Point.fromLngLat(6.5, 46.5), Point.fromLngLat(6.6, 46.6))))
+  }
 }

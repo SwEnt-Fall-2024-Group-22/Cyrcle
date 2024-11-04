@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.mapbox.geojson.Point
+import com.mapbox.turf.TurfMeasurement
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -25,20 +26,40 @@ class ParkingViewModel(
   private val _rectParkings = MutableStateFlow<List<Parking>>(emptyList())
   val rectParkings: StateFlow<List<Parking>> = _rectParkings
 
-  /** List of k (or less) closest parking queried */
-  private val _kClosestParkings = MutableStateFlow<List<Parking>>(emptyList())
-  val kClosestParkings: StateFlow<List<Parking>> = _kClosestParkings
+  /** List of parkings in the circle of radius _radius around _circleCenter */
+  private val _closestParkings = MutableStateFlow<List<Parking>>(emptyList())
+  val closestParkings: StateFlow<List<Parking>> = _closestParkings
 
   /** Selected parking to review/edit */
   private val _selectedParking = MutableStateFlow<Parking?>(null)
   val selectedParking: StateFlow<Parking?> = _selectedParking
 
+  // Circle center and radius for the circle search for the list screen
+  private val _radius = MutableStateFlow(0.0)
+  private val _circleCenter = MutableStateFlow<Point?>(null)
   // List of tiles to display
   private var tilesToDisplay: Set<Tile> = emptySet()
   // Map a tile to the parkings that are in it.
   private val tilesToParking =
       MutableStateFlow<LinkedHashMap<Tile, List<Parking>>>(LinkedHashMap(10, 1f, true))
 
+  init {
+    viewModelScope.launch {
+      _rectParkings.collect { parkings ->
+        Log.d("ListScreen", "Updating closest Parkings:s")
+        if (_circleCenter.value == null) return@collect
+        _closestParkings.value =
+            parkings
+                .filter { parking ->
+                  TurfMeasurement.distance(_circleCenter.value!!, parking.location.center) <=
+                      _radius.value
+                }
+                .sortedBy { parking ->
+                  TurfMeasurement.distance(_circleCenter.value!!, parking.location.center)
+                }
+      }
+    }
+  }
   /**
    * Fetches the image URL from the cloud storage, This function as to be called after retrieving
    * the path from the Firestore database.
@@ -124,15 +145,23 @@ class ParkingViewModel(
     }
   }
 
-  fun getKClosestParkings(
+  /**
+   * Get all parkings in a radius of k meters around a location.
+   *
+   * @param location: center of the circle
+   * @param radius: radius of the circle Uses the Haversine formula to calculate the distance
+   *   between two points on the Earth's surface. and make use of the getParkingBetween function to
+   *   get all parkings in the circle.
+   */
+  fun getParkingsInRadius(
       location: Point,
-      k: Int,
+      radius: Double,
   ) {
-    parkingRepository.getKClosestParkings(
-        location,
-        k,
-        { _kClosestParkings.value = it },
-        { Log.e("ParkingViewModel", "Error getting parkings: $it") })
+    _radius.value = radius
+    _circleCenter.value = location
+    Tile.getAllTilesInCircle(location, radius).forEach {
+      getParkingsInRect(it.bottomLeft, it.topRight)
+    }
   }
 
   fun getNewUid(): String {

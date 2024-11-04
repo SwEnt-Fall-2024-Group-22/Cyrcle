@@ -1,6 +1,7 @@
 package com.github.se.cyrcle.model.parking
 
 import com.mapbox.geojson.Point
+import com.mapbox.turf.TurfMeasurement
 
 const val TILE_SIZE = 0.1
 /**
@@ -66,6 +67,29 @@ data class Tile(val bottomLeft: Point, val topRight: Point) {
           Tile(
               Point.fromLngLat(x * TILE_SIZE, y * TILE_SIZE),
               Point.fromLngLat((x + 1) * TILE_SIZE, (y + 1) * TILE_SIZE)))
+    }
+
+    /**
+     * Return all tiles that are in the circle defined by the center and the radius.
+     *
+     * @param center the center of the circle
+     * @param radius the radius of the circle in meter
+     * @return a set of tiles that are in the circle
+     */
+    fun getAllTilesInCircle(center: Point, radius: Double): Set<Tile> {
+      val leftestPoint = TurfMeasurement.destination(center, radius, -90.0, "meters")
+      val rightestPoint = TurfMeasurement.destination(center, radius, 90.0, "meters")
+      val topPoint = TurfMeasurement.destination(center, radius, 0.0, "meters")
+      val bottomPoint = TurfMeasurement.destination(center, radius, 180.0, "meters")
+      println("Found tiles in circle")
+      println(
+          getAllTilesInRectangle(
+                  Point.fromLngLat(leftestPoint.longitude(), bottomPoint.latitude()),
+                  Point.fromLngLat(rightestPoint.longitude(), topPoint.latitude()))
+              .size)
+      return getAllTilesInRectangle(
+          Point.fromLngLat(leftestPoint.longitude(), bottomPoint.latitude()),
+          Point.fromLngLat(rightestPoint.longitude(), topPoint.latitude()))
     }
   }
 }

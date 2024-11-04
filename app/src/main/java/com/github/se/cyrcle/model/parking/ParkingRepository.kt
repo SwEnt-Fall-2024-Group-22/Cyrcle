@@ -48,14 +48,6 @@ interface ParkingRepository {
       onSuccess: (List<Parking>) -> Unit,
       onFailure: (Exception) -> Unit
   )
-
-  fun getKClosestParkings(
-      location: Point,
-      k: Int,
-      onSuccess: (List<Parking>) -> Unit,
-      onFailure: (Exception) -> Unit
-  )
-
   /**
    * Add a parking
    *
