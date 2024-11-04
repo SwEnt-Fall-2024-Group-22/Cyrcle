@@ -32,7 +32,6 @@ import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.bold
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
-import kotlinx.coroutines.flow.map
 
 @Composable
 fun CardScreen(
@@ -44,7 +43,7 @@ fun CardScreen(
       parkingViewModel.selectedParking.collectAsState().value
           ?: return Text(text = "No parking selected. Should not happen")
 
-  val userSignedOut = userViewModel.isSignedIn.map { !it }.collectAsState(false)
+  val userSignedIn = userViewModel.isSignedIn.collectAsState(false)
 
   Scaffold(
       topBar = {
@@ -183,7 +182,7 @@ fun CardScreen(
                               onClick = { navigationActions.navigateTo(Screen.REVIEW) },
                               modifier = Modifier.fillMaxWidth().height(40.dp),
                               colorLevel = ColorLevel.PRIMARY,
-                              disabled = userSignedOut,
+                              enabled = userSignedIn,
                               testTag = "AddReviewButton")
 
                           Button(

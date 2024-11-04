@@ -145,7 +145,7 @@ fun ExtendedFloatingActionButton(
  * @param onClick
  * @param modifier Chained modifier. `.testTag` will be overwritten, use the `testTag` for this.
  * @param colorLevel The color scheme of the object.
- * @param disabled If the button should be disabled (the onClick won't be triggered)
+ * @param enabled If the button should be enabled (the onClick won't be triggered)
  * @param testTag The test tag of the object.
  */
 @Composable
@@ -154,14 +154,14 @@ fun Button(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     colorLevel: ColorLevel = ColorLevel.PRIMARY,
-    disabled: State<Boolean> = mutableStateOf(false),
+    enabled: State<Boolean> = mutableStateOf(true),
     testTag: String = "Button"
 ) {
   Button(
-      onClick = { if (!disabled.value) onClick() },
+      onClick = { if (enabled.value) onClick() },
       modifier = modifier.testTag(testTag),
       colors = getButtonColors(colorLevel),
-      enabled = !disabled.value) {
+      enabled = enabled.value) {
         Text(text, Modifier.testTag("${testTag}Text"))
       }
 }

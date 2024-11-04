@@ -25,27 +25,27 @@ class ButtonTest {
   fun displayButton() {
     val tagD = "Button"
     val tag1 = "Button1"
-    val disabled = mutableStateOf(false)
+    val enabled = mutableStateOf(true)
     var a = 1
     composeTestRule.setContent {
       Button("Button", { a++ })
-      Button("Button", { a++ }, Modifier, ColorLevel.PRIMARY, disabled, tag1)
+      Button("Button", { a++ }, Modifier, ColorLevel.PRIMARY, enabled, tag1)
     }
 
     composeTestRule.onNodeWithTag(tagD).assertIsDisplayed()
     composeTestRule.onNodeWithTag("${tagD}Text", true).assertIsDisplayed()
     composeTestRule.onNodeWithTag(tagD).performClick()
     assertEquals(2, a)
-    disabled.value = true
+    enabled.value = false
     composeTestRule.onNodeWithTag(tagD).performClick() // Shouldn't trigger onClick
     assertEquals(2, a)
 
-    disabled.value = false
+    enabled.value = true
     composeTestRule.onNodeWithTag(tag1).assertIsDisplayed()
     composeTestRule.onNodeWithTag("${tag1}Text", true).assertIsDisplayed()
     composeTestRule.onNodeWithTag(tag1).performClick()
     assertEquals(3, a)
-    disabled.value = true
+    enabled.value = false
     composeTestRule.onNodeWithTag(tag1).performClick() // Shouldn't trigger onClick
     assertEquals(3, a)
   }
