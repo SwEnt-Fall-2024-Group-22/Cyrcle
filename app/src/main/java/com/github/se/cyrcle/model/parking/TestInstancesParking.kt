@@ -10,7 +10,7 @@ object TestInstancesParking {
   val parking1 =
       Parking(
           "Test_spot_1",
-          null,
+          "Rue de la paix",
           null,
           Location(Point.fromLngLat(6.6, 46.2)),
           listOf(
@@ -25,7 +25,7 @@ object TestInstancesParking {
   val parking2 =
       Parking(
           "Test_spot_2",
-          "Avenue de la Gare",
+          "Rude épais",
           null,
           Location(Point.fromLngLat(6.7, 46.3)),
           listOf(
@@ -39,7 +39,7 @@ object TestInstancesParking {
   val parking3 =
       Parking(
           "Test_spot_3",
-          null,
+          "Rue du pet",
           null,
           Location(Point.fromLngLat(7.1, 47.1)),
           listOf(
