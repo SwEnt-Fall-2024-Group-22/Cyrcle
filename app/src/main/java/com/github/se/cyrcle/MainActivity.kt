@@ -1,7 +1,6 @@
 package com.github.se.cyrcle
 
 import CyrcleNavHost
-import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -40,12 +39,11 @@ class MainActivity : ComponentActivity() {
 
   private lateinit var permissionsHandler: PermissionsHandler
 
-
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-      permissionsHandler = PermissionsHandler(this)
-      permissionsHandler.onCreate(savedInstanceState)
+    permissionsHandler = PermissionsHandler(this)
+    permissionsHandler.onCreate(savedInstanceState)
 
     val reviewViewModel = ReviewViewModel(reviewRepository)
     val userViewModel = UserViewModel(userRepository, parkingRepository)
@@ -66,8 +64,7 @@ class MainActivity : ComponentActivity() {
               userViewModel,
               mapViewModel,
               addressViewModel,
-                PermissionsManager.areLocationPermissionsGranted(this)
-              )
+              PermissionsManager.areLocationPermissionsGranted(this))
         }
       }
     }
