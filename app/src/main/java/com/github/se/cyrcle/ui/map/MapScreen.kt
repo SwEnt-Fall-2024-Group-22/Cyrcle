@@ -2,6 +2,11 @@ package com.github.se.cyrcle.ui.map
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -24,6 +29,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.github.se.cyrcle.PermissionsHandler
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.databinding.ItemCalloutViewBinding
 import com.github.se.cyrcle.model.map.MapViewModel
@@ -39,17 +45,26 @@ import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.IconButton
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.google.gson.Gson
+import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.common.Cancelable
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.Polygon
 import com.mapbox.maps.CameraBoundsOptions
+import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.CameraState
+import com.mapbox.maps.ImageHolder
 import com.mapbox.maps.MapIdleCallback
+import com.mapbox.maps.MapLoaded
+import com.mapbox.maps.MapLoadedCallback
 import com.mapbox.maps.MapView
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.ViewAnnotationAnchor
 import com.mapbox.maps.extension.compose.DisposableMapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
+import com.mapbox.maps.extension.observable.eventdata.MapLoadedEventData
+import com.mapbox.maps.extension.style.expressions.dsl.generated.interpolate
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
+import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.annotation.AnnotationConfig
 import com.mapbox.maps.plugin.annotation.AnnotationSourceOptions
 import com.mapbox.maps.plugin.annotation.ClusterOptions
@@ -60,7 +75,11 @@ import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
+import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadedListener
 import com.mapbox.maps.plugin.gestures.gestures
+import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
+import com.mapbox.maps.plugin.locationcomponent.createDefault2DPuck
+import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.maps.viewannotation.annotatedLayerFeature
 import com.mapbox.maps.viewannotation.annotationAnchor
 import com.mapbox.maps.viewannotation.geometry
@@ -72,13 +91,15 @@ const val minZoom = 8.0
 const val thresholdDisplayZoom = 13.0
 const val LAYER_ID = "0128"
 
+
 @Composable
 fun MapScreen(
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel,
     userViewModel: UserViewModel,
     mapViewModel: MapViewModel,
-    zoomState: MutableState<Double> = remember { mutableDoubleStateOf(defaultZoom) }
+    zoomState: MutableState<Double> = remember { mutableDoubleStateOf(defaultZoom) },
+    permissionGranted: Boolean
 ) {
 
   val listOfParkings by parkingViewModel.rectParkings.collectAsState()
@@ -110,7 +131,20 @@ fun MapScreen(
         Modifier.fillMaxSize().padding(padding).testTag("MapScreen"),
         mapViewportState = mapViewportState,
         style = { MapConfig.DefaultStyle() }) {
+
           DisposableMapEffect { mapView ->
+
+              val mapLoadedCallback = object :  OnMapLoadedListener {
+
+                  override fun onMapLoaded(eventData: MapLoadedEventData) {
+                      if(permissionGranted) {
+                          initLocationComponent(mapView, mapViewModel)
+                      }
+                  }
+              }
+
+              mapView.mapboxMap.addOnMapLoadedListener(mapLoadedCallback)
+
             val viewAnnotationManager = mapView.viewAnnotationManager
 
             // Lock rotations of the map
@@ -325,4 +359,26 @@ private fun drawMarkers(
             .withIconOffset(listOf(0.0, bitmap.height / 12.0))
             .withData(Gson().toJsonTree(it)))
   }
+}
+
+private fun initLocationComponent(mapView: MapView,mapViewModel: MapViewModel) {
+    val locationComponentPlugin = mapView.location
+    locationComponentPlugin.updateSettings {
+        this.enabled = true
+        this.locationPuck = createDefault2DPuck(true)
+    }
+    val onIndicatorPositionChangedListener = OnIndicatorPositionChangedListener { location ->
+        mapView.mapboxMap.setCamera(CameraOptions.Builder().center(location).build())
+        mapViewModel.updateCameraPosition(
+            CameraState(
+                location,
+                mapView.mapboxMap.cameraState.padding,
+                mapView.mapboxMap.cameraState.zoom,
+                0.0,
+                0.0
+            )
+        )
+    }
+
+    locationComponentPlugin.addOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener)
 }
