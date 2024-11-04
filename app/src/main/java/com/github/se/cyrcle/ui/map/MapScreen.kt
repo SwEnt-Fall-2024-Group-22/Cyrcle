@@ -81,12 +81,14 @@ fun MapScreen(
   val mapViewportState = MapConfig.createMapViewPortStateFromViewModel(mapViewModel)
   var removeViewAnnotation = remember { true }
   var cancelables = remember<Cancelable> { Cancelable({}) }
+  var listener = remember<MapIdleCallback?> { null }
   var pointAnnotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
+  val selectedParking = parkingViewModel.selectedParking.collectAsState().value
 
   val bitmap = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.red_marker)
   val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 100, 150, false)
   // Draw markers on the map when the list of parkings changes
-  LaunchedEffect(listOfParkings, pointAnnotationManager) {
+  LaunchedEffect(listOfParkings, pointAnnotationManager, selectedParking?.nbReviews) {
     drawMarkers(pointAnnotationManager, listOfParkings, resizedBitmap)
   }
 
@@ -133,7 +135,7 @@ fun MapScreen(
 
                   val pointAnnotation = it
 
-                  val listener = MapIdleCallback {
+                  listener = MapIdleCallback {
 
                     // Add the new view annotation
                     val viewAnnotation =
@@ -164,7 +166,7 @@ fun MapScreen(
                     removeViewAnnotation = true
                   }
                   cancelables.cancel()
-                  cancelables = mapView.mapboxMap.subscribeMapIdle(listener)
+                  cancelables = mapView.mapboxMap.subscribeMapIdle(listener!!)
                   true
                 })
 
