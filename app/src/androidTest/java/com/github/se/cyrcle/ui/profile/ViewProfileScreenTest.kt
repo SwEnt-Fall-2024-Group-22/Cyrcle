@@ -283,4 +283,31 @@ class ViewProfileScreenTest {
         .performScrollToNode(hasTestTag("FavoriteToggle_3"))
     composeTestRule.onNodeWithTag("FavoriteToggle_3").assertIsDisplayed()
   }
+
+  @Test
+  fun testUsernamePersistenceAfterSaveAndCancel() {
+    composeTestRule.waitForIdle()
+
+    // Enter edit mode
+    composeTestRule.onNodeWithTag("EditButton").performClick()
+    composeTestRule.waitForIdle()
+
+    // Change username and save
+    composeTestRule.onNodeWithTag("UsernameField").performTextReplacement("alicejohnson")
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("SaveButton").performClick()
+    composeTestRule.waitForIdle()
+
+    // Verify that the display reflects the new username
+    composeTestRule.onNodeWithTag("DisplayUsername").assertTextEquals("@alicejohnson")
+
+    // Enter edit mode again and cancel
+    composeTestRule.onNodeWithTag("EditButton").performClick()
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("CancelButton").performClick()
+    composeTestRule.waitForIdle()
+
+    // Verify that the display still reflects the new username
+    composeTestRule.onNodeWithTag("DisplayUsername").assertTextEquals("@alicejohnson")
+  }
 }

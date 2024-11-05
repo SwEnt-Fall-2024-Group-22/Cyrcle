@@ -95,10 +95,7 @@ fun ViewProfileScreen(
                               lastName = lastName,
                               username = username,
                               profilePictureUrl = profilePictureUrl) ?: return@EditProfileContent)
-                      firstName = userState?.firstName ?: ""
-                      lastName = userState?.lastName ?: ""
-                      username = userState?.username ?: ""
-                      profilePictureUrl = userState?.profilePictureUrl ?: ""
+                      userViewModel.getUserById(userState?.userId ?: "")
                       isEditing = false
                     },
                     onCancel = {
