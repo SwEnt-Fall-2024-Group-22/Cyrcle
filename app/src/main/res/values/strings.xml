@@ -11,7 +11,7 @@
     <string name="distance_m">%.0f m</string>
     <string name="no_reviews">No reviews yet</string>
     <plurals name="reviews_count">
-        <item quantity="zero">(0 review)</item>
+        <item quantity="zero">(0 reviews)</item>
         <item quantity="one">(1 review)</item>
         <item quantity="other">(%d reviews)</item>
     </plurals>
@@ -84,9 +84,10 @@
     <string name="view_profile_screen_first_name_label">First Name</string>
     <string name="view_profile_screen_last_name_label">Last Name</string>
     <string name="view_profile_screen_username_label">Username</string>
+    <string name="view_profile_screen_display_username">\@%s</string>
     <string name="view_profile_screen_save_button">Save</string>
     <string name="view_profile_screen_cancel_button">Cancel</string>
-    <string name="view_profile_screen_modify_profile_button">Cancel</string>
+    <string name="view_profile_screen_modify_profile_button">Modify Profile</string>
     <string name="view_profile_screen_default_profile_picture">Default Profile Picture</string>
     <string name="view_profile_screen_profile_picture">Profile Picture</string>
     <string name="view_profile_screen_edit_profile_picture">Edit Profile Picture</string>
