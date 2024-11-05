@@ -90,7 +90,9 @@ class CardScreenTest {
     parkingViewModel.selectParking(TestInstancesParking.parking1)
     composeTestRule.setContent { CardScreen(navigationActions, parkingViewModel, userViewModel) }
 
-    composeTestRule.onNodeWithTag("TopAppBarTitle").assertTextContains("Description of Unnamed Parking")
+    composeTestRule
+        .onNodeWithTag("TopAppBarTitle")
+        .assertTextContains("Description of Unnamed Parking")
     composeTestRule.onNodeWithTag("ParkingImagesRow").onChildren().assertCountEquals(1)
     composeTestRule.onNodeWithTag("CapacityColumn").onChildAt(1).assertTextContains("51-100 spots")
     composeTestRule.onNodeWithTag("RackTypeColumn").onChildAt(1).assertTextContains("Two-tier rack")
