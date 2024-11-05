@@ -352,9 +352,7 @@ private fun FavoriteParkingCard(parking: Parking, index: Int, onRemove: () -> Un
   if (showConfirmDialog) {
     AlertDialog(
         onDismissRequest = { showConfirmDialog = false },
-        title = {
-          Text(stringResource(R.string.view_profile_screen_remove_favorite_dialog_title))
-        },
+        title = { Text(stringResource(R.string.view_profile_screen_remove_favorite_dialog_title)) },
         text = {
           Text(
               stringResource(R.string.view_profile_screen_remove_favorite_dialog_message)
