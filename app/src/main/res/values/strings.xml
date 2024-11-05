@@ -94,7 +94,7 @@
     <string name="view_profile_screen_favorite_parking_title">Favorite Parkings</string>
     <string name="view_profile_screen_no_favorite_parking">No favorite parking</string>
     <string name="view_profile_screen_remove_from_favorite">Remove from Favorites</string>
-    <string name="view_profile_screen_remove_favorite_dialog_title">Remove favorites</string>
+    <string name="view_profile_screen_remove_favorite_dialog_title">Remove favorite</string>
     <string name="view_profile_screen_remove_favorite_dialog_message">Are you sure you want to remove %s from your favorites?</string>
     <string name="view_profile_screen_remove_favorite_dialog_action_button">Remove</string>
     <string name="view_profile_screen_remove_favorite_dialog_cancel_button">Cancel</string>

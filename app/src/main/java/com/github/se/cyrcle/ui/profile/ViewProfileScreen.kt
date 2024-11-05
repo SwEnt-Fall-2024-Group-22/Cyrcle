@@ -221,12 +221,14 @@ private fun DisplayProfileContent(
   Spacer(modifier = Modifier.height(8.dp))
 
   Text(
-      text = "@$username", style = MaterialTheme.typography.bodyMedium, testTag = "DisplayUsername")
+      text = stringResource(R.string.view_profile_screen_display_username).format(username),
+      style = MaterialTheme.typography.bodyMedium,
+      testTag = "DisplayUsername")
 
   Spacer(modifier = Modifier.height(16.dp))
 
   Button(
-      text = "Modify Profile",
+      text = stringResource(R.string.view_profile_screen_modify_profile_button),
       onClick = onEditClick,
       colorLevel = ColorLevel.TERTIARY,
       testTag = "EditButton")
@@ -291,7 +293,7 @@ private fun FavoriteParkingsSection(
     onFavoritesUpdated: (List<Parking>) -> Unit
 ) {
   Text(
-      text = "Favorite Parkings",
+      text = stringResource(R.string.view_profile_screen_favorite_parking_title),
       style = MaterialTheme.typography.titleLarge,
       modifier = Modifier.testTag("FavoriteParkingsTitle"))
 
@@ -299,7 +301,7 @@ private fun FavoriteParkingsSection(
 
   if (favoriteParkings.isEmpty()) {
     Text(
-        text = "No favorite parkings yet",
+        text = stringResource(R.string.view_profile_screen_no_favorite_parking),
         style = MaterialTheme.typography.bodyMedium,
         modifier = Modifier.testTag("NoFavoritesMessage"))
   } else {
@@ -350,17 +352,29 @@ private fun FavoriteParkingCard(parking: Parking, index: Int, onRemove: () -> Un
   if (showConfirmDialog) {
     AlertDialog(
         onDismissRequest = { showConfirmDialog = false },
-        title = { Text("Remove favorite") },
-        text = { Text("Are you sure you want to remove ${parking.optName} from your favorites?") },
+        title = {
+          Text(stringResource(R.string.view_profile_screen_remove_favorite_dialog_title))
+        },
+        text = {
+          Text(
+              stringResource(R.string.view_profile_screen_remove_favorite_dialog_message)
+                  .format(parking.optName))
+        },
         confirmButton = {
           TextButton(
               onClick = {
                 onRemove()
                 showConfirmDialog = false
               }) {
-                Text("Remove")
+                Text(
+                    stringResource(
+                        R.string.view_profile_screen_remove_favorite_dialog_action_button))
               }
         },
-        dismissButton = { TextButton(onClick = { showConfirmDialog = false }) { Text("Cancel") } })
+        dismissButton = {
+          TextButton(onClick = { showConfirmDialog = false }) {
+            Text(stringResource(R.string.view_profile_screen_remove_favorite_dialog_cancel_button))
+          }
+        })
   }
 }
