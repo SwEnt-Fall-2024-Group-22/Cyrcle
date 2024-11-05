@@ -76,7 +76,9 @@ fun GoogleSignInButton(onAuthComplete: (AuthResult) -> Unit, onAuthError: (ApiEx
 
               // Text on Sign-In button
               Text(
-                  text = "Sign in with Google", color = Color.Gray, style = googleSignInButtonStyle)
+                  text = stringResource(R.string.sign_in_google_button),
+                  color = Color.Gray,
+                  style = googleSignInButtonStyle)
             }
       }
 }

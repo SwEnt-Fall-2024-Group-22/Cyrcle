@@ -39,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -58,7 +59,6 @@ import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.atoms.ToggleButton
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.mapbox.turf.TurfMeasurement
-import java.util.Locale
 
 @Composable
 fun SpotListScreen(
@@ -229,7 +229,7 @@ fun FilterHeader(
                 modifier = Modifier.testTag("CCTVCheckbox"))
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-                text = "Only display parkings with CCTV camera",
+                text = stringResource(R.string.list_screen_display_only_cctv),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.testTag("CCTVCheckboxLabel"))
@@ -313,7 +313,9 @@ fun SpotCard(
             if (parking.nbReviews > 0) {
               Row {
                 Text(
-                    text = stringResource(R.string.list_screen_rating).format(parking.avgScore), // TODO: Replace with star composable
+                    text =
+                        stringResource(R.string.list_screen_rating)
+                            .format(parking.avgScore), // TODO: Replace with star composable
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface,
                     testTag = "ParkingRating")
@@ -321,14 +323,15 @@ fun SpotCard(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text =
-                        "(${parking.nbReviews} review" + if (parking.nbReviews > 1) "s)" else ")",
+                        pluralStringResource(R.plurals.reviews_count, count = parking.nbReviews)
+                            .format(parking.nbReviews),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
                     testTag = "ParkingNbReviews")
               }
             } else {
               Text(
-                  text = stringResource(R.string.no_review),
+                  text = stringResource(R.string.no_reviews),
                   style = MaterialTheme.typography.bodySmall,
                   color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
                   testTag = "ParkingNoReviews")

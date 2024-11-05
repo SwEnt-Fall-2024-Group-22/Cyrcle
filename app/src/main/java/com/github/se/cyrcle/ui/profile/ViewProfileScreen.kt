@@ -28,10 +28,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
+import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.ui.navigation.LIST_TOP_LEVEL_DESTINATION
@@ -156,7 +158,7 @@ private fun EditProfileContent(
   InputText(
       value = firstName,
       onValueChange = onFirstNameChange,
-      label = "First Name",
+      label = stringResource(R.string.view_profile_screen_first_name_label),
       testTag = "FirstNameField")
 
   Spacer(modifier = Modifier.height(8.dp))
@@ -164,7 +166,7 @@ private fun EditProfileContent(
   InputText(
       value = lastName,
       onValueChange = onLastNameChange,
-      label = "Last Name",
+      label = stringResource(R.string.view_profile_screen_last_name_label),
       testTag = "LastNameField")
 
   Spacer(modifier = Modifier.height(8.dp))
@@ -172,16 +174,20 @@ private fun EditProfileContent(
   InputText(
       value = username,
       onValueChange = onUsernameChange,
-      label = "Username",
+      label = stringResource(R.string.view_profile_screen_username_label),
       testTag = "UsernameField")
 
   Spacer(modifier = Modifier.height(16.dp))
 
   Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-    Button(text = "Save", onClick = onSave, colorLevel = ColorLevel.PRIMARY, testTag = "SaveButton")
+    Button(
+        text = stringResource(R.string.view_profile_screen_save_button),
+        onClick = onSave,
+        colorLevel = ColorLevel.PRIMARY,
+        testTag = "SaveButton")
 
     Button(
-        text = "Cancel",
+        text = stringResource(R.string.view_profile_screen_cancel_button),
         onClick = onCancel,
         colorLevel = ColorLevel.SECONDARY,
         testTag = "CancelButton")

@@ -9,6 +9,12 @@
     <string name="default_parking_name">Parking</string>
     <string name="distance_km">%.2f km</string>
     <string name="distance_m">%.0f m</string>
+    <string name="no_reviews">No reviews yet</string>
+    <plurals name="reviews_count">
+        <item quantity="zero">(0) review</item>
+        <item quantity="one">(1) review</item>
+        <item quantity="other">(%d) reviews</item>
+    </plurals>
 
     <!-- Attributes Picker -->
     <string name="attributes_picker_title_label">Title</string>
@@ -50,7 +56,6 @@
     <string name="card_screen_price">Price:</string>
     <string name="card_screen_surveillance">Surveillance Present::</string>
     <string name="card_screen_rating">Current Rating</string>
-    <string name="card_screen_no_reviews">No reviews yet</string>
     <string name="card_screen_see_review">See All Reviews</string>
     <string name="card_screen_show_map">Show in Map</string>
     <string name="card_screen_add_review">Add A Review</string>
@@ -63,6 +68,8 @@
     <string name="list_screen_rack_type">Rack Type</string>
     <string name="list_screen_capacity">Capacity</string>
     <string name="list_screen_price">%.2f $</string>
+    <string name="list_screen_rating">Rating: %.1f</string>
+    <string name="list_screen_display_only_cctv">Only display parkings with CCTV camera</string>
 
     <!-- Zoom Controls -->
     <string name="zoom_in">Zoom In</string>

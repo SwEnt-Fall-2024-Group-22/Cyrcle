@@ -160,7 +160,7 @@ fun CardScreen(
                                       Text(
                                           text =
                                               if (selectedParking.nbReviews == 0)
-                                                  stringResource(R.string.card_screen_no_reviews)
+                                                  stringResource(R.string.no_reviews)
                                               else selectedParking.avgScore.toString(),
                                           color = Color.Gray)
 
