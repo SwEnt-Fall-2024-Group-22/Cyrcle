@@ -72,7 +72,7 @@ class ProfileScreenMock {
     userViewModel.getSelectedUserFavoriteParking()
 
     composeTestRule.setContent {
-      ProfileScreen(navigationActions = mockNavigationActions, userViewModel = userViewModel)
+      ViewProfileScreen(navigationActions = mockNavigationActions, userViewModel = userViewModel)
     }
   }
 
