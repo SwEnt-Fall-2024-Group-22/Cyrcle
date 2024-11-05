@@ -91,7 +91,7 @@ fun MapScreen(
   var pointAnnotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
   val selectedParking by parkingViewModel.selectedParking.collectAsState()
 
-  val screenCapcityString = stringResource(R.string.map_screen_capacity)
+  val screenCapacityString = stringResource(R.string.map_screen_capacity)
 
   val bitmap = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.red_marker)
   val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 100, 150, false)
@@ -165,7 +165,7 @@ fun MapScreen(
                     // Set the text and the button of the view annotation
                     ItemCalloutViewBinding.bind(viewAnnotation).apply {
                       textNativeView.text =
-                          screenCapcityString.format(parkingDeserialized.capacity.description)
+                          screenCapacityString.format(parkingDeserialized.capacity.description)
                       selectButton.setOnClickListener {
                         parkingViewModel.selectParking(parkingDeserialized)
                         navigationActions.navigateTo(Screen.CARD)
