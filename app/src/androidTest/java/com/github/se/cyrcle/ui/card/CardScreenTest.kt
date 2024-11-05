@@ -13,9 +13,6 @@ import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.parking.ImageRepository
-import com.github.se.cyrcle.model.parking.ParkingCapacity
-import com.github.se.cyrcle.model.parking.ParkingProtection
-import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
@@ -95,20 +92,11 @@ class CardScreenTest {
 
     composeTestRule
         .onNodeWithTag("TopAppBarTitle")
-        .assertTextContains("Description of Unnamed Parking")
+        .assertTextContains("Description of Rue de la paix")
     composeTestRule.onNodeWithTag("ParkingImagesRow").onChildren().assertCountEquals(1)
-    composeTestRule
-        .onNodeWithTag("CapacityColumn")
-        .onChildAt(1)
-        .assertTextContains(ParkingCapacity.LARGE.description)
-    composeTestRule
-        .onNodeWithTag("RackTypeColumn")
-        .onChildAt(1)
-        .assertTextContains(ParkingRackType.TWO_TIER.description)
-    composeTestRule
-        .onNodeWithTag("ProtectionColumn")
-        .onChildAt(1)
-        .assertTextContains(ParkingProtection.COVERED.description)
+    composeTestRule.onNodeWithTag("CapacityColumn").onChildAt(1).assertTextContains("51-100 spots")
+    composeTestRule.onNodeWithTag("RackTypeColumn").onChildAt(1).assertTextContains("Two-tier rack")
+    composeTestRule.onNodeWithTag("ProtectionColumn").onChildAt(1).assertTextContains("Covered")
     composeTestRule.onNodeWithTag("PriceColumn").onChildAt(1).assertTextContains("Free")
     composeTestRule.onNodeWithTag("SecurityColumn").onChildAt(1).assertTextContains("Yes")
   }
@@ -133,9 +121,7 @@ class CardScreenTest {
     parkingViewModel.selectParking(TestInstancesParking.parking2)
     composeTestRule.setContent { CardScreen(navigationActions, parkingViewModel, userViewModel) }
 
-    composeTestRule
-        .onNodeWithTag("TopAppBarTitle")
-        .assertTextContains("Description of Avenue de la Gare")
+    composeTestRule.onNodeWithTag("TopAppBarTitle").assertTextContains("Description of Rude épais")
     composeTestRule.onNodeWithTag("ParkingImagesRow").onChildren().assertCountEquals(2)
   }
 }
