@@ -10,6 +10,6 @@ import com.github.se.cyrcle.ui.navigation.NavigationActions
 fun ProfileScreen(navigationActions: NavigationActions, userViewModel: UserViewModel) {
   val isSignedIn by userViewModel.isSignedIn.collectAsState(false)
 
-  if (isSignedIn) ViewProfileScreen(navigationActions)
+  if (isSignedIn) ViewProfileScreen(navigationActions, userViewModel)
   else CreateProfileScreen(navigationActions, userViewModel)
 }
