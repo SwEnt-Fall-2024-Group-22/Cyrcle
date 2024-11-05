@@ -23,17 +23,27 @@ import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.model.parking.ParkingProtection
 
 /**
+ * Interface for enums that can be displayed in a dropdown menu.
+ *
+ * @property description The description of the element that will be displayed in the dropdown menu.
+ */
+interface DropDownableEnum {
+  val description: String
+}
+
+/**
  * A composable that displays a question and a dropdown menu with an item per enum value. The
  * selected value is stored in a MutableState.
  *
- * @param options the list of enum values to display
- * @param selectedValue the MutableState that stores the selected value
- * @param label the question to display
- * @param modifier the modifier to apply to the composable
+ * @param options The list of entries of the enum to display.
+ * @param selectedValue The MutableState that stores the selected value.
+ * @param label The label to display.
+ * @param modifier The modifier to apply to the composable.
+ * @param testTag The test tag to apply to the composable.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun <T> EnumDropDown(
+fun <T : DropDownableEnum> EnumDropDown(
     options: List<T>,
     selectedValue: MutableState<T>,
     label: String,
@@ -47,7 +57,7 @@ fun <T> EnumDropDown(
       modifier = modifier.padding(10.dp)) {
         OutlinedTextField(
             readOnly = true,
-            value = selectedValue.value.toString(),
+            value = selectedValue.value.description,
             onValueChange = {},
             label = { Text(text = label, Modifier.testTag("${testTag}Label")) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
@@ -59,7 +69,7 @@ fun <T> EnumDropDown(
             DropdownMenuItem(
                 text = {
                   Text(
-                      text = option.toString(),
+                      text = option.description,
                       textAlign = TextAlign.Center,
                       modifier = Modifier.testTag("${testTag}${i}Text"))
                 },

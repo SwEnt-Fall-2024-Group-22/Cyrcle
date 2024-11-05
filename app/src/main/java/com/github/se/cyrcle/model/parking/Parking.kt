@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.model.parking
 
+import com.github.se.cyrcle.ui.theme.molecules.DropDownableEnum
 import com.mapbox.geojson.Point
 
 /**
@@ -33,9 +34,8 @@ data class Parking(
     var avgScore: Double = 0.0
 )
 
-interface ParkingAttribute {
-  val description: String
-}
+interface ParkingAttribute : DropDownableEnum
+
 /** Enum class representing the capacity of a parking spot. */
 enum class ParkingCapacity(override val description: String) : ParkingAttribute {
   XSMALL("Less than 10 spots"),
