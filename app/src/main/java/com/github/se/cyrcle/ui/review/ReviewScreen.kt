@@ -105,8 +105,9 @@ fun ReviewScreen(
 
               // Slider with step granularity of 0.5
               Text(
-                  text = stringResource(R.string.review_screen_rating),
-                  style = MaterialTheme.typography.bodyLarge)
+                  text = stringResource(R.string.review_screen_rating).format(sliderValue),
+                  style = MaterialTheme.typography.bodyLarge,
+                  testTag = "RatingText")
               Slider(
                   value = sliderValue,
                   onValueChange = { newValue -> sliderValue = newValue },
