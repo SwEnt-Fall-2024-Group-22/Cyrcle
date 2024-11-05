@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.databinding.ItemCalloutViewBinding
@@ -89,6 +90,8 @@ fun MapScreen(
   var listener = remember<MapIdleCallback?> { null }
   var pointAnnotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
   val selectedParking by parkingViewModel.selectedParking.collectAsState()
+
+  val screenCapacityString = stringResource(R.string.map_screen_capacity)
 
   val bitmap = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.red_marker)
   val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 100, 150, false)
@@ -162,7 +165,7 @@ fun MapScreen(
                     // Set the text and the button of the view annotation
                     ItemCalloutViewBinding.bind(viewAnnotation).apply {
                       textNativeView.text =
-                          "Capacity is ${parkingDeserialized.capacity.description}"
+                          screenCapacityString.format(parkingDeserialized.capacity.description)
                       selectButton.setOnClickListener {
                         parkingViewModel.selectParking(parkingDeserialized)
                         navigationActions.navigateTo(Screen.CARD)

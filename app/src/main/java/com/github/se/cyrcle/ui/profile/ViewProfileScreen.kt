@@ -28,10 +28,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
+import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.ui.navigation.LIST_TOP_LEVEL_DESTINATION
@@ -156,7 +158,7 @@ private fun EditProfileContent(
   InputText(
       value = firstName,
       onValueChange = onFirstNameChange,
-      label = "First Name",
+      label = stringResource(R.string.view_profile_screen_first_name_label),
       testTag = "FirstNameField")
 
   Spacer(modifier = Modifier.height(8.dp))
@@ -164,7 +166,7 @@ private fun EditProfileContent(
   InputText(
       value = lastName,
       onValueChange = onLastNameChange,
-      label = "Last Name",
+      label = stringResource(R.string.view_profile_screen_last_name_label),
       testTag = "LastNameField")
 
   Spacer(modifier = Modifier.height(8.dp))
@@ -172,16 +174,20 @@ private fun EditProfileContent(
   InputText(
       value = username,
       onValueChange = onUsernameChange,
-      label = "Username",
+      label = stringResource(R.string.view_profile_screen_username_label),
       testTag = "UsernameField")
 
   Spacer(modifier = Modifier.height(16.dp))
 
   Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-    Button(text = "Save", onClick = onSave, colorLevel = ColorLevel.PRIMARY, testTag = "SaveButton")
+    Button(
+        text = stringResource(R.string.view_profile_screen_save_button),
+        onClick = onSave,
+        colorLevel = ColorLevel.PRIMARY,
+        testTag = "SaveButton")
 
     Button(
-        text = "Cancel",
+        text = stringResource(R.string.view_profile_screen_cancel_button),
         onClick = onCancel,
         colorLevel = ColorLevel.SECONDARY,
         testTag = "CancelButton")
@@ -215,12 +221,14 @@ private fun DisplayProfileContent(
   Spacer(modifier = Modifier.height(8.dp))
 
   Text(
-      text = "@$username", style = MaterialTheme.typography.bodyMedium, testTag = "DisplayUsername")
+      text = stringResource(R.string.view_profile_screen_display_username).format(username),
+      style = MaterialTheme.typography.bodyMedium,
+      testTag = "DisplayUsername")
 
   Spacer(modifier = Modifier.height(16.dp))
 
   Button(
-      text = "Modify Profile",
+      text = stringResource(R.string.view_profile_screen_modify_profile_button),
       onClick = onEditClick,
       colorLevel = ColorLevel.TERTIARY,
       testTag = "EditButton")
@@ -285,7 +293,7 @@ private fun FavoriteParkingsSection(
     onFavoritesUpdated: (List<Parking>) -> Unit
 ) {
   Text(
-      text = "Favorite Parkings",
+      text = stringResource(R.string.view_profile_screen_favorite_parking_title),
       style = MaterialTheme.typography.titleLarge,
       modifier = Modifier.testTag("FavoriteParkingsTitle"))
 
@@ -293,7 +301,7 @@ private fun FavoriteParkingsSection(
 
   if (favoriteParkings.isEmpty()) {
     Text(
-        text = "No favorite parkings yet",
+        text = stringResource(R.string.view_profile_screen_no_favorite_parking),
         style = MaterialTheme.typography.bodyMedium,
         modifier = Modifier.testTag("NoFavoritesMessage"))
   } else {
@@ -344,17 +352,27 @@ private fun FavoriteParkingCard(parking: Parking, index: Int, onRemove: () -> Un
   if (showConfirmDialog) {
     AlertDialog(
         onDismissRequest = { showConfirmDialog = false },
-        title = { Text("Remove favorite") },
-        text = { Text("Are you sure you want to remove ${parking.optName} from your favorites?") },
+        title = { Text(stringResource(R.string.view_profile_screen_remove_favorite_dialog_title)) },
+        text = {
+          Text(
+              stringResource(R.string.view_profile_screen_remove_favorite_dialog_message)
+                  .format(parking.optName))
+        },
         confirmButton = {
           TextButton(
               onClick = {
                 onRemove()
                 showConfirmDialog = false
               }) {
-                Text("Remove")
+                Text(
+                    stringResource(
+                        R.string.view_profile_screen_remove_favorite_dialog_action_button))
               }
         },
-        dismissButton = { TextButton(onClick = { showConfirmDialog = false }) { Text("Cancel") } })
+        dismissButton = {
+          TextButton(onClick = { showConfirmDialog = false }) {
+            Text(stringResource(R.string.view_profile_screen_remove_favorite_dialog_cancel_button))
+          }
+        })
   }
 }

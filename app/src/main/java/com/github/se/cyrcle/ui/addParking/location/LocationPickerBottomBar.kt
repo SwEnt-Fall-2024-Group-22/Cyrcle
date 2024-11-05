@@ -21,8 +21,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.map.MapViewModel.LocationPickerState
 import com.github.se.cyrcle.ui.navigation.NavigationActions
@@ -52,7 +54,7 @@ fun LocationPickerBottomBar(
               modifier = Modifier.testTag("cancelButton"),
               colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
                 Text(
-                    "Cancel",
+                    stringResource(R.string.location_picker_bottom_bar_cancel_button),
                     modifier = Modifier.width(100.dp),
                     color = MaterialTheme.colorScheme.primary,
                     style = Typography.headlineMedium,
@@ -69,7 +71,7 @@ fun LocationPickerBottomBar(
                 modifier = Modifier.testTag("nextButton"),
                 colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
                   Text(
-                      "Next",
+                      stringResource(R.string.location_picker_bottom_bar_next_button),
                       modifier = Modifier.width(100.dp),
                       color = MaterialTheme.colorScheme.primary,
                       style = Typography.headlineMedium,
@@ -81,7 +83,7 @@ fun LocationPickerBottomBar(
                 modifier = Modifier.testTag("nextButton"),
                 colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
                   Text(
-                      "Next",
+                      stringResource(R.string.location_picker_bottom_bar_next_button),
                       modifier = Modifier.width(100.dp),
                       color = MaterialTheme.colorScheme.primary,
                       style = Typography.headlineMedium,

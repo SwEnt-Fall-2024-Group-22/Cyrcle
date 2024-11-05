@@ -25,8 +25,12 @@ fun CreateProfileScreen(navigationActions: NavigationActions, userViewModel: Use
         Column(
             modifier = Modifier.fillMaxSize().padding(padding),
             verticalArrangement = Arrangement.Center) {
-              Text("TODOOOOOOOOOO")
+              Text("TODO")
 
+              // TODO Toast text need to take inspiration from this
+              // val failSignInMsg = stringResource(R.string.sign_in_failed_toast)
+              // val successSignInMsg = stringResource(R.string.sign_in_successful_toast)
+              //
               // GoogleSignInButton(
               //    onAuthComplete = { result: AuthResult ->
               //      val user =

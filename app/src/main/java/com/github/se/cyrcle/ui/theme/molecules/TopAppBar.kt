@@ -46,7 +46,7 @@ fun TopAppBar(navigationActions: NavigationActions, title: String, testTag: Stri
         IconButton(
             onClick = { navigationActions.goBack() },
             modifier = Modifier.testTag("${testTag}GoBackButton")) {
-              Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "GoBack")
+              Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Go Back")
             }
       })
 }

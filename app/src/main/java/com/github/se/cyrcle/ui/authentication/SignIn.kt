@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,9 +44,12 @@ import kotlinx.coroutines.tasks.await
 fun SignInScreen(navigationActions: NavigationActions, userViewModel: UserViewModel) {
   val context = LocalContext.current
 
+  val failSignInMsg = stringResource(R.string.sign_in_failed_toast)
+  val successSignInMsg = stringResource(R.string.sign_in_successful_toast)
+
   val onAuthComplete = { result: AuthResult ->
     Log.d("Cyrcle", "User signed in: ${result.user?.displayName}")
-    Toast.makeText(context, "Login successful!", Toast.LENGTH_LONG).show()
+    Toast.makeText(context, successSignInMsg, Toast.LENGTH_LONG).show()
 
     val user =
         User(
@@ -58,7 +62,7 @@ fun SignInScreen(navigationActions: NavigationActions, userViewModel: UserViewMo
   }
   val onAuthFailure = { e: ApiException ->
     Log.e("Cyrcle", "Failed to sign in: ${e.statusCode}")
-    Toast.makeText(context, "Login Failed!", Toast.LENGTH_LONG).show()
+    Toast.makeText(context, failSignInMsg, Toast.LENGTH_LONG).show()
   }
 
   // The main container for the screen
@@ -73,7 +77,7 @@ fun SignInScreen(navigationActions: NavigationActions, userViewModel: UserViewMo
         ) {
           // Welcome Text
           Text(
-              text = "Welcome to Cyrcle",
+              text = stringResource(R.string.sign_in_welcome),
               style =
                   MaterialTheme.typography.headlineLarge.copy(
                       fontWeight = FontWeight.Bold, fontSize = 57.sp, lineHeight = 64.sp),
@@ -107,7 +111,7 @@ fun SignInScreen(navigationActions: NavigationActions, userViewModel: UserViewMo
                   Modifier.padding(16.dp)
                       .height(48.dp) // Adjust height as needed
                       .testTag("AnonymousLoginButton")) {
-                Text(text = "Continue as Guest")
+                Text(text = stringResource(R.string.sign_in_guest_button))
               }
         }
       })

@@ -10,7 +10,9 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.github.se.cyrcle.R
 import com.github.se.cyrcle.ui.theme.atoms.RadioButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
 
@@ -39,13 +41,13 @@ fun BooleanRadioButton(
               onClick = { state.value = true },
               modifier = Modifier.padding(2.dp),
               testTag = "${testTag}YesRadioButton")
-          Text(text = "Yes", testTag = "${testTag}YesText")
+          Text(text = stringResource(R.string.yes), testTag = "${testTag}YesText")
           RadioButton(
               selected = !state.value,
               onClick = { state.value = false },
               modifier = Modifier.padding(start = 20.dp),
               testTag = "${testTag}NoRadioButton")
-          Text(text = "No", testTag = "${testTag}NoText")
+          Text(text = stringResource(R.string.no), testTag = "${testTag}NoText")
         }
   }
 }
