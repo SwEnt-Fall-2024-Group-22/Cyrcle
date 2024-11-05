@@ -91,8 +91,8 @@ fun ReviewScreen(
               Text(
                   text =
                       when (sliderValue) {
-                        in 0f..1f -> ""
-                        in 1f..2f -> stringResource(R.string.review_screen_terrible_review)
+                        in 0f..1f -> stringResource(R.string.review_screen_terrible_review)
+                        in 1f..2f -> stringResource(R.string.review_screen_poor_review)
                         in 2f..3f -> stringResource(R.string.review_screen_bad_review)
                         3f -> stringResource(R.string.review_screen_average_review)
                         in 3.5f..4f -> stringResource(R.string.review_screen_good_review)

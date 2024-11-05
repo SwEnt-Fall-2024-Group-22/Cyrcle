@@ -106,7 +106,8 @@
 
     <!-- Review Screen -->
     <string name="review_screen_title">Add Your Review</string>
-    <string name="review_screen_terrible_review">Terrible experience :(</string>
+    <string name="review_screen_terrible_review">Terrible experience >:(</string>
+    <string name="review_screen_poor_review">Poor experience :(</string>
     <string name="review_screen_bad_review">Bad experience :/</string>
     <string name="review_screen_average_review">Average experience :|</string>
     <string name="review_screen_good_review">Good experience :)</string>
