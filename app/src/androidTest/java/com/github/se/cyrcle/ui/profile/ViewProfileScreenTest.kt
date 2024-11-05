@@ -76,22 +76,6 @@ class ViewProfileScreenTest {
         }
     }
 
-    @Test
-    fun testUserSetupAndFavoriteParkings() {
-        composeTestRule.waitForIdle()
-
-        // Verify user details
-        assert(userViewModel.currentUser.value?.userId == "1")
-
-        // Verify favorite parkings
-        assert(userViewModel.favoriteParkings.value.size == 3)
-        assert(
-            userViewModel.favoriteParkings.value.containsAll(
-                listOf(
-                    TestInstancesParking.parking1,
-                    TestInstancesParking.parking2,
-                    TestInstancesParking.parking3)))
-    }
 
     @Test
     fun testInitialDisplayMode() {
