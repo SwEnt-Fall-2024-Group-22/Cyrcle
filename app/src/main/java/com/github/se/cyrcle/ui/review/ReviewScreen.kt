@@ -40,6 +40,7 @@ import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.Button
+import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
@@ -68,26 +69,8 @@ fun ReviewScreen(
             modifier = Modifier.fillMaxSize().padding(paddingValues).padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center) {
-              // Stars reflecting the slider value (supports half stars)
-              Row(
-                  modifier = Modifier.padding(8.dp).testTag("StarsRow"),
-                  verticalAlignment = Alignment.CenterVertically) {
-                    for (i in 1..5) {
-                      val starIcon =
-                          when {
-                            i <= sliderValue -> Icons.Filled.Star // Full star
-                            i - 0.5f == sliderValue -> Icons.Filled.StarHalf // Half star
-                            else -> Icons.Filled.StarBorder // Empty star
-                          }
-                      Icon(
-                          imageVector = starIcon,
-                          contentDescription = null,
-                          tint = MaterialTheme.colorScheme.primary,
-                          modifier = Modifier.size(40.dp).testTag("Star$i"))
-                    }
-                  }
-
-              // Display the experience text based on the slider value
+            ScoreStars(sliderValue.toDouble(), scale = 2.5f)
+            // Display the experience text based on the slider value
               Text(
                   text =
                       when (sliderValue) {
