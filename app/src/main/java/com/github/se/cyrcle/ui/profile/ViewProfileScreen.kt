@@ -344,7 +344,7 @@ private fun FavoriteParkingCard(parking: Parking, index: Int, onRemove: () -> Un
           Text(
               stringResource(
                   R.string.view_profile_screen_remove_favorite_dialog_message,
-                  parking.optName ?: ""))
+                  parking.optName ?: R.string.default_parking_name))
         },
         confirmButton = {
           TextButton(

@@ -243,6 +243,28 @@ class ViewProfileScreenTest {
   }
 
   @Test
+  fun testRemoveFavoriteParkingsAndCheckIndexes() {
+    composeTestRule.waitForIdle()
+
+    // Remove the middle parking
+    composeTestRule.onNodeWithTag("FavoriteToggle_1").performClick()
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithText("Remove").performClick()
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithText("Rue de la paix").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Rue du pet").assertIsDisplayed()
+
+    // Remove the third parking (which is now second)
+    composeTestRule.onNodeWithTag("FavoriteToggle_1").performClick()
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithText("Remove").performClick()
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithText("Rue de la paix").assertIsDisplayed()
+  }
+
+  @Test
   fun testFavoriteToggleNotClickableWhileEditing() {
     composeTestRule.waitForIdle()
 
