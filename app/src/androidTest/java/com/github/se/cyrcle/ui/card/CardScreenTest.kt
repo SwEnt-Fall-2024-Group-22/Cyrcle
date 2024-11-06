@@ -95,7 +95,7 @@ class CardScreenTest {
 
     composeTestRule
         .onNodeWithTag("TopAppBarTitle")
-        .assertTextContains("Description of Unnamed Parking")
+        .assertTextContains("Description of Rue de la paix")
     composeTestRule.onNodeWithTag("ParkingImagesRow").onChildren().assertCountEquals(1)
     composeTestRule
         .onNodeWithTag("CapacityColumn")
@@ -133,9 +133,7 @@ class CardScreenTest {
     parkingViewModel.selectParking(TestInstancesParking.parking2)
     composeTestRule.setContent { CardScreen(navigationActions, parkingViewModel, userViewModel) }
 
-    composeTestRule
-        .onNodeWithTag("TopAppBarTitle")
-        .assertTextContains("Description of Avenue de la Gare")
+    composeTestRule.onNodeWithTag("TopAppBarTitle").assertTextContains("Description of Rude épais")
     composeTestRule.onNodeWithTag("ParkingImagesRow").onChildren().assertCountEquals(2)
   }
 }

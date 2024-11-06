@@ -30,12 +30,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.Parking
-import com.github.se.cyrcle.model.parking.TestInstancesParking
+import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
@@ -46,25 +47,16 @@ import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 
 @Composable
-fun ViewProfileScreen(navigationActions: NavigationActions) {
-
+fun ViewProfileScreen(
+    navigationActions: NavigationActions,
+    userViewModel: UserViewModel = viewModel(factory = UserViewModel.Factory)
+) {
+  val userState by userViewModel.currentUser.collectAsState()
   var isEditing by remember { mutableStateOf(false) }
-  var firstName by remember { mutableStateOf("John") }
-  var lastName by remember { mutableStateOf("Doe") }
-  var username by remember { mutableStateOf("johndoe") }
-  var profilePictureUrl by remember { mutableStateOf("") }
-  var favoriteParkings by remember {
-    mutableStateOf(
-        listOf(
-            TestInstancesParking.parking1,
-            TestInstancesParking.parking2,
-            TestInstancesParking.parking3))
-  }
-
-  var originalFirstName by remember { mutableStateOf(firstName) }
-  var originalLastName by remember { mutableStateOf(lastName) }
-  var originalUsername by remember { mutableStateOf(username) }
-  var originalProfilePictureUrl by remember { mutableStateOf(profilePictureUrl) }
+  var firstName by remember { mutableStateOf(userState?.firstName ?: "") }
+  var lastName by remember { mutableStateOf(userState?.lastName ?: "") }
+  var username by remember { mutableStateOf(userState?.username ?: "") }
+  var profilePictureUrl by remember { mutableStateOf(userState?.profilePictureUrl ?: "") }
 
   val imagePickerLauncher =
       rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
@@ -97,17 +89,20 @@ fun ViewProfileScreen(navigationActions: NavigationActions) {
                     onUsernameChange = { username = it },
                     onImageClick = { imagePickerLauncher.launch("image/*") },
                     onSave = {
-                      originalFirstName = firstName
-                      originalLastName = lastName
-                      originalUsername = username
-                      originalProfilePictureUrl = profilePictureUrl
+                      userViewModel.updateUser(
+                          userState?.copy(
+                              firstName = firstName,
+                              lastName = lastName,
+                              username = username,
+                              profilePictureUrl = profilePictureUrl) ?: return@EditProfileContent)
+                      userViewModel.getUserById(userState?.userId ?: "")
                       isEditing = false
                     },
                     onCancel = {
-                      firstName = originalFirstName
-                      lastName = originalLastName
-                      username = originalUsername
-                      profilePictureUrl = originalProfilePictureUrl
+                      firstName = userState?.firstName ?: ""
+                      lastName = userState?.lastName ?: ""
+                      username = userState?.username ?: ""
+                      profilePictureUrl = userState?.profilePictureUrl ?: ""
                       isEditing = false
                     })
               } else {
@@ -116,19 +111,11 @@ fun ViewProfileScreen(navigationActions: NavigationActions) {
                     lastName = lastName,
                     username = username,
                     profilePictureUrl = profilePictureUrl,
-                    onEditClick = {
-                      originalFirstName = firstName
-                      originalLastName = lastName
-                      originalUsername = username
-                      originalProfilePictureUrl = profilePictureUrl
-                      isEditing = true
-                    })
+                    onEditClick = { isEditing = true })
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                FavoriteParkingsSection(
-                    favoriteParkings = favoriteParkings,
-                    onFavoritesUpdated = { newFavorites -> favoriteParkings = newFavorites })
+                FavoriteParkingsSection(userViewModel)
               }
             }
       }
@@ -221,7 +208,7 @@ private fun DisplayProfileContent(
   Spacer(modifier = Modifier.height(8.dp))
 
   Text(
-      text = stringResource(R.string.view_profile_screen_display_username).format(username),
+      text = stringResource(R.string.view_profile_screen_display_username, username),
       style = MaterialTheme.typography.bodyMedium,
       testTag = "DisplayUsername")
 
@@ -253,7 +240,8 @@ private fun ProfileImage(
               contentAlignment = Alignment.Center) {
                 Icon(
                     imageVector = Icons.Filled.Person,
-                    contentDescription = "Default Profile Picture",
+                    contentDescription =
+                        stringResource(R.string.view_profile_screen_default_profile_picture),
                     modifier = Modifier.size(60.dp),
                     tint = MaterialTheme.colorScheme.onPrimaryContainer)
               }
@@ -265,7 +253,7 @@ private fun ProfileImage(
                           .data(url)
                           .apply { transformations(CircleCropTransformation()) }
                           .build()),
-              contentDescription = "Profile Picture",
+              contentDescription = stringResource(R.string.view_profile_screen_profile_picture),
               modifier = Modifier.size(120.dp).clip(CircleShape),
               contentScale = ContentScale.Crop)
         }
@@ -279,7 +267,8 @@ private fun ProfileImage(
               contentAlignment = Alignment.Center) {
                 Icon(
                     imageVector = Icons.Filled.Edit,
-                    contentDescription = "Edit Profile Picture",
+                    contentDescription =
+                        stringResource(R.string.view_profile_screen_edit_profile_picture),
                     tint = Color.White,
                     modifier = Modifier.size(40.dp))
               }
@@ -288,10 +277,11 @@ private fun ProfileImage(
 }
 
 @Composable
-private fun FavoriteParkingsSection(
-    favoriteParkings: List<Parking>,
-    onFavoritesUpdated: (List<Parking>) -> Unit
-) {
+private fun FavoriteParkingsSection(userViewModel: UserViewModel) {
+  val favoriteParkings = userViewModel.favoriteParkings.collectAsState().value
+
+  LaunchedEffect(Unit) { userViewModel.getSelectedUserFavoriteParking() }
+
   Text(
       text = stringResource(R.string.view_profile_screen_favorite_parking_title),
       style = MaterialTheme.typography.titleLarge,
@@ -313,9 +303,8 @@ private fun FavoriteParkingsSection(
                 parking = parking,
                 index = index,
                 onRemove = {
-                  val updatedList = favoriteParkings.toMutableList()
-                  updatedList.removeAt(index)
-                  onFavoritesUpdated(updatedList)
+                  userViewModel.removeFavoriteParkingFromSelectedUser(parking.uid)
+                  userViewModel.getSelectedUserFavoriteParking()
                 })
           }
         }
@@ -326,13 +315,10 @@ private fun FavoriteParkingsSection(
 private fun FavoriteParkingCard(parking: Parking, index: Int, onRemove: () -> Unit) {
   var showConfirmDialog by remember { mutableStateOf(false) }
 
-  Card(
-      modifier = Modifier.size(120.dp).padding(8.dp),
-      shape = MaterialTheme.shapes.medium,
-  ) {
+  Card(modifier = Modifier.size(120.dp).padding(8.dp), shape = MaterialTheme.shapes.medium) {
     Box(modifier = Modifier.fillMaxSize()) {
       Text(
-          text = parking.optName ?: "", // Display only the optName property
+          text = parking.optName ?: "",
           style = MaterialTheme.typography.bodySmall,
           modifier = Modifier.align(Alignment.Center).padding(8.dp).testTag("ParkingItem_$index"))
 
@@ -342,7 +328,8 @@ private fun FavoriteParkingCard(parking: Parking, index: Int, onRemove: () -> Un
               Modifier.align(Alignment.TopEnd).size(32.dp).testTag("FavoriteToggle_$index")) {
             Icon(
                 imageVector = Icons.Filled.Star,
-                contentDescription = "Remove from Favorites",
+                contentDescription =
+                    stringResource(R.string.view_profile_screen_remove_from_favorite),
                 tint = Color(0xFFFFD700),
                 modifier = Modifier.size(20.dp))
           }
@@ -355,8 +342,9 @@ private fun FavoriteParkingCard(parking: Parking, index: Int, onRemove: () -> Un
         title = { Text(stringResource(R.string.view_profile_screen_remove_favorite_dialog_title)) },
         text = {
           Text(
-              stringResource(R.string.view_profile_screen_remove_favorite_dialog_message)
-                  .format(parking.optName))
+              stringResource(
+                  R.string.view_profile_screen_remove_favorite_dialog_message,
+                  parking.optName ?: stringResource(R.string.default_parking_name)))
         },
         confirmButton = {
           TextButton(
