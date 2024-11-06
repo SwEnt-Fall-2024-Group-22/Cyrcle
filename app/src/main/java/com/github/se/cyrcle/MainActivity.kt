@@ -1,5 +1,6 @@
 package com.github.se.cyrcle
 
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -37,12 +38,14 @@ class MainActivity : ComponentActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
     val reviewViewModel = ReviewViewModel(reviewRepository)
     val userViewModel = UserViewModel(userRepository, parkingRepository)
     val parkingViewModel = ParkingViewModel(imageRepository, parkingRepository)
     val mapViewModel = MapViewModel()
     val addressViewModel = AddressViewModel(addressRepository)
+
     setContent {
       CyrcleTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
