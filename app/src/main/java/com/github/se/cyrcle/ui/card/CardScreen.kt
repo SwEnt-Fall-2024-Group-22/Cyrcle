@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.card
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,26 +27,32 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.Button
+import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.bold
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun CardScreen(
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel,
-    userViewModel: UserViewModel
+    userViewModel: UserViewModel,
+    reviewViewModel: ReviewViewModel
 ) {
   val selectedParking =
       parkingViewModel.selectedParking.collectAsState().value
           ?: return Text(stringResource(R.string.no_selected_parking_error))
-
   val userSignedIn = userViewModel.isSignedIn.collectAsState(false)
+  reviewViewModel.getReviewsByParking(selectedParking.uid)
+  selectedParking.nbReviews = reviewViewModel.parkingReviews.value.size
+  selectedParking.avgScore = reviewViewModel.parkingReviews.value.sumOf { it.rating } / selectedParking.nbReviews
 
   Scaffold(
       topBar = {
@@ -152,17 +159,18 @@ fun CardScreen(
                                           else stringResource(R.string.no),
                                       color = Color.Gray)
                                 }
-                                Column(
-                                    modifier = Modifier.weight(1f).testTag("AverageRatingColumn")) {
-                                      Text(
-                                          text = stringResource(R.string.card_screen_rating),
-                                          style = bold)
+                              Column(
+                                  modifier = Modifier.weight(1f).testTag("AverageRatingColumn")) {
+                                  Text(
+                                      text = stringResource(R.string.card_screen_rating),
+                                      style = bold)
+                                  if (selectedParking.nbReviews == 0) {
                                       Text(
                                           text =
-                                              if (selectedParking.nbReviews == 0)
-                                                  stringResource(R.string.no_reviews)
-                                              else selectedParking.avgScore.toString(),
-                                          color = Color.Gray)
+                                          stringResource(R.string.no_reviews)
+                                      )
+                                  } else
+                                      ScoreStars(selectedParking.avgScore, scale = 0.7f, text = "(${selectedParking.nbReviews})")
 
                                       Spacer(
                                           modifier =
