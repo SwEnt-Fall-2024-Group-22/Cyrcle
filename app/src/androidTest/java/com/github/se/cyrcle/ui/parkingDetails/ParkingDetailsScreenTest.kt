@@ -72,7 +72,7 @@ class ParkingDetailsScreenTest {
   fun displayAllComponents() {
     parkingViewModel.selectParking(TestInstancesParking.parking1)
     composeTestRule.setContent {
-      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel, reviewViewModel)
+      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
     }
 
     // Verify the top app bar
@@ -101,7 +101,7 @@ class ParkingDetailsScreenTest {
   fun componentsDisplayCorrectValues() {
     parkingViewModel.selectParking(TestInstancesParking.parking1)
     composeTestRule.setContent {
-      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel, reviewViewModel)
+      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
     }
 
     composeTestRule
@@ -128,7 +128,7 @@ class ParkingDetailsScreenTest {
   fun addReviewButtonBehavesCorrectly() {
     parkingViewModel.selectParking(TestInstancesParking.parking1)
     composeTestRule.setContent {
-      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel, reviewViewModel)
+      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
     }
 
     composeTestRule.onNodeWithTag("AddReviewButton").assertIsDisplayed().performClick()
@@ -145,7 +145,7 @@ class ParkingDetailsScreenTest {
   fun displayTitleAndMultipleImages() {
     parkingViewModel.selectParking(TestInstancesParking.parking2)
     composeTestRule.setContent {
-      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel, reviewViewModel)
+      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
     }
 
     composeTestRule.onNodeWithTag("TopAppBarTitle").assertTextContains("Description of Rude épais")
