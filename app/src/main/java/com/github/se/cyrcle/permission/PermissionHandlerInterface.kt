@@ -1,4 +1,4 @@
-package com.github.se.cyrcle
+package com.github.se.cyrcle.permission
 
 import android.app.Activity
 

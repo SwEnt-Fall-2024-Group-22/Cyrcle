@@ -1,7 +1,7 @@
 package com.github.se.cyrcle.di
 
-import com.github.se.cyrcle.PermissionHandlerInterface
 import com.github.se.cyrcle.di.mocks.MockPermissionHandler
+import com.github.se.cyrcle.permission.PermissionHandlerInterface
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.components.SingletonComponent

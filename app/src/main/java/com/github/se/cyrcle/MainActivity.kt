@@ -3,7 +3,6 @@ package com.github.se.cyrcle
 import CyrcleNavHost
 import android.content.pm.ActivityInfo
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,6 +19,7 @@ import com.github.se.cyrcle.model.review.ReviewRepository
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.UserRepository
 import com.github.se.cyrcle.model.user.UserViewModel
+import com.github.se.cyrcle.permission.PermissionHandlerInterface
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.CyrcleTheme
 import com.mapbox.android.core.permissions.PermissionsManager
@@ -46,7 +46,6 @@ class MainActivity : ComponentActivity() {
     requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
     permissionsHandler.initHandler(this)
-    Log.e("MainActivity", "PermissionsHandler initialized")
 
     val reviewViewModel = ReviewViewModel(reviewRepository)
     val userViewModel = UserViewModel(userRepository, parkingRepository)

@@ -1,7 +1,7 @@
 package com.github.se.cyrcle.di
 
-import com.github.se.cyrcle.PermissionHandlerInterface
-import com.github.se.cyrcle.PermissionsHandler
+import com.github.se.cyrcle.permission.PermissionHandlerInterface
+import com.github.se.cyrcle.permission.PermissionsHandler
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
