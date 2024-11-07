@@ -51,7 +51,7 @@ class ParkingViewModel(
         _closestParkings.value =
             parkings
                 .filter { parking ->
-                  TurfMeasurement.distance(_circleCenter.value!!, parking.location.center) <=
+                  TurfMeasurement.distance(_circleCenter.value!!, parking.location.center) * 1000 <=
                       _radius.value
                 }
                 .sortedBy { parking ->
