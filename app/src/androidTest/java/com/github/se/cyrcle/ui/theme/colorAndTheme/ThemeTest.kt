@@ -1,4 +1,4 @@
-package com.github.se.cyrcle.ui.theme
+package com.github.se.cyrcle.ui.theme.colorAndTheme
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -12,6 +12,12 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.dp
+import com.github.se.cyrcle.ui.theme.Black
+import com.github.se.cyrcle.ui.theme.DarkColorScheme
+import com.github.se.cyrcle.ui.theme.LightColorScheme
+import com.github.se.cyrcle.ui.theme.White
+import com.github.se.cyrcle.ui.theme.defaultOnColorFromLuminance
+import com.github.se.cyrcle.ui.theme.disabledColor
 import org.junit.Rule
 import org.junit.Test
 
