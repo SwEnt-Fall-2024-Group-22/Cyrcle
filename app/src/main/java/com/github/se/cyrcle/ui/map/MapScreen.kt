@@ -2,10 +2,6 @@ package com.github.se.cyrcle.ui.map
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -50,17 +46,12 @@ import com.mapbox.maps.CameraBoundsOptions
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.CameraState
 import com.mapbox.maps.MapIdleCallback
-import com.mapbox.maps.MapLoaded
-import com.mapbox.maps.MapLoadedCallback
 import com.mapbox.maps.MapView
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.ViewAnnotationAnchor
 import com.mapbox.maps.extension.compose.DisposableMapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
-import com.mapbox.maps.extension.observable.eventdata.MapLoadedEventData
-import com.mapbox.maps.extension.style.expressions.dsl.generated.interpolate
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
-import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.annotation.AnnotationConfig
 import com.mapbox.maps.plugin.annotation.AnnotationSourceOptions
 import com.mapbox.maps.plugin.annotation.ClusterOptions
@@ -71,7 +62,6 @@ import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
-import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadedListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.createDefault2DPuck
@@ -86,7 +76,6 @@ const val maxZoom = 18.0
 const val minZoom = 8.0
 const val thresholdDisplayZoom = 13.0
 const val LAYER_ID = "0128"
-
 
 @Composable
 fun MapScreen(
@@ -127,14 +116,13 @@ fun MapScreen(
         Modifier.fillMaxSize().padding(padding).testTag("MapScreen"),
         mapViewportState = mapViewportState,
         style = { MapConfig.DefaultStyle() }) {
-
           DisposableMapEffect { mapView ->
 
             // When map is loaded, check if the location permission is granted and initialize the
             // location component
-              if(permissionGranted){
-                initLocationComponent(mapView, mapViewModel)
-              }
+            if (permissionGranted) {
+              initLocationComponent(mapView, mapViewModel)
+            }
 
             val viewAnnotationManager = mapView.viewAnnotationManager
 
@@ -358,7 +346,6 @@ private fun drawMarkers(
  * @param mapView the MapView to initialize the location component on
  * @param mapViewModel the MapViewModel to update the camera position
  */
-
 private fun initLocationComponent(mapView: MapView, mapViewModel: MapViewModel) {
   val locationComponentPlugin = mapView.location
   locationComponentPlugin.updateSettings {
