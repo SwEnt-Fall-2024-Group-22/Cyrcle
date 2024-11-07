@@ -43,6 +43,8 @@ import com.mapbox.common.Cancelable
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.Polygon
 import com.mapbox.maps.CameraBoundsOptions
+import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.CameraState
 import com.mapbox.maps.MapIdleCallback
 import com.mapbox.maps.MapView
 import com.mapbox.maps.ScreenCoordinate
@@ -61,6 +63,9 @@ import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.maps.plugin.gestures.gestures
+import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
+import com.mapbox.maps.plugin.locationcomponent.createDefault2DPuck
+import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.maps.viewannotation.annotatedLayerFeature
 import com.mapbox.maps.viewannotation.annotationAnchor
 import com.mapbox.maps.viewannotation.geometry
@@ -78,7 +83,8 @@ fun MapScreen(
     parkingViewModel: ParkingViewModel,
     userViewModel: UserViewModel,
     mapViewModel: MapViewModel,
-    zoomState: MutableState<Double> = remember { mutableDoubleStateOf(defaultZoom) }
+    zoomState: MutableState<Double> = remember { mutableDoubleStateOf(defaultZoom) },
+    permissionGranted: Boolean
 ) {
 
   val listOfParkings by parkingViewModel.rectParkings.collectAsState()
@@ -111,6 +117,13 @@ fun MapScreen(
         mapViewportState = mapViewportState,
         style = { MapConfig.DefaultStyle() }) {
           DisposableMapEffect { mapView ->
+
+            // When map is loaded, check if the location permission is granted and initialize the
+            // location component
+            if (permissionGranted) {
+              initLocationComponent(mapView, mapViewModel)
+            }
+
             val viewAnnotationManager = mapView.viewAnnotationManager
 
             // Lock rotations of the map
@@ -325,4 +338,30 @@ private fun drawMarkers(
             .withIconOffset(listOf(0.0, bitmap.height / 12.0))
             .withData(Gson().toJsonTree(it)))
   }
+}
+
+/**
+ * Initialize the location component of the map.
+ *
+ * @param mapView the MapView to initialize the location component on
+ * @param mapViewModel the MapViewModel to update the camera position
+ */
+private fun initLocationComponent(mapView: MapView, mapViewModel: MapViewModel) {
+  val locationComponentPlugin = mapView.location
+  locationComponentPlugin.updateSettings {
+    this.enabled = true
+    this.locationPuck = createDefault2DPuck(true)
+  }
+  val onIndicatorPositionChangedListener = OnIndicatorPositionChangedListener { location ->
+    mapView.mapboxMap.setCamera(CameraOptions.Builder().center(location).build())
+    mapViewModel.updateCameraPosition(
+        CameraState(
+            location,
+            mapView.mapboxMap.cameraState.padding,
+            mapView.mapboxMap.cameraState.zoom,
+            0.0,
+            0.0))
+  }
+
+  locationComponentPlugin.addOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener)
 }

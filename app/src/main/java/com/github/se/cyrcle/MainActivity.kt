@@ -1,5 +1,6 @@
 package com.github.se.cyrcle
 
+import CyrcleNavHost
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -18,8 +19,10 @@ import com.github.se.cyrcle.model.review.ReviewRepository
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.UserRepository
 import com.github.se.cyrcle.model.user.UserViewModel
+import com.github.se.cyrcle.permission.PermissionHandlerInterface
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.CyrcleTheme
+import com.mapbox.android.core.permissions.PermissionsManager
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -36,9 +39,13 @@ class MainActivity : ComponentActivity() {
 
   @Inject lateinit var addressRepository: AddressRepository
 
+  @Inject lateinit var permissionsHandler: PermissionHandlerInterface
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
+    permissionsHandler.initHandler(this)
 
     val reviewViewModel = ReviewViewModel(reviewRepository)
     val userViewModel = UserViewModel(userRepository, parkingRepository)
@@ -59,7 +66,8 @@ class MainActivity : ComponentActivity() {
               reviewViewModel,
               userViewModel,
               mapViewModel,
-              addressViewModel)
+              addressViewModel,
+              PermissionsManager.areLocationPermissionsGranted(this))
         }
       }
     }
