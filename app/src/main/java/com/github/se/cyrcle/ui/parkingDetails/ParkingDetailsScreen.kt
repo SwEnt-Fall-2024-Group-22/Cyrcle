@@ -52,8 +52,10 @@ fun ParkingDetailsScreen(
   val userSignedIn = userViewModel.isSignedIn.collectAsState(false)
   reviewViewModel.getReviewsByParking(selectedParking.uid)
   selectedParking.nbReviews = reviewViewModel.parkingReviews.value.size
-  selectedParking.avgScore = if(selectedParking.nbReviews != 0)
-      reviewViewModel.parkingReviews.value.sumOf { it.rating } / selectedParking.nbReviews else 0.0
+  selectedParking.avgScore =
+      if (selectedParking.nbReviews != 0)
+          reviewViewModel.parkingReviews.value.sumOf { it.rating } / selectedParking.nbReviews
+      else 0.0
 
   Scaffold(
       topBar = {
