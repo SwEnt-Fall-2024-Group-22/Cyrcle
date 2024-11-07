@@ -87,7 +87,13 @@ class MapScreenTest {
     val state = mutableStateOf(defaultZoom)
 
     composeTestRule.setContent {
-      MapScreen(mockNavigation, parkingViewModel, userViewModel, mapViewModel, state, permissionGranted = false)
+      MapScreen(
+          mockNavigation,
+          parkingViewModel,
+          userViewModel,
+          mapViewModel,
+          state,
+          permissionGranted = false)
     }
 
     for (i in 0..(defaultZoom - minZoom).toInt()) {
@@ -101,7 +107,8 @@ class MapScreenTest {
   @Test
   fun testAddParkingRules() {
     composeTestRule.setContent {
-      MapScreen(mockNavigation, parkingViewModel, userViewModel, mapViewModel, permissionGranted = false)
+      MapScreen(
+          mockNavigation, parkingViewModel, userViewModel, mapViewModel, permissionGranted = false)
     }
 
     // Check that the add button has no click action when there is no user
@@ -127,7 +134,13 @@ class MapScreenTest {
     val state = mutableStateOf(defaultZoom)
 
     composeTestRule.setContent {
-      MapScreen(mockNavigation, parkingViewModel, userViewModel, mapViewModel, state, permissionGranted = false)
+      MapScreen(
+          mockNavigation,
+          parkingViewModel,
+          userViewModel,
+          mapViewModel,
+          state,
+          permissionGranted = false)
     }
 
     for (i in 0..(maxZoom - defaultZoom).toInt()) {
