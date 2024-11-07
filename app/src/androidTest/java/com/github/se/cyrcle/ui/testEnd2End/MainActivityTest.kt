@@ -1,4 +1,4 @@
-package com.github.se.cyrcle
+package com.github.se.cyrcle.ui.testEnd2End
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertHasClickAction
@@ -12,6 +12,7 @@ import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
+import com.github.se.cyrcle.MainActivity
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -33,7 +34,7 @@ class MainActivityTest {
   private lateinit var authRobot: AuthScreenRobot
   private lateinit var mapRobot: MapScreenRobot
   private lateinit var listRobot: ListScreenRobot
-  private lateinit var cardRobot: CardScreenRobot
+  private lateinit var cardRobot: ParkingDetailsScreenRobot
 
   @Before
   fun setUp() {
@@ -43,7 +44,7 @@ class MainActivityTest {
     authRobot = AuthScreenRobot(composeTestRule)
     mapRobot = MapScreenRobot(composeTestRule)
     listRobot = ListScreenRobot(composeTestRule)
-    cardRobot = CardScreenRobot(composeTestRule)
+    cardRobot = ParkingDetailsScreenRobot(composeTestRule)
   }
 
   @Test
@@ -57,11 +58,11 @@ class MainActivityTest {
     listRobot.assertListScreen()
     listRobot.toCard(0)
 
-    cardRobot.assertCardScreen()
+    cardRobot.assertParkingDetailsScreen()
   }
 
-  private class CardScreenRobot(val composeTestRule: ComposeTestRule) {
-    fun assertCardScreen() {
+  private class ParkingDetailsScreenRobot(val composeTestRule: ComposeTestRule) {
+    fun assertParkingDetailsScreen() {
       composeTestRule.onNodeWithTag("TopAppBar").assertIsDisplayed()
       composeTestRule.onNodeWithTag("RowCapacityRack").assertIsDisplayed()
       composeTestRule.onNodeWithTag("RowProtectionPrice").assertIsDisplayed()
@@ -97,7 +98,7 @@ class MainActivityTest {
           .assertHasClickAction()
           .performClick()
 
-      composeTestRule.waitUntilExactlyOneExists(hasTestTag("CardScreen"))
+      composeTestRule.waitUntilExactlyOneExists(hasTestTag("ParkingDetailsScreen"))
     }
 
     fun assertListScreen() {

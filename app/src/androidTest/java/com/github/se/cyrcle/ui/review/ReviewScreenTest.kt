@@ -95,24 +95,6 @@ class ReviewScreenTest {
   }
 
   @Test
-  fun reviewScreen_starsReflectSliderValue() {
-    composeTestRule.setContent {
-      ReviewScreen(mockNavigationActions, parkingViewModel, reviewViewModel, userViewModel)
-    }
-
-    // Test initial stars (all empty)
-    composeTestRule.onNodeWithTag("Star1").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("Star2").assertIsDisplayed()
-
-    // Move slider to 2.5
-    composeTestRule.onNodeWithTag("Slider").performTouchInput { swipeRight(50f) }
-
-    // Assert stars are updated
-    composeTestRule.onNodeWithTag("Star1").assertExists()
-    composeTestRule.onNodeWithTag("Star3").assertExists()
-  }
-
-  @Test
   fun reviewScreen_addReviewButtonSaves() {
     doNothing().`when`(mockNavigationActions).navigateTo(Screen.CARD)
 

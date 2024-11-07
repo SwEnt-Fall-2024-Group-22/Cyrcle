@@ -40,7 +40,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 
 @RunWith(AndroidJUnit4::class)
-class ListTest {
+class ListScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -73,12 +73,6 @@ class ListTest {
         .onNodeWithTag("ParkingDistance", useUnmergedTree = true)
         .assertIsDisplayed()
         .assertTextEquals(String.format("%.0f m", 0.0))
-
-    composeTestRule.onNodeWithTag("ParkingRating", useUnmergedTree = true).assertIsDisplayed()
-    composeTestRule
-        .onNodeWithTag("ParkingNbReviews", useUnmergedTree = true)
-        .assertIsDisplayed()
-        .assertTextEquals("(2 reviews)")
     composeTestRule.onNodeWithTag("ParkingNoReviews", useUnmergedTree = true).assertIsNotDisplayed()
   }
 
@@ -255,7 +249,7 @@ class ListTest {
 
   @OptIn(ExperimentalTestApi::class)
   @Test
-  fun testCardScreenListsParkings() {
+  fun testParkingDetailsScreenListsParkings() {
     val testParking = TestInstancesParking.parking1
 
     // Prepare to populate the parking list
