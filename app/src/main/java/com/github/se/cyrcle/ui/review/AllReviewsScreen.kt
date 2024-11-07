@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -31,22 +32,37 @@ import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.review.ReviewViewModel
+import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
+import com.google.firebase.Timestamp
+import java.text.SimpleDateFormat
+import java.util.Locale
+
+fun Timestamp.toFormattedDate(): String {
+  val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+  return dateFormat.format(this.toDate())
+}
 
 @SuppressLint("StateFlowValueCalledInComposition", "Range")
 @Composable
 fun AllReviewsScreen(
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel,
-    reviewViewModel: ReviewViewModel
+    reviewViewModel: ReviewViewModel,
+    userViewModel: UserViewModel
 ) {
   val selectedParking =
       parkingViewModel.selectedParking.collectAsState().value
           ?: return Text(text = "No parking selected. Should not happen")
 
-  // Track the selected card index
   val (selectedCardIndex, setSelectedCardIndex) = remember { mutableStateOf(-1) }
+
+  val ownerHasReviewed =
+      reviewViewModel.parkingReviews.value.any {
+        it.owner == userViewModel.currentUser?.value?.userId
+      }
 
   Scaffold(
       topBar = {
@@ -65,7 +81,6 @@ fun AllReviewsScreen(
                   modifier = Modifier.fillMaxSize().padding(it),
                   horizontalAlignment = Alignment.CenterHorizontally,
                   verticalArrangement = Arrangement.SpaceBetween) {
-                    // LazyColumn for displaying reviews, each wrapped in a Card
                     LazyColumn(
                         modifier =
                             Modifier.fillMaxWidth()
@@ -76,7 +91,6 @@ fun AllReviewsScreen(
                             val curReview = reviewViewModel.parkingReviews.value[index]
 
                             if (index == selectedCardIndex) {
-                              // Display the larger composable if this card is selected
                               Box(
                                   modifier =
                                       Modifier.fillMaxWidth(2f)
@@ -86,6 +100,21 @@ fun AllReviewsScreen(
                                           .testTag("ExpandedReviewBox$index")
                                           .clickable { setSelectedCardIndex(-1) }) {
                                     Column {
+                                      userViewModel.getUserById(curReview.owner)
+                                      Text(
+                                          text =
+                                              "Owner: ${userViewModel.currentUser.value?.username!!}",
+                                          fontWeight = FontWeight.Medium,
+                                          color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                          style = MaterialTheme.typography.bodyMedium,
+                                          modifier = Modifier.testTag("ExpandedReviewOwner$index"))
+                                      Text(
+                                          text = "Date: ${curReview.time.toFormattedDate()}",
+                                          fontWeight = FontWeight.Light,
+                                          color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                          style = MaterialTheme.typography.bodySmall,
+                                          modifier = Modifier.testTag("ExpandedReviewDate$index"))
+                                      Spacer(modifier = Modifier.height(4.dp))
                                       Text(
                                           text =
                                               stringResource(R.string.all_review_rating)
@@ -105,7 +134,6 @@ fun AllReviewsScreen(
                                     }
                                   }
                             } else {
-                              // Display the regular card layout if not selected
                               Card(
                                   modifier =
                                       Modifier.fillMaxWidth()
@@ -124,6 +152,22 @@ fun AllReviewsScreen(
                                             Modifier.fillMaxWidth()
                                                 .padding(16.dp)
                                                 .testTag("ReviewCardContent$index")) {
+                                          Text(
+                                              text =
+                                                  "Owner: ${userViewModel.currentUser.value?.username!!}",
+                                              fontWeight = FontWeight.Medium,
+                                              color =
+                                                  MaterialTheme.colorScheme.onSecondaryContainer,
+                                              style = MaterialTheme.typography.bodySmall,
+                                              modifier = Modifier.testTag("ReviewOwner$index"))
+                                          Text(
+                                              text = "Date: ${curReview.time.toFormattedDate()}",
+                                              fontWeight = FontWeight.Light,
+                                              color =
+                                                  MaterialTheme.colorScheme.onSecondaryContainer,
+                                              style = MaterialTheme.typography.bodySmall,
+                                              modifier = Modifier.testTag("ReviewDate$index"))
+                                          Spacer(modifier = Modifier.height(4.dp))
                                           Text(
                                               text =
                                                   stringResource(R.string.all_review_rating)
@@ -147,6 +191,20 @@ fun AllReviewsScreen(
                             }
                           }
                         }
+                  }
+            }
+
+        Box(
+            modifier = Modifier.fillMaxSize().padding(16.dp),
+            contentAlignment = Alignment.BottomEnd) {
+              FloatingActionButton(
+                  onClick = { navigationActions.navigateTo(Screen.REVIEW) },
+                  containerColor = MaterialTheme.colorScheme.primary) {
+                    Text(
+                        text = if (ownerHasReviewed) "Edit Review" else "Add Review",
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold)
                   }
             }
       }

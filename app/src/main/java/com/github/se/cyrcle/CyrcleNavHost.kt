@@ -53,7 +53,7 @@ fun CyrcleNavHost(
         ReviewScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
       }
       composable(Screen.ALL_REVIEWS) {
-        AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel)
+        AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
       }
     }
 
