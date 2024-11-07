@@ -6,10 +6,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReviewRepository
+import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.review.TestInstancesReview
+import com.github.se.cyrcle.model.user.TestInstancesUser
+import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import org.junit.Before
 import org.junit.Rule
@@ -25,6 +28,7 @@ class AllReviewsScreenTest {
   private val navigationActions = mock(NavigationActions::class.java)
   private val parkingViewModel = ParkingViewModel(MockImageRepository(), MockParkingRepository())
   private val reviewViewModel = ReviewViewModel(MockReviewRepository())
+  private val userViewModel = UserViewModel(MockUserRepository(), MockParkingRepository())
 
   @Before
   fun setUp() {
@@ -39,7 +43,9 @@ class AllReviewsScreenTest {
   fun allReviewsScreen_displaysTopBarAndList() {
 
     composeTestRule.setContent {
-      AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel)
+      AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
+      userViewModel.setCurrentUser(TestInstancesUser.user1)
+      parkingViewModel.selectParking(TestInstancesParking.parking1)
     }
 
     composeTestRule.onNodeWithTag("AllReviewsScreenBox").assertIsDisplayed()
@@ -50,7 +56,9 @@ class AllReviewsScreenTest {
   @Test
   fun clickingReviewCard_expandsAndCollapsesCard() {
     composeTestRule.setContent {
-      AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel)
+      AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
+      userViewModel.setCurrentUser(TestInstancesUser.user1)
+      parkingViewModel.selectParking(TestInstancesParking.parking1)
     }
 
     composeTestRule.onNodeWithTag("ReviewCard0").performClick()
@@ -65,7 +73,9 @@ class AllReviewsScreenTest {
   fun clickingAnotherReviewCard_expandsCorrectCard() {
 
     composeTestRule.setContent {
-      AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel)
+      AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
+      userViewModel.setCurrentUser(TestInstancesUser.user1)
+      parkingViewModel.selectParking(TestInstancesParking.parking1)
     }
 
     composeTestRule.onNodeWithTag("ReviewCard1").performClick()
