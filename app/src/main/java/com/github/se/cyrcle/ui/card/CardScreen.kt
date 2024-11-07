@@ -52,7 +52,8 @@ fun CardScreen(
   val userSignedIn = userViewModel.isSignedIn.collectAsState(false)
   reviewViewModel.getReviewsByParking(selectedParking.uid)
   selectedParking.nbReviews = reviewViewModel.parkingReviews.value.size
-  selectedParking.avgScore = reviewViewModel.parkingReviews.value.sumOf { it.rating } / selectedParking.nbReviews
+  selectedParking.avgScore =
+      reviewViewModel.parkingReviews.value.sumOf { it.rating } / selectedParking.nbReviews
 
   Scaffold(
       topBar = {
@@ -159,18 +160,18 @@ fun CardScreen(
                                           else stringResource(R.string.no),
                                       color = Color.Gray)
                                 }
-                              Column(
-                                  modifier = Modifier.weight(1f).testTag("AverageRatingColumn")) {
-                                  Text(
-                                      text = stringResource(R.string.card_screen_rating),
-                                      style = bold)
-                                  if (selectedParking.nbReviews == 0) {
+                                Column(
+                                    modifier = Modifier.weight(1f).testTag("AverageRatingColumn")) {
                                       Text(
-                                          text =
-                                          stringResource(R.string.no_reviews)
-                                      )
-                                  } else
-                                      ScoreStars(selectedParking.avgScore, scale = 0.7f, text = "(${selectedParking.nbReviews})")
+                                          text = stringResource(R.string.card_screen_rating),
+                                          style = bold)
+                                      if (selectedParking.nbReviews == 0) {
+                                        Text(text = stringResource(R.string.no_reviews))
+                                      } else
+                                          ScoreStars(
+                                              selectedParking.avgScore,
+                                              scale = 0.7f,
+                                              text = "(${selectedParking.nbReviews})")
 
                                       Spacer(
                                           modifier =

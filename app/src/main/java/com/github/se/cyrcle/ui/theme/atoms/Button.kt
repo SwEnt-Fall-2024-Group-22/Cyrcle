@@ -262,7 +262,6 @@ fun IconButton(
       }
 }
 
-
 @Composable
 fun ScoreStars(
     score: Double,
@@ -271,45 +270,41 @@ fun ScoreStars(
     scale: Float = 1.0f,
     text: String? = null
 ) {
-    val roundedScore = (round(score * 2) / 2).coerceIn(0.0, maxStars.toDouble())
-    val fullStars = floor(roundedScore).toInt()
-    val hasHalfStar = (roundedScore - fullStars) >= 0.5
+  val roundedScore = (round(score * 2) / 2).coerceIn(0.0, maxStars.toDouble())
+  val fullStars = floor(roundedScore).toInt()
+  val hasHalfStar = (roundedScore - fullStars) >= 0.5
 
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(0.dp) // Smaller spacing between stars
-    ) {
+  Row(
+      horizontalArrangement = Arrangement.spacedBy(0.dp) // Smaller spacing between stars
+      ) {
         for (i in 1..maxStars) {
-            when {
-                i <= fullStars -> Icon(
+          when {
+            i <= fullStars ->
+                Icon(
                     imageVector = Icons.Filled.Star,
                     contentDescription = "Full Star",
                     tint = starColor,
-                    modifier = Modifier.size((30 * scale).dp)
-                )
-                i == fullStars + 1 && hasHalfStar -> Icon(
+                    modifier = Modifier.size((30 * scale).dp))
+            i == fullStars + 1 && hasHalfStar ->
+                Icon(
                     imageVector = Icons.Filled.StarHalf,
                     contentDescription = "Half Star",
                     tint = starColor,
-                    modifier = Modifier.size((30 * scale).dp)
-                )
-                else -> Icon(
+                    modifier = Modifier.size((30 * scale).dp))
+            else ->
+                Icon(
                     imageVector = Icons.Filled.StarBorder,
                     contentDescription = "Empty Star",
                     tint = starColor,
-                    modifier = Modifier.size((30 * scale).dp)
-                )
-            }
+                    modifier = Modifier.size((30 * scale).dp))
+          }
         }
 
         text?.let {
-            Spacer(modifier = Modifier.size((4 * scale).dp)) // Reduced space between stars and text
-            Text(
-                text = it,
-                color = starColor,
-                style = MaterialTheme.typography.bodyMedium
-            )
+          Spacer(modifier = Modifier.size((4 * scale).dp)) // Reduced space between stars and text
+          Text(text = it, color = starColor, style = MaterialTheme.typography.bodyMedium)
         }
-    }
+      }
 }
 
 /**
