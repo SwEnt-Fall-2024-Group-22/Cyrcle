@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.addParking
 
+import CyrcleNavHost
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
@@ -57,7 +58,8 @@ class AddScreensNavigationTest {
         reviewViewModel,
         userViewModel,
         mapViewModel,
-        addressViewModel)
+        addressViewModel,
+        false)
     return listOf<Any>(
         navigationActions,
         parkingViewModel,

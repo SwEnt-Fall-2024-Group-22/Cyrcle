@@ -60,7 +60,8 @@ class MapScreenTest {
   @Test
   fun testMapIsDisplayed() {
     composeTestRule.setContent {
-      MapScreen(mockNavigation, parkingViewModel, userViewModel, mapViewModel)
+      MapScreen(
+          mockNavigation, parkingViewModel, userViewModel, mapViewModel, permissionGranted = false)
     }
 
     composeTestRule.onNodeWithTag("MapScreen").assertIsDisplayed()
