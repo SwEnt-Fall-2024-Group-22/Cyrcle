@@ -2,7 +2,6 @@ package com.github.se.cyrcle.model.review
 
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.android.gms.tasks.Tasks
-import com.google.firebase.Timestamp
 import com.google.firebase.firestore.*
 import org.junit.Assert.*
 import org.junit.Before
@@ -140,11 +139,11 @@ class ReviewRepositoryFirestoreTest {
     // Verify serialization by checking the data passed to Firestore on `set`
     `when`(mockDocumentReference.set(any())).thenAnswer { invocation ->
       val data = invocation.arguments[0] as Map<String, Any>
-        assertEquals(data["uid"], reviewData["uid"])
-        assertEquals(data["owner"], reviewData["owner"])
-        assertEquals(data["text"], reviewData["text"])
-        assertEquals(data["rating"], reviewData["rating"])
-        assertEquals(data["parking"], reviewData["parking"])
+      assertEquals(data["uid"], reviewData["uid"])
+      assertEquals(data["owner"], reviewData["owner"])
+      assertEquals(data["text"], reviewData["text"])
+      assertEquals(data["rating"], reviewData["rating"])
+      assertEquals(data["parking"], reviewData["parking"])
       Tasks.forResult(null)
     }
 

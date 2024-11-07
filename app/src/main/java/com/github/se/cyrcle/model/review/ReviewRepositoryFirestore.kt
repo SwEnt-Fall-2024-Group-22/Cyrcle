@@ -10,7 +10,6 @@ import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
-import com.google.gson.JsonPrimitive
 import com.google.gson.JsonSerializationContext
 import com.google.gson.JsonSerializer
 import com.google.gson.reflect.TypeToken
@@ -18,21 +17,32 @@ import java.lang.reflect.Type
 import javax.inject.Inject
 
 class TimestampAdapter : JsonSerializer<Timestamp>, JsonDeserializer<Timestamp> {
-    override fun serialize(src: Timestamp, typeOfSrc: Type, context: JsonSerializationContext): JsonElement {
-        val jsonObject = JsonObject()
-        jsonObject.addProperty("seconds", src.seconds.toString())  // Convert to String to prevent scientific notation
-        jsonObject.addProperty("nanoseconds", src.nanoseconds.toString())  // Convert to String to prevent scientific notation
-        return jsonObject
-    }
+  override fun serialize(
+      src: Timestamp,
+      typeOfSrc: Type,
+      context: JsonSerializationContext
+  ): JsonElement {
+    val jsonObject = JsonObject()
+    jsonObject.addProperty(
+        "seconds", src.seconds.toString()) // Convert to String to prevent scientific notation
+    jsonObject.addProperty(
+        "nanoseconds",
+        src.nanoseconds.toString()) // Convert to String to prevent scientific notation
+    return jsonObject
+  }
 
-    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): Timestamp {
-        val jsonObject = json.asJsonObject
-        val seconds = jsonObject.get("seconds").asString.toLong()  // Convert back to Long from String
-        val nanoseconds = jsonObject.get("nanoseconds").asString.toInt()  // Convert back to Int from String
-        return Timestamp(seconds, nanoseconds)
-    }
+  override fun deserialize(
+      json: JsonElement,
+      typeOfT: Type,
+      context: JsonDeserializationContext
+  ): Timestamp {
+    val jsonObject = json.asJsonObject
+    val seconds = jsonObject.get("seconds").asString.toLong() // Convert back to Long from String
+    val nanoseconds =
+        jsonObject.get("nanoseconds").asString.toInt() // Convert back to Int from String
+    return Timestamp(seconds, nanoseconds)
+  }
 }
-
 
 class ReviewRepositoryFirestore @Inject constructor(private val db: FirebaseFirestore) :
     ReviewRepository {
@@ -143,39 +153,40 @@ class ReviewRepositoryFirestore @Inject constructor(private val db: FirebaseFire
         .addOnFailureListener { onFailure(it) }
   }
 
-    private val gson: Gson = GsonBuilder()
-        .registerTypeAdapter(Timestamp::class.java, TimestampAdapter()) // Register Timestamp adapter
-        .create()
+  private val gson: Gson =
+      GsonBuilder()
+          .registerTypeAdapter(
+              Timestamp::class.java, TimestampAdapter()) // Register Timestamp adapter
+          .create()
 
-    fun serializeReview(review: Review): Map<String, Any> {
-        // Serialize the Review object directly to a Map using Gson
-        val json = gson.toJson(review)
-        val type = object : TypeToken<Map<String, Any>>() {}.type
-        return gson.fromJson(json, type)
+  fun serializeReview(review: Review): Map<String, Any> {
+    // Serialize the Review object directly to a Map using Gson
+    val json = gson.toJson(review)
+    val type = object : TypeToken<Map<String, Any>>() {}.type
+    return gson.fromJson(json, type)
+  }
+
+  fun deserializeReview(data: Map<String, Any>): Review {
+    val processedData = data.toMutableMap()
+    val timeMap = data["time"] as? Map<String, Any>
+    if (timeMap != null) {
+      val timestamp = createTimestamp(timeMap)
+      if (timestamp != null) {
+        processedData["time"] = timestamp
+      }
     }
+    val json = gson.toJson(processedData)
+    return gson.fromJson(json, Review::class.java)
+  }
 
-    fun deserializeReview(data: Map<String, Any>): Review {
-        val processedData = data.toMutableMap()
-        val timeMap = data["time"] as? Map<String, Any>
-        if (timeMap != null) {
-            val timestamp = createTimestamp(timeMap)
-            if (timestamp != null) {
-                processedData["time"] = timestamp
-            }
-        }
-        val json = gson.toJson(processedData)
-        return gson.fromJson(json, Review::class.java)
+  fun createTimestamp(timeAttributes: Map<String, Any>): Timestamp? {
+    val seconds = timeAttributes["seconds"] as? Number
+    val nanoseconds = timeAttributes["nanoseconds"] as? Number
+
+    return if (seconds != null && nanoseconds != null) {
+      Timestamp(seconds.toLong(), nanoseconds.toInt())
+    } else {
+      null
     }
-
-    fun createTimestamp(timeAttributes: Map<String, Any>): Timestamp? {
-        val seconds = timeAttributes["seconds"] as? Number
-        val nanoseconds = timeAttributes["nanoseconds"] as? Number
-
-        return if (seconds != null && nanoseconds != null) {
-            Timestamp(seconds.toLong(), nanoseconds.toInt())
-        } else {
-            null
-        }
-    }
-
+  }
 }
