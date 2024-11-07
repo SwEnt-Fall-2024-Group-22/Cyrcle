@@ -64,6 +64,7 @@ class ListScreenTest {
       SpotCard(mockNavigationActions, parkingViewModel, TestInstancesParking.parking1, 0.0)
     }
 
+    Thread.sleep(1000)
     composeTestRule.onNodeWithTag("SpotListItem", useUnmergedTree = true).assertIsDisplayed()
     composeTestRule
         .onNodeWithTag("ParkingName", useUnmergedTree = true)
@@ -74,6 +75,7 @@ class ListScreenTest {
         .assertIsDisplayed()
         .assertTextEquals(String.format("%.0f m", 0.0))
 
+      Thread.sleep(1000)
     composeTestRule.onNodeWithTag("ParkingRating", useUnmergedTree = true).assertIsDisplayed()
     composeTestRule
         .onNodeWithTag("ParkingNbReviews", useUnmergedTree = true)

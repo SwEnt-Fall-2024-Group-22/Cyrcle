@@ -1,4 +1,4 @@
-package com.github.se.cyrcle.ui.theme.colorAndTheme
+package com.github.se.cyrcle.ui.theme
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -28,9 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
-import com.github.se.cyrcle.ui.theme.Black
-import com.github.se.cyrcle.ui.theme.ColorLevel
-import com.github.se.cyrcle.ui.theme.LightColorScheme
 import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.ExtendedFloatingActionButton
 import com.github.se.cyrcle.ui.theme.atoms.FloatingActionButton
