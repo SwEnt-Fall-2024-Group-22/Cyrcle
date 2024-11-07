@@ -132,19 +132,9 @@ fun MapScreen(
 
             // When map is loaded, check if the location permission is granted and initialize the
             // location component
-
-            val mapLoadedCallback =
-                object : OnMapLoadedListener {
-
-                  override fun onMapLoaded(eventData: MapLoadedEventData) {
-                    if (permissionGranted) {
-                      initLocationComponent(mapView, mapViewModel)
-                    }
-                  }
-                }
-
-            // add the listener to the map
-            mapView.mapboxMap.addOnMapLoadedListener(mapLoadedCallback)
+              if(permissionGranted){
+                initLocationComponent(mapView, mapViewModel)
+              }
 
             val viewAnnotationManager = mapView.viewAnnotationManager
 
@@ -361,6 +351,13 @@ private fun drawMarkers(
             .withData(Gson().toJsonTree(it)))
   }
 }
+
+/**
+ * Initialize the location component of the map.
+ *
+ * @param mapView the MapView to initialize the location component on
+ * @param mapViewModel the MapViewModel to update the camera position
+ */
 
 private fun initLocationComponent(mapView: MapView, mapViewModel: MapViewModel) {
   val locationComponentPlugin = mapView.location
