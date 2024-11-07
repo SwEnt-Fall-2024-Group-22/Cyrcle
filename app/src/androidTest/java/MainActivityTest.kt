@@ -1,5 +1,3 @@
-package com.github.se.cyrcle.ui.testEnd2end
-
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
