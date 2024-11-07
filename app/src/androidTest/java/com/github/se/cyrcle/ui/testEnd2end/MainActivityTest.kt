@@ -34,7 +34,7 @@ class MainActivityTest {
   private lateinit var authRobot: AuthScreenRobot
   private lateinit var mapRobot: MapScreenRobot
   private lateinit var listRobot: ListScreenRobot
-  private lateinit var cardRobot: CardScreenRobot
+  private lateinit var cardRobot: ParkingDetailsScreenRobot
 
   @Before
   fun setUp() {
@@ -44,7 +44,7 @@ class MainActivityTest {
     authRobot = AuthScreenRobot(composeTestRule)
     mapRobot = MapScreenRobot(composeTestRule)
     listRobot = ListScreenRobot(composeTestRule)
-    cardRobot = CardScreenRobot(composeTestRule)
+    cardRobot = ParkingDetailsScreenRobot(composeTestRule)
   }
 
   @Test
@@ -58,11 +58,11 @@ class MainActivityTest {
     listRobot.assertListScreen()
     listRobot.toCard(0)
 
-    cardRobot.assertCardScreen()
+    cardRobot.assertParkingDetailsScreen()
   }
 
-  private class CardScreenRobot(val composeTestRule: ComposeTestRule) {
-    fun assertCardScreen() {
+  private class ParkingDetailsScreenRobot(val composeTestRule: ComposeTestRule) {
+    fun assertParkingDetailsScreen() {
       composeTestRule.onNodeWithTag("TopAppBar").assertIsDisplayed()
       composeTestRule.onNodeWithTag("RowCapacityRack").assertIsDisplayed()
       composeTestRule.onNodeWithTag("RowProtectionPrice").assertIsDisplayed()
@@ -98,7 +98,7 @@ class MainActivityTest {
           .assertHasClickAction()
           .performClick()
 
-      composeTestRule.waitUntilExactlyOneExists(hasTestTag("CardScreen"))
+      composeTestRule.waitUntilExactlyOneExists(hasTestTag("ParkingDetailsScreen"))
     }
 
     fun assertListScreen() {

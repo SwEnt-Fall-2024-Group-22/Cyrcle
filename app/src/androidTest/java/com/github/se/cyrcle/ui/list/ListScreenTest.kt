@@ -255,7 +255,7 @@ class ListScreenTest {
 
   @OptIn(ExperimentalTestApi::class)
   @Test
-  fun testCardScreenListsParkings() {
+  fun testParkingDetailsScreenListsParkings() {
     val testParking = TestInstancesParking.parking1
 
     // Prepare to populate the parking list

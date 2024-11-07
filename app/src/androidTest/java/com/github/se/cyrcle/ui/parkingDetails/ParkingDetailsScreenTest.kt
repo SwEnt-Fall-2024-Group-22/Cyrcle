@@ -1,4 +1,4 @@
-package com.github.se.cyrcle.ui.card
+package com.github.se.cyrcle.ui.parkingDetails
 
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
@@ -38,7 +38,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 
 @RunWith(AndroidJUnit4::class)
-class CardScreenTest {
+class ParkingDetailsScreenTest {
   private lateinit var parkingRepository: ParkingRepository
   private lateinit var imageRepository: ImageRepository
   private lateinit var userRepository: UserRepository
@@ -72,7 +72,7 @@ class CardScreenTest {
   fun displayAllComponents() {
     parkingViewModel.selectParking(TestInstancesParking.parking1)
     composeTestRule.setContent {
-      CardScreen(navigationActions, parkingViewModel, userViewModel, reviewViewModel)
+      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel, reviewViewModel)
     }
 
     // Verify the top app bar
@@ -101,7 +101,7 @@ class CardScreenTest {
   fun componentsDisplayCorrectValues() {
     parkingViewModel.selectParking(TestInstancesParking.parking1)
     composeTestRule.setContent {
-      CardScreen(navigationActions, parkingViewModel, userViewModel, reviewViewModel)
+      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel, reviewViewModel)
     }
 
     composeTestRule
@@ -128,7 +128,7 @@ class CardScreenTest {
   fun addReviewButtonBehavesCorrectly() {
     parkingViewModel.selectParking(TestInstancesParking.parking1)
     composeTestRule.setContent {
-      CardScreen(navigationActions, parkingViewModel, userViewModel, reviewViewModel)
+      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel, reviewViewModel)
     }
 
     composeTestRule.onNodeWithTag("AddReviewButton").assertIsDisplayed().performClick()
@@ -145,7 +145,7 @@ class CardScreenTest {
   fun displayTitleAndMultipleImages() {
     parkingViewModel.selectParking(TestInstancesParking.parking2)
     composeTestRule.setContent {
-      CardScreen(navigationActions, parkingViewModel, userViewModel, reviewViewModel)
+      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel, reviewViewModel)
     }
 
     composeTestRule

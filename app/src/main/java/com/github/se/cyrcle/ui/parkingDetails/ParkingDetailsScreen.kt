@@ -1,4 +1,4 @@
-package com.github.se.cyrcle.ui.card
+package com.github.se.cyrcle.ui.parkingDetails
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
@@ -40,7 +40,7 @@ import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun CardScreen(
+fun ParkingDetailsScreen(
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel,
     userViewModel: UserViewModel,
@@ -62,12 +62,12 @@ fun CardScreen(
             stringResource(R.string.card_screen_description)
                 .format(selectedParking.optName ?: stringResource(R.string.default_parking_name)))
       },
-      modifier = Modifier.testTag("CardScreen")) { padding ->
+      modifier = Modifier.testTag("ParkingDetailsScreen")) { padding ->
         Box(
             modifier =
                 Modifier.fillMaxSize()
                     .background(MaterialTheme.colorScheme.background)
-                    .testTag("CardScreenBox") // Test tag for main container
+                    .testTag("ParkingDetailsScreenBox") // Test tag for main container
             ) {
               Column(
                   modifier = Modifier.fillMaxSize().padding(padding),
