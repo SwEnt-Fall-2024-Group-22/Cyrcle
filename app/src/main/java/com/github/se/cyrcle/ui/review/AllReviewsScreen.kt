@@ -60,8 +60,12 @@ fun AllReviewsScreen(
   val (selectedCardIndex, setSelectedCardIndex) = remember { mutableStateOf(-1) }
 
   val ownerHasReviewed =
-      reviewViewModel.parkingReviews.value.any {
-        it.owner == userViewModel.currentUser?.value?.userId
+      if (userViewModel.currentUser.value?.userId != null) {
+        reviewViewModel.parkingReviews.value.any {
+          it.owner == userViewModel.currentUser.value?.userId
+        }
+      } else {
+        false
       }
 
   Scaffold(
@@ -192,21 +196,20 @@ fun AllReviewsScreen(
                   }
             }
 
-
-      if(userViewModel.currentUser.value?.userId != null){
-        Box(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
-            contentAlignment = Alignment.BottomEnd) {
-              FloatingActionButton(
-                  onClick = { navigationActions.navigateTo(Screen.REVIEW) },
-                  containerColor = MaterialTheme.colorScheme.primary) {
-                    Text(
-                        text = if (ownerHasReviewed) "Edit Review" else "Add Review",
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold)
-                  }
-            }
-      }
+        if (userViewModel.currentUser.value?.userId != null) {
+          Box(
+              modifier = Modifier.fillMaxSize().padding(16.dp),
+              contentAlignment = Alignment.BottomEnd) {
+                FloatingActionButton(
+                    onClick = { navigationActions.navigateTo(Screen.REVIEW) },
+                    containerColor = MaterialTheme.colorScheme.primary) {
+                      Text(
+                          text = if (ownerHasReviewed) "Edit Review" else "Add Review",
+                          color = MaterialTheme.colorScheme.onPrimary,
+                          style = MaterialTheme.typography.bodyMedium,
+                          fontWeight = FontWeight.Bold)
+                    }
+              }
+        }
       }
 }
