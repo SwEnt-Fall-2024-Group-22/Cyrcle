@@ -1,11 +1,20 @@
 package com.github.se.cyrcle.ui.theme.atoms
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
+import androidx.compose.material.icons.filled.StarHalf
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFloatingActionButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.SmallFloatingActionButton
@@ -14,8 +23,10 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.disabledColor
 import com.github.se.cyrcle.ui.theme.getButtonColors
@@ -23,6 +34,8 @@ import com.github.se.cyrcle.ui.theme.getColor
 import com.github.se.cyrcle.ui.theme.getIconButtonColors
 import com.github.se.cyrcle.ui.theme.getOnColor
 import com.github.se.cyrcle.ui.theme.onDisabledColor
+import kotlin.math.floor
+import kotlin.math.round
 
 /**
  * Create a themed small floating action button, with simplified arguments.
@@ -246,6 +259,52 @@ fun IconButton(
             imageVector = icon,
             contentDescription = contentDescription,
             modifier = Modifier.testTag("${testTag}Icon"))
+      }
+}
+
+@Composable
+fun ScoreStars(
+    score: Double,
+    maxStars: Int = 5,
+    starColor: Color = MaterialTheme.colorScheme.primary,
+    scale: Float = 1.0f,
+    text: String? = null,
+    testTag: String = "StarButton"
+) {
+  val roundedScore = (round(score * 2) / 2).coerceIn(0.0, maxStars.toDouble())
+  val fullStars = floor(roundedScore).toInt()
+  val hasHalfStar = (roundedScore - fullStars) >= 0.5
+
+  Row(
+      horizontalArrangement = Arrangement.spacedBy(0.dp) // Smaller spacing between stars
+      ) {
+        for (i in 1..maxStars) {
+          when {
+            i <= fullStars ->
+                Icon(
+                    imageVector = Icons.Filled.Star,
+                    contentDescription = "Full Star",
+                    tint = starColor,
+                    modifier = Modifier.size((30 * scale).dp).testTag("${testTag}Icon$i"))
+            i == fullStars + 1 && hasHalfStar ->
+                Icon(
+                    imageVector = Icons.Filled.StarHalf,
+                    contentDescription = "Half Star",
+                    tint = starColor,
+                    modifier = Modifier.size((30 * scale).dp).testTag("${testTag}Icon$i"))
+            else ->
+                Icon(
+                    imageVector = Icons.Filled.StarBorder,
+                    contentDescription = "Empty Star",
+                    tint = starColor,
+                    modifier = Modifier.size((30 * scale).dp).testTag("${testTag}Icon$i"))
+          }
+        }
+
+        text?.let {
+          Spacer(modifier = Modifier.size((4 * scale).dp)) // Reduced space between stars and text
+          Text(text = it, color = starColor, style = MaterialTheme.typography.bodyMedium)
+        }
       }
 }
 

@@ -1,4 +1,4 @@
-package com.github.se.cyrcle.ui.card
+package com.github.se.cyrcle.ui.parkingDetails
 
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
@@ -11,6 +11,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
+import com.github.se.cyrcle.di.mocks.MockReviewRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.parking.ImageRepository
 import com.github.se.cyrcle.model.parking.ParkingCapacity
@@ -19,6 +20,8 @@ import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
+import com.github.se.cyrcle.model.review.ReviewRepository
+import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.model.user.UserRepository
 import com.github.se.cyrcle.model.user.UserViewModel
@@ -35,13 +38,15 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 
 @RunWith(AndroidJUnit4::class)
-class CardScreenTest {
+class ParkingDetailsScreenTest {
   private lateinit var parkingRepository: ParkingRepository
   private lateinit var imageRepository: ImageRepository
   private lateinit var userRepository: UserRepository
+  private lateinit var reviewRepository: ReviewRepository
 
   private lateinit var userViewModel: UserViewModel
   private lateinit var parkingViewModel: ParkingViewModel
+  private lateinit var reviewViewModel: ReviewViewModel
 
   private lateinit var navigationActions: NavigationActions
 
@@ -54,9 +59,11 @@ class CardScreenTest {
     parkingRepository = MockParkingRepository()
     imageRepository = MockImageRepository()
     userRepository = MockUserRepository()
+    reviewRepository = MockReviewRepository()
 
     parkingViewModel = ParkingViewModel(imageRepository, parkingRepository)
     userViewModel = UserViewModel(userRepository, parkingRepository)
+    reviewViewModel = ReviewViewModel(reviewRepository)
 
     `when`(navigationActions.currentRoute()).thenReturn(Screen.CARD)
   }
@@ -64,7 +71,9 @@ class CardScreenTest {
   @Test
   fun displayAllComponents() {
     parkingViewModel.selectParking(TestInstancesParking.parking1)
-    composeTestRule.setContent { CardScreen(navigationActions, parkingViewModel, userViewModel) }
+    composeTestRule.setContent {
+      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
+    }
 
     // Verify the top app bar
     composeTestRule.onNodeWithTag("TopAppBar").assertIsDisplayed()
@@ -91,7 +100,9 @@ class CardScreenTest {
   @Test
   fun componentsDisplayCorrectValues() {
     parkingViewModel.selectParking(TestInstancesParking.parking1)
-    composeTestRule.setContent { CardScreen(navigationActions, parkingViewModel, userViewModel) }
+    composeTestRule.setContent {
+      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
+    }
 
     composeTestRule
         .onNodeWithTag("TopAppBarTitle")
@@ -116,7 +127,9 @@ class CardScreenTest {
   @Test
   fun addReviewButtonBehavesCorrectly() {
     parkingViewModel.selectParking(TestInstancesParking.parking1)
-    composeTestRule.setContent { CardScreen(navigationActions, parkingViewModel, userViewModel) }
+    composeTestRule.setContent {
+      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
+    }
 
     composeTestRule.onNodeWithTag("AddReviewButton").assertIsDisplayed().performClick()
 
@@ -131,7 +144,9 @@ class CardScreenTest {
   @Test
   fun displayTitleAndMultipleImages() {
     parkingViewModel.selectParking(TestInstancesParking.parking2)
-    composeTestRule.setContent { CardScreen(navigationActions, parkingViewModel, userViewModel) }
+    composeTestRule.setContent {
+      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
+    }
 
     composeTestRule.onNodeWithTag("TopAppBarTitle").assertTextContains("Description of Rude épais")
     composeTestRule.onNodeWithTag("ParkingImagesRow").onChildren().assertCountEquals(2)

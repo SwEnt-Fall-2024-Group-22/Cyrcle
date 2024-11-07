@@ -1,5 +1,6 @@
-package com.github.se.cyrcle.ui.card
+package com.github.se.cyrcle.ui.parkingDetails
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,12 +32,14 @@ import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.Button
+import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.bold
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun CardScreen(
+fun ParkingDetailsScreen(
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel,
     userViewModel: UserViewModel
@@ -44,7 +47,6 @@ fun CardScreen(
   val selectedParking =
       parkingViewModel.selectedParking.collectAsState().value
           ?: return Text(stringResource(R.string.no_selected_parking_error))
-
   val userSignedIn = userViewModel.isSignedIn.collectAsState(false)
 
   Scaffold(
@@ -54,12 +56,12 @@ fun CardScreen(
             stringResource(R.string.card_screen_description)
                 .format(selectedParking.optName ?: stringResource(R.string.default_parking_name)))
       },
-      modifier = Modifier.testTag("CardScreen")) { padding ->
+      modifier = Modifier.testTag("ParkingDetailsScreen")) { padding ->
         Box(
             modifier =
                 Modifier.fillMaxSize()
                     .background(MaterialTheme.colorScheme.background)
-                    .testTag("CardScreenBox") // Test tag for main container
+                    .testTag("ParkingDetailsScreenBox") // Test tag for main container
             ) {
               Column(
                   modifier = Modifier.fillMaxSize().padding(padding),
@@ -157,12 +159,13 @@ fun CardScreen(
                                       Text(
                                           text = stringResource(R.string.card_screen_rating),
                                           style = bold)
-                                      Text(
-                                          text =
-                                              if (selectedParking.nbReviews == 0)
-                                                  stringResource(R.string.no_reviews)
-                                              else selectedParking.avgScore.toString(),
-                                          color = Color.Gray)
+                                      if (selectedParking.nbReviews == 0) {
+                                        Text(text = stringResource(R.string.no_reviews))
+                                      } else
+                                          ScoreStars(
+                                              selectedParking.avgScore,
+                                              scale = 0.8f,
+                                              text = "(${selectedParking.nbReviews})")
 
                                       Spacer(
                                           modifier =

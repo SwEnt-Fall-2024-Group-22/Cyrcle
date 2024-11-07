@@ -1,6 +1,7 @@
 package com.github.se.cyrcle
 
 import CyrcleNavHost
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -42,6 +43,7 @@ class MainActivity : ComponentActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
     permissionsHandler.initHandler(this)
     Log.e("MainActivity", "PermissionsHandler initialized")
@@ -51,6 +53,7 @@ class MainActivity : ComponentActivity() {
     val parkingViewModel = ParkingViewModel(imageRepository, parkingRepository)
     val mapViewModel = MapViewModel()
     val addressViewModel = AddressViewModel(addressRepository)
+
     setContent {
       CyrcleTheme {
         Surface(modifier = Modifier.fillMaxSize()) {

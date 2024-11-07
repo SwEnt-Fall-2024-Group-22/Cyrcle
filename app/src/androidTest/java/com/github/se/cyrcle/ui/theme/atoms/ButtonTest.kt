@@ -5,9 +5,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.ui.theme.ColorLevel
@@ -237,5 +241,84 @@ class ButtonTest {
     composeTestRule.onNodeWithTag(tag1).assertIsDisplayed()
     composeTestRule.onNodeWithTag(tag1).performClick()
     assertEquals(b, true)
+  }
+
+  @Test
+  fun displayScoreStars_fullStars() {
+    val tag = "StarButton"
+
+    composeTestRule.setContent {
+      ScoreStars(score = 3.0, maxStars = 5, text = "3.0", testTag = tag)
+    }
+
+    // Check for 3 full stars and 2 empty stars
+    composeTestRule.onAllNodesWithContentDescription("Full Star").assertCountEquals(3)
+    composeTestRule.onAllNodesWithContentDescription("Empty Star").assertCountEquals(2)
+  }
+
+  @Test
+  fun displayScoreStars_halfStar() {
+    val tag = "StarButton"
+
+    composeTestRule.setContent {
+      ScoreStars(score = 3.5, maxStars = 5, text = "3.5", testTag = tag)
+    }
+
+    // Check for 3 full stars, 1 half star, and 1 empty star
+    composeTestRule.onAllNodesWithContentDescription("Full Star").assertCountEquals(3)
+    composeTestRule.onAllNodesWithContentDescription("Half Star").assertCountEquals(1)
+    composeTestRule.onAllNodesWithContentDescription("Empty Star").assertCountEquals(1)
+  }
+
+  @Test
+  fun displayScoreStars_emptyStars() {
+    val tag = "StarButton"
+
+    composeTestRule.setContent {
+      ScoreStars(score = 0.0, maxStars = 5, text = "0.0", testTag = tag)
+    }
+
+    // Check for 5 empty stars
+    composeTestRule.onAllNodesWithContentDescription("Empty Star").assertCountEquals(5)
+  }
+
+  @Test
+  fun displayScoreStars_maxStars() {
+    val tag = "StarButton"
+
+    composeTestRule.setContent {
+      ScoreStars(score = 5.0, maxStars = 5, text = "5.0", testTag = tag)
+    }
+
+    // Check for 5 full stars
+    composeTestRule.onAllNodesWithContentDescription("Full Star").assertCountEquals(5)
+  }
+
+  @Test
+  fun displayScoreStars_withText() {
+    val tag = "StarButton"
+
+    composeTestRule.setContent {
+      ScoreStars(score = 4.0, maxStars = 5, text = "4.0", testTag = tag)
+    }
+
+    // Check for 4 full stars, 1 empty star, and the text label "4.0"
+    composeTestRule.onAllNodesWithContentDescription("Full Star").assertCountEquals(4)
+    composeTestRule.onAllNodesWithContentDescription("Empty Star").assertCountEquals(1)
+
+    // Verify the text label is displayed
+    composeTestRule.onNodeWithText("4.0").assertExists()
+  }
+
+  @Test
+  fun displayScoreStars_scaledStars() {
+    val tag = "StarButton"
+
+    composeTestRule.setContent {
+      ScoreStars(score = 3.0, maxStars = 5, scale = 1.5f, text = "3.0", testTag = tag)
+    }
+
+    // Check for 3 full stars and confirm the presence of the component
+    composeTestRule.onAllNodesWithContentDescription("Full Star").assertCountEquals(3)
   }
 }

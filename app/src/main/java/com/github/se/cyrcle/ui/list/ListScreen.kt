@@ -54,6 +54,7 @@ import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
+import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.atoms.ToggleButton
@@ -312,14 +313,7 @@ fun SpotCard(
             Spacer(modifier = Modifier.height(4.dp))
             if (parking.nbReviews > 0) {
               Row {
-                Text(
-                    text =
-                        stringResource(R.string.list_screen_rating)
-                            .format(parking.avgScore), // TODO: Replace with star composable
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    testTag = "ParkingRating")
-                // Number of reviews
+                ScoreStars(parking.avgScore, scale = 0.8f) // TODO: Replace with star composable
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text =
