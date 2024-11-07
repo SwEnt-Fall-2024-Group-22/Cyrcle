@@ -40,7 +40,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 
 @RunWith(AndroidJUnit4::class)
-class ListTest {
+class ListScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
 

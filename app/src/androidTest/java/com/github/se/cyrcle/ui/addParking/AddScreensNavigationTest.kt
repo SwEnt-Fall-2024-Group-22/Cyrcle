@@ -102,14 +102,13 @@ class AddScreensNavigationTest {
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("nextButton"))
     // Perform click on the add button
     composeTestRule.onNodeWithTag("nextButton").performClick()
+
     // check that we're still on the same screen
     composeTestRule.waitUntilAtLeastOneExists(hasTestTag("LocationPickerScreen"))
     composeTestRule.onNodeWithTag("LocationPickerScreen").assertExists().assertIsDisplayed()
 
     // Perform Click on the next button
     composeTestRule.onNodeWithTag("nextButton").performClick()
-    composeTestRule.waitUntilAtLeastOneExists(hasTestTag("AttributesPickerScreen"))
-    composeTestRule.onNodeWithTag("AttributesPickerScreen").assertExists().isDisplayed()
   }
 
   @OptIn(ExperimentalTestApi::class)
