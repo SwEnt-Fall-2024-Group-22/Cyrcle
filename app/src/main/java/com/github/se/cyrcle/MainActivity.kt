@@ -2,6 +2,7 @@ package com.github.se.cyrcle
 
 import CyrcleNavHost
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,13 +38,13 @@ class MainActivity : ComponentActivity() {
 
   @Inject lateinit var addressRepository: AddressRepository
 
-  private lateinit var permissionsHandler: PermissionsHandler
+  @Inject lateinit var permissionsHandler: PermissionHandlerInterface
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    permissionsHandler = PermissionsHandler(this)
-    permissionsHandler.onCreate(savedInstanceState)
+      permissionsHandler.initHandler(this)
+      Log.e("MainActivity", "PermissionsHandler initialized")
 
     val reviewViewModel = ReviewViewModel(reviewRepository)
     val userViewModel = UserViewModel(userRepository, parkingRepository)

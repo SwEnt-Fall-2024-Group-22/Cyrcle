@@ -4,15 +4,18 @@ import android.app.Activity
 import android.os.Bundle
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
+import javax.inject.Inject
 
 /**
  * Handles permissions for the app.
  *
  * @param activity the activity that the permissions are requested from
  */
-class PermissionsHandler(private val activity: Activity) {
+class PermissionsHandler @Inject constructor() : PermissionHandlerInterface {
 
   lateinit var permissionsManager: PermissionsManager
+
+  lateinit var activity: Activity
 
   /** Listener for permissions. */
   private val permissionsListener: PermissionsListener =
@@ -33,12 +36,13 @@ class PermissionsHandler(private val activity: Activity) {
         override fun onPermissionResult(granted: Boolean) {}
       }
 
-  /**
-   * Called when the activity is created.
-   *
-   * @param savedInstanceState the saved instance state
-   */
-  fun onCreate(savedInstanceState: Bundle?) {
+    /**
+     * Called when the activity is created.
+     *
+     * @param savedInstanceState the saved instance state
+     */
+    override fun initHandler(activity: Activity) {
+    this.activity = activity
     if (!PermissionsManager.areLocationPermissionsGranted(activity)) {
       permissionsManager = PermissionsManager(permissionsListener)
       permissionsManager.requestLocationPermissions(activity)
