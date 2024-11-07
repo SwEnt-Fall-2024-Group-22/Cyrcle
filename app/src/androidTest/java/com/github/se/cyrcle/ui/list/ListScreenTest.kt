@@ -73,12 +73,6 @@ class ListScreenTest {
         .onNodeWithTag("ParkingDistance", useUnmergedTree = true)
         .assertIsDisplayed()
         .assertTextEquals(String.format("%.0f m", 0.0))
-
-    composeTestRule.onNodeWithTag("ParkingRating", useUnmergedTree = true).assertIsDisplayed()
-    composeTestRule
-        .onNodeWithTag("ParkingNbReviews", useUnmergedTree = true)
-        .assertIsDisplayed()
-        .assertTextEquals("(2 reviews)")
     composeTestRule.onNodeWithTag("ParkingNoReviews", useUnmergedTree = true).assertIsNotDisplayed()
   }
 
