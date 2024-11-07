@@ -8,11 +8,20 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+/**
+ * A module that provides the [PermissionsHandler] implementation of the
+ * [PermissionHandlerInterface] interface.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class PermissionModule {
 
-    @Binds
-    @Singleton
-    abstract fun bindPermissionsHandler(permissionHandler: PermissionsHandler): PermissionHandlerInterface
+  /**
+   * Binds the [PermissionsHandler] implementation of the [PermissionHandlerInterface] interface.
+   */
+  @Binds
+  @Singleton
+  abstract fun bindPermissionsHandler(
+      permissionHandler: PermissionsHandler
+  ): PermissionHandlerInterface
 }

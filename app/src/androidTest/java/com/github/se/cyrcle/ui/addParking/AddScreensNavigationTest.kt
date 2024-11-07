@@ -80,7 +80,12 @@ class AddScreensNavigationTest {
       val mapViewModel = list[4] as MapViewModel
 
       userViewModel.setCurrentUser(User(userId = "default", username = "sayMyName", email = ""))
-      MapScreen(navigationActions, parkingViewModel, userViewModel, mapViewModel, permissionGranted = false)
+      MapScreen(
+          navigationActions,
+          parkingViewModel,
+          userViewModel,
+          mapViewModel,
+          permissionGranted = false)
     }
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("addButton"))
     // Perform click on the add button

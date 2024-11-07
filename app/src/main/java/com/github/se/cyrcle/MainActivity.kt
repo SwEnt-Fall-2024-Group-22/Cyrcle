@@ -43,8 +43,8 @@ class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-      permissionsHandler.initHandler(this)
-      Log.e("MainActivity", "PermissionsHandler initialized")
+    permissionsHandler.initHandler(this)
+    Log.e("MainActivity", "PermissionsHandler initialized")
 
     val reviewViewModel = ReviewViewModel(reviewRepository)
     val userViewModel = UserViewModel(userRepository, parkingRepository)

@@ -1,8 +1,14 @@
 package com.github.se.cyrcle
 
 import android.app.Activity
-import android.os.Bundle
 
+/** Interface for handling permissions. */
 interface PermissionHandlerInterface {
-    fun initHandler(activity: Activity)
+
+  /**
+   * Initializes the permissions handler.
+   *
+   * @param activity the activity
+   */
+  fun initHandler(activity: Activity)
 }

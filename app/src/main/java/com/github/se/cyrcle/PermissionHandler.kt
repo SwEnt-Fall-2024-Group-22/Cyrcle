@@ -1,16 +1,11 @@
 package com.github.se.cyrcle
 
 import android.app.Activity
-import android.os.Bundle
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
 import javax.inject.Inject
 
-/**
- * Handles permissions for the app.
- *
- * @param activity the activity that the permissions are requested from
- */
+/** Handles permissions for the app. */
 class PermissionsHandler @Inject constructor() : PermissionHandlerInterface {
 
   lateinit var permissionsManager: PermissionsManager
@@ -36,12 +31,12 @@ class PermissionsHandler @Inject constructor() : PermissionHandlerInterface {
         override fun onPermissionResult(granted: Boolean) {}
       }
 
-    /**
-     * Called when the activity is created.
-     *
-     * @param savedInstanceState the saved instance state
-     */
-    override fun initHandler(activity: Activity) {
+  /**
+   * Initializes the permissions handler.
+   *
+   * @param activity the activity
+   */
+  override fun initHandler(activity: Activity) {
     this.activity = activity
     if (!PermissionsManager.areLocationPermissionsGranted(activity)) {
       permissionsManager = PermissionsManager(permissionsListener)

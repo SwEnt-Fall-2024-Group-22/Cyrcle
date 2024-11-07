@@ -4,7 +4,13 @@ import android.app.Activity
 import com.github.se.cyrcle.PermissionHandlerInterface
 import javax.inject.Inject
 
+/** A mock implementation of the [PermissionHandlerInterface] interface. */
 class MockPermissionHandler @Inject constructor() : PermissionHandlerInterface {
 
-    override fun initHandler(activity: Activity) {}
+  /**
+   * Initializes the permissions handler.
+   *
+   * @param activity the activity
+   */
+  override fun initHandler(activity: Activity) {}
 }
