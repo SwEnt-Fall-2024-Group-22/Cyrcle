@@ -268,7 +268,8 @@ fun ScoreStars(
     maxStars: Int = 5,
     starColor: Color = MaterialTheme.colorScheme.primary,
     scale: Float = 1.0f,
-    text: String? = null
+    text: String? = null,
+    testTag: String = "StarButton"
 ) {
   val roundedScore = (round(score * 2) / 2).coerceIn(0.0, maxStars.toDouble())
   val fullStars = floor(roundedScore).toInt()
@@ -284,7 +285,7 @@ fun ScoreStars(
                     imageVector = Icons.Filled.Star,
                     contentDescription = "Full Star",
                     tint = starColor,
-                    modifier = Modifier.size((30 * scale).dp))
+                    modifier = Modifier.testTag("${testTag}Icon"))
             i == fullStars + 1 && hasHalfStar ->
                 Icon(
                     imageVector = Icons.Filled.StarHalf,
