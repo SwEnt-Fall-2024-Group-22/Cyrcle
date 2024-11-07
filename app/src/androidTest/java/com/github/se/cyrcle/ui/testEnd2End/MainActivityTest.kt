@@ -1,4 +1,4 @@
-package com.github.se.cyrcle
+package com.github.se.cyrcle.ui.testEnd2End
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertHasClickAction
@@ -12,6 +12,7 @@ import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
+import com.github.se.cyrcle.MainActivity
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import dagger.hilt.android.testing.HiltAndroidRule
