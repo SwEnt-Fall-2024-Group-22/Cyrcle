@@ -13,12 +13,12 @@ import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.addParking.attributes.AttributesPicker
 import com.github.se.cyrcle.ui.addParking.location.LocationPicker
 import com.github.se.cyrcle.ui.authentication.SignInScreen
-import com.github.se.cyrcle.ui.card.CardScreen
 import com.github.se.cyrcle.ui.list.SpotListScreen
 import com.github.se.cyrcle.ui.map.MapScreen
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
+import com.github.se.cyrcle.ui.parkingDetails.ParkingDetailsScreen
 import com.github.se.cyrcle.ui.profile.ProfileScreen
 import com.github.se.cyrcle.ui.review.AllReviewsScreen
 import com.github.se.cyrcle.ui.review.ReviewScreen
@@ -47,7 +47,7 @@ fun CyrcleNavHost(
     ) {
       composable(Screen.LIST) { SpotListScreen(navigationActions, parkingViewModel) }
       composable(Screen.CARD) {
-        CardScreen(navigationActions, parkingViewModel, userViewModel, reviewViewModel)
+        ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel, reviewViewModel)
       }
       composable(Screen.REVIEW) {
         ReviewScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
