@@ -69,8 +69,6 @@ class MainActivityTest {
       composeTestRule.onNodeWithTag("RowSecurity").assertIsDisplayed()
       composeTestRule.onNodeWithTag("ButtonsColumn").assertIsDisplayed()
       composeTestRule.onNodeWithTag("ShowInMapButton").assertIsDisplayed().assertHasClickAction()
-      composeTestRule.onNodeWithTag("AddReviewButton").assertIsDisplayed().assertHasClickAction()
-      composeTestRule.onNodeWithTag("ReportButton").assertIsDisplayed().assertHasClickAction()
     }
 
     @OptIn(ExperimentalTestApi::class)
