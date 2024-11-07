@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.ParkingViewModel
-import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
@@ -43,19 +42,12 @@ import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 fun ParkingDetailsScreen(
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel,
-    userViewModel: UserViewModel,
-    reviewViewModel: ReviewViewModel
+    userViewModel: UserViewModel
 ) {
   val selectedParking =
       parkingViewModel.selectedParking.collectAsState().value
           ?: return Text(stringResource(R.string.no_selected_parking_error))
   val userSignedIn = userViewModel.isSignedIn.collectAsState(false)
-  reviewViewModel.getReviewsByParking(selectedParking.uid)
-  selectedParking.nbReviews = reviewViewModel.parkingReviews.value.size
-  selectedParking.avgScore =
-      if (selectedParking.nbReviews != 0)
-          reviewViewModel.parkingReviews.value.sumOf { it.rating } / selectedParking.nbReviews
-      else 0.0
 
   Scaffold(
       topBar = {
@@ -172,7 +164,7 @@ fun ParkingDetailsScreen(
                                       } else
                                           ScoreStars(
                                               selectedParking.avgScore,
-                                              scale = 0.7f,
+                                              scale = 0.8f,
                                               text = "(${selectedParking.nbReviews})")
 
                                       Spacer(

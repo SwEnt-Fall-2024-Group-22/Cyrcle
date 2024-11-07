@@ -285,19 +285,19 @@ fun ScoreStars(
                     imageVector = Icons.Filled.Star,
                     contentDescription = "Full Star",
                     tint = starColor,
-                    modifier = Modifier.testTag("${testTag}Icon"))
+                    modifier = Modifier.size((30 * scale).dp).testTag("${testTag}Icon$i"))
             i == fullStars + 1 && hasHalfStar ->
                 Icon(
                     imageVector = Icons.Filled.StarHalf,
                     contentDescription = "Half Star",
                     tint = starColor,
-                    modifier = Modifier.size((30 * scale).dp))
+                    modifier = Modifier.size((30 * scale).dp).testTag("${testTag}Icon$i"))
             else ->
                 Icon(
                     imageVector = Icons.Filled.StarBorder,
                     contentDescription = "Empty Star",
                     tint = starColor,
-                    modifier = Modifier.size((30 * scale).dp))
+                    modifier = Modifier.size((30 * scale).dp).testTag("${testTag}Icon$i"))
           }
         }
 
