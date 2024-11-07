@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -276,6 +277,7 @@ fun ScoreStars(
   val hasHalfStar = (roundedScore - fullStars) >= 0.5
 
   Row(
+      verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(0.dp) // Smaller spacing between stars
       ) {
         for (i in 1..maxStars) {

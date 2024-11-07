@@ -42,7 +42,7 @@
     <string name="location_picker_top_bar_select_bottom_right">Set the bottom-right corner of the parking, by dragging on the screen</string>
 
     <!-- Sign In -->
-    <string name="sign_in_welcome">Welcome to Cyrcle</string>
+    <string name="sign_in_welcome">Welcome to</string>
     <string name="sign_in_successful_toast">Login successful!</string>
     <string name="sign_in_failed_toast">Login failed!</string>
     <string name="sign_in_guest_button">Continue as Guest</string>
@@ -60,6 +60,8 @@
     <string name="card_screen_show_map">Show in Map</string>
     <string name="card_screen_add_review">Add A Review</string>
     <string name="card_screen_report">Report</string>
+    <string name="card_screen_no_image">No images for this parking yet</string>
+    <string name="free">Free</string>
 
     <!-- List Screen -->
     <string name="list_screen_protection">Protection</string>
