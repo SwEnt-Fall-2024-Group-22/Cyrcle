@@ -146,12 +146,21 @@ class ParkingViewModel(
    * @param newScore: score of the new review to add
    * @param parking: Parking to update (selectedParking by default, should never be null)
    */
-  fun updateReviewScore(newScore: Double, parking: Parking = selectedParking.value!!) {
-    parking.avgScore =
-        (100 * ((parking.avgScore * parking.nbReviews) + newScore) / (parking.nbReviews + 1))
-            .toInt() / 100.00
-    parking.nbReviews += 1
-    parkingRepository.updateParking(parking, {}, {})
+  fun updateReviewScore(
+      newScore: Double,
+      oldScore: Double = 0.0,
+      parking: Parking = selectedParking.value!!,
+      isNewReview: Boolean
+  ) {
+    if (isNewReview) {
+      parking.avgScore =
+          (100 * ((parking.avgScore * parking.nbReviews) + newScore) / (parking.nbReviews + 1))
+              .toInt() / 100.00
+      parking.nbReviews += 1
+      parkingRepository.updateParking(parking, {}, {})
+    } else {
+      parking.avgScore += (oldScore - newScore) / parking.nbReviews
+    }
   }
 
   // create factory (imported from bootcamp)
