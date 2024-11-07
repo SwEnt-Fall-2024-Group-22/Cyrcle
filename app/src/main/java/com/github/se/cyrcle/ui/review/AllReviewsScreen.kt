@@ -192,6 +192,8 @@ fun AllReviewsScreen(
                   }
             }
 
+
+      if(userViewModel.currentUser.value?.userId != null){
         Box(
             modifier = Modifier.fillMaxSize().padding(16.dp),
             contentAlignment = Alignment.BottomEnd) {
@@ -205,5 +207,6 @@ fun AllReviewsScreen(
                         fontWeight = FontWeight.Bold)
                   }
             }
+      }
       }
 }
