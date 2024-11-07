@@ -105,14 +105,11 @@ fun ColorSchemePreviewPreview() {
                 modifier = Modifier.fillMaxSize(),
                 horizontalArrangement = Arrangement.SpaceEvenly) {
                   SmallFloatingActionButton(
-                      Icons.Filled.Add, "", onClick = {}, colorLevel = ColorLevel.PRIMARY
-                  )
+                      Icons.Filled.Add, "", onClick = {}, colorLevel = ColorLevel.PRIMARY)
                   FloatingActionButton(
-                      Icons.Filled.Add, "", onClick = {}, colorLevel = ColorLevel.SECONDARY
-                  )
+                      Icons.Filled.Add, "", onClick = {}, colorLevel = ColorLevel.SECONDARY)
                   LargeFloatingActionButton(
-                      Icons.Filled.Add, "", onClick = {}, colorLevel = ColorLevel.TERTIARY
-                  )
+                      Icons.Filled.Add, "", onClick = {}, colorLevel = ColorLevel.TERTIARY)
                   ExtendedFloatingActionButton(
                       Icons.Filled.Add,
                       "",
