@@ -1,3 +1,5 @@
+package com.github.se.cyrcle.ui.theme.colorAndTheme
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
