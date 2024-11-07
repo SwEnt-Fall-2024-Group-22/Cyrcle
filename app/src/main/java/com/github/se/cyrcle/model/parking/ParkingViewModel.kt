@@ -159,7 +159,8 @@ class ParkingViewModel(
       parking.nbReviews += 1
       parkingRepository.updateParking(parking, {}, {})
     } else {
-      parking.avgScore += (oldScore - newScore) / parking.nbReviews
+      val delta = if (parking.nbReviews != 0) (oldScore - newScore) / parking.nbReviews else 0.0
+      parking.avgScore += delta
     }
   }
 

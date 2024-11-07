@@ -23,7 +23,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.review.Review
 import com.github.se.cyrcle.model.review.ReviewViewModel
@@ -83,12 +85,11 @@ fun ReviewScreen(
               Text(
                   text =
                       when (sliderValue) {
-                        in 0f..1f -> "Terrible experience!"
-                        in 1f..2f -> "Bad experience :("
-                        in 2f..3f -> "Poor experience :/"
-                        3f -> "Average experience..."
-                        in 3.5f..4f -> "Good experience!"
-                        in 4.5f..5f -> "Great experience!"
+                        in 1f..2f -> stringResource(R.string.review_screen_poor_review)
+                        in 2f..3f -> stringResource(R.string.review_screen_bad_review)
+                        3f -> stringResource(R.string.review_screen_average_review)
+                        in 3.5f..4f -> stringResource(R.string.review_screen_good_review)
+                        in 4.5f..5f -> stringResource(R.string.review_screen_great_review)
                         else -> ""
                       },
                   style = MaterialTheme.typography.bodyLarge,

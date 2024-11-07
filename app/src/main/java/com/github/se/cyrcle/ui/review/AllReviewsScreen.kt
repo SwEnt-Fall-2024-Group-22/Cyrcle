@@ -89,7 +89,8 @@ fun AllReviewsScreen(
                           reviewViewModel.getReviewsByParking(selectedParking.uid)
                           items(reviewViewModel.parkingReviews.value.size) { index ->
                             val curReview = reviewViewModel.parkingReviews.value[index]
-
+                            userViewModel.getUserById(curReview.owner)
+                            val uidOfOwner = userViewModel.currentUser.value?.username
                             if (index == selectedCardIndex) {
                               Box(
                                   modifier =
@@ -100,10 +101,8 @@ fun AllReviewsScreen(
                                           .testTag("ExpandedReviewBox$index")
                                           .clickable { setSelectedCardIndex(-1) }) {
                                     Column {
-                                      userViewModel.getUserById(curReview.owner)
                                       Text(
-                                          text =
-                                              "Owner: ${userViewModel.currentUser.value?.username!!}",
+                                          text = "Owner: ${uidOfOwner}",
                                           fontWeight = FontWeight.Medium,
                                           color = MaterialTheme.colorScheme.onSecondaryContainer,
                                           style = MaterialTheme.typography.bodyMedium,
@@ -153,8 +152,7 @@ fun AllReviewsScreen(
                                                 .padding(16.dp)
                                                 .testTag("ReviewCardContent$index")) {
                                           Text(
-                                              text =
-                                                  "Owner: ${userViewModel.currentUser.value?.username!!}",
+                                              text = "Owner: $uidOfOwner",
                                               fontWeight = FontWeight.Medium,
                                               color =
                                                   MaterialTheme.colorScheme.onSecondaryContainer,
