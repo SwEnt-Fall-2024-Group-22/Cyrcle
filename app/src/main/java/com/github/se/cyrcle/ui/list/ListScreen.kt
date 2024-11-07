@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -68,7 +69,7 @@ fun SpotListScreen(
 ) {
 
   val referencePoint = TestInstancesParking.EPFLCenter
-  var radius = 100.0
+  val radius = remember { mutableDoubleStateOf(100.0) }
 
   val parkingSpots by parkingViewModel.closestParkings.collectAsState()
 
@@ -89,7 +90,7 @@ fun SpotListScreen(
   // Fetch initial parkings if the list is empty
   LaunchedEffect(parkingSpots) {
     if (parkingSpots.isEmpty()) {
-      parkingViewModel.getParkingsInRadius(referencePoint, radius)
+      parkingViewModel.getParkingsInRadius(referencePoint, radius.doubleValue)
     }
   }
 
@@ -97,7 +98,6 @@ fun SpotListScreen(
     Log.d("ListScreen", "selectedProtection: $selectedProtection")
     Log.d("ListScreen", "selectedRackTypes: $selectedRackTypes")
     Log.d("ListScreen", "selectedCapacities: $selectedCapacities")
-    Log.d("ListScreen", "Filtered parking spots: $filteredParkingSpots")
   }
 
   Scaffold(
@@ -134,8 +134,8 @@ fun SpotListScreen(
                   Log.d("ListScreen", "Filtered parking spots: $filteredParkingSpots")
                   if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1) {
                     // This incremental solution could be improved to be dynamic and with a limit
-                    radius += 100.0
-                    parkingViewModel.getParkingsInRadius(referencePoint, radius)
+                    radius.doubleValue += 100
+                    parkingViewModel.getParkingsInRadius(referencePoint, radius.doubleValue)
                   }
                 }
               }
