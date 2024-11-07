@@ -71,19 +71,6 @@ import com.mapbox.maps.plugin.annotation.generated.createPolygonAnnotationManage
 import com.mapbox.maps.plugin.gestures.generated.GesturesSettings
 import androidx.compose.ui.unit.LayoutDirection
 
-
-private fun scaledPadding(
-    padding: PaddingValues,
-    horizontalScaleFactor: Float,
-    verticalScaleFactor: Float
-): PaddingValues {
-    return PaddingValues(
-        start = padding.calculateStartPadding(LayoutDirection.Ltr) * horizontalScaleFactor,
-        top = padding.calculateTopPadding() * verticalScaleFactor,
-        end = padding.calculateEndPadding(LayoutDirection.Ltr) * horizontalScaleFactor,
-        bottom = padding.calculateBottomPadding() * verticalScaleFactor
-    )
-}
 @Composable
 fun AttributesPicker(
     navigationActions: NavigationActions,
@@ -95,8 +82,12 @@ fun AttributesPicker(
     val screenWidth = configuration.screenWidthDp.dp
     val screenHeight = configuration.screenHeightDp.dp
 
+    // Define padding as a percentage of screen dimensions
+    val horizontalPaddingScaleFactor = screenWidth * 0.03f // 3% of screen width
+    val verticalPaddingScaleFactor = screenHeight * 0.02f  // 2% of screen height
+
     // Dynamically calculated heights for top and bottom boxes
-    val topBoxHeight = screenHeight * 0.1f // 10% of screen height for top box
+    val topBoxHeight = screenHeight * 0.10f // 10% of screen height for top box
     val bottomBoxHeight = screenHeight * 0.15f // 15% of screen height for bottom box
 
     val title = remember { mutableStateOf("") }
@@ -132,30 +123,33 @@ fun AttributesPicker(
         topBar = { AttributePickerTopBar(mapViewModel, title) },
         bottomBar = { BottomBarAddAttr(navigationActions) { onSubmit() } }
     ) { padding ->
-        // Apply scaled padding with different factors for horizontal and vertical padding
-        val scaledPaddingValues = scaledPadding(padding, horizontalScaleFactor = 0.3f, verticalScaleFactor = 0.2f)
+        // Apply screen-dimension-scaled padding for consistent spacing
+        val scaledPaddingValues = scaledPadding(
+            padding = padding,
+            horizontalScaleFactor = horizontalPaddingScaleFactor.value / screenWidth.value,
+            verticalScaleFactor = verticalPaddingScaleFactor.value / screenHeight.value
+        )
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = scaledPaddingValues.calculateStartPadding(LayoutDirection.Ltr))
-                .padding(top = scaledPaddingValues.calculateTopPadding()) // Apply top padding
+                .padding(scaledPaddingValues)
         ) {
             // Top Box as padding at the top of the screen, dynamically sized
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(topBoxHeight) // Dynamic height for top box
-                    .background(MaterialTheme.colorScheme.primary)
+                    .background(MaterialTheme.colorScheme.background)
             )
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(
-                        horizontal = scaledPaddingValues.calculateStartPadding(LayoutDirection.Ltr),
-                        vertical = scaledPaddingValues.calculateTopPadding()
+                        horizontal = horizontalPaddingScaleFactor,
+                        vertical = verticalPaddingScaleFactor
                     ),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -165,7 +159,7 @@ fun AttributesPicker(
                     label = stringResource(R.string.attributes_picker_title_label),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = screenHeight * 0.015f) // Matching padding
+                        .padding(horizontal = horizontalPaddingScaleFactor)
                 )
                 EnumDropDown(
                     options = ParkingProtection.entries.toList(),
@@ -195,9 +189,9 @@ fun AttributesPicker(
                     maxLines = 5,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(screenHeight * 0.2f) // Make description field height dynamic
+                        .height(screenHeight * 0.2f) // Dynamic height for description field
                         .verticalScroll(rememberScrollState())
-                        .padding(horizontal = screenHeight * 0.015f) // Matching padding
+                        .padding(horizontal = horizontalPaddingScaleFactor)
                 )
             }
 
@@ -206,10 +200,23 @@ fun AttributesPicker(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(bottomBoxHeight) // Dynamic height for bottom box
-                    .background(MaterialTheme.colorScheme.primary)
+                    .background(MaterialTheme.colorScheme.background)
             )
         }
     }
+}
+
+private fun scaledPadding(
+    padding: PaddingValues,
+    horizontalScaleFactor: Float,
+    verticalScaleFactor: Float
+): PaddingValues {
+    return PaddingValues(
+        start = padding.calculateStartPadding(LayoutDirection.Ltr) * horizontalScaleFactor,
+        top = padding.calculateTopPadding() * verticalScaleFactor,
+        end = padding.calculateEndPadding(LayoutDirection.Ltr) * horizontalScaleFactor,
+        bottom = padding.calculateBottomPadding() * verticalScaleFactor
+    )
 }
 
 
@@ -256,9 +263,9 @@ fun AttributePickerTopBar(mapViewModel: MapViewModel, title: MutableState<String
     val screenWidth = configuration.screenWidthDp.dp
 
     // Reduced the top bar height for tighter bounds
-    val topBarHeight = screenWidth * 0.18f // Reduced height to 18% of screen width
-    val titleFontSize = (screenWidth * 0.045f).coerceAtLeast(16.dp).value.sp // Slightly smaller font size
-    val subtitleFontSize = (screenWidth * 0.035f).coerceAtLeast(12.dp).value.sp
+    val topBarHeight = screenWidth * 0.20f // Reduced height to 18% of screen width
+    val titleFontSize = (screenWidth * 0.045f).value.sp // Slightly smaller font size
+    val subtitleFontSize = (screenWidth * 0.035f).value.sp
 
     var annotationManager by remember { mutableStateOf<PolygonAnnotationManager?>(null) }
     val location = mapViewModel.selectedLocation.collectAsState().value!!
