@@ -21,6 +21,7 @@ class ParkingViewModel(
     private val imageRepository: ImageRepository,
     private val parkingRepository: ParkingRepository
 ) : ViewModel() {
+  val kmToMeters = 1000.0
 
   /** List of parkings within the designated area */
   private val _rectParkings = MutableStateFlow<List<Parking>>(emptyList())
@@ -45,14 +46,19 @@ class ParkingViewModel(
 
   init {
     viewModelScope.launch {
+      /*
+         * When the list of parkings in the rectangle changes, update the list of closest parkings
+         * For this it uses the two states _circleCenter and _radius to filter the parkings
+
+      */
       _rectParkings.collect { parkings ->
         Log.d("ListScreen", "Updating closest Parkings:s")
-        if (_circleCenter.value == null) return@collect
+        if (_circleCenter.value == null) return@collect // Don't compute if the circle is not set
         _closestParkings.value =
             parkings
                 .filter { parking ->
-                  TurfMeasurement.distance(_circleCenter.value!!, parking.location.center) * 1000 <=
-                      _radius.value
+                  TurfMeasurement.distance(_circleCenter.value!!, parking.location.center) *
+                      kmToMeters <= _radius.value
                 }
                 .sortedBy { parking ->
                   TurfMeasurement.distance(_circleCenter.value!!, parking.location.center)
@@ -146,20 +152,21 @@ class ParkingViewModel(
   }
 
   /**
-   * Get all parkings in a radius of k meters around a location.
+   * Get all parkings in a radius of k meters around a location. Uses the Haversine formula to
+   * calculate the distance between two points on the Earth's surface. and make use of the
+   * getParkingBetween function to get all parkings in the circle.* The result is stored in the
+   * closestParkings state.
    *
-   * @param location: center of the circle
-   * @param radius: radius of the circle Uses the Haversine formula to calculate the distance
-   *   between two points on the Earth's surface. and make use of the getParkingBetween function to
-   *   get all parkings in the circle.
+   * @param center: center of the circle
+   * @param radius: radius of the circle in meter.
    */
   fun getParkingsInRadius(
-      location: Point,
+      center: Point,
       radius: Double,
   ) {
     _radius.value = radius
-    _circleCenter.value = location
-    Tile.getAllTilesInCircle(location, radius).forEach {
+    _circleCenter.value = center
+    Tile.getAllTilesInCircle(center, radius).forEach {
       getParkingsInRect(it.bottomLeft, it.topRight)
     }
   }

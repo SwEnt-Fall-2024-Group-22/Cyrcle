@@ -4,8 +4,10 @@ import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMeasurement
 import java.math.BigDecimal
 import java.math.RoundingMode
+import kotlin.math.pow
 
 const val TILE_SIZE = 0.1
+const val DECIMALS = 2
 /**
  * Represents a tile in the map.
  *
@@ -18,17 +20,29 @@ data class Tile(val bottomLeft: Point, val topRight: Point) {
   }
 
   companion object {
+    /**
+     * Rounds the tile to the nearest decimals
+     *
+     * @param value the value to round
+     * @param decimals the number of decimals to round to
+     * @return the rounded value
+     */
+    private fun roundDouble(value: Double, decimals: Int): Double {
+      val roundingFactor = 10.0.pow(decimals)
+      return (value * roundingFactor).toInt() / roundingFactor
+    }
     /** Rounds the tile to the nearest 0.01 */
     private fun roundTiles(tile: Tile): Tile {
-      val roundedBotomLeft =
+
+      val roundedBottomLeft =
           Point.fromLngLat(
-              (tile.bottomLeft.longitude() * 100).toInt() / 100.0,
-              (tile.bottomLeft.latitude() * 100).toInt() / 100.0)
+              roundDouble(tile.bottomLeft.longitude(), DECIMALS),
+              roundDouble(tile.bottomLeft.latitude(), DECIMALS))
       val roundedTopRight =
           Point.fromLngLat(
-              (tile.topRight.longitude() * 100).toInt() / 100.0,
-              (tile.topRight.latitude() * 100).toInt() / 100.0)
-      return Tile(roundedBotomLeft, roundedTopRight)
+              roundDouble(tile.topRight.longitude(), DECIMALS),
+              roundDouble(tile.topRight.latitude(), DECIMALS))
+      return Tile(roundedBottomLeft, roundedTopRight)
     }
 
     /**
@@ -91,19 +105,13 @@ data class Tile(val bottomLeft: Point, val topRight: Point) {
      * @return a set of tiles that are in the circle
      */
     fun getAllTilesInCircle(center: Point, radius: Double): Set<Tile> {
-      val leftestPoint = TurfMeasurement.destination(center, radius, -90.0, "meters")
-      val rightestPoint = TurfMeasurement.destination(center, radius, 90.0, "meters")
-      val topPoint = TurfMeasurement.destination(center, radius, 0.0, "meters")
-      val bottomPoint = TurfMeasurement.destination(center, radius, 180.0, "meters")
-      println("Found tiles in circle")
-      println(
-          getAllTilesInRectangle(
-                  Point.fromLngLat(leftestPoint.longitude(), bottomPoint.latitude()),
-                  Point.fromLngLat(rightestPoint.longitude(), topPoint.latitude()))
-              .size)
+      val westPoint = TurfMeasurement.destination(center, radius, -90.0, "meters")
+      val eastPoint = TurfMeasurement.destination(center, radius, 90.0, "meters")
+      val northPoint = TurfMeasurement.destination(center, radius, 0.0, "meters")
+      val southPoint = TurfMeasurement.destination(center, radius, 180.0, "meters")
       return getAllTilesInRectangle(
-          Point.fromLngLat(leftestPoint.longitude(), bottomPoint.latitude()),
-          Point.fromLngLat(rightestPoint.longitude(), topPoint.latitude()))
+          Point.fromLngLat(westPoint.longitude(), southPoint.latitude()),
+          Point.fromLngLat(eastPoint.longitude(), northPoint.latitude()))
     }
   }
 }
