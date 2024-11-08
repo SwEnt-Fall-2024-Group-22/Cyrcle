@@ -1,8 +1,11 @@
 package com.github.se.cyrcle.ui.parkingDetails
 
+import android.util.Log
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onChildren
@@ -22,7 +25,6 @@ import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.model.review.ReviewRepository
 import com.github.se.cyrcle.model.review.ReviewViewModel
-import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.model.user.UserRepository
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
@@ -31,11 +33,9 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyNoInteractions
 
 @RunWith(AndroidJUnit4::class)
 class ParkingDetailsScreenTest {
@@ -68,33 +68,40 @@ class ParkingDetailsScreenTest {
     `when`(navigationActions.currentRoute()).thenReturn(Screen.CARD)
   }
 
+  @OptIn(ExperimentalTestApi::class)
   @Test
   fun displayAllComponents() {
     parkingViewModel.selectParking(TestInstancesParking.parking1)
     composeTestRule.setContent {
       ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
     }
-
+    composeTestRule.waitUntilExactlyOneExists(hasTestTag("ParkingImage0"))
+    Log.w("ParkingDetailsScreenTest", "Checking TopAppBar...")
     // Verify the top app bar
     composeTestRule.onNodeWithTag("TopAppBar").assertIsDisplayed()
     composeTestRule.onNodeWithTag("TopAppBarTitle").assertIsDisplayed()
-
+    Log.w("ParkingDetailsScreenTest", "TopAppBar checked")
+    Log.w("ParkingDetailsScreenTest", "Checking ParkingImagesRow...")
     // Verify the images
     composeTestRule.onNodeWithTag("ParkingImagesRow").assertIsDisplayed()
     composeTestRule.onNodeWithTag("ParkingImage0").assertIsDisplayed()
+    Log.w("ParkingDetailsScreenTest", "ParkingImagesRow checked")
 
+    Log.w("ParkingDetailsScreenTest", "Checking Buttons..")
     // Verify the buttons
     composeTestRule.onNodeWithTag("ButtonsColumn").assertIsDisplayed()
     composeTestRule.onNodeWithTag("ShowInMapButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("AddReviewButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("ReportButton").assertIsDisplayed()
+    Log.w("ParkingDetailsScreenTest", "Buttons checked")
 
+    Log.w("ParkingDetailsScreenTest", "Checking Rest...")
     // Verify the rest of the content
     composeTestRule.onNodeWithTag("CapacityColumn").assertIsDisplayed()
     composeTestRule.onNodeWithTag("RackTypeColumn").assertIsDisplayed()
     composeTestRule.onNodeWithTag("ProtectionColumn").assertIsDisplayed()
     composeTestRule.onNodeWithTag("PriceColumn").assertIsDisplayed()
     composeTestRule.onNodeWithTag("SecurityColumn").assertIsDisplayed()
+    Log.w("ParkingDetailsScreenTest", "Rest checked")
   }
 
   @Test
@@ -125,23 +132,6 @@ class ParkingDetailsScreenTest {
   }
 
   @Test
-  fun addReviewButtonBehavesCorrectly() {
-    parkingViewModel.selectParking(TestInstancesParking.parking1)
-    composeTestRule.setContent {
-      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
-    }
-
-    composeTestRule.onNodeWithTag("AddReviewButton").assertIsDisplayed().performClick()
-
-    verifyNoInteractions(navigationActions)
-
-    userViewModel.setCurrentUser(TestInstancesUser.user1)
-    composeTestRule.onNodeWithTag("AddReviewButton").assertIsDisplayed().performClick()
-
-    verify(navigationActions).navigateTo(ArgumentMatchers.matches(Screen.REVIEW))
-  }
-
-  @Test
   fun displayTitleAndMultipleImages() {
     parkingViewModel.selectParking(TestInstancesParking.parking2)
     composeTestRule.setContent {
@@ -150,5 +140,17 @@ class ParkingDetailsScreenTest {
 
     composeTestRule.onNodeWithTag("TopAppBarTitle").assertTextContains("Description of Rude épais")
     composeTestRule.onNodeWithTag("ParkingImagesRow").onChildren().assertCountEquals(2)
+  }
+
+  @Test
+  fun seeAllReviewsBehavesCorrectly() {
+    parkingViewModel.selectParking(TestInstancesParking.parking1)
+    composeTestRule.setContent {
+      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("SeeAllReviewsText").performClick()
+
+    verify(navigationActions).navigateTo(Screen.ALL_REVIEWS)
   }
 }
