@@ -1,8 +1,11 @@
 package com.github.se.cyrcle.ui.parkingDetails
 
+import android.util.Log
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onChildren
@@ -65,32 +68,40 @@ class ParkingDetailsScreenTest {
     `when`(navigationActions.currentRoute()).thenReturn(Screen.CARD)
   }
 
+  @OptIn(ExperimentalTestApi::class)
   @Test
   fun displayAllComponents() {
     parkingViewModel.selectParking(TestInstancesParking.parking1)
     composeTestRule.setContent {
       ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
     }
-
+    composeTestRule.waitUntilExactlyOneExists(hasTestTag("ParkingImage0"))
+    Log.w("ParkingDetailsScreenTest", "Checking TopAppBar...")
     // Verify the top app bar
     composeTestRule.onNodeWithTag("TopAppBar").assertIsDisplayed()
     composeTestRule.onNodeWithTag("TopAppBarTitle").assertIsDisplayed()
-
+    Log.w("ParkingDetailsScreenTest", "TopAppBar checked")
+    Log.w("ParkingDetailsScreenTest", "Checking ParkingImagesRow...")
     // Verify the images
     composeTestRule.onNodeWithTag("ParkingImagesRow").assertIsDisplayed()
     composeTestRule.onNodeWithTag("ParkingImage0").assertIsDisplayed()
+    Log.w("ParkingDetailsScreenTest", "ParkingImagesRow checked")
 
+    Log.w("ParkingDetailsScreenTest", "Checking Buttons..")
     // Verify the buttons
     composeTestRule.onNodeWithTag("ButtonsColumn").assertIsDisplayed()
     composeTestRule.onNodeWithTag("ShowInMapButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("ReportButton").assertIsDisplayed()
+    Log.w("ParkingDetailsScreenTest", "Buttons checked")
 
+    Log.w("ParkingDetailsScreenTest", "Checking Rest...")
     // Verify the rest of the content
     composeTestRule.onNodeWithTag("CapacityColumn").assertIsDisplayed()
     composeTestRule.onNodeWithTag("RackTypeColumn").assertIsDisplayed()
     composeTestRule.onNodeWithTag("ProtectionColumn").assertIsDisplayed()
     composeTestRule.onNodeWithTag("PriceColumn").assertIsDisplayed()
     composeTestRule.onNodeWithTag("SecurityColumn").assertIsDisplayed()
+    Log.w("ParkingDetailsScreenTest", "Rest checked")
   }
 
   @Test
