@@ -88,16 +88,10 @@ fun SpotListScreen(
       }
 
   // Fetch initial parkings if the list is empty
-  LaunchedEffect(parkingSpots) {
+  LaunchedEffect(Unit) {
     if (parkingSpots.isEmpty()) {
       parkingViewModel.getParkingsInRadius(referencePoint, radius.doubleValue)
     }
-  }
-
-  LaunchedEffect(selectedProtection, selectedProtection, selectedCapacities, onlyWithCCTV) {
-    Log.d("ListScreen", "selectedProtection: $selectedProtection")
-    Log.d("ListScreen", "selectedRackTypes: $selectedRackTypes")
-    Log.d("ListScreen", "selectedCapacities: $selectedCapacities")
   }
 
   Scaffold(
@@ -132,7 +126,8 @@ fun SpotListScreen(
                   val distance = TurfMeasurement.distance(referencePoint, parking.location.center)
                   SpotCard(navigationActions, parkingViewModel, parking, distance)
                   Log.d("ListScreen", "Filtered parking spots: $filteredParkingSpots")
-                  if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1) {
+                  if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1 &&
+                      radius.doubleValue < 1000) {
                     // This incremental solution could be improved to be dynamic and with a limit
                     radius.doubleValue += 100
                     parkingViewModel.getParkingsInRadius(referencePoint, radius.doubleValue)

@@ -8,7 +8,7 @@ import javax.inject.Inject
 
 class MockParkingRepository @Inject constructor() : ParkingRepository {
   private var uid = 0
-  private val parkings = mutableListOf(TestInstancesParking.parkingEnd2End)
+  private val parkings = mutableListOf(TestInstancesParking.parking1)
 
   override fun getNewUid(): String {
     return (uid++).toString()

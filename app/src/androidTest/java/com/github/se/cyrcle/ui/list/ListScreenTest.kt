@@ -254,7 +254,7 @@ class ListScreenTest {
   @Test
   fun testParkingDetailsScreenListsParkings() {
     val testParking = TestInstancesParking.parking1
-
+    val loc = testParking.location.center
     // Prepare to populate the parking list
     `when`(mockParkingRepository.getParkingsBetween(any(), any(), any(), any())).then {
       println(it.getArgument<Point>(0).toString())
@@ -262,16 +262,11 @@ class ListScreenTest {
     }
     `when`(
             mockParkingRepository.getParkingsBetween(
-                eq(Tile.getTileFromPoint(TestInstancesParking.referencePoint).bottomLeft),
-                any(),
-                any(),
-                any()))
+                eq(Tile.getTileFromPoint(loc).bottomLeft), any(), any(), any()))
         .then { it.getArgument<(List<Parking>) -> Unit>(2)(listOf(testParking)) }
 
-    // Force list update
-    parkingViewModel.getParkingsInRadius(TestInstancesParking.referencePoint, 2.0)
-
     composeTestRule.setContent { SpotListScreen(mockNavigationActions, parkingViewModel) }
+    composeTestRule.waitUntilAtLeastOneExists(hasTestTag("SpotListColumn"))
 
     // Check that the list is displayed
     composeTestRule.onNodeWithTag("SpotListColumn").assertIsDisplayed()
@@ -292,7 +287,7 @@ class ListScreenTest {
         .assertIsDisplayed()
         .assertTextEquals(
             String.format(
-                "%.2f km",
+                "%.0f m",
                 TurfMeasurement.distance(
                     TestInstancesParking.EPFLCenter, testParking.location.center)))
 

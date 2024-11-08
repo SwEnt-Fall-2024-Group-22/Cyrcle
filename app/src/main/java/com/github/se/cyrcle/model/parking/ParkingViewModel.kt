@@ -166,9 +166,8 @@ class ParkingViewModel(
   ) {
     _radius.value = radius
     _circleCenter.value = center
-    Tile.getAllTilesInCircle(center, radius).forEach {
-      getParkingsInRect(it.bottomLeft, it.topRight)
-    }
+    val (bottomLeft, topRight) = Tile.getSmallestRectangleEnclosingCircle(center, radius)
+    getParkingsInRect(bottomLeft, topRight)
   }
 
   fun getNewUid(): String {

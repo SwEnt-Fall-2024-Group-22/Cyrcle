@@ -98,18 +98,19 @@ data class Tile(val bottomLeft: Point, val topRight: Point) {
     }
 
     /**
-     * Return all tiles that are in the circle defined by the center and the radius.
+     * Return a pair of point representing the bottom left and top right corner of the smallest
+     * rectangle that contains the circle.
      *
      * @param center the center of the circle
      * @param radius the radius of the circle in meter
-     * @return a set of tiles that are in the circle
+     * @return a pair of point representing the bottom left and top right corner of the smallest
      */
-    fun getAllTilesInCircle(center: Point, radius: Double): Set<Tile> {
+    fun getSmallestRectangleEnclosingCircle(center: Point, radius: Double): Pair<Point, Point> {
       val westPoint = TurfMeasurement.destination(center, radius, -90.0, "meters")
       val eastPoint = TurfMeasurement.destination(center, radius, 90.0, "meters")
       val northPoint = TurfMeasurement.destination(center, radius, 0.0, "meters")
       val southPoint = TurfMeasurement.destination(center, radius, 180.0, "meters")
-      return getAllTilesInRectangle(
+      return Pair(
           Point.fromLngLat(westPoint.longitude(), southPoint.latitude()),
           Point.fromLngLat(eastPoint.longitude(), northPoint.latitude()))
     }
