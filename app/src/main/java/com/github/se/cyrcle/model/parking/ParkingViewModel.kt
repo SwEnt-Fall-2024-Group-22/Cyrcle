@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+const val KMTOMETERS = 1000.0
 /**
  * ViewModel for the Parking feature.
  *
@@ -21,7 +22,6 @@ class ParkingViewModel(
     private val imageRepository: ImageRepository,
     private val parkingRepository: ParkingRepository
 ) : ViewModel() {
-  val kmToMeters = 1000.0
 
   /** List of parkings within the designated area */
   private val _rectParkings = MutableStateFlow<List<Parking>>(emptyList())
@@ -58,7 +58,7 @@ class ParkingViewModel(
             parkings
                 .filter { parking ->
                   TurfMeasurement.distance(_circleCenter.value!!, parking.location.center) *
-                      kmToMeters <= _radius.value
+                      KMTOMETERS <= _radius.value
                 }
                 .sortedBy { parking ->
                   TurfMeasurement.distance(_circleCenter.value!!, parking.location.center)

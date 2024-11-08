@@ -28,7 +28,6 @@ import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.model.parking.Tile
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
-import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMeasurement
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -257,7 +256,6 @@ class ListScreenTest {
     val loc = testParking.location.center
     // Prepare to populate the parking list
     `when`(mockParkingRepository.getParkingsBetween(any(), any(), any(), any())).then {
-      println(it.getArgument<Point>(0).toString())
       it.getArgument<(List<Parking>) -> Unit>(2)(emptyList())
     }
     `when`(

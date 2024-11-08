@@ -84,7 +84,6 @@ class ParkingViewModelTest {
   @Test
   fun getParkingsInRadiusNomainalCaseTest() {
     `when`(parkingRepository.getParkingsBetween(any(), any(), any(), any())).then {
-      println("Called")
       it.getArgument<(List<Parking>) -> Unit>(2)(
           listOf(
               TestInstancesParking.parking4, // at 7.111, 47.111
