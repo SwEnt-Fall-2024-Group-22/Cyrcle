@@ -30,4 +30,21 @@ class TileManagerTest {
         )
     assert(tile == Tile(Point.fromLngLat(6.0, 46.0), Point.fromLngLat(6.1, 46.1)))
   }
+
+  /*
+   * Test the smallest rectangle that contains a circle
+   * The circle is centered at 6.05, 46.05 with a radius of 10
+   * The rectangle should have a bottom left corner smaller than 6.05, 46.05
+   * and a top right corner bigger than 6.05, 46.05
+   * This function is pretty simple, so it doesn't need more tests.
+   */
+  @Test
+  fun getSmallestRectangleEnclosingCircleTest() {
+    val (bottomLeft, topRight) =
+        Tile.getSmallestRectangleEnclosingCircle(Point.fromLngLat(6.05, 46.05), 10.0)
+    assert(bottomLeft.longitude() < 6.05)
+    assert(bottomLeft.latitude() < 46.05)
+    assert(topRight.longitude() > 6.05)
+    assert(topRight.latitude() > 46.05)
+  }
 }

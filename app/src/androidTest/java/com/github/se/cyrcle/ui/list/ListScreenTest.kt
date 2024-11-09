@@ -25,6 +25,7 @@ import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
+import com.github.se.cyrcle.model.parking.Tile
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
 import com.mapbox.turf.TurfMeasurement
@@ -37,6 +38,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 
 @RunWith(AndroidJUnit4::class)
@@ -251,16 +253,18 @@ class ListScreenTest {
   @Test
   fun testParkingDetailsScreenListsParkings() {
     val testParking = TestInstancesParking.parking1
-
+    val loc = testParking.location.center
     // Prepare to populate the parking list
-    `when`(mockParkingRepository.getKClosestParkings(any(), any(), any(), any())).then {
-      it.getArgument<(List<Parking>) -> Unit>(2)(listOf(testParking))
+    `when`(mockParkingRepository.getParkingsBetween(any(), any(), any(), any())).then {
+      it.getArgument<(List<Parking>) -> Unit>(2)(emptyList())
     }
-
-    // Force list update
-    parkingViewModel.getKClosestParkings(TestInstancesParking.referencePoint, 1)
+    `when`(
+            mockParkingRepository.getParkingsBetween(
+                eq(Tile.getTileFromPoint(loc).bottomLeft), any(), any(), any()))
+        .then { it.getArgument<(List<Parking>) -> Unit>(2)(listOf(testParking)) }
 
     composeTestRule.setContent { SpotListScreen(mockNavigationActions, parkingViewModel) }
+    composeTestRule.waitUntilAtLeastOneExists(hasTestTag("SpotListColumn"))
 
     // Check that the list is displayed
     composeTestRule.onNodeWithTag("SpotListColumn").assertIsDisplayed()
@@ -281,7 +285,7 @@ class ListScreenTest {
         .assertIsDisplayed()
         .assertTextEquals(
             String.format(
-                "%.2f km",
+                "%.0f m",
                 TurfMeasurement.distance(
                     TestInstancesParking.EPFLCenter, testParking.location.center)))
 

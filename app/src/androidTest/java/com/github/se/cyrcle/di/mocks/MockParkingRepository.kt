@@ -4,7 +4,6 @@ import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.mapbox.geojson.Point
-import com.mapbox.turf.TurfMeasurement
 import javax.inject.Inject
 
 class MockParkingRepository @Inject constructor() : ParkingRepository {
@@ -47,22 +46,6 @@ class MockParkingRepository @Inject constructor() : ParkingRepository {
               it.location.center.latitude() in start.latitude()..end.latitude() &&
                   it.location.center.longitude() in start.longitude()..end.longitude()
             })
-  }
-
-  override fun getKClosestParkings(
-      location: Point,
-      k: Int,
-      onSuccess: (List<Parking>) -> Unit,
-      onFailure: (Exception) -> Unit
-  ) {
-    if (k < 0) onFailure(Exception("Error getting parkings"))
-    else
-        onSuccess(
-            parkings
-                .sortedBy {
-                  TurfMeasurement.distance(TestInstancesParking.referencePoint, it.location.center)
-                }
-                .take(k))
   }
 
   override fun addParking(parking: Parking, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
