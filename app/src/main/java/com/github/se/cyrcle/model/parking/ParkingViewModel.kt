@@ -12,7 +12,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-const val KMTOMETERS = 1000.0
+const val KM_TO_METERS = 1000.0
+const val DEFAULT_RADIUS = 100.0
+const val MAX_RADIUS = 1000.0
+const val RADIUS_INCREMENT = 100.0
 /**
  * ViewModel for the Parking feature.
  *
@@ -35,8 +38,18 @@ class ParkingViewModel(
   private val _selectedParking = MutableStateFlow<Parking?>(null)
   val selectedParking: StateFlow<Parking?> = _selectedParking
 
-  // Circle center and radius for the circle search for the list screen
-  private val _radius = MutableStateFlow(0.0)
+  /**
+   * Radius of the circle around the center to display parkings With a public getter to display the
+   * radius in the TopBar of the ListScreen The default value is DEFAULT_RADIUS stored in meters
+   */
+  private val _radius = MutableStateFlow(DEFAULT_RADIUS)
+  val radius: StateFlow<Double> = _radius
+
+  /**
+   * Center of the circle, normally corresponding to the user's location. When this is null, the
+   * filtering and sorting of parkings is not computing. Hence, we should make sure that this is
+   * null when in the map screen.
+   */
   private val _circleCenter = MutableStateFlow<Point?>(null)
   // List of tiles to display
   private var tilesToDisplay: Set<Tile> = emptySet()
@@ -44,28 +57,6 @@ class ParkingViewModel(
   private val tilesToParking =
       MutableStateFlow<LinkedHashMap<Tile, List<Parking>>>(LinkedHashMap(10, 1f, true))
 
-  init {
-    viewModelScope.launch {
-      /*
-         * When the list of parkings in the rectangle changes, update the list of closest parkings
-         * For this it uses the two states _circleCenter and _radius to filter the parkings
-
-      */
-      _rectParkings.collect { parkings ->
-        Log.d("ListScreen", "Updating closest Parkings:s")
-        if (_circleCenter.value == null) return@collect // Don't compute if the circle is not set
-        _closestParkings.value =
-            parkings
-                .filter { parking ->
-                  TurfMeasurement.distance(_circleCenter.value!!, parking.location.center) *
-                      KMTOMETERS <= _radius.value
-                }
-                .sortedBy { parking ->
-                  TurfMeasurement.distance(_circleCenter.value!!, parking.location.center)
-                }
-      }
-    }
-  }
   /**
    * Fetches the image URL from the cloud storage, This function as to be called after retrieving
    * the path from the Firestore database.
@@ -134,9 +125,12 @@ class ParkingViewModel(
             maxOf(startPos.latitude(), endPos.latitude()))
     // Get all tiles that are in the rectangle
     tilesToDisplay = Tile.getAllTilesInRectangle(bottomLeft, topRight)
+    // Used to keep track of when the last request has finished.
+    var nbRequestLeft = tilesToDisplay.size
     tilesToDisplay.forEach { tile ->
       if (tilesToParking.value.containsKey(tile)) {
         _rectParkings.value += tilesToParking.value[tile]!!
+        updateClosestParkings(--nbRequestLeft)
         return@forEach // Skip to the next tile if already fetched
       }
       tilesToParking.value[tile] = emptyList() // Avoid querying the same tile multiple times
@@ -146,21 +140,22 @@ class ParkingViewModel(
           { parkings ->
             tilesToParking.value[tile] = parkings
             _rectParkings.value += parkings
+            updateClosestParkings(--nbRequestLeft)
           },
           { Log.e("ParkingViewModel", "-- Error getting parkings: $it") })
     }
   }
 
   /**
-   * Get all parkings in a radius of k meters around a location. Uses the Haversine formula to
+   * Get all parkings in a radius of radius meters around a location. Uses the Haversine formula to
    * calculate the distance between two points on the Earth's surface. and make use of the
-   * getParkingBetween function to get all parkings in the circle.* The result is stored in the
+   * getParkingBetween function to get all parkings in the circle. The result is stored in the
    * closestParkings state.
    *
    * @param center: center of the circle
    * @param radius: radius of the circle in meter.
    */
-  fun getParkingsInRadius(
+  private fun getParkingsInRadius(
       center: Point,
       radius: Double,
   ) {
@@ -168,6 +163,23 @@ class ParkingViewModel(
     _circleCenter.value = center
     val (bottomLeft, topRight) = Tile.getSmallestRectangleEnclosingCircle(center, radius)
     getParkingsInRect(bottomLeft, topRight)
+  }
+
+  /**
+   * Increments the radius of the circle by RADIUS_INCREMENT if the new radius is less than
+   * MAX_RADIUS.
+   */
+  fun incrementRadius() {
+    if (_circleCenter.value == null || _radius.value == MAX_RADIUS) return
+    _radius.value += RADIUS_INCREMENT
+    getParkingsInRadius(_circleCenter.value!!, _radius.value)
+  }
+
+  /** set the center of the circle, and reset the radius to DEFAULT_RADIUS */
+  fun setCircleCenter(center: Point) {
+    _circleCenter.value = center
+    _radius.value = DEFAULT_RADIUS
+    getParkingsInRadius(center, DEFAULT_RADIUS)
   }
 
   fun getNewUid(): String {
@@ -187,6 +199,29 @@ class ParkingViewModel(
             .toInt() / 100.00
     parking.nbReviews += 1
     parkingRepository.updateParking(parking, {}, {})
+  }
+
+  /**
+   * Updates the list of closest parkings.
+   *
+   * @param nbRequestLeft: number of tiles left to fetch the parkings from. If nbRequestLeft is 0,
+   *   the function will update the closest parkings and if the result is empty, it will increment
+   *   the radius.
+   */
+  private fun updateClosestParkings(nbRequestLeft: Int) {
+    if (_circleCenter.value == null || nbRequestLeft != 0) return // avoid updating if not ready
+    _closestParkings.value =
+        _rectParkings.value
+            .filter { parking ->
+              TurfMeasurement.distance(_circleCenter.value!!, parking.location.center) *
+                  KM_TO_METERS <= _radius.value
+            }
+            .sortedBy { parking ->
+              TurfMeasurement.distance(_circleCenter.value!!, parking.location.center)
+            }
+    if (_closestParkings.value.isEmpty() || _radius.value == MAX_RADIUS) {
+      incrementRadius()
+    }
   }
 
   // create factory (imported from bootcamp)
