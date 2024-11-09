@@ -11,6 +11,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToIndex
 import com.github.se.cyrcle.MainActivity
 import com.github.se.cyrcle.model.parking.ParkingRepository
@@ -69,6 +70,12 @@ class MainActivityTest {
       composeTestRule.onNodeWithTag("RowSecurity").assertIsDisplayed()
       composeTestRule.onNodeWithTag("ButtonsColumn").assertIsDisplayed()
       composeTestRule.onNodeWithTag("ShowInMapButton").assertIsDisplayed().assertHasClickAction()
+      composeTestRule
+          .onNodeWithTag("ReportButton")
+          .assertExists()
+          .performScrollTo()
+          .assertIsDisplayed()
+          .assertHasClickAction()
     }
 
     @OptIn(ExperimentalTestApi::class)

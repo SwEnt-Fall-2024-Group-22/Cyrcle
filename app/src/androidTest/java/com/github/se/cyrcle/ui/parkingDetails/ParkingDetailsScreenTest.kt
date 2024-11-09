@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
@@ -76,20 +77,29 @@ class ParkingDetailsScreenTest {
     composeTestRule.onNodeWithTag("TopAppBar").assertIsDisplayed()
     composeTestRule.onNodeWithTag("TopAppBarTitle").assertIsDisplayed()
 
+    // Verify the reviews
+    composeTestRule.onNodeWithTag("AverageRatingRow").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("SeeAllReviewsText").assertIsDisplayed()
+
     // Verify the images
     composeTestRule.onNodeWithTag("ParkingImagesRow").assertIsDisplayed()
     composeTestRule.onNodeWithTag("ParkingImage0").assertIsDisplayed()
 
-    // Verify the buttons
-    composeTestRule.onNodeWithTag("ButtonsColumn").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("ShowInMapButton").assertIsDisplayed()
-
-    // Verify the rest of the content
+    // Verify the information
     composeTestRule.onNodeWithTag("CapacityColumn").assertIsDisplayed()
     composeTestRule.onNodeWithTag("RackTypeColumn").assertIsDisplayed()
     composeTestRule.onNodeWithTag("ProtectionColumn").assertIsDisplayed()
     composeTestRule.onNodeWithTag("PriceColumn").assertIsDisplayed()
     composeTestRule.onNodeWithTag("SecurityColumn").assertIsDisplayed()
+
+    // Verify the buttons
+    composeTestRule.onNodeWithTag("ButtonsColumn").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("ShowInMapButton").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag("ReportButton")
+        .assertExists()
+        .performScrollTo()
+        .assertIsDisplayed()
   }
 
   @Test
