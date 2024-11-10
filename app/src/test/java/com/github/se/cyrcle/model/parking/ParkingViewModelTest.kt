@@ -72,7 +72,7 @@ class ParkingViewModelTest {
   @Test
   fun updateReviewScoreTest() {
     val parking = TestInstancesParking.parking2
-    parkingViewModel.updateReviewScore(5.0, parking)
+    parkingViewModel.updateReviewScore(5.0, oldScore = 5.0, parking, isNewReview = true)
     assert(parking.avgScore == 5.0)
   }
   /*

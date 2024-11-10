@@ -23,6 +23,10 @@ class ReviewViewModel(private val reviewRepository: ReviewRepository) : ViewMode
     reviewRepository.addReview(review, {}, { Log.e("ReviewViewModel", "Error adding review", it) })
   }
 
+  fun selectReview(review: Review) {
+    _selectedReview.value = review
+  }
+
   fun getNewUid(): String {
     return reviewRepository.getNewUid()
   }

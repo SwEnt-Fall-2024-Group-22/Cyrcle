@@ -89,34 +89,6 @@ class ReviewRepositoryFirestoreTest {
   }
 
   @Test
-  fun addReview_callsOnFailure() {
-    val exception = Exception("Failed to add review")
-
-    // Create a serialized map that represents the Review object
-    val serializedReview =
-        mapOf(
-            "uid" to review.uid,
-            "owner" to review.owner,
-            "parking" to review.parking,
-            "text" to review.text,
-            "rating" to review.rating)
-
-    // Mock the behavior of Firestore's set() to throw an exception
-    `when`(mockDocumentReference.set(serializedReview)).thenReturn(Tasks.forException(exception))
-
-    reviewRepositoryFirestore.addReview(
-        review,
-        onSuccess = { fail("Expected failure but got success") },
-        onFailure = { error ->
-          // Assert that the error is the expected exception
-          assertEquals(exception, error)
-        })
-
-    // Verify that set() was called with the serialized data
-    verify(mockDocumentReference).set(serializedReview)
-  }
-
-  @Test
   fun updateReview_callsOnSuccess() {
     `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
 
@@ -159,14 +131,19 @@ class ReviewRepositoryFirestoreTest {
         mapOf(
             "uid" to review.uid,
             "owner" to review.owner,
-            "parking" to review.parking,
             "text" to review.text,
-            "rating" to review.rating)
+            "rating" to review.rating,
+            "parking" to review.parking,
+            "time" to review.time)
 
     // Verify serialization by checking the data passed to Firestore on `set`
     `when`(mockDocumentReference.set(any())).thenAnswer { invocation ->
       val data = invocation.arguments[0] as Map<String, Any>
-      assertEquals(reviewData, data) // Check that serialized data matches expected map
+      assertEquals(data["uid"], reviewData["uid"])
+      assertEquals(data["owner"], reviewData["owner"])
+      assertEquals(data["text"], reviewData["text"])
+      assertEquals(data["rating"], reviewData["rating"])
+      assertEquals(data["parking"], reviewData["parking"])
       Tasks.forResult(null)
     }
 

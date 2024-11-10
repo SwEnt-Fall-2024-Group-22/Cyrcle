@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.review
 
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,7 +16,6 @@ import androidx.compose.material3.Slider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -37,6 +37,7 @@ import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ReviewScreen(
     navigationActions: NavigationActions,
@@ -44,19 +45,36 @@ fun ReviewScreen(
     reviewViewModel: ReviewViewModel,
     userViewModel: UserViewModel
 ) {
-  var sliderValue by remember { mutableFloatStateOf(0f) }
-  var textValue by remember { mutableStateOf("") }
-
-  val context = LocalContext.current // Get the current context
 
   val selectedParking =
       parkingViewModel.selectedParking.collectAsState().value
-          ?: return Text(stringResource(R.string.no_selected_parking_error))
+          ?: return Text(text = "No parking selected. Should not happen")
+
+  reviewViewModel.getReviewsByParking(selectedParking.uid)
+  val ownerHasReviewed =
+      reviewViewModel.parkingReviews.value.any {
+        it.owner == userViewModel.currentUser?.value?.userId
+      }
+  val matchingReview =
+      reviewViewModel.parkingReviews.value.find {
+        it.owner == userViewModel.currentUser?.value?.userId
+      }
+  if (matchingReview != null) {
+    reviewViewModel.selectReview(matchingReview)
+  }
+
+  var sliderValue by remember {
+    mutableStateOf(if (ownerHasReviewed) matchingReview?.rating?.toFloat()!! else 0f)
+  }
+  var textValue by remember { mutableStateOf(if (ownerHasReviewed) matchingReview?.text!! else "") }
+
+  val context = LocalContext.current // Get the current context
 
   Scaffold(
       topBar = {
         TopAppBar(
-            navigationActions = navigationActions, stringResource(R.string.review_screen_title))
+            navigationActions = navigationActions,
+            if (ownerHasReviewed) "Edit Your Review" else "Add Your Review")
       }) { paddingValues ->
         Column(
             modifier = Modifier.fillMaxSize().padding(paddingValues).padding(16.dp),
@@ -67,7 +85,6 @@ fun ReviewScreen(
               Text(
                   text =
                       when (sliderValue) {
-                        in 0f..1f -> stringResource(R.string.review_screen_terrible_review)
                         in 1f..2f -> stringResource(R.string.review_screen_poor_review)
                         in 2f..3f -> stringResource(R.string.review_screen_bad_review)
                         3f -> stringResource(R.string.review_screen_average_review)
@@ -81,9 +98,8 @@ fun ReviewScreen(
 
               // Slider with step granularity of 0.5
               Text(
-                  text = stringResource(R.string.review_screen_rating).format(sliderValue),
-                  style = MaterialTheme.typography.bodyLarge,
-                  testTag = "RatingText")
+                  text = "Rating: ${sliderValue.toDouble()}",
+                  style = MaterialTheme.typography.bodyLarge)
               Slider(
                   value = sliderValue,
                   onValueChange = { newValue -> sliderValue = newValue },
@@ -103,22 +119,38 @@ fun ReviewScreen(
               Spacer(modifier = Modifier.height(16.dp))
 
               // Add Review Button
-              val toastTextOnSuccess = stringResource(R.string.review_screen_submit_button_toast)
-              val defaultReviewOwner = stringResource(R.string.review_screen_default_review_owner)
               Button(
-                  text = stringResource(R.string.review_screen_submit_button),
+                  text = "Save my Review",
                   onClick = {
-                    Toast.makeText(context, toastTextOnSuccess, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Review Added!", Toast.LENGTH_SHORT).show()
                     // to avoid problematic castings
                     val sliderToValue = (sliderValue * 100).toInt() / 100.0
-                    reviewViewModel.addReview(
-                        Review(
-                            owner = userViewModel.currentUser.value?.userId ?: defaultReviewOwner,
-                            text = textValue,
-                            parking = selectedParking.uid,
-                            rating = sliderToValue,
-                            uid = reviewViewModel.getNewUid()))
-                    parkingViewModel.updateReviewScore(sliderToValue, selectedParking)
+
+                    if (!ownerHasReviewed) {
+                      parkingViewModel.updateReviewScore(
+                          newScore = sliderToValue, parking = selectedParking, isNewReview = true)
+                      reviewViewModel.addReview(
+                          Review(
+                              owner = userViewModel.currentUser.value?.userId ?: "default",
+                              text = textValue,
+                              parking = selectedParking.uid,
+                              rating = sliderToValue,
+                              uid = reviewViewModel.getNewUid()))
+                    } else {
+                      parkingViewModel.updateReviewScore(
+                          newScore = sliderToValue,
+                          oldScore = matchingReview?.rating!!,
+                          parking = selectedParking,
+                          isNewReview = false)
+
+                      reviewViewModel.updateReview(
+                          Review(
+                              owner = userViewModel.currentUser.value?.userId ?: "default",
+                              text = textValue,
+                              parking = selectedParking.uid,
+                              rating = sliderToValue,
+                              uid = reviewViewModel.selectedReview.value?.uid!!))
+                    }
                     navigationActions.goBack()
                   },
                   modifier = Modifier.fillMaxWidth().height(60.dp),
