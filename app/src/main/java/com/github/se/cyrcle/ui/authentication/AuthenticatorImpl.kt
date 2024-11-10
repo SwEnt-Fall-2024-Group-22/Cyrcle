@@ -5,41 +5,18 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.user.User
-import com.github.se.cyrcle.ui.theme.ColorLevel
-import com.github.se.cyrcle.ui.theme.atoms.Button
-import com.github.se.cyrcle.ui.theme.atoms.Text
-import com.github.se.cyrcle.ui.theme.googleSignInButtonStyle
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.auth
+import javax.inject.Inject
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
@@ -48,7 +25,7 @@ import kotlinx.coroutines.tasks.await
  * Implementation of the Authenticator interface This class uses the Firebase Authentication SDK to
  * authenticate users
  */
-object AuthenticatorImpl : Authenticator {
+class AuthenticatorImpl @Inject constructor(private val auth: FirebaseAuth) : Authenticator {
 
   /**
    * Composable button that authenticates the user
@@ -66,41 +43,15 @@ object AuthenticatorImpl : Authenticator {
 
     val launcher = rememberFirebaseAuthLauncher(onAuthComplete, onAuthError)
 
-    Button(
-        onClick = {
-          val gso =
-              GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                  .requestIdToken(token)
-                  .requestEmail()
-                  .build()
-          val googleSignInClient = GoogleSignIn.getClient(context, gso)
-          launcher.launch(googleSignInClient.signInIntent)
-        },
-        colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-        shape = RoundedCornerShape(50),
-        border = BorderStroke(1.dp, Color.LightGray),
-        modifier =
-            Modifier.padding(16.dp)
-                .height(48.dp) // Adjust height as needed
-                .testTag("GoogleLoginButton")) {
-          Row(
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.Center,
-              modifier = Modifier.fillMaxWidth()) {
-
-                // Google Logo
-                Image(
-                    painter = painterResource(id = R.drawable.google_logo),
-                    contentDescription = "Google Logo",
-                    modifier = Modifier.size(30.dp).padding(end = 8.dp))
-
-                // Text on Sign-In button
-                Text(
-                    text = stringResource(R.string.sign_in_google_button),
-                    color = Color.Gray,
-                    style = googleSignInButtonStyle)
-              }
-        }
+    Authenticator.DefaultAuthenticateButton {
+      val gso =
+          GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+              .requestIdToken(token)
+              .requestEmail()
+              .build()
+      val googleSignInClient = GoogleSignIn.getClient(context, gso)
+      launcher.launch(googleSignInClient.signInIntent)
+    }
   }
 
   /**
@@ -110,18 +61,10 @@ object AuthenticatorImpl : Authenticator {
    */
   @Composable
   override fun SignInAnonymouslyButton(onComplete: () -> Unit) {
-    Button(
-        text = stringResource(R.string.sign_in_guest_button),
-        onClick = {
-          runBlocking { FirebaseAuth.getInstance().signInAnonymously().await() }
-          onComplete()
-        },
-        colorLevel = ColorLevel.SECONDARY,
-        modifier =
-            Modifier.padding(16.dp)
-                .border(BorderStroke(1.dp, Color.LightGray), RoundedCornerShape(50))
-                .height(48.dp)
-                .testTag("AnonymousLoginButton"))
+    Authenticator.DefaultAnonymousLoginButton {
+      runBlocking { auth.signInAnonymously().await() }
+      onComplete()
+    }
   }
 
   /**
@@ -144,7 +87,7 @@ object AuthenticatorImpl : Authenticator {
         val account = task.getResult(ApiException::class.java)!!
         val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
         scope.launch {
-          val authResult = Firebase.auth.signInWithCredential(credential).await()
+          val authResult = auth.signInWithCredential(credential).await()
 
           val user =
               User(

@@ -31,7 +31,11 @@ import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.google.android.gms.common.api.ApiException
 
 @Composable
-fun SignInScreen(navigationActions: NavigationActions, userViewModel: UserViewModel) {
+fun SignInScreen(
+    authenticator: Authenticator,
+    navigationActions: NavigationActions,
+    userViewModel: UserViewModel
+) {
   val context = LocalContext.current
 
   val failSignInMsg = stringResource(R.string.sign_in_failed_toast)
@@ -82,10 +86,10 @@ fun SignInScreen(navigationActions: NavigationActions, userViewModel: UserViewMo
           Spacer(modifier = Modifier.height(20.dp))
 
           // Authenticate With Google Button
-          AuthenticatorImpl.AuthenticateButton(onAuthComplete, onAuthFailure)
+          authenticator.AuthenticateButton(onAuthComplete, onAuthFailure)
 
           // Anonymous Login Button
-          AuthenticatorImpl.SignInAnonymouslyButton {
+          authenticator.SignInAnonymouslyButton {
             navigationActions.navigateTo(TopLevelDestinations.MAP)
           }
         }

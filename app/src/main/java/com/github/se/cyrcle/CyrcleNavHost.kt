@@ -10,6 +10,7 @@ import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.addParking.attributes.AttributesPicker
 import com.github.se.cyrcle.ui.addParking.location.LocationPicker
+import com.github.se.cyrcle.ui.authentication.Authenticator
 import com.github.se.cyrcle.ui.authentication.SignInScreen
 import com.github.se.cyrcle.ui.list.SpotListScreen
 import com.github.se.cyrcle.ui.map.MapScreen
@@ -30,6 +31,7 @@ fun CyrcleNavHost(
     userViewModel: UserViewModel,
     mapViewModel: MapViewModel,
     addressViewModel: AddressViewModel,
+    authenticator: Authenticator,
     permissionGranted: Boolean
 ) {
   NavHost(navController = navController, startDestination = Route.AUTH) {
@@ -37,7 +39,7 @@ fun CyrcleNavHost(
         startDestination = Screen.AUTH,
         route = Route.AUTH,
     ) {
-      composable(Screen.AUTH) { SignInScreen(navigationActions, userViewModel) }
+      composable(Screen.AUTH) { SignInScreen(authenticator, navigationActions, userViewModel) }
     }
 
     navigation(
