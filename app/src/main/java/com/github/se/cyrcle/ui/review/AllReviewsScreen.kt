@@ -41,13 +41,14 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 fun Timestamp?.toFormattedDate(): String {
-    return if (this != null) {
-        val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-        dateFormat.format(this.toDate())
-    } else {
-        "Date not available"
-    }
+  return if (this != null) {
+    val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+    dateFormat.format(this.toDate())
+  } else {
+    "Date not available"
+  }
 }
+
 @SuppressLint("StateFlowValueCalledInComposition", "Range")
 @Composable
 fun AllReviewsScreen(
