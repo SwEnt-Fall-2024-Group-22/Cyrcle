@@ -118,6 +118,7 @@ fun AttributesPicker(
   }
 
   Scaffold(
+      modifier = Modifier.testTag("AttributesPickerScreen"),
       topBar = { AttributePickerTopBar(mapViewModel, title) },
       bottomBar = { BottomBarAddAttr(navigationActions) { onSubmit() } }) { padding ->
         // Apply screen-dimension-scaled padding for consistent spacing
@@ -131,7 +132,8 @@ fun AttributesPicker(
             modifier =
                 Modifier.fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(scaledPaddingValues)) {
+                    .padding(scaledPaddingValues)
+                    .testTag("AttributesPickerColumn")) {
               // Top Box as padding at the top of the screen, dynamically sized
               Box(
                   modifier =
@@ -152,16 +154,16 @@ fun AttributesPicker(
                         label = stringResource(R.string.attributes_picker_title_label),
                         modifier =
                             Modifier.fillMaxWidth()
-                                .padding(horizontal = horizontalPaddingScaleFactor))
+                                .padding(horizontal = horizontalPaddingScaleFactor),
+                        testTag = "AttributesPickerTitle")
                     EnumDropDown(
                         options = ParkingProtection.entries.toList(),
                         selectedValue = protection,
-                        label = stringResource(R.string.attributes_picker_capacity_label),
-                    )
+                        label = stringResource(R.string.attributes_picker_protection_label))
                     EnumDropDown(
                         options = ParkingCapacity.entries.toList(),
                         selectedValue = capacity,
-                        label = stringResource(R.string.attributes_picker_protection_label),
+                        label = stringResource(R.string.attributes_picker_capacity_label),
                     )
                     EnumDropDown(
                         options = ParkingRackType.entries.toList(),
@@ -183,7 +185,8 @@ fun AttributesPicker(
                             Modifier.fillMaxWidth()
                                 .height(screenHeight * 0.2f) // Dynamic height for description field
                                 .verticalScroll(rememberScrollState())
-                                .padding(horizontal = horizontalPaddingScaleFactor))
+                                .padding(horizontal = horizontalPaddingScaleFactor),
+                        testTag = "AttributesPickerDescription")
                   }
 
               // Bottom Box as padding at the bottom of the screen, dynamically sized
@@ -210,7 +213,7 @@ private fun scaledPadding(
 
 @Composable
 fun BottomBarAddAttr(navigationActions: NavigationActions, onSubmit: () -> Unit) {
-  Box(Modifier.background(Color.White)) {
+  Box(Modifier.background(Color.White).testTag("AttributesPickerBottomBar")) {
     Row(
         Modifier.fillMaxWidth().wrapContentHeight().padding(16.dp).background(Color.White),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -266,62 +269,67 @@ fun AttributePickerTopBar(mapViewModel: MapViewModel, title: MutableState<String
     }
   }
 
-  Box(modifier = Modifier.fillMaxWidth().height(topBarHeight).clipToBounds()) {
-    val mapState = rememberMapState()
-    mapState.gesturesSettings = GesturesSettings {
-      scrollEnabled = false
-      quickZoomEnabled = false
-      pinchToZoomEnabled = false
-      doubleTapToZoomInEnabled = false
-      doubleTouchToZoomOutEnabled = false
-      rotateEnabled = false
-      pitchEnabled = false
-    }
-
-    MapboxMap(
-        mapViewportState = mapViewportState,
-        style = { MapConfig.DefaultStyle() },
-        modifier = Modifier.fillMaxWidth().height(topBarHeight),
-        mapState = mapState,
-        attribution = {},
-        scaleBar = {}) {
-          DisposableMapEffect { mapView ->
-            annotationManager = mapView.annotations.createPolygonAnnotationManager()
-            onDispose { annotationManager!!.deleteAll() }
-          }
+  Box(
+      modifier =
+          Modifier.fillMaxWidth()
+              .height(topBarHeight)
+              .clipToBounds()
+              .testTag("AttributesPickerTopBar")) {
+        val mapState = rememberMapState()
+        mapState.gesturesSettings = GesturesSettings {
+          scrollEnabled = false
+          quickZoomEnabled = false
+          pinchToZoomEnabled = false
+          doubleTapToZoomInEnabled = false
+          doubleTouchToZoomOutEnabled = false
+          rotateEnabled = false
+          pitchEnabled = false
         }
 
-    Box(
-        modifier =
-            Modifier.matchParentSize()
-                .background(
-                    Brush.horizontalGradient(
-                        colors =
-                            listOf(
-                                Color.White.copy(alpha = 0.9f),
-                                Color.White.copy(alpha = 0.9f),
-                                Color.White.copy(alpha = 0.5f),
-                                Color.White.copy(alpha = 0.3f)))))
-    Column(modifier = Modifier.padding(start = 4.dp, top = 4.dp)) {
-      Text(
-          text = stringResource(R.string.attributes_picker_top_bar_new_parking_spot),
-          fontSize = titleFontSize,
-          color = MaterialTheme.colorScheme.primary,
-          fontWeight = FontWeight.Bold,
-          maxLines = 1)
-      Text(
-          text = title.value,
-          fontSize = subtitleFontSize,
-          color = MaterialTheme.colorScheme.primary,
-          fontWeight = FontWeight.Bold,
-          maxLines = 1)
-      Text(
-          text = stringResource(R.string.attributes_picker_top_bar_set_attributes),
-          fontSize = subtitleFontSize,
-          color = MaterialTheme.colorScheme.tertiary,
-          fontWeight = FontWeight.Bold,
-          maxLines = 1)
-    }
-    drawRectangles(annotationManager, listOf(location))
-  }
+        MapboxMap(
+            mapViewportState = mapViewportState,
+            style = { MapConfig.DefaultStyle() },
+            modifier = Modifier.fillMaxWidth().height(topBarHeight),
+            mapState = mapState,
+            attribution = {},
+            scaleBar = {}) {
+              DisposableMapEffect { mapView ->
+                annotationManager = mapView.annotations.createPolygonAnnotationManager()
+                onDispose { annotationManager!!.deleteAll() }
+              }
+            }
+
+        Box(
+            modifier =
+                Modifier.matchParentSize()
+                    .background(
+                        Brush.horizontalGradient(
+                            colors =
+                                listOf(
+                                    Color.White.copy(alpha = 0.9f),
+                                    Color.White.copy(alpha = 0.9f),
+                                    Color.White.copy(alpha = 0.5f),
+                                    Color.White.copy(alpha = 0.3f)))))
+        Column(modifier = Modifier.padding(start = 4.dp, top = 4.dp)) {
+          Text(
+              text = stringResource(R.string.attributes_picker_top_bar_new_parking_spot),
+              fontSize = titleFontSize,
+              color = MaterialTheme.colorScheme.primary,
+              fontWeight = FontWeight.Bold,
+              maxLines = 1)
+          Text(
+              text = title.value,
+              fontSize = subtitleFontSize,
+              color = MaterialTheme.colorScheme.primary,
+              fontWeight = FontWeight.Bold,
+              maxLines = 1)
+          Text(
+              text = stringResource(R.string.attributes_picker_top_bar_set_attributes),
+              fontSize = subtitleFontSize,
+              color = MaterialTheme.colorScheme.tertiary,
+              fontWeight = FontWeight.Bold,
+              maxLines = 1)
+        }
+        drawRectangles(annotationManager, listOf(location))
+      }
 }

@@ -15,6 +15,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
@@ -75,6 +76,7 @@ fun RectangleSelection(mapViewModel: MapViewModel, paddingValues: PaddingValues)
           modifier = Modifier.fillMaxSize().padding(end = 55.dp),
       ) {
         androidx.compose.material3.Button(
+            modifier = Modifier.testTag("toggleRectangleButton"),
             onClick = { mapGesturesEnabled.value = !mapGesturesEnabled.value },
             content = {
               if (mapGesturesEnabled.value) {

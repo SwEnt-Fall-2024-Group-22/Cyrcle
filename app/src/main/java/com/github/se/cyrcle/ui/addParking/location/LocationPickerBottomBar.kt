@@ -40,7 +40,7 @@ fun LocationPickerBottomBar(
     mapView: MutableState<MapView?>,
 ) {
   val locationPickerState by mapViewModel.locationPickerState.collectAsState()
-  Box(Modifier.background(Color.White).height(100.dp)) {
+  Box(Modifier.background(Color.White).height(100.dp).testTag("LocationPickerBottomBar")) {
     Row(
         Modifier.fillMaxWidth().wrapContentHeight().padding(16.dp).background(Color.White),
         horizontalArrangement = Arrangement.SpaceBetween,
