@@ -32,7 +32,6 @@ import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
-import com.github.se.cyrcle.permission.PermissionHandlerInterface
 import com.github.se.cyrcle.ui.map.overlay.ZoomControls
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
@@ -86,9 +85,7 @@ fun MapScreen(
     parkingViewModel: ParkingViewModel,
     userViewModel: UserViewModel,
     mapViewModel: MapViewModel,
-    zoomState: MutableState<Double> = remember { mutableDoubleStateOf(defaultZoom) },
-    permissionsHandler: PermissionHandlerInterface,
-    activity: Activity = LocalContext.current as Activity
+    zoomState: MutableState<Double> = remember { mutableDoubleStateOf(defaultZoom) }
 ) {
 
   val listOfParkings by parkingViewModel.rectParkings.collectAsState()
@@ -102,6 +99,8 @@ fun MapScreen(
   val selectedParking by parkingViewModel.selectedParking.collectAsState()
 
   val screenCapacityString = stringResource(R.string.map_screen_capacity)
+
+  val activity = LocalContext.current as Activity
 
   val bitmap = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.red_marker)
   val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 100, 150, false)

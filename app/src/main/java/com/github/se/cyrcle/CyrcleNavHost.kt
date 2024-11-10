@@ -1,4 +1,3 @@
-import android.app.Activity
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -9,7 +8,6 @@ import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
-import com.github.se.cyrcle.permission.PermissionHandlerInterface
 import com.github.se.cyrcle.ui.addParking.attributes.AttributesPicker
 import com.github.se.cyrcle.ui.addParking.location.LocationPicker
 import com.github.se.cyrcle.ui.authentication.SignInScreen
@@ -31,9 +29,7 @@ fun CyrcleNavHost(
     reviewViewModel: ReviewViewModel,
     userViewModel: UserViewModel,
     mapViewModel: MapViewModel,
-    addressViewModel: AddressViewModel,
-    permissionsHandler: PermissionHandlerInterface,
-    activity: Activity
+    addressViewModel: AddressViewModel
 ) {
   NavHost(navController = navController, startDestination = Route.AUTH) {
     navigation(
@@ -64,14 +60,7 @@ fun CyrcleNavHost(
         route = Route.MAP,
     ) {
       composable(Screen.MAP) {
-        MapScreen(
-            navigationActions,
-            parkingViewModel,
-            userViewModel,
-            mapViewModel,
-            permissionsHandler = permissionsHandler,
-            activity = activity,
-        )
+        MapScreen(navigationActions, parkingViewModel, userViewModel, mapViewModel)
       }
     }
 

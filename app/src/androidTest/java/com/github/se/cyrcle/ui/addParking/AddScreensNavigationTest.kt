@@ -1,9 +1,7 @@
 package com.github.se.cyrcle.ui.addParking
 
 import CyrcleNavHost
-import android.app.Activity
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
@@ -15,7 +13,6 @@ import androidx.compose.ui.test.performClick
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.github.se.cyrcle.di.mocks.MockPermissionHandler
 import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ImageRepository
@@ -60,9 +57,7 @@ class AddScreensNavigationTest {
         reviewViewModel,
         userViewModel,
         mapViewModel,
-        addressViewModel,
-        permissionsHandler = MockPermissionHandler(),
-        activity = LocalContext.current as Activity)
+        addressViewModel)
     return listOf<Any>(
         navigationActions,
         parkingViewModel,
@@ -84,13 +79,7 @@ class AddScreensNavigationTest {
       val mapViewModel = list[4] as MapViewModel
 
       userViewModel.setCurrentUser(User(userId = "default", username = "sayMyName", email = ""))
-      MapScreen(
-          navigationActions,
-          parkingViewModel,
-          userViewModel,
-          mapViewModel,
-          permissionsHandler = MockPermissionHandler(),
-          activity = LocalContext.current as Activity)
+      MapScreen(navigationActions, parkingViewModel, userViewModel, mapViewModel)
     }
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("addButton"))
     // Perform click on the add button
