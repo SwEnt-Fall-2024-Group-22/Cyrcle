@@ -17,8 +17,8 @@
     </plurals>
 
     <!-- Error Messages -->
-    <string name="input_min_characters">Minimum %1$d characters required</string>
-    <string name="input_max_characters">Maximum %1$d characters allowed</string>
+    <string name="input_min_characters">Minimum %1$d characters required (current: %2$d)</string>
+    <string name="input_max_characters">Maximum %1$d characters allowed (current: %2$d)</string>
 
     <!-- Attributes Picker -->
     <string name="attributes_picker_title_label">Title</string>

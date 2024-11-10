@@ -124,9 +124,9 @@ fun ConditionCheckingInputText(
             Text(
                 text =
                     if (value.length < minCharacters) {
-                      stringResource(R.string.input_min_characters, minCharacters)
+                      stringResource(R.string.input_min_characters, minCharacters, value.length)
                     } else {
-                      stringResource(R.string.input_max_characters, maxCharacters)
+                      stringResource(R.string.input_max_characters, maxCharacters, value.length)
                     },
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,

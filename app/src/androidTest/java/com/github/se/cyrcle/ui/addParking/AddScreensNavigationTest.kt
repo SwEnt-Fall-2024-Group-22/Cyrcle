@@ -11,6 +11,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -66,7 +67,7 @@ class AddScreensNavigationTest {
         addressViewModel,
         mockedAuthenticator,
         LocalContext.current as android.app.Activity)
-    return listOf<Any>(
+    return listOf(
         navigationActions,
         parkingViewModel,
         reviewViewModel,
@@ -133,6 +134,10 @@ class AddScreensNavigationTest {
       mapViewModel.updateLocation(Location(Point.fromLngLat(0.0, 0.0)))
       AttributesPicker(navigationActions, parkingViewModel, mapViewModel, addressViewModel)
     }
+
+    composeTestRule.waitUntilExactlyOneExists(hasTestTag("TitleInput"))
+    // Artificially set the title (otherwise the submit button is disabled)
+    composeTestRule.onNodeWithTag("TitleInput").assertExists().performTextInput("titleForParking")
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("submitButton"))
     // Perform click on the add button
     composeTestRule.onNodeWithTag("submitButton").performClick()

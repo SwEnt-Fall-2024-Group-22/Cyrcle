@@ -33,7 +33,7 @@ class ButtonTest {
     var a = 1
     composeTestRule.setContent {
       Button("Button", { a++ })
-      Button("Button", { a++ }, Modifier, ColorLevel.PRIMARY, enabled, tag1)
+      Button("Button", { a++ }, Modifier, ColorLevel.PRIMARY, enabled.value, tag1)
     }
 
     composeTestRule.onNodeWithTag(tagD).assertIsDisplayed()
