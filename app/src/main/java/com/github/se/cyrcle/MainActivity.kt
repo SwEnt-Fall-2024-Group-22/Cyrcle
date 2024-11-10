@@ -69,7 +69,8 @@ class MainActivity : ComponentActivity() {
               userViewModel,
               mapViewModel,
               addressViewModel,
-              authenticator)
+              authenticator,
+              this@MainActivity)
         }
       }
     }

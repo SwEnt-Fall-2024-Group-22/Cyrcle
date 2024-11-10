@@ -2,6 +2,7 @@ package com.github.se.cyrcle.ui.addParking
 
 import CyrcleNavHost
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
@@ -54,6 +55,7 @@ class AddScreensNavigationTest {
     val mapViewModel: MapViewModel = viewModel(factory = MapViewModel.Factory)
     val userViewModel: UserViewModel = viewModel(factory = UserViewModel.Factory)
     val addressViewModel: AddressViewModel = viewModel(factory = AddressViewModel.Factory)
+
     CyrcleNavHost(
         navigationActions,
         navController,
@@ -62,7 +64,8 @@ class AddScreensNavigationTest {
         userViewModel,
         mapViewModel,
         addressViewModel,
-        mockedAuthenticator)
+        mockedAuthenticator,
+        LocalContext.current as android.app.Activity)
     return listOf<Any>(
         navigationActions,
         parkingViewModel,

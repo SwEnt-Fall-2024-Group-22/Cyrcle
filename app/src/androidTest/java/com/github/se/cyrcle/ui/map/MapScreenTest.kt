@@ -1,6 +1,7 @@
 package com.github.se.cyrcle.ui.map
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -126,7 +127,13 @@ class MapScreenTest {
     val state = mutableStateOf(defaultZoom)
 
     composeTestRule.setContent {
-      MapScreen(mockNavigation, parkingViewModel, userViewModel, mapViewModel, state)
+      MapScreen(
+          mockNavigation,
+          parkingViewModel,
+          userViewModel,
+          mapViewModel,
+          state,
+          LocalContext.current as android.app.Activity)
     }
 
     for (i in 0..(maxZoom - defaultZoom).toInt()) {

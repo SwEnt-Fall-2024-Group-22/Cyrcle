@@ -85,7 +85,8 @@ fun MapScreen(
     parkingViewModel: ParkingViewModel,
     userViewModel: UserViewModel,
     mapViewModel: MapViewModel,
-    zoomState: MutableState<Double> = remember { mutableDoubleStateOf(defaultZoom) }
+    zoomState: MutableState<Double> = remember { mutableDoubleStateOf(defaultZoom) },
+    activity: Activity = LocalContext.current as Activity
 ) {
 
   val listOfParkings by parkingViewModel.rectParkings.collectAsState()
@@ -99,8 +100,6 @@ fun MapScreen(
   val selectedParking by parkingViewModel.selectedParking.collectAsState()
 
   val screenCapacityString = stringResource(R.string.map_screen_capacity)
-
-  val activity = LocalContext.current as Activity
 
   val bitmap = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.red_marker)
   val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 100, 150, false)

@@ -1,3 +1,4 @@
+import android.app.Activity
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -31,7 +32,8 @@ fun CyrcleNavHost(
     userViewModel: UserViewModel,
     mapViewModel: MapViewModel,
     addressViewModel: AddressViewModel,
-    authenticator: Authenticator
+    authenticator: Authenticator,
+    activity: Activity
 ) {
   NavHost(navController = navController, startDestination = Route.AUTH) {
     navigation(
