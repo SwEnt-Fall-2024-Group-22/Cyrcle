@@ -40,11 +40,14 @@ import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-fun Timestamp.toFormattedDate(): String {
-  val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-  return dateFormat.format(this.toDate())
+fun Timestamp?.toFormattedDate(): String {
+    return if (this != null) {
+        val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+        dateFormat.format(this.toDate())
+    } else {
+        "Date not available"
+    }
 }
-
 @SuppressLint("StateFlowValueCalledInComposition", "Range")
 @Composable
 fun AllReviewsScreen(
