@@ -117,7 +117,7 @@ interface Authenticator {
 
     @Composable
     fun DefaultSignOutButton(onComplete: () -> Unit) {
-      IconButton(Icons.Filled.Outbox, "Sign Out", onComplete)
+      IconButton(Icons.Filled.Outbox, "Sign Out", onComplete, testTag = "SignOutButton")
     }
   }
 }

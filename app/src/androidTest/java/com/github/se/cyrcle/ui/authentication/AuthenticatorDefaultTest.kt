@@ -40,4 +40,17 @@ class AuthenticatorDefaultTest {
         .performClick()
     assert(clicked)
   }
+
+  @Test
+  fun testDefaultSignOutBtn() {
+    var clicked = false
+    composeTestRule.setContent { Authenticator.DefaultSignOutButton { clicked = true } }
+
+    composeTestRule
+        .onNodeWithTag("SignOutButton")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+    assert(clicked)
+  }
 }

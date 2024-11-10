@@ -30,13 +30,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.user.UserViewModel
+import com.github.se.cyrcle.ui.authentication.Authenticator
 import com.github.se.cyrcle.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
@@ -56,7 +56,8 @@ const val USERNAME_MAX_LENGTH = 32
 @Composable
 fun ViewProfileScreen(
     navigationActions: NavigationActions,
-    userViewModel: UserViewModel = viewModel(factory = UserViewModel.Factory)
+    userViewModel: UserViewModel,
+    authenticator: Authenticator
 ) {
   val userState by userViewModel.currentUser.collectAsState()
   var isEditing by remember { mutableStateOf(false) }
@@ -78,53 +79,56 @@ fun ViewProfileScreen(
             tabList = LIST_TOP_LEVEL_DESTINATION,
             selectedItem = Route.PROFILE)
       }) { innerPadding ->
-        Column(
-            modifier =
-                Modifier.fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(16.dp)
-                    .testTag("ProfileContent"),
-            horizontalAlignment = Alignment.CenterHorizontally) {
-              if (isEditing) {
-                EditProfileContent(
-                    firstName = firstName,
-                    lastName = lastName,
-                    username = username,
-                    profilePictureUrl = profilePictureUrl,
-                    onFirstNameChange = { firstName = it },
-                    onLastNameChange = { lastName = it },
-                    onUsernameChange = { username = it },
-                    onImageClick = { imagePickerLauncher.launch("image/*") },
-                    onSave = {
-                      userViewModel.updateUser(
-                          userState?.copy(
-                              firstName = firstName,
-                              lastName = lastName,
-                              username = username,
-                              profilePictureUrl = profilePictureUrl) ?: return@EditProfileContent)
-                      userViewModel.getUserById(userState?.userId ?: "")
-                      isEditing = false
-                    },
-                    onCancel = {
-                      firstName = userState?.firstName ?: ""
-                      lastName = userState?.lastName ?: ""
-                      username = userState?.username ?: ""
-                      profilePictureUrl = userState?.profilePictureUrl ?: ""
-                      isEditing = false
-                    })
-              } else {
-                DisplayProfileContent(
-                    firstName = firstName,
-                    lastName = lastName,
-                    username = username,
-                    profilePictureUrl = profilePictureUrl,
-                    onEditClick = { isEditing = true })
+        Box(Modifier.fillMaxSize().padding(innerPadding)) {
+          authenticator.SignOutButton {
+            userViewModel.setCurrentUser(null)
+            navigationActions.navigateTo(Route.AUTH)
+          }
 
-                Spacer(modifier = Modifier.height(24.dp))
+          Column(
+              modifier = Modifier.fillMaxSize().padding(16.dp).testTag("ProfileContent"),
+              horizontalAlignment = Alignment.CenterHorizontally) {
+                if (isEditing) {
+                  EditProfileContent(
+                      firstName = firstName,
+                      lastName = lastName,
+                      username = username,
+                      profilePictureUrl = profilePictureUrl,
+                      onFirstNameChange = { firstName = it },
+                      onLastNameChange = { lastName = it },
+                      onUsernameChange = { username = it },
+                      onImageClick = { imagePickerLauncher.launch("image/*") },
+                      onSave = {
+                        userViewModel.updateUser(
+                            userState?.copy(
+                                firstName = firstName,
+                                lastName = lastName,
+                                username = username,
+                                profilePictureUrl = profilePictureUrl) ?: return@EditProfileContent)
+                        userViewModel.getUserById(userState?.userId ?: "")
+                        isEditing = false
+                      },
+                      onCancel = {
+                        firstName = userState?.firstName ?: ""
+                        lastName = userState?.lastName ?: ""
+                        username = userState?.username ?: ""
+                        profilePictureUrl = userState?.profilePictureUrl ?: ""
+                        isEditing = false
+                      })
+                } else {
+                  DisplayProfileContent(
+                      firstName = firstName,
+                      lastName = lastName,
+                      username = username,
+                      profilePictureUrl = profilePictureUrl,
+                      onEditClick = { isEditing = true })
 
-                FavoriteParkingsSection(userViewModel)
+                  Spacer(modifier = Modifier.height(24.dp))
+
+                  FavoriteParkingsSection(userViewModel)
+                }
               }
-            }
+        }
       }
 }
 
