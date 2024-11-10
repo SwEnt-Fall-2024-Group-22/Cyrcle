@@ -147,7 +147,7 @@ fun FilterHeader(
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically) {
           Text(
-              "All parkings in a radius of \n ${radius.value} m",
+              text = stringResource(R.string.all_parkings_radius, radius.value.toInt()),
               modifier = Modifier.weight(1f),
               style = MaterialTheme.typography.headlineMedium,
               color = MaterialTheme.colorScheme.onSurface)
