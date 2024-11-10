@@ -16,6 +16,10 @@
         <item quantity="other">(%d reviews)</item>
     </plurals>
 
+    <!-- Error Messages -->
+    <string name="input_min_characters">Minimum %1$d characters required</string>
+    <string name="input_max_characters">Maximum %1$d characters allowed</string>
+
     <!-- Attributes Picker -->
     <string name="attributes_picker_title_label">Title</string>
     <string name="attributes_picker_protection_label">How protected from the weather is the spot?</string>

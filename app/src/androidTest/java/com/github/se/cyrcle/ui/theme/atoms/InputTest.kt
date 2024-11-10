@@ -25,7 +25,17 @@ class InputTest {
 
     composeTestRule.setContent {
       InputText("Test", onValueChange = { newText -> text = newText })
-      InputText("Test", Modifier, { newText -> text = newText }, text, false, 2, 1, tag1)
+      InputText(
+          "Test",
+          Modifier,
+          { newText -> text = newText },
+          text,
+          false,
+          2,
+          1,
+          hasClearIcon = false,
+          isError = false,
+          testTag = tag1)
     }
 
     composeTestRule.onNodeWithTag(tagD).assertIsDisplayed()
