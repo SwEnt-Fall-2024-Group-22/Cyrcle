@@ -13,6 +13,7 @@ import androidx.compose.ui.test.performClick
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.se.cyrcle.di.mocks.AuthenticatorMock
 import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ImageRepository
@@ -45,6 +46,9 @@ class AddScreensNavigationTest {
   fun setUp(): List<Any> {
     val navController = rememberNavController()
     val navigationActions = NavigationActions(navController)
+
+    val mockedAuthenticator = AuthenticatorMock()
+
     val parkingViewModel: ParkingViewModel = viewModel(factory = ParkingViewModel.Factory)
     val reviewViewModel: ReviewViewModel = viewModel(factory = ReviewViewModel.Factory)
     val mapViewModel: MapViewModel = viewModel(factory = MapViewModel.Factory)
@@ -57,7 +61,8 @@ class AddScreensNavigationTest {
         reviewViewModel,
         userViewModel,
         mapViewModel,
-        addressViewModel)
+        addressViewModel,
+        mockedAuthenticator)
     return listOf<Any>(
         navigationActions,
         parkingViewModel,

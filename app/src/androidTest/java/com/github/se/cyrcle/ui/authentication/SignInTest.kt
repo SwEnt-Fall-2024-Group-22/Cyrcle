@@ -1,81 +1,73 @@
 package com.github.se.cyrcle.ui.authentication
 
-import androidx.activity.compose.setContent
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.navigation.NavHostController
-import androidx.test.espresso.intent.Intents
-import androidx.test.espresso.intent.Intents.intended
-import androidx.test.espresso.intent.matcher.IntentMatchers.toPackage
-import com.github.se.cyrcle.MainActivity
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.se.cyrcle.di.mocks.AuthenticatorMock
+import com.github.se.cyrcle.di.mocks.MockParkingRepository
+import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.parking.ParkingRepository
+import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.model.user.UserRepository
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
-import dagger.hilt.android.testing.HiltAndroidRule
-import dagger.hilt.android.testing.HiltAndroidTest
-import org.junit.After
+import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
+import junit.framework.TestCase.assertEquals
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mock
-import org.mockito.MockitoAnnotations
+import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
+import org.mockito.kotlin.verify
 
-@HiltAndroidTest
-class LoginTest {
+@RunWith(AndroidJUnit4::class)
+class SignInTest {
 
-  @get:Rule(order = 0) val hiltRule = HiltAndroidRule(this)
-
-  @get:Rule(order = 1) val composeTestRule = createAndroidComposeRule<MainActivity>()
-
-  @Mock lateinit var navigationHost: NavHostController
-  @Mock lateinit var userRepository: UserRepository
-  @Mock lateinit var parkingRepository: ParkingRepository
+  @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var navigationActions: NavigationActions
-  private lateinit var userViewModel: UserViewModel
+  private lateinit var userRepository: UserRepository
+  private lateinit var parkingRepository: ParkingRepository
 
-  // The IntentsTestRule is not reliable.
+  private lateinit var userViewModel: UserViewModel
 
   @Before
   fun setUp() {
-    Intents.init()
-    MockitoAnnotations.openMocks(this)
+    navigationActions = mock(NavigationActions::class.java)
 
+    userRepository = MockUserRepository()
+    parkingRepository = MockParkingRepository()
     userViewModel = UserViewModel(userRepository, parkingRepository)
-    navigationActions = NavigationActions(navigationHost)
-  }
 
-  // Release Intents after each test
-  @After
-  fun tearDown() {
-    Intents.release()
+    val mockAuthenticator = AuthenticatorMock()
+
+    composeTestRule.setContent { SignInScreen(mockAuthenticator, navigationActions, userViewModel) }
   }
 
   @Test
-  fun titleAndButtonsAreCorrectlyDisplayed() {
-    composeTestRule.activity.setContent { SignInScreen(navigationActions, userViewModel) }
+  fun testComponentsAndFunctionality() = runTest {
     composeTestRule
         .onNodeWithTag("LoginTitle")
         .assertIsDisplayed()
         .assertTextEquals("Welcome to Cyrcle")
 
-    composeTestRule.onNodeWithTag("GoogleLoginButton").assertIsDisplayed().assertHasClickAction()
+    composeTestRule
+        .onNodeWithTag("AuthenticateButton")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+
+    assert(userViewModel.isSignedIn.first())
+    assertEquals(TestInstancesUser.user1, userViewModel.currentUser.first())
+
+    verify(navigationActions).navigateTo(TopLevelDestinations.MAP)
 
     composeTestRule.onNodeWithTag("AnonymousLoginButton").assertIsDisplayed().assertHasClickAction()
-  }
-
-  @Test
-  fun googleSignInReturnsValidActivityResult() {
-    composeTestRule.activity.setContent { SignInScreen(navigationActions, userViewModel) }
-
-    composeTestRule.onNodeWithTag("GoogleLoginButton").performClick()
-    composeTestRule.waitForIdle()
-    // assert that an Intent resolving to Google Mobile Services has been sent (for sign-in)
-    intended(toPackage("com.google.android.gms"))
   }
 }

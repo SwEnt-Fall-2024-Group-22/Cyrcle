@@ -20,6 +20,7 @@ import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.UserRepository
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.permission.PermissionHandlerInterface
+import com.github.se.cyrcle.ui.authentication.Authenticator
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.CyrcleTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -39,6 +40,8 @@ class MainActivity : ComponentActivity() {
   @Inject lateinit var addressRepository: AddressRepository
 
   @Inject lateinit var permissionsHandler: PermissionHandlerInterface
+
+  @Inject lateinit var authenticator: Authenticator
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -66,8 +69,7 @@ class MainActivity : ComponentActivity() {
               userViewModel,
               mapViewModel,
               addressViewModel,
-              permissionsHandler,
-              this@MainActivity)
+              authenticator)
         }
       }
     }

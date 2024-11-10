@@ -159,7 +159,7 @@ class MainActivityTest {
           .assertIsDisplayed()
           .assertHasClickAction()
       composeTestRule
-          .onNodeWithTag("GoogleLoginButton")
+          .onNodeWithTag("AuthenticateButton")
           .assertIsDisplayed()
           .assertHasClickAction()
           .assertTextContains("Sign in with Google")
