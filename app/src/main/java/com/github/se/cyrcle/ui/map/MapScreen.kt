@@ -101,8 +101,6 @@ fun MapScreen(
   var pointAnnotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
   val selectedParking by parkingViewModel.selectedParking.collectAsState()
 
-  val context = LocalContext.current as Activity
-
   val screenCapacityString = stringResource(R.string.map_screen_capacity)
 
   val bitmap = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.red_marker)
