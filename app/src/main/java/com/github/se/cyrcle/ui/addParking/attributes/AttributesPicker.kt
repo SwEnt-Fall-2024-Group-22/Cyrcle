@@ -132,7 +132,8 @@ fun AttributesPicker(
             modifier =
                 Modifier.fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(scaledPaddingValues)) {
+                    .padding(scaledPaddingValues)
+                    .testTag("AttributesPickerColumn")) {
               // Top Box as padding at the top of the screen, dynamically sized
               Box(
                   modifier =
@@ -153,16 +154,16 @@ fun AttributesPicker(
                         label = stringResource(R.string.attributes_picker_title_label),
                         modifier =
                             Modifier.fillMaxWidth()
-                                .padding(horizontal = horizontalPaddingScaleFactor))
+                                .padding(horizontal = horizontalPaddingScaleFactor),
+                        testTag = "AttributesPickerTitle")
                     EnumDropDown(
                         options = ParkingProtection.entries.toList(),
                         selectedValue = protection,
-                        label = stringResource(R.string.attributes_picker_capacity_label),
-                        testTag = "AttributesDropdown")
+                        label = stringResource(R.string.attributes_picker_protection_label))
                     EnumDropDown(
                         options = ParkingCapacity.entries.toList(),
                         selectedValue = capacity,
-                        label = stringResource(R.string.attributes_picker_protection_label),
+                        label = stringResource(R.string.attributes_picker_capacity_label),
                     )
                     EnumDropDown(
                         options = ParkingRackType.entries.toList(),
@@ -184,7 +185,8 @@ fun AttributesPicker(
                             Modifier.fillMaxWidth()
                                 .height(screenHeight * 0.2f) // Dynamic height for description field
                                 .verticalScroll(rememberScrollState())
-                                .padding(horizontal = horizontalPaddingScaleFactor))
+                                .padding(horizontal = horizontalPaddingScaleFactor),
+                        testTag = "AttributesPickerDescription")
                   }
 
               // Bottom Box as padding at the bottom of the screen, dynamically sized

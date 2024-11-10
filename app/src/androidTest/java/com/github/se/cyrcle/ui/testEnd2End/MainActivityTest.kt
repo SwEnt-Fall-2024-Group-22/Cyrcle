@@ -15,17 +15,21 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToIndex
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipe
 import com.github.se.cyrcle.MainActivity
 import com.github.se.cyrcle.model.parking.Parking
+import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
+import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -66,9 +70,9 @@ class MainActivityTest {
     addParkingRobot.selectLocation()
     addParkingRobot.makeRectangleAndNext()
     addParkingRobot.assertAttributesPickerScreen()
-    addParkingRobot.inputParkingAttributes(TestInstancesParking.parking2)
 
-    Thread.sleep(10000)
+    addParkingRobot.addParking(TestInstancesParking.parking2)
+    assertParkingInRepo(composeTestRule.activity.parkingRepository, TestInstancesParking.parking2)
   }
 
   @Test
@@ -85,6 +89,9 @@ class MainActivityTest {
     cardRobot.assertParkingDetailsScreen()
   }
 
+  // ============================================================================
+  // ============================ ADDPARKINGS ROBOT =============================
+  // ============================================================================
   private class AddParkingRobot(val composeTestRule: ComposeTestRule) {
 
     fun assertLocationPickerScreen() {
@@ -122,22 +129,45 @@ class MainActivityTest {
     }
 
     @OptIn(ExperimentalTestApi::class)
-    fun inputParkingAttributes(parking: Parking) {
+    fun addParking(parking: Parking) {
       fun selectEnumValue(enumIdx: Int, enumValueIdx: Int) {
         composeTestRule.onAllNodesWithTag("EnumDropDown")[enumIdx].performClick()
+        composeTestRule.waitUntilAtLeastOneExists(hasTestTag("EnumDropDown0Item"))
+        composeTestRule
+            .onNodeWithTag("EnumDropDown${enumValueIdx}Item")
+            .performScrollTo()
+            .performClick()
       }
 
-      composeTestRule.onAllNodesWithTag("InputText")[0].performTextClearance()
-      composeTestRule
-          .onAllNodesWithTag("InputText")[0]
-          .performTextInput(parking.optName ?: "Default")
-      composeTestRule.onNodeWithTag("AttributesDropdown").performClick()
-      composeTestRule.waitUntilAtLeastOneExists(hasTestTag("EnumDropDown"))
-      // selectEnumValue(0, parking.protection.ordinal)
+      composeTestRule.onNodeWithTag("AttributesPickerTitle").performTextClearance()
+      composeTestRule.onNodeWithTag("AttributesPickerTitle").performTextInput(parking.optName ?: "")
 
+      selectEnumValue(0, parking.protection.ordinal)
+      selectEnumValue(1, parking.capacity.ordinal)
+      selectEnumValue(2, parking.rackType.ordinal)
+
+      if (parking.hasSecurity) {
+        composeTestRule.onNodeWithTag("BooleanRadioButtonYesRadioButton").performClick()
+      } else {
+        composeTestRule.onNodeWithTag("BooleanRadioButtonNoRadioButton").performClick()
+      }
+
+      composeTestRule
+          .onNodeWithTag("AttributesPickerColumn")
+          .performScrollToNode(hasTestTag("AttributesPickerDescription"))
+      composeTestRule.onNodeWithTag("AttributesPickerDescription").performTextClearance()
+      composeTestRule
+          .onNodeWithTag("AttributesPickerDescription")
+          .performTextInput(parking.optDescription ?: "")
+
+      composeTestRule.onNodeWithTag("submitButton").performClick()
+      composeTestRule.waitUntilAtLeastOneExists(hasTestTag("MapScreen"))
     }
   }
 
+  // ============================================================================
+  // =========================== PARKINGDETAILS ROBOT ===========================
+  // ============================================================================
   private class ParkingDetailsScreenRobot(val composeTestRule: ComposeTestRule) {
     fun assertParkingDetailsScreen() {
       composeTestRule.onNodeWithTag("TopAppBar").assertIsDisplayed()
@@ -166,6 +196,9 @@ class MainActivityTest {
     }
   }
 
+  // ============================================================================
+  // ============================= LISTSCREEN ROBOT =============================
+  // ============================================================================
   private class ListScreenRobot(val composeTestRule: ComposeTestRule) {
 
     @OptIn(ExperimentalTestApi::class)
@@ -201,6 +234,9 @@ class MainActivityTest {
     }
   }
 
+  // ============================================================================
+  // ============================= MAPSCREEN ROBOT ==============================
+  // ============================================================================
   private class MapScreenRobot(val composeTestRule: ComposeTestRule) {
 
     fun assertMapScreen() {
@@ -229,6 +265,9 @@ class MainActivityTest {
     }
   }
 
+  // ============================================================================
+  // ============================= AUTHSCREEN ROBOT =============================
+  // ============================================================================
   private class AuthScreenRobot(val composeTestRule: ComposeTestRule) {
 
     fun assertAuthScreen() {
@@ -261,5 +300,26 @@ class MainActivityTest {
 
       composeTestRule.waitUntilExactlyOneExists(hasTestTag("MapScreen"))
     }
+  }
+
+  // ============================================================================
+  // ============================= HELPER FUNCTIONS =============================
+  // ============================================================================
+
+  private fun assertParkingInRepo(repository: ParkingRepository, parking: Parking) {
+    repository.getAllParkings(
+        {
+          val found = it.find { p -> p.optName == parking.optName }
+          if (found == null) {
+            fail("Parking not found in repository")
+          } else {
+            assertEquals(parking.optDescription ?: "", found.optDescription)
+            assertEquals(parking.protection, found.protection)
+            assertEquals(parking.capacity, found.capacity)
+            assertEquals(parking.rackType, found.rackType)
+            assertEquals(parking.hasSecurity, found.hasSecurity)
+          }
+        },
+        { fail("Error getting parkings") })
   }
 }
