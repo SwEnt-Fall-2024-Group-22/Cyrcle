@@ -23,7 +23,6 @@ import com.github.se.cyrcle.permission.PermissionHandlerInterface
 import com.github.se.cyrcle.ui.authentication.Authenticator
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.CyrcleTheme
-import com.mapbox.android.core.permissions.PermissionsManager
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -48,7 +47,7 @@ class MainActivity : ComponentActivity() {
     super.onCreate(savedInstanceState)
     requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
-    permissionsHandler.initHandler(this)
+    permissionsHandler.initHandler(this@MainActivity)
 
     val reviewViewModel = ReviewViewModel(reviewRepository)
     val userViewModel = UserViewModel(userRepository, parkingRepository)
@@ -71,7 +70,7 @@ class MainActivity : ComponentActivity() {
               mapViewModel,
               addressViewModel,
               authenticator,
-              PermissionsManager.areLocationPermissionsGranted(this))
+              this@MainActivity)
         }
       }
     }

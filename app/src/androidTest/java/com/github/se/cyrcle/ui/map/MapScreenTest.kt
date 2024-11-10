@@ -1,6 +1,7 @@
 package com.github.se.cyrcle.ui.map
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -60,8 +61,7 @@ class MapScreenTest {
   @Test
   fun testMapIsDisplayed() {
     composeTestRule.setContent {
-      MapScreen(
-          mockNavigation, parkingViewModel, userViewModel, mapViewModel, permissionGranted = false)
+      MapScreen(mockNavigation, parkingViewModel, userViewModel, mapViewModel)
     }
 
     composeTestRule.onNodeWithTag("MapScreen").assertIsDisplayed()
@@ -87,13 +87,7 @@ class MapScreenTest {
     val state = mutableStateOf(defaultZoom)
 
     composeTestRule.setContent {
-      MapScreen(
-          mockNavigation,
-          parkingViewModel,
-          userViewModel,
-          mapViewModel,
-          state,
-          permissionGranted = false)
+      MapScreen(mockNavigation, parkingViewModel, userViewModel, mapViewModel, state)
     }
 
     for (i in 0..(defaultZoom - minZoom).toInt()) {
@@ -107,8 +101,7 @@ class MapScreenTest {
   @Test
   fun testAddParkingRules() {
     composeTestRule.setContent {
-      MapScreen(
-          mockNavigation, parkingViewModel, userViewModel, mapViewModel, permissionGranted = false)
+      MapScreen(mockNavigation, parkingViewModel, userViewModel, mapViewModel)
     }
 
     // Check that the add button has no click action when there is no user
@@ -140,7 +133,7 @@ class MapScreenTest {
           userViewModel,
           mapViewModel,
           state,
-          permissionGranted = false)
+          LocalContext.current as android.app.Activity)
     }
 
     for (i in 0..(maxZoom - defaultZoom).toInt()) {

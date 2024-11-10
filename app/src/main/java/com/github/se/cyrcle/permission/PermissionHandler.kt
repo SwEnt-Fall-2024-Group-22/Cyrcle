@@ -38,6 +38,7 @@ class PermissionsHandler @Inject constructor() : PermissionHandlerInterface {
    */
   override fun initHandler(activity: Activity) {
     this.activity = activity
+
     if (!PermissionsManager.areLocationPermissionsGranted(activity)) {
       permissionsManager = PermissionsManager(permissionsListener)
       permissionsManager.requestLocationPermissions(activity)

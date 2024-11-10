@@ -1,3 +1,4 @@
+import android.app.Activity
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -32,7 +33,7 @@ fun CyrcleNavHost(
     mapViewModel: MapViewModel,
     addressViewModel: AddressViewModel,
     authenticator: Authenticator,
-    permissionGranted: Boolean
+    activity: Activity
 ) {
   NavHost(navController = navController, startDestination = Route.AUTH) {
     navigation(
@@ -63,12 +64,7 @@ fun CyrcleNavHost(
         route = Route.MAP,
     ) {
       composable(Screen.MAP) {
-        MapScreen(
-            navigationActions,
-            parkingViewModel,
-            userViewModel,
-            mapViewModel,
-            permissionGranted = permissionGranted)
+        MapScreen(navigationActions, parkingViewModel, userViewModel, mapViewModel)
       }
     }
 

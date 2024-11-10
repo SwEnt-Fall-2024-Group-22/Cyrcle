@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.map
 
+import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.layout.Box
@@ -39,6 +40,7 @@ import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.IconButton
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.google.gson.Gson
+import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.common.Cancelable
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.Polygon
@@ -84,7 +86,7 @@ fun MapScreen(
     userViewModel: UserViewModel,
     mapViewModel: MapViewModel,
     zoomState: MutableState<Double> = remember { mutableDoubleStateOf(defaultZoom) },
-    permissionGranted: Boolean
+    activity: Activity = LocalContext.current as Activity
 ) {
 
   val listOfParkings by parkingViewModel.rectParkings.collectAsState()
@@ -120,7 +122,7 @@ fun MapScreen(
 
             // When map is loaded, check if the location permission is granted and initialize the
             // location component
-            if (permissionGranted) {
+            if (PermissionsManager.areLocationPermissionsGranted(activity)) {
               initLocationComponent(mapView, mapViewModel)
             }
 
