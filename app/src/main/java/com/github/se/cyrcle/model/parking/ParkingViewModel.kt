@@ -182,6 +182,39 @@ class ParkingViewModel(
     getParkingsInRadius(center, DEFAULT_RADIUS)
   }
 
+  // All states to move the filtering to the viewmodel :
+  private val _selectedProtection = MutableStateFlow<Set<ParkingProtection>>(emptySet())
+  val selectedProtection: StateFlow<Set<ParkingProtection>> = _selectedProtection
+
+  fun setSelectedProtection(protections: Set<ParkingProtection>) {
+    _selectedProtection.value = protections
+    updateClosestParkings(0)
+  }
+
+  private val _selectedRackTypes = MutableStateFlow<Set<ParkingRackType>>(emptySet())
+  val selectedRackTypes: StateFlow<Set<ParkingRackType>> = _selectedRackTypes
+
+  fun setSelectedRackTypes(rackTypes: Set<ParkingRackType>) {
+    _selectedRackTypes.value = rackTypes
+    updateClosestParkings(0)
+  }
+
+  private val _selectedCapacities = MutableStateFlow<Set<ParkingCapacity>>(emptySet())
+  val selectedCapacities: StateFlow<Set<ParkingCapacity>> = _selectedCapacities
+
+  fun setSelectedCapacities(capacities: Set<ParkingCapacity>) {
+    _selectedCapacities.value = capacities
+    updateClosestParkings(0)
+  }
+
+  private val _onlyWithCCTV = MutableStateFlow(false)
+  val onlyWithCCTV: StateFlow<Boolean> = _onlyWithCCTV
+
+  fun setOnlyWithCCTV(onlyWithCCTV: Boolean) {
+    _onlyWithCCTV.value = onlyWithCCTV
+    updateClosestParkings(0)
+  }
+
   fun getNewUid(): String {
     return parkingRepository.getNewUid()
   }
@@ -219,7 +252,16 @@ class ParkingViewModel(
             .sortedBy { parking ->
               TurfMeasurement.distance(_circleCenter.value!!, parking.location.center)
             }
-    if (_closestParkings.value.isEmpty() || _radius.value == MAX_RADIUS) {
+            .filter { parking ->
+              (_selectedProtection.value.isEmpty() ||
+                  _selectedProtection.value.contains(parking.protection)) &&
+                  (selectedRackTypes.value.isEmpty() ||
+                      _selectedRackTypes.value.contains(parking.rackType)) &&
+                  (_selectedCapacities.value.isEmpty() ||
+                      _selectedCapacities.value.contains(parking.capacity)) &&
+                  (!_onlyWithCCTV.value || parking.hasSecurity)
+            }
+    if (_closestParkings.value.size < 5 || _radius.value == MAX_RADIUS) {
       incrementRadius()
     }
   }

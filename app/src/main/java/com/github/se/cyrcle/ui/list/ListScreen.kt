@@ -68,21 +68,12 @@ fun SpotListScreen(
 
   val referencePoint = TestInstancesParking.EPFLCenter
 
-  val parkingSpots by parkingViewModel.closestParkings.collectAsState()
+  val filteredParkingSpots by parkingViewModel.closestParkings.collectAsState()
 
-  var selectedProtection by remember { mutableStateOf<Set<ParkingProtection>>(emptySet()) }
-  var selectedRackTypes by remember { mutableStateOf<Set<ParkingRackType>>(emptySet()) }
-  var selectedCapacities by remember { mutableStateOf<Set<ParkingCapacity>>(emptySet()) }
-  var onlyWithCCTV by remember { mutableStateOf(false) }
-
-  // Filter the parking spots based on the selected attributes
-  val filteredParkingSpots =
-      parkingSpots.filter { parking ->
-        (selectedProtection.isEmpty() || selectedProtection.contains(parking.protection)) &&
-            (selectedRackTypes.isEmpty() || selectedRackTypes.contains(parking.rackType)) &&
-            (selectedCapacities.isEmpty() || selectedCapacities.contains(parking.capacity)) &&
-            (!onlyWithCCTV || parking.hasSecurity)
-      }
+  val selectedProtection by parkingViewModel.selectedProtection.collectAsState()
+  val selectedRackTypes by parkingViewModel.selectedRackTypes.collectAsState()
+  val selectedCapacities by parkingViewModel.selectedCapacities.collectAsState()
+  val onlyWithCCTV by parkingViewModel.onlyWithCCTV.collectAsState()
 
   /**
    * Set the center of the circle in the ViewModel when the screen is launched. This should be
@@ -102,15 +93,18 @@ fun SpotListScreen(
               onAttributeSelected = { attribute ->
                 when (attribute) {
                   is ParkingProtection ->
-                      selectedProtection = toggleSelection(selectedProtection, attribute)
+                      parkingViewModel.setSelectedProtection(
+                          toggleSelection(selectedProtection, attribute))
                   is ParkingRackType ->
-                      selectedRackTypes = toggleSelection(selectedRackTypes, attribute)
+                      parkingViewModel.setSelectedRackTypes(
+                          toggleSelection(selectedRackTypes, attribute))
                   is ParkingCapacity ->
-                      selectedCapacities = toggleSelection(selectedCapacities, attribute)
+                      parkingViewModel.setSelectedCapacities(
+                          toggleSelection(selectedCapacities, attribute))
                 }
               },
               onlyWithCCTV = onlyWithCCTV,
-              onCCTVCheckedChange = { onlyWithCCTV = it },
+              onCCTVCheckedChange = { parkingViewModel.setOnlyWithCCTV(it) },
               parkingViewModel = parkingViewModel)
 
           val listState = rememberLazyListState()
