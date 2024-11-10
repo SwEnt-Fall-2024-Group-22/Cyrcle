@@ -20,4 +20,9 @@ class AuthenticatorMock @Inject constructor() : Authenticator {
   override fun SignInAnonymouslyButton(onComplete: () -> Unit) {
     Authenticator.DefaultAnonymousLoginButton(onComplete)
   }
+
+  @Composable
+  override fun SignOutButton(onComplete: () -> Unit) {
+    Authenticator.DefaultSignOutButton(onComplete)
+  }
 }

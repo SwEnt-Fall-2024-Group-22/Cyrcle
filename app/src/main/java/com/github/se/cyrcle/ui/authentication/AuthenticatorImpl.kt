@@ -68,6 +68,19 @@ class AuthenticatorImpl @Inject constructor(private val auth: FirebaseAuth) : Au
   }
 
   /**
+   * Composable button that signs the user out
+   *
+   * @param onComplete callback for when the button is clicked
+   */
+  @Composable
+  override fun SignOutButton(onComplete: () -> Unit) {
+    Authenticator.DefaultSignOutButton {
+      auth.signOut()
+      onComplete()
+    }
+  }
+
+  /**
    * Function to remember the Firebase Auth launcher
    *
    * @param onAuthComplete callback for when authentication is successful

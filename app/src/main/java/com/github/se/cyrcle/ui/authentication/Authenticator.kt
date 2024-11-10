@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Outbox
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
@@ -23,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.ui.theme.ColorLevel
+import com.github.se.cyrcle.ui.theme.atoms.IconButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.googleSignInButtonStyle
 
@@ -47,6 +50,13 @@ interface Authenticator {
    * @param onComplete callback for when sign in is complete
    */
   @Composable fun SignInAnonymouslyButton(onComplete: () -> Unit)
+
+  /**
+   * Composable button that signs the user out
+   *
+   * @param onComplete callback for when the button is clicked
+   */
+  @Composable fun SignOutButton(onComplete: () -> Unit)
 
   /** Static methods for default composable buttons */
   companion object {
@@ -101,8 +111,13 @@ interface Authenticator {
           modifier =
               Modifier.padding(16.dp)
                   .border(BorderStroke(1.dp, Color.LightGray), RoundedCornerShape(50))
-                  .height(48.dp)
-                  .testTag("AnonymousLoginButton"))
+                  .height(48.dp),
+          testTag = "AnonymousLoginButton")
+    }
+
+    @Composable
+    fun DefaultSignOutButton(onComplete: () -> Unit) {
+      IconButton(Icons.Filled.Outbox, "Sign Out", onComplete)
     }
   }
 }
