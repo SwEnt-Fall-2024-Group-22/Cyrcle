@@ -54,7 +54,7 @@ fun <T : DropDownableEnum> EnumDropDown(
   ExposedDropdownMenuBox(
       expanded = expanded,
       onExpandedChange = { expanded = !expanded },
-      modifier = modifier.padding(10.dp)) {
+      modifier = modifier.padding(10.dp).testTag(testTag)) {
         OutlinedTextField(
             readOnly = true,
             value = selectedValue.value.description,
@@ -62,7 +62,7 @@ fun <T : DropDownableEnum> EnumDropDown(
             label = { Text(text = label, Modifier.testTag("${testTag}Label")) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             colors = OutlinedTextFieldDefaults.colors(),
-            modifier = Modifier.menuAnchor().fillMaxWidth().testTag(testTag))
+            modifier = Modifier.menuAnchor().fillMaxWidth())
 
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
           options.withIndex().forEach { (i, option: T) ->
