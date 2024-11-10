@@ -1,6 +1,8 @@
 package com.github.se.cyrcle.ui.map
 
+import android.app.Activity
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -8,6 +10,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
+import com.github.se.cyrcle.di.mocks.MockPermissionHandler
 import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingViewModel
@@ -61,7 +64,12 @@ class MapScreenTest {
   fun testMapIsDisplayed() {
     composeTestRule.setContent {
       MapScreen(
-          mockNavigation, parkingViewModel, userViewModel, mapViewModel, permissionGranted = false)
+          mockNavigation,
+          parkingViewModel,
+          userViewModel,
+          mapViewModel,
+          permissionsHandler = MockPermissionHandler(),
+          activity = LocalContext.current as Activity)
     }
 
     composeTestRule.onNodeWithTag("MapScreen").assertIsDisplayed()
@@ -93,7 +101,8 @@ class MapScreenTest {
           userViewModel,
           mapViewModel,
           state,
-          permissionGranted = false)
+          permissionsHandler = MockPermissionHandler(),
+          activity = LocalContext.current as Activity)
     }
 
     for (i in 0..(defaultZoom - minZoom).toInt()) {
@@ -108,7 +117,12 @@ class MapScreenTest {
   fun testAddParkingRules() {
     composeTestRule.setContent {
       MapScreen(
-          mockNavigation, parkingViewModel, userViewModel, mapViewModel, permissionGranted = false)
+          mockNavigation,
+          parkingViewModel,
+          userViewModel,
+          mapViewModel,
+          permissionsHandler = MockPermissionHandler(),
+          activity = LocalContext.current as Activity)
     }
 
     // Check that the add button has no click action when there is no user
@@ -140,7 +154,8 @@ class MapScreenTest {
           userViewModel,
           mapViewModel,
           state,
-          permissionGranted = false)
+          permissionsHandler = MockPermissionHandler(),
+          activity = LocalContext.current as Activity)
     }
 
     for (i in 0..(maxZoom - defaultZoom).toInt()) {

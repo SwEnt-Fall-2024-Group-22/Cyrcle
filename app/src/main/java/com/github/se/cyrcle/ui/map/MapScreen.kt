@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.map
 
+import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.layout.Box
@@ -31,6 +32,7 @@ import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
+import com.github.se.cyrcle.permission.PermissionHandlerInterface
 import com.github.se.cyrcle.ui.map.overlay.ZoomControls
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
@@ -39,6 +41,7 @@ import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.IconButton
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.google.gson.Gson
+import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.common.Cancelable
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.Polygon
@@ -84,7 +87,8 @@ fun MapScreen(
     userViewModel: UserViewModel,
     mapViewModel: MapViewModel,
     zoomState: MutableState<Double> = remember { mutableDoubleStateOf(defaultZoom) },
-    permissionGranted: Boolean
+    permissionsHandler: PermissionHandlerInterface,
+    activity: Activity = LocalContext.current as Activity
 ) {
 
   val listOfParkings by parkingViewModel.rectParkings.collectAsState()
@@ -96,6 +100,8 @@ fun MapScreen(
   var listener = remember<MapIdleCallback?> { null }
   var pointAnnotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
   val selectedParking by parkingViewModel.selectedParking.collectAsState()
+
+  val context = LocalContext.current as Activity
 
   val screenCapacityString = stringResource(R.string.map_screen_capacity)
 
@@ -120,7 +126,7 @@ fun MapScreen(
 
             // When map is loaded, check if the location permission is granted and initialize the
             // location component
-            if (permissionGranted) {
+            if (PermissionsManager.areLocationPermissionsGranted(activity)) {
               initLocationComponent(mapView, mapViewModel)
             }
 
