@@ -42,9 +42,16 @@ import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.Button
-import com.github.se.cyrcle.ui.theme.atoms.InputText
+import com.github.se.cyrcle.ui.theme.atoms.ConditionCheckingInputText
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
+
+const val FIRST_NAME_MIN_LENGTH = 0
+const val FIRST_NAME_MAX_LENGTH = 32
+const val LAST_NAME_MIN_LENGTH = 0
+const val LAST_NAME_MAX_LENGTH = 32
+const val USERNAME_MIN_LENGTH = 4
+const val USERNAME_MAX_LENGTH = 32
 
 @Composable
 fun ViewProfileScreen(
@@ -142,26 +149,32 @@ private fun EditProfileContent(
 
   Spacer(modifier = Modifier.height(24.dp))
 
-  InputText(
+  ConditionCheckingInputText(
       value = firstName,
       onValueChange = onFirstNameChange,
       label = stringResource(R.string.view_profile_screen_first_name_label),
+      minCharacters = FIRST_NAME_MIN_LENGTH,
+      maxCharacters = FIRST_NAME_MAX_LENGTH,
       testTag = "FirstNameField")
 
   Spacer(modifier = Modifier.height(8.dp))
 
-  InputText(
+  ConditionCheckingInputText(
       value = lastName,
       onValueChange = onLastNameChange,
       label = stringResource(R.string.view_profile_screen_last_name_label),
+      minCharacters = LAST_NAME_MIN_LENGTH,
+      maxCharacters = LAST_NAME_MAX_LENGTH,
       testTag = "LastNameField")
 
   Spacer(modifier = Modifier.height(8.dp))
 
-  InputText(
+  ConditionCheckingInputText(
       value = username,
       onValueChange = onUsernameChange,
       label = stringResource(R.string.view_profile_screen_username_label),
+      minCharacters = USERNAME_MIN_LENGTH,
+      maxCharacters = USERNAME_MAX_LENGTH,
       testTag = "UsernameField")
 
   Spacer(modifier = Modifier.height(16.dp))
@@ -171,6 +184,7 @@ private fun EditProfileContent(
         text = stringResource(R.string.view_profile_screen_save_button),
         onClick = onSave,
         colorLevel = ColorLevel.PRIMARY,
+        enabled = areInputsValid(firstName, lastName, username),
         testTag = "SaveButton")
 
     Button(
@@ -179,6 +193,12 @@ private fun EditProfileContent(
         colorLevel = ColorLevel.SECONDARY,
         testTag = "CancelButton")
   }
+}
+
+fun areInputsValid(firstName: String, lastName: String, username: String): Boolean {
+  return firstName.length in FIRST_NAME_MIN_LENGTH..FIRST_NAME_MAX_LENGTH &&
+      lastName.length in LAST_NAME_MIN_LENGTH..LAST_NAME_MAX_LENGTH &&
+      username.length in USERNAME_MIN_LENGTH..USERNAME_MAX_LENGTH
 }
 
 @Composable

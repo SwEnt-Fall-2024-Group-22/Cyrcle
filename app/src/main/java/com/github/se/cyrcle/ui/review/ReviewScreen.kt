@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.runtime.Composable
@@ -33,9 +32,13 @@ import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.Button
+import com.github.se.cyrcle.ui.theme.atoms.ConditionCheckingInputText
 import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
+
+const val REVIEW_MIN_LENGTH = 0
+const val REVIEW_MAX_LENGTH = 256
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
@@ -74,7 +77,8 @@ fun ReviewScreen(
       topBar = {
         TopAppBar(
             navigationActions = navigationActions,
-            if (ownerHasReviewed) "Edit Your Review" else "Add Your Review")
+            if (ownerHasReviewed) stringResource(R.string.review_screen_title_edit_review)
+            else stringResource(R.string.review_screen_title_new_review))
       }) { paddingValues ->
         Column(
             modifier = Modifier.fillMaxSize().padding(paddingValues).padding(16.dp),
@@ -109,18 +113,20 @@ fun ReviewScreen(
 
               Spacer(modifier = Modifier.height(16.dp))
 
-              // OutlinedTextField for text input
-              OutlinedTextField(
-                  value = textValue,
+              ConditionCheckingInputText(
+                  label = stringResource(R.string.review_screen_write_review_label),
                   onValueChange = { newText -> textValue = newText },
-                  label = { Text("Write your review") },
-                  modifier = Modifier.fillMaxWidth().testTag("ReviewInput"))
+                  value = textValue,
+                  minCharacters = REVIEW_MIN_LENGTH,
+                  maxCharacters = REVIEW_MAX_LENGTH,
+                  hasClearIcon = true,
+                  testTag = "ReviewInput")
 
               Spacer(modifier = Modifier.height(16.dp))
 
               // Add Review Button
               Button(
-                  text = "Save my Review",
+                  text = stringResource(R.string.review_screen_submit_button),
                   onClick = {
                     Toast.makeText(context, "Review Added!", Toast.LENGTH_SHORT).show()
                     // to avoid problematic castings
@@ -153,6 +159,7 @@ fun ReviewScreen(
                     }
                     navigationActions.goBack()
                   },
+                  enabled = textValue.length in REVIEW_MIN_LENGTH..REVIEW_MAX_LENGTH,
                   modifier = Modifier.fillMaxWidth().height(60.dp),
                   colorLevel = ColorLevel.PRIMARY,
                   testTag = "AddReviewButton")

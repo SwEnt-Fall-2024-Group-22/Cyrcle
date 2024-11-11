@@ -56,7 +56,7 @@ import com.github.se.cyrcle.ui.map.MapConfig
 import com.github.se.cyrcle.ui.map.drawRectangles
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
-import com.github.se.cyrcle.ui.theme.atoms.InputText
+import com.github.se.cyrcle.ui.theme.atoms.ConditionCheckingInputText
 import com.github.se.cyrcle.ui.theme.molecules.BooleanRadioButton
 import com.github.se.cyrcle.ui.theme.molecules.EnumDropDown
 import com.mapbox.geojson.Point
@@ -68,6 +68,11 @@ import com.mapbox.maps.plugin.annotation.annotations
 import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.createPolygonAnnotationManager
 import com.mapbox.maps.plugin.gestures.generated.GesturesSettings
+
+const val TITLE_MIN_LENGTH = 8
+const val TITLE_MAX_LENGTH = 48
+const val DESCRIPTION_MIN_LENGTH = 0
+const val DESCRIPTION_MAX_LENGTH = 128
 
 @Composable
 fun AttributesPicker(
@@ -89,7 +94,9 @@ fun AttributesPicker(
   val bottomBoxHeight = screenHeight * 0.15f // 15% of screen height for bottom box
 
   val title = remember { mutableStateOf("") }
+
   val description = remember { mutableStateOf("") }
+
   val rackType = remember { mutableStateOf<ParkingAttribute>(ParkingRackType.TWO_TIER) }
   val capacity = remember { mutableStateOf<ParkingAttribute>(ParkingCapacity.XSMALL) }
   val protection = remember { mutableStateOf<ParkingAttribute>(ParkingProtection.INDOOR) }
@@ -120,7 +127,11 @@ fun AttributesPicker(
   Scaffold(
       modifier = Modifier.testTag("AttributesPickerScreen"),
       topBar = { AttributePickerTopBar(mapViewModel, title) },
-      bottomBar = { BottomBarAddAttr(navigationActions) { onSubmit() } }) { padding ->
+      bottomBar = {
+        BottomBarAddAttr(navigationActions) {
+          if (areInputsValid(title.value, description.value)) onSubmit()
+        }
+      }) { padding ->
         // Apply screen-dimension-scaled padding for consistent spacing
         val scaledPaddingValues =
             scaledPadding(
@@ -148,10 +159,12 @@ fun AttributesPicker(
                               horizontal = horizontalPaddingScaleFactor,
                               vertical = verticalPaddingScaleFactor),
                   verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    InputText(
+                    ConditionCheckingInputText(
                         value = title.value,
                         onValueChange = { title.value = it },
                         label = stringResource(R.string.attributes_picker_title_label),
+                        minCharacters = TITLE_MIN_LENGTH,
+                        maxCharacters = TITLE_MAX_LENGTH,
                         modifier =
                             Modifier.fillMaxWidth()
                                 .padding(horizontal = horizontalPaddingScaleFactor),
@@ -174,13 +187,12 @@ fun AttributesPicker(
                         question =
                             stringResource(R.string.attributes_picker_has_surveillance_question),
                         hasSecurity)
-                    InputText(
+                    ConditionCheckingInputText(
                         value = description.value,
-                        label = stringResource(R.string.attributes_picker_description_label),
                         onValueChange = { description.value = it },
-                        singleLine = false,
-                        minLines = 3,
-                        maxLines = 5,
+                        label = stringResource(R.string.attributes_picker_description_label),
+                        minCharacters = DESCRIPTION_MIN_LENGTH,
+                        maxCharacters = DESCRIPTION_MAX_LENGTH,
                         modifier =
                             Modifier.fillMaxWidth()
                                 .height(screenHeight * 0.2f) // Dynamic height for description field
@@ -332,4 +344,9 @@ fun AttributePickerTopBar(mapViewModel: MapViewModel, title: MutableState<String
         }
         drawRectangles(annotationManager, listOf(location))
       }
+}
+
+private fun areInputsValid(title: String, description: String): Boolean {
+  return title.length in TITLE_MIN_LENGTH..TITLE_MAX_LENGTH &&
+      description.length in DESCRIPTION_MIN_LENGTH..DESCRIPTION_MAX_LENGTH
 }

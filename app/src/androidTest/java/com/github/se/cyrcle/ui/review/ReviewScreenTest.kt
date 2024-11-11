@@ -75,7 +75,7 @@ class ReviewScreenTest {
     composeTestRule
         .onNodeWithTag("TopAppBarTitle")
         .assertIsDisplayed()
-        .assertTextContains("Add Your Review")
+        .assertTextContains("Add your review")
   }
 
   @Test

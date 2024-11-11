@@ -20,8 +20,6 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -168,14 +166,14 @@ fun Button(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     colorLevel: ColorLevel = ColorLevel.PRIMARY,
-    enabled: State<Boolean> = mutableStateOf(true),
+    enabled: Boolean = true,
     testTag: String = "Button"
 ) {
   Button(
-      onClick = { if (enabled.value) onClick() },
+      onClick = { if (enabled) onClick() },
       modifier = modifier.testTag(testTag),
       colors = getButtonColors(colorLevel),
-      enabled = enabled.value) {
+      enabled = enabled) {
         Text(text, Modifier.testTag("${testTag}Text"))
       }
 }
