@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,10 +24,13 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -39,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
@@ -262,6 +267,7 @@ fun FilterSection(
       }
 }
 
+
 @Composable
 fun SpotCard(
     navigationActions: NavigationActions,
@@ -271,85 +277,136 @@ fun SpotCard(
 ) {
     var offsetX by remember { mutableStateOf(0f) }
 
-    Card(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(120.dp)
             .padding(4.dp)
-            .offset { IntOffset(offsetX.roundToInt(), 0) }
-            .pointerInput(Unit) {
-                detectHorizontalDragGestures(
-                    onDragEnd = {
-                        // Handle the end of the drag to trigger actions
-                        if (offsetX > 100) {
-                            // Swipe right action (e.g., add to favorites)
-                            // Reset offset
-                        } else if (offsetX < -100) {
-                            // Swipe left action (e.g., pin to top)
-                            // Reset offset
-                        }
-                        offsetX = 0f
-                    }
-                ) { change, dragAmount ->
-                    change.consume()
-                    offsetX += dragAmount
-                }
-            }
-            .clickable(
-                onClick = {
-                    parkingViewModel.selectParking(parking)
-                    navigationActions.navigateTo(Screen.CARD)
-                }
-            )
-            .testTag("SpotListItem"),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Column(modifier = Modifier.fillMaxSize().padding(16.dp).testTag("SpotCardContent")) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = parking.optName?.let { if (it.length > 35) it.take(32) + "..." else it }
-                            ?: stringResource(R.string.default_parking_name),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        testTag = "ParkingName"
-                    )
-                    Text(
-                        text = if (distance < 1) stringResource(R.string.distance_m).format(distance * 1000)
-                        else stringResource(R.string.distance_km).format(distance),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        testTag = "ParkingDistance"
-                    )
-                }
+        // Background actions
+        Row(
+            modifier = Modifier
+                .fillMaxSize(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ActionCard(
+                text = "Pin parking spot",
+                icon = Icons.Default.PushPin,
+                backgroundColor = Color.LightGray,
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(1f)
+            )
+            ActionCard(
+                text = "Add to favorites",
+                icon = Icons.Default.Star,
+                backgroundColor = Color.Yellow,
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(1f)
+            )
+        }
 
-                // Rating
-                Spacer(modifier = Modifier.height(4.dp))
-                if (parking.nbReviews > 0) {
-                    Row {
-                        ScoreStars(parking.avgScore, scale = 0.8f)
-                        Spacer(modifier = Modifier.width(8.dp))
+        // Main card
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp)
+                .offset { IntOffset(offsetX.roundToInt(), 0) }
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures(
+                        onDragEnd = {
+                            if (offsetX > 100) {
+                                // Swipe right action
+                            } else if (offsetX < -100) {
+                                // Swipe left action
+                            }
+                            offsetX = 0f
+                        }
+                    ) { change, dragAmount ->
+                        change.consume()
+                        offsetX += dragAmount
+                    }
+                }
+                .clickable(
+                    onClick = {
+                        parkingViewModel.selectParking(parking)
+                        navigationActions.navigateTo(Screen.CARD)
+                    }
+                )
+                .testTag("SpotListItem"),
+            colors = CardDefaults.cardColors(containerColor = Color.White)
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Column(modifier = Modifier.fillMaxSize().padding(16.dp).testTag("SpotCardContent")) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
                         Text(
-                            text = pluralStringResource(R.plurals.reviews_count, count = parking.nbReviews)
-                                .format(parking.nbReviews),
+                            text = parking.optName?.let { if (it.length > 35) it.take(32) + "..." else it }
+                                ?: stringResource(R.string.default_parking_name),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = Color.Black,
+                            testTag = "ParkingName"
+                        )
+                        Text(
+                            text = if (distance < 1) stringResource(R.string.distance_m).format(distance * 1000)
+                            else stringResource(R.string.distance_km).format(distance),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
-                            testTag = "ParkingNbReviews"
+                            color = Color.Black,
+                            testTag = "ParkingDistance"
                         )
                     }
-                } else {
-                    Text(
-                        text = stringResource(R.string.no_reviews),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
-                        testTag = "ParkingNoReviews"
-                    )
+
+                    // Rating
+                    Spacer(modifier = Modifier.height(4.dp))
+                    if (parking.nbReviews > 0) {
+                        Row {
+                            ScoreStars(parking.avgScore, scale = 0.8f)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = pluralStringResource(R.plurals.reviews_count, count = parking.nbReviews)
+                                    .format(parking.nbReviews),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Black.copy(alpha = 0.8f),
+                                testTag = "ParkingNbReviews"
+                            )
+                        }
+                    } else {
+                        Text(
+                            text = stringResource(R.string.no_reviews),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Black.copy(alpha = 0.8f),
+                            testTag = "ParkingNoReviews"
+                        )
+                    }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun ActionCard(
+    text: String,
+    icon: ImageVector,
+    backgroundColor: Color,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .background(backgroundColor)
+            .padding(8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(icon, contentDescription = null, tint = Color.Black)
+            Text(text, color = Color.Black)
         }
     }
 }
