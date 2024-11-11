@@ -43,14 +43,10 @@ import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.google.gson.Gson
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.common.Cancelable
-import com.mapbox.geojson.Point
 import com.mapbox.geojson.Polygon
 import com.mapbox.maps.CameraBoundsOptions
-import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapIdleCallback
-import com.mapbox.maps.MapView
-import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.ViewAnnotationAnchor
 import com.mapbox.maps.extension.compose.DisposableMapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
@@ -66,8 +62,6 @@ import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.maps.plugin.gestures.gestures
-import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
-import com.mapbox.maps.plugin.locationcomponent.createDefault2DPuck
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.maps.plugin.viewport.data.FollowPuckViewportStateOptions
 import com.mapbox.maps.plugin.viewport.data.OverviewViewportStateOptions
@@ -129,7 +123,7 @@ fun MapScreen(
             // When map is loaded, check if the location permission is granted and initialize the
             // location component
             if (PermissionsManager.areLocationPermissionsGranted(activity)) {
-              initLocationComponent(mapView, mapViewModel)
+              mapViewModel.initLocationComponent(mapView, mapViewModel)
             }
 
             val viewAnnotationManager = mapView.viewAnnotationManager
@@ -199,7 +193,7 @@ fun MapScreen(
                   true
                 })
 
-            val (loadedBottomLeft, loadedTopRight) = getScreenCorners(mapView)
+            val (loadedBottomLeft, loadedTopRight) = mapViewModel.getScreenCorners(mapView)
 
             // Get parkings in the current view
             parkingViewModel.getParkingsInRect(loadedBottomLeft, loadedTopRight)
@@ -217,7 +211,7 @@ fun MapScreen(
 
                   // Get the top right and bottom left coordinates of the current view only when
                   // what the user sees is outside the screen
-                  val (currentBottomLeft, currentTopRight) = getScreenCorners(mapView)
+                  val (currentBottomLeft, currentTopRight) = mapViewModel.getScreenCorners(mapView)
 
                   // Temporary fix to avoid loading too much parkings when zoomed out
                   if (mapView.mapboxMap.cameraState.zoom > thresholdDisplayZoom) {
@@ -293,40 +287,6 @@ fun MapScreen(
 }
 
 /**
- * h Get the bottom left and top right corners of the screen in latitude and longitude coordinates.
- * The corners are calculated based on the center of the screen and the viewport dimensions. If
- * useBuffer is true, the corners are calculated with a buffer of 2x the viewport dimensions. This
- * is useful for loading parkings that are not yet visible on the screen.
- *
- * @param mapView the MapView to get the screen corners from
- * @return a pair of the bottom left and top right corners of the screen
- */
-private fun getScreenCorners(mapView: MapView): Pair<Point, Point> {
-  // Retrieve viewport dimensions
-  val viewportWidth = mapView.width
-  val viewportHeight = mapView.height
-
-  val centerPixel = mapView.mapboxMap.pixelForCoordinate(mapView.mapboxMap.cameraState.center)
-
-  // Calculate the multiplier for the buffer
-  val multiplier = 3.0
-
-  val bottomLeftCorner =
-      mapView.mapboxMap.coordinateForPixel(
-          ScreenCoordinate(
-              centerPixel.x - (viewportWidth * multiplier),
-              centerPixel.y + (viewportHeight * multiplier)))
-
-  val topRightCorner =
-      mapView.mapboxMap.coordinateForPixel(
-          ScreenCoordinate(
-              centerPixel.x + (viewportWidth * multiplier),
-              centerPixel.y - (viewportHeight * multiplier)))
-
-  return Pair(bottomLeftCorner, topRightCorner)
-}
-
-/**
  * Draw the rectangles on the map
  *
  * @param polygonAnnotationManager the polygon annotation manager
@@ -376,24 +336,4 @@ private fun drawMarkers(
             .withIconOffset(listOf(0.0, bitmap.height / 12.0))
             .withData(Gson().toJsonTree(it)))
   }
-}
-
-/**
- * Initialize the location component of the map.
- *
- * @param mapView the MapView to initialize the location component on
- * @param mapViewModel the MapViewModel to update the camera position
- */
-private fun initLocationComponent(mapView: MapView, mapViewModel: MapViewModel) {
-  val locationComponentPlugin = mapView.location
-  locationComponentPlugin.updateSettings {
-    this.enabled = true
-    this.locationPuck = createDefault2DPuck(true)
-  }
-  val onIndicatorPositionChangedListener = OnIndicatorPositionChangedListener { location ->
-    mapView.mapboxMap.setCamera(CameraOptions.Builder().center(location).build())
-    mapViewModel.updateCameraPosition(mapView.mapboxMap.cameraState)
-  }
-
-  locationComponentPlugin.addOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener)
 }
