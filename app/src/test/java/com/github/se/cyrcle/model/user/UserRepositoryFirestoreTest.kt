@@ -89,7 +89,7 @@ class UserRepositoryFirestoreTest {
     `when`(mockDocumentSnapshot.toObject(User::class.java)).thenReturn(user)
 
     userRepositoryFirestore.getUserById(
-        userId = user.userId,
+        userId = user.public.userId,
         onSuccess = { assert(it == user) },
         onFailure = { fail("Expected success but got failure") })
     verify(timeout(100)) { mockDocumentReference.get() }
@@ -123,7 +123,7 @@ class UserRepositoryFirestoreTest {
     `when`(mockDocumentReference.delete()).thenReturn(Tasks.forResult(null))
 
     userRepositoryFirestore.deleteUserById(
-        userId = user.userId,
+        userId = user.public.userId,
         onSuccess = { assert(true) },
         onFailure = { fail("Expected success but got failure") })
     verify(mockDocumentReference).delete()

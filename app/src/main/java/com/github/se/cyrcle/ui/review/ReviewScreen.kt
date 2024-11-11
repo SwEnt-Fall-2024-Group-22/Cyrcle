@@ -15,6 +15,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -56,18 +57,18 @@ fun ReviewScreen(
   reviewViewModel.getReviewsByParking(selectedParking.uid)
   val ownerHasReviewed =
       reviewViewModel.parkingReviews.value.any {
-        it.owner == userViewModel.currentUser?.value?.userId
+        it.owner == userViewModel.currentUser.value?.public?.userId
       }
   val matchingReview =
       reviewViewModel.parkingReviews.value.find {
-        it.owner == userViewModel.currentUser?.value?.userId
+        it.owner == userViewModel.currentUser.value?.public?.userId
       }
   if (matchingReview != null) {
     reviewViewModel.selectReview(matchingReview)
   }
 
   var sliderValue by remember {
-    mutableStateOf(if (ownerHasReviewed) matchingReview?.rating?.toFloat()!! else 0f)
+    mutableFloatStateOf(if (ownerHasReviewed) matchingReview?.rating?.toFloat()!! else 0f)
   }
   var textValue by remember { mutableStateOf(if (ownerHasReviewed) matchingReview?.text!! else "") }
 
@@ -137,7 +138,7 @@ fun ReviewScreen(
                           newScore = sliderToValue, parking = selectedParking, isNewReview = true)
                       reviewViewModel.addReview(
                           Review(
-                              owner = userViewModel.currentUser.value?.userId ?: "default",
+                              owner = userViewModel.currentUser.value?.public?.userId ?: "default",
                               text = textValue,
                               parking = selectedParking.uid,
                               rating = sliderToValue,
@@ -151,7 +152,7 @@ fun ReviewScreen(
 
                       reviewViewModel.updateReview(
                           Review(
-                              owner = userViewModel.currentUser.value?.userId ?: "default",
+                              owner = userViewModel.currentUser.value?.public?.userId ?: "default",
                               text = textValue,
                               parking = selectedParking.uid,
                               rating = sliderToValue,

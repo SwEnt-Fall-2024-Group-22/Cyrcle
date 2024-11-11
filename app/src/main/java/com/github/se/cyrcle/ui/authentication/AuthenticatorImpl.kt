@@ -12,6 +12,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.user.User
+import com.github.se.cyrcle.model.user.UserDetails
+import com.github.se.cyrcle.model.user.UserPublic
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -105,9 +107,7 @@ class AuthenticatorImpl @Inject constructor(private val auth: FirebaseAuth) : Au
 
           val user =
               User(
-                  userId = authResult.user?.uid ?: "",
-                  username = authResult.user?.displayName ?: "",
-                  email = authResult.user?.email ?: "")
+                  UserPublic(authResult.user!!.uid, authResult.user!!.displayName!!), UserDetails())
 
           onAuthComplete(user)
         }

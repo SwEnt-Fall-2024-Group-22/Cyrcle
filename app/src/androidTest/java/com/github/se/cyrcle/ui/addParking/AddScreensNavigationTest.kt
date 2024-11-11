@@ -24,6 +24,7 @@ import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.User
+import com.github.se.cyrcle.model.user.UserPublic
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.addParking.attributes.AttributesPicker
 import com.github.se.cyrcle.ui.addParking.location.LocationPicker
@@ -87,7 +88,7 @@ class AddScreensNavigationTest {
       val userViewModel = list[3] as UserViewModel
       val mapViewModel = list[4] as MapViewModel
 
-      userViewModel.setCurrentUser(User(userId = "default", username = "sayMyName", email = ""))
+      userViewModel.setCurrentUser(User(UserPublic("default", "sayMyName", ""), null))
       MapScreen(navigationActions, parkingViewModel, userViewModel, mapViewModel)
     }
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("addButton"))

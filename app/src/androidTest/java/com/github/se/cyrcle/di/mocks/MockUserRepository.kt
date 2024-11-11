@@ -21,18 +21,18 @@ class MockUserRepository @Inject constructor() : UserRepository {
       onSuccess: (User) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    if (userId == "" || users.none { it.userId == userId })
+    if (userId == "" || users.none { it.public.userId == userId })
         onFailure(Exception("Error getting user"))
-    else onSuccess(users.find { it.userId == userId }!!)
+    else onSuccess(users.find { it.public.userId == userId }!!)
   }
 
   override fun getAllUsers(onSuccess: (List<User>) -> Unit, onFailure: (Exception) -> Unit) {
-    if (users.none { it.userId == "" }) onSuccess(users)
+    if (users.none { it.public.userId == "" }) onSuccess(users)
     else onFailure(Exception("Error getting users"))
   }
 
   override fun addUser(user: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-    if (user.userId == "") onFailure(Exception("Error adding user"))
+    if (user.public.userId == "") onFailure(Exception("Error adding user"))
     else {
       users.add(user)
       onSuccess()
@@ -40,10 +40,10 @@ class MockUserRepository @Inject constructor() : UserRepository {
   }
 
   override fun updateUser(user: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-    if (user.userId == "" || users.none { it.userId == user.userId })
+    if (user.public.userId == "" || users.none { it.public.userId == user.public.userId })
         onFailure(Exception("Error updating user"))
     else {
-      users.remove(users.find { it.userId == user.userId })
+      users.remove(users.find { it.public.userId == user.public.userId })
       users.add(user)
       onSuccess()
     }
@@ -54,10 +54,10 @@ class MockUserRepository @Inject constructor() : UserRepository {
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    if (userId == "" || users.none { it.userId == userId })
+    if (userId == "" || users.none { it.public.userId == userId })
         onFailure(Exception("Error deleting user"))
     else {
-      users.remove(users.find { it.userId == userId })
+      users.remove(users.find { it.public.userId == userId })
       onSuccess()
     }
   }

@@ -75,7 +75,11 @@ class UserViewModelTest {
     userViewModel.addFavoriteParkingToSelectedUser("Test_spot_3")
 
     // Create a copy of the user with the favorite parking added
-    val updatedUser = user.copy(favoriteParkings = user.favoriteParkings + "Test_spot_3")
+    val updatedUser =
+        user.copy(
+            details =
+                user.details?.copy(
+                    favoriteParkings = user.details!!.favoriteParkings + "Test_spot_3"))
 
     // Check if the favorite parking was added to the selected user
     verify(userRepository).updateUser(eq(updatedUser), any(), any())
@@ -91,7 +95,10 @@ class UserViewModelTest {
     userViewModel.getSelectedUserFavoriteParking()
     // Check if the favorite parkings were fetched from the repository
     verify(parkingRepository)
-        .getParkingsByListOfIds(eq(TestInstancesUser.user1.favoriteParkings.toList()), any(), any())
+        .getParkingsByListOfIds(
+            eq(TestInstancesUser.user1.details?.favoriteParkings?.toList()) ?: emptyList(),
+            any(),
+            any())
   }
 
   @Test
@@ -118,7 +125,11 @@ class UserViewModelTest {
     userViewModel.removeFavoriteParkingFromSelectedUser("Test_spot_1")
 
     // Create a copy of the user with the favorite parking removed
-    val updatedUser = user.copy(favoriteParkings = user.favoriteParkings - "Test_spot_1")
+    val updatedUser =
+        user.copy(
+            details =
+                user.details?.copy(
+                    favoriteParkings = user.details!!.favoriteParkings - "Test_spot_1"))
 
     // Check if the favorite parking was removed from the selected user
     verify(userRepository).updateUser(eq(updatedUser), any(), any())

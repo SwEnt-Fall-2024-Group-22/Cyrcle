@@ -61,10 +61,10 @@ fun ViewProfileScreen(
 ) {
   val userState by userViewModel.currentUser.collectAsState()
   var isEditing by remember { mutableStateOf(false) }
-  var firstName by remember { mutableStateOf(userState?.firstName ?: "") }
-  var lastName by remember { mutableStateOf(userState?.lastName ?: "") }
-  var username by remember { mutableStateOf(userState?.username ?: "") }
-  var profilePictureUrl by remember { mutableStateOf(userState?.profilePictureUrl ?: "") }
+  var firstName by remember { mutableStateOf(userState?.details?.firstName ?: "") }
+  var lastName by remember { mutableStateOf(userState?.details?.lastName ?: "") }
+  var username by remember { mutableStateOf(userState?.public?.username ?: "") }
+  var profilePictureUrl by remember { mutableStateOf(userState?.public?.profilePictureUrl ?: "") }
 
   val imagePickerLauncher =
       rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
