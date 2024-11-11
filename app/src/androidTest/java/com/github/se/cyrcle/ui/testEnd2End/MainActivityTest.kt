@@ -245,6 +245,7 @@ class MainActivityTest {
       composeTestRule.onNodeWithTag("ZoomControlsIn").assertIsDisplayed().assertHasClickAction()
       composeTestRule.onNodeWithTag("ZoomControlsOut").assertIsDisplayed().assertHasClickAction()
       composeTestRule.onNodeWithTag("NavigationBar").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("recenterButton").assertIsDisplayed().assertHasClickAction()
     }
 
     @OptIn(ExperimentalTestApi::class)

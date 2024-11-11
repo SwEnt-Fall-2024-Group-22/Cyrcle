@@ -3,7 +3,6 @@ package com.github.se.cyrcle.ui.map
 import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -48,7 +47,6 @@ import com.mapbox.geojson.Point
 import com.mapbox.geojson.Polygon
 import com.mapbox.maps.CameraBoundsOptions
 import com.mapbox.maps.CameraOptions
-import com.mapbox.maps.CameraState
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapIdleCallback
 import com.mapbox.maps.MapView
@@ -108,12 +106,8 @@ fun MapScreen(
 
   val screenCapacityString = stringResource(R.string.map_screen_capacity)
 
-    val focusMode = remember { mutableStateOf(false) }
-
-
-
-
-    val bitmap = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.red_marker)
+  val focusMode = remember { mutableStateOf(false) }
+  val bitmap = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.red_marker)
   val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 100, 150, false)
   // Draw markers on the map when the list of parkings changes
   LaunchedEffect(listOfParkings, pointAnnotationManager, selectedParking?.nbReviews) {
@@ -265,42 +259,41 @@ fun MapScreen(
           colorLevel = ColorLevel.PRIMARY,
           testTag = "addButton")
 
-        IconButton(
-            icon = Icons.Default.MyLocation,
-            contentDescription = "Recenter on Location",
-            modifier =
-            Modifier.align(Alignment.BottomStart)
-                .scale(1.2f)
-                .padding(bottom = 25.dp, start = 270.dp),
-            onClick = {
+      IconButton(
+          icon = Icons.Default.MyLocation,
+          contentDescription = "Recenter on Location",
+          modifier =
+              Modifier.align(Alignment.BottomStart)
+                  .scale(1.2f)
+                  .padding(bottom = 25.dp, start = 270.dp)
+                  .testTag("recenterButton"),
+          onClick = {
+            focusMode.value = !focusMode.value
 
-                focusMode.value = !focusMode.value
-
-                /*If Camera is in Location tracking mode (focusMode) then i disable this mode by changing ViewPortState to OverviewState */
-                if (mapViewportState.mapViewportStatus as? ViewportState is FollowPuckViewportState) {
-                    mapViewportState.transitionToOverviewState(
-                        OverviewViewportStateOptions.Builder()
-                        .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
-                        .build())
-                }
-                /* If the Camera is not in location tracking mode (focusMode) then it enable location tracking by changing viewPortState to FollowPuckViewportState */
-                else {
-                    mapViewportState.transitionToFollowPuckState(
-                        FollowPuckViewportStateOptions.Builder()
-                        .pitch(0.0)
-                        .zoom(18.0)
-                        .padding(EdgeInsets(500.0, 100.0, 100.0, 100.0))
-                        .build())
-                }
-            },
-            colorLevel = if (focusMode.value) ColorLevel.SECONDARY else ColorLevel.PRIMARY)
-
+            /*If Camera is in Location tracking mode (focusMode) then i disable this mode by changing ViewPortState to OverviewState */
+            if (mapViewportState.mapViewportStatus as? ViewportState is FollowPuckViewportState) {
+              mapViewportState.transitionToOverviewState(
+                  OverviewViewportStateOptions.Builder()
+                      .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
+                      .build())
+            }
+            /* If the Camera is not in location tracking mode (!focusMode) then it enables location tracking by changing viewPortState to FollowPuckViewportState */
+            else {
+              mapViewportState.transitionToFollowPuckState(
+                  FollowPuckViewportStateOptions.Builder()
+                      .pitch(0.0)
+                      .zoom(maxZoom)
+                      .padding(EdgeInsets(500.0, 100.0, 100.0, 100.0))
+                      .build())
+            }
+          },
+          colorLevel = if (focusMode.value) ColorLevel.SECONDARY else ColorLevel.PRIMARY)
     }
   }
 }
 
-/**h
- * Get the bottom left and top right corners of the screen in latitude and longitude coordinates.
+/**
+ * h Get the bottom left and top right corners of the screen in latitude and longitude coordinates.
  * The corners are calculated based on the center of the screen and the viewport dimensions. If
  * useBuffer is true, the corners are calculated with a buffer of 2x the viewport dimensions. This
  * is useful for loading parkings that are not yet visible on the screen.
@@ -398,9 +391,8 @@ private fun initLocationComponent(mapView: MapView, mapViewModel: MapViewModel) 
     this.locationPuck = createDefault2DPuck(true)
   }
   val onIndicatorPositionChangedListener = OnIndicatorPositionChangedListener { location ->
-
     mapView.mapboxMap.setCamera(CameraOptions.Builder().center(location).build())
-
+    mapViewModel.updateCameraPosition(mapView.mapboxMap.cameraState)
   }
 
   locationComponentPlugin.addOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener)

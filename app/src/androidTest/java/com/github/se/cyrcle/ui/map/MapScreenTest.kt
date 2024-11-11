@@ -2,6 +2,7 @@ package com.github.se.cyrcle.ui.map
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -68,11 +69,14 @@ class MapScreenTest {
     composeTestRule.onNodeWithTag("NavigationBar").assertIsDisplayed()
 
     // Assert that the zoom controls are displayed
-    composeTestRule.onNodeWithTag("ZoomControlsIn").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("ZoomControlsOut").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("ZoomControlsIn").assertIsDisplayed().assertHasClickAction()
+    composeTestRule.onNodeWithTag("ZoomControlsOut").assertIsDisplayed().assertHasClickAction()
 
     // Assert that the add button is displayed
-    composeTestRule.onNodeWithTag("addButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("addButton").assertIsDisplayed().assertHasClickAction()
+
+    // Assert that the recenter button is displayed
+    composeTestRule.onNodeWithTag("recenterButton").assertIsDisplayed().assertHasClickAction()
   }
 
   /**
