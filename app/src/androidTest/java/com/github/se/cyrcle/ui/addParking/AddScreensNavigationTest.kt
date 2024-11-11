@@ -135,9 +135,12 @@ class AddScreensNavigationTest {
       AttributesPicker(navigationActions, parkingViewModel, mapViewModel, addressViewModel)
     }
 
-    composeTestRule.waitUntilExactlyOneExists(hasTestTag("TitleInput"))
+    composeTestRule.waitUntilExactlyOneExists(hasTestTag("AttributesPickerTitle"))
     // Artificially set the title (otherwise the submit button is disabled)
-    composeTestRule.onNodeWithTag("TitleInput").assertExists().performTextInput("titleForParking")
+    composeTestRule
+        .onNodeWithTag("AttributesPickerTitle")
+        .assertExists()
+        .performTextInput("titleForParking")
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("submitButton"))
     // Perform click on the add button
     composeTestRule.onNodeWithTag("submitButton").performClick()

@@ -168,7 +168,7 @@ fun AttributesPicker(
                         modifier =
                             Modifier.fillMaxWidth()
                                 .padding(horizontal = horizontalPaddingScaleFactor),
-                        testTag = "TitleInput")
+                        testTag = "AttributesPickerTitle")
                     EnumDropDown(
                         options = ParkingProtection.entries.toList(),
                         selectedValue = protection,
