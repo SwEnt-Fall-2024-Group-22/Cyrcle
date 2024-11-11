@@ -10,7 +10,6 @@ import com.mapbox.maps.CameraState
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapView
 import com.mapbox.maps.ScreenCoordinate
-import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.createDefault2DPuck
 import com.mapbox.maps.plugin.locationcomponent.location
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -142,13 +141,11 @@ class MapViewModel : ViewModel() {
       this.enabled = true
       this.locationPuck = createDefault2DPuck(true)
     }
-    val onIndicatorPositionChangedListener = OnIndicatorPositionChangedListener { location ->
+
+    locationComponentPlugin.addOnIndicatorPositionChangedListener({ location ->
       mapView.mapboxMap.setCamera(CameraOptions.Builder().center(location).build())
       mapViewModel.updateCameraPosition(mapView.mapboxMap.cameraState)
-    }
-
-    locationComponentPlugin.addOnIndicatorPositionChangedListener(
-        onIndicatorPositionChangedListener)
+    })
   }
 
   /**
