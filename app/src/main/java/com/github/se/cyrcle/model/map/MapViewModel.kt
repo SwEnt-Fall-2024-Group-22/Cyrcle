@@ -97,10 +97,10 @@ class MapViewModel : ViewModel() {
   }
 
   /**
-   * h Get the bottom left and top right corners of the screen in latitude and longitude
-   * coordinates. The corners are calculated based on the center of the screen and the viewport
-   * dimensions. If useBuffer is true, the corners are calculated with a buffer of 2x the viewport
-   * dimensions. This is useful for loading parkings that are not yet visible on the screen.
+   * Get the bottom left and top right corners of the screen in latitude and longitude coordinates.
+   * The corners are calculated based on the center of the screen and the viewport dimensions. If
+   * useBuffer is true, the corners are calculated with a buffer of 2x the viewport dimensions. This
+   * is useful for loading parkings that are not yet visible on the screen.
    *
    * @param mapView the MapView to get the screen corners from
    * @return a pair of the bottom left and top right corners of the screen
