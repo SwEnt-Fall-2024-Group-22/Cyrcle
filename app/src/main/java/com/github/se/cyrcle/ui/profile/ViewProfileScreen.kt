@@ -101,18 +101,25 @@ fun ViewProfileScreen(
                       onSave = {
                         userViewModel.updateUser(
                             userState?.copy(
-                                firstName = firstName,
-                                lastName = lastName,
-                                username = username,
-                                profilePictureUrl = profilePictureUrl) ?: return@EditProfileContent)
-                        userViewModel.getUserById(userState?.userId ?: "")
+                                public =
+                                    userState
+                                        ?.public!!
+                                        .copy(
+                                            username = username,
+                                            profilePictureUrl = profilePictureUrl),
+                                details =
+                                    userState
+                                        ?.details
+                                        ?.copy(firstName = firstName, lastName = lastName))
+                                ?: return@EditProfileContent)
+                        userViewModel.getUserById(userState?.public!!.userId)
                         isEditing = false
                       },
                       onCancel = {
-                        firstName = userState?.firstName ?: ""
-                        lastName = userState?.lastName ?: ""
-                        username = userState?.username ?: ""
-                        profilePictureUrl = userState?.profilePictureUrl ?: ""
+                        firstName = userState?.details?.firstName ?: ""
+                        lastName = userState?.details?.lastName ?: ""
+                        username = userState?.public!!.username
+                        profilePictureUrl = userState?.public!!.profilePictureUrl
                         isEditing = false
                       })
                 } else {
