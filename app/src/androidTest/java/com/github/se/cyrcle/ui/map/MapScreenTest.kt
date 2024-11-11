@@ -147,4 +147,34 @@ class MapScreenTest {
     // Assert the state value
     assert(state.value == maxZoom)
   }
+
+  @Test
+
+  /**
+   * Test to verify that the recenter button has a click action.
+   *
+   * This test sets the content to the `MapScreen` and checks if the recenter button has a click
+   * action. It then performs a click action on the recenter button and asserts that the focus mode
+   * is toggled.
+   */
+  fun testRecenterButton() {
+    composeTestRule.setContent {
+      MapScreen(mockNavigation, parkingViewModel, userViewModel, mapViewModel)
+    }
+
+    // Assert that the recenter button is displayed
+    composeTestRule.onNodeWithTag("recenterButton").assertIsDisplayed()
+
+    // Assert that the recenter button has a click action
+    composeTestRule.onNodeWithTag("recenterButton").assertHasClickAction()
+
+    // Perform click on the recenter button
+    composeTestRule.onNodeWithTag("recenterButton").performClick()
+
+    assert(mapViewModel.focusMode.value)
+
+    composeTestRule.onNodeWithTag("recenterButton").performClick()
+
+    assert(!mapViewModel.focusMode.value)
+  }
 }

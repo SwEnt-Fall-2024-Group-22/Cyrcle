@@ -99,8 +99,6 @@ fun MapScreen(
   val selectedParking by parkingViewModel.selectedParking.collectAsState()
 
   val screenCapacityString = stringResource(R.string.map_screen_capacity)
-
-  val focusMode = remember { mutableStateOf(false) }
   val bitmap = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.red_marker)
   val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 100, 150, false)
   // Draw markers on the map when the list of parkings changes
@@ -262,7 +260,7 @@ fun MapScreen(
                   .padding(bottom = 25.dp, start = 270.dp)
                   .testTag("recenterButton"),
           onClick = {
-            focusMode.value = !focusMode.value
+            mapViewModel.updateFocusMode(!mapViewModel.focusMode.value)
 
             /*If Camera is in Location tracking mode (focusMode) then i disable this mode by changing ViewPortState to OverviewState */
             if (mapViewportState.mapViewportStatus as? ViewportState is FollowPuckViewportState) {
@@ -281,7 +279,9 @@ fun MapScreen(
                       .build())
             }
           },
-          colorLevel = if (focusMode.value) ColorLevel.SECONDARY else ColorLevel.PRIMARY)
+          colorLevel =
+              if (mapViewModel.focusMode.collectAsState().value) ColorLevel.SECONDARY
+              else ColorLevel.PRIMARY)
     }
   }
 }
