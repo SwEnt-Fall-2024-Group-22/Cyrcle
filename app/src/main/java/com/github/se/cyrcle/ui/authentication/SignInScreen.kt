@@ -89,7 +89,10 @@ fun SignInScreen(
           authenticator.AuthenticateButton(onAuthComplete, onAuthFailure)
 
           // Anonymous Login Button
-          authenticator.SignInAnonymouslyButton {
+          authenticator.SignInAnonymouslyButton(
+              Modifier /* Necessary since "overridable Composable function
+                       do not support default arguments" */,
+          ) {
             navigationActions.navigateTo(TopLevelDestinations.MAP)
           }
         }

@@ -80,7 +80,7 @@ fun ViewProfileScreen(
             selectedItem = Route.PROFILE)
       }) { innerPadding ->
         Box(Modifier.fillMaxSize().padding(innerPadding)) {
-          authenticator.SignOutButton {
+          authenticator.SignOutButton(Modifier.padding(10.dp).align(Alignment.TopEnd)) {
             userViewModel.setCurrentUser(null)
             navigationActions.navigateTo(Route.AUTH)
           }

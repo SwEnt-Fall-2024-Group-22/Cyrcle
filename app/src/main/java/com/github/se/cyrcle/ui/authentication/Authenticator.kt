@@ -47,16 +47,18 @@ interface Authenticator {
   /**
    * Composable button that signs the user in anonymously
    *
+   * @param modifier modifier for the button
    * @param onComplete callback for when sign in is complete
    */
-  @Composable fun SignInAnonymouslyButton(onComplete: () -> Unit)
+  @Composable fun SignInAnonymouslyButton(modifier: Modifier, onComplete: () -> Unit)
 
   /**
    * Composable button that signs the user out
    *
+   * @param modifier modifier for the button
    * @param onComplete callback for when the button is clicked
    */
-  @Composable fun SignOutButton(onComplete: () -> Unit)
+  @Composable fun SignOutButton(modifier: Modifier, onComplete: () -> Unit)
 
   /** Static methods for default composable buttons */
   companion object {
@@ -100,24 +102,32 @@ interface Authenticator {
     /**
      * Default composable button for anonymous login
      *
+     * @param modifier modifier for the button
      * @param onClick callback for when the button is clicked
      */
     @Composable
-    fun DefaultAnonymousLoginButton(onClick: () -> Unit) {
+    fun DefaultAnonymousLoginButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
       com.github.se.cyrcle.ui.theme.atoms.Button(
           text = stringResource(R.string.sign_in_guest_button),
           onClick = onClick,
           colorLevel = ColorLevel.SECONDARY,
           modifier =
-              Modifier.padding(16.dp)
+              modifier
+                  .padding(16.dp)
                   .border(BorderStroke(1.dp, Color.LightGray), RoundedCornerShape(50))
                   .height(48.dp),
           testTag = "AnonymousLoginButton")
     }
 
+    /**
+     * Default composable button for signing out
+     *
+     * @param modifier modifier for the button
+     * @param onComplete callback for when the button is clicked
+     */
     @Composable
-    fun DefaultSignOutButton(onComplete: () -> Unit) {
-      IconButton(Icons.Filled.Outbox, "Sign Out", onComplete, testTag = "SignOutButton")
+    fun DefaultSignOutButton(modifier: Modifier = Modifier, onComplete: () -> Unit) {
+      IconButton(Icons.Filled.Outbox, "Sign Out", onComplete, modifier, testTag = "SignOutButton")
     }
   }
 }
