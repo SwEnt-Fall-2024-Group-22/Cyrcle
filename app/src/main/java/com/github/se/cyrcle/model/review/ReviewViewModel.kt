@@ -43,6 +43,14 @@ class ReviewViewModel(private val reviewRepository: ReviewRepository) : ViewMode
         { Log.e("ReviewViewModel", "Error getting reviews", it) })
   }
 
+  /**
+   * Reset the selectedReview This is to prevent old review from being shown while the new spots
+   * review are being fetched
+   */
+  fun clearReviews() {
+    _parkingReviews.value = emptyList()
+  }
+
   // create factory (imported from bootcamp)
   companion object {
     val Factory: ViewModelProvider.Factory =

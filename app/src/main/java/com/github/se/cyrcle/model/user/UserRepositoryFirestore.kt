@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.model.user
 
+import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -30,7 +31,15 @@ constructor(private val db: FirebaseFirestore, private val auth: FirebaseAuth) :
         .document(userId)
         .get()
         .addOnSuccessListener { document ->
-          val userPublic = deserializeUser(document.data!!)
+          val userPublic: UserPublic =
+              try {
+                Log.d("UserRepositoryFirestore", " Correctly fetched UserPublic")
+                deserializeUserPublic(document.data!!)
+              } catch (e: Exception) {
+                Log.d("UserRepositoryFirestore", "Error fetching UserPublic")
+                onFailure(e)
+                return@addOnSuccessListener
+              }
 
           db.collection(collectionPath)
               .document(userId)
@@ -41,7 +50,7 @@ constructor(private val db: FirebaseFirestore, private val auth: FirebaseAuth) :
                 val userDetails = deserializeUserDetails(detailsDocument.data!!)
                 onSuccess(User(userPublic, userDetails))
               }
-              .addOnFailureListener(onFailure)
+              .addOnFailureListener { onSuccess(User(userPublic, null)) }
         }
         .addOnFailureListener(onFailure)
   }
@@ -58,7 +67,7 @@ constructor(private val db: FirebaseFirestore, private val auth: FirebaseAuth) :
         .addOnSuccessListener { querySnapshot ->
           val users =
               querySnapshot.documents.mapNotNull { document ->
-                val userPublic = deserializeUser(document.data!!)
+                val userPublic = deserializeUserPublic(document.data!!)
                 User(userPublic, null)
               }
           onSuccess(users)
@@ -147,7 +156,7 @@ constructor(private val db: FirebaseFirestore, private val auth: FirebaseAuth) :
   }
    */
 
-  private fun deserializeUser(data: Map<String, Any>): UserPublic {
+  private fun deserializeUserPublic(data: Map<String, Any>): UserPublic {
     val gson = Gson()
     return gson.fromJson(gson.toJson(data), UserPublic::class.java)
   }

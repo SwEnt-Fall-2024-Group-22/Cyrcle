@@ -111,6 +111,7 @@
     <string name="all_review_title">All Reviews For %s</string>
     <string name="all_review_rating">Rating: %.1f</string>
     <string name="all_review_text">Text: %s</string>
+    <string name="undefined_username">Unknown user</string>
 
     <!-- Review Screen -->
     <string name="review_screen_title_new_review">Add your review</string>
