@@ -99,6 +99,8 @@ class UserRepositoryFirestoreTest {
   @Test
   fun addUser_callsOnSuccess() {
     `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
+    // simulate that the user already exists
+    `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
 
     userRepositoryFirestore.addUser(
         user = user,
