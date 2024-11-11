@@ -97,7 +97,7 @@ fun ConditionCheckingInputText(
     minCharacters: Int = 0,
     maxCharacters: Int = Int.MAX_VALUE,
     hasClearIcon: Boolean = true,
-    testTag: String = "InputText"
+    testTag: String = "ConditionCheckingInputText"
 ) {
   Column {
     val isError = value.length !in minCharacters..maxCharacters
@@ -113,7 +113,7 @@ fun ConditionCheckingInputText(
     // Display error message below the text field if the input is not valid
     if (isError) {
       Row(
-          modifier = Modifier.padding(start = 16.dp, top = 4.dp),
+          modifier = Modifier.padding(start = 16.dp, top = 4.dp).testTag("${testTag}ErrorRow"),
           verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 imageVector = Icons.Filled.WarningAmber,
