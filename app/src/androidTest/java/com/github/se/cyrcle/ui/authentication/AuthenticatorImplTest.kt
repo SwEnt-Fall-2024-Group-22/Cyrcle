@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.authentication
 
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -50,7 +51,9 @@ class AuthenticatorImplTest {
   @Test
   fun testAnonymousLoginButton() {
     var callbackCalled = false
-    composeTestRule.setContent { authenticator.SignInAnonymouslyButton { callbackCalled = true } }
+    composeTestRule.setContent {
+      authenticator.SignInAnonymouslyButton(Modifier) { callbackCalled = true }
+    }
 
     composeTestRule
         .onNodeWithTag("AnonymousLoginButton")

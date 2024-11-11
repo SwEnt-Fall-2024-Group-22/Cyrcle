@@ -1,6 +1,7 @@
 package com.github.se.cyrcle.di.mocks
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.ui.authentication.Authenticator
@@ -17,7 +18,12 @@ class AuthenticatorMock @Inject constructor() : Authenticator {
   }
 
   @Composable
-  override fun SignInAnonymouslyButton(onComplete: () -> Unit) {
-    Authenticator.DefaultAnonymousLoginButton(onComplete)
+  override fun SignInAnonymouslyButton(modifier: Modifier, onComplete: () -> Unit) {
+    Authenticator.DefaultAnonymousLoginButton(modifier, onComplete)
+  }
+
+  @Composable
+  override fun SignOutButton(modifier: Modifier, onComplete: () -> Unit) {
+    Authenticator.DefaultSignOutButton(modifier, onComplete)
   }
 }

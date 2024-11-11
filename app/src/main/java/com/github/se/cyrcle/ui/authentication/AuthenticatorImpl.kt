@@ -7,6 +7,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.github.se.cyrcle.R
@@ -60,9 +61,22 @@ class AuthenticatorImpl @Inject constructor(private val auth: FirebaseAuth) : Au
    * @param onComplete callback for when sign in is complete
    */
   @Composable
-  override fun SignInAnonymouslyButton(onComplete: () -> Unit) {
-    Authenticator.DefaultAnonymousLoginButton {
+  override fun SignInAnonymouslyButton(modifier: Modifier, onComplete: () -> Unit) {
+    Authenticator.DefaultAnonymousLoginButton(modifier) {
       runBlocking { auth.signInAnonymously().await() }
+      onComplete()
+    }
+  }
+
+  /**
+   * Composable button that signs the user out
+   *
+   * @param onComplete callback for when the button is clicked
+   */
+  @Composable
+  override fun SignOutButton(modifier: Modifier, onComplete: () -> Unit) {
+    Authenticator.DefaultSignOutButton(modifier) {
+      auth.signOut()
       onComplete()
     }
   }

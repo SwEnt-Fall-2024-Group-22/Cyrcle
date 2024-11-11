@@ -3,6 +3,7 @@ package com.github.se.cyrcle.ui.profile
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.se.cyrcle.di.mocks.AuthenticatorMock
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
@@ -16,12 +17,14 @@ import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.github.se.cyrcle.ui.navigation.Route
 import com.mapbox.geojson.Point
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
+import org.mockito.kotlin.verify
 
 @RunWith(AndroidJUnit4::class)
 class ViewProfileScreenTest {
@@ -72,8 +75,22 @@ class ViewProfileScreenTest {
     userViewModel.getSelectedUserFavoriteParking()
 
     composeTestRule.setContent {
-      ViewProfileScreen(navigationActions = mockNavigationActions, userViewModel = userViewModel)
+      ViewProfileScreen(
+          navigationActions = mockNavigationActions,
+          userViewModel = userViewModel,
+          AuthenticatorMock())
     }
+  }
+
+  @Test
+  fun testSignOut() {
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithTag("SignOutButton").performClick()
+    composeTestRule.waitForIdle()
+
+    assert(userViewModel.currentUser.value == null)
+    verify(mockNavigationActions).navigateTo(Route.AUTH)
   }
 
   @Test
