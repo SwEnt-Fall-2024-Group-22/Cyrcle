@@ -16,6 +16,7 @@ const val KM_TO_METERS = 1000.0
 const val DEFAULT_RADIUS = 100.0
 const val MAX_RADIUS = 1000.0
 const val RADIUS_INCREMENT = 100.0
+const val MIN_NB_PARKINGS = 10
 /**
  * ViewModel for the Parking feature.
  *
@@ -261,7 +262,7 @@ class ParkingViewModel(
                       _selectedCapacities.value.contains(parking.capacity)) &&
                   (!_onlyWithCCTV.value || parking.hasSecurity)
             }
-    if (_closestParkings.value.size < 5 || _radius.value == MAX_RADIUS) {
+    if (_closestParkings.value.size < MIN_NB_PARKINGS || _radius.value == MAX_RADIUS) {
       incrementRadius()
     }
   }
