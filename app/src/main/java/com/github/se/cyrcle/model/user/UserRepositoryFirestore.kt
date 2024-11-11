@@ -41,9 +41,9 @@ constructor(private val db: FirebaseFirestore, private val auth: FirebaseAuth) :
                 val userDetails = deserializeUserDetails(detailsDocument.data!!)
                 onSuccess(User(userPublic, userDetails))
               }
-          onSuccess(User(userPublic, null))
+              .addOnFailureListener(onFailure)
         }
-        .addOnFailureListener { onFailure(it) }
+        .addOnFailureListener(onFailure)
   }
 
   override fun getUid(): String {
@@ -63,7 +63,7 @@ constructor(private val db: FirebaseFirestore, private val auth: FirebaseAuth) :
               }
           onSuccess(users)
         }
-        .addOnFailureListener { onFailure(it) }
+        .addOnFailureListener(onFailure)
   }
 
   override fun addUser(user: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
@@ -71,26 +71,30 @@ constructor(private val db: FirebaseFirestore, private val auth: FirebaseAuth) :
       onFailure(Exception("User details are required"))
       return
     }
-    db.collection(collectionPath).document(user.public.userId).get().addOnSuccessListener {
-      if (it.exists()) {
-        onSuccess()
-        return@addOnSuccessListener
-      } else {
-        db.collection(collectionPath)
-            .document(user.public.userId)
-            .set(user.public)
-            .addOnSuccessListener {
-              db.collection(collectionPath)
-                  .document(user.public.userId)
-                  .collection("private")
-                  .document("details")
-                  .set(user.details)
-                  .addOnSuccessListener { onSuccess() }
-                  .addOnFailureListener { exception -> onFailure(exception) }
-            }
-            .addOnFailureListener { exception -> onFailure(exception) }
-      }
-    }
+    db.collection(collectionPath)
+        .document(user.public.userId)
+        .get()
+        .addOnSuccessListener {
+          if (it.exists()) {
+            onSuccess()
+            return@addOnSuccessListener
+          } else {
+            db.collection(collectionPath)
+                .document(user.public.userId)
+                .set(user.public)
+                .addOnSuccessListener {
+                  db.collection(collectionPath)
+                      .document(user.public.userId)
+                      .collection("private")
+                      .document("details")
+                      .set(user.details)
+                      .addOnSuccessListener { onSuccess() }
+                      .addOnFailureListener(onFailure)
+                }
+                .addOnFailureListener(onFailure)
+          }
+        }
+        .addOnFailureListener(onFailure)
   }
 
   override fun updateUser(user: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
