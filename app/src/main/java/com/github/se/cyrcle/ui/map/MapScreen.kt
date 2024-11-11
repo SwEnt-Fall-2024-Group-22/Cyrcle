@@ -42,6 +42,7 @@ import com.github.se.cyrcle.ui.theme.atoms.IconButton
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.google.gson.Gson
 import com.mapbox.android.core.permissions.PermissionsManager
+import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.common.Cancelable
 import com.mapbox.geojson.Polygon
 import com.mapbox.maps.CameraBoundsOptions
@@ -61,12 +62,11 @@ import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
+import com.mapbox.maps.plugin.gestures.OnMoveListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.maps.plugin.viewport.data.FollowPuckViewportStateOptions
 import com.mapbox.maps.plugin.viewport.data.OverviewViewportStateOptions
-import com.mapbox.maps.plugin.viewport.state.FollowPuckViewportState
-import com.mapbox.maps.plugin.viewport.state.ViewportState
 import com.mapbox.maps.viewannotation.annotatedLayerFeature
 import com.mapbox.maps.viewannotation.annotationAnchor
 import com.mapbox.maps.viewannotation.geometry
@@ -106,6 +106,16 @@ fun MapScreen(
     drawMarkers(pointAnnotationManager, listOfParkings, resizedBitmap)
   }
 
+  // Center the camera on th puck and transition to the follow puck state
+  LaunchedEffect(PermissionsManager.areLocationPermissionsGranted(activity)) {
+    mapViewportState.transitionToFollowPuckState(
+        FollowPuckViewportStateOptions.Builder()
+            .pitch(0.0)
+            .zoom(maxZoom)
+            .padding(EdgeInsets(500.0, 100.0, 100.0, 100.0))
+            .build())
+  }
+
   // initialize the Gson object that will deserialize and serialize the parking to bind it
   // to the marker
   val gson = Gson()
@@ -121,8 +131,33 @@ fun MapScreen(
             // When map is loaded, check if the location permission is granted and initialize the
             // location component
             if (PermissionsManager.areLocationPermissionsGranted(activity)) {
-              mapViewModel.initLocationComponent(mapView, mapViewModel)
+              mapViewModel.initLocationComponent(mapView)
             }
+
+            // Add a move listener to the map to deactivate tracking mode when the user moves the
+            // map
+
+            val moveListener =
+                object : OnMoveListener {
+                  override fun onMoveBegin(detector: MoveGestureDetector) {
+                    if (mapViewModel.isTrackingModeEnable.value) {
+                      mapViewportState.transitionToOverviewState(
+                          OverviewViewportStateOptions.Builder()
+                              .geometry(mapViewportState.cameraState!!.center)
+                              .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
+                              .build())
+                      mapViewModel.updateTrackingMode(false)
+                    }
+                  }
+
+                  override fun onMove(detector: MoveGestureDetector): Boolean {
+                    return false
+                  }
+
+                  override fun onMoveEnd(detector: MoveGestureDetector) {}
+                }
+
+            mapView.gestures.addOnMoveListener(moveListener)
 
             val viewAnnotationManager = mapView.viewAnnotationManager
 
@@ -255,29 +290,20 @@ fun MapScreen(
           icon = Icons.Default.MyLocation,
           contentDescription = "Recenter on Location",
           modifier =
-              Modifier.align(Alignment.BottomStart)
-                  .scale(1.2f)
+              Modifier.align(Alignment.BottomEnd)
                   .padding(bottom = 25.dp, end = 16.dp)
+                  .scale(1.2f)
                   .testTag("recenterButton"),
           onClick = {
             mapViewModel.updateTrackingMode(!mapViewModel.isTrackingModeEnable.value)
 
-            /* If Camera is in Location tracking mode (isTrackingModeEnable) then it disable this mode by changing ViewPortState to OverviewState */
-            if (mapViewportState.mapViewportStatus as? ViewportState is FollowPuckViewportState) {
-              mapViewportState.transitionToOverviewState(
-                  OverviewViewportStateOptions.Builder()
-                      .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
-                      .build())
-            }
-            /* If the Camera is not in location tracking mode (!isTrackingModeEnable) then it enables location tracking by changing viewPortState to FollowPuckViewportState */
-            else {
-              mapViewportState.transitionToFollowPuckState(
-                  FollowPuckViewportStateOptions.Builder()
-                      .pitch(0.0)
-                      .zoom(maxZoom)
-                      .padding(EdgeInsets(500.0, 100.0, 100.0, 100.0))
-                      .build())
-            }
+            mapViewportState.transitionToFollowPuckState(
+                FollowPuckViewportStateOptions.Builder()
+                    .pitch(0.0)
+                    .zoom(maxZoom)
+                    .padding(EdgeInsets(500.0, 100.0, 100.0, 100.0))
+                    .build())
+            mapViewModel.updateTrackingMode(true)
           },
           colorLevel =
               if (mapViewModel.isTrackingModeEnable.collectAsState().value) ColorLevel.SECONDARY

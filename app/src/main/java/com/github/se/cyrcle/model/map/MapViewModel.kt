@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.ui.map.MapConfig
 import com.mapbox.geojson.Point
-import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.CameraState
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapView
@@ -29,8 +28,9 @@ class MapViewModel : ViewModel() {
   private val _locationPickerState = MutableStateFlow(LocationPickerState.NONE_SET)
   val locationPickerState: StateFlow<LocationPickerState> = _locationPickerState
 
-  private val _isTrackingModeEnable = MutableStateFlow(false)
+  private val _isTrackingModeEnable = MutableStateFlow(true)
   val isTrackingModeEnable: StateFlow<Boolean> = _isTrackingModeEnable
+
   /**
    * Update the state of the location picker, This state is used to determine which steps of the
    * process to set the new location are completed
@@ -133,19 +133,13 @@ class MapViewModel : ViewModel() {
    * Initialize the location component of the map.
    *
    * @param mapView the MapView to initialize the location component on
-   * @param mapViewModel the MapViewModel to update the camera position
    */
-  fun initLocationComponent(mapView: MapView, mapViewModel: MapViewModel) {
+  fun initLocationComponent(mapView: MapView) {
     val locationComponentPlugin = mapView.location
     locationComponentPlugin.updateSettings {
       this.enabled = true
       this.locationPuck = createDefault2DPuck(true)
     }
-
-    locationComponentPlugin.addOnIndicatorPositionChangedListener({ location ->
-      mapView.mapboxMap.setCamera(CameraOptions.Builder().center(location).build())
-      mapViewModel.updateCameraPosition(mapView.mapboxMap.cameraState)
-    })
   }
 
   /**
@@ -161,6 +155,7 @@ class MapViewModel : ViewModel() {
     RECTANGLE_SET
   }
 
+  // create factory (imported from bootcamp)
   // create factory (imported from bootcamp)
   companion object {
     val Factory: ViewModelProvider.Factory =
