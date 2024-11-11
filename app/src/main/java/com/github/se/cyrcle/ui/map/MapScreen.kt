@@ -112,7 +112,7 @@ fun MapScreen(
         FollowPuckViewportStateOptions.Builder()
             .pitch(0.0)
             .zoom(maxZoom)
-            .padding(EdgeInsets(500.0, 100.0, 100.0, 100.0))
+            .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
             .build())
   }
 
@@ -295,15 +295,13 @@ fun MapScreen(
                   .scale(1.2f)
                   .testTag("recenterButton"),
           onClick = {
-            mapViewModel.updateTrackingMode(!mapViewModel.isTrackingModeEnable.value)
-
+            mapViewModel.updateTrackingMode(true)
             mapViewportState.transitionToFollowPuckState(
                 FollowPuckViewportStateOptions.Builder()
                     .pitch(0.0)
                     .zoom(maxZoom)
                     .padding(EdgeInsets(500.0, 100.0, 100.0, 100.0))
                     .build())
-            mapViewModel.updateTrackingMode(true)
           },
           colorLevel =
               if (mapViewModel.isTrackingModeEnable.collectAsState().value) ColorLevel.SECONDARY
