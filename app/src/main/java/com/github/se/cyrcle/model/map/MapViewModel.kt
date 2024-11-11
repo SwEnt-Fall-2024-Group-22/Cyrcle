@@ -4,9 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.ui.map.MapConfig
+import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraState
 import com.mapbox.maps.EdgeInsets
+import com.mapbox.maps.MapView
 import com.mapbox.maps.ScreenCoordinate
+import com.mapbox.maps.plugin.locationcomponent.createDefault2DPuck
+import com.mapbox.maps.plugin.locationcomponent.location
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -23,6 +27,9 @@ class MapViewModel : ViewModel() {
 
   private val _locationPickerState = MutableStateFlow(LocationPickerState.NONE_SET)
   val locationPickerState: StateFlow<LocationPickerState> = _locationPickerState
+
+  private val _isTrackingModeEnable = MutableStateFlow(true)
+  val isTrackingModeEnable: StateFlow<Boolean> = _isTrackingModeEnable
 
   /**
    * Update the state of the location picker, This state is used to determine which steps of the
@@ -43,6 +50,16 @@ class MapViewModel : ViewModel() {
    */
   fun updateCameraPosition(cameraState: CameraState) {
     _cameraPosition.value = cameraState
+  }
+
+  /**
+   * Update the focus mode
+   *
+   * @param focusMode the new focus mode This function is used to update the focus mode of the map
+   *   screen. The focus mode is used to center the map on the user's location
+   */
+  fun updateTrackingMode(focusMode: Boolean) {
+    _isTrackingModeEnable.value = focusMode
   }
 
   /**
@@ -79,6 +96,53 @@ class MapViewModel : ViewModel() {
   }
 
   /**
+   * Get the bottom left and top right corners of the screen in latitude and longitude coordinates.
+   * The corners are calculated based on the center of the screen and the viewport dimensions. If
+   * useBuffer is true, the corners are calculated with a buffer of 2x the viewport dimensions. This
+   * is useful for loading parkings that are not yet visible on the screen.
+   *
+   * @param mapView the MapView to get the screen corners from
+   * @return a pair of the bottom left and top right corners of the screen
+   */
+  fun getScreenCorners(mapView: MapView): Pair<Point, Point> {
+    // Retrieve viewport dimensions
+    val viewportWidth = mapView.width
+    val viewportHeight = mapView.height
+
+    val centerPixel = mapView.mapboxMap.pixelForCoordinate(mapView.mapboxMap.cameraState.center)
+
+    // Calculate the multiplier for the buffer
+    val multiplier = 3.0
+
+    val bottomLeftCorner =
+        mapView.mapboxMap.coordinateForPixel(
+            ScreenCoordinate(
+                centerPixel.x - (viewportWidth * multiplier),
+                centerPixel.y + (viewportHeight * multiplier)))
+
+    val topRightCorner =
+        mapView.mapboxMap.coordinateForPixel(
+            ScreenCoordinate(
+                centerPixel.x + (viewportWidth * multiplier),
+                centerPixel.y - (viewportHeight * multiplier)))
+
+    return Pair(bottomLeftCorner, topRightCorner)
+  }
+
+  /**
+   * Initialize the location component of the map.
+   *
+   * @param mapView the MapView to initialize the location component on
+   */
+  fun initLocationComponent(mapView: MapView) {
+    val locationComponentPlugin = mapView.location
+    locationComponentPlugin.updateSettings {
+      this.enabled = true
+      this.locationPuck = createDefault2DPuck(true)
+    }
+  }
+
+  /**
    * Enum class to represent the state of the location picker, This state is used to determine which
    * steps of the process to set the new location are completed NONE_SET: No location is set
    * TOP_LEFT_SET: The top left corner of the rectangle is set BOTTOM_RIGHT_SET: The bottom right
@@ -91,6 +155,7 @@ class MapViewModel : ViewModel() {
     RECTANGLE_SET
   }
 
+  // create factory (imported from bootcamp)
   // create factory (imported from bootcamp)
   companion object {
     val Factory: ViewModelProvider.Factory =

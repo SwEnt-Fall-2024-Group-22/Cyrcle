@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,15 +42,12 @@ import com.github.se.cyrcle.ui.theme.atoms.IconButton
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.google.gson.Gson
 import com.mapbox.android.core.permissions.PermissionsManager
+import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.common.Cancelable
-import com.mapbox.geojson.Point
 import com.mapbox.geojson.Polygon
 import com.mapbox.maps.CameraBoundsOptions
-import com.mapbox.maps.CameraOptions
-import com.mapbox.maps.CameraState
+import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapIdleCallback
-import com.mapbox.maps.MapView
-import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.ViewAnnotationAnchor
 import com.mapbox.maps.extension.compose.DisposableMapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
@@ -64,10 +62,11 @@ import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
+import com.mapbox.maps.plugin.gestures.OnMoveListener
 import com.mapbox.maps.plugin.gestures.gestures
-import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
-import com.mapbox.maps.plugin.locationcomponent.createDefault2DPuck
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.maps.plugin.viewport.data.FollowPuckViewportStateOptions
+import com.mapbox.maps.plugin.viewport.data.OverviewViewportStateOptions
 import com.mapbox.maps.viewannotation.annotatedLayerFeature
 import com.mapbox.maps.viewannotation.annotationAnchor
 import com.mapbox.maps.viewannotation.geometry
@@ -100,12 +99,21 @@ fun MapScreen(
   val selectedParking by parkingViewModel.selectedParking.collectAsState()
 
   val screenCapacityString = stringResource(R.string.map_screen_capacity)
-
   val bitmap = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.red_marker)
   val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 100, 150, false)
   // Draw markers on the map when the list of parkings changes
   LaunchedEffect(listOfParkings, pointAnnotationManager, selectedParking?.nbReviews) {
     drawMarkers(pointAnnotationManager, listOfParkings, resizedBitmap)
+  }
+
+  // Center the camera on th puck and transition to the follow puck state
+  LaunchedEffect(PermissionsManager.areLocationPermissionsGranted(activity)) {
+    mapViewportState.transitionToFollowPuckState(
+        FollowPuckViewportStateOptions.Builder()
+            .pitch(0.0)
+            .zoom(maxZoom)
+            .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
+            .build())
   }
 
   // initialize the Gson object that will deserialize and serialize the parking to bind it
@@ -123,8 +131,33 @@ fun MapScreen(
             // When map is loaded, check if the location permission is granted and initialize the
             // location component
             if (PermissionsManager.areLocationPermissionsGranted(activity)) {
-              initLocationComponent(mapView, mapViewModel)
+              mapViewModel.initLocationComponent(mapView)
             }
+
+            // Add a move listener to the map to deactivate tracking mode when the user moves the
+            // map
+
+            val moveListener =
+                object : OnMoveListener {
+                  override fun onMoveBegin(detector: MoveGestureDetector) {
+                    if (mapViewModel.isTrackingModeEnable.value) {
+                      mapViewportState.transitionToOverviewState(
+                          OverviewViewportStateOptions.Builder()
+                              .geometry(mapViewportState.cameraState!!.center)
+                              .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
+                              .build())
+                      mapViewModel.updateTrackingMode(false)
+                    }
+                  }
+
+                  override fun onMove(detector: MoveGestureDetector): Boolean {
+                    return false
+                  }
+
+                  override fun onMoveEnd(detector: MoveGestureDetector) {}
+                }
+
+            mapView.gestures.addOnMoveListener(moveListener)
 
             val viewAnnotationManager = mapView.viewAnnotationManager
 
@@ -193,7 +226,7 @@ fun MapScreen(
                   true
                 })
 
-            val (loadedBottomLeft, loadedTopRight) = getScreenCorners(mapView)
+            val (loadedBottomLeft, loadedTopRight) = mapViewModel.getScreenCorners(mapView)
 
             // Get parkings in the current view
             parkingViewModel.getParkingsInRect(loadedBottomLeft, loadedTopRight)
@@ -211,7 +244,7 @@ fun MapScreen(
 
                   // Get the top right and bottom left coordinates of the current view only when
                   // what the user sees is outside the screen
-                  val (currentBottomLeft, currentTopRight) = getScreenCorners(mapView)
+                  val (currentBottomLeft, currentTopRight) = mapViewModel.getScreenCorners(mapView)
 
                   // Temporary fix to avoid loading too much parkings when zoomed out
                   if (mapView.mapboxMap.cameraState.zoom > thresholdDisplayZoom) {
@@ -252,42 +285,29 @@ fun MapScreen(
           enabled = enableParkingAddition,
           colorLevel = ColorLevel.PRIMARY,
           testTag = "addButton")
+
+      IconButton(
+          icon = Icons.Default.MyLocation,
+          contentDescription = "Recenter on Location",
+          modifier =
+              Modifier.align(Alignment.BottomEnd)
+                  .padding(bottom = 25.dp, end = 16.dp)
+                  .scale(1.2f)
+                  .testTag("recenterButton"),
+          onClick = {
+            mapViewModel.updateTrackingMode(true)
+            mapViewportState.transitionToFollowPuckState(
+                FollowPuckViewportStateOptions.Builder()
+                    .pitch(0.0)
+                    .zoom(maxZoom)
+                    .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
+                    .build())
+          },
+          colorLevel =
+              if (mapViewModel.isTrackingModeEnable.collectAsState().value) ColorLevel.SECONDARY
+              else ColorLevel.PRIMARY)
     }
   }
-}
-
-/**
- * Get the bottom left and top right corners of the screen in latitude and longitude coordinates.
- * The corners are calculated based on the center of the screen and the viewport dimensions. If
- * useBuffer is true, the corners are calculated with a buffer of 2x the viewport dimensions. This
- * is useful for loading parkings that are not yet visible on the screen.
- *
- * @param mapView the MapView to get the screen corners from
- * @return a pair of the bottom left and top right corners of the screen
- */
-private fun getScreenCorners(mapView: MapView): Pair<Point, Point> {
-  // Retrieve viewport dimensions
-  val viewportWidth = mapView.width
-  val viewportHeight = mapView.height
-
-  val centerPixel = mapView.mapboxMap.pixelForCoordinate(mapView.mapboxMap.cameraState.center)
-
-  // Calculate the multiplier for the buffer
-  val multiplier = 3.0
-
-  val bottomLeftCorner =
-      mapView.mapboxMap.coordinateForPixel(
-          ScreenCoordinate(
-              centerPixel.x - (viewportWidth * multiplier),
-              centerPixel.y + (viewportHeight * multiplier)))
-
-  val topRightCorner =
-      mapView.mapboxMap.coordinateForPixel(
-          ScreenCoordinate(
-              centerPixel.x + (viewportWidth * multiplier),
-              centerPixel.y - (viewportHeight * multiplier)))
-
-  return Pair(bottomLeftCorner, topRightCorner)
 }
 
 /**
@@ -340,30 +360,4 @@ private fun drawMarkers(
             .withIconOffset(listOf(0.0, bitmap.height / 12.0))
             .withData(Gson().toJsonTree(it)))
   }
-}
-
-/**
- * Initialize the location component of the map.
- *
- * @param mapView the MapView to initialize the location component on
- * @param mapViewModel the MapViewModel to update the camera position
- */
-private fun initLocationComponent(mapView: MapView, mapViewModel: MapViewModel) {
-  val locationComponentPlugin = mapView.location
-  locationComponentPlugin.updateSettings {
-    this.enabled = true
-    this.locationPuck = createDefault2DPuck(true)
-  }
-  val onIndicatorPositionChangedListener = OnIndicatorPositionChangedListener { location ->
-    mapView.mapboxMap.setCamera(CameraOptions.Builder().center(location).build())
-    mapViewModel.updateCameraPosition(
-        CameraState(
-            location,
-            mapView.mapboxMap.cameraState.padding,
-            mapView.mapboxMap.cameraState.zoom,
-            0.0,
-            0.0))
-  }
-
-  locationComponentPlugin.addOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener)
 }
