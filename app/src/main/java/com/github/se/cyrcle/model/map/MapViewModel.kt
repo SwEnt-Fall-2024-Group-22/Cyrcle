@@ -29,8 +29,8 @@ class MapViewModel : ViewModel() {
   private val _locationPickerState = MutableStateFlow(LocationPickerState.NONE_SET)
   val locationPickerState: StateFlow<LocationPickerState> = _locationPickerState
 
-  private val _focusMode = MutableStateFlow(false)
-  val focusMode: StateFlow<Boolean> = _focusMode
+  private val _isTrackingModeEnable = MutableStateFlow(false)
+  val isTrackingModeEnable: StateFlow<Boolean> = _isTrackingModeEnable
   /**
    * Update the state of the location picker, This state is used to determine which steps of the
    * process to set the new location are completed
@@ -58,8 +58,8 @@ class MapViewModel : ViewModel() {
    * @param focusMode the new focus mode This function is used to update the focus mode of the map
    *   screen. The focus mode is used to center the map on the user's location
    */
-  fun updateFocusMode(focusMode: Boolean) {
-    _focusMode.value = focusMode
+  fun updateTrackingMode(focusMode: Boolean) {
+    _isTrackingModeEnable.value = focusMode
   }
 
   /**

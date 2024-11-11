@@ -171,10 +171,10 @@ class MapScreenTest {
     // Perform click on the recenter button
     composeTestRule.onNodeWithTag("recenterButton").performClick()
 
-    assert(mapViewModel.focusMode.value)
+    assert(mapViewModel.isTrackingModeEnable.value)
 
     composeTestRule.onNodeWithTag("recenterButton").performClick()
 
-    assert(!mapViewModel.focusMode.value)
+    assert(!mapViewModel.isTrackingModeEnable.value)
   }
 }

@@ -257,19 +257,19 @@ fun MapScreen(
           modifier =
               Modifier.align(Alignment.BottomStart)
                   .scale(1.2f)
-                  .padding(bottom = 25.dp, start = 270.dp)
+                  .padding(bottom = 25.dp, end = 16.dp)
                   .testTag("recenterButton"),
           onClick = {
-            mapViewModel.updateFocusMode(!mapViewModel.focusMode.value)
+            mapViewModel.updateTrackingMode(!mapViewModel.isTrackingModeEnable.value)
 
-            /*If Camera is in Location tracking mode (focusMode) then i disable this mode by changing ViewPortState to OverviewState */
+            /* If Camera is in Location tracking mode (isTrackingModeEnable) then it disable this mode by changing ViewPortState to OverviewState */
             if (mapViewportState.mapViewportStatus as? ViewportState is FollowPuckViewportState) {
               mapViewportState.transitionToOverviewState(
                   OverviewViewportStateOptions.Builder()
                       .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
                       .build())
             }
-            /* If the Camera is not in location tracking mode (!focusMode) then it enables location tracking by changing viewPortState to FollowPuckViewportState */
+            /* If the Camera is not in location tracking mode (!isTrackingModeEnable) then it enables location tracking by changing viewPortState to FollowPuckViewportState */
             else {
               mapViewportState.transitionToFollowPuckState(
                   FollowPuckViewportStateOptions.Builder()
@@ -280,7 +280,7 @@ fun MapScreen(
             }
           },
           colorLevel =
-              if (mapViewModel.focusMode.collectAsState().value) ColorLevel.SECONDARY
+              if (mapViewModel.isTrackingModeEnable.collectAsState().value) ColorLevel.SECONDARY
               else ColorLevel.PRIMARY)
     }
   }
