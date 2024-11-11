@@ -64,7 +64,8 @@ fun CyrcleNavHost(
         route = Route.MAP,
     ) {
       composable(Screen.MAP) {
-        MapScreen(navigationActions, parkingViewModel, userViewModel, mapViewModel)
+        MapScreen(
+            navigationActions, parkingViewModel, userViewModel, mapViewModel, activity = activity)
       }
     }
 
