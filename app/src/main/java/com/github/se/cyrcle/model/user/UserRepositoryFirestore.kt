@@ -1,12 +1,10 @@
 package com.github.se.cyrcle.model.user
 
-import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import javax.inject.Inject
 
 class UserRepositoryFirestore
@@ -32,14 +30,20 @@ constructor(private val db: FirebaseFirestore, private val auth: FirebaseAuth) :
         .document(userId)
         .get()
         .addOnSuccessListener { document ->
-          val user = document.data?.let { deserializeUser(it) }
-          if (user != null) {
-            onSuccess(user)
-          } else {
-            onFailure(Exception("User not found"))
-          }
+          val userPublic = deserializeUser(document.data!!)
+
+          db.collection(collectionPath)
+              .document(userId)
+              .collection("private")
+              .document("details")
+              .get()
+              .addOnSuccessListener { detailsDocument ->
+                val userDetails = deserializeUserDetails(detailsDocument.data!!)
+                onSuccess(User(userPublic, userDetails))
+              }
+              .addOnFailureListener(onFailure)
         }
-        .addOnFailureListener { onFailure(it) }
+        .addOnFailureListener(onFailure)
   }
 
   override fun getUid(): String {
@@ -52,30 +56,64 @@ constructor(private val db: FirebaseFirestore, private val auth: FirebaseAuth) :
     db.collection(collectionPath)
         .get()
         .addOnSuccessListener { querySnapshot ->
-          Log.d("UserRepositoryFirestore", "getAllUsers")
           val users =
               querySnapshot.documents.mapNotNull { document ->
-                Log.d("UserRepositoryFirestore", document.data.toString())
-                document.data?.let { deserializeUser(it) }
+                val userPublic = deserializeUser(document.data!!)
+                User(userPublic, null)
               }
           onSuccess(users)
         }
-        .addOnFailureListener { onFailure(it) }
+        .addOnFailureListener(onFailure)
   }
 
   override fun addUser(user: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    if (user.details == null) {
+      onFailure(Exception("User details are required"))
+      return
+    }
     db.collection(collectionPath)
-        .document(user.userId)
-        .set(serializeUser(user))
-        .addOnSuccessListener { onSuccess() }
-        .addOnFailureListener { onFailure(it) }
+        .document(user.public.userId)
+        .get()
+        .addOnSuccessListener {
+          if (it.exists()) {
+            onSuccess()
+            return@addOnSuccessListener
+          } else {
+            db.collection(collectionPath)
+                .document(user.public.userId)
+                .set(user.public)
+                .addOnSuccessListener {
+                  db.collection(collectionPath)
+                      .document(user.public.userId)
+                      .collection("private")
+                      .document("details")
+                      .set(user.details)
+                      .addOnSuccessListener { onSuccess() }
+                      .addOnFailureListener(onFailure)
+                }
+                .addOnFailureListener(onFailure)
+          }
+        }
+        .addOnFailureListener(onFailure)
   }
 
   override fun updateUser(user: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    if (user.details == null) {
+      onFailure(Exception("User details are required"))
+      return
+    }
     db.collection(collectionPath)
-        .document(user.userId)
-        .set(serializeUser(user))
-        .addOnSuccessListener { onSuccess() }
+        .document(user.public.userId)
+        .set(user.public)
+        .addOnSuccessListener {
+          db.collection(collectionPath)
+              .document(user.public.userId)
+              .collection("private")
+              .document("details")
+              .set(user.details)
+              .addOnSuccessListener { onSuccess() }
+              .addOnFailureListener { onFailure(it) }
+        }
         .addOnFailureListener { onFailure(it) }
   }
 
@@ -109,14 +147,13 @@ constructor(private val db: FirebaseFirestore, private val auth: FirebaseAuth) :
   }
    */
 
-  private fun serializeUser(user: User): Map<String, Any> {
+  private fun deserializeUser(data: Map<String, Any>): UserPublic {
     val gson = Gson()
-    val type = object : TypeToken<Map<String, Any>>() {}.type
-    return gson.fromJson(gson.toJson(user), type)
+    return gson.fromJson(gson.toJson(data), UserPublic::class.java)
   }
 
-  private fun deserializeUser(data: Map<String, Any>): User {
+  private fun deserializeUserDetails(data: Map<String, Any>): UserDetails {
     val gson = Gson()
-    return gson.fromJson(gson.toJson(data), User::class.java)
+    return gson.fromJson(gson.toJson(data), UserDetails::class.java)
   }
 }

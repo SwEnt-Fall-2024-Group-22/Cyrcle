@@ -15,6 +15,8 @@ import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.model.user.User
+import com.github.se.cyrcle.model.user.UserDetails
+import com.github.se.cyrcle.model.user.UserPublic
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
@@ -48,12 +50,8 @@ class ViewProfileScreenTest {
 
     val user =
         User(
-            userId = "1",
-            username = "janesmith",
-            firstName = "Jane",
-            lastName = "Smith",
-            email = "jane.smith@example.com",
-            profilePictureUrl = "http://example.com/jane.jpg")
+            UserPublic("1", "janesmith", "http://example.com/jane.jpg"),
+            UserDetails("Jane", "Smith", "jane.smith@example.com"))
 
     userViewModel = UserViewModel(mockUserRepository, mockParkingRepository)
     parkingViewModel = ParkingViewModel(mockImageRepository, mockParkingRepository)

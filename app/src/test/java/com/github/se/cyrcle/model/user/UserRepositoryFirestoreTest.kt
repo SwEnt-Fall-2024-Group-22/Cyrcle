@@ -89,7 +89,7 @@ class UserRepositoryFirestoreTest {
     `when`(mockDocumentSnapshot.toObject(User::class.java)).thenReturn(user)
 
     userRepositoryFirestore.getUserById(
-        userId = user.userId,
+        userId = user.public.userId,
         onSuccess = { assert(it == user) },
         onFailure = { fail("Expected success but got failure") })
     verify(timeout(100)) { mockDocumentReference.get() }
@@ -99,6 +99,8 @@ class UserRepositoryFirestoreTest {
   @Test
   fun addUser_callsOnSuccess() {
     `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
+    // simulate that the user already exists
+    `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
 
     userRepositoryFirestore.addUser(
         user = user,
@@ -123,7 +125,7 @@ class UserRepositoryFirestoreTest {
     `when`(mockDocumentReference.delete()).thenReturn(Tasks.forResult(null))
 
     userRepositoryFirestore.deleteUserById(
-        userId = user.userId,
+        userId = user.public.userId,
         onSuccess = { assert(true) },
         onFailure = { fail("Expected success but got failure") })
     verify(mockDocumentReference).delete()

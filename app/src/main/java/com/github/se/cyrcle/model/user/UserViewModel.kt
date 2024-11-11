@@ -8,6 +8,7 @@ import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingRepositoryFirestore
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.mapbox.maps.extension.style.expressions.dsl.generated.get
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -61,11 +62,17 @@ class UserViewModel(
   fun addUser(user: User) {
     userRepository.addUser(
         user,
-        onSuccess = {},
+        onSuccess = {
+          // set the current user by fetching the user from the database
+          // can't use the user object passed in because it doesn't have the full details of the
+          // user if the user is not a new user.
+          userRepository.getUserById(
+              user.public.userId, onSuccess = { setCurrentUser(it) }, onFailure = {})
+        },
         onFailure = { exception ->
           Log.e(
               "com.github.se.cyrcle.model.user.UserViewModel",
-              "Failed to add user: ${user.userId}",
+              "Failed to add user: ${user.public.userId}",
               exception)
         })
   }
@@ -78,11 +85,11 @@ class UserViewModel(
   fun updateUser(user: User) {
     userRepository.updateUser(
         user,
-        onSuccess = {},
+        onSuccess = { Log.d("UserViewModel", "User updated") },
         onFailure = { exception ->
           Log.e(
               "com.github.se.cyrcle.model.user.UserViewModel",
-              "Failed to update user: ${user.userId}",
+              "Failed to update user: ${user.public.userId}",
               exception)
         })
   }
@@ -94,7 +101,9 @@ class UserViewModel(
    */
   fun addFavoriteParkingToSelectedUser(parkingId: String) {
     currentUser.value?.let { user ->
-      val updatedUser = user.copy(favoriteParkings = user.favoriteParkings + parkingId)
+      val updatedDetails =
+          user.details?.copy(favoriteParkings = user.details.favoriteParkings + parkingId)
+      val updatedUser = user.copy(details = updatedDetails)
       updateUser(updatedUser)
       setCurrentUser(updatedUser)
     }
@@ -107,7 +116,9 @@ class UserViewModel(
    */
   fun removeFavoriteParkingFromSelectedUser(parkingId: String) {
     currentUser.value?.let { user ->
-      val updatedUser = user.copy(favoriteParkings = user.favoriteParkings - parkingId)
+      val updatedDetails =
+          user.details?.copy(favoriteParkings = user.details.favoriteParkings - parkingId)
+      val updatedUser = user.copy(details = updatedDetails)
       updateUser(updatedUser)
       setCurrentUser(updatedUser)
     }
@@ -115,12 +126,14 @@ class UserViewModel(
 
   /** Gets the favorite parkings of the current user and sets them in the favorite parkings state */
   fun getSelectedUserFavoriteParking() {
-    parkingRepository.getParkingsByListOfIds(
-        currentUser.value!!.favoriteParkings,
-        onSuccess = { _favoriteParkings.value = it },
-        onFailure = { exception ->
-          Log.e("UserViewModel", "Failed to fetch favorite parkings of current user", exception)
-        })
+    currentUser.value?.details?.let { details ->
+      parkingRepository.getParkingsByListOfIds(
+          details.favoriteParkings,
+          onSuccess = { _favoriteParkings.value = it },
+          onFailure = { exception ->
+            Log.e("UserViewModel", "Failed to fetch favorite parkings of current user", exception)
+          })
+    }
   }
 
   companion object {

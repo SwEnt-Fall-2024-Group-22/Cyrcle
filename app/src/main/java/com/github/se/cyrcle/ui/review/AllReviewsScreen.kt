@@ -64,9 +64,9 @@ fun AllReviewsScreen(
   val (selectedCardIndex, setSelectedCardIndex) = remember { mutableStateOf(-1) }
 
   val ownerHasReviewed =
-      if (userViewModel.currentUser.value?.userId != null) {
+      if (userViewModel.currentUser.value?.public?.userId != null) {
         reviewViewModel.parkingReviews.value.any {
-          it.owner == userViewModel.currentUser.value?.userId
+          it.owner == userViewModel.currentUser.value?.public?.userId
         }
       } else {
         false
@@ -98,7 +98,8 @@ fun AllReviewsScreen(
                           items(reviewViewModel.parkingReviews.value.size) { index ->
                             val curReview = reviewViewModel.parkingReviews.value[index]
                             userViewModel.getUserById(curReview.owner)
-                            val uidOfOwner = userViewModel.currentUser.value?.username ?: "none"
+                            val uidOfOwner =
+                                userViewModel.currentUser.value?.public?.username ?: "none"
                             if (index == selectedCardIndex) {
                               Box(
                                   modifier =
@@ -200,7 +201,7 @@ fun AllReviewsScreen(
                   }
             }
 
-        if (userViewModel.currentUser.value?.userId != null) {
+        if (userViewModel.currentUser.value?.public?.userId != null) {
           Box(
               modifier = Modifier.fillMaxSize().padding(16.dp),
               contentAlignment = Alignment.BottomEnd) {

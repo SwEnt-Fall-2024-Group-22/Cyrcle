@@ -42,12 +42,11 @@ fun SignInScreen(
   val successSignInMsg = stringResource(R.string.sign_in_successful_toast)
 
   val onAuthComplete = { user: User ->
-    Log.d("Cyrcle", "User signed in: ${user.username}")
     Toast.makeText(context, successSignInMsg, Toast.LENGTH_LONG).show()
 
     // TODO add checks if user is already exists
 
-    userViewModel.setCurrentUser(user)
+    userViewModel.addUser(user)
     navigationActions.navigateTo(TopLevelDestinations.MAP)
   }
   val onAuthFailure = { e: Exception ->

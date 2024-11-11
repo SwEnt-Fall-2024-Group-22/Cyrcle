@@ -61,10 +61,10 @@ fun ViewProfileScreen(
 ) {
   val userState by userViewModel.currentUser.collectAsState()
   var isEditing by remember { mutableStateOf(false) }
-  var firstName by remember { mutableStateOf(userState?.firstName ?: "") }
-  var lastName by remember { mutableStateOf(userState?.lastName ?: "") }
-  var username by remember { mutableStateOf(userState?.username ?: "") }
-  var profilePictureUrl by remember { mutableStateOf(userState?.profilePictureUrl ?: "") }
+  var firstName by remember { mutableStateOf(userState?.details?.firstName ?: "") }
+  var lastName by remember { mutableStateOf(userState?.details?.lastName ?: "") }
+  var username by remember { mutableStateOf(userState?.public?.username ?: "") }
+  var profilePictureUrl by remember { mutableStateOf(userState?.public?.profilePictureUrl ?: "") }
 
   val imagePickerLauncher =
       rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
@@ -101,18 +101,25 @@ fun ViewProfileScreen(
                       onSave = {
                         userViewModel.updateUser(
                             userState?.copy(
-                                firstName = firstName,
-                                lastName = lastName,
-                                username = username,
-                                profilePictureUrl = profilePictureUrl) ?: return@EditProfileContent)
-                        userViewModel.getUserById(userState?.userId ?: "")
+                                public =
+                                    userState
+                                        ?.public!!
+                                        .copy(
+                                            username = username,
+                                            profilePictureUrl = profilePictureUrl),
+                                details =
+                                    userState
+                                        ?.details
+                                        ?.copy(firstName = firstName, lastName = lastName))
+                                ?: return@EditProfileContent)
+                        userViewModel.getUserById(userState?.public!!.userId)
                         isEditing = false
                       },
                       onCancel = {
-                        firstName = userState?.firstName ?: ""
-                        lastName = userState?.lastName ?: ""
-                        username = userState?.username ?: ""
-                        profilePictureUrl = userState?.profilePictureUrl ?: ""
+                        firstName = userState?.details?.firstName ?: ""
+                        lastName = userState?.details?.lastName ?: ""
+                        username = userState?.public!!.username
+                        profilePictureUrl = userState?.public!!.profilePictureUrl
                         isEditing = false
                       })
                 } else {

@@ -1,26 +1,42 @@
 package com.github.se.cyrcle.model.user
 
 /**
- * Data class representing a user.
+ * Data class representing the public information of a user.
  *
- * @property userId Unique identifier of the user.
- * @property username Username of the user.
- * @property firstName First name of the user.
- * @property lastName Last name of the user.
- * @property email Email of the user.
- * @property profilePictureUrl URL of the profile picture of the user.
- * @property favoriteParkings List of unique identifiers of the user's favorite parkings.
+ * @property userId The unique identifier of the user.
+ * @property username The username of the user.
+ * @property profilePictureUrl The path to the profile picture of the user on the cloud storage.
+ *   (Not implemented)
  */
-data class User(
+data class UserPublic(
     val userId: String,
     val username: String,
-    val firstName: String = "",
-    val lastName: String = "",
-    val email: String,
     val profilePictureUrl: String = "",
-    val favoriteParkings: List<String> = emptyList(),
-    // val lastLoginTime: Timestamp? = null,
     // val accountCreationDate: Timestamp? = null,
     // val numberOfContributedSpots: Int = 0,
     // val userReputationScore: Int = 0
 )
+
+/**
+ * Data class representing the private information of a user.
+ *
+ * @property firstName The first name of the user.
+ * @property lastName The last name of the user.
+ * @property email The email of the user.
+ * @property favoriteParkings The list of favorite parkings of the user.
+ */
+data class UserDetails(
+    val firstName: String = "",
+    val lastName: String = "",
+    val email: String = "",
+    val favoriteParkings: List<String> = emptyList(),
+    // val lastLoginTime: Timestamp? = null,
+)
+
+/**
+ * Data class representing a user.
+ *
+ * @property public Public information of the user.
+ * @property details Private information of the user.
+ */
+data class User(val public: UserPublic, val details: UserDetails?)
