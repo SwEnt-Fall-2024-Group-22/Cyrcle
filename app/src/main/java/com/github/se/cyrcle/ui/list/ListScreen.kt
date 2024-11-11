@@ -45,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -267,7 +268,6 @@ fun FilterSection(
       }
 }
 
-
 @Composable
 fun SpotCard(
     navigationActions: NavigationActions,
@@ -276,6 +276,7 @@ fun SpotCard(
     distance: Double
 ) {
     var offsetX by remember { mutableStateOf(0f) }
+    val maxSwipeDistance = 150.dp // Half of the card's width in dp
 
     Box(
         modifier = Modifier
@@ -317,16 +318,16 @@ fun SpotCard(
                 .pointerInput(Unit) {
                     detectHorizontalDragGestures(
                         onDragEnd = {
-                            if (offsetX > 100) {
+                            if (offsetX > maxSwipeDistance.toPx() / 2) {
                                 // Swipe right action
-                            } else if (offsetX < -100) {
+                            } else if (offsetX < -maxSwipeDistance.toPx() / 2) {
                                 // Swipe left action
                             }
                             offsetX = 0f
                         }
                     ) { change, dragAmount ->
                         change.consume()
-                        offsetX += dragAmount
+                        offsetX = (offsetX + dragAmount).coerceIn(-maxSwipeDistance.toPx(), maxSwipeDistance.toPx())
                     }
                 }
                 .clickable(
