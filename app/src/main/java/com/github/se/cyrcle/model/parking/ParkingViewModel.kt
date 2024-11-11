@@ -242,8 +242,10 @@ class ParkingViewModel(
           parking,
           {
             val tile = Tile.getTileFromPoint(parking.location.center)
-            tilesToParking.value[tile] =
-                tilesToParking.value[tile]!!.map { p -> if (p.uid == parking.uid) parking else p }
+            if (tilesToParking.value[tile] != null) {
+              tilesToParking.value[tile] =
+                  tilesToParking.value[tile]!!.map { p -> if (p.uid == parking.uid) parking else p }
+            }
           },
           {})
     } else {
