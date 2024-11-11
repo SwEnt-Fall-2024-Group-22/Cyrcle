@@ -107,7 +107,8 @@ class AuthenticatorImpl @Inject constructor(private val auth: FirebaseAuth) : Au
 
           val user =
               User(
-                  UserPublic(authResult.user!!.uid, authResult.user!!.displayName!!), UserDetails())
+                  UserPublic(authResult.user!!.uid, authResult.user!!.displayName!!),
+                  UserDetails(email = authResult.user!!.email!!))
 
           onAuthComplete(user)
         }

@@ -51,7 +51,7 @@ class ViewProfileScreenTest {
     val user =
         User(
             UserPublic("1", "janesmith", "http://example.com/jane.jpg"),
-            UserDetails("Jane", "Smith", ""))
+            UserDetails("Jane", "Smith", "jane.smith@example.com"))
 
     userViewModel = UserViewModel(mockUserRepository, mockParkingRepository)
     parkingViewModel = ParkingViewModel(mockImageRepository, mockParkingRepository)

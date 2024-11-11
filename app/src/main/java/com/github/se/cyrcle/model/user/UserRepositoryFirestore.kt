@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.model.user
 
-import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -60,7 +59,7 @@ constructor(private val db: FirebaseFirestore, private val auth: FirebaseAuth) :
           val users =
               querySnapshot.documents.mapNotNull { document ->
                 val userPublic = deserializeUser(document.data!!)
-                User(userPublic!!, null)
+                User(userPublic, null)
               }
           onSuccess(users)
         }
@@ -85,19 +84,17 @@ constructor(private val db: FirebaseFirestore, private val auth: FirebaseAuth) :
                   .document(user.public.userId)
                   .collection("private")
                   .document("details")
-                  .set(user.details!!)
+                  .set(user.details)
                   .addOnSuccessListener { onSuccess() }
-                  .addOnFailureListener { onFailure(it) }
+                  .addOnFailureListener { exception -> onFailure(exception) }
             }
-            .addOnFailureListener { onFailure(it) }
+            .addOnFailureListener { exception -> onFailure(exception) }
       }
     }
   }
 
   override fun updateUser(user: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-    Log.d("UserRepositoryFirestore", "updateUser: $user")
     if (user.details == null) {
-      Log.d("UserRepositoryFirestore", "updateUser: user details are null, can't update")
       onFailure(Exception("User details are required"))
       return
     }
@@ -109,7 +106,7 @@ constructor(private val db: FirebaseFirestore, private val auth: FirebaseAuth) :
               .document(user.public.userId)
               .collection("private")
               .document("details")
-              .set(user.details!!)
+              .set(user.details)
               .addOnSuccessListener { onSuccess() }
               .addOnFailureListener { onFailure(it) }
         }
