@@ -76,6 +76,8 @@
     <string name="list_screen_price">%.2f $</string>
     <string name="list_screen_rating">Rating: %.1f</string>
     <string name="list_screen_display_only_cctv">Only display parkings with CCTV camera</string>
+    <string name="all_parkings_radius">All parkings in a radius of \n %1$d m</string>
+
 
     <!-- Zoom Controls -->
     <string name="zoom_in">Zoom In</string>

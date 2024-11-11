@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.list
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -32,7 +31,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -69,30 +67,19 @@ fun SpotListScreen(
 ) {
 
   val referencePoint = TestInstancesParking.EPFLCenter
-  val radius = remember { mutableDoubleStateOf(100.0) }
 
-  val parkingSpots by parkingViewModel.closestParkings.collectAsState()
+  val filteredParkingSpots by parkingViewModel.closestParkings.collectAsState()
 
-  var selectedProtection by remember { mutableStateOf<Set<ParkingProtection>>(emptySet()) }
-  var selectedRackTypes by remember { mutableStateOf<Set<ParkingRackType>>(emptySet()) }
-  var selectedCapacities by remember { mutableStateOf<Set<ParkingCapacity>>(emptySet()) }
-  var onlyWithCCTV by remember { mutableStateOf(false) }
+  val selectedProtection by parkingViewModel.selectedProtection.collectAsState()
+  val selectedRackTypes by parkingViewModel.selectedRackTypes.collectAsState()
+  val selectedCapacities by parkingViewModel.selectedCapacities.collectAsState()
+  val onlyWithCCTV by parkingViewModel.onlyWithCCTV.collectAsState()
 
-  // Filter the parking spots based on the selected attributes
-  val filteredParkingSpots =
-      parkingSpots.filter { parking ->
-        (selectedProtection.isEmpty() || selectedProtection.contains(parking.protection)) &&
-            (selectedRackTypes.isEmpty() || selectedRackTypes.contains(parking.rackType)) &&
-            (selectedCapacities.isEmpty() || selectedCapacities.contains(parking.capacity)) &&
-            (!onlyWithCCTV || parking.hasSecurity)
-      }
-
-  // Fetch initial parkings if the list is empty
-  LaunchedEffect(Unit) {
-    if (parkingSpots.isEmpty()) {
-      parkingViewModel.getParkingsInRadius(referencePoint, radius.doubleValue)
-    }
-  }
+  /**
+   * Set the center of the circle in the ViewModel when the screen is launched. This should be
+   * linked to the user's location in the future.
+   */
+  LaunchedEffect(Unit) { parkingViewModel.setCircleCenter(referencePoint) }
 
   Scaffold(
       modifier = Modifier.testTag("SpotListScreen"),
@@ -106,15 +93,19 @@ fun SpotListScreen(
               onAttributeSelected = { attribute ->
                 when (attribute) {
                   is ParkingProtection ->
-                      selectedProtection = toggleSelection(selectedProtection, attribute)
+                      parkingViewModel.setSelectedProtection(
+                          toggleSelection(selectedProtection, attribute))
                   is ParkingRackType ->
-                      selectedRackTypes = toggleSelection(selectedRackTypes, attribute)
+                      parkingViewModel.setSelectedRackTypes(
+                          toggleSelection(selectedRackTypes, attribute))
                   is ParkingCapacity ->
-                      selectedCapacities = toggleSelection(selectedCapacities, attribute)
+                      parkingViewModel.setSelectedCapacities(
+                          toggleSelection(selectedCapacities, attribute))
                 }
               },
               onlyWithCCTV = onlyWithCCTV,
-              onCCTVCheckedChange = { onlyWithCCTV = it })
+              onCCTVCheckedChange = { parkingViewModel.setOnlyWithCCTV(it) },
+              parkingViewModel = parkingViewModel)
 
           val listState = rememberLazyListState()
           LazyColumn(
@@ -125,12 +116,9 @@ fun SpotListScreen(
                 items(items = filteredParkingSpots) { parking ->
                   val distance = TurfMeasurement.distance(referencePoint, parking.location.center)
                   SpotCard(navigationActions, parkingViewModel, parking, distance)
-                  Log.d("ListScreen", "Filtered parking spots: $filteredParkingSpots")
-                  if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1 &&
-                      radius.doubleValue < 1000) {
-                    // This incremental solution could be improved to be dynamic and with a limit
-                    radius.doubleValue += 100
-                    parkingViewModel.getParkingsInRadius(referencePoint, radius.doubleValue)
+                  // Increment the radius when the last parking spot is reached
+                  if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1) {
+                    parkingViewModel.incrementRadius()
                   }
                 }
               }
@@ -145,21 +133,31 @@ fun FilterHeader(
     selectedCapacities: Set<ParkingCapacity>,
     onAttributeSelected: (ParkingAttribute) -> Unit,
     onlyWithCCTV: Boolean,
-    onCCTVCheckedChange: (Boolean) -> Unit
+    onCCTVCheckedChange: (Boolean) -> Unit,
+    parkingViewModel: ParkingViewModel = viewModel(factory = ParkingViewModel.Factory)
 ) {
   var showProtectionOptions by remember { mutableStateOf(false) }
   var showRackTypeOptions by remember { mutableStateOf(false) }
   var showCapacityOptions by remember { mutableStateOf(false) }
   var showFilters by remember { mutableStateOf(false) }
-
+  val radius = parkingViewModel.radius.collectAsState()
   Column(modifier = Modifier.padding(16.dp)) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-      SmallFloatingActionButton(
-          onClick = { showFilters = !showFilters },
-          icon = if (showFilters) Icons.Default.Close else Icons.Default.FilterList,
-          contentDescription = "Filter",
-          testTag = "ShowFiltersButton")
-    }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically) {
+          Text(
+              text = stringResource(R.string.all_parkings_radius, radius.value.toInt()),
+              modifier = Modifier.weight(1f),
+              style = MaterialTheme.typography.headlineMedium,
+              color = MaterialTheme.colorScheme.onSurface)
+
+          SmallFloatingActionButton(
+              onClick = { showFilters = !showFilters },
+              icon = if (showFilters) Icons.Default.Close else Icons.Default.FilterList,
+              contentDescription = "Filter",
+              testTag = "ShowFiltersButton")
+        }
 
     if (showFilters) {
       FilterSection(
