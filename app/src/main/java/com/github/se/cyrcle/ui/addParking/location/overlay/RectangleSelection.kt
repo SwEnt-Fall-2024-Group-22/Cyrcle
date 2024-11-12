@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.Location
-import com.github.se.cyrcle.model.parking.PARKING_MAX_AREA
 import com.github.se.cyrcle.ui.theme.Red
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.mapbox.maps.MapView
@@ -68,10 +67,9 @@ fun RectangleSelection(
           // Convert width to the same unit as the canvas center
           val rectSize = Size(width, height)
 
-          val listScreenCoordinates = computeScreenCoordinates(canvasCenter, width, height)
+          val listScreenCoordinates = computeCornersScreenCoordinates(canvasCenter, width, height)
           val pointsList = mapView?.mapboxMap?.coordinatesForPixels(listScreenCoordinates)
-          val area = pointsList?.let { Location(it).computeArea() } ?: 0.0
-          mapViewModel.updateIsAreaTooLarge(area > PARKING_MAX_AREA)
+          mapViewModel.updateIsAreaTooLarge(pointsList?.let { Location(it).computeArea() } ?: 0.0)
 
           if (hasDragged.value) {
             // Fill of the rectangle
@@ -109,12 +107,21 @@ fun RectangleSelection(
     }
   }
   if (locationPickerState == MapViewModel.LocationPickerState.BOTTOM_RIGHT_SET) {
-    mapViewModel.updateScreenCoordinates(computeScreenCoordinates(canvasCenter, width, height))
+    mapViewModel.updateScreenCoordinates(
+        computeCornersScreenCoordinates(canvasCenter, width, height))
     mapViewModel.updateLocationPickerState(MapViewModel.LocationPickerState.RECTANGLE_SET)
   }
 }
 
-fun computeScreenCoordinates(
+/**
+ * Compute the screen coordinates of the 4 corners of the rectangle.
+ *
+ * @param canvasCenter The center of the canvas
+ * @param width The width of the rectangle
+ * @param height The height of the rectangle
+ * @return The screen coordinates of the rectangle as a list of ScreenCoordinate
+ */
+private fun computeCornersScreenCoordinates(
     canvasCenter: Offset,
     width: Float,
     height: Float

@@ -3,6 +3,7 @@ package com.github.se.cyrcle.model.map
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.github.se.cyrcle.model.parking.Location
+import com.github.se.cyrcle.model.parking.PARKING_MAX_AREA
 import com.github.se.cyrcle.ui.map.MapConfig
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraState
@@ -99,6 +100,15 @@ class MapViewModel : ViewModel() {
   }
 
   /**
+   * Update the isAreaTooLarge state
+   *
+   * @param area the area of the selected parking
+   */
+  fun updateIsAreaTooLarge(area: Double) {
+    _isAreaTooLarge.value = area > PARKING_MAX_AREA
+  }
+
+  /**
    * Get the bottom left and top right corners of the screen in latitude and longitude coordinates.
    * The corners are calculated based on the center of the screen and the viewport dimensions. If
    * useBuffer is true, the corners are calculated with a buffer of 2x the viewport dimensions. This
@@ -143,16 +153,6 @@ class MapViewModel : ViewModel() {
       this.enabled = true
       this.locationPuck = createDefault2DPuck(true)
     }
-  }
-
-  /**
-   * Update the isAreaTooLarge state
-   *
-   * @param isAreaTooLarge the new state of the area This function is used to store the state of the
-   *   area when the user is selecting a parking area
-   */
-  fun updateIsAreaTooLarge(isAreaTooLarge: Boolean) {
-    _isAreaTooLarge.value = isAreaTooLarge
   }
 
   /**
