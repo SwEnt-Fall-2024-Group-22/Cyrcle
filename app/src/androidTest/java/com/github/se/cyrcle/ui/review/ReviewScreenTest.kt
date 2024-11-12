@@ -96,7 +96,7 @@ class ReviewScreenTest {
 
   @Test
   fun reviewScreen_addReviewButtonSaves() {
-    doNothing().`when`(mockNavigationActions).navigateTo(Screen.CARD)
+    doNothing().`when`(mockNavigationActions).navigateTo(Screen.PARKING_DETAILS)
 
     composeTestRule.setContent {
       ReviewScreen(mockNavigationActions, parkingViewModel, reviewViewModel, userViewModel)

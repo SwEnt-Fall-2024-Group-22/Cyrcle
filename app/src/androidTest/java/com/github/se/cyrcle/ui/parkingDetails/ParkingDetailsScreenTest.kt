@@ -63,7 +63,7 @@ class ParkingDetailsScreenTest {
     userViewModel = UserViewModel(userRepository, parkingRepository)
     reviewViewModel = ReviewViewModel(reviewRepository)
 
-    `when`(navigationActions.currentRoute()).thenReturn(Screen.CARD)
+    `when`(navigationActions.currentRoute()).thenReturn(Screen.PARKING_DETAILS)
   }
 
   @Test

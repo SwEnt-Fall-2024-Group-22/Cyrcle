@@ -276,7 +276,7 @@ fun SpotCard(
               .clickable(
                   onClick = {
                     parkingViewModel.selectParking(parking)
-                    navigationActions.navigateTo(Screen.CARD)
+                    navigationActions.navigateTo(Screen.PARKING_DETAILS)
                   })
               .testTag("SpotListItem"),
       colors = CardDefaults.cardColors(containerColor = Color.Transparent)) {

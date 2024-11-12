@@ -40,6 +40,7 @@ import com.github.se.cyrcle.ui.authentication.Authenticator
 import com.github.se.cyrcle.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
+import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.ConditionCheckingInputText
@@ -82,7 +83,7 @@ fun ViewProfileScreen(
         Box(Modifier.fillMaxSize().padding(innerPadding)) {
           authenticator.SignOutButton(Modifier.padding(10.dp).align(Alignment.TopEnd)) {
             userViewModel.setCurrentUser(null)
-            navigationActions.navigateTo(Route.AUTH)
+            navigationActions.navigateTo(TopLevelDestinations.AUTH)
           }
 
           Column(

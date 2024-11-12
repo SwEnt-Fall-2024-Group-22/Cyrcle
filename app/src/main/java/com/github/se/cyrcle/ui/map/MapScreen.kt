@@ -65,7 +65,6 @@ import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.maps.plugin.gestures.OnMoveListener
 import com.mapbox.maps.plugin.gestures.gestures
-import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.maps.plugin.viewport.data.FollowPuckViewportStateOptions
 import com.mapbox.maps.plugin.viewport.data.OverviewViewportStateOptions
 import com.mapbox.maps.viewannotation.annotatedLayerFeature
@@ -216,7 +215,7 @@ fun MapScreen(
                           screenCapacityString.format(parkingDeserialized.capacity.description)
                       selectButton.setOnClickListener {
                         parkingViewModel.selectParking(parkingDeserialized)
-                        navigationActions.navigateTo(Screen.CARD)
+                        navigationActions.navigateTo(Screen.PARKING_DETAILS)
                       }
                     }
                     removeViewAnnotation = true

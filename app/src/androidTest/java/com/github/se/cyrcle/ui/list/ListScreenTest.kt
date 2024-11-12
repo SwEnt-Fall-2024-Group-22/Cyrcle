@@ -94,7 +94,7 @@ class ListScreenTest {
     composeTestRule.onNodeWithTag("ParkingNbReviews", useUnmergedTree = true).assertIsNotDisplayed()
     composeTestRule.onNodeWithTag("ParkingRating", useUnmergedTree = true).assertIsNotDisplayed()
 
-    verify(mockNavigationActions).navigateTo(Screen.CARD)
+    verify(mockNavigationActions).navigateTo(Screen.PARKING_DETAILS)
     assertEquals(TestInstancesParking.parking2, parkingViewModel.selectedParking.value)
   }
 
