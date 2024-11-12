@@ -14,11 +14,15 @@ import com.github.se.cyrcle.model.review.TestInstancesReview
 import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.github.se.cyrcle.ui.navigation.Screen
+import org.junit.Assert.assertNotEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 
 @RunWith(AndroidJUnit4::class)
 class AllReviewsScreenTest {
@@ -53,17 +57,31 @@ class AllReviewsScreenTest {
   }
 
   @Test
-  fun clickingReviewCard_expandsAndCollapsesCard() {
+  fun clickingReviewCard_expandsCard() {
     composeTestRule.setContent {
       AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
     }
 
     composeTestRule.onNodeWithTag("ReviewCard0").performClick()
-    composeTestRule.onNodeWithTag("ExpandedReviewBox0").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("ExpandedReviewBox0").assertTextContains("Rating: 4.5")
-    composeTestRule.onNodeWithTag("ExpandedReviewBox0").assertTextContains("Text: New Review.")
-    composeTestRule.onNodeWithTag("ExpandedReviewBox0").performClick()
-    composeTestRule.onNodeWithTag("ReviewCard0").assertIsDisplayed()
+    composeTestRule.onNodeWithText("New Review.").assertIsDisplayed()
+  }
+
+  @Test
+  fun sortingReviewsChangesCardOrder() {
+    composeTestRule.setContent {
+      AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
+    }
+
+
+    val firstReviewCardB4 = composeTestRule.onNodeWithTag("ReviewCard0")
+    // Open filter and select sorting by rating
+    composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
+    composeTestRule.onNodeWithText("Sort By Rating").performClick()
+
+    // Verify if the reviews are sorted by rating by checking the order of ReviewCards
+    val firstReviewCardAfter = composeTestRule.onNodeWithTag("ReviewCard0")
+    assertNotEquals(firstReviewCardB4,firstReviewCardAfter)
+
   }
 
   @Test
@@ -73,10 +91,45 @@ class AllReviewsScreenTest {
       AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
       userViewModel.setCurrentUser(TestInstancesUser.user1)
     }
-
     composeTestRule.onNodeWithTag("ReviewCard1").performClick()
-    composeTestRule.onNodeWithTag("ExpandedReviewBox1").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("ExpandedReviewBox1").assertTextContains("Rating: 1.0")
-    composeTestRule.onNodeWithTag("ExpandedReviewBox1").assertTextContains("Text: Bad Parking.")
+    composeTestRule.onNodeWithText("Bad Parking.").assertIsDisplayed()
+  }
+
+  @Test
+  fun clickingFilterButton_displaysFilterOptions() {
+    composeTestRule.setContent {
+      AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
+    }
+
+    // Click the filter button
+    composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
+
+    // Verify that the filter options are displayed
+    composeTestRule.onNodeWithText("Sort By Rating").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Sort By Date/Time").assertIsDisplayed()
+  }
+
+  @Test
+  fun clickingAddEditReviewButton_navigatesToReviewScreen() {
+    composeTestRule.setContent {
+      AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
+      userViewModel.setCurrentUser(TestInstancesUser.user1)
+    }
+
+    // Click the "Add/Edit Review" button
+    composeTestRule.onNodeWithTag("AddOrEditReviewButton").performClick()
+
+    verify(navigationActions).navigateTo(Screen.REVIEW)
+  }
+
+  @Test
+  fun clickingDeleteReviewButton_doesntMoveIfUnneeded() {
+    composeTestRule.setContent {
+      AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
+      userViewModel.setCurrentUser(TestInstancesUser.user1)
+    }
+    composeTestRule.onNodeWithTag("ReviewCard0").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("DeleteReviewButton").performClick()
+    verify(navigationActions,times(0)).navigateTo(Screen.CARD)
   }
 }

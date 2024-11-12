@@ -33,18 +33,21 @@ class ReviewViewModel(private val reviewRepository: ReviewRepository) : ViewMode
 
   fun updateReview(review: Review) {
     reviewRepository.updateReview(
-      review, {}, { Log.e("ReviewViewModel", "Error adding review", it) })
+        review, {}, { Log.e("ReviewViewModel", "Error adding review", it) })
   }
 
   fun getReviewsByParking(parking: String) {
     reviewRepository.getReviewByParking(
-      parking,
-      { reviews -> _parkingReviews.value = reviews },
-      { Log.e("ReviewViewModel", "Error getting reviews", it) })
+        parking,
+        { reviews -> _parkingReviews.value = reviews },
+        { Log.e("ReviewViewModel", "Error getting reviews", it) })
   }
 
-  fun deleteReviewById(review: Review){
-    reviewRepository.deleteReviewById(review.uid,{Log.e("ReviewViewModel", "REVIEW DELETED") },{Log.e("ReviewViewModel", "Error deleting reviews", it) })
+  fun deleteReviewById(review: Review) {
+    reviewRepository.deleteReviewById(
+        review.uid,
+        { Log.e("ReviewViewModel", "REVIEW DELETED") },
+        { Log.e("ReviewViewModel", "Error deleting reviews", it) })
   }
 
   /**
@@ -58,11 +61,11 @@ class ReviewViewModel(private val reviewRepository: ReviewRepository) : ViewMode
   // create factory (imported from bootcamp)
   companion object {
     val Factory: ViewModelProvider.Factory =
-      object : ViewModelProvider.Factory {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-          return ReviewViewModel(ReviewRepositoryFirestore(FirebaseFirestore.getInstance())) as T
+        object : ViewModelProvider.Factory {
+          @Suppress("UNCHECKED_CAST")
+          override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return ReviewViewModel(ReviewRepositoryFirestore(FirebaseFirestore.getInstance())) as T
+          }
         }
-      }
   }
 }
