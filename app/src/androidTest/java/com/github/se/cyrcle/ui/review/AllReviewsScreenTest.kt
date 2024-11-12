@@ -72,7 +72,6 @@ class AllReviewsScreenTest {
       AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
     }
 
-
     val firstReviewCardB4 = composeTestRule.onNodeWithTag("ReviewCard0")
     // Open filter and select sorting by rating
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
@@ -80,8 +79,7 @@ class AllReviewsScreenTest {
 
     // Verify if the reviews are sorted by rating by checking the order of ReviewCards
     val firstReviewCardAfter = composeTestRule.onNodeWithTag("ReviewCard0")
-    assertNotEquals(firstReviewCardB4,firstReviewCardAfter)
-
+    assertNotEquals(firstReviewCardB4, firstReviewCardAfter)
   }
 
   @Test
@@ -130,6 +128,6 @@ class AllReviewsScreenTest {
     }
     composeTestRule.onNodeWithTag("ReviewCard0").assertIsDisplayed()
     composeTestRule.onNodeWithTag("DeleteReviewButton").performClick()
-    verify(navigationActions,times(0)).navigateTo(Screen.CARD)
+    verify(navigationActions, times(0)).navigateTo(Screen.CARD)
   }
 }

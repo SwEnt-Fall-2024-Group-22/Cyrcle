@@ -134,8 +134,7 @@ fun ReviewScreen(
                     val sliderToValue = (sliderValue * 100).toInt() / 100.0
 
                     if (!ownerHasReviewed) {
-                      parkingViewModel.updateReviewScore(
-                          newScore = sliderToValue, parking = selectedParking, isNewReview = true)
+                      parkingViewModel.handleNewReview(newScore = sliderToValue)
                       reviewViewModel.addReview(
                           Review(
                               owner = userViewModel.currentUser.value?.public?.userId ?: "default",
@@ -144,12 +143,8 @@ fun ReviewScreen(
                               rating = sliderToValue,
                               uid = reviewViewModel.getNewUid()))
                     } else {
-                      parkingViewModel.updateReviewScore(
-                          newScore = sliderToValue,
-                          oldScore = matchingReview?.rating!!,
-                          parking = selectedParking,
-                          isNewReview = false)
-
+                      parkingViewModel.handleReviewUpdate(
+                          newScore = sliderToValue, oldScore = matchingReview?.rating!!)
                       reviewViewModel.updateReview(
                           Review(
                               owner = userViewModel.currentUser.value?.public?.userId ?: "default",

@@ -7,16 +7,19 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.mapbox.geojson.Point
+import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-const val KM_TO_METERS = 1000.0
 const val DEFAULT_RADIUS = 100.0
 const val MAX_RADIUS = 1000.0
 const val RADIUS_INCREMENT = 100.0
 const val MIN_NB_PARKINGS = 10
+
+const val PARKING_MAX_AREA = 1000.0
+
 /**
  * ViewModel for the Parking feature.
  *
@@ -227,6 +230,40 @@ class ParkingViewModel(
    * @param newScore: score of the new review to add
    * @param parking: Parking to update (selectedParking by default, should never be null)
    */
+
+  /**
+   * Updates the list of closest parkings.
+   *
+   * @param nbRequestLeft: number of tiles left to fetch the parkings from. If nbRequestLeft is 0,
+   *   the function will update the closest parkings and if the result is empty, it will increment
+   *   the radius.
+   */
+  private fun updateClosestParkings(nbRequestLeft: Int) {
+    if (_circleCenter.value == null || nbRequestLeft != 0) return // avoid updating if not ready
+    _closestParkings.value =
+        _rectParkings.value
+            .filter { parking ->
+              TurfMeasurement.distance(
+                  _circleCenter.value!!, parking.location.center, TurfConstants.UNIT_METERS) <=
+                  _radius.value
+            }
+            .sortedBy { parking ->
+              TurfMeasurement.distance(_circleCenter.value!!, parking.location.center)
+            }
+            .filter { parking ->
+              (_selectedProtection.value.isEmpty() ||
+                  _selectedProtection.value.contains(parking.protection)) &&
+                  (selectedRackTypes.value.isEmpty() ||
+                      _selectedRackTypes.value.contains(parking.rackType)) &&
+                  (_selectedCapacities.value.isEmpty() ||
+                      _selectedCapacities.value.contains(parking.capacity)) &&
+                  (!_onlyWithCCTV.value || parking.hasSecurity)
+            }
+    if (_closestParkings.value.size < MIN_NB_PARKINGS || _radius.value == MAX_RADIUS) {
+      incrementRadius()
+    }
+  }
+
   fun handleReviewDeletion(parking: Parking = selectedParking.value!!, newScore: Double) {
     parking.avgScore =
         if (parking.nbReviews >= 2) {
@@ -263,38 +300,6 @@ class ParkingViewModel(
     val delta = if (parking.nbReviews != 0) (newScore - oldScore) / parking.nbReviews else 0.0
     parking.avgScore += delta
     parkingRepository.updateParking(parking, {}, {})
-  }
-
-  /**
-   * Updates the list of closest parkings.
-   *
-   * @param nbRequestLeft: number of tiles left to fetch the parkings from. If nbRequestLeft is 0,
-   *   the function will update the closest parkings and if the result is empty, it will increment
-   *   the radius.
-   */
-  private fun updateClosestParkings(nbRequestLeft: Int) {
-    if (_circleCenter.value == null || nbRequestLeft != 0) return // avoid updating if not ready
-    _closestParkings.value =
-        _rectParkings.value
-            .filter { parking ->
-              TurfMeasurement.distance(_circleCenter.value!!, parking.location.center) *
-                  KM_TO_METERS <= _radius.value
-            }
-            .sortedBy { parking ->
-              TurfMeasurement.distance(_circleCenter.value!!, parking.location.center)
-            }
-            .filter { parking ->
-              (_selectedProtection.value.isEmpty() ||
-                  _selectedProtection.value.contains(parking.protection)) &&
-                  (selectedRackTypes.value.isEmpty() ||
-                      _selectedRackTypes.value.contains(parking.rackType)) &&
-                  (_selectedCapacities.value.isEmpty() ||
-                      _selectedCapacities.value.contains(parking.capacity)) &&
-                  (!_onlyWithCCTV.value || parking.hasSecurity)
-            }
-    if (_closestParkings.value.size < MIN_NB_PARKINGS || _radius.value == MAX_RADIUS) {
-      incrementRadius()
-    }
   }
 
   // create factory (imported from bootcamp)
