@@ -32,11 +32,11 @@ class AllReviewsScreenTest {
 
   @Before
   fun setUp() {
-    parkingViewModel.selectParking(TestInstancesParking.parking2)
     reviewViewModel.addReview(TestInstancesReview.review4)
     reviewViewModel.addReview(TestInstancesReview.review3)
     reviewViewModel.addReview(TestInstancesReview.review2)
     reviewViewModel.addReview(TestInstancesReview.review1)
+    parkingViewModel.selectParking(TestInstancesParking.parking2)
   }
 
   @Test
@@ -45,7 +45,6 @@ class AllReviewsScreenTest {
     composeTestRule.setContent {
       AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
       userViewModel.setCurrentUser(TestInstancesUser.user1)
-      parkingViewModel.selectParking(TestInstancesParking.parking1)
     }
 
     composeTestRule.onNodeWithTag("AllReviewsScreenBox").assertIsDisplayed()
@@ -57,8 +56,6 @@ class AllReviewsScreenTest {
   fun clickingReviewCard_expandsAndCollapsesCard() {
     composeTestRule.setContent {
       AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
-      userViewModel.setCurrentUser(TestInstancesUser.user1)
-      parkingViewModel.selectParking(TestInstancesParking.parking1)
     }
 
     composeTestRule.onNodeWithTag("ReviewCard0").performClick()
@@ -75,7 +72,6 @@ class AllReviewsScreenTest {
     composeTestRule.setContent {
       AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
       userViewModel.setCurrentUser(TestInstancesUser.user1)
-      parkingViewModel.selectParking(TestInstancesParking.parking1)
     }
 
     composeTestRule.onNodeWithTag("ReviewCard1").performClick()

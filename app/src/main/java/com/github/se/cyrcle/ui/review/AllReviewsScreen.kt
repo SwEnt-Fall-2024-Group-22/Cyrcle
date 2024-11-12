@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
@@ -19,7 +20,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -57,27 +61,30 @@ fun AllReviewsScreen(
     reviewViewModel: ReviewViewModel,
     userViewModel: UserViewModel
 ) {
-  val selectedParking =
-      parkingViewModel.selectedParking.collectAsState().value
-          ?: return Text(text = "No parking selected. Should not happen")
 
-  val (selectedCardIndex, setSelectedCardIndex) = remember { mutableStateOf(-1) }
+  val selectedParking by parkingViewModel.selectedParking.collectAsState()
+  val reviewsList by reviewViewModel.parkingReviews.collectAsState()
+  val ownerHasReviewed = remember { mutableStateOf(false) }
+  val (selectedCardIndex, setSelectedCardIndex) = remember { mutableIntStateOf(-1) }
 
-  val ownerHasReviewed =
-      if (userViewModel.currentUser.value?.public?.userId != null) {
-        reviewViewModel.parkingReviews.value.any {
-          it.owner == userViewModel.currentUser.value?.public?.userId
-        }
-      } else {
-        false
-      }
+  // When the screen is composed, clear the reviews and fetch the reviews for the selected parking
+  LaunchedEffect(Unit) {
+    reviewViewModel.clearReviews()
+    reviewViewModel.getReviewsByParking(selectedParking!!.uid)
+  }
+  // When the reviewsList changes (When they are done being fetched), check if the owner has
+  // reviewed the parking
+  LaunchedEffect(reviewsList) {
+    ownerHasReviewed.value =
+        reviewsList.any { it.owner == userViewModel.currentUser.value?.public?.userId }
+  }
 
   Scaffold(
       topBar = {
         TopAppBar(
             navigationActions,
             stringResource(R.string.all_review_title)
-                .format(selectedParking.optName ?: stringResource(R.string.default_parking_name)))
+                .format(selectedParking?.optName ?: stringResource(R.string.default_parking_name)))
       },
       modifier = Modifier.testTag("AllReviewsScreen")) {
         Box(
@@ -94,24 +101,25 @@ fun AllReviewsScreen(
                             Modifier.fillMaxWidth()
                                 .padding(horizontal = 16.dp)
                                 .testTag("ReviewList")) {
-                          reviewViewModel.getReviewsByParking(selectedParking.uid)
-                          items(reviewViewModel.parkingReviews.value.size) { index ->
-                            val curReview = reviewViewModel.parkingReviews.value[index]
-                            userViewModel.getUserById(curReview.owner)
-                            val uidOfOwner =
-                                userViewModel.currentUser.value?.public?.username ?: "none"
-                            if (index == selectedCardIndex) {
+                          items(items = reviewsList) { curReview ->
+                            val index = reviewsList.indexOf(curReview)
+                            val defaultUsername = stringResource(R.string.undefined_username)
+                            val uidOfOwner = remember { mutableStateOf(defaultUsername) }
+                            userViewModel.getUserById(curReview.owner) {
+                              uidOfOwner.value = it.public.username
+                            }
+                            if (selectedCardIndex == reviewsList.indexOf(curReview)) {
                               Box(
                                   modifier =
                                       Modifier.fillMaxWidth(2f)
                                           .padding(8.dp)
                                           .background(MaterialTheme.colorScheme.secondaryContainer)
                                           .padding(16.dp)
-                                          .testTag("ExpandedReviewBox$index")
+                                          .testTag("ExpandedReviewBox$selectedCardIndex")
                                           .clickable { setSelectedCardIndex(-1) }) {
                                     Column {
                                       Text(
-                                          text = "Owner: $uidOfOwner",
+                                          text = "Owner: ${uidOfOwner.value}",
                                           fontWeight = FontWeight.Medium,
                                           color = MaterialTheme.colorScheme.onSecondaryContainer,
                                           style = MaterialTheme.typography.bodyMedium,
@@ -161,7 +169,7 @@ fun AllReviewsScreen(
                                                 .padding(16.dp)
                                                 .testTag("ReviewCardContent$index")) {
                                           Text(
-                                              text = "Owner: $uidOfOwner",
+                                              text = "Owner: ${uidOfOwner.value}",
                                               fontWeight = FontWeight.Medium,
                                               color =
                                                   MaterialTheme.colorScheme.onSecondaryContainer,
@@ -209,7 +217,7 @@ fun AllReviewsScreen(
                     onClick = { navigationActions.navigateTo(Screen.REVIEW) },
                     containerColor = MaterialTheme.colorScheme.primary) {
                       Text(
-                          text = if (ownerHasReviewed) "Edit Review" else "Add Review",
+                          text = if (ownerHasReviewed.value) "Edit Review" else "Add Review",
                           color = MaterialTheme.colorScheme.onPrimary,
                           style = MaterialTheme.typography.bodyMedium,
                           fontWeight = FontWeight.Bold)

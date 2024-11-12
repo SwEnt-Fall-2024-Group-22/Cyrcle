@@ -58,6 +58,17 @@ class UserViewModelTest {
     // Check if the user was fetched from the repository
     verify(userRepository).getUserById(eq("user1"), any(), any())
   }
+  // Check that the user returned is the correct one
+  // and that onSuccess is called.
+  @Test
+  fun getUserBydWithCallbackTest() {
+    `when`(userRepository.getUserById(any(), any(), any())).thenAnswer { invocation ->
+      val onSuccess = invocation.arguments[1] as (User) -> Unit
+      onSuccess(TestInstancesUser.user1)
+    }
+    userViewModel.getUserById("user1") { assert(it == TestInstancesUser.user1) }
+    verify(userRepository).getUserById(eq("user1"), any(), any())
+  }
 
   @Test
   fun updateUserTest() {

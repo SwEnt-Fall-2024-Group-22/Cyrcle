@@ -55,6 +55,24 @@ class UserViewModel(
   }
 
   /**
+   * Gets a user by ID from the Firestore database and calls the onSuccess callback with the user.
+   *
+   * @param userId the ID of the user to get
+   * @param onSuccess the callback to call with the user
+   */
+  fun getUserById(userId: String, onSuccess: (User) -> Unit) {
+    userRepository.getUserById(
+        userId,
+        onSuccess = { onSuccess(it) },
+        onFailure = { exception ->
+          Log.e(
+              "com.github.se.cyrcle.model.user.UserViewModel",
+              "Failed to fetch user by ID: $userId",
+              exception)
+        })
+  }
+
+  /**
    * Adds a user to the Firestore database.
    *
    * @param user the user to add

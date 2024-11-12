@@ -238,7 +238,16 @@ class ParkingViewModel(
           (100 * ((parking.avgScore * parking.nbReviews) + newScore) / (parking.nbReviews + 1))
               .toInt() / 100.00
       parking.nbReviews += 1
-      parkingRepository.updateParking(parking, {}, {})
+      parkingRepository.updateParking(
+          parking,
+          {
+            val tile = Tile.getTileFromPoint(parking.location.center)
+            if (tilesToParking.value[tile] != null) {
+              tilesToParking.value[tile] =
+                  tilesToParking.value[tile]!!.map { p -> if (p.uid == parking.uid) parking else p }
+            }
+          },
+          {})
     } else {
       val delta = if (parking.nbReviews != 0) (oldScore - newScore) / parking.nbReviews else 0.0
       parking.avgScore += delta
