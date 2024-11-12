@@ -20,13 +20,21 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.map.MapViewModel
+import com.github.se.cyrcle.model.parking.Location
+import com.github.se.cyrcle.ui.theme.Red
 import com.github.se.cyrcle.ui.theme.atoms.Text
+import com.mapbox.maps.MapView
 import com.mapbox.maps.ScreenCoordinate
 
 /** This composable is used to draw a rectangle on the map to select a region. */
 @Composable
-fun RectangleSelection(mapViewModel: MapViewModel, paddingValues: PaddingValues) {
+fun RectangleSelection(
+    mapViewModel: MapViewModel,
+    paddingValues: PaddingValues,
+    mapView: MapView?
+) {
   val locationPickerState by mapViewModel.locationPickerState.collectAsState()
+  val isAreaTooLarge by mapViewModel.isAreaTooLarge.collectAsState()
   val center = Offset(0.5f, 0.5f)
   var touchPosition by remember { mutableStateOf(Offset.Unspecified) }
   val hasDragged = remember { mutableStateOf(false) }
@@ -56,15 +64,25 @@ fun RectangleSelection(mapViewModel: MapViewModel, paddingValues: PaddingValues)
           }
           width = touchPosition.x - canvasCenter.x
           height = touchPosition.y - canvasCenter.y
-          // Convert width o the same unit as the canvas center
+          // Convert width to the same unit as the canvas center
           val rectSize = Size(width, height)
+
+          val listScreenCoordinates = computeCornersScreenCoordinates(canvasCenter, width, height)
+          val pointsList = mapView?.mapboxMap?.coordinatesForPixels(listScreenCoordinates)
+          mapViewModel.updateIsAreaTooLarge(pointsList?.let { Location(it).computeArea() } ?: 0.0)
+
           if (hasDragged.value) {
+            // Fill of the rectangle
             drawRect(
-                color = Color(0xFF22799B).copy(alpha = 0.7f),
+                color =
+                    if (isAreaTooLarge) Red.copy(alpha = 0.5f)
+                    else Color(0xFF22799B).copy(alpha = 0.7f),
                 topLeft = canvasCenter,
                 size = rectSize)
+
+            // Outline of the rectangle
             drawRect(
-                color = Color(0xFF22799B),
+                color = if (isAreaTooLarge) Red else Color(0xFF22799B),
                 topLeft = canvasCenter,
                 size = rectSize,
                 style = Stroke(width = 2f))
@@ -89,15 +107,30 @@ fun RectangleSelection(mapViewModel: MapViewModel, paddingValues: PaddingValues)
     }
   }
   if (locationPickerState == MapViewModel.LocationPickerState.BOTTOM_RIGHT_SET) {
-    // get all four coordinates of the rectangle
-    val topLeft = ScreenCoordinate((canvasCenter.x).toDouble(), (canvasCenter.y).toDouble())
-    val topRight =
-        ScreenCoordinate((canvasCenter.x + width).toDouble(), (canvasCenter.y).toDouble())
-    val bottomRight =
-        ScreenCoordinate((canvasCenter.x + width).toDouble(), (canvasCenter.y + height).toDouble())
-    val bottomLeft =
-        ScreenCoordinate((canvasCenter.x).toDouble(), (canvasCenter.y + height).toDouble())
-    mapViewModel.updateScreenCoordinates(listOf(topLeft, topRight, bottomRight, bottomLeft))
+    mapViewModel.updateScreenCoordinates(
+        computeCornersScreenCoordinates(canvasCenter, width, height))
     mapViewModel.updateLocationPickerState(MapViewModel.LocationPickerState.RECTANGLE_SET)
   }
+}
+
+/**
+ * Compute the screen coordinates of the 4 corners of the rectangle.
+ *
+ * @param canvasCenter The center of the canvas
+ * @param width The width of the rectangle
+ * @param height The height of the rectangle
+ * @return The screen coordinates of the rectangle as a list of ScreenCoordinate
+ */
+private fun computeCornersScreenCoordinates(
+    canvasCenter: Offset,
+    width: Float,
+    height: Float
+): List<ScreenCoordinate> {
+  val topLeft = ScreenCoordinate((canvasCenter.x).toDouble(), (canvasCenter.y).toDouble())
+  val topRight = ScreenCoordinate((canvasCenter.x + width).toDouble(), (canvasCenter.y).toDouble())
+  val bottomRight =
+      ScreenCoordinate((canvasCenter.x + width).toDouble(), (canvasCenter.y + height).toDouble())
+  val bottomLeft =
+      ScreenCoordinate((canvasCenter.x).toDouble(), (canvasCenter.y + height).toDouble())
+  return listOf(topLeft, topRight, bottomRight, bottomLeft)
 }

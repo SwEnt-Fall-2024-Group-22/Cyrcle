@@ -3,6 +3,7 @@ package com.github.se.cyrcle.model.map
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.github.se.cyrcle.model.parking.Location
+import com.github.se.cyrcle.model.parking.PARKING_MAX_AREA
 import com.github.se.cyrcle.ui.map.MapConfig
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraState
@@ -30,6 +31,9 @@ class MapViewModel : ViewModel() {
 
   private val _isTrackingModeEnable = MutableStateFlow(true)
   val isTrackingModeEnable: StateFlow<Boolean> = _isTrackingModeEnable
+
+  private val _isAreaTooLarge: MutableStateFlow<Boolean> = MutableStateFlow(false)
+  val isAreaTooLarge: StateFlow<Boolean> = _isAreaTooLarge
 
   /**
    * Update the state of the location picker, This state is used to determine which steps of the
@@ -93,6 +97,15 @@ class MapViewModel : ViewModel() {
    */
   fun updateLocation(location: Location?) {
     _selectedLocation.value = location
+  }
+
+  /**
+   * Update the isAreaTooLarge state
+   *
+   * @param area the area of the selected parking
+   */
+  fun updateIsAreaTooLarge(area: Double) {
+    _isAreaTooLarge.value = area > PARKING_MAX_AREA
   }
 
   /**

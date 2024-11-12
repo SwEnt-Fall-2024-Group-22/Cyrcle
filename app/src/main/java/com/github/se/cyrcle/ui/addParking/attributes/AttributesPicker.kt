@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.addParking.attributes
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,6 +37,7 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -128,9 +130,8 @@ fun AttributesPicker(
       modifier = Modifier.testTag("AttributesPickerScreen"),
       topBar = { AttributePickerTopBar(mapViewModel, title) },
       bottomBar = {
-        BottomBarAddAttr(navigationActions) {
-          if (areInputsValid(title.value, description.value)) onSubmit()
-        }
+        val validInputs = areInputsValid(title.value, description.value)
+        BottomBarAddAttr(navigationActions, validInputs) { onSubmit() }
       }) { padding ->
         // Apply screen-dimension-scaled padding for consistent spacing
         val scaledPaddingValues =
@@ -223,8 +224,14 @@ private fun scaledPadding(
       bottom = padding.calculateBottomPadding() * verticalScaleFactor)
 }
 
+private const val s = "Please fill in all fields appropriately"
+
 @Composable
-fun BottomBarAddAttr(navigationActions: NavigationActions, onSubmit: () -> Unit) {
+fun BottomBarAddAttr(
+    navigationActions: NavigationActions,
+    validInputs: Boolean,
+    onSubmit: () -> Unit
+) {
   Box(Modifier.background(Color.White).testTag("AttributesPickerBottomBar")) {
     Row(
         Modifier.fillMaxWidth().wrapContentHeight().padding(16.dp).background(Color.White),
@@ -246,13 +253,19 @@ fun BottomBarAddAttr(navigationActions: NavigationActions, onSubmit: () -> Unit)
               color = MaterialTheme.colorScheme.primary,
               modifier = Modifier.height(32.dp).width(1.dp),
               thickness = 2.dp)
+
+          val toast =
+              Toast.makeText(
+                  LocalContext.current,
+                  stringResource(R.string.attributes_picker_bottom_bar_submit_button_toast),
+                  Toast.LENGTH_SHORT)
           Button(
-              onClick = { onSubmit() },
+              onClick = { if (validInputs) onSubmit() else toast.show() },
               modifier = Modifier.testTag("submitButton"),
               colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
                 Text(
                     stringResource(R.string.attributes_picker_bottom_bar_submit_button),
-                    color = MaterialTheme.colorScheme.primary,
+                    color = if (validInputs) MaterialTheme.colorScheme.primary else Color.Gray,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center)
               }
