@@ -1,6 +1,8 @@
 package com.github.se.cyrcle.ui.review
 
 import android.annotation.SuppressLint
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -43,17 +45,162 @@ import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Locale
+import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
+import com.google.firebase.auth.FirebaseAuth
+
 
 fun Timestamp?.toFormattedDate(): String {
-  return if (this != null) {
-    val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-    dateFormat.format(this.toDate())
-  } else {
-    "Date not available"
-  }
+    return if (this != null) {
+        val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+        dateFormat.format(this.toDate())
+    } else {
+        "Date not available"
+    }
 }
 
-@SuppressLint("StateFlowValueCalledInComposition", "Range")
+enum class ReviewSortingOption {
+    Rating,
+    DateTime
+}
+@Composable
+fun FilterSection(
+    title: String,
+    isExpanded: Boolean,
+    onToggle: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    Column(
+        modifier =
+        Modifier.padding(8.dp)
+            .border(1.dp, Color.Gray, shape = MaterialTheme.shapes.medium)
+            .background(MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.medium)
+            .padding(8.dp)) {
+        com.github.se.cyrcle.ui.theme.atoms.Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.clickable(onClick = onToggle).padding(8.dp).fillMaxWidth(),
+            color = MaterialTheme.colorScheme.primary,
+            testTag = title
+        )
+
+        if (isExpanded) {
+            content()
+        }
+    }
+}
+@Composable
+fun FilterHeader(
+    selectedSortingOption: ReviewSortingOption,
+    onSortingOptionSelected: (ReviewSortingOption) -> Unit
+) {
+    var showFilters by remember { mutableStateOf(false) }
+
+    Column(modifier = Modifier.padding(16.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Sort Reviews", // "Sort Reviews" or similar title
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            SmallFloatingActionButton(
+                onClick = { showFilters = !showFilters },
+                icon = if (showFilters) Icons.Default.Close else Icons.Default.FilterList,
+                contentDescription = "Filter",
+                testTag = "ShowFiltersButton"
+            )
+        }
+
+        if (showFilters) {
+            FilterSection(
+                title = "Sort Reviews", // "Sort Reviews" title
+                isExpanded = true,
+                onToggle = { /* No toggle needed for always-visible sorting options */ }
+            ) {
+                SortingOptionSelector(
+                    selectedSortingOption = selectedSortingOption,
+                    onOptionSelected = onSortingOptionSelected
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun SortingOptionSelector(
+    selectedSortingOption: ReviewSortingOption,
+    onOptionSelected: (ReviewSortingOption) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp)
+                .clickable { onOptionSelected(ReviewSortingOption.Rating) }
+                .background(
+                    color = if (selectedSortingOption == ReviewSortingOption.Rating)
+                        MaterialTheme.colorScheme.secondaryContainer
+                    else Color.Transparent,
+                    shape = MaterialTheme.shapes.small
+                )
+                .padding(12.dp)
+        ) {
+            Text(
+                text = "Sort By Rating",
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (selectedSortingOption == ReviewSortingOption.Rating)
+                    MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurface
+            )
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp)
+                .clickable { onOptionSelected(ReviewSortingOption.DateTime) }
+                .background(
+                    color = if (selectedSortingOption == ReviewSortingOption.DateTime)
+                        MaterialTheme.colorScheme.secondaryContainer
+                    else Color.Transparent,
+                    shape = MaterialTheme.shapes.small
+                )
+                .padding(12.dp)
+        ) {
+            Text(
+                text = "Sort By Date/Time",
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (selectedSortingOption == ReviewSortingOption.DateTime)
+                    MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurface
+            )
+        }
+    }
+}
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun AllReviewsScreen(
     navigationActions: NavigationActions,
@@ -61,168 +208,188 @@ fun AllReviewsScreen(
     reviewViewModel: ReviewViewModel,
     userViewModel: UserViewModel
 ) {
+    val selectedParking by parkingViewModel.selectedParking.collectAsState()
+    val reviewsList by reviewViewModel.parkingReviews.collectAsState()
+    val ownerHasReviewed = remember { mutableStateOf(false) }
+    var selectedCardIndex by remember { mutableStateOf(-1) }
+    val context = LocalContext.current
+    var selectedSortingOption by remember { mutableStateOf(ReviewSortingOption.DateTime) }
 
-  val selectedParking by parkingViewModel.selectedParking.collectAsState()
-  val reviewsList by reviewViewModel.parkingReviews.collectAsState()
-  val ownerHasReviewed = remember { mutableStateOf(false) }
-  val (selectedCardIndex, setSelectedCardIndex) = remember { mutableIntStateOf(-1) }
+    LaunchedEffect(Unit) {
+        reviewViewModel.clearReviews()
+        reviewViewModel.getReviewsByParking(selectedParking!!.uid)
+    }
 
-  // When the screen is composed, clear the reviews and fetch the reviews for the selected parking
-  LaunchedEffect(Unit) {
-    reviewViewModel.clearReviews()
-    reviewViewModel.getReviewsByParking(selectedParking!!.uid)
-  }
-  // When the reviewsList changes (When they are done being fetched), check if the owner has
-  // reviewed the parking
-  LaunchedEffect(reviewsList) {
-    ownerHasReviewed.value =
-        reviewsList.any { it.owner == userViewModel.currentUser.value?.public?.userId }
-  }
+    LaunchedEffect(reviewsList) {
+        ownerHasReviewed.value =
+            reviewsList.any { it.owner == userViewModel.currentUser.value?.public?.userId }
+    }
 
-  Scaffold(
-      topBar = {
-        TopAppBar(
-            navigationActions,
-            stringResource(R.string.all_review_title)
-                .format(selectedParking?.optName ?: stringResource(R.string.default_parking_name)))
-      },
-      modifier = Modifier.testTag("AllReviewsScreen")) {
+    // Sort reviews based on the selected sorting option
+    val sortedReviews = remember(reviewsList, selectedSortingOption) {
+        when (selectedSortingOption) {
+            ReviewSortingOption.DateTime -> reviewsList.sortedByDescending { it.time?.nanoseconds }
+            ReviewSortingOption.Rating -> reviewsList.sortedByDescending { it.rating }
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                navigationActions,
+                stringResource(R.string.all_review_title)
+                    .format(selectedParking?.optName ?: stringResource(R.string.default_parking_name))
+            )
+        },
+        modifier = Modifier.testTag("AllReviewsScreen")
+    ) { innerPadding ->
         Box(
-            modifier =
-                Modifier.fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .testTag("AllReviewsScreenBox")) {
-              Column(
-                  modifier = Modifier.fillMaxSize().padding(it),
-                  horizontalAlignment = Alignment.CenterHorizontally,
-                  verticalArrangement = Arrangement.SpaceBetween) {
-                    LazyColumn(
-                        modifier =
-                            Modifier.fillMaxWidth()
-                                .padding(horizontal = 16.dp)
-                                .testTag("ReviewList")) {
-                          items(items = reviewsList) { curReview ->
-                            val index = reviewsList.indexOf(curReview)
-                            val defaultUsername = stringResource(R.string.undefined_username)
-                            val uidOfOwner = remember { mutableStateOf(defaultUsername) }
-                            userViewModel.getUserById(curReview.owner) {
-                              uidOfOwner.value = it.public.username
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .testTag("AllReviewsScreenBox")
+                .padding(innerPadding)
+        ) {
+            Column {
+                // Add the FilterHeader here
+                FilterHeader(
+                    selectedSortingOption = selectedSortingOption,
+                    onSortingOptionSelected = { selectedOption ->
+                        selectedSortingOption = selectedOption
+                    }
+                )
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .testTag("ReviewList")
+                ) {
+                    items(items = sortedReviews) { curReview ->
+                        val index = sortedReviews.indexOf(curReview)
+                        val isExpanded = selectedCardIndex == index
+                        val cardHeight by animateDpAsState(if (isExpanded) 200.dp else 100.dp)
+                        val cardColor = MaterialTheme.colorScheme.surface
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                                .height(cardHeight)
+                                .clickable {
+                                    selectedCardIndex = if (isExpanded) -1 else index
+                                }
+                                .testTag("ReviewCard$index"),
+                            colors = CardDefaults.cardColors(
+                                containerColor = cardColor
+                            ),
+                            shape = MaterialTheme.shapes.medium,
+                            elevation = CardDefaults.cardElevation(8.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                                    .testTag("ReviewCardContent$index")
+                            ) {
+                                val defaultUsername = stringResource(R.string.undefined_username)
+                                val uidOfOwner = remember { mutableStateOf(defaultUsername) }
+                                userViewModel.getUserById(curReview.owner) {
+                                    uidOfOwner.value = it.public.username
+                                }
+
+                                Text(
+                                    text = "By: ${uidOfOwner.value}",
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.testTag("ReviewOwner$index")
+                                )
+                                Text(
+                                    text = "On: ${curReview.time.toFormattedDate()}",
+                                    fontWeight = FontWeight.Light,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.testTag("ReviewDate$index")
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                ScoreStars(
+                                    curReview.rating,
+                                    scale = 0.9f,
+                                    starColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = curReview.text,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    maxLines = if (isExpanded) Int.MAX_VALUE else 2,
+                                    modifier = Modifier.testTag("ReviewText$index")
+                                )
                             }
-                            if (selectedCardIndex == reviewsList.indexOf(curReview)) {
-                              Box(
-                                  modifier =
-                                      Modifier.fillMaxWidth(2f)
-                                          .padding(8.dp)
-                                          .background(MaterialTheme.colorScheme.secondaryContainer)
-                                          .padding(16.dp)
-                                          .testTag("ExpandedReviewBox$selectedCardIndex")
-                                          .clickable { setSelectedCardIndex(-1) }) {
-                                    Column {
-                                      Text(
-                                          text = "Owner: ${uidOfOwner.value}",
-                                          fontWeight = FontWeight.Medium,
-                                          color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                          style = MaterialTheme.typography.bodyMedium,
-                                          modifier = Modifier.testTag("ExpandedReviewOwner$index"))
-                                      Text(
-                                          text = "Date: ${curReview.time.toFormattedDate()}",
-                                          fontWeight = FontWeight.Light,
-                                          color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                          style = MaterialTheme.typography.bodySmall,
-                                          modifier = Modifier.testTag("ExpandedReviewDate$index"))
-                                      Spacer(modifier = Modifier.height(4.dp))
-                                      Text(
-                                          text =
-                                              stringResource(R.string.all_review_rating)
-                                                  .format(curReview.rating),
-                                          fontWeight = FontWeight.Bold,
-                                          color = MaterialTheme.colorScheme.primary,
-                                          style = MaterialTheme.typography.titleLarge,
-                                          modifier = Modifier.testTag("ExpandedReviewRating$index"))
-                                      Spacer(modifier = Modifier.height(4.dp))
-                                      Text(
-                                          text =
-                                              stringResource(R.string.all_review_text)
-                                                  .format(curReview.text),
-                                          color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                          style = MaterialTheme.typography.bodyMedium,
-                                          modifier = Modifier.testTag("ExpandedReviewText$index"))
-                                    }
-                                  }
-                            } else {
-                              Card(
-                                  modifier =
-                                      Modifier.fillMaxWidth()
-                                          .padding(8.dp)
-                                          .shadow(8.dp, shape = MaterialTheme.shapes.medium)
-                                          .clickable { setSelectedCardIndex(index) }
-                                          .testTag("ReviewCard$index"),
-                                  colors =
-                                      CardDefaults.cardColors(
-                                          containerColor =
-                                              MaterialTheme.colorScheme.secondaryContainer),
-                                  shape = MaterialTheme.shapes.medium,
-                                  elevation = CardDefaults.cardElevation(8.dp)) {
-                                    Column(
-                                        modifier =
-                                            Modifier.fillMaxWidth()
-                                                .padding(16.dp)
-                                                .testTag("ReviewCardContent$index")) {
-                                          Text(
-                                              text = "Owner: ${uidOfOwner.value}",
-                                              fontWeight = FontWeight.Medium,
-                                              color =
-                                                  MaterialTheme.colorScheme.onSecondaryContainer,
-                                              style = MaterialTheme.typography.bodySmall,
-                                              modifier = Modifier.testTag("ReviewOwner$index"))
-                                          Text(
-                                              text = "Date: ${curReview.time.toFormattedDate()}",
-                                              fontWeight = FontWeight.Light,
-                                              color =
-                                                  MaterialTheme.colorScheme.onSecondaryContainer,
-                                              style = MaterialTheme.typography.bodySmall,
-                                              modifier = Modifier.testTag("ReviewDate$index"))
-                                          Spacer(modifier = Modifier.height(4.dp))
-                                          Text(
-                                              text =
-                                                  stringResource(R.string.all_review_rating)
-                                                      .format(curReview.rating),
-                                              fontWeight = FontWeight.Bold,
-                                              color = MaterialTheme.colorScheme.primary,
-                                              style = MaterialTheme.typography.titleLarge,
-                                              modifier = Modifier.testTag("ReviewRating$index"))
-                                          Spacer(modifier = Modifier.height(4.dp))
-                                          Text(
-                                              text =
-                                                  stringResource(R.string.all_review_text)
-                                                      .format(curReview.text),
-                                              color =
-                                                  MaterialTheme.colorScheme.onSecondaryContainer,
-                                              style = MaterialTheme.typography.bodySmall,
-                                              maxLines = 2,
-                                              modifier = Modifier.testTag("ReviewText$index"))
-                                        }
-                                  }
-                            }
-                          }
                         }
-                  }
+                    }
+                }
             }
 
-        if (userViewModel.currentUser.value?.public?.userId != null) {
-          Box(
-              modifier = Modifier.fillMaxSize().padding(16.dp),
-              contentAlignment = Alignment.BottomEnd) {
-                FloatingActionButton(
-                    onClick = { navigationActions.navigateTo(Screen.ADD_REVIEW) },
-                    containerColor = MaterialTheme.colorScheme.primary) {
-                      Text(
-                          text = if (ownerHasReviewed.value) "Edit Review" else "Add Review",
-                          color = MaterialTheme.colorScheme.onPrimary,
-                          style = MaterialTheme.typography.bodyMedium,
-                          fontWeight = FontWeight.Bold)
+            if (userViewModel.currentUser.value?.public?.userId != null) {
+                val userReview = reviewsList.find { it.owner == userViewModel.currentUser.value?.public?.userId }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.BottomEnd
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        FloatingActionButton(
+                            onClick = {
+                                if (userReview != null) {
+                                    reviewViewModel.deleteReviewById(userReview)
+                                    parkingViewModel.handleReviewDeletion(newScore = userReview.rating)
+                                    Toast.makeText(context, "Review Deleted!", Toast.LENGTH_SHORT).show()
+                                    navigationActions.goBack()
+                                } else {
+                                    Toast.makeText(context, "Add A Review First!", Toast.LENGTH_SHORT).show()
+                                }
+                            },
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(end = 8.dp)
+                                .height(56.dp)
+                                .testTag("DeleteReviewButton")
+                        ) {
+                            Text(
+                                text = "Delete Review",
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+
+                        FloatingActionButton(
+                            onClick = { navigationActions.navigateTo(Screen.REVIEW) },
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(start = 8.dp)
+                                .height(56.dp)
+                                .testTag("AddOrEditReviewButton")
+                        ) {
+                            Text(
+                                text = if (ownerHasReviewed.value) "Edit Review" else "Add Review",
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
-              }
+                }
+            }
         }
-      }
+    }
 }
