@@ -69,8 +69,8 @@ fun RectangleSelection(
           val rectSize = Size(width, height)
 
           val listScreenCoordinates = computeScreenCoordinates(canvasCenter, width, height)
-          val pointsList = mapView?.mapboxMap?.coordinatesForPixels(listScreenCoordinates)!!
-          val area = Location(pointsList).computeArea()
+          val pointsList = mapView?.mapboxMap?.coordinatesForPixels(listScreenCoordinates)
+          val area = pointsList?.let { Location(it).computeArea() } ?: 0.0
           mapViewModel.updateIsAreaTooLarge(area > PARKING_MAX_AREA)
 
           if (hasDragged.value) {

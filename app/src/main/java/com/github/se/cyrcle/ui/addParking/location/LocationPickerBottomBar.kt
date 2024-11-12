@@ -80,15 +80,14 @@ fun LocationPickerBottomBar(
                       textAlign = TextAlign.Center)
                 }
           } else if (locationPickerState == LocationPickerState.TOP_LEFT_SET) {
-            val toast =
-                Toast.makeText(
-                    mapView.value?.context,
-                    R.string.location_picker_invalid_area,
-                    Toast.LENGTH_SHORT)
             Button(
                 {
                   if (isAreaTooLarge) {
-                    toast.show()
+                    Toast.makeText(
+                            mapView.value?.context,
+                            R.string.location_picker_invalid_area,
+                            Toast.LENGTH_SHORT)
+                        .show()
                   } else {
                     onBottomRightSelected(mapViewModel)
                   }
