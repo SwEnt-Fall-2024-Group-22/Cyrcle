@@ -33,6 +33,7 @@
     <!-- Attributes Picker > TopBarAddAttr -->
     <string name="attributes_picker_top_bar_new_parking_spot">New Parking Spot</string>
     <string name="attributes_picker_top_bar_set_attributes">Set the attributes of the parking spot</string>
+    <string name="attributes_picker_bottom_bar_submit_button_toast">Please fill in all mandatory fields appropriately</string>
 
     <!-- Rectangle Selection -->
     <string name="rectangle_selection_lock_map">Lock Map</string>
@@ -40,6 +41,7 @@
     <!-- Location Picker Bottom Bar -->
     <string name="location_picker_bottom_bar_cancel_button">Cancel</string>
     <string name="location_picker_bottom_bar_next_button">Next</string>
+    <string name="location_picker_invalid_area">Please select a valid area</string>
     <!-- Location Picker Top Bar -->
     <string name="location_picker_top_bar_where">Where is the Parking ?</string>
     <string name="location_picker_top_bar_select_top_left">Set the top-left corner of the parking, by placing it under the crosshair below</string>

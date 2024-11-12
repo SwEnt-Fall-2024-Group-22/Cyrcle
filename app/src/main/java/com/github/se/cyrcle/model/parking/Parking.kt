@@ -2,6 +2,8 @@ package com.github.se.cyrcle.model.parking
 
 import com.github.se.cyrcle.ui.theme.molecules.DropDownableEnum
 import com.mapbox.geojson.Point
+import com.mapbox.geojson.Polygon
+import com.mapbox.turf.TurfMeasurement
 
 /**
  * Data class representing a parking spot.
@@ -70,6 +72,26 @@ data class Location(
     val bottomLeft: Point?,
     val bottomRight: Point?,
 ) {
+
+  /**
+   * Convert the location to a polygon.
+   *
+   * @return The polygon representing the location.
+   */
+  private fun toPolygon(): Polygon {
+    return Polygon.fromLngLats(listOf(listOf(topLeft, topRight, bottomRight, bottomLeft, topLeft)))
+  }
+
+  /**
+   * Compute the area of the location in square meters. The area is computed using the Turf
+   * Measurement library.
+   *
+   * @return The area of the location in square meters.
+   */
+  fun computeArea(): Double {
+    return TurfMeasurement.area(toPolygon())
+  }
+
   constructor(
       topLeft: Point,
       topRight: Point,

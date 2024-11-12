@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.addParking.location
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -40,6 +41,7 @@ fun LocationPickerBottomBar(
     mapView: MutableState<MapView?>,
 ) {
   val locationPickerState by mapViewModel.locationPickerState.collectAsState()
+  val isAreaTooLarge by mapViewModel.isAreaTooLarge.collectAsState()
   Box(Modifier.background(Color.White).height(100.dp).testTag("LocationPickerBottomBar")) {
     Row(
         Modifier.fillMaxWidth().wrapContentHeight().padding(16.dp).background(Color.White),
@@ -78,14 +80,25 @@ fun LocationPickerBottomBar(
                       textAlign = TextAlign.Center)
                 }
           } else if (locationPickerState == LocationPickerState.TOP_LEFT_SET) {
+            val toast =
+                Toast.makeText(
+                    mapView.value?.context,
+                    R.string.location_picker_invalid_area,
+                    Toast.LENGTH_SHORT)
             Button(
-                { onBottomRightSelected(mapViewModel) },
+                {
+                  if (isAreaTooLarge) {
+                    toast.show()
+                  } else {
+                    onBottomRightSelected(mapViewModel)
+                  }
+                },
                 modifier = Modifier.testTag("nextButton"),
                 colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
                   Text(
                       stringResource(R.string.location_picker_bottom_bar_next_button),
                       modifier = Modifier.width(100.dp),
-                      color = MaterialTheme.colorScheme.primary,
+                      color = if (isAreaTooLarge) Color.Gray else MaterialTheme.colorScheme.primary,
                       style = Typography.headlineMedium,
                       textAlign = TextAlign.Center)
                 }

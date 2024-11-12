@@ -31,6 +31,9 @@ class MapViewModel : ViewModel() {
   private val _isTrackingModeEnable = MutableStateFlow(true)
   val isTrackingModeEnable: StateFlow<Boolean> = _isTrackingModeEnable
 
+  private val _isAreaTooLarge: MutableStateFlow<Boolean> = MutableStateFlow(false)
+  val isAreaTooLarge: StateFlow<Boolean> = _isAreaTooLarge
+
   /**
    * Update the state of the location picker, This state is used to determine which steps of the
    * process to set the new location are completed
@@ -140,6 +143,16 @@ class MapViewModel : ViewModel() {
       this.enabled = true
       this.locationPuck = createDefault2DPuck(true)
     }
+  }
+
+  /**
+   * Update the isAreaTooLarge state
+   *
+   * @param isAreaTooLarge the new state of the area This function is used to store the state of the
+   *   area when the user is selecting a parking area
+   */
+  fun updateIsAreaTooLarge(isAreaTooLarge: Boolean) {
+    _isAreaTooLarge.value = isAreaTooLarge
   }
 
   /**

@@ -48,7 +48,7 @@ fun LocationPicker(
             onDispose {}
           }
         }
-        RectangleSelection(mapViewModel, padding)
+        RectangleSelection(mapViewModel, padding, mapView.value)
         Crosshair(mapViewModel, padding)
       }
   LaunchedEffect(locationPickerState) {

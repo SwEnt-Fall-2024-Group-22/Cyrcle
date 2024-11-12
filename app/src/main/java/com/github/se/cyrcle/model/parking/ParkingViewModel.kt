@@ -7,16 +7,19 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.mapbox.geojson.Point
+import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-const val KM_TO_METERS = 1000.0
 const val DEFAULT_RADIUS = 100.0
 const val MAX_RADIUS = 1000.0
 const val RADIUS_INCREMENT = 100.0
 const val MIN_NB_PARKINGS = 10
+
+const val PARKING_MAX_AREA = 1000.0
+
 /**
  * ViewModel for the Parking feature.
  *
@@ -266,8 +269,9 @@ class ParkingViewModel(
     _closestParkings.value =
         _rectParkings.value
             .filter { parking ->
-              TurfMeasurement.distance(_circleCenter.value!!, parking.location.center) *
-                  KM_TO_METERS <= _radius.value
+              TurfMeasurement.distance(
+                  _circleCenter.value!!, parking.location.center, TurfConstants.UNIT_METERS) <=
+                  _radius.value
             }
             .sortedBy { parking ->
               TurfMeasurement.distance(_circleCenter.value!!, parking.location.center)
