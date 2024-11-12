@@ -50,6 +50,13 @@ constructor(private val db: FirebaseFirestore, private val auth: FirebaseAuth) :
                 val userDetails = deserializeUserDetails(detailsDocument.data!!)
                 onSuccess(User(userPublic, userDetails))
               }
+              /*
+              We still call onSuccess even if the request to get the user's private information fails.
+              This happens when trying to get the information of a user that is not the current user.
+              The user's public information is still useful to have. i.e when loading the reviewer's name in a review.
+              Another solution would be to make two separate function, one for the public information and one for the private information.
+              but this seems easier and robust.
+              */
               .addOnFailureListener { onSuccess(User(userPublic, null)) }
         }
         .addOnFailureListener(onFailure)

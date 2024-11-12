@@ -61,7 +61,6 @@ class UserViewModel(
    * @param onSuccess the callback to call with the user
    */
   fun getUserById(userId: String, onSuccess: (User) -> Unit) {
-    Log.d("UserViewModel", "Getting user by ID: $userId")
     userRepository.getUserById(
         userId,
         onSuccess = { onSuccess(it) },
