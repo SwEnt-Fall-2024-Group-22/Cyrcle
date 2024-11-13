@@ -19,43 +19,39 @@ import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
-import com.github.se.cyrcle.ui.navigation.TopLevelDestination
-import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
-import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
 @Composable
 fun CreateProfileScreen(navigationActions: NavigationActions, userViewModel: UserViewModel) {
-    val screenTitle = stringResource(R.string.profile_screen_title)
+  val screenTitle = stringResource(R.string.profile_screen_title)
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize().testTag("CreateProfileScreen"),
-        bottomBar =  { BottomNavigationBar(navigationActions, selectedItem = Route.PROFILE) },
-       ) { padding ->
-        Box(modifier = Modifier.padding(padding)) {
-            Column(
-                modifier = Modifier.fillMaxSize().padding(16.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    "You need to be signed-in to modify your profile",
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text("Sign in now to add new spots, share reviews, and help fellow drivers find the perfect parking space.")
-                Spacer(modifier = Modifier.height(8.dp))
-                Button(
-                    text = "Go back to sign in",
-                    onClick = {
-                        // navigate to the route to not clear backstack
-                        navigationActions.navigateTo(Route.AUTH)
-                    }
-                )
-                Spacer(modifier = Modifier.height(200.dp))
-            }
-        }
+  Scaffold(
+      modifier = Modifier.fillMaxSize().testTag("CreateProfileScreen"),
+      bottomBar = { BottomNavigationBar(navigationActions, selectedItem = Route.PROFILE) },
+  ) { padding ->
+    Box(modifier = Modifier.padding(padding)) {
+      Column(
+          modifier = Modifier.fillMaxSize().padding(16.dp),
+          verticalArrangement = Arrangement.Center,
+          horizontalAlignment = Alignment.CenterHorizontally,
+      ) {
+        Text(
+            "You need to be signed-in to modify your profile",
+            style = MaterialTheme.typography.titleLarge)
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            "Sign in now to add new spots, share reviews, and help fellow drivers find the perfect parking space.")
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(
+            text = "Go back to sign in",
+            onClick = {
+              // navigate to the route to not clear backstack
+              navigationActions.navigateTo(Route.AUTH)
+            })
+        Spacer(modifier = Modifier.height(200.dp))
+      }
     }
+  }
 }
