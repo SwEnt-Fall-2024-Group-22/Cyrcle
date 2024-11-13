@@ -99,7 +99,7 @@ class ParkingViewModelTest {
   fun handleReviewDeletionTest() {
     val parking = TestInstancesParking.parking1.copy(avgScore = 4.0, nbReviews = 3)
 
-    parkingViewModel.handleReviewDeletion(parking, newScore = 4.0)
+    parkingViewModel.handleReviewDeletion(parking, oldScore = 4.0)
 
     // Expected avgScore after deletion with nbReviews - 1
     assertEquals(4.0, parking.avgScore, 0.01) // Verify adjusted average score after deletion
