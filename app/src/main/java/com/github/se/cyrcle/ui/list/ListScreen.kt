@@ -40,7 +40,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.se.cyrcle.R
@@ -54,7 +53,6 @@ import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
-import com.github.se.cyrcle.ui.theme.CyrcleTheme
 import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
 import com.github.se.cyrcle.ui.theme.atoms.Text

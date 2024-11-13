@@ -85,7 +85,7 @@ fun FilterSection(
             text = title,
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.clickable(onClick = onToggle).padding(8.dp).fillMaxWidth(),
-            color = MaterialTheme.colorScheme.primary,
+            color = MaterialTheme.colorScheme.onSurface,
             testTag = title)
 
         if (isExpanded) {
@@ -155,8 +155,8 @@ fun SortingOptionSelector(
               style = MaterialTheme.typography.bodyMedium,
               color =
                   if (selectedSortingOption == ReviewSortingOption.Rating)
-                      MaterialTheme.colorScheme.primary
-                  else MaterialTheme.colorScheme.onSurface)
+                      MaterialTheme.colorScheme.onSecondaryContainer
+                  else MaterialTheme.colorScheme.primary)
         }
 
     Row(
@@ -176,8 +176,8 @@ fun SortingOptionSelector(
               style = MaterialTheme.typography.bodyMedium,
               color =
                   if (selectedSortingOption == ReviewSortingOption.DateTime)
-                      MaterialTheme.colorScheme.primary
-                  else MaterialTheme.colorScheme.onSurface)
+                      MaterialTheme.colorScheme.onSecondaryContainer
+                  else MaterialTheme.colorScheme.primary)
         }
   }
 }
