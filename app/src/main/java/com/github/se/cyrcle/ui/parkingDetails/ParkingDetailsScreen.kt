@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,10 +14,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.AddAPhoto
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -36,7 +38,9 @@ import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
+import com.github.se.cyrcle.ui.theme.Black
 import com.github.se.cyrcle.ui.theme.ColorLevel
+import com.github.se.cyrcle.ui.theme.Red
 import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.IconButton
 import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
@@ -70,8 +74,41 @@ fun ParkingDetailsScreen(
                 Modifier.fillMaxSize()
                     .padding(padding)
                     .padding(32.dp)
-                    .verticalScroll(rememberScrollState())
                     .testTag("ParkingDetailsColumn")) {
+            Box(
+                modifier = Modifier.fillMaxWidth().height(48.dp).testTag("FavoriteIconContainer"),
+                contentAlignment = Alignment.TopEnd
+            ) {
+                val isFavorite = if (userSignedIn.value) {
+                    userViewModel.favoriteParkings.collectAsState().value.contains(selectedParking)
+                } else {
+                    false
+                }
+
+                Icon(
+                    imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Outlined.FavoriteBorder,
+                    contentDescription = "Favorite",
+                    tint = if (isFavorite) Red else Black,
+                    modifier = Modifier
+                        .testTag(if (isFavorite) "RedFilledFavoriteIcon" else "BlackOutlinedFavoriteIcon")
+                        .clickable {
+                            if (userSignedIn.value) {
+                                if (isFavorite) {
+                                    userViewModel.removeFavoriteParkingFromSelectedUser(selectedParking.uid)
+                                } else {
+                                    userViewModel.addFavoriteParkingToSelectedUser(selectedParking.uid)
+                                }
+                                userViewModel.getSelectedUserFavoriteParking()
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    "Please sign in to add favorites",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                )
+            }
               // Reviews
               Row(
                   modifier =
