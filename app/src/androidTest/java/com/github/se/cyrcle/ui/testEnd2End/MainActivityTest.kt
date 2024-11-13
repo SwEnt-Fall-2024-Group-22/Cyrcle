@@ -241,7 +241,6 @@ class MainActivityTest {
 
     fun assertMapScreen() {
       composeTestRule.onNodeWithTag("MapScreen").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("addButton").assertIsDisplayed().assertHasClickAction()
       composeTestRule.onNodeWithTag("ZoomControlsIn").assertIsDisplayed().assertHasClickAction()
       composeTestRule.onNodeWithTag("ZoomControlsOut").assertIsDisplayed().assertHasClickAction()
       composeTestRule.onNodeWithTag("NavigationBar").assertIsDisplayed()

@@ -94,7 +94,7 @@ fun MapScreen(
   val mapViewportState = MapConfig.createMapViewPortStateFromViewModel(mapViewModel)
   var removeViewAnnotation = remember { true }
   var cancelables = remember { Cancelable {} }
-  var listener = remember<MapIdleCallback?> { null }
+  var listener: MapIdleCallback?
   var pointAnnotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
   val selectedParking by parkingViewModel.selectedParking.collectAsState()
   val locationEnabled = PermissionsManager.areLocationPermissionsGranted(activity)
@@ -307,27 +307,6 @@ fun MapScreen(
             colorLevel = ColorLevel.PRIMARY,
             testTag = "addButton")
       }
-
-      IconButton(
-          icon = Icons.Default.MyLocation,
-          contentDescription = "Recenter on Location",
-          modifier =
-              Modifier.align(Alignment.BottomEnd)
-                  .padding(bottom = 25.dp, end = 16.dp)
-                  .scale(1.2f)
-                  .testTag("recenterButton"),
-          onClick = {
-            mapViewModel.updateTrackingMode(true)
-            mapViewportState.transitionToFollowPuckState(
-                FollowPuckViewportStateOptions.Builder()
-                    .pitch(0.0)
-                    .zoom(maxZoom)
-                    .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
-                    .build())
-          },
-          colorLevel =
-              if (mapViewModel.isTrackingModeEnable.collectAsState().value) ColorLevel.SECONDARY
-              else ColorLevel.PRIMARY)
     }
   }
 }

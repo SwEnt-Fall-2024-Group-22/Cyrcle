@@ -42,7 +42,7 @@ fun CreateProfileScreen(navigationActions: NavigationActions, userViewModel: Use
             style = MaterialTheme.typography.titleLarge)
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            "Sign in now to add new spots, share reviews, and help fellow drivers find the perfect parking space.")
+            "Sign in now to add new spots, share reviews, and help fellow cyclists find the perfect parking space.")
         Spacer(modifier = Modifier.height(8.dp))
         Button(
             text = "Go back to sign in",
