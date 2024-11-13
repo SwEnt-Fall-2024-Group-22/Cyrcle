@@ -350,21 +350,6 @@ fun MapScreen(
           })
 
       IconButton(
-          icon = Icons.Default.Add,
-          contentDescription = "Add parking spots",
-          modifier =
-              Modifier.align(Alignment.BottomStart)
-                  .scale(1.2f)
-                  .padding(bottom = 25.dp, start = 16.dp),
-          onClick = {
-            mapViewModel.updateCameraPosition(mapViewportState.cameraState!!)
-            navigationActions.navigateTo(Route.ADD_SPOTS)
-          },
-          enabled = enableParkingAddition,
-          colorLevel = ColorLevel.PRIMARY,
-          testTag = "addButton")
-
-      IconButton(
           icon = Icons.Default.MyLocation,
           contentDescription = "Recenter on Location",
           modifier =
@@ -385,15 +370,6 @@ fun MapScreen(
           colorLevel =
               if (mapViewModel.isTrackingModeEnable.collectAsState().value) ColorLevel.SECONDARY
               else ColorLevel.PRIMARY)
-
-      ZoomControls(
-          modifier = Modifier.align(Alignment.TopEnd),
-          onZoomIn = {
-            mapViewportState.setCameraOptions { zoom(mapViewportState.cameraState!!.zoom + 1.0) }
-          },
-          onZoomOut = {
-            mapViewportState.setCameraOptions { zoom(mapViewportState.cameraState!!.zoom - 1.0) }
-          })
 
       if (enableParkingAddition) {
         IconButton(
