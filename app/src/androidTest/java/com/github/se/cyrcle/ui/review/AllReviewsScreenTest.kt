@@ -103,8 +103,8 @@ class AllReviewsScreenTest {
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
 
     // Verify that the filter options are displayed
-    composeTestRule.onNodeWithText("Sort By Rating").assertIsDisplayed()
-    composeTestRule.onNodeWithText("Sort By Date/Time").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Sort By Rating (Best Rated First)").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Sort By Date (Most Recent First)").assertIsDisplayed()
   }
 
   @Test
