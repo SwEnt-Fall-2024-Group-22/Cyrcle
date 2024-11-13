@@ -44,7 +44,7 @@ fun InputText(
     modifier: Modifier = Modifier,
     onValueChange: (String) -> Unit,
     value: String = "",
-    labelColor: Color = MaterialTheme.colorScheme.onSurface,
+    labelColor: Color = MaterialTheme.colorScheme.onBackground,
     singleLine: Boolean = true,
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     minLines: Int = 1,

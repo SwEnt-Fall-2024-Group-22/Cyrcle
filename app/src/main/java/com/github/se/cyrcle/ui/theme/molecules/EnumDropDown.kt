@@ -64,7 +64,12 @@ fun <T : DropDownableEnum> EnumDropDown(
             readOnly = true,
             value = selectedValue.value.description,
             onValueChange = {},
-            label = { Text(text = label, Modifier.testTag("${testTag}Label"), color = Cerulean) },
+            label = {
+              Text(
+                  text = label,
+                  Modifier.testTag("${testTag}Label"),
+                  color = MaterialTheme.colorScheme.onBackground)
+            },
             trailingIcon = { DropDownTrailingIcon(expanded) },
             colors = OutlinedTextFieldDefaults.colors(),
             modifier = Modifier.menuAnchor().fillMaxWidth())

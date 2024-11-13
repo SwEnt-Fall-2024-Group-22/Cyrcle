@@ -32,7 +32,6 @@ import com.github.se.cyrcle.ui.theme.getButtonColors
 import com.github.se.cyrcle.ui.theme.getColor
 import com.github.se.cyrcle.ui.theme.getIconButtonColors
 import com.github.se.cyrcle.ui.theme.getOnColor
-import com.github.se.cyrcle.ui.theme.onDisabledColor
 import kotlin.math.floor
 import kotlin.math.round
 
@@ -213,10 +212,11 @@ fun ToggleButton(
       modifier = modifier.testTag(testTag),
       colors =
           if (value.value) getButtonColors(colorLevel)
-          else
-              ButtonDefaults.buttonColors(
-                  containerColor = disabledColor(), contentColor = onDisabledColor())) {
-        Text(text, Modifier.testTag("${testTag}Text"), color = getOnColor(colorLevel))
+          else ButtonDefaults.buttonColors(containerColor = disabledColor())) {
+        Text(
+            text,
+            Modifier.testTag("${testTag}Text"),
+            color = if (value.value) getOnColor(colorLevel) else getColor(colorLevel))
       }
 }
 
@@ -244,10 +244,11 @@ fun ToggleButton(
       modifier = modifier.testTag(testTag),
       colors =
           if (value) getButtonColors(colorLevel)
-          else
-              ButtonDefaults.buttonColors(
-                  containerColor = disabledColor(), contentColor = onDisabledColor())) {
-        Text(text, Modifier.testTag("${testTag}Text"), color = getOnColor(colorLevel))
+          else ButtonDefaults.buttonColors(containerColor = disabledColor())) {
+        Text(
+            text,
+            Modifier.testTag("${testTag}Text"),
+            color = if (value) getOnColor(colorLevel) else getColor(colorLevel))
       }
 }
 

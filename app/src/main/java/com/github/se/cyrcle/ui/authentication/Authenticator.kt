@@ -93,7 +93,7 @@ interface Authenticator {
                   // Text on Sign-In button
                   Text(
                       text = stringResource(R.string.sign_in_google_button),
-                      color = Color.Gray,
+                      color = Color.Black,
                       style = googleSignInButtonStyle)
                 }
           }
@@ -110,7 +110,7 @@ interface Authenticator {
       com.github.se.cyrcle.ui.theme.atoms.Button(
           text = stringResource(R.string.sign_in_guest_button),
           onClick = onClick,
-          colorLevel = ColorLevel.SECONDARY,
+          colorLevel = ColorLevel.PRIMARY,
           modifier =
               modifier
                   .padding(16.dp)
