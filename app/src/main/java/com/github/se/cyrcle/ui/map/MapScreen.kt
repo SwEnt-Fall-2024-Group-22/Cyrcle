@@ -3,10 +3,9 @@ package com.github.se.cyrcle.ui.map
 import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -29,10 +28,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.databinding.ItemCalloutViewBinding
@@ -48,6 +47,7 @@ import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.IconButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
+import com.github.se.cyrcle.ui.theme.disabledColor
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.github.se.cyrcle.ui.theme.molecules.DropDownableEnum
 import com.google.gson.Gson
@@ -87,7 +87,7 @@ const val maxZoom = 18.0
 const val minZoom = 8.0
 const val thresholdDisplayZoom = 13.0
 const val LAYER_ID = "0128"
-const val LABEL_THRESHOLD = 15.5
+const val ADVANCED_MODE_ZOOM_THRESHOLD = 15.5
 const val CLUSTER_COLORS = "#1A4988"
 
 /**
@@ -136,7 +136,8 @@ fun MapScreen(
   val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 80, 80, false)
   val alpha by
       animateFloatAsState(
-          targetValue = if (zoomState.value > LABEL_THRESHOLD) 1f else 0f, label = "zoomAlpha")
+          targetValue = if (zoomState.value > ADVANCED_MODE_ZOOM_THRESHOLD) 1f else 0f,
+          label = "zoomAlpha")
 
   // Draw markers on the map when the list of parkings changes
   LaunchedEffect(
@@ -311,13 +312,13 @@ fun MapScreen(
                     parkingViewModel.getParkingsInRect(currentBottomLeft, currentTopRight)
                   }
                   // On zoom-out past the threshold, switch to the markers mode
-                  if (mapView.mapboxMap.cameraState.zoom < LABEL_THRESHOLD &&
-                      zoomState.value >= LABEL_THRESHOLD) {
+                  if (mapView.mapboxMap.cameraState.zoom < ADVANCED_MODE_ZOOM_THRESHOLD &&
+                      zoomState.value >= ADVANCED_MODE_ZOOM_THRESHOLD) {
                     mapMode.value = MapMode.MARKERS
                   }
                   // On zoomin in past the threshold, switch to the user's selected mode
-                  if (mapView.mapboxMap.cameraState.zoom >= LABEL_THRESHOLD &&
-                      zoomState.value < LABEL_THRESHOLD) {
+                  if (mapView.mapboxMap.cameraState.zoom >= ADVANCED_MODE_ZOOM_THRESHOLD &&
+                      zoomState.value < ADVANCED_MODE_ZOOM_THRESHOLD) {
                     mapMode.value = userMapMode.value
                   }
 
@@ -328,6 +329,8 @@ fun MapScreen(
             // =======================  CAMERA  LISTENER  =======================
 
             onDispose {
+              pLabelAnnotationManager?.deleteAll()
+              rectangleAnnotationManager?.deleteAll()
               markerAnnotationManager?.deleteAll()
               cancelables.cancel()
               cameraCancelable.cancel()
@@ -338,15 +341,16 @@ fun MapScreen(
     // ======================= OVERLAY =======================
     Box(modifier = Modifier.padding(padding).fillMaxSize()) {
       // A switch to change the display mode
-      Column(
+      Row(
           modifier =
               Modifier.align(Alignment.TopStart).padding(start = 8.dp, top = 32.dp).alpha(alpha),
-          horizontalAlignment = Alignment.CenterHorizontally) {
+          verticalAlignment = Alignment.CenterVertically) {
             Text(
-                "Advanced Mode",
+                stringResource(R.string.map_screen_mode_switch_label),
                 color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.bodyMedium)
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold))
             Switch(
+                modifier = Modifier.padding(start = 8.dp),
                 checked = mapMode.value.isAdvancedMode,
                 onCheckedChange = {
                   userMapMode.value = if (it) MapMode.RECTANGLES else MapMode.MARKERS
@@ -355,8 +359,7 @@ fun MapScreen(
                 colors =
                     SwitchDefaults.colors()
                         .copy(
-                            uncheckedTrackColor =
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                            uncheckedTrackColor = disabledColor(),
                         ))
           }
 
@@ -437,7 +440,6 @@ fun drawRectangles(
               .withFillOpacity(0.7)
       annotations.add(polygonAnnotationOptions)
       val area = TurfMeasurement.area(polygon)
-      Log.d("MapScreen", "Area: $area")
       val labelAnnotationOption =
           PointAnnotationOptions()
               .withPoint(location.center)

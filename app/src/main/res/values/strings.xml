@@ -87,6 +87,7 @@
 
     <!-- Map Screen -->
     <string name="map_screen_capacity">Capacity is %s</string>
+    <string name="map_screen_mode_switch_label">Advanced</string>
 
     <!-- Create Profile Screen -->
     <string name="profile_screen_title">Create your profile</string>
