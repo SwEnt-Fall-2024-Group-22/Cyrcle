@@ -2,10 +2,14 @@ package com.github.se.cyrcle.ui.theme.molecules
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -21,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.model.parking.ParkingProtection
+import com.github.se.cyrcle.ui.theme.Cerulean
 
 /**
  * Interface for enums that can be displayed in a dropdown menu.
@@ -59,8 +64,8 @@ fun <T : DropDownableEnum> EnumDropDown(
             readOnly = true,
             value = selectedValue.value.description,
             onValueChange = {},
-            label = { Text(text = label, Modifier.testTag("${testTag}Label")) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            label = { Text(text = label, Modifier.testTag("${testTag}Label"), color = Cerulean) },
+            trailingIcon = { DropDownTrailingIcon(expanded) },
             colors = OutlinedTextFieldDefaults.colors(),
             modifier = Modifier.menuAnchor().fillMaxWidth())
 
@@ -71,7 +76,8 @@ fun <T : DropDownableEnum> EnumDropDown(
                   Text(
                       text = option.description,
                       textAlign = TextAlign.Center,
-                      modifier = Modifier.testTag("${testTag}${i}Text"))
+                      modifier = Modifier.testTag("${testTag}${i}Text"),
+                      color = Cerulean)
                 },
                 onClick = {
                   expanded = false
@@ -81,6 +87,15 @@ fun <T : DropDownableEnum> EnumDropDown(
           }
         }
       }
+}
+
+@Composable
+fun DropDownTrailingIcon(expanded: Boolean) {
+  Icon(
+      imageVector = if (expanded) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
+      contentDescription = "Dropdown",
+      tint = MaterialTheme.colorScheme.primary,
+      modifier = Modifier.testTag("DropDownIcon"))
 }
 
 @Preview

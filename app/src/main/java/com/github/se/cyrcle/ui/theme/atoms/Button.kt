@@ -60,7 +60,11 @@ fun SmallFloatingActionButton(
       modifier = modifier.testTag(testTag),
       containerColor = getColor(colorLevel),
       contentColor = getOnColor(colorLevel)) {
-        Icon(icon, contentDescription, Modifier.testTag("${testTag}Icon"))
+        Icon(
+            icon,
+            contentDescription,
+            Modifier.testTag("${testTag}Icon"),
+            tint = getOnColor(colorLevel))
       }
 }
 
@@ -88,7 +92,11 @@ fun FloatingActionButton(
       modifier = modifier.testTag(testTag),
       containerColor = getColor(colorLevel),
       contentColor = getOnColor(colorLevel)) {
-        Icon(icon, contentDescription, Modifier.testTag("${testTag}Icon"))
+        Icon(
+            icon,
+            contentDescription,
+            Modifier.testTag("${testTag}Icon"),
+            tint = getOnColor(colorLevel))
       }
 }
 
@@ -116,7 +124,11 @@ fun LargeFloatingActionButton(
       modifier = modifier.testTag(testTag),
       containerColor = getColor(colorLevel),
       contentColor = getOnColor(colorLevel)) {
-        Icon(icon, contentDescription, Modifier.testTag("${testTag}Icon"))
+        Icon(
+            icon,
+            contentDescription,
+            Modifier.testTag("${testTag}Icon"),
+            tint = getOnColor(colorLevel))
       }
 }
 
@@ -145,7 +157,7 @@ fun ExtendedFloatingActionButton(
       onClick = { onClick() },
       modifier = modifier.testTag(testTag),
       icon = { Icon(icon, contentDescription, Modifier.testTag("${testTag}Icon")) },
-      text = { Text(text, Modifier.testTag("${testTag}Text")) },
+      text = { Text(text, Modifier.testTag("${testTag}Text"), color = getOnColor(colorLevel)) },
       containerColor = getColor(colorLevel),
       contentColor = getOnColor(colorLevel))
 }
@@ -174,7 +186,7 @@ fun Button(
       modifier = modifier.testTag(testTag),
       colors = getButtonColors(colorLevel),
       enabled = enabled) {
-        Text(text, Modifier.testTag("${testTag}Text"))
+        Text(text, Modifier.testTag("${testTag}Text"), color = getOnColor(colorLevel))
       }
 }
 
@@ -204,7 +216,7 @@ fun ToggleButton(
           else
               ButtonDefaults.buttonColors(
                   containerColor = disabledColor(), contentColor = onDisabledColor())) {
-        Text(text, Modifier.testTag("${testTag}Text"))
+        Text(text, Modifier.testTag("${testTag}Text"), color = getOnColor(colorLevel))
       }
 }
 
@@ -235,7 +247,7 @@ fun ToggleButton(
           else
               ButtonDefaults.buttonColors(
                   containerColor = disabledColor(), contentColor = onDisabledColor())) {
-        Text(text, Modifier.testTag("${testTag}Text"))
+        Text(text, Modifier.testTag("${testTag}Text"), color = getOnColor(colorLevel))
       }
 }
 
@@ -257,7 +269,8 @@ fun IconButton(
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
-            modifier = Modifier.testTag("${testTag}Icon"))
+            modifier = Modifier.testTag("${testTag}Icon"),
+            tint = getOnColor(colorLevel))
       }
 }
 

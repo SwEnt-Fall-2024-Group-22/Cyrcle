@@ -92,7 +92,7 @@ fun ParkingDetailsScreen(
                       Text(
                           text = stringResource(R.string.no_reviews),
                           style = MaterialTheme.typography.bodyMedium,
-                          color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+                          color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                           testTag = "ParkingNoReviews")
                     }
                     Text(

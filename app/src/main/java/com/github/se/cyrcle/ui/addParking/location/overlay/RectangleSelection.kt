@@ -8,11 +8,16 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
@@ -21,8 +26,10 @@ import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.Location
+import com.github.se.cyrcle.ui.theme.Cerulean
+import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.Red
-import com.github.se.cyrcle.ui.theme.atoms.Text
+import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.mapbox.maps.MapView
 import com.mapbox.maps.ScreenCoordinate
 
@@ -74,15 +81,14 @@ fun RectangleSelection(
           if (hasDragged.value) {
             // Fill of the rectangle
             drawRect(
-                color =
-                    if (isAreaTooLarge) Red.copy(alpha = 0.5f)
-                    else Color(0xFF22799B).copy(alpha = 0.7f),
+                color = if (isAreaTooLarge) Red.copy(alpha = 0.5f) else Cerulean.copy(alpha = 0.7f),
                 topLeft = canvasCenter,
                 size = rectSize)
 
             // Outline of the rectangle
+            drawRect(color = Cerulean.copy(alpha = 0.7f), topLeft = canvasCenter, size = rectSize)
             drawRect(
-                color = if (isAreaTooLarge) Red else Color(0xFF22799B),
+                color = if (isAreaTooLarge) Red else Cerulean,
                 topLeft = canvasCenter,
                 size = rectSize,
                 style = Stroke(width = 2f))
@@ -93,16 +99,16 @@ fun RectangleSelection(
           horizontalArrangement = Arrangement.End,
           modifier = Modifier.fillMaxSize().padding(end = 55.dp),
       ) {
-        androidx.compose.material3.Button(
+        Button(
             modifier = Modifier.testTag("toggleRectangleButton"),
             onClick = { mapGesturesEnabled.value = !mapGesturesEnabled.value },
-            content = {
-              if (mapGesturesEnabled.value) {
-                Text(stringResource(R.string.rectangle_selection_lock_map))
-              } else {
-                Text(stringResource(R.string.rectangle_selection_unlock_map))
-              }
-            })
+            text =
+                if (mapGesturesEnabled.value) {
+                  stringResource(R.string.rectangle_selection_lock_map)
+                } else {
+                  stringResource(R.string.rectangle_selection_unlock_map)
+                },
+            colorLevel = ColorLevel.PRIMARY)
       }
     }
   }

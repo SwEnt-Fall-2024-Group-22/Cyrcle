@@ -47,4 +47,17 @@ class EnumDropDownTest {
       // composeTestRule.onNodeWithTag("${tag1}${i}Text", true).assertIsDisplayed()
     }
   }
+
+  @Test
+  fun enumDropDownTrailingIconTest() {
+    val tag = "DropDownIcon"
+    var expanded = false
+
+    composeTestRule.setContent { DropDownTrailingIcon(expanded) }
+
+    composeTestRule.onNodeWithTag(tag, true).assertIsDisplayed()
+
+    expanded = true
+    composeTestRule.onNodeWithTag(tag, true).assertIsDisplayed()
+  }
 }

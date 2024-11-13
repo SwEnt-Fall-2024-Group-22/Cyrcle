@@ -14,6 +14,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -43,6 +44,7 @@ fun InputText(
     modifier: Modifier = Modifier,
     onValueChange: (String) -> Unit,
     value: String = "",
+    labelColor: Color = MaterialTheme.colorScheme.onSurface,
     singleLine: Boolean = true,
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     minLines: Int = 1,
@@ -54,7 +56,7 @@ fun InputText(
       value,
       onValueChange = onValueChange,
       modifier = modifier.testTag(testTag),
-      label = { Text(label, Modifier.testTag("${testTag}Text")) },
+      label = { Text(label, Modifier.testTag("${testTag}Text"), color = labelColor) },
       singleLine = singleLine,
       maxLines = maxLines,
       minLines = minLines,

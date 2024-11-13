@@ -120,9 +120,9 @@ val LightColorScheme =
         surfaceContainerHigh = CeruleanHigh,
         surfaceContainerHighest = CeruleanHighest,
         // Others
-        scrim = White, // Semi-transparent overlay color // Unused
-        outline = White, // Unused
-        outlineVariant = White // Unused
+        scrim = Color.Unspecified, // Semi-transparent overlay color // Unused
+        outline = Cerulean,
+        outlineVariant = Color.Unspecified // Unused
         )
 
 val DarkColorScheme = LightColorScheme

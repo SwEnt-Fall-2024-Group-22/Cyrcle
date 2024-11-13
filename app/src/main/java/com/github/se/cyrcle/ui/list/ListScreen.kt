@@ -265,7 +265,7 @@ fun SpotCard(
     distance: Double
 ) {
   // make a line between the card and the next one
-  HorizontalDivider(modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.surface)
+  HorizontalDivider(modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.onSurface)
   Card(
       modifier =
           Modifier.fillMaxWidth()
@@ -312,14 +312,14 @@ fun SpotCard(
                         pluralStringResource(R.plurals.reviews_count, count = parking.nbReviews)
                             .format(parking.nbReviews),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+                    color = MaterialTheme.colorScheme.onSurface,
                     testTag = "ParkingNbReviews")
               }
             } else {
               Text(
                   text = stringResource(R.string.no_reviews),
                   style = MaterialTheme.typography.bodySmall,
-                  color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+                  color = MaterialTheme.colorScheme.onSurface,
                   testTag = "ParkingNoReviews")
             }
           }
