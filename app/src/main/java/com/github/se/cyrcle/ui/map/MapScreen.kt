@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -87,6 +88,7 @@ const val minZoom = 8.0
 const val thresholdDisplayZoom = 13.0
 const val LAYER_ID = "0128"
 const val LABEL_THRESHOLD = 15.5
+const val CLUSTER_COLORS = "#1A4988"
 
 /**
  * Enum class to represent the different modes of the map
@@ -190,7 +192,15 @@ fun MapScreen(
                 mapView.annotations.createPointAnnotationManager(
                     AnnotationConfig(
                         annotationSourceOptions =
-                            AnnotationSourceOptions(clusterOptions = ClusterOptions()),
+                            AnnotationSourceOptions(
+                                clusterOptions =
+                                    ClusterOptions(
+                                        colorLevels =
+                                            listOf(
+                                                Pair(
+                                                    1,
+                                                    android.graphics.Color.parseColor(
+                                                        CLUSTER_COLORS))))),
                         layerId = LAYER_ID))
             // Create polygon annotation manager to draw rectangles
             rectangleAnnotationManager = mapView.annotations.createPolygonAnnotationManager()
