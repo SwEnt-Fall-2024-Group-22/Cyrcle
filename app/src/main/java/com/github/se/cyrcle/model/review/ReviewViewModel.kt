@@ -45,9 +45,7 @@ class ReviewViewModel(private val reviewRepository: ReviewRepository) : ViewMode
 
   fun deleteReviewById(review: Review) {
     reviewRepository.deleteReviewById(
-        review.uid,
-        { Log.e("ReviewViewModel", "REVIEW DELETED") },
-        { Log.e("ReviewViewModel", "Error deleting reviews", it) })
+        review.uid, {}, { Log.e("ReviewViewModel", "Error deleting reviews", it) })
   }
 
   /**

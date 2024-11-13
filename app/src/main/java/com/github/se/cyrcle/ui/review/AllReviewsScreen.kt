@@ -152,7 +152,7 @@ fun SortingOptionSelector(
                     shape = MaterialTheme.shapes.small)
                 .padding(12.dp)) {
           Text(
-              text = "Sort By Rating",
+              text = stringResource(R.string.sort_by_rating),
               style = MaterialTheme.typography.bodyMedium,
               color =
                   if (selectedSortingOption == ReviewSortingOption.Rating)
@@ -173,7 +173,7 @@ fun SortingOptionSelector(
                     shape = MaterialTheme.shapes.small)
                 .padding(12.dp)) {
           Text(
-              text = "Sort By Date/Time",
+              text = stringResource(R.string.sort_by_rating),
               style = MaterialTheme.typography.bodyMedium,
               color =
                   if (selectedSortingOption == ReviewSortingOption.DateTime)
@@ -313,7 +313,7 @@ fun AllReviewsScreen(
                                   if (userReview != null) {
                                     reviewViewModel.deleteReviewById(userReview)
                                     parkingViewModel.handleReviewDeletion(
-                                        newScore = userReview.rating)
+                                        oldScore = userReview.rating)
                                     Toast.makeText(context, "Review Deleted!", Toast.LENGTH_SHORT)
                                         .show()
                                     navigationActions.goBack()

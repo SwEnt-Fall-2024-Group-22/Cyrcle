@@ -114,6 +114,8 @@
     <string name="all_review_rating">Rating: %.1f</string>
     <string name="all_review_text">Text: %s</string>
     <string name="undefined_username">Unknown user</string>
+    <string name="sort_by_rating">Sort By Rating(Best Rated First)</string>
+    <string name="sort_by_date">Sort By Date(Most Recent First)</string>
 
     <!-- Review Screen -->
     <string name="review_screen_title_new_review">Add your review</string>
