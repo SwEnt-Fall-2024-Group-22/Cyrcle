@@ -8,6 +8,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
+val Aero = Color(0xFF5BC0EB)
+val ShamrockGreen = Color(0xFF229C6B)
+val YInMnBlue = Color(0xFF23538F)
+
 val Black = Color(0xFF000000)
 val White = Color(0xFFFFFFFF)
 val Red = Color(0xFFFF0000)
@@ -20,18 +24,6 @@ val CeruleanLowest = Color(0xFF134558)
 val CeruleanLow = Color(0xFF1B5F7A)
 val CeruleanHigh = Color(0xFF2687AE)
 val CeruleanHighest = Color(0xFF2A96C0)
-val CeruleanTint = Color(0xFF43ACD6)
-val Madder = Color(0xFF9B2228)
-val GoldenBrown = Color(0xFF9B6C22)
-
-val DarkCerulean = Color(0xFF1D6785)
-val DarkCeruleanLowest = Color(0xFF154A60)
-val DarkCeruleanLow = Color(0xFF195973)
-val DarkCeruleanHigh = Color(0xFF22789A)
-val DarkCeruleanHighest = Color(0xFF2688AE)
-val DarkCeruleanTint = Color(0xFF34A5D2)
-val DarkMadder = Color(0xFF851D22)
-val DarkGoldenBrown = Color(0xFF855D1D)
 
 /**
  * Invert a color, without changing its alpha channel.
@@ -46,9 +38,19 @@ fun invertColor(color: Color): Color {
   return Color(r, g, b, (color.alpha * 255).toInt())
 }
 
-/** A class containing the choice of color for an element. */
+/**
+ * A class containing the choice of color for an element.
+ *
+ * @property PRIMARY The primary color "scheme"
+ * @property INVERSE_PRIMARY The primary color "scheme", but with the `onPrimary` and `primary`
+ *   inverted (same for `container`)
+ * @property SECONDARY The secondary color "scheme"
+ * @property TERTIARY The tertiary color "scheme"
+ * @property ERROR The error color "scheme"
+ */
 enum class ColorLevel {
   PRIMARY,
+  INVERSE_PRIMARY,
   SECONDARY,
   TERTIARY,
   ERROR
@@ -64,6 +66,7 @@ enum class ColorLevel {
 fun getColor(colorLevel: ColorLevel): Color {
   return when (colorLevel) {
     ColorLevel.PRIMARY -> MaterialTheme.colorScheme.primary
+    ColorLevel.INVERSE_PRIMARY -> MaterialTheme.colorScheme.onPrimary
     ColorLevel.SECONDARY -> MaterialTheme.colorScheme.secondary
     ColorLevel.TERTIARY -> MaterialTheme.colorScheme.tertiary
     ColorLevel.ERROR -> MaterialTheme.colorScheme.error
@@ -80,6 +83,7 @@ fun getColor(colorLevel: ColorLevel): Color {
 fun getOnColor(colorLevel: ColorLevel): Color {
   return when (colorLevel) {
     ColorLevel.PRIMARY -> MaterialTheme.colorScheme.onPrimary
+    ColorLevel.INVERSE_PRIMARY -> MaterialTheme.colorScheme.primary
     ColorLevel.SECONDARY -> MaterialTheme.colorScheme.onSecondary
     ColorLevel.TERTIARY -> MaterialTheme.colorScheme.onTertiary
     ColorLevel.ERROR -> MaterialTheme.colorScheme.onError
@@ -96,6 +100,7 @@ fun getOnColor(colorLevel: ColorLevel): Color {
 fun getContainerColor(colorLevel: ColorLevel): Color {
   return when (colorLevel) {
     ColorLevel.PRIMARY -> MaterialTheme.colorScheme.primaryContainer
+    ColorLevel.INVERSE_PRIMARY -> MaterialTheme.colorScheme.onPrimaryContainer
     ColorLevel.SECONDARY -> MaterialTheme.colorScheme.secondaryContainer
     ColorLevel.TERTIARY -> MaterialTheme.colorScheme.tertiaryContainer
     ColorLevel.ERROR -> MaterialTheme.colorScheme.errorContainer
@@ -112,6 +117,7 @@ fun getContainerColor(colorLevel: ColorLevel): Color {
 fun getOnContainerColor(colorLevel: ColorLevel): Color {
   return when (colorLevel) {
     ColorLevel.PRIMARY -> MaterialTheme.colorScheme.onPrimaryContainer
+    ColorLevel.INVERSE_PRIMARY -> MaterialTheme.colorScheme.primaryContainer
     ColorLevel.SECONDARY -> MaterialTheme.colorScheme.onSecondaryContainer
     ColorLevel.TERTIARY -> MaterialTheme.colorScheme.onTertiaryContainer
     ColorLevel.ERROR -> MaterialTheme.colorScheme.onErrorContainer

@@ -87,14 +87,14 @@ val LightColorScheme =
         onPrimaryContainer = White, // Text over a group of element
         inversePrimary = invertColor(Cerulean),
         // Secondary
-        secondary = Madder,
+        secondary = YInMnBlue,
         onSecondary = White,
-        secondaryContainer = Madder,
+        secondaryContainer = YInMnBlue,
         onSecondaryContainer = White,
         // Tertiary
-        tertiary = GoldenBrown,
+        tertiary = ShamrockGreen,
         onTertiary = White,
-        tertiaryContainer = GoldenBrown,
+        tertiaryContainer = ShamrockGreen,
         onTertiaryContainer = White,
         // Error
         error = Red,
@@ -108,8 +108,8 @@ val LightColorScheme =
         onSurface = Cerulean,
         surfaceDim = CeruleanLow, // Darker version of surface
         surfaceBright = CeruleanHigh, // Lighter version of surface
-        surfaceTint = CeruleanTint,
-        surfaceVariant = Blue,
+        surfaceTint = Aero,
+        surfaceVariant = Aero,
         onSurfaceVariant = White,
         inverseSurface = invertColor(Cerulean),
         inverseOnSurface = invertColor(White),
