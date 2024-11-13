@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -97,6 +98,7 @@ fun MapScreen(
   var listener = remember<MapIdleCallback?> { null }
   var pointAnnotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
   val selectedParking by parkingViewModel.selectedParking.collectAsState()
+  val locationEnabled = PermissionsManager.areLocationPermissionsGranted(activity)
 
   val screenCapacityString = stringResource(R.string.map_screen_capacity)
   val bitmap = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.red_marker)
@@ -130,9 +132,7 @@ fun MapScreen(
 
             // When map is loaded, check if the location permission is granted and initialize the
             // location component
-            if (PermissionsManager.areLocationPermissionsGranted(activity)) {
-              mapViewModel.initLocationComponent(mapView)
-            }
+            if (locationEnabled) mapViewModel.initLocationComponent(mapView)
 
             // Add a move listener to the map to deactivate tracking mode when the user moves the
             // map
@@ -262,6 +262,28 @@ fun MapScreen(
 
     // ======================= OVERLAY =======================
     Box(modifier = Modifier.padding(padding).fillMaxSize()) {
+      IconButton(
+          icon = Icons.Default.MyLocation,
+          contentDescription = "Recenter on Location",
+          modifier =
+              Modifier.align(if (locationEnabled) Alignment.BottomEnd else Alignment.TopEnd)
+                  .alpha(if (locationEnabled) 1f else 0f)
+                  .padding(bottom = 25.dp, end = 16.dp)
+                  .scale(if (locationEnabled) 1.2f else 0.01f)
+                  .testTag("recenterButton"),
+          onClick = {
+            mapViewModel.updateTrackingMode(true)
+            mapViewportState.transitionToFollowPuckState(
+                FollowPuckViewportStateOptions.Builder()
+                    .pitch(0.0)
+                    .zoom(maxZoom)
+                    .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
+                    .build())
+          },
+          colorLevel =
+              if (mapViewModel.isTrackingModeEnable.collectAsState().value) ColorLevel.SECONDARY
+              else ColorLevel.PRIMARY)
+
       ZoomControls(
           modifier = Modifier.align(Alignment.TopEnd),
           onZoomIn = {
@@ -285,27 +307,6 @@ fun MapScreen(
           enabled = enableParkingAddition,
           colorLevel = ColorLevel.PRIMARY,
           testTag = "addButton")
-
-      IconButton(
-          icon = Icons.Default.MyLocation,
-          contentDescription = "Recenter on Location",
-          modifier =
-              Modifier.align(Alignment.BottomEnd)
-                  .padding(bottom = 25.dp, end = 16.dp)
-                  .scale(1.2f)
-                  .testTag("recenterButton"),
-          onClick = {
-            mapViewModel.updateTrackingMode(true)
-            mapViewportState.transitionToFollowPuckState(
-                FollowPuckViewportStateOptions.Builder()
-                    .pitch(0.0)
-                    .zoom(maxZoom)
-                    .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
-                    .build())
-          },
-          colorLevel =
-              if (mapViewModel.isTrackingModeEnable.collectAsState().value) ColorLevel.SECONDARY
-              else ColorLevel.PRIMARY)
     }
   }
 }
