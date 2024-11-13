@@ -75,7 +75,7 @@ class AllReviewsScreenTest {
     val firstReviewCardB4 = composeTestRule.onNodeWithTag("ReviewCard0")
     // Open filter and select sorting by rating
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
-    composeTestRule.onNodeWithText("Sort By Rating").performClick()
+    composeTestRule.onNodeWithText("Sort By Rating (Best Rated First)").performClick()
 
     // Verify if the reviews are sorted by rating by checking the order of ReviewCards
     val firstReviewCardAfter = composeTestRule.onNodeWithTag("ReviewCard0")
