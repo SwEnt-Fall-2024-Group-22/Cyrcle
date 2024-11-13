@@ -173,7 +173,7 @@ fun SortingOptionSelector(
                     shape = MaterialTheme.shapes.small)
                 .padding(12.dp)) {
           Text(
-              text = stringResource(R.string.sort_by_rating),
+              text = stringResource(R.string.sort_by_date),
               style = MaterialTheme.typography.bodyMedium,
               color =
                   if (selectedSortingOption == ReviewSortingOption.DateTime)
