@@ -159,12 +159,12 @@ class MapViewModel : ViewModel() {
 
   private val handler = Handler(Looper.getMainLooper())
   private var lastUpdateTime = 0L
-  private val updateInterval = 1000L // 1 second
+  private val updateInterval = 500L // 0.5 seconds
 
   /**
    * Initialize the location component of the map and add a listener to update the user position
    *
-   * @param locationComponentPlugin the location component plugin to initialize
+   * @param mapView the MapView to initialize the location component on
    */
   fun initLocationComponent(mapView: MapView) {
     val locationComponentPlugin = mapView.location

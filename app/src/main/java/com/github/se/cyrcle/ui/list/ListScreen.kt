@@ -64,7 +64,7 @@ import com.mapbox.turf.TurfMeasurement
 fun SpotListScreen(
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel = viewModel(factory = ParkingViewModel.Factory),
-    mapViewModel: MapViewModel = viewModel(factory = MapViewModel.Factory)
+    mapViewModel: MapViewModel
 ) {
 
   val userPosition by mapViewModel.userPosition.collectAsState()

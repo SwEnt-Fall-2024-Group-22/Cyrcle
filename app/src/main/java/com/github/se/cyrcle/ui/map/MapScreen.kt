@@ -153,7 +153,8 @@ fun MapScreen(
         else drawMarkers(markerAnnotationManager, listOfParkings, resizedBitmap)
       }
 
-  // Center the camera on th puck and transition to the follow puck state
+  // Center the camera on th puck and transition to the follow puck state. Update the user
+  // position to the center of the camera
   LaunchedEffect(PermissionsManager.areLocationPermissionsGranted(activity)) {
     mapViewportState.transitionToFollowPuckState(
         FollowPuckViewportStateOptions.Builder()
