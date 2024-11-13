@@ -214,7 +214,7 @@ fun AllReviewsScreen(
               modifier = Modifier.fillMaxSize().padding(16.dp),
               contentAlignment = Alignment.BottomEnd) {
                 FloatingActionButton(
-                    onClick = { navigationActions.navigateTo(Screen.REVIEW) },
+                    onClick = { navigationActions.navigateTo(Screen.ADD_REVIEW) },
                     containerColor = MaterialTheme.colorScheme.primary) {
                       Text(
                           text = if (ownerHasReviewed.value) "Edit Review" else "Add Review",

@@ -48,10 +48,15 @@ fun CyrcleNavHost(
         route = Route.LIST,
     ) {
       composable(Screen.LIST) { SpotListScreen(navigationActions, parkingViewModel) }
-      composable(Screen.CARD) {
+      composable(Screen.PARKING_DETAILS) {
         ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
       }
-      composable(Screen.REVIEW) {
+    }
+    navigation(
+        startDestination = Screen.ALL_REVIEWS,
+        route = Route.REVIEW,
+    ) {
+      composable(Screen.ADD_REVIEW) {
         ReviewScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
       }
       composable(Screen.ALL_REVIEWS) {
@@ -76,7 +81,6 @@ fun CyrcleNavHost(
       }
     }
 
-    // Add this new navigation block for Profile
     navigation(
         startDestination = Screen.PROFILE,
         route = Route.PROFILE,

@@ -65,7 +65,6 @@ import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.maps.plugin.gestures.OnMoveListener
 import com.mapbox.maps.plugin.gestures.gestures
-import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.maps.plugin.viewport.data.FollowPuckViewportStateOptions
 import com.mapbox.maps.plugin.viewport.data.OverviewViewportStateOptions
 import com.mapbox.maps.viewannotation.annotatedLayerFeature
@@ -95,7 +94,7 @@ fun MapScreen(
   val mapViewportState = MapConfig.createMapViewPortStateFromViewModel(mapViewModel)
   var removeViewAnnotation = remember { true }
   var cancelables = remember { Cancelable {} }
-  var listener = remember<MapIdleCallback?> { null }
+  var listener: MapIdleCallback?
   var pointAnnotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
   val selectedParking by parkingViewModel.selectedParking.collectAsState()
   val locationEnabled = PermissionsManager.areLocationPermissionsGranted(activity)
@@ -216,7 +215,7 @@ fun MapScreen(
                           screenCapacityString.format(parkingDeserialized.capacity.description)
                       selectButton.setOnClickListener {
                         parkingViewModel.selectParking(parkingDeserialized)
-                        navigationActions.navigateTo(Screen.CARD)
+                        navigationActions.navigateTo(Screen.PARKING_DETAILS)
                       }
                     }
                     removeViewAnnotation = true
@@ -293,20 +292,21 @@ fun MapScreen(
             mapViewportState.setCameraOptions { zoom(mapViewportState.cameraState!!.zoom - 1.0) }
           })
 
-      IconButton(
-          icon = Icons.Default.Add,
-          contentDescription = "Add parking spots",
-          modifier =
-              Modifier.align(Alignment.BottomStart)
-                  .scale(1.2f)
-                  .padding(bottom = 25.dp, start = 16.dp),
-          onClick = {
-            mapViewModel.updateCameraPosition(mapViewportState.cameraState!!)
-            navigationActions.navigateTo(Route.ADD_SPOTS)
-          },
-          enabled = enableParkingAddition,
-          colorLevel = ColorLevel.PRIMARY,
-          testTag = "addButton")
+      if (enableParkingAddition) {
+        IconButton(
+            icon = Icons.Default.Add,
+            contentDescription = "Add parking spots",
+            modifier =
+                Modifier.align(Alignment.BottomStart)
+                    .scale(1.2f)
+                    .padding(bottom = 25.dp, start = 16.dp),
+            onClick = {
+              mapViewModel.updateCameraPosition(mapViewportState.cameraState!!)
+              navigationActions.navigateTo(Route.ADD_SPOTS)
+            },
+            colorLevel = ColorLevel.PRIMARY,
+            testTag = "addButton")
+      }
     }
   }
 }

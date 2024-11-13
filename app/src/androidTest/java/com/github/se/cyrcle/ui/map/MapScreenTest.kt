@@ -72,9 +72,6 @@ class MapScreenTest {
     composeTestRule.onNodeWithTag("ZoomControlsIn").assertIsDisplayed().assertHasClickAction()
     composeTestRule.onNodeWithTag("ZoomControlsOut").assertIsDisplayed().assertHasClickAction()
 
-    // Assert that the add button is displayed
-    composeTestRule.onNodeWithTag("addButton").assertIsDisplayed().assertHasClickAction()
-
     // Assert that the recenter button is displayed
     composeTestRule.onNodeWithTag("recenterButton").assertIsDisplayed().assertHasClickAction()
   }
@@ -109,7 +106,7 @@ class MapScreenTest {
     }
 
     // Check that the add button has no click action when there is no user
-    composeTestRule.onNodeWithTag("addButton").performClick()
+    composeTestRule.onNodeWithTag("addButton").assertDoesNotExist()
     verifyNoInteractions(mockNavigation)
 
     userViewModel.setCurrentUser(TestInstancesUser.user1)

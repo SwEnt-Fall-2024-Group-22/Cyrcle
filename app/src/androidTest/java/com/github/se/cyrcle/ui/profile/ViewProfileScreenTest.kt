@@ -19,7 +19,7 @@ import com.github.se.cyrcle.model.user.UserDetails
 import com.github.se.cyrcle.model.user.UserPublic
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
-import com.github.se.cyrcle.ui.navigation.Route
+import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import com.mapbox.geojson.Point
 import org.junit.Before
 import org.junit.Rule
@@ -88,7 +88,7 @@ class ViewProfileScreenTest {
     composeTestRule.waitForIdle()
 
     assert(userViewModel.currentUser.value == null)
-    verify(mockNavigationActions).navigateTo(Route.AUTH)
+    verify(mockNavigationActions).navigateTo(TopLevelDestinations.AUTH)
   }
 
   @Test
