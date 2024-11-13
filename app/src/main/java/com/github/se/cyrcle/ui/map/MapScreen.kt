@@ -292,20 +292,42 @@ fun MapScreen(
             mapViewportState.setCameraOptions { zoom(mapViewportState.cameraState!!.zoom - 1.0) }
           })
 
+      if (enableParkingAddition) {
+        IconButton(
+            icon = Icons.Default.Add,
+            contentDescription = "Add parking spots",
+            modifier =
+                Modifier.align(Alignment.BottomStart)
+                    .scale(1.2f)
+                    .padding(bottom = 25.dp, start = 16.dp),
+            onClick = {
+              mapViewModel.updateCameraPosition(mapViewportState.cameraState!!)
+              navigationActions.navigateTo(Route.ADD_SPOTS)
+            },
+            colorLevel = ColorLevel.PRIMARY,
+            testTag = "addButton")
+      }
+
       IconButton(
-          icon = Icons.Default.Add,
-          contentDescription = "Add parking spots",
+          icon = Icons.Default.MyLocation,
+          contentDescription = "Recenter on Location",
           modifier =
-              Modifier.align(Alignment.BottomStart)
+              Modifier.align(Alignment.BottomEnd)
+                  .padding(bottom = 25.dp, end = 16.dp)
                   .scale(1.2f)
-                  .padding(bottom = 25.dp, start = 16.dp),
+                  .testTag("recenterButton"),
           onClick = {
-            mapViewModel.updateCameraPosition(mapViewportState.cameraState!!)
-            navigationActions.navigateTo(Route.ADD_SPOTS)
+            mapViewModel.updateTrackingMode(true)
+            mapViewportState.transitionToFollowPuckState(
+                FollowPuckViewportStateOptions.Builder()
+                    .pitch(0.0)
+                    .zoom(maxZoom)
+                    .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
+                    .build())
           },
-          enabled = enableParkingAddition,
-          colorLevel = ColorLevel.PRIMARY,
-          testTag = "addButton")
+          colorLevel =
+              if (mapViewModel.isTrackingModeEnable.collectAsState().value) ColorLevel.SECONDARY
+              else ColorLevel.PRIMARY)
     }
   }
 }
