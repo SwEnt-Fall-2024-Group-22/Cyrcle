@@ -1,9 +1,12 @@
 package com.github.se.cyrcle.model.map
 
+import android.os.Handler
+import android.os.Looper
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.model.parking.PARKING_MAX_AREA
+import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.ui.map.MapConfig
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraState
@@ -35,6 +38,9 @@ class MapViewModel : ViewModel() {
   private val _isAreaTooLarge: MutableStateFlow<Boolean> = MutableStateFlow(false)
   val isAreaTooLarge: StateFlow<Boolean> = _isAreaTooLarge
 
+  private val _userPosition = MutableStateFlow<Point>(TestInstancesParking.EPFLCenter)
+  val userPosition: StateFlow<Point> = _userPosition
+
   /**
    * Update the state of the location picker, This state is used to determine which steps of the
    * process to set the new location are completed
@@ -60,7 +66,7 @@ class MapViewModel : ViewModel() {
    * Update the focus mode
    *
    * @param focusMode the new focus mode This function is used to update the focus mode of the map
-   *   screen. The focus mode is used to center the map on the user's location
+   *   screen. The focus mode is used to center the map on the user's position
    */
   fun updateTrackingMode(focusMode: Boolean) {
     _isTrackingModeEnable.value = focusMode
@@ -109,6 +115,15 @@ class MapViewModel : ViewModel() {
   }
 
   /**
+   * Update the user position
+   *
+   * @param position the new user position
+   */
+  fun updateUserPosition(position: Point) {
+    _userPosition.value = position
+  }
+
+  /**
    * Get the bottom left and top right corners of the screen in latitude and longitude coordinates.
    * The corners are calculated based on the center of the screen and the viewport dimensions. If
    * useBuffer is true, the corners are calculated with a buffer of 2x the viewport dimensions. This
@@ -142,8 +157,12 @@ class MapViewModel : ViewModel() {
     return Pair(bottomLeftCorner, topRightCorner)
   }
 
+  private val handler = Handler(Looper.getMainLooper())
+  private var lastUpdateTime = 0L
+  private val updateInterval = 500L // 0.5 seconds
+
   /**
-   * Initialize the location component of the map.
+   * Initialize the location component of the map and add a listener to update the user position
    *
    * @param mapView the MapView to initialize the location component on
    */
@@ -152,6 +171,16 @@ class MapViewModel : ViewModel() {
     locationComponentPlugin.updateSettings {
       this.enabled = true
       this.locationPuck = createDefault2DPuck(true)
+    }
+
+    locationComponentPlugin.addOnIndicatorPositionChangedListener { point ->
+      val currentTime = System.currentTimeMillis()
+      if (currentTime - lastUpdateTime >= updateInterval) {
+        handler.post {
+          updateUserPosition(point)
+          lastUpdateTime = currentTime
+        }
+      }
     }
   }
 

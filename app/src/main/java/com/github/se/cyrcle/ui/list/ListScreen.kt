@@ -43,13 +43,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingAttribute
 import com.github.se.cyrcle.model.parking.ParkingCapacity
 import com.github.se.cyrcle.model.parking.ParkingProtection
 import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingViewModel
-import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
@@ -64,9 +64,10 @@ import com.mapbox.turf.TurfMeasurement
 fun SpotListScreen(
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel = viewModel(factory = ParkingViewModel.Factory),
+    mapViewModel: MapViewModel
 ) {
 
-  val referencePoint = TestInstancesParking.EPFLCenter
+  val userPosition by mapViewModel.userPosition.collectAsState()
 
   val filteredParkingSpots by parkingViewModel.closestParkings.collectAsState()
 
@@ -75,11 +76,8 @@ fun SpotListScreen(
   val selectedCapacities by parkingViewModel.selectedCapacities.collectAsState()
   val onlyWithCCTV by parkingViewModel.onlyWithCCTV.collectAsState()
 
-  /**
-   * Set the center of the circle in the ViewModel when the screen is launched. This should be
-   * linked to the user's location in the future.
-   */
-  LaunchedEffect(Unit) { parkingViewModel.setCircleCenter(referencePoint) }
+  // Set the center of the circle as the user's location when the screen is launched.
+  LaunchedEffect(userPosition) { parkingViewModel.setCircleCenter(userPosition) }
 
   Scaffold(
       modifier = Modifier.testTag("SpotListScreen"),
@@ -114,7 +112,7 @@ fun SpotListScreen(
               verticalArrangement = Arrangement.spacedBy(8.dp),
               modifier = Modifier.testTag("SpotListColumn")) {
                 items(items = filteredParkingSpots) { parking ->
-                  val distance = TurfMeasurement.distance(referencePoint, parking.location.center)
+                  val distance = TurfMeasurement.distance(userPosition, parking.location.center)
                   SpotCard(navigationActions, parkingViewModel, parking, distance)
                   // Increment the radius when the last parking spot is reached
                   if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1) {

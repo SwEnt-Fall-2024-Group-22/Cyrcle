@@ -17,6 +17,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ImageRepository
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingCapacity
@@ -50,12 +51,14 @@ class ListScreenTest {
   @Mock private lateinit var mockImageRepository: ImageRepository
   @Mock private lateinit var mockNavigationActions: NavigationActions
   private lateinit var parkingViewModel: ParkingViewModel
+  private lateinit var mapViewModel: MapViewModel
 
   @Before
   fun setUp() {
     // Set up the test environment for the Compose UI test
     MockitoAnnotations.openMocks(this)
     parkingViewModel = ParkingViewModel(mockImageRepository, mockParkingRepository)
+    mapViewModel = MapViewModel()
 
     `when`(mockNavigationActions.currentRoute()).thenReturn(Screen.LIST)
   }
@@ -263,7 +266,9 @@ class ListScreenTest {
                 eq(Tile.getTileFromPoint(loc).bottomLeft), any(), any(), any()))
         .then { it.getArgument<(List<Parking>) -> Unit>(2)(listOf(testParking)) }
 
-    composeTestRule.setContent { SpotListScreen(mockNavigationActions, parkingViewModel) }
+    composeTestRule.setContent {
+      SpotListScreen(mockNavigationActions, parkingViewModel, mapViewModel)
+    }
     composeTestRule.waitUntilAtLeastOneExists(hasTestTag("SpotListColumn"))
 
     // Check that the list is displayed

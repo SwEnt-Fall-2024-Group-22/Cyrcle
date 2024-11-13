@@ -153,14 +153,17 @@ fun MapScreen(
         else drawMarkers(markerAnnotationManager, listOfParkings, resizedBitmap)
       }
 
-  // Center the camera on th puck and transition to the follow puck state
+  // Center the camera on th puck and transition to the follow puck state. Update the user
+  // position to the center of the camera
   LaunchedEffect(PermissionsManager.areLocationPermissionsGranted(activity)) {
     mapViewportState.transitionToFollowPuckState(
         FollowPuckViewportStateOptions.Builder()
             .pitch(0.0)
             .zoom(maxZoom)
             .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
-            .build())
+            .build()) {
+          mapViewportState.cameraState?.let { mapViewModel.updateUserPosition(it.center) }
+        }
   }
 
   Scaffold(bottomBar = { BottomNavigationBar(navigationActions, selectedItem = Route.MAP) }) {
