@@ -78,7 +78,7 @@ data class Location(
    *
    * @return The polygon representing the location.
    */
-  private fun toPolygon(): Polygon {
+  fun toPolygon(): Polygon {
     return Polygon.fromLngLats(listOf(listOf(topLeft, topRight, bottomRight, bottomLeft, topLeft)))
   }
 
