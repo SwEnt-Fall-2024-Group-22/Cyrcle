@@ -31,52 +31,6 @@ fun defaultOnColorFromLuminance(backgroundColor: Color): Color {
   return if (backgroundColor.luminance() < 0.5) White else Black
 }
 
-val DebugColorScheme =
-    lightColorScheme(
-        // Primary
-        primary = Color(0xFF000011),
-        onPrimary = Color(0xFF000022),
-        primaryContainer = Color(0xFF000033),
-        onPrimaryContainer = Color(0xFF000044),
-        inversePrimary = Color(0xFF000055),
-        // Secondary
-        secondary = Color(0xFF000066),
-        onSecondary = Color(0xFF000077),
-        secondaryContainer = Color(0xFF000088),
-        onSecondaryContainer = Color(0xFF000099),
-        // Tertiary
-        tertiary = Color(0xFF0000AA),
-        onTertiary = Color(0xFF0000BB),
-        tertiaryContainer = Color(0xFF0000CC),
-        onTertiaryContainer = Color(0xFF0000DD),
-        // Error
-        error = Color(0xFF110000),
-        onError = Color(0xFF220000),
-        errorContainer = Color(0xFF330000),
-        onErrorContainer = Color(0xFF440000),
-        // Surfaces
-        background = Color(0xFFFFFFFF),
-        onBackground = Color(0xFFFF2200),
-        surface = Color(0xFFFFFFFF),
-        onSurface = Color(0xFF884400),
-        surfaceDim = Color(0xFF445500),
-        surfaceBright = Color(0xFF0066FF),
-        surfaceTint = Color(0xFF0077AA),
-        surfaceVariant = Color(0xFF008888),
-        onSurfaceVariant = Color(0xFF009944),
-        inverseSurface = Color(0xFFFFAAFF),
-        inverseOnSurface = Color(0xFF88BB88),
-        surfaceContainer = Color(0xFF44CC44),
-        surfaceContainerLowest = Color(0xFFFFDD44),
-        surfaceContainerLow = Color(0xFFAAEE88),
-        surfaceContainerHigh = Color(0xFF88FFAA),
-        surfaceContainerHighest = Color(0xFF44FFFF),
-        // Others
-        scrim = Color(0xFF111111),
-        outline = Color(0xFF222222),
-        outlineVariant = Color(0xFF333333),
-    )
-
 val LightColorScheme =
     lightColorScheme(
         // Primary
