@@ -26,7 +26,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,7 +39,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.ParkingViewModel
@@ -50,6 +48,7 @@ import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
+import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
@@ -82,7 +81,7 @@ fun FilterSection(
               .border(1.dp, Color.Gray, shape = MaterialTheme.shapes.medium)
               .background(MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.medium)
               .padding(8.dp)) {
-        com.github.se.cyrcle.ui.theme.atoms.Text(
+        Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.clickable(onClick = onToggle).padding(8.dp).fillMaxWidth(),
@@ -122,7 +121,7 @@ fun FilterHeader(
 
     if (showFilters) {
       FilterSection(
-          title = "Sort Reviews", // "Sort Reviews" title
+          title = stringResource(R.string.sort_reviews), // "Sort Reviews" title
           isExpanded = true,
           onToggle = { /* No toggle needed for always-visible sorting options */}) {
             SortingOptionSelector(
@@ -270,14 +269,16 @@ fun AllReviewsScreen(
                                     }
 
                                     Text(
-                                        text = "By: ${uidOfOwner.value}",
-                                        fontWeight = FontWeight.Medium,
+                                        text =
+                                            stringResource(R.string.by_text)
+                                                .format(uidOfOwner.value),
                                         color = MaterialTheme.colorScheme.onSecondaryContainer,
                                         style = MaterialTheme.typography.bodySmall,
                                         modifier = Modifier.testTag("ReviewOwner$index"))
                                     Text(
-                                        text = "On: ${curReview.time.toFormattedDate()}",
-                                        fontWeight = FontWeight.Light,
+                                        text =
+                                            stringResource(R.string.on_text)
+                                                .format(curReview.time.toFormattedDate()),
                                         color = MaterialTheme.colorScheme.onSecondaryContainer,
                                         style = MaterialTheme.typography.bodySmall,
                                         modifier = Modifier.testTag("ReviewDate$index"))
@@ -291,7 +292,6 @@ fun AllReviewsScreen(
                                         text = curReview.text,
                                         color = MaterialTheme.colorScheme.onSecondaryContainer,
                                         style = MaterialTheme.typography.bodySmall,
-                                        maxLines = if (isExpanded) Int.MAX_VALUE else 2,
                                         modifier = Modifier.testTag("ReviewText$index"))
                                   }
                             }
@@ -330,14 +330,13 @@ fun AllReviewsScreen(
                                         .height(56.dp)
                                         .testTag("DeleteReviewButton")) {
                                   Text(
-                                      text = "Delete Review",
+                                      text = stringResource(R.string.delete_review),
                                       color = MaterialTheme.colorScheme.onPrimary,
-                                      style = MaterialTheme.typography.bodyMedium,
-                                      fontWeight = FontWeight.Bold)
+                                      style = MaterialTheme.typography.bodyMedium)
                                 }
 
                             FloatingActionButton(
-                                onClick = { navigationActions.navigateTo(Screen.REVIEW) },
+                                onClick = { navigationActions.navigateTo(Screen.ADD_REVIEW) },
                                 containerColor = MaterialTheme.colorScheme.primary,
                                 modifier =
                                     Modifier.weight(1f)
@@ -346,11 +345,11 @@ fun AllReviewsScreen(
                                         .testTag("AddOrEditReviewButton")) {
                                   Text(
                                       text =
-                                          if (ownerHasReviewed.value) "Edit Review"
-                                          else "Add Review",
+                                          if (ownerHasReviewed.value)
+                                              stringResource(R.string.edit_review)
+                                          else stringResource(R.string.add_review),
                                       color = MaterialTheme.colorScheme.onPrimary,
-                                      style = MaterialTheme.typography.bodyMedium,
-                                      fontWeight = FontWeight.Bold)
+                                      style = MaterialTheme.typography.bodyMedium)
                                 }
                           }
                     }

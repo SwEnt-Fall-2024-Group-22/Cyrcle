@@ -117,7 +117,7 @@ class AllReviewsScreenTest {
     // Click the "Add/Edit Review" button
     composeTestRule.onNodeWithTag("AddOrEditReviewButton").performClick()
 
-    verify(navigationActions).navigateTo(Screen.REVIEW)
+    verify(navigationActions).navigateTo(Screen.ADD_REVIEW)
   }
 
   @Test
@@ -128,6 +128,6 @@ class AllReviewsScreenTest {
     }
     composeTestRule.onNodeWithTag("ReviewCard0").assertIsDisplayed()
     composeTestRule.onNodeWithTag("DeleteReviewButton").performClick()
-    verify(navigationActions, times(0)).navigateTo(Screen.CARD)
+    verify(navigationActions, times(0)).navigateTo(Screen.PARKING_DETAILS)
   }
 }

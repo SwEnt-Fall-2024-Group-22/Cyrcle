@@ -224,14 +224,6 @@ class ParkingViewModel(
   }
 
   /**
-   * updates the Review Score of the Parking passed as arguemnt with the score of the new review
-   * score The average score is given w/ two decimal places.
-   *
-   * @param newScore: score of the new review to add
-   * @param parking: Parking to update (selectedParking by default, should never be null)
-   */
-
-  /**
    * Updates the list of closest parkings.
    *
    * @param nbRequestLeft: number of tiles left to fetch the parkings from. If nbRequestLeft is 0,
