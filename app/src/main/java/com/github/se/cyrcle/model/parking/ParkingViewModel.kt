@@ -181,6 +181,7 @@ class ParkingViewModel(
 
   /** set the center of the circle, and reset the radius to DEFAULT_RADIUS */
   fun setCircleCenter(center: Point) {
+    Log.d("ParkingViewModel", "Setting center to $center")
     _circleCenter.value = center
     _radius.value = DEFAULT_RADIUS
     getParkingsInRadius(center, DEFAULT_RADIUS)

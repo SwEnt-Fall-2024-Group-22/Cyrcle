@@ -160,7 +160,9 @@ fun MapScreen(
             .pitch(0.0)
             .zoom(maxZoom)
             .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
-            .build())
+            .build()) {
+          mapViewportState.cameraState?.let { mapViewModel.updateUserPosition(it.center) }
+        }
   }
 
   Scaffold(bottomBar = { BottomNavigationBar(navigationActions, selectedItem = Route.MAP) }) {
