@@ -117,6 +117,8 @@ fun MapScreen(
   val enableParkingAddition by userViewModel.isSignedIn.collectAsState(false)
   // create a remember  state to store if the markers or the rectangles are displayed
   val mapMode = remember { mutableStateOf(MapMode.MARKERS) }
+  // this is the state the user selected by the user, remembered even when zoomed out.
+  val userMapMode = remember { mutableStateOf(MapMode.MARKERS) }
   val mapViewportState = MapConfig.createMapViewPortStateFromViewModel(mapViewModel)
   var removeViewAnnotation = remember { true }
   var cancelables = remember { Cancelable {} }
@@ -308,12 +310,19 @@ fun MapScreen(
                   if (mapView.mapboxMap.cameraState.zoom > thresholdDisplayZoom) {
                     parkingViewModel.getParkingsInRect(currentBottomLeft, currentTopRight)
                   }
+                  // On zoom-out past the threshold, switch to the markers mode
                   if (mapView.mapboxMap.cameraState.zoom < LABEL_THRESHOLD &&
                       zoomState.value >= LABEL_THRESHOLD) {
                     mapMode.value = MapMode.MARKERS
                   }
+                  // On zoomin in past the threshold, switch to the user's selected mode
+                  if (mapView.mapboxMap.cameraState.zoom >= LABEL_THRESHOLD &&
+                      zoomState.value < LABEL_THRESHOLD) {
+                    mapMode.value = userMapMode.value
+                  }
 
                   // store the zoom level
+                  // This must stay at the end of the listener.
                   zoomState.value = mapView.mapboxMap.cameraState.zoom
                 }
             // =======================  CAMERA  LISTENER  =======================
@@ -340,7 +349,8 @@ fun MapScreen(
             Switch(
                 checked = mapMode.value.isAdvancedMode,
                 onCheckedChange = {
-                  mapMode.value = if (it) MapMode.RECTANGLES else MapMode.MARKERS
+                  userMapMode.value = if (it) MapMode.RECTANGLES else MapMode.MARKERS
+                  mapMode.value = userMapMode.value
                 },
                 colors =
                     SwitchDefaults.colors()
