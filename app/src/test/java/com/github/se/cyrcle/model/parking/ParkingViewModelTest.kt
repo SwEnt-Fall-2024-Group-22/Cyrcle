@@ -69,9 +69,43 @@ class ParkingViewModelTest {
   }
 
   @Test
-  fun updateReviewScoreTest() {
-    val parking = TestInstancesParking.parking2
-    parkingViewModel.updateReviewScore(5.0, oldScore = 5.0, parking, isNewReview = true)
-    assert(parking.avgScore == 5.0)
+  fun handleNewReviewTest() {
+    val parking = TestInstancesParking.parking1.copy(avgScore = 4.0, nbReviews = 2)
+
+    parkingViewModel.handleNewReview(parking, newScore = 5.0)
+
+    assertEquals(4.33, parking.avgScore, 0.01) // Check average score with precision
+    assertEquals(3, parking.nbReviews) // Check number of reviews incremented
+
+    // Verify that the parking repository update method was called
+    verify(parkingRepository).updateParking(eq(parking), any(), any())
+  }
+
+  @Test
+  fun handleReviewUpdateTest() {
+    val parking = TestInstancesParking.parking1.copy(avgScore = 4.0, nbReviews = 3)
+
+    parkingViewModel.handleReviewUpdate(parking, newScore = 5.0, oldScore = 3.0)
+
+    // Calculate expected avgScore: initial avgScore + ((newScore - oldScore) / nbReviews)
+    assertEquals(4.66, parking.avgScore, 0.01) // Verify the adjusted average score
+    assertEquals(3, parking.nbReviews) // Number of reviews should remain the same
+
+    // Verify that the parking repository update method was called
+    verify(parkingRepository).updateParking(eq(parking), any(), any())
+  }
+
+  @Test
+  fun handleReviewDeletionTest() {
+    val parking = TestInstancesParking.parking1.copy(avgScore = 4.0, nbReviews = 3)
+
+    parkingViewModel.handleReviewDeletion(parking, oldScore = 4.0)
+
+    // Expected avgScore after deletion with nbReviews - 1
+    assertEquals(4.0, parking.avgScore, 0.01) // Verify adjusted average score after deletion
+    assertEquals(2, parking.nbReviews) // Verify that the number of reviews decreased
+
+    // Verify that the parking repository update method was called
+    verify(parkingRepository).updateParking(eq(parking), any(), any())
   }
 }

@@ -113,7 +113,17 @@
     <string name="all_review_title">All Reviews For %s</string>
     <string name="all_review_rating">Rating: %.1f</string>
     <string name="all_review_text">Text: %s</string>
+    <string name="by_text">By: %s</string>
+    <string name="on_text">On: %s</string>
     <string name="undefined_username">Unknown user</string>
+    <string name="sort_reviews">Sort Reviews</string>
+    <string name="sort_by_rating">Sort By Rating (Best Rated First)</string>
+    <string name="sort_by_date">Sort By Date (Most Recent First)</string>
+    <string name="delete_review">Delete Review</string>
+    <string name="add_review_first">Add A Review First!</string>
+    <string name="add_review">Add Review</string>
+    <string name="edit_review">Edit Review</string>
+    <string name="review_deleted">Review Deleted!</string>
 
     <!-- Review Screen -->
     <string name="review_screen_title_new_review">Add your review</string>

@@ -224,40 +224,6 @@ class ParkingViewModel(
   }
 
   /**
-   * updates the Review Score of the Parking passed as arguemnt with the score of the new review
-   * score The average score is given w/ two decimal places.
-   *
-   * @param newScore: score of the new review to add
-   * @param parking: Parking to update (selectedParking by default, should never be null)
-   */
-  fun updateReviewScore(
-      newScore: Double,
-      oldScore: Double = 0.0,
-      parking: Parking = selectedParking.value!!,
-      isNewReview: Boolean
-  ) {
-    if (isNewReview) {
-      parking.avgScore =
-          (100 * ((parking.avgScore * parking.nbReviews) + newScore) / (parking.nbReviews + 1))
-              .toInt() / 100.00
-      parking.nbReviews += 1
-      parkingRepository.updateParking(
-          parking,
-          {
-            val tile = Tile.getTileFromPoint(parking.location.center)
-            if (tilesToParking.value[tile] != null) {
-              tilesToParking.value[tile] =
-                  tilesToParking.value[tile]!!.map { p -> if (p.uid == parking.uid) parking else p }
-            }
-          },
-          {})
-    } else {
-      val delta = if (parking.nbReviews != 0) (oldScore - newScore) / parking.nbReviews else 0.0
-      parking.avgScore += delta
-    }
-  }
-
-  /**
    * Updates the list of closest parkings.
    *
    * @param nbRequestLeft: number of tiles left to fetch the parkings from. If nbRequestLeft is 0,
@@ -287,6 +253,78 @@ class ParkingViewModel(
             }
     if (_closestParkings.value.size < MIN_NB_PARKINGS || _radius.value == MAX_RADIUS) {
       incrementRadius()
+    }
+  }
+
+  /**
+   * Handles the deletion of a review for a given parking. Adjusts the average score and the number
+   * of reviews accordingly.
+   *
+   * @param parking The parking object for which the review is being deleted. Defaults to the
+   *   currently selected parking.
+   * @param oldScore The score of the review that is being deleted.
+   *
+   * The function recalculates the `avgScore` by removing the contribution of `oldScore` from the
+   * total score. If the number of reviews becomes zero after deletion, the `avgScore` is set to
+   * 0.0. The function then decrements the `nbReviews` count and updates the parking data in the
+   * repository.
+   */
+  fun handleReviewDeletion(parking: Parking = selectedParking.value!!, oldScore: Double) {
+    parking.avgScore =
+        if (parking.nbReviews >= 2) {
+          ((parking.nbReviews * parking.avgScore) - oldScore) / (parking.nbReviews - 1)
+        } else {
+          0.0
+        }
+    parking.nbReviews -= 1
+    parkingRepository.updateParking(parking, {}, {})
+  }
+
+  /**
+   * Handles the addition of a new review for a given parking. Adjusts the average score and the
+   * number of reviews accordingly.
+   *
+   * @param parking The parking object for which the review is being added. Defaults to the
+   *   currently selected parking.
+   * @param newScore The score of the new review being added.
+   *
+   * The function calculates the new `avgScore` by adding the `newScore` to the total score and
+   * dividing by the updated number of reviews. The new average is rounded to two decimal places.
+   * The function then increments the `nbReviews` count and updates the parking data in the
+   * repository.
+   */
+  fun handleNewReview(parking: Parking = selectedParking.value!!, newScore: Double) {
+    parking.avgScore =
+        (100 * ((parking.avgScore * parking.nbReviews) + newScore) / (parking.nbReviews + 1))
+            .toInt() / 100.00
+    parking.nbReviews += 1
+    parkingRepository.updateParking(parking, onSuccess = {}, onFailure = {})
+  }
+
+  /**
+   * Handles updating an existing review for a given parking. Adjusts the average score based on the
+   * difference between the new and old review scores.
+   *
+   * @param parking The parking object for which the review is being updated. Defaults to the
+   *   currently selected parking.
+   * @param newScore The new score of the review after the update.
+   * @param oldScore The previous score of the review before the update.
+   *
+   * The function calculates the difference (`delta`) between the `newScore` and `oldScore`, divided
+   * by the total number of reviews, to adjust the `avgScore`. The adjusted average score is then
+   * updated in the repository.
+   */
+  fun handleReviewUpdate(
+      parking: Parking = selectedParking.value!!,
+      newScore: Double,
+      oldScore: Double
+  ) {
+    if (parking.nbReviews != 0) {
+      val delta = (newScore - oldScore) / parking.nbReviews
+      parking.avgScore += delta
+      parkingRepository.updateParking(parking, {}, {})
+    } else {
+      Log.e("ParkingViewModel", "An unexpect error occured (0 reviews)")
     }
   }
 
