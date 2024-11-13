@@ -74,7 +74,7 @@ fun getColor(colorLevel: ColorLevel): Color {
 }
 
 /**
- * Get the color for a container from a ColorLevel.
+ * Get the color for content on a color from a ColorLevel.
  *
  * @param colorLevel The chosen ColorLevel
  * @return The container color from the `colorLevel`.
@@ -108,10 +108,10 @@ fun getContainerColor(colorLevel: ColorLevel): Color {
 }
 
 /**
- * Get the color for a container from a ColorLevel.
+ * Get the color for the content on a container from a ColorLevel.
  *
  * @param colorLevel The chosen ColorLevel
- * @return The container color from the `colorLevel`.
+ * @return The onContainer color from the `colorLevel`.
  */
 @Composable
 fun getOnContainerColor(colorLevel: ColorLevel): Color {
