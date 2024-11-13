@@ -4,6 +4,7 @@ import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -64,7 +65,6 @@ import com.mapbox.maps.plugin.annotation.AnnotationSourceOptions
 import com.mapbox.maps.plugin.annotation.ClusterOptions
 import com.mapbox.maps.plugin.annotation.annotations
 import com.mapbox.maps.plugin.annotation.generated.OnPointAnnotationClickListener
-import com.mapbox.maps.plugin.annotation.generated.PointAnnotation
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationManager
@@ -86,8 +86,15 @@ const val maxZoom = 18.0
 const val minZoom = 8.0
 const val thresholdDisplayZoom = 13.0
 const val LAYER_ID = "0128"
-const val LABEL_THRESHOLD = 15.0
+const val LABEL_THRESHOLD = 15.5
 
+/**
+ * Enum class to represent the different modes of the map
+ *
+ * @param description the description of the mode
+ * @param isAdvancedMode true if the mode is advanced, false otherwise The advanced mode is the mode
+ *   where the rectangles are displayed The simple mode is the mode where the markers are displayed
+ */
 enum class MapMode(override val description: String, val isAdvancedMode: Boolean) :
     DropDownableEnum {
   MARKERS("Simple", false),
@@ -107,28 +114,33 @@ fun MapScreen(
   val listOfParkings by parkingViewModel.rectParkings.collectAsState()
   val enableParkingAddition by userViewModel.isSignedIn.collectAsState(false)
   // create a remember  state to store if the markers or the rectangles are displayed
-  var displayMarkers by remember { mutableStateOf(MapMode.MARKERS) }
+  val mapMode = remember { mutableStateOf(MapMode.MARKERS) }
   val mapViewportState = MapConfig.createMapViewPortStateFromViewModel(mapViewModel)
   var removeViewAnnotation = remember { true }
   var cancelables = remember { Cancelable {} }
-  var listener = remember<MapIdleCallback?> { null }
+  var listener: MapIdleCallback?
   var markerAnnotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
   var rectangleAnnotationManager by remember { mutableStateOf<PolygonAnnotationManager?>(null) }
   var pLabelAnnotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
   val selectedParking by parkingViewModel.selectedParking.collectAsState()
   val locationEnabled = PermissionsManager.areLocationPermissionsGranted(activity)
-
+  // initialize the Gson object that will deserialize and serialize the parking to bind it to the
+  // marker
+  val gson = Gson()
   val screenCapacityString = stringResource(R.string.map_screen_capacity)
   val bitmap = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.dot)
   val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 80, 80, false)
+  val alpha by
+      animateFloatAsState(
+          targetValue = if (zoomState.value > LABEL_THRESHOLD) 1f else 0f, label = "zoomAlpha")
+
   // Draw markers on the map when the list of parkings changes
   LaunchedEffect(
-      listOfParkings, markerAnnotationManager, selectedParking?.nbReviews, displayMarkers) {
-        Log.d("MapScreen", "List of parkings changed")
+      listOfParkings, markerAnnotationManager, selectedParking?.nbReviews, mapMode.value) {
         pLabelAnnotationManager?.deleteAll()
         markerAnnotationManager?.deleteAll()
         rectangleAnnotationManager?.deleteAll()
-        if (displayMarkers.isAdvancedMode)
+        if (mapMode.value.isAdvancedMode)
             drawRectangles(
                 rectangleAnnotationManager,
                 pLabelAnnotationManager,
@@ -146,10 +158,6 @@ fun MapScreen(
             .build())
   }
 
-  // initialize the Gson object that will deserialize and serialize the parking to bind it
-  // to the marker
-  val gson = Gson()
-
   Scaffold(bottomBar = { BottomNavigationBar(navigationActions, selectedItem = Route.MAP) }) {
       padding ->
     MapboxMap(
@@ -158,9 +166,23 @@ fun MapScreen(
         style = { MapConfig.DefaultStyle() }) {
           DisposableMapEffect { mapView ->
 
+            // ======================= GLOBAL SETTINGS =======================
+            // Disable the rotation gesture
+            mapView.gestures.getGesturesManager().rotateGestureDetector.isEnabled = false
+
+            // Set camera bounds options
+            val cameraBoundsOptions =
+                CameraBoundsOptions.Builder().minZoom(minZoom).maxZoom(maxZoom).build()
+            mapView.mapboxMap.setBounds(cameraBoundsOptions)
+
+            // Get parkings in the current view
+            val (loadedBottomLeft, loadedTopRight) = mapViewModel.getScreenCorners(mapView)
+            parkingViewModel.getParkingsInRect(loadedBottomLeft, loadedTopRight)
+
             // When map is loaded, check if the location permission is granted and initialize the
             // location component
             if (locationEnabled) mapViewModel.initLocationComponent(mapView)
+            // ======================= GLOBAL SETTINGS =======================
 
             // ======================= ANNOTATIONS =======================
             // Create annotation manager to draw markers
@@ -173,9 +195,11 @@ fun MapScreen(
             // Create polygon annotation manager to draw rectangles
             rectangleAnnotationManager = mapView.annotations.createPolygonAnnotationManager()
             // Create point annotation manager to draw parking labels
-            pLabelAnnotationManager = mapView.annotations.createPointAnnotationManager()
+            pLabelAnnotationManager =
+                mapView.annotations.createPointAnnotationManager(AnnotationConfig())
             // ======================= ANNOTATIONS =======================
 
+            // ======================= MOVE LISTENER =======================
             // Add a move listener to the map to deactivate tracking mode when the user moves the
             // map
             val moveListener =
@@ -199,16 +223,10 @@ fun MapScreen(
                 }
 
             mapView.gestures.addOnMoveListener(moveListener)
+            // ======================= MOVE LISTENER =======================
 
+            // ======================= MARKERS CLICK =======================
             val viewAnnotationManager = mapView.viewAnnotationManager
-
-            // Lock rotations of the map
-            mapView.gestures.getGesturesManager().rotateGestureDetector.isEnabled = false
-
-            // Set camera bounds options
-            val cameraBoundsOptions =
-                CameraBoundsOptions.Builder().minZoom(minZoom).maxZoom(maxZoom).build()
-            mapView.mapboxMap.setBounds(cameraBoundsOptions)
 
             // Define the click  on the markers
             markerAnnotationManager?.addClickListener(
@@ -259,18 +277,12 @@ fun MapScreen(
                   cancelables = mapView.mapboxMap.subscribeMapIdle(listener!!)
                   true
                 })
+            // ======================= MARKERS CLICK =======================
 
-            val (loadedBottomLeft, loadedTopRight) = mapViewModel.getScreenCorners(mapView)
-
-            // Get parkings in the current view
-            parkingViewModel.getParkingsInRect(loadedBottomLeft, loadedTopRight)
+            // =======================  CAMERA  LISTENER  =======================
             // Add a camera change listener to detect zoom changes
             val cameraCancelable =
                 mapView.mapboxMap.subscribeCameraChanged {
-
-                  // Set the visibility of the labels
-                  setPointAnnotationManagerVisibility(
-                      pLabelAnnotationManager, mapView.mapboxMap.cameraState.zoom, zoomState.value)
 
                   // Remove the view annotation if the user moves the map
                   if (removeViewAnnotation) {
@@ -286,9 +298,15 @@ fun MapScreen(
                   if (mapView.mapboxMap.cameraState.zoom > thresholdDisplayZoom) {
                     parkingViewModel.getParkingsInRect(currentBottomLeft, currentTopRight)
                   }
+                  if (mapView.mapboxMap.cameraState.zoom < LABEL_THRESHOLD &&
+                      zoomState.value >= LABEL_THRESHOLD) {
+                    mapMode.value = MapMode.MARKERS
+                  }
+
                   // store the zoom level
                   zoomState.value = mapView.mapboxMap.cameraState.zoom
                 }
+            // =======================  CAMERA  LISTENER  =======================
 
             onDispose {
               markerAnnotationManager?.deleteAll()
@@ -302,16 +320,17 @@ fun MapScreen(
     Box(modifier = Modifier.padding(padding).fillMaxSize()) {
       // A switch to change the display mode
       Column(
-          modifier = Modifier.align(Alignment.TopStart).padding(start = 8.dp, top = 32.dp),
+          modifier =
+              Modifier.align(Alignment.TopStart).padding(start = 8.dp, top = 32.dp).alpha(alpha),
           horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 "Advanced Mode",
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.bodyMedium)
             Switch(
-                checked = displayMarkers.isAdvancedMode,
+                checked = mapMode.value.isAdvancedMode,
                 onCheckedChange = {
-                  displayMarkers = if (it) MapMode.RECTANGLES else MapMode.MARKERS
+                  mapMode.value = if (it) MapMode.RECTANGLES else MapMode.MARKERS
                 },
                 colors =
                     SwitchDefaults.colors()
@@ -437,25 +456,6 @@ fun drawRectangles(
   polygonAnnotationManager?.create(annotations)
 }
 
-fun setPointAnnotationManagerVisibility(
-    pointAnnotationManager: PointAnnotationManager?,
-    zoomLevel: Double,
-    previousZoom: Double
-) {
-  if (zoomLevel > LABEL_THRESHOLD && previousZoom > LABEL_THRESHOLD) {
-    return
-  }
-  if (zoomLevel <= LABEL_THRESHOLD && previousZoom <= LABEL_THRESHOLD) {
-    return
-  }
-  val isVisible = zoomLevel > LABEL_THRESHOLD
-  pointAnnotationManager?.annotations?.forEach { annotation ->
-    (annotation as? PointAnnotation)?.let {
-      it.textField = if (isVisible) "P" else ""
-      pointAnnotationManager.update(it)
-    }
-  }
-}
 /**
  * Draw markers on the map.
  *
