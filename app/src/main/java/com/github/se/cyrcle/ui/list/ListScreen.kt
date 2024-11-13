@@ -259,25 +259,6 @@ fun FilterSection(
       }
 }
 
-@Preview
-@Composable
-fun PreviewFilterSection() {
-  CyrcleTheme {
-    FilterSection(title = "Title", isExpanded = true, onToggle = {}) {
-      LazyRow(
-          modifier = Modifier.fillMaxWidth().testTag("CapacityFilter"),
-          horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            item {
-              ToggleButton(
-                  "Option 1", onClick = {}, value = true, modifier = Modifier.padding(2.dp))
-              ToggleButton(
-                  "Option 2", onClick = {}, value = false, modifier = Modifier.padding(2.dp))
-            }
-          }
-    }
-  }
-}
-
 @Composable
 fun SpotCard(
     navigationActions: NavigationActions,
