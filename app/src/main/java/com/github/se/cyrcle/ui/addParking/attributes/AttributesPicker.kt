@@ -355,7 +355,7 @@ fun AttributePickerTopBar(mapViewModel: MapViewModel, title: MutableState<String
               fontWeight = FontWeight.Bold,
               maxLines = 1)
         }
-        drawRectangles(annotationManager, listOf(location))
+        drawRectangles(annotationManager, null, listOf(location))
       }
 }
 
