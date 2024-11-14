@@ -14,7 +14,8 @@ object TestInstancesUser {
                   firstName = "John",
                   lastName = "Doe",
                   email = "john.doe@example.com",
-                  favoriteParkings = listOf("Test_spot_1", "Test_spot_2")))
+                  favoriteParkings = listOf("Test_spot_1", "Test_spot_2"),
+                  wallet = Wallet.empty()))
 
   val newUser =
       User(
@@ -24,7 +25,8 @@ object TestInstancesUser {
                   firstName = "New",
                   lastName = "User",
                   email = "newuser@example.com",
-                  favoriteParkings = emptyList()))
+                  favoriteParkings = emptyList(),
+                  wallet = Wallet.empty()))
 
   val updatedUser =
       User(
@@ -38,5 +40,6 @@ object TestInstancesUser {
                   firstName = "Updated",
                   lastName = "User",
                   email = "updateduser@example.com",
-                  favoriteParkings = emptyList()))
+                  favoriteParkings = emptyList(),
+                  wallet = Wallet.empty()))
 }

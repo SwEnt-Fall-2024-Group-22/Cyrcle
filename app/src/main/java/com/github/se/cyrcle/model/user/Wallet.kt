@@ -34,8 +34,8 @@ class Wallet(private var coins: Coin = 0) {
 
   /**
    * Return whether the user is solvable. A user is solvable if, after debiting the amount, the
-   * amount of coins in the wallet is still superior to the credit threshold.
-   * This function does not modify the value of the coins in the wallet, it's a simple projection.
+   * amount of coins in the wallet is still superior to the credit threshold. This function does not
+   * modify the value of the coins in the wallet, it's a simple projection.
    */
   fun isSolvable(amount: Coin, creditThreshold: Coin): Boolean {
     if (amount < 0) throw IllegalArgumentException("Amount must be positive")
