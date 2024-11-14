@@ -53,6 +53,7 @@
     <string name="sign_in_failed_toast">Login failed!</string>
     <string name="sign_in_guest_button">Continue as Guest</string>
     <string name="sign_in_google_button">Sign in with Google</string>
+    <string name="sign_in_to_add_favorites">Please sign in to add favorites</string>
 
     <!-- Card Screen -->
     <string name="card_screen_description">Description of %s</string>

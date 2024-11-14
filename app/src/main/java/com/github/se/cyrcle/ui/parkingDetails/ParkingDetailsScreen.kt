@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,7 +17,10 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.AddAPhoto
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -36,7 +40,9 @@ import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
+import com.github.se.cyrcle.ui.theme.Black
 import com.github.se.cyrcle.ui.theme.ColorLevel
+import com.github.se.cyrcle.ui.theme.Red
 import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.IconButton
 import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
@@ -54,8 +60,9 @@ fun ParkingDetailsScreen(
       parkingViewModel.selectedParking.collectAsState().value
           ?: return Text(stringResource(R.string.no_selected_parking_error))
   val userSignedIn = userViewModel.isSignedIn.collectAsState(false)
-
+  val scrollState = rememberScrollState()
   val context = LocalContext.current
+  val toastMessage = stringResource(R.string.sign_in_to_add_favorites)
 
   Scaffold(
       topBar = {
@@ -70,8 +77,44 @@ fun ParkingDetailsScreen(
                 Modifier.fillMaxSize()
                     .padding(padding)
                     .padding(32.dp)
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(scrollState)
                     .testTag("ParkingDetailsColumn")) {
+              Box(
+                  modifier = Modifier.fillMaxWidth().height(48.dp).testTag("FavoriteIconContainer"),
+                  contentAlignment = Alignment.TopEnd) {
+                    val isFavorite =
+                        userSignedIn.value &&
+                            userViewModel.favoriteParkings
+                                .collectAsState()
+                                .value
+                                .contains(selectedParking)
+
+                    Icon(
+                        imageVector =
+                            if (isFavorite) Icons.Default.Favorite
+                            else Icons.Outlined.FavoriteBorder,
+                        contentDescription = "Favorite",
+                        tint = if (isFavorite) Red else Black,
+                        modifier =
+                            Modifier.testTag(
+                                    if (isFavorite) "RedFilledFavoriteIcon"
+                                    else "BlackOutlinedFavoriteIcon")
+                                .clickable {
+                                  if (userSignedIn.value) {
+                                    if (isFavorite) {
+                                      userViewModel.removeFavoriteParkingFromSelectedUser(
+                                          selectedParking.uid)
+                                    } else {
+                                      userViewModel.addFavoriteParkingToSelectedUser(
+                                          selectedParking.uid)
+                                    }
+                                    userViewModel.getSelectedUserFavoriteParking()
+                                  } else {
+                                    Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show()
+                                  }
+                                })
+                  }
+
               // Reviews
               Row(
                   modifier =
@@ -107,6 +150,7 @@ fun ParkingDetailsScreen(
                   }
 
               Spacer(modifier = Modifier.height(16.dp))
+
               // Images
               Row(
                   modifier = Modifier.fillMaxWidth().testTag("ImagesRow"),
@@ -122,7 +166,6 @@ fun ParkingDetailsScreen(
                           icon = Icons.Outlined.AddAPhoto,
                           contentDescription = "Add Image",
                           onClick = {
-                            // Temporary toast. Will be replaced by an image picker
                             Toast.makeText(
                                     context,
                                     "A feature to add images will be added later",
@@ -179,6 +222,7 @@ fun ParkingDetailsScreen(
                                 color = MaterialTheme.colorScheme.onSurface)
                           }
                         }
+
                     Row(
                         modifier = Modifier.fillMaxWidth().testTag("RowProtectionPrice"),
                         horizontalArrangement = Arrangement.SpaceBetween) {
@@ -230,7 +274,6 @@ fun ParkingDetailsScreen(
                     Button(
                         text = stringResource(R.string.card_screen_show_map),
                         onClick = {
-                          // Temporary toast. Will redirect to the map screen later
                           Toast.makeText(
                                   context,
                                   "A feature to show the parking on the map will be added later",
@@ -244,7 +287,6 @@ fun ParkingDetailsScreen(
                     Button(
                         text = stringResource(R.string.card_screen_report),
                         onClick = {
-                          // Temporary toast. Will be replaced by a report system
                           Toast.makeText(
                                   context,
                                   "A report system will be added to the app later",

@@ -174,7 +174,7 @@ class MainActivityTest {
       composeTestRule.onNodeWithTag("RowCapacityRack").assertIsDisplayed()
       composeTestRule.onNodeWithTag("RowProtectionPrice").assertIsDisplayed()
       composeTestRule.onNodeWithTag("RowSecurity").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("ButtonsColumn").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("ButtonsColumn").performScrollTo().assertIsDisplayed()
       composeTestRule.onNodeWithTag("ShowInMapButton").assertIsDisplayed().assertHasClickAction()
       composeTestRule
           .onNodeWithTag("ReportButton")
