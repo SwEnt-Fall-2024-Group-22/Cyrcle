@@ -97,8 +97,8 @@ fun ReviewScreen(
                         in 0f..1f -> stringResource(R.string.review_screen_terrible_review)
                         in 1f..2f -> stringResource(R.string.review_screen_bad_review)
                         in 2f..3f -> stringResource(R.string.review_screen_average_review)
-                        in 3.5f..4f -> stringResource(R.string.review_screen_good_review)
-                        in 4.5f..5f -> stringResource(R.string.review_screen_great_review)
+                        in 3f..4f -> stringResource(R.string.review_screen_good_review)
+                        in 4f..5f -> stringResource(R.string.review_screen_great_review)
                         else -> ""
                       },
                   style = MaterialTheme.typography.bodyLarge,
