@@ -8,12 +8,10 @@ package com.github.se.cyrcle.model.user
  * @param userViewModel The ViewModel of the user to get info about the current state of the user
  * @throws IllegalArgumentException if the amount is negative.
  */
-class CoinViewModel(userViewModel: UserViewModel) {
+class CoinViewModel(userViewModel: UserViewModel, private val creditThreshold: Coin = 0) {
   private val currentUser = userViewModel.currentUser
 
   private var anonymousWallet: Wallet = Wallet.empty()
-
-  private val creditThreshold = 0
 
   /**
    * The amount of coins the user has.
