@@ -15,7 +15,7 @@ class ColorSchemeTest {
             ColorProperty("OnPrimary", White),
             ColorProperty("PrimaryContainer", Cerulean),
             ColorProperty("OnPrimaryContainer", White),
-            ColorProperty("InversePrimary", Black),
+            ColorProperty("InversePrimary", invertColor(Cerulean)),
             ColorProperty("Secondary", YInMnBlue),
             ColorProperty("OnSecondary", White),
             ColorProperty("SecondaryContainer", YInMnBlue),
@@ -54,7 +54,7 @@ class ColorSchemeTest {
             "OnPrimary" -> White
             "PrimaryContainer" -> Cerulean
             "OnPrimaryContainer" -> White
-            "InversePrimary" -> Black
+            "InversePrimary" -> invertColor(Cerulean)
             "Secondary" -> YInMnBlue
             "OnSecondary" -> White
             "SecondaryContainer" -> YInMnBlue
@@ -67,10 +67,10 @@ class ColorSchemeTest {
             "OnError" -> White
             "ErrorContainer" -> Red
             "OnErrorContainer" -> White
-            "Background" -> Cerulean
+            "Background" -> White
             "OnBackground" -> Black
-            "Surface" -> Cerulean
-            "OnSurface" -> White
+            "Surface" -> White
+            "OnSurface" -> Cerulean
             "SurfaceDim" -> CeruleanLow
             "SurfaceBright" -> CeruleanHigh
             "SurfaceTint" -> Aero
