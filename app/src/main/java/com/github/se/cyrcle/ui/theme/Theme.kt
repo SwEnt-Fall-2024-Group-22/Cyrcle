@@ -14,7 +14,8 @@ import androidx.compose.ui.graphics.luminance
  */
 @Composable
 fun defaultOnColor(): Color {
-  return if (isSystemInDarkTheme()) White else Black
+  // return if (isSystemInDarkTheme()) White else Black
+  return Black
 }
 
 /**

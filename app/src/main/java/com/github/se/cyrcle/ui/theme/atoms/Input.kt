@@ -14,11 +14,13 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.ui.theme.ColorLevel
+import com.github.se.cyrcle.ui.theme.defaultOnColor
+import com.github.se.cyrcle.ui.theme.getOutlinedTextFieldColors
 
 /**
  * Create a themed `OutlinedTextField`, with simplified arguments. The value contained in the text
@@ -44,23 +46,24 @@ fun InputText(
     modifier: Modifier = Modifier,
     onValueChange: (String) -> Unit,
     value: String = "",
-    labelColor: Color = MaterialTheme.colorScheme.onBackground,
     singleLine: Boolean = true,
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     minLines: Int = 1,
     hasClearIcon: Boolean = true,
     isError: Boolean = false,
+    colorLevel: ColorLevel = ColorLevel.PRIMARY,
     testTag: String = "InputText"
 ) {
   OutlinedTextField(
       value,
       onValueChange = onValueChange,
       modifier = modifier.testTag(testTag),
-      label = { Text(label, Modifier.testTag("${testTag}Text"), color = labelColor) },
+      label = { Text(label, Modifier.testTag("${testTag}Text"), color = defaultOnColor()) },
       singleLine = singleLine,
       maxLines = maxLines,
       minLines = minLines,
       isError = isError,
+      colors = getOutlinedTextFieldColors(ColorLevel.PRIMARY),
       trailingIcon = {
         if (hasClearIcon && value.isNotEmpty()) {
           Icon(

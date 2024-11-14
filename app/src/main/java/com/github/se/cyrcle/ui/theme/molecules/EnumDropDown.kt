@@ -11,7 +11,6 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -25,7 +24,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.model.parking.ParkingProtection
-import com.github.se.cyrcle.ui.theme.Cerulean
+import com.github.se.cyrcle.ui.theme.ColorLevel
+import com.github.se.cyrcle.ui.theme.defaultOnColor
+import com.github.se.cyrcle.ui.theme.getOutlinedTextFieldColors
 
 /**
  * Interface for enums that can be displayed in a dropdown menu.
@@ -65,13 +66,10 @@ fun <T : DropDownableEnum> EnumDropDown(
             value = selectedValue.value.description,
             onValueChange = {},
             label = {
-              Text(
-                  text = label,
-                  Modifier.testTag("${testTag}Label"),
-                  color = MaterialTheme.colorScheme.onBackground)
+              Text(text = label, Modifier.testTag("${testTag}Label"), color = defaultOnColor())
             },
             trailingIcon = { DropDownTrailingIcon(expanded) },
-            colors = OutlinedTextFieldDefaults.colors(),
+            colors = getOutlinedTextFieldColors(ColorLevel.PRIMARY),
             modifier = Modifier.menuAnchor().fillMaxWidth())
 
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
@@ -82,7 +80,7 @@ fun <T : DropDownableEnum> EnumDropDown(
                       text = option.description,
                       textAlign = TextAlign.Center,
                       modifier = Modifier.testTag("${testTag}${i}Text"),
-                      color = Cerulean)
+                      color = defaultOnColor())
                 },
                 onClick = {
                   expanded = false

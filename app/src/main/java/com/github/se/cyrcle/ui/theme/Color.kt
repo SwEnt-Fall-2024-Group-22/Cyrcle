@@ -5,8 +5,15 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.github.se.cyrcle.ui.theme.ColorLevel.ERROR
+import com.github.se.cyrcle.ui.theme.ColorLevel.INVERSE_PRIMARY
+import com.github.se.cyrcle.ui.theme.ColorLevel.PRIMARY
+import com.github.se.cyrcle.ui.theme.ColorLevel.SECONDARY
+import com.github.se.cyrcle.ui.theme.ColorLevel.TERTIARY
 
 val Aero = Color(0xFF5BC0EB)
 val ShamrockGreen = Color(0xFF229C6B)
@@ -152,4 +159,20 @@ fun getIconButtonColors(colorLevel: ColorLevel): IconButtonColors {
       contentColor = getOnColor(colorLevel),
       disabledContainerColor = disabledColor(),
       disabledContentColor = onDisabledColor())
+}
+
+/**
+ * Get the colors for a text field from a ColorScheme.
+ *
+ * @param colorLevel The chosen ColorScheme
+ * @return The `TextFieldColors` from the `colorScheme`
+ */
+@Composable
+fun getOutlinedTextFieldColors(colorLevel: ColorLevel): TextFieldColors {
+  return OutlinedTextFieldDefaults.colors()
+      .copy(
+          unfocusedIndicatorColor = defaultOnColor(),
+          focusedIndicatorColor = getColor(colorLevel),
+          unfocusedTextColor = defaultOnColor(),
+          focusedTextColor = defaultOnColor())
 }

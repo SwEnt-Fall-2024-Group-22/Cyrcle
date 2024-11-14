@@ -148,7 +148,7 @@ fun FilterHeader(
               text = stringResource(R.string.all_parkings_radius, radius.value.toInt()),
               modifier = Modifier.weight(1f),
               style = MaterialTheme.typography.headlineMedium,
-              color = MaterialTheme.colorScheme.onSurface)
+          )
 
           SmallFloatingActionButton(
               onClick = { showFilters = !showFilters },
@@ -224,7 +224,6 @@ fun FilterHeader(
             Text(
                 text = stringResource(R.string.list_screen_display_only_cctv),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.testTag("CCTVCheckboxLabel"))
           }
     }
@@ -248,7 +247,6 @@ fun FilterSection(
             text = title,
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.clickable(onClick = onToggle).padding(8.dp).fillMaxWidth(),
-            color = MaterialTheme.colorScheme.onSurface,
             testTag = title)
 
         if (isExpanded) {
@@ -289,7 +287,6 @@ fun SpotCard(
                           parking.optName?.let { if (it.length > 35) it.take(32) + "..." else it }
                               ?: stringResource(R.string.default_parking_name),
                       style = MaterialTheme.typography.bodyLarge,
-                      color = MaterialTheme.colorScheme.onSurface,
                       testTag = "ParkingName")
                   Text(
                       text =
@@ -297,7 +294,6 @@ fun SpotCard(
                               stringResource(R.string.distance_m).format(distance * 1000)
                           else stringResource(R.string.distance_km).format(distance),
                       style = MaterialTheme.typography.bodySmall,
-                      color = MaterialTheme.colorScheme.onSurface,
                       testTag = "ParkingDistance")
                 }
 
