@@ -506,4 +506,62 @@ class ListScreenTest {
     composeTestRule.onAllNodesWithTag("CapacityFilterItem").onFirst().performClick()
     assert(selectedCapacities.contains(ParkingCapacity.entries[0]))
   }
+
+  @Test
+  fun testDistanceFormattingM() {
+    composeTestRule.setContent {
+      SpotCard(
+          navigationActions = mockNavigationActions,
+          parkingViewModel = parkingViewModel,
+          userViewModel = userViewModel,
+          parking = TestInstancesParking.parking1,
+          distance = 0.5, // 500m
+          initialIsPinned = false)
+    }
+
+    // Test meters display
+    composeTestRule
+        .onNodeWithTag("ParkingDistance", useUnmergedTree = true)
+        .assertTextEquals("500 m")
+  }
+
+  @Test
+  fun testDistanceFormattingKM() {
+    composeTestRule.setContent {
+      SpotCard(
+          navigationActions = mockNavigationActions,
+          parkingViewModel = parkingViewModel,
+          userViewModel = userViewModel,
+          parking = TestInstancesParking.parking1,
+          distance = 2.5, // 2.5km
+          initialIsPinned = false)
+    }
+
+    // Test kilometers display
+    composeTestRule
+        .onNodeWithTag("ParkingDistance", useUnmergedTree = true)
+        .assertTextEquals("2.50 km")
+  }
+
+  @Test
+  fun testParkingNameTruncation() {
+    val longNameParking =
+        TestInstancesParking.parking1.copy(
+            optName = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+    parkingViewModel.addParking(longNameParking)
+
+    composeTestRule.setContent {
+      SpotCard(
+          navigationActions = mockNavigationActions,
+          parkingViewModel = parkingViewModel,
+          userViewModel = userViewModel,
+          parking = longNameParking,
+          distance = 0.0,
+          initialIsPinned = false)
+    }
+
+    composeTestRule
+        .onNodeWithTag("ParkingName", useUnmergedTree = true)
+        .assertTextEquals("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...")
+  }
 }
