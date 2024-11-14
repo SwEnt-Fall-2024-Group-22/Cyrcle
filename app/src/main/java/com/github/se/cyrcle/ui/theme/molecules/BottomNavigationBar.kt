@@ -19,6 +19,7 @@ import com.github.se.cyrcle.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.TopLevelDestination
 import com.github.se.cyrcle.ui.theme.Black
+import com.github.se.cyrcle.ui.theme.White
 
 /**
  * Create a themed bottom navigation bar, with simplified arguments. The name isn't correct anymore,
@@ -60,8 +61,8 @@ fun BottomNavigationBar(
                       disabledIconColor = LightGray,
                       unselectedTextColor = Black,
                       unselectedIconColor = Black,
-                      selectedIconColor = MaterialTheme.colorScheme.onSurface,
-                      selectedTextColor = MaterialTheme.colorScheme.onSurface,
+                      selectedIconColor = White,
+                      selectedTextColor = White,
                       selectedIndicatorColor = MaterialTheme.colorScheme.surfaceTint))
         }
       },

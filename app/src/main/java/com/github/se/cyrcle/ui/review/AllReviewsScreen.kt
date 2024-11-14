@@ -85,7 +85,7 @@ fun FilterSection(
             text = title,
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.clickable(onClick = onToggle).padding(8.dp).fillMaxWidth(),
-            color = MaterialTheme.colorScheme.primary,
+            color = MaterialTheme.colorScheme.onSurface,
             testTag = title)
 
         if (isExpanded) {
@@ -155,8 +155,8 @@ fun SortingOptionSelector(
               style = MaterialTheme.typography.bodyMedium,
               color =
                   if (selectedSortingOption == ReviewSortingOption.Rating)
-                      MaterialTheme.colorScheme.primary
-                  else MaterialTheme.colorScheme.onSurface)
+                      MaterialTheme.colorScheme.onSecondaryContainer
+                  else MaterialTheme.colorScheme.primary)
         }
 
     Row(
@@ -176,8 +176,8 @@ fun SortingOptionSelector(
               style = MaterialTheme.typography.bodyMedium,
               color =
                   if (selectedSortingOption == ReviewSortingOption.DateTime)
-                      MaterialTheme.colorScheme.primary
-                  else MaterialTheme.colorScheme.onSurface)
+                      MaterialTheme.colorScheme.onSecondaryContainer
+                  else MaterialTheme.colorScheme.primary)
         }
   }
 }
@@ -245,7 +245,7 @@ fun AllReviewsScreen(
                         val index = sortedReviews.indexOf(curReview)
                         val isExpanded = selectedCardIndex == index
                         val cardHeight by animateDpAsState(if (isExpanded) 200.dp else 100.dp)
-                        val cardColor = MaterialTheme.colorScheme.surface
+                        val cardColor = MaterialTheme.colorScheme.surfaceContainer
                         Card(
                             modifier =
                                 Modifier.fillMaxWidth()
@@ -272,25 +272,25 @@ fun AllReviewsScreen(
                                         text =
                                             stringResource(R.string.by_text)
                                                 .format(uidOfOwner.value),
-                                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
                                         style = MaterialTheme.typography.bodySmall,
                                         modifier = Modifier.testTag("ReviewOwner$index"))
                                     Text(
                                         text =
                                             stringResource(R.string.on_text)
                                                 .format(curReview.time.toFormattedDate()),
-                                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
                                         style = MaterialTheme.typography.bodySmall,
                                         modifier = Modifier.testTag("ReviewDate$index"))
                                     Spacer(modifier = Modifier.height(4.dp))
                                     ScoreStars(
                                         curReview.rating,
                                         scale = 0.9f,
-                                        starColor = MaterialTheme.colorScheme.onSecondaryContainer)
+                                        starColor = MaterialTheme.colorScheme.onPrimaryContainer)
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
                                         text = curReview.text,
-                                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
                                         style = MaterialTheme.typography.bodySmall,
                                         modifier = Modifier.testTag("ReviewText$index"))
                                   }

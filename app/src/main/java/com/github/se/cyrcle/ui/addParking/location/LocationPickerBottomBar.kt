@@ -44,7 +44,10 @@ fun LocationPickerBottomBar(
   val isAreaTooLarge by mapViewModel.isAreaTooLarge.collectAsState()
   Box(Modifier.background(Color.White).height(100.dp).testTag("LocationPickerBottomBar")) {
     Row(
-        Modifier.fillMaxWidth().wrapContentHeight().padding(16.dp).background(Color.White),
+        Modifier.fillMaxWidth()
+            .wrapContentHeight()
+            .padding(16.dp)
+            .background(MaterialTheme.colorScheme.background),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically) {
           Button(

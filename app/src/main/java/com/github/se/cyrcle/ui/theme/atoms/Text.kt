@@ -8,7 +8,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
-import com.github.se.cyrcle.ui.theme.White
+import com.github.se.cyrcle.ui.theme.defaultOnColor
 
 /**
  * Create a themed text, with simplified arguments. TODO
@@ -25,7 +25,7 @@ fun Text(
     text: String,
     modifier: Modifier = Modifier,
     style: TextStyle = MaterialTheme.typography.bodyLarge,
-    color: Color = White,
+    color: Color = defaultOnColor(),
     textAlign: TextAlign = TextAlign.Center,
     testTag: String = "Text"
 ) {

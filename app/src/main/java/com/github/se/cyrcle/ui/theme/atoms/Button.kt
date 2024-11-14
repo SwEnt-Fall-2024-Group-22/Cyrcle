@@ -32,7 +32,6 @@ import com.github.se.cyrcle.ui.theme.getButtonColors
 import com.github.se.cyrcle.ui.theme.getColor
 import com.github.se.cyrcle.ui.theme.getIconButtonColors
 import com.github.se.cyrcle.ui.theme.getOnColor
-import com.github.se.cyrcle.ui.theme.onDisabledColor
 import kotlin.math.floor
 import kotlin.math.round
 
@@ -60,7 +59,11 @@ fun SmallFloatingActionButton(
       modifier = modifier.testTag(testTag),
       containerColor = getColor(colorLevel),
       contentColor = getOnColor(colorLevel)) {
-        Icon(icon, contentDescription, Modifier.testTag("${testTag}Icon"))
+        Icon(
+            icon,
+            contentDescription,
+            Modifier.testTag("${testTag}Icon"),
+            tint = getOnColor(colorLevel))
       }
 }
 
@@ -88,7 +91,11 @@ fun FloatingActionButton(
       modifier = modifier.testTag(testTag),
       containerColor = getColor(colorLevel),
       contentColor = getOnColor(colorLevel)) {
-        Icon(icon, contentDescription, Modifier.testTag("${testTag}Icon"))
+        Icon(
+            icon,
+            contentDescription,
+            Modifier.testTag("${testTag}Icon"),
+            tint = getOnColor(colorLevel))
       }
 }
 
@@ -116,7 +123,11 @@ fun LargeFloatingActionButton(
       modifier = modifier.testTag(testTag),
       containerColor = getColor(colorLevel),
       contentColor = getOnColor(colorLevel)) {
-        Icon(icon, contentDescription, Modifier.testTag("${testTag}Icon"))
+        Icon(
+            icon,
+            contentDescription,
+            Modifier.testTag("${testTag}Icon"),
+            tint = getOnColor(colorLevel))
       }
 }
 
@@ -145,7 +156,7 @@ fun ExtendedFloatingActionButton(
       onClick = { onClick() },
       modifier = modifier.testTag(testTag),
       icon = { Icon(icon, contentDescription, Modifier.testTag("${testTag}Icon")) },
-      text = { Text(text, Modifier.testTag("${testTag}Text")) },
+      text = { Text(text, Modifier.testTag("${testTag}Text"), color = getOnColor(colorLevel)) },
       containerColor = getColor(colorLevel),
       contentColor = getOnColor(colorLevel))
 }
@@ -174,7 +185,7 @@ fun Button(
       modifier = modifier.testTag(testTag),
       colors = getButtonColors(colorLevel),
       enabled = enabled) {
-        Text(text, Modifier.testTag("${testTag}Text"))
+        Text(text, Modifier.testTag("${testTag}Text"), color = getOnColor(colorLevel))
       }
 }
 
@@ -201,10 +212,11 @@ fun ToggleButton(
       modifier = modifier.testTag(testTag),
       colors =
           if (value.value) getButtonColors(colorLevel)
-          else
-              ButtonDefaults.buttonColors(
-                  containerColor = disabledColor(), contentColor = onDisabledColor())) {
-        Text(text, Modifier.testTag("${testTag}Text"))
+          else ButtonDefaults.buttonColors(containerColor = disabledColor())) {
+        Text(
+            text,
+            Modifier.testTag("${testTag}Text"),
+            color = if (value.value) getOnColor(colorLevel) else getColor(colorLevel))
       }
 }
 
@@ -232,10 +244,11 @@ fun ToggleButton(
       modifier = modifier.testTag(testTag),
       colors =
           if (value) getButtonColors(colorLevel)
-          else
-              ButtonDefaults.buttonColors(
-                  containerColor = disabledColor(), contentColor = onDisabledColor())) {
-        Text(text, Modifier.testTag("${testTag}Text"))
+          else ButtonDefaults.buttonColors(containerColor = disabledColor())) {
+        Text(
+            text,
+            Modifier.testTag("${testTag}Text"),
+            color = if (value) getOnColor(colorLevel) else getColor(colorLevel))
       }
 }
 
@@ -257,7 +270,8 @@ fun IconButton(
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
-            modifier = Modifier.testTag("${testTag}Icon"))
+            modifier = Modifier.testTag("${testTag}Icon"),
+            tint = getOnColor(colorLevel))
       }
 }
 

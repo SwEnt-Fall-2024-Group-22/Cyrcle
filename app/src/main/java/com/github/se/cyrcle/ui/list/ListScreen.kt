@@ -53,10 +53,12 @@ import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
+import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.atoms.ToggleButton
+import com.github.se.cyrcle.ui.theme.getCheckBoxColors
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.mapbox.turf.TurfMeasurement
 
@@ -148,7 +150,7 @@ fun FilterHeader(
               text = stringResource(R.string.all_parkings_radius, radius.value.toInt()),
               modifier = Modifier.weight(1f),
               style = MaterialTheme.typography.headlineMedium,
-              color = MaterialTheme.colorScheme.onSurface)
+          )
 
           SmallFloatingActionButton(
               onClick = { showFilters = !showFilters },
@@ -219,12 +221,12 @@ fun FilterHeader(
             Checkbox(
                 checked = onlyWithCCTV,
                 onCheckedChange = onCCTVCheckedChange,
-                modifier = Modifier.testTag("CCTVCheckbox"))
+                modifier = Modifier.testTag("CCTVCheckbox"),
+                colors = getCheckBoxColors(ColorLevel.PRIMARY))
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = stringResource(R.string.list_screen_display_only_cctv),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.testTag("CCTVCheckboxLabel"))
           }
     }
@@ -248,7 +250,6 @@ fun FilterSection(
             text = title,
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.clickable(onClick = onToggle).padding(8.dp).fillMaxWidth(),
-            color = MaterialTheme.colorScheme.primary,
             testTag = title)
 
         if (isExpanded) {
@@ -265,7 +266,7 @@ fun SpotCard(
     distance: Double
 ) {
   // make a line between the card and the next one
-  HorizontalDivider(modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.surface)
+  HorizontalDivider(modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.onSurface)
   Card(
       modifier =
           Modifier.fillMaxWidth()
@@ -289,7 +290,6 @@ fun SpotCard(
                           parking.optName?.let { if (it.length > 35) it.take(32) + "..." else it }
                               ?: stringResource(R.string.default_parking_name),
                       style = MaterialTheme.typography.bodyLarge,
-                      color = MaterialTheme.colorScheme.onSurface,
                       testTag = "ParkingName")
                   Text(
                       text =
@@ -297,7 +297,6 @@ fun SpotCard(
                               stringResource(R.string.distance_m).format(distance * 1000)
                           else stringResource(R.string.distance_km).format(distance),
                       style = MaterialTheme.typography.bodySmall,
-                      color = MaterialTheme.colorScheme.onSurface,
                       testTag = "ParkingDistance")
                 }
 
@@ -312,14 +311,14 @@ fun SpotCard(
                         pluralStringResource(R.plurals.reviews_count, count = parking.nbReviews)
                             .format(parking.nbReviews),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+                    color = MaterialTheme.colorScheme.onSurface,
                     testTag = "ParkingNbReviews")
               }
             } else {
               Text(
                   text = stringResource(R.string.no_reviews),
                   style = MaterialTheme.typography.bodySmall,
-                  color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+                  color = MaterialTheme.colorScheme.onSurface,
                   testTag = "ParkingNoReviews")
             }
           }
