@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.parkingDetails
 
+import android.util.Log
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
@@ -23,6 +24,10 @@ import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.model.review.ReviewRepository
 import com.github.se.cyrcle.model.review.ReviewViewModel
+import com.github.se.cyrcle.model.user.TestInstancesUser
+import com.github.se.cyrcle.model.user.User
+import com.github.se.cyrcle.model.user.UserDetails
+import com.github.se.cyrcle.model.user.UserPublic
 import com.github.se.cyrcle.model.user.UserRepository
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
@@ -63,8 +68,72 @@ class ParkingDetailsScreenTest {
     userViewModel = UserViewModel(userRepository, parkingRepository)
     reviewViewModel = ReviewViewModel(reviewRepository)
 
+    parkingViewModel.addParking(TestInstancesParking.parking2)
+    parkingViewModel.addParking(TestInstancesParking.parking3)
+
     `when`(navigationActions.currentRoute()).thenReturn(Screen.PARKING_DETAILS)
   }
+
+
+
+  @Test
+  fun favoriteIconVisibleWhenNotSignedInAndDoesNothing() {
+    parkingViewModel.selectParking(TestInstancesParking.parking1)
+    userViewModel.setCurrentUser(null) // Ensure user is signed out
+
+    composeTestRule.setContent {
+      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("FavoriteIconContainer").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("BlackOutlinedFavoriteIcon").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("BlackOutlinedFavoriteIcon").performClick()
+    composeTestRule.onNodeWithTag("BlackOutlinedFavoriteIcon").assertIsDisplayed()
+  }
+
+  @Test
+  fun addToFavoritesWhenSignedIn() {
+
+
+    parkingViewModel.selectParking(TestInstancesParking.parking3)
+    userViewModel.addUser(TestInstancesUser.user1)
+    userViewModel.getUserById(TestInstancesUser.user1.public.userId)
+    userViewModel.getSelectedUserFavoriteParking()
+
+    composeTestRule.setContent {
+      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
+    }
+    // Initially should show outline icon
+    composeTestRule.onNodeWithTag("BlackOutlinedFavoriteIcon").assertIsDisplayed()
+
+    // Click to add to favorites
+    composeTestRule.onNodeWithTag("BlackOutlinedFavoriteIcon").performClick()
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithTag("RedFilledFavoriteIcon").assertIsDisplayed()
+  }
+
+  @Test
+  fun removeFromFavoritesWhenSignedIn() {
+    parkingViewModel.selectParking(TestInstancesParking.parking1)
+    userViewModel.addUser(TestInstancesUser.user1)
+    userViewModel.getUserById(TestInstancesUser.user1.public.userId)
+    userViewModel.getSelectedUserFavoriteParking()
+
+    composeTestRule.setContent {
+      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
+    }
+
+    // Initially should show filled icon
+    composeTestRule.onNodeWithTag("RedFilledFavoriteIcon").assertIsDisplayed()
+
+    // Click to remove from favorites
+    composeTestRule.onNodeWithTag("RedFilledFavoriteIcon").performClick()
+
+    // Should now show outline icon
+    composeTestRule.onNodeWithTag("BlackOutlinedFavoriteIcon").assertIsDisplayed()
+  }
+
 
   @Test
   fun displayAllComponents() {
@@ -85,21 +154,17 @@ class ParkingDetailsScreenTest {
     composeTestRule.onNodeWithTag("ParkingImagesRow").assertIsDisplayed()
     composeTestRule.onNodeWithTag("ParkingImage0").assertIsDisplayed()
 
-    // Verify the information
-    composeTestRule.onNodeWithTag("CapacityColumn").assertIsDisplayed()
+    // Scroll to the information section
+    composeTestRule.onNodeWithTag("CapacityColumn").performScrollTo().assertIsDisplayed()
     composeTestRule.onNodeWithTag("RackTypeColumn").assertIsDisplayed()
     composeTestRule.onNodeWithTag("ProtectionColumn").assertIsDisplayed()
     composeTestRule.onNodeWithTag("PriceColumn").assertIsDisplayed()
     composeTestRule.onNodeWithTag("SecurityColumn").assertIsDisplayed()
 
-    // Verify the buttons
-    composeTestRule.onNodeWithTag("ButtonsColumn").assertIsDisplayed()
+    // Scroll to the buttons section
+    composeTestRule.onNodeWithTag("ButtonsColumn").performScrollTo().assertIsDisplayed()
     composeTestRule.onNodeWithTag("ShowInMapButton").assertIsDisplayed()
-    composeTestRule
-        .onNodeWithTag("ReportButton")
-        .assertExists()
-        .performScrollTo()
-        .assertIsDisplayed()
+    composeTestRule.onNodeWithTag("ReportButton").assertIsDisplayed()
   }
 
   @Test
