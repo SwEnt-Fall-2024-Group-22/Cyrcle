@@ -4,12 +4,14 @@ import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 
-class ImageRepositoryCloudStorage(private val auth: FirebaseAuth) : ImageRepository {
+class ImageRepositoryCloudStorage @Inject constructor(private val auth: FirebaseAuth) :
+    ImageRepository {
 
   private val storage: FirebaseStorage = FirebaseStorage.getInstance()
   private val storageRef: StorageReference = storage.reference

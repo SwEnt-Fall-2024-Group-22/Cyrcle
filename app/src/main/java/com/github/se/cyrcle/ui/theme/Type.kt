@@ -51,3 +51,6 @@ val Typography =
                 fontSize = 20.sp,
                 lineHeight = 28.sp,
                 letterSpacing = 0.sp))
+
+val googleSignInButtonStyle = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Medium)
+val bold = TextStyle(fontWeight = FontWeight.Bold)

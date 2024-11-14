@@ -1,40 +1,54 @@
 package com.github.se.cyrcle.ui.map
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.github.se.cyrcle.model.parking.ImageRepositoryCloudStorage
-import com.github.se.cyrcle.model.parking.ParkingRepositoryFirestore
+import com.github.se.cyrcle.di.mocks.MockImageRepository
+import com.github.se.cyrcle.di.mocks.MockParkingRepository
+import com.github.se.cyrcle.di.mocks.MockUserRepository
+import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.user.TestInstancesUser
+import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 
 @RunWith(AndroidJUnit4::class)
-class MapScreenTest : TestCase() {
+class MapScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var mockNavigation: NavigationActions
+
   private lateinit var parkingViewModel: ParkingViewModel
+  private lateinit var userViewModel: UserViewModel
+  private lateinit var mapViewModel: MapViewModel
 
   @Before
   fun setUp() {
     mockNavigation = mock(NavigationActions::class.java)
-    val imageRepository = ImageRepositoryCloudStorage(FirebaseAuth.getInstance())
-    val parkingRepository = ParkingRepositoryFirestore(FirebaseFirestore.getInstance())
+
+    val imageRepository = MockImageRepository()
+    val parkingRepository = MockParkingRepository()
+    val userRepository = MockUserRepository()
+
     parkingViewModel = ParkingViewModel(imageRepository, parkingRepository)
+    userViewModel = UserViewModel(userRepository, parkingRepository)
+    mapViewModel = MapViewModel()
 
     `when`(mockNavigation.currentRoute()).thenReturn(Screen.MAP)
   }
@@ -47,17 +61,19 @@ class MapScreenTest : TestCase() {
    */
   @Test
   fun testMapIsDisplayed() {
-    composeTestRule.setContent { MapScreen(mockNavigation, parkingViewModel = parkingViewModel) }
+    composeTestRule.setContent {
+      MapScreen(mockNavigation, parkingViewModel, userViewModel, mapViewModel)
+    }
 
     composeTestRule.onNodeWithTag("MapScreen").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("BottomNavigationBar").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("NavigationBar").assertIsDisplayed()
 
     // Assert that the zoom controls are displayed
-    composeTestRule.onNodeWithTag("ZoomControlsIn").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("ZoomControlsOut").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("ZoomControlsIn").assertIsDisplayed().assertHasClickAction()
+    composeTestRule.onNodeWithTag("ZoomControlsOut").assertIsDisplayed().assertHasClickAction()
 
-    // Assert that the add button is displayed
-    composeTestRule.onNodeWithTag("addButton").assertIsDisplayed()
+    // Assert that the recenter button is displayed
+    composeTestRule.onNodeWithTag("recenterButton").assertIsDisplayed().assertHasClickAction()
   }
 
   /**
@@ -72,8 +88,7 @@ class MapScreenTest : TestCase() {
     val state = mutableStateOf(defaultZoom)
 
     composeTestRule.setContent {
-      MapScreen(
-          navigationActions = mockNavigation, parkingViewModel = parkingViewModel, state = state)
+      MapScreen(mockNavigation, parkingViewModel, userViewModel, mapViewModel, state)
     }
 
     for (i in 0..(defaultZoom - minZoom).toInt()) {
@@ -82,6 +97,23 @@ class MapScreenTest : TestCase() {
 
     // Assert the state value
     assert(state.value == minZoom)
+  }
+
+  @Test
+  fun testAddParkingRules() {
+    composeTestRule.setContent {
+      MapScreen(mockNavigation, parkingViewModel, userViewModel, mapViewModel)
+    }
+
+    // Check that the add button has no click action when there is no user
+    composeTestRule.onNodeWithTag("addButton").assertDoesNotExist()
+    verifyNoInteractions(mockNavigation)
+
+    userViewModel.setCurrentUser(TestInstancesUser.user1)
+
+    // Check that the add button has a click action when there is a user
+    composeTestRule.onNodeWithTag("addButton").performClick()
+    verify(mockNavigation).navigateTo(Route.ADD_SPOTS)
   }
 
   /**
@@ -97,7 +129,12 @@ class MapScreenTest : TestCase() {
 
     composeTestRule.setContent {
       MapScreen(
-          navigationActions = mockNavigation, parkingViewModel = parkingViewModel, state = state)
+          mockNavigation,
+          parkingViewModel,
+          userViewModel,
+          mapViewModel,
+          state,
+          LocalContext.current as android.app.Activity)
     }
 
     for (i in 0..(maxZoom - defaultZoom).toInt()) {
@@ -106,5 +143,28 @@ class MapScreenTest : TestCase() {
 
     // Assert the state value
     assert(state.value == maxZoom)
+  }
+
+  @Test
+
+  /**
+   * Test to verify that the recenter button has a click action.
+   *
+   * This test sets the content to the `MapScreen` and checks if the recenter button has a click
+   * action. It then performs a click action on the recenter button and asserts that the focus mode
+   * is toggled.
+   */
+  fun testRecenterButton() {
+    composeTestRule.setContent {
+      MapScreen(mockNavigation, parkingViewModel, userViewModel, mapViewModel)
+    }
+
+    // Assert that the recenter button is displayed
+    composeTestRule.onNodeWithTag("recenterButton").assertIsDisplayed()
+
+    // Assert that the recenter button has a click action
+    composeTestRule.onNodeWithTag("recenterButton").assertHasClickAction()
+
+    assert(mapViewModel.isTrackingModeEnable.value)
   }
 }
