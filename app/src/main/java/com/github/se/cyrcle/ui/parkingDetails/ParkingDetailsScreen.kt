@@ -62,6 +62,7 @@ fun ParkingDetailsScreen(
   val userSignedIn = userViewModel.isSignedIn.collectAsState(false)
   val scrollState = rememberScrollState()
   val context = LocalContext.current
+  val toastMessage = stringResource(R.string.sign_in_to_add_favorites)
 
   Scaffold(
       topBar = {
@@ -109,11 +110,7 @@ fun ParkingDetailsScreen(
                                     }
                                     userViewModel.getSelectedUserFavoriteParking()
                                   } else {
-                                    Toast.makeText(
-                                            context,
-                                            "Please sign in to add favorites",
-                                            Toast.LENGTH_SHORT)
-                                        .show()
+                                    Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show()
                                   }
                                 })
                   }
