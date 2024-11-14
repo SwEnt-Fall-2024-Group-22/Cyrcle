@@ -37,9 +37,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -80,18 +80,7 @@ fun SpotListScreen(
     mapViewModel: MapViewModel,
     userViewModel: UserViewModel = viewModel(factory = UserViewModel.Factory)
 ) {
-
   val userPosition by mapViewModel.userPosition.collectAsState()
-
-  var pinnedParkings by rememberSaveable { mutableStateOf(setOf<String>()) }
-  val handlePinStatusChanged = { parkingId: String, isPinned: Boolean ->
-    pinnedParkings =
-        if (isPinned) {
-          pinnedParkings + parkingId
-        } else {
-          pinnedParkings - parkingId
-        }
-  }
 
   val filteredParkingSpots by parkingViewModel.closestParkings.collectAsState()
 
@@ -100,7 +89,8 @@ fun SpotListScreen(
   val selectedCapacities by parkingViewModel.selectedCapacities.collectAsState()
   val onlyWithCCTV by parkingViewModel.onlyWithCCTV.collectAsState()
 
-  // Set the center of the circle as the user's location when the screen is launched.
+  val pinnedParkings by parkingViewModel.pinnedParkings.collectAsState()
+
   LaunchedEffect(userPosition) { parkingViewModel.setCircleCenter(userPosition) }
 
   Scaffold(
@@ -143,18 +133,19 @@ fun SpotListScreen(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         color = MaterialTheme.colorScheme.primary)
                   }
-                  items(items = filteredParkingSpots.filter { it.uid in pinnedParkings }) { parking
-                    ->
-                    val distance = TurfMeasurement.distance(userPosition, parking.location.center)
-                    SpotCard(
-                        navigationActions = navigationActions,
-                        parkingViewModel = parkingViewModel,
-                        userViewModel = userViewModel,
-                        parking = parking,
-                        distance = distance,
-                        initialIsPinned = true,
-                        onPinStatusChanged = handlePinStatusChanged)
-                  }
+                  items(
+                      items = filteredParkingSpots.filter { it in pinnedParkings },
+                      key = { parking -> parking.uid }) { parking ->
+                        val distance =
+                            TurfMeasurement.distance(userPosition, parking.location.center)
+                        SpotCard(
+                            navigationActions = navigationActions,
+                            parkingViewModel = parkingViewModel,
+                            userViewModel = userViewModel,
+                            parking = parking,
+                            distance = distance,
+                            initialIsPinned = true)
+                      }
                   item {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
@@ -165,22 +156,22 @@ fun SpotListScreen(
                   }
                 }
 
-                items(items = filteredParkingSpots.filter { it.uid !in pinnedParkings }) { parking
-                  ->
-                  val distance = TurfMeasurement.distance(userPosition, parking.location.center)
-                  SpotCard(
-                      navigationActions = navigationActions,
-                      parkingViewModel = parkingViewModel,
-                      userViewModel = userViewModel,
-                      parking = parking,
-                      distance = distance,
-                      initialIsPinned = false,
-                      onPinStatusChanged = handlePinStatusChanged)
+                items(
+                    items = filteredParkingSpots.filter { it !in pinnedParkings },
+                    key = { parking -> parking.uid }) { parking ->
+                      val distance = TurfMeasurement.distance(userPosition, parking.location.center)
+                      SpotCard(
+                          navigationActions = navigationActions,
+                          parkingViewModel = parkingViewModel,
+                          userViewModel = userViewModel,
+                          parking = parking,
+                          distance = distance,
+                          initialIsPinned = false)
 
-                  if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1) {
-                    parkingViewModel.incrementRadius()
-                  }
-                }
+                      if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1) {
+                        parkingViewModel.incrementRadius()
+                      }
+                    }
               }
         }
       }
@@ -326,11 +317,10 @@ fun SpotCard(
     userViewModel: UserViewModel,
     parking: Parking,
     distance: Double,
-    initialIsPinned: Boolean,
-    onPinStatusChanged: (String, Boolean) -> Unit
+    initialIsPinned: Boolean
 ) {
   val context = LocalContext.current
-  var offsetX by remember { mutableStateOf(0f) }
+  var offsetX by remember { mutableFloatStateOf(0f) }
   val maxSwipeDistance = 150.dp
   val userState by userViewModel.currentUser.collectAsState()
   val userSignedIn = userViewModel.isSignedIn.collectAsState(false)
@@ -351,7 +341,6 @@ fun SpotCard(
                   Modifier.fillMaxHeight()
                       .weight(1f)
                       .testTag(if (initialIsPinned) "UnpinActionCard" else "PinActionCard"))
-
           if (isFavorite) {
             ActionCard(
                 text = "Already in favorites",
@@ -377,12 +366,12 @@ fun SpotCard(
                   detectHorizontalDragGestures(
                       onDragEnd = {
                         if (offsetX > maxSwipeDistance.toPx() / 2) {
-                          // Swipe right action: Pin parking
-                          onPinStatusChanged(parking.uid, !initialIsPinned)
+                          // Swipe right action: Toggle pin status
+                          parkingViewModel.togglePinStatus(parking)
                         } else if (offsetX < -maxSwipeDistance.toPx() / 2) {
                           // Swipe left action: Add to favorites
                           if (!isFavorite && userSignedIn.value) {
-                            userState?.let { user ->
+                            userState?.let {
                               userViewModel.addFavoriteParkingToSelectedUser(parking.uid)
                               userViewModel.getSelectedUserFavoriteParking()
                             }
