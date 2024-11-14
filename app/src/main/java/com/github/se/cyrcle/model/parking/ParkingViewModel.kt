@@ -11,6 +11,7 @@ import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 const val DEFAULT_RADIUS = 100.0
@@ -209,6 +210,25 @@ class ParkingViewModel(
   fun setSelectedCapacities(capacities: Set<ParkingCapacity>) {
     _selectedCapacities.value = capacities
     updateClosestParkings(0)
+  }
+
+  // State for pins
+  private val _pinnedParkings = MutableStateFlow<Set<Parking>>(emptySet())
+  val pinnedParkings: StateFlow<Set<Parking>> = _pinnedParkings
+
+  /**
+   * Toggles the pin status of a parking.
+   *
+   * @param parking the parking to toggle the pin status of
+   */
+  fun togglePinStatus(parking: Parking) {
+    _pinnedParkings.update { currentPinned ->
+      if (currentPinned.contains(parking)) {
+        currentPinned - parking
+      } else {
+        currentPinned + parking
+      }
+    }
   }
 
   private val _onlyWithCCTV = MutableStateFlow(false)
