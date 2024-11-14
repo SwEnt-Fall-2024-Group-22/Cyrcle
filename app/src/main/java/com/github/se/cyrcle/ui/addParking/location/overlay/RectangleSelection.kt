@@ -86,7 +86,10 @@ fun RectangleSelection(
                 size = rectSize)
 
             // Outline of the rectangle
-            drawRect(color = Cerulean.copy(alpha = 0.7f), topLeft = canvasCenter, size = rectSize)
+            drawRect(
+                color = if (isAreaTooLarge) Red.copy(alpha = 0.5f) else Cerulean.copy(alpha = 0.7f),
+                topLeft = canvasCenter,
+                size = rectSize)
             drawRect(
                 color = if (isAreaTooLarge) Red else Cerulean,
                 topLeft = canvasCenter,
