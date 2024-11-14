@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.list
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -45,7 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -60,6 +61,7 @@ import com.github.se.cyrcle.model.parking.ParkingCapacity
 import com.github.se.cyrcle.model.parking.ParkingProtection
 import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
@@ -75,64 +77,115 @@ import kotlin.math.roundToInt
 fun SpotListScreen(
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel = viewModel(factory = ParkingViewModel.Factory),
-    mapViewModel: MapViewModel
+    mapViewModel: MapViewModel,
+    userViewModel: UserViewModel = viewModel(factory = UserViewModel.Factory)
 ) {
 
-  val userPosition by mapViewModel.userPosition.collectAsState()
+    val userPosition by mapViewModel.userPosition.collectAsState()
 
-  val filteredParkingSpots by parkingViewModel.closestParkings.collectAsState()
-
-  val selectedProtection by parkingViewModel.selectedProtection.collectAsState()
-  val selectedRackTypes by parkingViewModel.selectedRackTypes.collectAsState()
-  val selectedCapacities by parkingViewModel.selectedCapacities.collectAsState()
-  val onlyWithCCTV by parkingViewModel.onlyWithCCTV.collectAsState()
-
-  // Set the center of the circle as the user's location when the screen is launched.
-  LaunchedEffect(userPosition) { parkingViewModel.setCircleCenter(userPosition) }
-
-  Scaffold(
-      modifier = Modifier.testTag("SpotListScreen"),
-      bottomBar = { BottomNavigationBar(navigationActions, selectedItem = Route.LIST) }) {
-          innerPadding ->
-        Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(bottom = 16.dp)) {
-          FilterHeader(
-              selectedProtection = selectedProtection,
-              selectedRackTypes = selectedRackTypes,
-              selectedCapacities = selectedCapacities,
-              onAttributeSelected = { attribute ->
-                when (attribute) {
-                  is ParkingProtection ->
-                      parkingViewModel.setSelectedProtection(
-                          toggleSelection(selectedProtection, attribute))
-                  is ParkingRackType ->
-                      parkingViewModel.setSelectedRackTypes(
-                          toggleSelection(selectedRackTypes, attribute))
-                  is ParkingCapacity ->
-                      parkingViewModel.setSelectedCapacities(
-                          toggleSelection(selectedCapacities, attribute))
-                }
-              },
-              onlyWithCCTV = onlyWithCCTV,
-              onCCTVCheckedChange = { parkingViewModel.setOnlyWithCCTV(it) },
-              parkingViewModel = parkingViewModel)
-
-          val listState = rememberLazyListState()
-          LazyColumn(
-              state = listState,
-              contentPadding = PaddingValues(16.dp),
-              verticalArrangement = Arrangement.spacedBy(8.dp),
-              modifier = Modifier.testTag("SpotListColumn")) {
-                items(items = filteredParkingSpots) { parking ->
-                  val distance = TurfMeasurement.distance(userPosition, parking.location.center)
-                  SpotCard(navigationActions, parkingViewModel, parking, distance)
-                  // Increment the radius when the last parking spot is reached
-                  if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1) {
-                    parkingViewModel.incrementRadius()
-                  }
-                }
-              }
+    var pinnedParkings by remember { mutableStateOf(setOf<String>()) }
+    val handlePinStatusChanged = { parkingId: String, isPinned: Boolean ->
+        pinnedParkings = if (isPinned) {
+            pinnedParkings + parkingId
+        } else {
+            pinnedParkings - parkingId
         }
-      }
+    }
+
+    val filteredParkingSpots by parkingViewModel.closestParkings.collectAsState()
+
+    val selectedProtection by parkingViewModel.selectedProtection.collectAsState()
+    val selectedRackTypes by parkingViewModel.selectedRackTypes.collectAsState()
+    val selectedCapacities by parkingViewModel.selectedCapacities.collectAsState()
+    val onlyWithCCTV by parkingViewModel.onlyWithCCTV.collectAsState()
+
+    // Set the center of the circle as the user's location when the screen is launched.
+    LaunchedEffect(userPosition) { parkingViewModel.setCircleCenter(userPosition) }
+
+    Scaffold(
+        modifier = Modifier.testTag("SpotListScreen"),
+        bottomBar = { BottomNavigationBar(navigationActions, selectedItem = Route.LIST) }) {
+            innerPadding ->
+        Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(bottom = 16.dp)) {
+            FilterHeader(
+                selectedProtection = selectedProtection,
+                selectedRackTypes = selectedRackTypes,
+                selectedCapacities = selectedCapacities,
+                onAttributeSelected = { attribute ->
+                    when (attribute) {
+                        is ParkingProtection ->
+                            parkingViewModel.setSelectedProtection(
+                                toggleSelection(selectedProtection, attribute))
+                        is ParkingRackType ->
+                            parkingViewModel.setSelectedRackTypes(
+                                toggleSelection(selectedRackTypes, attribute))
+                        is ParkingCapacity ->
+                            parkingViewModel.setSelectedCapacities(
+                                toggleSelection(selectedCapacities, attribute))
+                    }
+                },
+                onlyWithCCTV = onlyWithCCTV,
+                onCCTVCheckedChange = { parkingViewModel.setOnlyWithCCTV(it) },
+                parkingViewModel = parkingViewModel)
+
+            val listState = rememberLazyListState()
+            LazyColumn(
+                state = listState,
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.testTag("SpotListColumn")
+            ) {
+                if (pinnedParkings.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = "Pinned Spots",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    items(items = filteredParkingSpots.filter { it.uid in pinnedParkings }) { parking ->
+                        val distance = TurfMeasurement.distance(userPosition, parking.location.center)
+                        SpotCard(
+                            navigationActions = navigationActions,
+                            parkingViewModel = parkingViewModel,
+                            userViewModel = userViewModel,
+                            parking = parking,
+                            distance = distance,
+                            initialIsPinned = true,
+                            onPinStatusChanged = handlePinStatusChanged
+                        )
+                    }
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "All Spots",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+
+                items(items = filteredParkingSpots.filter { it.uid !in pinnedParkings }) { parking ->
+                    val distance = TurfMeasurement.distance(userPosition, parking.location.center)
+                    SpotCard(
+                        navigationActions = navigationActions,
+                        parkingViewModel = parkingViewModel,
+                        userViewModel = userViewModel,
+                        parking = parking,
+                        distance = distance,
+                        initialIsPinned = false,
+                        onPinStatusChanged = handlePinStatusChanged
+                    )
+
+                    if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1) {
+                        parkingViewModel.incrementRadius()
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -145,101 +198,101 @@ fun FilterHeader(
     onCCTVCheckedChange: (Boolean) -> Unit,
     parkingViewModel: ParkingViewModel = viewModel(factory = ParkingViewModel.Factory)
 ) {
-  var showProtectionOptions by remember { mutableStateOf(false) }
-  var showRackTypeOptions by remember { mutableStateOf(false) }
-  var showCapacityOptions by remember { mutableStateOf(false) }
-  var showFilters by remember { mutableStateOf(false) }
-  val radius = parkingViewModel.radius.collectAsState()
-  Column(modifier = Modifier.padding(16.dp)) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.End,
-        verticalAlignment = Alignment.CenterVertically) {
-          Text(
-              text = stringResource(R.string.all_parkings_radius, radius.value.toInt()),
-              modifier = Modifier.weight(1f),
-              style = MaterialTheme.typography.headlineMedium,
-              color = MaterialTheme.colorScheme.onSurface)
+    var showProtectionOptions by remember { mutableStateOf(false) }
+    var showRackTypeOptions by remember { mutableStateOf(false) }
+    var showCapacityOptions by remember { mutableStateOf(false) }
+    var showFilters by remember { mutableStateOf(false) }
+    val radius = parkingViewModel.radius.collectAsState()
+    Column(modifier = Modifier.padding(16.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(R.string.all_parkings_radius, radius.value.toInt()),
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurface)
 
-          SmallFloatingActionButton(
-              onClick = { showFilters = !showFilters },
-              icon = if (showFilters) Icons.Default.Close else Icons.Default.FilterList,
-              contentDescription = "Filter",
-              testTag = "ShowFiltersButton")
+            SmallFloatingActionButton(
+                onClick = { showFilters = !showFilters },
+                icon = if (showFilters) Icons.Default.Close else Icons.Default.FilterList,
+                contentDescription = "Filter",
+                testTag = "ShowFiltersButton")
         }
 
-    if (showFilters) {
-      FilterSection(
-          title = stringResource(R.string.list_screen_protection),
-          isExpanded = showProtectionOptions,
-          onToggle = { showProtectionOptions = !showProtectionOptions }) {
-            LazyRow(
-                modifier = Modifier.fillMaxWidth().testTag("ProtectionFilter"),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                  items(ParkingProtection.entries.toTypedArray()) { option ->
-                    ToggleButton(
-                        text = option.description,
-                        onClick = { onAttributeSelected(option) },
-                        value = selectedProtection.contains(option),
-                        modifier = Modifier.padding(2.dp),
-                        testTag = "ProtectionFilterItem")
-                  }
+        if (showFilters) {
+            FilterSection(
+                title = stringResource(R.string.list_screen_protection),
+                isExpanded = showProtectionOptions,
+                onToggle = { showProtectionOptions = !showProtectionOptions }) {
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth().testTag("ProtectionFilter"),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    items(ParkingProtection.entries.toTypedArray()) { option ->
+                        ToggleButton(
+                            text = option.description,
+                            onClick = { onAttributeSelected(option) },
+                            value = selectedProtection.contains(option),
+                            modifier = Modifier.padding(2.dp),
+                            testTag = "ProtectionFilterItem")
+                    }
                 }
-          }
+            }
 
-      FilterSection(
-          title = stringResource(R.string.list_screen_rack_type),
-          isExpanded = showRackTypeOptions,
-          onToggle = { showRackTypeOptions = !showRackTypeOptions }) {
-            LazyRow(
-                modifier = Modifier.fillMaxWidth().testTag("RackTypeFilter"),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                  items(ParkingRackType.entries.toTypedArray()) { option ->
-                    ToggleButton(
-                        text = option.description,
-                        onClick = { onAttributeSelected(option) },
-                        value = selectedRackTypes.contains(option),
-                        modifier = Modifier.padding(2.dp),
-                        testTag = "RackTypeFilterItem")
-                  }
+            FilterSection(
+                title = stringResource(R.string.list_screen_rack_type),
+                isExpanded = showRackTypeOptions,
+                onToggle = { showRackTypeOptions = !showRackTypeOptions }) {
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth().testTag("RackTypeFilter"),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    items(ParkingRackType.entries.toTypedArray()) { option ->
+                        ToggleButton(
+                            text = option.description,
+                            onClick = { onAttributeSelected(option) },
+                            value = selectedRackTypes.contains(option),
+                            modifier = Modifier.padding(2.dp),
+                            testTag = "RackTypeFilterItem")
+                    }
                 }
-          }
+            }
 
-      FilterSection(
-          title = stringResource(R.string.list_screen_capacity),
-          isExpanded = showCapacityOptions,
-          onToggle = { showCapacityOptions = !showCapacityOptions }) {
-            LazyRow(
-                modifier = Modifier.fillMaxWidth().testTag("CapacityFilter"),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                  items(ParkingCapacity.entries.toTypedArray()) { option ->
-                    ToggleButton(
-                        text = option.description,
-                        onClick = { onAttributeSelected(option) },
-                        value = selectedCapacities.contains(option),
-                        modifier = Modifier.padding(2.dp),
-                        testTag = "CapacityFilterItem")
-                  }
+            FilterSection(
+                title = stringResource(R.string.list_screen_capacity),
+                isExpanded = showCapacityOptions,
+                onToggle = { showCapacityOptions = !showCapacityOptions }) {
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth().testTag("CapacityFilter"),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    items(ParkingCapacity.entries.toTypedArray()) { option ->
+                        ToggleButton(
+                            text = option.description,
+                            onClick = { onAttributeSelected(option) },
+                            value = selectedCapacities.contains(option),
+                            modifier = Modifier.padding(2.dp),
+                            testTag = "CapacityFilterItem")
+                    }
                 }
-          }
+            }
 
-      // CCTV filter with checkbox
-      Row(
-          modifier = Modifier.fillMaxWidth().padding(8.dp),
-          verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(
-                checked = onlyWithCCTV,
-                onCheckedChange = onCCTVCheckedChange,
-                modifier = Modifier.testTag("CCTVCheckbox"))
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                text = stringResource(R.string.list_screen_display_only_cctv),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.testTag("CCTVCheckboxLabel"))
-          }
+            // CCTV filter with checkbox
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(
+                    checked = onlyWithCCTV,
+                    onCheckedChange = onCCTVCheckedChange,
+                    modifier = Modifier.testTag("CCTVCheckbox"))
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = stringResource(R.string.list_screen_display_only_cctv),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.testTag("CCTVCheckboxLabel"))
+            }
+        }
     }
-  }
 }
 
 @Composable
@@ -249,12 +302,12 @@ fun FilterSection(
     onToggle: () -> Unit,
     content: @Composable () -> Unit
 ) {
-  Column(
-      modifier =
-          Modifier.padding(8.dp)
-              .border(1.dp, Color.Gray, shape = MaterialTheme.shapes.medium)
-              .background(MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.medium)
-              .padding(8.dp)) {
+    Column(
+        modifier =
+        Modifier.padding(8.dp)
+            .border(1.dp, Color.Gray, shape = MaterialTheme.shapes.medium)
+            .background(MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.medium)
+            .padding(8.dp)) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
@@ -263,126 +316,152 @@ fun FilterSection(
             testTag = title)
 
         if (isExpanded) {
-          content()
+            content()
         }
-      }
+    }
 }
 
 @Composable
 fun SpotCard(
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel,
+    userViewModel: UserViewModel,
     parking: Parking,
-    distance: Double
+    distance: Double,
+    initialIsPinned: Boolean,
+    onPinStatusChanged: (String, Boolean) -> Unit
 ) {
+    val context = LocalContext.current
     var offsetX by remember { mutableStateOf(0f) }
-    val maxSwipeDistance = 150.dp // Half of the card's width in dp
+    val maxSwipeDistance = 150.dp
+    val userState by userViewModel.currentUser.collectAsState()
+    val userSignedIn = userViewModel.isSignedIn.collectAsState(false)
+    val isFavorite = userState?.details?.favoriteParkings.orEmpty().contains(parking.uid)
 
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(120.dp)
-            .padding(4.dp)
-    ) {
+    Box(modifier = Modifier.fillMaxWidth().height(120.dp).padding(4.dp)) {
         // Background actions
         Row(
-            modifier = Modifier
-                .fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+            verticalAlignment = Alignment.CenterVertically) {
             ActionCard(
-                text = "Pin parking spot",
+                text = if (initialIsPinned) "Remove pin" else "Pin parking spot",
                 icon = Icons.Default.PushPin,
-                backgroundColor = Color.LightGray,
-                modifier = Modifier
-                    .fillMaxHeight()
+                backgroundColor =
+                if (initialIsPinned) Color.Red.copy(alpha = 0.7f) else Color.LightGray,
+                modifier =
+                Modifier.fillMaxHeight()
                     .weight(1f)
-            )
-            ActionCard(
-                text = "Add to favorites",
-                icon = Icons.Default.Star,
-                backgroundColor = Color.Yellow,
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .weight(1f)
-            )
+                    .testTag(if (initialIsPinned) "UnpinActionCard" else "PinActionCard"))
+
+            if (isFavorite) {
+                ActionCard(
+                    text = "Already in favorites",
+                    icon = Icons.Default.Star,
+                    backgroundColor = Color.Gray,
+                    modifier = Modifier.fillMaxHeight().weight(1f).testTag("AlreadyFavoriteActionCard"))
+            } else {
+                ActionCard(
+                    text = "Add to favorites",
+                    icon = Icons.Default.Star,
+                    backgroundColor = Color.Yellow,
+                    modifier = Modifier.fillMaxHeight().weight(1f).testTag("AddToFavoriteActionCard"))
+            }
         }
 
         // Main card
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier =
+            Modifier.fillMaxWidth()
                 .height(120.dp)
                 .offset { IntOffset(offsetX.roundToInt(), 0) }
                 .pointerInput(Unit) {
                     detectHorizontalDragGestures(
                         onDragEnd = {
                             if (offsetX > maxSwipeDistance.toPx() / 2) {
-                                // Swipe right action
+                                // Swipe right action: Pin parking
+                                onPinStatusChanged(parking.uid, !initialIsPinned)
                             } else if (offsetX < -maxSwipeDistance.toPx() / 2) {
-                                // Swipe left action
+                                // Swipe left action: Add to favorites
+                                if (!isFavorite && userSignedIn.value) {
+                                    userState?.let { user ->
+                                        userViewModel.addFavoriteParkingToSelectedUser(parking.uid)
+                                        userViewModel.getSelectedUserFavoriteParking()
+                                    }
+                                } else if (!userSignedIn.value) {
+                                    Toast.makeText(
+                                        context, "Please sign in to add favorites", Toast.LENGTH_SHORT)
+                                        .show()
+                                } else if (isFavorite) {
+                                    Toast.makeText(
+                                        context, "Parking is already in favorites", Toast.LENGTH_SHORT)
+                                        .show()
+                                }
                             }
                             offsetX = 0f
-                        }
-                    ) { change, dragAmount ->
+                        }) { change, dragAmount ->
                         change.consume()
-                        offsetX = (offsetX + dragAmount).coerceIn(-maxSwipeDistance.toPx(), maxSwipeDistance.toPx())
+                        offsetX =
+                            (offsetX + dragAmount).coerceIn(
+                                -maxSwipeDistance.toPx(), maxSwipeDistance.toPx())
                     }
                 }
                 .clickable(
                     onClick = {
                         parkingViewModel.selectParking(parking)
-                        navigationActions.navigateTo(Screen.CARD)
-                    }
-                )
+                        navigationActions.navigateTo(Screen.PARKING_DETAILS)
+                    })
                 .testTag("SpotListItem"),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
-        ) {
+            colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 1f)),
+            shape = MaterialTheme.shapes.medium) {
             Box(modifier = Modifier.fillMaxSize()) {
                 Column(modifier = Modifier.fillMaxSize().padding(16.dp).testTag("SpotCardContent")) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
+                        horizontalArrangement = Arrangement.SpaceBetween) {
                         Text(
-                            text = parking.optName?.let { if (it.length > 35) it.take(32) + "..." else it }
+                            text =
+                            parking.optName?.let { if (it.length > 35) it.take(32) + "..." else it }
                                 ?: stringResource(R.string.default_parking_name),
                             style = MaterialTheme.typography.bodyLarge,
-                            color = Color.Black,
-                            testTag = "ParkingName"
-                        )
+                            color = MaterialTheme.colorScheme.onSurface,
+                            testTag = "ParkingName")
                         Text(
-                            text = if (distance < 1) stringResource(R.string.distance_m).format(distance * 1000)
+                            text =
+                            if (distance < 1)
+                                stringResource(R.string.distance_m).format(distance * 1000)
                             else stringResource(R.string.distance_km).format(distance),
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color.Black,
-                            testTag = "ParkingDistance"
-                        )
+                            color = MaterialTheme.colorScheme.onSurface,
+                            testTag = "ParkingDistance")
                     }
 
                     // Rating
                     Spacer(modifier = Modifier.height(4.dp))
                     if (parking.nbReviews > 0) {
                         Row {
-                            ScoreStars(parking.avgScore, scale = 0.8f)
+                            ScoreStars(
+                                parking.avgScore,
+                                scale = 0.8f,
+                                starColor = MaterialTheme.colorScheme.onSurface)
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = pluralStringResource(R.plurals.reviews_count, count = parking.nbReviews)
+                                text =
+                                pluralStringResource(R.plurals.reviews_count, count = parking.nbReviews)
                                     .format(parking.nbReviews),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = Color.Black.copy(alpha = 0.8f),
-                                testTag = "ParkingNbReviews"
-                            )
+                                color = MaterialTheme.colorScheme.onSurface,
+                                testTag = "ParkingNbReviews")
                         }
                     } else {
                         Text(
                             text = stringResource(R.string.no_reviews),
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color.Black.copy(alpha = 0.8f),
-                            testTag = "ParkingNoReviews"
-                        )
+                            color = MaterialTheme.colorScheme.onSurface,
+                            testTag = "ParkingNoReviews")
                     }
                 }
             }
@@ -398,14 +477,10 @@ fun ActionCard(
     modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = modifier
-            .background(backgroundColor)
-            .padding(8.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+        modifier =
+        modifier.background(backgroundColor, shape = MaterialTheme.shapes.medium).padding(8.dp),
+        contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(icon, contentDescription = null, tint = Color.Black)
             Text(text, color = Color.Black)
         }
@@ -413,9 +488,9 @@ fun ActionCard(
 }
 
 private fun <T> toggleSelection(set: Set<T>, item: T): Set<T> {
-  return if (set.contains(item)) {
-    set - item
-  } else {
-    set + item
-  }
+    return if (set.contains(item)) {
+        set - item
+    } else {
+        set + item
+    }
 }
