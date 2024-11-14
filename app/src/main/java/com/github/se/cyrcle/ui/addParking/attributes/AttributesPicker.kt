@@ -58,6 +58,7 @@ import com.github.se.cyrcle.ui.map.MapConfig
 import com.github.se.cyrcle.ui.map.drawRectangles
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
+import com.github.se.cyrcle.ui.theme.Typography
 import com.github.se.cyrcle.ui.theme.atoms.ConditionCheckingInputText
 import com.github.se.cyrcle.ui.theme.molecules.BooleanRadioButton
 import com.github.se.cyrcle.ui.theme.molecules.EnumDropDown
@@ -232,45 +233,52 @@ fun BottomBarAddAttr(
     validInputs: Boolean,
     onSubmit: () -> Unit
 ) {
-  Box(Modifier.background(Color.White).testTag("AttributesPickerBottomBar")) {
-    Row(
-        Modifier.fillMaxWidth().wrapContentHeight().padding(16.dp).background(Color.White),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically) {
-          Button(
-              { navigationActions.navigateTo(TopLevelDestinations.MAP) },
-              modifier = Modifier.testTag("cancelButton"),
-              colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
-                Text(
-                    stringResource(R.string.attributes_picker_bottom_bar_cancel_button),
-                    color = MaterialTheme.colorScheme.primary,
-                    fontFamily = MaterialTheme.typography.bodyLarge.fontFamily,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center)
-              }
+  Box(
+      Modifier.background(Color.White)
+          .height(100.dp) // Matching the height of LocationPickerBottomBar
+          .testTag("AttributesPickerBottomBar")) {
+        Row(
+            Modifier.fillMaxWidth().wrapContentHeight().padding(16.dp).background(Color.White),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically) {
+              Button(
+                  onClick = { navigationActions.navigateTo(TopLevelDestinations.MAP) },
+                  modifier = Modifier.testTag("cancelButton"),
+                  colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
+                    Text(
+                        text = stringResource(R.string.attributes_picker_bottom_bar_cancel_button),
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold,
+                        style = Typography.headlineMedium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.width(100.dp))
+                  }
 
-          VerticalDivider(
-              color = MaterialTheme.colorScheme.primary,
-              modifier = Modifier.height(32.dp).width(1.dp),
-              thickness = 2.dp)
+              VerticalDivider(
+                  color = MaterialTheme.colorScheme.primary,
+                  modifier = Modifier.height(32.dp).width(1.dp),
+                  thickness = 2.dp)
 
-          val toast =
-              Toast.makeText(
-                  LocalContext.current,
-                  stringResource(R.string.attributes_picker_bottom_bar_submit_button_toast),
-                  Toast.LENGTH_SHORT)
-          Button(
-              onClick = { if (validInputs) onSubmit() else toast.show() },
-              modifier = Modifier.testTag("submitButton"),
-              colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
-                Text(
-                    stringResource(R.string.attributes_picker_bottom_bar_submit_button),
-                    color = if (validInputs) MaterialTheme.colorScheme.primary else Color.Gray,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center)
-              }
-        }
-  }
+              val toast =
+                  Toast.makeText(
+                      LocalContext.current,
+                      stringResource(R.string.attributes_picker_bottom_bar_submit_button_toast),
+                      Toast.LENGTH_SHORT)
+
+              Button(
+                  onClick = { if (validInputs) onSubmit() else toast.show() },
+                  modifier = Modifier.testTag("submitButton"),
+                  colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
+                    Text(
+                        text = stringResource(R.string.attributes_picker_bottom_bar_submit_button),
+                        color = if (validInputs) MaterialTheme.colorScheme.primary else Color.Gray,
+                        fontWeight = FontWeight.Bold,
+                        style = Typography.headlineMedium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.width(100.dp))
+                  }
+            }
+      }
 }
 
 @Composable

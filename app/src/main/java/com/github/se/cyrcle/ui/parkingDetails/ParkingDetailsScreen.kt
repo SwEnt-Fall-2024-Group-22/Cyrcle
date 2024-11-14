@@ -104,9 +104,17 @@ fun ParkingDetailsScreen(
                                     if (isFavorite) {
                                       userViewModel.removeFavoriteParkingFromSelectedUser(
                                           selectedParking.uid)
+                                      Toast.makeText(
+                                              context,
+                                              "Removed From Favorites!",
+                                              Toast.LENGTH_SHORT)
+                                          .show()
                                     } else {
                                       userViewModel.addFavoriteParkingToSelectedUser(
                                           selectedParking.uid)
+                                      Toast.makeText(
+                                              context, "Added To Favorites!", Toast.LENGTH_SHORT)
+                                          .show()
                                     }
                                     userViewModel.getSelectedUserFavoriteParking()
                                   } else {
