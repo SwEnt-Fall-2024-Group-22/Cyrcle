@@ -1,8 +1,6 @@
 package com.github.se.cyrcle.ui.list
 
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertAll
@@ -95,24 +93,13 @@ class ListScreenTest {
   @Test
   fun testPinActionCardDisplayed() {
     composeTestRule.setContent {
-      var pinnedParkings by rememberSaveable { mutableStateOf(setOf<String>()) }
-      val handlePinStatusChanged = { parkingId: String, isPinned: Boolean ->
-        pinnedParkings =
-            if (isPinned) {
-              pinnedParkings + parkingId
-            } else {
-              pinnedParkings - parkingId
-            }
-      }
-
       SpotCard(
           mockNavigationActions,
           parkingViewModel,
           userViewModel,
           TestInstancesParking.parking1,
           0.0,
-          initialIsPinned = false,
-          onPinStatusChanged = handlePinStatusChanged)
+          initialIsPinned = false)
     }
 
     // Verify that the PinActionCard is displayed
@@ -123,23 +110,13 @@ class ListScreenTest {
   @Test
   fun testUnpinActionCardDisplayed() {
     composeTestRule.setContent {
-      var pinnedParkings by rememberSaveable { mutableStateOf(setOf<String>()) }
-      val handlePinStatusChanged = { parkingId: String, isPinned: Boolean ->
-        pinnedParkings =
-            if (isPinned) {
-              pinnedParkings + parkingId
-            } else {
-              pinnedParkings - parkingId
-            }
-      }
       SpotCard(
           mockNavigationActions,
           parkingViewModel,
           userViewModel,
           TestInstancesParking.parking1,
           0.0,
-          initialIsPinned = true,
-          onPinStatusChanged = handlePinStatusChanged)
+          initialIsPinned = true)
     }
     composeTestRule.onNodeWithTag("PinActionCard").assertIsNotDisplayed()
     composeTestRule.onNodeWithTag("UnpinActionCard").assertIsDisplayed()
@@ -148,24 +125,13 @@ class ListScreenTest {
   @Test
   fun testAddToFavoritesActionCardDisplayed() {
     composeTestRule.setContent {
-      var pinnedParkings by rememberSaveable { mutableStateOf(setOf<String>()) }
-      val handlePinStatusChanged = { parkingId: String, isPinned: Boolean ->
-        pinnedParkings =
-            if (isPinned) {
-              pinnedParkings + parkingId
-            } else {
-              pinnedParkings - parkingId
-            }
-      }
-
       SpotCard(
           mockNavigationActions,
           parkingViewModel,
           userViewModel,
           TestInstancesParking.parking3, // not in our user's favorites
           0.0,
-          initialIsPinned = false,
-          onPinStatusChanged = handlePinStatusChanged)
+          initialIsPinned = false)
     }
 
     // Verify that the AddToFavoriteActionCard is displayed
@@ -176,24 +142,13 @@ class ListScreenTest {
   @Test
   fun testAlreadyFavoriteActionCardDisplayed() {
     composeTestRule.setContent {
-      var pinnedParkings by rememberSaveable { mutableStateOf(setOf<String>()) }
-      val handlePinStatusChanged = { parkingId: String, isPinned: Boolean ->
-        pinnedParkings =
-            if (isPinned) {
-              pinnedParkings + parkingId
-            } else {
-              pinnedParkings - parkingId
-            }
-      }
-
       SpotCard(
           mockNavigationActions,
           parkingViewModel,
           userViewModel,
           TestInstancesParking.parking1, // in our user's favorites
           0.0,
-          initialIsPinned = false,
-          onPinStatusChanged = handlePinStatusChanged)
+          initialIsPinned = false)
     }
 
     // Verify that the AlreadyFavoriteActionCard is displayed
@@ -204,24 +159,13 @@ class ListScreenTest {
   @Test
   fun testQuickFavoriteAddsToUserFavorites() {
     composeTestRule.setContent {
-      var pinnedParkings by rememberSaveable { mutableStateOf(setOf<String>()) }
-      val handlePinStatusChanged = { parkingId: String, isPinned: Boolean ->
-        pinnedParkings =
-            if (isPinned) {
-              pinnedParkings + parkingId
-            } else {
-              pinnedParkings - parkingId
-            }
-      }
-
       SpotCard(
           mockNavigationActions,
           parkingViewModel,
           userViewModel,
           TestInstancesParking.parking3,
           0.0,
-          initialIsPinned = false,
-          onPinStatusChanged = handlePinStatusChanged)
+          initialIsPinned = false)
     }
 
     val isFavorite =
@@ -248,24 +192,13 @@ class ListScreenTest {
   @Test
   fun testQuickFavoriteDoesNothingOnQuickAddAlreadyFavorite() {
     composeTestRule.setContent {
-      var pinnedParkings by rememberSaveable { mutableStateOf(setOf<String>()) }
-      val handlePinStatusChanged = { parkingId: String, isPinned: Boolean ->
-        pinnedParkings =
-            if (isPinned) {
-              pinnedParkings + parkingId
-            } else {
-              pinnedParkings - parkingId
-            }
-      }
-
       SpotCard(
           mockNavigationActions,
           parkingViewModel,
           userViewModel,
           TestInstancesParking.parking1, // already in favorites
           0.0,
-          initialIsPinned = false,
-          onPinStatusChanged = handlePinStatusChanged)
+          initialIsPinned = false)
     }
 
     val isFavorite =
@@ -293,24 +226,13 @@ class ListScreenTest {
   fun testQuickFavoriteDoesNothingForUnsignedUsers() {
     userViewModel.setCurrentUser(null)
     composeTestRule.setContent {
-      var pinnedParkings by rememberSaveable { mutableStateOf(setOf<String>()) }
-      val handlePinStatusChanged = { parkingId: String, isPinned: Boolean ->
-        pinnedParkings =
-            if (isPinned) {
-              pinnedParkings + parkingId
-            } else {
-              pinnedParkings - parkingId
-            }
-      }
-
       SpotCard(
           mockNavigationActions,
           parkingViewModel,
           userViewModel,
           TestInstancesParking.parking3,
           0.0,
-          initialIsPinned = false,
-          onPinStatusChanged = handlePinStatusChanged)
+          initialIsPinned = false)
     }
 
     composeTestRule.onNodeWithTag("AddToFavoriteActionCard").assertIsDisplayed()
@@ -389,24 +311,13 @@ class ListScreenTest {
   @Test
   fun testSpotCardIsDisplayed() {
     composeTestRule.setContent {
-      var pinnedParkings by rememberSaveable { mutableStateOf(setOf<String>()) }
-      val handlePinStatusChanged = { parkingId: String, isPinned: Boolean ->
-        pinnedParkings =
-            if (isPinned) {
-              pinnedParkings + parkingId
-            } else {
-              pinnedParkings - parkingId
-            }
-      }
-
       SpotCard(
           navigationActions = mockNavigationActions,
           parkingViewModel = parkingViewModel,
           userViewModel = userViewModel,
           parking = TestInstancesParking.parking1,
           distance = 0.0,
-          initialIsPinned = false,
-          onPinStatusChanged = handlePinStatusChanged)
+          initialIsPinned = false)
     }
 
     composeTestRule.onNodeWithTag("SpotListItem", useUnmergedTree = true).assertIsDisplayed()
@@ -424,24 +335,13 @@ class ListScreenTest {
   @Test
   fun testSpotCardIsClickable() {
     composeTestRule.setContent {
-      var pinnedParkings by rememberSaveable { mutableStateOf(setOf<String>()) }
-      val handlePinStatusChanged = { parkingId: String, isPinned: Boolean ->
-        pinnedParkings =
-            if (isPinned) {
-              pinnedParkings + parkingId
-            } else {
-              pinnedParkings - parkingId
-            }
-      }
-
       SpotCard(
           navigationActions = mockNavigationActions,
           parkingViewModel = parkingViewModel,
           userViewModel = userViewModel,
           parking = TestInstancesParking.parking2,
           distance = 0.0,
-          initialIsPinned = false,
-          onPinStatusChanged = handlePinStatusChanged)
+          initialIsPinned = false)
     }
 
     composeTestRule
@@ -606,93 +506,4 @@ class ListScreenTest {
     composeTestRule.onAllNodesWithTag("CapacityFilterItem").onFirst().performClick()
     assert(selectedCapacities.contains(ParkingCapacity.entries[0]))
   }
-
-  /*@OptIn(ExperimentalTestApi::class)
-  @Test
-  fun testParkingDetailsScreenListsParkings() {
-    val testParking = TestInstancesParking.parking1
-    val loc = testParking.location.center
-    // Prepare to populate the parking list
-    `when`(mockParkingRepository.getParkingsBetween(any(), any(), any(), any())).then {
-      it.getArgument<(List<Parking>) -> Unit>(2)(emptyList())
-    }
-    `when`(
-            mockParkingRepository.getParkingsBetween(
-                eq(Tile.getTileFromPoint(loc).bottomLeft), any(), any(), any()))
-        .then { it.getArgument<(List<Parking>) -> Unit>(2)(listOf(testParking)) }
-
-    composeTestRule.setContent {
-      SpotListScreen(mockNavigationActions, parkingViewModel, mapViewModel, userViewModel)
-    }
-    composeTestRule.waitUntilAtLeastOneExists(hasTestTag("SpotListColumn"))
-
-    // Check that the list is displayed
-    composeTestRule.onNodeWithTag("SpotListColumn").assertIsDisplayed()
-    composeTestRule
-        .onAllNodesWithTag("SpotListItem", useUnmergedTree = true)
-        .assertCountEquals(1)
-        .assertAll(hasClickAction())
-
-    // Check that the parking name is displayed
-    composeTestRule
-        .onNodeWithTag("ParkingName", useUnmergedTree = true)
-        .assertIsDisplayed()
-        .assertTextEquals(testParking.optName ?: "Unnamed Parking")
-
-    // Check that the parking distance is displayed
-    composeTestRule
-        .onNodeWithTag("ParkingDistance", useUnmergedTree = true)
-        .assertIsDisplayed()
-        .assertTextEquals(
-            String.format(
-                "%.0f m",
-                TurfMeasurement.distance(
-                    TestInstancesParking.EPFLCenter, testParking.location.center)))
-
-    // Select all 3 criteria
-    composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
-
-    // Select Protection
-    composeTestRule.waitUntilAtLeastOneExists(hasTestTag("Protection"))
-    composeTestRule.onNodeWithTag("Protection", useUnmergedTree = true).performClick()
-    composeTestRule.waitUntilExactlyOneExists(hasTestTag("ProtectionFilter"))
-
-    composeTestRule
-        .onNodeWithTag("ProtectionFilter")
-        .performScrollToIndex(testParking.protection.ordinal)
-    composeTestRule.onNodeWithText(testParking.protection.description).performClick()
-
-    // Select Rack Type
-    composeTestRule.waitUntilAtLeastOneExists(hasTestTag("Rack Type"))
-    composeTestRule.onNodeWithTag("Rack Type", useUnmergedTree = true).performClick()
-    composeTestRule.waitUntilExactlyOneExists(hasTestTag("RackTypeFilter"))
-
-    composeTestRule
-        .onNodeWithTag("RackTypeFilter")
-        .performScrollToIndex(testParking.rackType.ordinal)
-    composeTestRule
-        .onNodeWithText(testParking.rackType.description)
-        .assertHasClickAction()
-        .performClick()
-
-    composeTestRule.onNodeWithTag("Rack Type", useUnmergedTree = true).performClick()
-
-    // Select Capacity
-    composeTestRule.waitUntilAtLeastOneExists(hasTestTag("Capacity"))
-    composeTestRule.onNodeWithTag("Capacity", useUnmergedTree = true).performClick()
-    composeTestRule.waitUntilExactlyOneExists(hasTestTag("CapacityFilter"))
-
-    composeTestRule
-        .onNodeWithTag("CapacityFilter")
-        .performScrollToIndex(testParking.capacity.ordinal)
-    composeTestRule
-        .onNodeWithText(testParking.capacity.description)
-        .assertHasClickAction()
-        .performClick()
-
-    // Store filters away
-    composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
-    composeTestRule.waitUntilAtLeastOneExists(hasTestTag("SpotListItem"))
-    composeTestRule.onAllNodesWithTag("SpotListItem").assertCountEquals(1)
-  }*/
 }
