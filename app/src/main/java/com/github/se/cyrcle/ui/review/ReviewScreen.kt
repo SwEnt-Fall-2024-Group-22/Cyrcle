@@ -51,8 +51,8 @@ fun ReviewScreen(
     userViewModel: UserViewModel
 ) {
   val configuration = LocalConfiguration.current
-  val screenWidth = configuration.screenWidthDp
-  val scaleFactor = screenWidth / 160f // Adjust the divisor based on your preferred scaling
+  val scaleFactor =
+      configuration.screenWidthDp / 160f // Adjust the divisor based on your preferred scaling
 
   val selectedParking =
       parkingViewModel.selectedParking.collectAsState().value
