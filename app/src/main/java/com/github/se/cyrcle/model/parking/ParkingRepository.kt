@@ -23,7 +23,7 @@ interface ParkingRepository {
    * @param onSuccess a callback that is called when the parkings are retrieved
    * @param onFailure a callback that is called when an error occurs
    */
-  fun getParkings(onSuccess: (List<Parking>) -> Unit, onFailure: (Exception) -> Unit)
+  fun getAllParkings(onSuccess: (List<Parking>) -> Unit, onFailure: (Exception) -> Unit)
 
   /**
    * Get a parking by its identifier
@@ -48,14 +48,6 @@ interface ParkingRepository {
       onSuccess: (List<Parking>) -> Unit,
       onFailure: (Exception) -> Unit
   )
-
-  fun getKClosestParkings(
-      location: Point,
-      k: Int,
-      onSuccess: (List<Parking>) -> Unit,
-      onFailure: (Exception) -> Unit
-  )
-
   /**
    * Add a parking
    *
@@ -82,4 +74,18 @@ interface ParkingRepository {
    * @param onFailure a callback that is called when an error occurs
    */
   fun deleteParkingById(id: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
+
+  /**
+   * Get parkings by a list of identifiers. This is useful for getting the parkings that are in the
+   * list of favorite parkings of a user without having to make multiple requests.
+   *
+   * @param ids the list of identifiers of the parkings
+   * @param onSuccess a callback that is called when the parkings are retrieved
+   * @param onFailure a callback that is called when an error occurs
+   */
+  fun getParkingsByListOfIds(
+      ids: List<String>,
+      onSuccess: (List<Parking>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
 }

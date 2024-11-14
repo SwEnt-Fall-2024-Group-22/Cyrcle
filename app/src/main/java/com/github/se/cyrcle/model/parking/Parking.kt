@@ -1,6 +1,9 @@
 package com.github.se.cyrcle.model.parking
 
+import com.github.se.cyrcle.ui.theme.molecules.DropDownableEnum
 import com.mapbox.geojson.Point
+import com.mapbox.geojson.Polygon
+import com.mapbox.turf.TurfMeasurement
 
 /**
  * Data class representing a parking spot.
@@ -15,6 +18,8 @@ import com.mapbox.geojson.Point
  * @property protection Protection of the parking spot from the weather.
  * @property price Price of the parking spot. The price is in the currency of the country where the
  *   parking spot is located. 0 if the parking spot is free.
+ * @property nbReviews Number of Reviews for this Parking spot as of now.
+ * @property avgScore Average Review Score for this Parking spot as of now.
  */
 data class Parking(
     val uid: String,
@@ -26,12 +31,15 @@ data class Parking(
     val rackType: ParkingRackType,
     val protection: ParkingProtection,
     val price: Double,
-    val hasSecurity: Boolean
-    // TODO: Add list of reviews when implemented
+    val hasSecurity: Boolean,
+    var nbReviews: Int = 0,
+    var avgScore: Double = 0.0
 )
 
+interface ParkingAttribute : DropDownableEnum
+
 /** Enum class representing the capacity of a parking spot. */
-enum class ParkingCapacity(val description: String) {
+enum class ParkingCapacity(override val description: String) : ParkingAttribute {
   XSMALL("Less than 10 spots"),
   SMALL("10-25 spots"),
   MEDIUM("26-50 spots"),
@@ -40,7 +48,7 @@ enum class ParkingCapacity(val description: String) {
 }
 
 /** Enum class representing the type of rack in a parking spot. */
-enum class ParkingRackType(val description: String) {
+enum class ParkingRackType(override val description: String) : ParkingAttribute {
   TWO_TIER("Two-tier rack"),
   U_RACK("U-Rack"),
   VERTICAL("Vertical rack"),
@@ -51,7 +59,7 @@ enum class ParkingRackType(val description: String) {
   OTHER("Other type of rack")
 }
 
-enum class ParkingProtection(val description: String) {
+enum class ParkingProtection(override val description: String) : ParkingAttribute {
   INDOOR("Indoor"),
   COVERED("Covered"),
   NONE("Exposed")
@@ -64,11 +72,31 @@ data class Location(
     val bottomLeft: Point?,
     val bottomRight: Point?,
 ) {
+
+  /**
+   * Convert the location to a polygon.
+   *
+   * @return The polygon representing the location.
+   */
+  fun toPolygon(): Polygon {
+    return Polygon.fromLngLats(listOf(listOf(topLeft, topRight, bottomRight, bottomLeft, topLeft)))
+  }
+
+  /**
+   * Compute the area of the location in square meters. The area is computed using the Turf
+   * Measurement library.
+   *
+   * @return The area of the location in square meters.
+   */
+  fun computeArea(): Double {
+    return TurfMeasurement.area(toPolygon())
+  }
+
   constructor(
       topLeft: Point,
       topRight: Point,
-      bottomLeft: Point,
-      bottomRight: Point
+      bottomRight: Point,
+      bottomLeft: Point
   ) : this(
       Point.fromLngLat(
           (topLeft.longitude() + bottomRight.longitude()) / 2,
@@ -79,4 +107,8 @@ data class Location(
       bottomRight)
 
   constructor(center: Point) : this(center, null, null, null, null)
+
+  constructor(
+      listPoints: List<Point>
+  ) : this(listPoints[0], listPoints[1], listPoints[2], listPoints[3])
 }
