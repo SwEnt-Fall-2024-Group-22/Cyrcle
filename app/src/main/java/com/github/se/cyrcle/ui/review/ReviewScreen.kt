@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -49,6 +50,9 @@ fun ReviewScreen(
     reviewViewModel: ReviewViewModel,
     userViewModel: UserViewModel
 ) {
+  val configuration = LocalConfiguration.current
+  val screenWidth = configuration.screenWidthDp
+  val scaleFactor = screenWidth / 160f // Adjust the divisor based on your preferred scaling
 
   val selectedParking =
       parkingViewModel.selectedParking.collectAsState().value
@@ -72,27 +76,27 @@ fun ReviewScreen(
   }
   var textValue by remember { mutableStateOf(if (ownerHasReviewed) matchingReview?.text!! else "") }
 
-  val context = LocalContext.current // Get the current context
+  val context = LocalContext.current
 
   Scaffold(
       topBar = {
         TopAppBar(
             navigationActions = navigationActions,
-            if (ownerHasReviewed) stringResource(R.string.review_screen_title_edit_review)
-            else stringResource(R.string.review_screen_title_new_review))
+            title =
+                if (ownerHasReviewed) stringResource(R.string.review_screen_title_edit_review)
+                else stringResource(R.string.review_screen_title_new_review))
       }) { paddingValues ->
         Column(
             modifier = Modifier.fillMaxSize().padding(paddingValues).padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center) {
-              ScoreStars(sliderValue.toDouble(), scale = 2.5f)
-              // Display the experience text based on the slider value
+              ScoreStars(sliderValue.toDouble(), scale = scaleFactor) // Use dynamic scale factor
               Text(
                   text =
                       when (sliderValue) {
-                        in 1f..2f -> stringResource(R.string.review_screen_poor_review)
-                        in 2f..3f -> stringResource(R.string.review_screen_bad_review)
-                        3f -> stringResource(R.string.review_screen_average_review)
+                        in 0f..1f -> stringResource(R.string.review_screen_terrible_review)
+                        in 1f..2f -> stringResource(R.string.review_screen_bad_review)
+                        in 2f..3f -> stringResource(R.string.review_screen_average_review)
                         in 3.5f..4f -> stringResource(R.string.review_screen_good_review)
                         in 4.5f..5f -> stringResource(R.string.review_screen_great_review)
                         else -> ""
@@ -101,15 +105,11 @@ fun ReviewScreen(
                   modifier = Modifier.padding(top = 8.dp),
                   testTag = "ExperienceText")
 
-              // Slider with step granularity of 0.5
-              Text(
-                  text = "Rating: ${sliderValue.toDouble()}",
-                  style = MaterialTheme.typography.bodyLarge)
               Slider(
                   value = sliderValue,
                   onValueChange = { newValue -> sliderValue = newValue },
                   valueRange = 0f..5f,
-                  steps = 9, // Steps for granularity of 0.5 between 0 and 5
+                  steps = 9,
                   modifier = Modifier.padding(16.dp).testTag("Slider"))
 
               Spacer(modifier = Modifier.height(16.dp))
@@ -125,12 +125,10 @@ fun ReviewScreen(
 
               Spacer(modifier = Modifier.height(16.dp))
 
-              // Add Review Button
               Button(
                   text = stringResource(R.string.review_screen_submit_button),
                   onClick = {
                     Toast.makeText(context, "Review Added!", Toast.LENGTH_SHORT).show()
-                    // to avoid problematic castings
                     val sliderToValue = (sliderValue * 100).toInt() / 100.0
 
                     if (!ownerHasReviewed) {

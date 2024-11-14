@@ -12,7 +12,9 @@ import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.sp
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.Typography
 
@@ -26,11 +28,15 @@ import com.github.se.cyrcle.ui.theme.Typography
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun TopAppBar(navigationActions: NavigationActions, title: String, testTag: String = "TopAppBar") {
+  val configuration = LocalConfiguration.current
+  val screenWidth = configuration.screenWidthDp
+  val scaledFontSize = (screenWidth * 0.05).sp // Adjust the scaling factor as needed
+
   CenterAlignedTopAppBar(
       title = {
         Text(
             text = title,
-            style = Typography.titleLarge,
+            style = Typography.titleLarge.copy(fontSize = scaledFontSize),
             color = Color.White,
             modifier = Modifier.testTag("${testTag}Title"))
       },

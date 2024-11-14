@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.profile
 
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -67,6 +68,7 @@ fun ViewProfileScreen(
   var lastName by remember { mutableStateOf(userState?.details?.lastName ?: "") }
   var username by remember { mutableStateOf(userState?.public?.username ?: "") }
   var profilePictureUrl by remember { mutableStateOf(userState?.public?.profilePictureUrl ?: "") }
+  val context = LocalContext.current
 
   val imagePickerLauncher =
       rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
@@ -84,6 +86,7 @@ fun ViewProfileScreen(
         Box(Modifier.fillMaxSize().padding(innerPadding)) {
           authenticator.SignOutButton(Modifier.padding(10.dp).align(Alignment.TopEnd)) {
             userViewModel.setCurrentUser(null)
+            Toast.makeText(context, "You're signed out!", Toast.LENGTH_SHORT).show()
             navigationActions.navigateTo(TopLevelDestinations.AUTH)
           }
 
@@ -237,7 +240,6 @@ private fun DisplayProfileContent(
       onClick = {},
       isEditable = false,
       modifier = Modifier.testTag("ProfileImage"))
-
   Spacer(modifier = Modifier.height(8.dp))
 
   Text(
@@ -347,6 +349,7 @@ private fun FavoriteParkingsSection(userViewModel: UserViewModel) {
 @Composable
 private fun FavoriteParkingCard(parking: Parking, index: Int, onRemove: () -> Unit) {
   var showConfirmDialog by remember { mutableStateOf(false) }
+  val context = LocalContext.current
 
   Card(modifier = Modifier.size(120.dp).padding(8.dp), shape = MaterialTheme.shapes.medium) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -384,6 +387,7 @@ private fun FavoriteParkingCard(parking: Parking, index: Int, onRemove: () -> Un
               onClick = {
                 onRemove()
                 showConfirmDialog = false
+                Toast.makeText(context, "Removed from Favorites!", Toast.LENGTH_SHORT).show()
               }) {
                 Text(
                     stringResource(

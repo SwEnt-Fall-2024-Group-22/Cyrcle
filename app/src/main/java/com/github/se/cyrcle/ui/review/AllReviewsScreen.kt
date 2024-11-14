@@ -1,6 +1,7 @@
 package com.github.se.cyrcle.ui.review
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
@@ -300,6 +301,9 @@ fun AllReviewsScreen(
               }
 
               if (userViewModel.currentUser.value?.public?.userId != null) {
+                Log.d(
+                    "ListScreen",
+                    "ARE WE SIGNED IN: ${userViewModel.currentUser.value?.public?.userId != null}")
                 val userReview =
                     reviewsList.find { it.owner == userViewModel.currentUser.value?.public?.userId }
                 Box(
