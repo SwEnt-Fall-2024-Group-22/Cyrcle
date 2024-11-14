@@ -2,6 +2,8 @@ package com.github.se.cyrcle.ui.theme
 
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CheckboxColors
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -175,4 +177,22 @@ fun getOutlinedTextFieldColors(colorLevel: ColorLevel): TextFieldColors {
           focusedIndicatorColor = getColor(colorLevel),
           unfocusedTextColor = defaultOnColor(),
           focusedTextColor = defaultOnColor())
+}
+
+/**
+ * Get the colors for a checkbox from a ColorScheme.
+ *
+ * @param colorLevel The chosen ColorScheme
+ * @return The `CheckboxColors` from the `colorScheme`
+ */
+@Composable
+fun getCheckBoxColors(colorLevel: ColorLevel): CheckboxColors {
+  return CheckboxDefaults.colors()
+      .copy(
+          checkedCheckmarkColor = getOnColor(colorLevel),
+          uncheckedCheckmarkColor = getOnColor(colorLevel),
+          checkedBoxColor = getColor(colorLevel),
+          uncheckedBoxColor = Color.Transparent,
+          checkedBorderColor = defaultOnColor(),
+          uncheckedBorderColor = defaultOnColor())
 }

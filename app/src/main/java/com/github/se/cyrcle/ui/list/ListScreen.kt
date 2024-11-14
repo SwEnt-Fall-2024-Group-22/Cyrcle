@@ -53,10 +53,12 @@ import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
+import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.atoms.ToggleButton
+import com.github.se.cyrcle.ui.theme.getCheckBoxColors
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.mapbox.turf.TurfMeasurement
 
@@ -219,7 +221,8 @@ fun FilterHeader(
             Checkbox(
                 checked = onlyWithCCTV,
                 onCheckedChange = onCCTVCheckedChange,
-                modifier = Modifier.testTag("CCTVCheckbox"))
+                modifier = Modifier.testTag("CCTVCheckbox"),
+                colors = getCheckBoxColors(ColorLevel.PRIMARY))
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = stringResource(R.string.list_screen_display_only_cctv),
