@@ -7,9 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 
-const val primaryContainerAlphaModifier = 0.75f
-const val surfaceContainerAlphaModifier = 0.75f
-
 /**
  * Return a default OnColor (for text and/or icon), based on the system theme.
  *
