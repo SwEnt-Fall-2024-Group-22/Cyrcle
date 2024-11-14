@@ -11,8 +11,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -42,6 +42,7 @@ import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import com.github.se.cyrcle.ui.theme.ColorLevel
+import com.github.se.cyrcle.ui.theme.Red
 import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.ConditionCheckingInputText
 import com.github.se.cyrcle.ui.theme.atoms.Text
@@ -359,10 +360,10 @@ private fun FavoriteParkingCard(parking: Parking, index: Int, onRemove: () -> Un
           modifier =
               Modifier.align(Alignment.TopEnd).size(32.dp).testTag("FavoriteToggle_$index")) {
             Icon(
-                imageVector = Icons.Filled.Star,
+                imageVector = Icons.Default.Favorite,
                 contentDescription =
                     stringResource(R.string.view_profile_screen_remove_from_favorite),
-                tint = Color(0xFFFFD700),
+                tint = Red,
                 modifier = Modifier.size(20.dp))
           }
     }

@@ -83,11 +83,10 @@ fun ParkingDetailsScreen(
                   contentAlignment = Alignment.TopEnd) {
                     val isFavorite =
                         userSignedIn.value &&
-                          userViewModel.favoriteParkings
-                              .collectAsState()
-                              .value
-                              .contains(selectedParking)
-
+                            userViewModel.favoriteParkings
+                                .collectAsState()
+                                .value
+                                .contains(selectedParking)
 
                     Icon(
                         imageVector =
