@@ -82,14 +82,12 @@ fun ParkingDetailsScreen(
                   modifier = Modifier.fillMaxWidth().height(48.dp).testTag("FavoriteIconContainer"),
                   contentAlignment = Alignment.TopEnd) {
                     val isFavorite =
-                        if (userSignedIn.value) {
+                        userSignedIn.value &&
                           userViewModel.favoriteParkings
                               .collectAsState()
                               .value
                               .contains(selectedParking)
-                        } else {
-                          false
-                        }
+
 
                     Icon(
                         imageVector =
