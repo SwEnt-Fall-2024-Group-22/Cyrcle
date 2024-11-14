@@ -10,7 +10,6 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -206,8 +205,7 @@ class MainActivityTest {
       composeTestRule.waitUntilAtLeastOneExists(hasTestTag("SpotListItem"))
       composeTestRule.onNodeWithTag("SpotListColumn").performScrollToIndex(index)
       composeTestRule
-          .onNodeWithTag("SpotListColumn")
-          .onChildAt(index)
+          .onAllNodesWithTag("SpotListItem")[index]
           .assertIsDisplayed()
           .assertHasClickAction()
           .performClick()
