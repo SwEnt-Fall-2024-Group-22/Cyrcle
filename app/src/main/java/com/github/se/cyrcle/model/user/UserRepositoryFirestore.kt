@@ -170,6 +170,8 @@ constructor(private val db: FirebaseFirestore, private val auth: FirebaseAuth) :
 
   private fun deserializeUserDetails(data: Map<String, Any>): UserDetails {
     val gson = Gson()
-    return gson.fromJson(gson.toJson(data), UserDetails::class.java)
+    val json = gson.toJson(data)
+    val userDetails = gson.fromJson(json, UserDetails::class.java)
+    return userDetails.copy(wallet = userDetails.wallet ?: Wallet.empty())
   }
 }

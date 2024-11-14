@@ -24,6 +24,7 @@ data class UserPublic(
  * @property lastName The last name of the user.
  * @property email The email of the user.
  * @property favoriteParkings The list of favorite parkings of the user.
+ * @property wallet The wallet containing the coins of the user.
  */
 data class UserDetails(
     val firstName: String = "",
@@ -31,6 +32,7 @@ data class UserDetails(
     val email: String = "",
     val favoriteParkings: List<String> = emptyList(),
     // val lastLoginTime: Timestamp? = null,
+    val wallet: Wallet = Wallet.empty()
 )
 
 /**
