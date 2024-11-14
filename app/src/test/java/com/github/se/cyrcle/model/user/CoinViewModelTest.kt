@@ -8,15 +8,15 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 class CoinViewModelTest {
-  
+
   @Mock private lateinit var userViewModel: UserViewModel
   @Mock private lateinit var userRepository: UserRepository
   @Mock private lateinit var parkingRepository: ParkingRepository
-  
+
   @Before
   fun setUp() {
     MockitoAnnotations.openMocks(this)
-    
+
     userViewModel = UserViewModel(userRepository, parkingRepository)
   }
 
@@ -38,17 +38,13 @@ class CoinViewModelTest {
   @Test
   fun creditCoins_throwsExceptionForNegativeAmount() {
     val viewModel = CoinViewModel(userViewModel)
-    assertThrows(IllegalArgumentException::class.java) {
-      viewModel.creditCoins(-5)
-    }
+    assertThrows(IllegalArgumentException::class.java) { viewModel.creditCoins(-5) }
   }
 
   @Test
   fun debitCoins_throwsExceptionForNegativeAmount() {
     val viewModel = CoinViewModel(userViewModel)
-    assertThrows(IllegalArgumentException::class.java) {
-      viewModel.debitCoins(-5)
-    }
+    assertThrows(IllegalArgumentException::class.java) { viewModel.debitCoins(-5) }
   }
 
   @Test

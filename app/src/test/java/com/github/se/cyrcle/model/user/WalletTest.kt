@@ -23,17 +23,13 @@ class WalletTest {
   @Test
   fun creditCoins_throwsExceptionForNegativeAmount() {
     val wallet = Wallet()
-    assertThrows(IllegalArgumentException::class.java) {
-      wallet.creditCoins(-5)
-    }
+    assertThrows(IllegalArgumentException::class.java) { wallet.creditCoins(-5) }
   }
 
   @Test
   fun debitCoins_throwsExceptionForNegativeAmount() {
     val wallet = Wallet()
-    assertThrows(IllegalArgumentException::class.java) {
-      wallet.debitCoins(-5)
-    }
+    assertThrows(IllegalArgumentException::class.java) { wallet.debitCoins(-5) }
   }
 
   @Test
