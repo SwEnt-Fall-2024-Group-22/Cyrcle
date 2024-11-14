@@ -20,6 +20,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipe
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
@@ -88,7 +90,7 @@ class ListScreenTest {
         )
 
         // Set up test data
-        parkingViewModel.addParking(TestInstancesParking.parking1)
+        // parking1 already in
         parkingViewModel.addParking(TestInstancesParking.parking2)
         parkingViewModel.addParking(TestInstancesParking.parking3)
         userViewModel.addUser(user)
@@ -101,22 +103,207 @@ class ListScreenTest {
 
     @Test
     fun testPinActionCardDisplayed() {
+        composeTestRule.setContent {
+            var pinnedParkings by rememberSaveable { mutableStateOf(setOf<String>()) }
+            val handlePinStatusChanged = { parkingId: String, isPinned: Boolean ->
+                pinnedParkings =
+                    if (isPinned) {
+                        pinnedParkings + parkingId
+                    } else {
+                        pinnedParkings - parkingId
+                    }
+            }
+
+            SpotCard(
+                mockNavigationActions,
+                parkingViewModel,
+                userViewModel,
+                TestInstancesParking.parking1,
+                0.0,
+                initialIsPinned = false,
+                onPinStatusChanged = handlePinStatusChanged)
+        }
+
+        // Verify that the PinActionCard is displayed
+        composeTestRule.onNodeWithTag("PinActionCard").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("UnpinActionCard").assertIsNotDisplayed()
     }
 
     @Test
     fun testUnpinActionCardDisplayed() {
+        composeTestRule.setContent {
+            var pinnedParkings by rememberSaveable { mutableStateOf(setOf<String>()) }
+            val handlePinStatusChanged = { parkingId: String, isPinned: Boolean ->
+                pinnedParkings =
+                    if (isPinned) {
+                        pinnedParkings + parkingId
+                    } else {
+                        pinnedParkings - parkingId
+                    }
+            }
+            SpotCard(
+                mockNavigationActions,
+                parkingViewModel,
+                userViewModel,
+                TestInstancesParking.parking1,
+                0.0,
+                initialIsPinned = true,
+                onPinStatusChanged = handlePinStatusChanged)
+        }
+        composeTestRule.onNodeWithTag("PinActionCard").assertIsNotDisplayed()
+        composeTestRule.onNodeWithTag("UnpinActionCard").assertIsDisplayed()
     }
 
     @Test
     fun testAddToFavoritesActionCardDisplayed() {
+        composeTestRule.setContent {
+            var pinnedParkings by rememberSaveable { mutableStateOf(setOf<String>()) }
+            val handlePinStatusChanged = { parkingId: String, isPinned: Boolean ->
+                pinnedParkings =
+                    if (isPinned) {
+                        pinnedParkings + parkingId
+                    } else {
+                        pinnedParkings - parkingId
+                    }
+            }
+
+            SpotCard(
+                mockNavigationActions,
+                parkingViewModel,
+                userViewModel,
+                TestInstancesParking.parking3, // not in our user's favorites
+                0.0,
+                initialIsPinned = false,
+                onPinStatusChanged = handlePinStatusChanged)
+        }
+
+        // Verify that the AddToFavoriteActionCard is displayed
+        composeTestRule.onNodeWithTag("AddToFavoriteActionCard").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("AlreadyFavoriteActionCard").assertIsNotDisplayed()
     }
 
     @Test
     fun testAlreadyFavoriteActionCardDisplayed() {
+        composeTestRule.setContent {
+            var pinnedParkings by rememberSaveable { mutableStateOf(setOf<String>()) }
+            val handlePinStatusChanged = { parkingId: String, isPinned: Boolean ->
+                pinnedParkings =
+                    if (isPinned) {
+                        pinnedParkings + parkingId
+                    } else {
+                        pinnedParkings - parkingId
+                    }
+            }
+
+            SpotCard(
+                mockNavigationActions,
+                parkingViewModel,
+                userViewModel,
+                TestInstancesParking.parking1, // in our user's favorites
+                0.0,
+                initialIsPinned = false,
+                onPinStatusChanged = handlePinStatusChanged)
+        }
+
+        // Verify that the AlreadyFavoriteActionCard is displayed
+        composeTestRule.onNodeWithTag("AddToFavoriteActionCard").assertIsNotDisplayed()
+        composeTestRule.onNodeWithTag("AlreadyFavoriteActionCard").assertIsDisplayed()
     }
 
     @Test
     fun testQuickFavoriteAddsToUserFavorites() {
+        composeTestRule.setContent {
+            var pinnedParkings by rememberSaveable { mutableStateOf(setOf<String>()) }
+            val handlePinStatusChanged = { parkingId: String, isPinned: Boolean ->
+                pinnedParkings =
+                    if (isPinned) {
+                        pinnedParkings + parkingId
+                    } else {
+                        pinnedParkings - parkingId
+                    }
+            }
+
+            SpotCard(
+                mockNavigationActions,
+                parkingViewModel,
+                userViewModel,
+                TestInstancesParking.parking3,
+                0.0,
+                initialIsPinned = false,
+                onPinStatusChanged = handlePinStatusChanged)
+        }
+
+        val isFavorite =
+            userViewModel.currentUser.value
+                ?.details
+                ?.favoriteParkings
+                ?.contains(TestInstancesParking.parking3.uid) ?: false
+        assert(!isFavorite)
+
+        // Perform swipe left to add to favorites using general swipe
+        composeTestRule.onNodeWithTag("SpotListItem").performTouchInput {
+            swipe(
+                start = centerRight,
+                end = centerLeft,
+                durationMillis = 300
+            )
+        }
+
+        // Check if the parking was added to favorites
+        val isFavoriteAdded =
+            userViewModel.currentUser.value
+                ?.details
+                ?.favoriteParkings
+                ?.contains(TestInstancesParking.parking3.uid) ?: true
+        assert(isFavoriteAdded)
+    }
+
+    @Test
+    fun testQuickFavoriteDoesNothingOnQuickAddAlreadyFavorite() {
+        composeTestRule.setContent {
+            var pinnedParkings by rememberSaveable { mutableStateOf(setOf<String>()) }
+            val handlePinStatusChanged = { parkingId: String, isPinned: Boolean ->
+                pinnedParkings =
+                    if (isPinned) {
+                        pinnedParkings + parkingId
+                    } else {
+                        pinnedParkings - parkingId
+                    }
+            }
+
+            SpotCard(
+                mockNavigationActions,
+                parkingViewModel,
+                userViewModel,
+                TestInstancesParking.parking1, // already in favorites
+                0.0,
+                initialIsPinned = false,
+                onPinStatusChanged = handlePinStatusChanged)
+        }
+
+        val isFavorite =
+            userViewModel.currentUser.value
+                ?.details
+                ?.favoriteParkings
+                ?.contains(TestInstancesParking.parking1.uid) ?: false
+        assert(isFavorite)
+
+        // Perform swipe left to add to favorites using general swipe
+        composeTestRule.onNodeWithTag("SpotListItem").performTouchInput {
+            swipe(
+                start = centerRight,
+                end = centerLeft,
+                durationMillis = 300
+            )
+        }
+
+        // Check if the parking was added to favorites
+        val isFavoriteAdded =
+            userViewModel.currentUser.value
+                ?.details
+                ?.favoriteParkings
+                ?.contains(TestInstancesParking.parking1.uid) ?: true
+        assert(isFavoriteAdded)
     }
 
 
