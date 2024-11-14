@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.parkingDetails
 
-import android.util.Log
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
@@ -25,9 +24,6 @@ import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.model.review.ReviewRepository
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.TestInstancesUser
-import com.github.se.cyrcle.model.user.User
-import com.github.se.cyrcle.model.user.UserDetails
-import com.github.se.cyrcle.model.user.UserPublic
 import com.github.se.cyrcle.model.user.UserRepository
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
@@ -74,8 +70,6 @@ class ParkingDetailsScreenTest {
     `when`(navigationActions.currentRoute()).thenReturn(Screen.PARKING_DETAILS)
   }
 
-
-
   @Test
   fun favoriteIconVisibleWhenNotSignedInAndDoesNothing() {
     parkingViewModel.selectParking(TestInstancesParking.parking1)
@@ -93,7 +87,6 @@ class ParkingDetailsScreenTest {
 
   @Test
   fun addToFavoritesWhenSignedIn() {
-
 
     parkingViewModel.selectParking(TestInstancesParking.parking3)
     userViewModel.addUser(TestInstancesUser.user1)
@@ -133,7 +126,6 @@ class ParkingDetailsScreenTest {
     // Should now show outline icon
     composeTestRule.onNodeWithTag("BlackOutlinedFavoriteIcon").assertIsDisplayed()
   }
-
 
   @Test
   fun displayAllComponents() {
