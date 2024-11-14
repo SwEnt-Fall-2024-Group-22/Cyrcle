@@ -69,6 +69,7 @@ fun InputText(
           Icon(
               imageVector = Icons.Filled.Close,
               contentDescription = "Clear",
+              tint = defaultOnColor(),
               modifier = Modifier.clickable { onValueChange("") }.testTag("${testTag}Clear"))
         }
       })
