@@ -6,6 +6,7 @@ package com.github.se.cyrcle.model.user
  * won't be persistent
  *
  * @param userViewModel The ViewModel of the user to get info about the current state of the user
+ * @throws IllegalArgumentException if the amount is negative.
  */
 class CoinViewModel(userViewModel: UserViewModel) {
   private val currentUser = userViewModel.currentUser
@@ -18,6 +19,7 @@ class CoinViewModel(userViewModel: UserViewModel) {
    * The amount of coins the user has.
    *
    * @param amount The amount of coins the user has. Must be positive.
+   * @throws IllegalArgumentException if the amount is negative.
    */
   fun creditCoins(amount: Coin) {
     if (amount < 0) throw IllegalArgumentException("Amount must be positive")

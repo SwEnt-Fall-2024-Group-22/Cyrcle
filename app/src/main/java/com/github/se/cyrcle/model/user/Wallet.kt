@@ -16,6 +16,7 @@ class Wallet(private var coins: Coin = 0) {
    * Add amount of coins to the wallet.
    *
    * @param amount the amount of coins to add. Must be positive.
+   * @throws IllegalArgumentException if the amount is negative.
    */
   fun creditCoins(amount: Coin) {
     if (amount < 0) throw IllegalArgumentException("Amount must be positive")
@@ -26,6 +27,7 @@ class Wallet(private var coins: Coin = 0) {
    * Remove amount of coins to the wallet. This function does not check if the wallet is solvable.
    *
    * @param amount the amount of coins to remove. Must be positive.
+   * @throws IllegalArgumentException if the amount is negative.
    */
   fun debitCoins(amount: Coin) {
     if (amount < 0) throw IllegalArgumentException("Amount must be positive")
