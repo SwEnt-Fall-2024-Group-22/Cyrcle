@@ -35,7 +35,6 @@ class InputTest {
           Modifier,
           { newText -> text = newText },
           text,
-          White,
           false,
           2,
           1,
