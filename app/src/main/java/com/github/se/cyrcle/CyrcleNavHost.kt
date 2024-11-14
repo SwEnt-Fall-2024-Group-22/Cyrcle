@@ -47,9 +47,7 @@ fun CyrcleNavHost(
         startDestination = Screen.LIST,
         route = Route.LIST,
     ) {
-      composable(Screen.LIST) {
-        SpotListScreen(navigationActions, parkingViewModel, mapViewModel, userViewModel)
-      }
+      composable(Screen.LIST) { SpotListScreen(navigationActions, parkingViewModel, mapViewModel, userViewModel) }
       composable(Screen.PARKING_DETAILS) {
         ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
       }
