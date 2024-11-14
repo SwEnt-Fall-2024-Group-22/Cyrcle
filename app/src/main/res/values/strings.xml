@@ -15,6 +15,15 @@
         <item quantity="one">(1 review)</item>
         <item quantity="other">(%d reviews)</item>
     </plurals>
+    <string name="pinned_spots">Pinned Spots</string>
+    <string name="all_spots">All Spots</string>
+    <string name="remove_pin">Remove pin</string>
+    <string name="pin_parking_spot">Pin parking spot</string>
+    <string name="already_in_favorites">Already in favorites</string>
+    <string name="add_to_favorites">Add to favorites</string>
+    <string name="already_in_favorites_toast">Parking is already in favorites</string>
+    <string name="sign_in_to_add_favorites">Please sign in to add favorites</string>
+    <string name="filter">Filter</string>
 
     <!-- Error Messages -->
     <string name="input_min_characters">Minimum %1$d characters required (current: %2$d)</string>
@@ -53,7 +62,6 @@
     <string name="sign_in_failed_toast">Login failed!</string>
     <string name="sign_in_guest_button">Continue as Guest</string>
     <string name="sign_in_google_button">Sign in with Google</string>
-    <string name="sign_in_to_add_favorites">Please sign in to add favorites</string>
 
     <!-- Card Screen -->
     <string name="card_screen_description">Description of %s</string>
@@ -80,7 +88,6 @@
     <string name="list_screen_rating">Rating: %.1f</string>
     <string name="list_screen_display_only_cctv">Only display parkings with CCTV camera</string>
     <string name="all_parkings_radius">All parkings in a radius of \n %1$d m</string>
-
 
     <!-- Zoom Controls -->
     <string name="zoom_in">Zoom In</string>

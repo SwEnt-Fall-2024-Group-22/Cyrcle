@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
@@ -65,10 +66,12 @@ import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
+import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.atoms.ToggleButton
+import com.github.se.cyrcle.ui.theme.getCheckBoxColors
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.mapbox.turf.TurfMeasurement
 import kotlin.math.roundToInt
@@ -128,7 +131,7 @@ fun SpotListScreen(
                 if (pinnedParkings.isNotEmpty()) {
                   item {
                     Text(
-                        text = "Pinned Spots",
+                        text = stringResource(R.string.pinned_spots),
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(horizontal = 16.dp),
                         color = MaterialTheme.colorScheme.primary)
@@ -149,7 +152,7 @@ fun SpotListScreen(
                   item {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "All Spots",
+                        text = stringResource(R.string.all_spots),
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(horizontal = 16.dp),
                         color = MaterialTheme.colorScheme.primary)
@@ -272,12 +275,12 @@ fun FilterHeader(
             Checkbox(
                 checked = onlyWithCCTV,
                 onCheckedChange = onCCTVCheckedChange,
-                modifier = Modifier.testTag("CCTVCheckbox"))
+                modifier = Modifier.testTag("CCTVCheckbox"),
+                colors = getCheckBoxColors(ColorLevel.PRIMARY))
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = stringResource(R.string.list_screen_display_only_cctv),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.testTag("CCTVCheckboxLabel"))
           }
     }
@@ -301,7 +304,6 @@ fun FilterSection(
             text = title,
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.clickable(onClick = onToggle).padding(8.dp).fillMaxWidth(),
-            color = MaterialTheme.colorScheme.primary,
             testTag = title)
 
         if (isExpanded) {
@@ -333,7 +335,9 @@ fun SpotCard(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically) {
           ActionCard(
-              text = if (initialIsPinned) "Remove pin" else "Pin parking spot",
+              text =
+                  if (initialIsPinned) stringResource(R.string.remove_pin)
+                  else stringResource(R.string.pin_parking_spot),
               icon = Icons.Default.PushPin,
               backgroundColor =
                   if (initialIsPinned) Color.Red.copy(alpha = 0.7f) else Color.LightGray,
@@ -343,13 +347,13 @@ fun SpotCard(
                       .testTag(if (initialIsPinned) "UnpinActionCard" else "PinActionCard"))
           if (isFavorite) {
             ActionCard(
-                text = "Already in favorites",
+                text = stringResource(R.string.already_in_favorites),
                 icon = Icons.Default.Star,
                 backgroundColor = Color.Gray,
                 modifier = Modifier.fillMaxHeight().weight(1f).testTag("AlreadyFavoriteActionCard"))
           } else {
             ActionCard(
-                text = "Add to favorites",
+                text = stringResource(R.string.add_to_favorites),
                 icon = Icons.Default.Star,
                 backgroundColor = Color.Yellow,
                 modifier = Modifier.fillMaxHeight().weight(1f).testTag("AddToFavoriteActionCard"))
@@ -377,11 +381,15 @@ fun SpotCard(
                             }
                           } else if (!userSignedIn.value) {
                             Toast.makeText(
-                                    context, "Please sign in to add favorites", Toast.LENGTH_SHORT)
+                                    context,
+                                    context.getString(R.string.sign_in_to_add_favorites),
+                                    Toast.LENGTH_SHORT)
                                 .show()
                           } else if (isFavorite) {
                             Toast.makeText(
-                                    context, "Parking is already in favorites", Toast.LENGTH_SHORT)
+                                    context,
+                                    context.getString(R.string.already_in_favorites_toast),
+                                    Toast.LENGTH_SHORT)
                                 .show()
                           }
                         }
@@ -414,7 +422,6 @@ fun SpotCard(
                             parking.optName?.let { if (it.length > 35) it.take(32) + "..." else it }
                                 ?: stringResource(R.string.default_parking_name),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
                         testTag = "ParkingName")
                     Text(
                         text =
@@ -422,7 +429,6 @@ fun SpotCard(
                                 stringResource(R.string.distance_m).format(distance * 1000)
                             else stringResource(R.string.distance_km).format(distance),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface,
                         testTag = "ParkingDistance")
                   }
 
@@ -430,10 +436,7 @@ fun SpotCard(
               Spacer(modifier = Modifier.height(4.dp))
               if (parking.nbReviews > 0) {
                 Row {
-                  ScoreStars(
-                      parking.avgScore,
-                      scale = 0.8f,
-                      starColor = MaterialTheme.colorScheme.onSurface)
+                  ScoreStars(parking.avgScore, scale = 0.8f)
                   Spacer(modifier = Modifier.width(8.dp))
                   Text(
                       text =
