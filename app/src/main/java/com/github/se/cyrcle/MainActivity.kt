@@ -19,7 +19,7 @@ import com.github.se.cyrcle.model.review.ReviewRepository
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.UserRepository
 import com.github.se.cyrcle.model.user.UserViewModel
-import com.github.se.cyrcle.permission.PermissionHandlerInterface
+import com.github.se.cyrcle.permission.PermissionHandler
 import com.github.se.cyrcle.ui.authentication.Authenticator
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.CyrcleTheme
@@ -39,7 +39,7 @@ class MainActivity : ComponentActivity() {
 
   @Inject lateinit var addressRepository: AddressRepository
 
-  @Inject lateinit var permissionsHandler: PermissionHandlerInterface
+  @Inject lateinit var permissionsHandler: PermissionHandler
 
   @Inject lateinit var authenticator: Authenticator
 
@@ -48,6 +48,7 @@ class MainActivity : ComponentActivity() {
     requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
     permissionsHandler.initHandler(this@MainActivity)
+    permissionsHandler.requestPermission(android.Manifest.permission.ACCESS_FINE_LOCATION)
 
     val reviewViewModel = ReviewViewModel(reviewRepository)
     val userViewModel = UserViewModel(userRepository, parkingRepository)
@@ -70,9 +71,22 @@ class MainActivity : ComponentActivity() {
               mapViewModel,
               addressViewModel,
               authenticator,
-              this@MainActivity)
+              permissionsHandler)
         }
       }
     }
+  }
+
+  @Deprecated(
+      "Deprecated in Java",
+      ReplaceWith(
+          "super.onRequestPermissionsResult(requestCode, permissions, grantResults)",
+          "androidx.activity.ComponentActivity"))
+  override fun onRequestPermissionsResult(
+      requestCode: Int,
+      permissions: Array<out String>,
+      grantResults: IntArray
+  ) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults)
   }
 }

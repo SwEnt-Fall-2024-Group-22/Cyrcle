@@ -23,6 +23,7 @@ import com.github.se.cyrcle.MainActivity
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.TestInstancesParking
+import com.github.se.cyrcle.permission.PermissionHandler
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -46,12 +47,16 @@ class MainActivityTest {
   private lateinit var cardRobot: ParkingDetailsScreenRobot
   private lateinit var addParkingRobot: AddParkingRobot
 
+  private lateinit var permissionHandler: PermissionHandler
+
   @Before
   fun setUp() {
     hiltRule.inject()
 
+    permissionHandler = composeTestRule.activity.permissionsHandler
+
     authRobot = AuthScreenRobot(composeTestRule)
-    mapRobot = MapScreenRobot(composeTestRule)
+    mapRobot = MapScreenRobot(composeTestRule, permissionHandler)
     listRobot = ListScreenRobot(composeTestRule)
     cardRobot = ParkingDetailsScreenRobot(composeTestRule)
     addParkingRobot = AddParkingRobot(composeTestRule)
@@ -235,14 +240,19 @@ class MainActivityTest {
   // ============================================================================
   // ============================= MAPSCREEN ROBOT ==============================
   // ============================================================================
-  private class MapScreenRobot(val composeTestRule: ComposeTestRule) {
+  private class MapScreenRobot(
+      val composeTestRule: ComposeTestRule,
+      val permissionHandler: PermissionHandler
+  ) {
 
     fun assertMapScreen() {
       composeTestRule.onNodeWithTag("MapScreen").assertIsDisplayed()
       composeTestRule.onNodeWithTag("ZoomControlsIn").assertIsDisplayed().assertHasClickAction()
       composeTestRule.onNodeWithTag("ZoomControlsOut").assertIsDisplayed().assertHasClickAction()
       composeTestRule.onNodeWithTag("NavigationBar").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("recenterButton").assertIsDisplayed().assertHasClickAction()
+
+      if (permissionHandler.getPositionState().value)
+          composeTestRule.onNodeWithTag("recenterButton").assertIsDisplayed().assertHasClickAction()
     }
 
     @OptIn(ExperimentalTestApi::class)

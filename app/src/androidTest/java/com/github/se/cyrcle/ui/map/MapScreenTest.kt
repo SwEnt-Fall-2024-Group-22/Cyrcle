@@ -1,7 +1,6 @@
 package com.github.se.cyrcle.ui.map
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -10,6 +9,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
+import com.github.se.cyrcle.di.mocks.MockPermissionHandler
 import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingViewModel
@@ -37,6 +37,7 @@ class MapScreenTest {
   private lateinit var parkingViewModel: ParkingViewModel
   private lateinit var userViewModel: UserViewModel
   private lateinit var mapViewModel: MapViewModel
+  private lateinit var permissionHandler: MockPermissionHandler
 
   @Before
   fun setUp() {
@@ -49,6 +50,7 @@ class MapScreenTest {
     parkingViewModel = ParkingViewModel(imageRepository, parkingRepository)
     userViewModel = UserViewModel(userRepository, parkingRepository)
     mapViewModel = MapViewModel()
+    permissionHandler = MockPermissionHandler()
 
     `when`(mockNavigation.currentRoute()).thenReturn(Screen.MAP)
   }
@@ -62,7 +64,7 @@ class MapScreenTest {
   @Test
   fun testMapIsDisplayed() {
     composeTestRule.setContent {
-      MapScreen(mockNavigation, parkingViewModel, userViewModel, mapViewModel)
+      MapScreen(mockNavigation, parkingViewModel, userViewModel, mapViewModel, permissionHandler)
     }
 
     composeTestRule.onNodeWithTag("MapScreen").assertIsDisplayed()
@@ -71,9 +73,6 @@ class MapScreenTest {
     // Assert that the zoom controls are displayed
     composeTestRule.onNodeWithTag("ZoomControlsIn").assertIsDisplayed().assertHasClickAction()
     composeTestRule.onNodeWithTag("ZoomControlsOut").assertIsDisplayed().assertHasClickAction()
-
-    // Assert that the recenter button is displayed
-    composeTestRule.onNodeWithTag("recenterButton").assertIsDisplayed().assertHasClickAction()
   }
 
   /**
@@ -88,7 +87,8 @@ class MapScreenTest {
     val state = mutableStateOf(defaultZoom)
 
     composeTestRule.setContent {
-      MapScreen(mockNavigation, parkingViewModel, userViewModel, mapViewModel, state)
+      MapScreen(
+          mockNavigation, parkingViewModel, userViewModel, mapViewModel, permissionHandler, state)
     }
 
     for (i in 0..(defaultZoom - minZoom).toInt()) {
@@ -102,7 +102,7 @@ class MapScreenTest {
   @Test
   fun testAddParkingRules() {
     composeTestRule.setContent {
-      MapScreen(mockNavigation, parkingViewModel, userViewModel, mapViewModel)
+      MapScreen(mockNavigation, parkingViewModel, userViewModel, mapViewModel, permissionHandler)
     }
 
     // Check that the add button has no click action when there is no user
@@ -129,12 +129,7 @@ class MapScreenTest {
 
     composeTestRule.setContent {
       MapScreen(
-          mockNavigation,
-          parkingViewModel,
-          userViewModel,
-          mapViewModel,
-          state,
-          LocalContext.current as android.app.Activity)
+          mockNavigation, parkingViewModel, userViewModel, mapViewModel, permissionHandler, state)
     }
 
     for (i in 0..(maxZoom - defaultZoom).toInt()) {
@@ -145,8 +140,6 @@ class MapScreenTest {
     assert(state.value == maxZoom)
   }
 
-  @Test
-
   /**
    * Test to verify that the recenter button has a click action.
    *
@@ -154,10 +147,14 @@ class MapScreenTest {
    * action. It then performs a click action on the recenter button and asserts that the focus mode
    * is toggled.
    */
+  @Test
   fun testRecenterButton() {
     composeTestRule.setContent {
-      MapScreen(mockNavigation, parkingViewModel, userViewModel, mapViewModel)
+      MapScreen(mockNavigation, parkingViewModel, userViewModel, mapViewModel, permissionHandler)
     }
+
+    // Start with enabled location
+    permissionHandler.authorizeLoc.value = true
 
     // Assert that the recenter button is displayed
     composeTestRule.onNodeWithTag("recenterButton").assertIsDisplayed()
@@ -166,5 +163,10 @@ class MapScreenTest {
     composeTestRule.onNodeWithTag("recenterButton").assertHasClickAction()
 
     assert(mapViewModel.isTrackingModeEnable.value)
+
+    // Remove location permission
+    permissionHandler.authorizeLoc.value = false
+    // Assert that the recenter button is displayed
+    composeTestRule.onNodeWithTag("recenterButton").assertDoesNotExist()
   }
 }
