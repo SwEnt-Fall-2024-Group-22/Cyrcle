@@ -14,11 +14,11 @@ class MockPermissionHandler @Inject constructor() : PermissionHandler {
   /**
    * Initializes the permissions handler.
    *
-   * @param activity the activity
+   * @param mainActivity the activity
    */
-  override fun initHandler(activity: MainActivity) {}
+  override fun initHandler(mainActivity: MainActivity) {}
 
-  override fun requestPermission(permissionName: String) {}
+  override fun requestPermission(permissionName: Array<String>) {}
 
   override fun getPositionState(): StateFlow<Boolean> {
     return authorizeLoc

@@ -48,7 +48,6 @@ class MainActivity : ComponentActivity() {
     requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
     permissionsHandler.initHandler(this@MainActivity)
-    permissionsHandler.requestPermission(android.Manifest.permission.ACCESS_FINE_LOCATION)
 
     val reviewViewModel = ReviewViewModel(reviewRepository)
     val userViewModel = UserViewModel(userRepository, parkingRepository)
@@ -75,18 +74,5 @@ class MainActivity : ComponentActivity() {
         }
       }
     }
-  }
-
-  @Deprecated(
-      "Deprecated in Java",
-      ReplaceWith(
-          "super.onRequestPermissionsResult(requestCode, permissions, grantResults)",
-          "androidx.activity.ComponentActivity"))
-  override fun onRequestPermissionsResult(
-      requestCode: Int,
-      permissions: Array<out String>,
-      grantResults: IntArray
-  ) {
-    super.onRequestPermissionsResult(requestCode, permissions, grantResults)
   }
 }

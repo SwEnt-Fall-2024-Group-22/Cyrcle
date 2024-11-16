@@ -1,9 +1,12 @@
 package com.github.se.cyrcle.permission
 
+import android.content.pm.PackageManager
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import com.github.se.cyrcle.MainActivity
+import com.mapbox.android.core.permissions.PermissionsListener
+import com.mapbox.android.core.permissions.PermissionsManager
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,30 +14,57 @@ import kotlinx.coroutines.flow.StateFlow
 /** Handles permissions for the app. */
 class PermissionHandlerImpl @Inject constructor() : PermissionHandler {
 
+  private lateinit var permissionManager: PermissionsManager
   private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
 
-  private val positionState: MutableStateFlow<Boolean> = MutableStateFlow(false)
+  private val positionGranted: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
   /**
    * Initializes the permissions handler.
    *
-   * @param activity the activity
+   * @param mainActivity the activity
    */
-  override fun initHandler(activity: MainActivity) {
+  override fun initHandler(mainActivity: MainActivity) {
+    positionGranted.value = PermissionsManager.areLocationPermissionsGranted(mainActivity)
+
+    // Create a PermissionsManager
+    permissionManager =
+        PermissionsManager(
+            object : PermissionsListener {
+              override fun onExplanationNeeded(permissionsToExplain: List<String>) {
+                Log.d("PermissionsHandlerImpl", "Permissions: $permissionsToExplain")
+              }
+
+              override fun onPermissionResult(granted: Boolean) {
+                positionGranted.value = granted
+                Log.d("PermissionsHandlerImpl", "Permission granted: $granted")
+              }
+            })
+
+    // Register for permission results
     permissionLauncher =
-        activity.registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
-            permissions ->
-          for ((permission, granted) in permissions) {
-            when (permission) {
-              android.Manifest.permission.ACCESS_FINE_LOCATION -> {
-                positionState.value = granted
-              }
-              android.Manifest.permission.ACCESS_COARSE_LOCATION -> {
-                positionState.value = granted
-              }
+        mainActivity.registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+
+              // Call Mapbox's implementation of onRequestPermissionsResult
+              permissionManager.onRequestPermissionsResult(
+                  0,
+                  permissions.keys.toTypedArray(),
+                  permissions.values
+                      .map {
+                        if (it) PackageManager.PERMISSION_GRANTED
+                        else PackageManager.PERMISSION_DENIED
+                      }
+                      .toIntArray())
             }
-          }
-        }
+
+    // Ask for permissions if not granted
+    if (!positionGranted.value) {
+      permissionLauncher.launch(
+          arrayOf(
+              android.Manifest.permission.ACCESS_FINE_LOCATION,
+              android.Manifest.permission.ACCESS_COARSE_LOCATION))
+    }
   }
 
   /**
@@ -42,18 +72,21 @@ class PermissionHandlerImpl @Inject constructor() : PermissionHandler {
    *
    * @param permissionName the name of the permission
    */
-  override fun requestPermission(permissionName: String) {
-    when (permissionName) {
-      android.Manifest.permission.ACCESS_FINE_LOCATION -> {
-        permissionLauncher.launch(arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION))
-      }
-      android.Manifest.permission.ACCESS_COARSE_LOCATION -> {
-        permissionLauncher.launch(arrayOf(android.Manifest.permission.ACCESS_COARSE_LOCATION))
-      }
-      else -> {
-        Log.e("PermissionsHandlerImpl", "Unknown permission: $permissionName")
-      }
-    }
+  override fun requestPermission(permissionName: Array<String>) {
+    val requestedPermissions =
+        permissionName.filter {
+          when (it) {
+            android.Manifest.permission.ACCESS_FINE_LOCATION -> true
+            android.Manifest.permission.ACCESS_COARSE_LOCATION -> true
+            else -> {
+              Log.e("PermissionsHandlerImpl", "Unknown permission: $it")
+              false
+            }
+          }
+        }
+
+    if (requestedPermissions.isNotEmpty())
+        permissionLauncher.launch(requestedPermissions.toTypedArray())
   }
 
   /**
@@ -61,5 +94,5 @@ class PermissionHandlerImpl @Inject constructor() : PermissionHandler {
    *
    * @return A state flow indicating if location tracking is authorised
    */
-  override fun getPositionState(): StateFlow<Boolean> = positionState
+  override fun getPositionState(): StateFlow<Boolean> = positionGranted
 }

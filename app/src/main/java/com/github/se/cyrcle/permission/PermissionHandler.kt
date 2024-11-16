@@ -9,16 +9,16 @@ interface PermissionHandler {
   /**
    * Initializes the permissions handler.
    *
-   * @param activity the activity
+   * @param mainActivity the activity
    */
-  fun initHandler(activity: MainActivity)
+  fun initHandler(mainActivity: MainActivity)
 
   /**
    * Requests a permission.
    *
    * @param permissionName the name of the permission
    */
-  fun requestPermission(permissionName: String)
+  fun requestPermission(permissionName: Array<String>)
 
   /**
    * Checks if the position permission is granted.
