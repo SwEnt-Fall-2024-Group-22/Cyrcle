@@ -336,7 +336,6 @@ class ListScreenTest {
         .performClick()
 
     composeTestRule.onNodeWithTag("ParkingNoReviews", useUnmergedTree = true).assertIsDisplayed()
-    composeTestRule.onNodeWithTag("ParkingNbReviews", useUnmergedTree = true).assertIsNotDisplayed()
     composeTestRule.onNodeWithTag("ParkingRating", useUnmergedTree = true).assertIsNotDisplayed()
 
     verify(mockNavigationActions).navigateTo(Screen.PARKING_DETAILS)

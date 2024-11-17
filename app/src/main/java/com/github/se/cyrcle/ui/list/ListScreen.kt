@@ -421,18 +421,15 @@ fun SpotCard(
                   }
 
               // Rating
-              Spacer(modifier = Modifier.height(4.dp))
+              Spacer(modifier = Modifier.height(8.dp))
               if (parking.nbReviews > 0) {
                 Row {
-                  ScoreStars(parking.avgScore, scale = 0.8f)
-                  Spacer(modifier = Modifier.width(8.dp))
-                  Text(
+                  ScoreStars(
+                      parking.avgScore,
+                      scale = 0.7f,
                       text =
                           pluralStringResource(R.plurals.reviews_count, count = parking.nbReviews)
-                              .format(parking.nbReviews),
-                      style = MaterialTheme.typography.bodySmall,
-                      color = MaterialTheme.colorScheme.onSurface,
-                      testTag = "ParkingNbReviews")
+                              .format(parking.nbReviews))
                 }
               } else {
                 Text(
