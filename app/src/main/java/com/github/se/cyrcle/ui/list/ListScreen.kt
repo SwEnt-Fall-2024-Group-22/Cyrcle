@@ -8,7 +8,6 @@ import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -17,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -24,12 +24,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.PushPin
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -43,7 +44,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -74,6 +77,8 @@ import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.mapbox.turf.TurfMeasurement
 import kotlin.math.roundToInt
 
+const val CARD_HEIGHT = 120
+
 @Composable
 fun SpotListScreen(
     navigationActions: NavigationActions,
@@ -84,7 +89,6 @@ fun SpotListScreen(
   val userPosition by mapViewModel.userPosition.collectAsState()
 
   val filteredParkingSpots by parkingViewModel.closestParkings.collectAsState()
-
   val pinnedParkings by parkingViewModel.pinnedParkings.collectAsState()
 
   LaunchedEffect(userPosition) { parkingViewModel.setCircleCenter(userPosition) }
@@ -96,57 +100,52 @@ fun SpotListScreen(
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(bottom = 16.dp)) {
           FilterHeader(parkingViewModel = parkingViewModel)
           val listState = rememberLazyListState()
-          LazyColumn(
-              state = listState,
-              contentPadding = PaddingValues(16.dp),
-              verticalArrangement = Arrangement.spacedBy(8.dp),
-              modifier = Modifier.testTag("SpotListColumn")) {
-                if (pinnedParkings.isNotEmpty()) {
-                  item {
-                    Text(
-                        text = stringResource(R.string.pinned_spots),
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        color = MaterialTheme.colorScheme.primary)
+          LazyColumn(state = listState, modifier = Modifier.testTag("SpotListColumn")) {
+            if (pinnedParkings.isNotEmpty()) {
+              item {
+                Text(
+                    text = stringResource(R.string.pinned_spots),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.primary)
+              }
+              items(
+                  items = filteredParkingSpots.filter { it in pinnedParkings },
+                  key = { parking -> parking.uid }) { parking ->
+                    val distance = TurfMeasurement.distance(userPosition, parking.location.center)
+                    SpotCard(
+                        navigationActions = navigationActions,
+                        parkingViewModel = parkingViewModel,
+                        userViewModel = userViewModel,
+                        parking = parking,
+                        distance = distance)
                   }
-                  items(
-                      items = filteredParkingSpots.filter { it in pinnedParkings },
-                      key = { parking -> parking.uid }) { parking ->
-                        val distance =
-                            TurfMeasurement.distance(userPosition, parking.location.center)
-                        SpotCard(
-                            navigationActions = navigationActions,
-                            parkingViewModel = parkingViewModel,
-                            userViewModel = userViewModel,
-                            parking = parking,
-                            distance = distance)
-                      }
-                  item {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = stringResource(R.string.all_spots),
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        color = MaterialTheme.colorScheme.primary)
+              item {
+                Spacer(modifier = Modifier.height(32.dp))
+                Text(
+                    text = stringResource(R.string.all_spots),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.primary)
+              }
+            }
+
+            items(
+                items = filteredParkingSpots.filter { it !in pinnedParkings },
+                key = { parking -> parking.uid }) { parking ->
+                  val distance = TurfMeasurement.distance(userPosition, parking.location.center)
+                  SpotCard(
+                      navigationActions = navigationActions,
+                      parkingViewModel = parkingViewModel,
+                      userViewModel = userViewModel,
+                      parking = parking,
+                      distance = distance)
+
+                  if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1) {
+                    parkingViewModel.incrementRadius()
                   }
                 }
-
-                items(
-                    items = filteredParkingSpots.filter { it !in pinnedParkings },
-                    key = { parking -> parking.uid }) { parking ->
-                      val distance = TurfMeasurement.distance(userPosition, parking.location.center)
-                      SpotCard(
-                          navigationActions = navigationActions,
-                          parkingViewModel = parkingViewModel,
-                          userViewModel = userViewModel,
-                          parking = parking,
-                          distance = distance)
-
-                      if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1) {
-                        parkingViewModel.incrementRadius()
-                      }
-                    }
-              }
+          }
         }
       }
 }
@@ -303,9 +302,9 @@ fun SpotCard(
   val isFavorite = userState?.details?.favoriteParkings.orEmpty().contains(parking.uid)
 
   val pinnedParkings by parkingViewModel.pinnedParkings.collectAsState()
-  val initialIsPinned = parking in pinnedParkings
+  val isPinned = parking in pinnedParkings
 
-  Box(modifier = Modifier.fillMaxWidth().height(120.dp).padding(4.dp)) {
+  Box(modifier = Modifier.fillMaxWidth().height(CARD_HEIGHT.dp)) {
     // Background actions
     Row(
         modifier = Modifier.fillMaxSize(),
@@ -313,26 +312,28 @@ fun SpotCard(
         verticalAlignment = Alignment.CenterVertically) {
           ActionCard(
               text =
-                  if (initialIsPinned) stringResource(R.string.remove_pin)
+                  if (isPinned) stringResource(R.string.remove_pin)
                   else stringResource(R.string.pin_parking_spot),
               icon = Icons.Default.PushPin,
-              backgroundColor =
-                  if (initialIsPinned) Color.Red.copy(alpha = 0.7f) else Color.LightGray,
+              backgroundColor = if (isPinned) Color.Red.copy(alpha = 0.7f) else Color.LightGray,
+              left = true,
               modifier =
                   Modifier.fillMaxHeight()
                       .weight(1f)
-                      .testTag(if (initialIsPinned) "UnpinActionCard" else "PinActionCard"))
+                      .testTag(if (isPinned) "UnpinActionCard" else "PinActionCard"))
           if (isFavorite) {
             ActionCard(
                 text = stringResource(R.string.already_in_favorites),
-                icon = Icons.Default.Star,
+                icon = Icons.Default.Favorite,
                 backgroundColor = Color.Gray,
+                left = false,
                 modifier = Modifier.fillMaxHeight().weight(1f).testTag("AlreadyFavoriteActionCard"))
           } else {
             ActionCard(
                 text = stringResource(R.string.add_to_favorites),
-                icon = Icons.Default.Star,
-                backgroundColor = Color.Yellow,
+                icon = Icons.Default.Favorite,
+                backgroundColor = Color.Red.copy(alpha = 0.5f),
+                left = false,
                 modifier = Modifier.fillMaxHeight().weight(1f).testTag("AddToFavoriteActionCard"))
           }
         }
@@ -341,7 +342,7 @@ fun SpotCard(
     Card(
         modifier =
             Modifier.fillMaxWidth()
-                .height(120.dp)
+                .height(CARD_HEIGHT.dp)
                 .offset { IntOffset(offsetX.roundToInt(), 0) }
                 .pointerInput(Unit) {
                   detectHorizontalDragGestures(
@@ -384,12 +385,22 @@ fun SpotCard(
                       navigationActions.navigateTo(Screen.PARKING_DETAILS)
                     })
                 .testTag("SpotListItem"),
-        colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 1f)),
-        shape = MaterialTheme.shapes.medium) {
-          Box(modifier = Modifier.fillMaxSize()) {
-            Column(modifier = Modifier.fillMaxSize().padding(16.dp).testTag("SpotCardContent")) {
+        shape = RectangleShape,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+          Box(modifier = Modifier.fillMaxSize().padding(horizontal = 32.dp, vertical = 16.dp)) {
+            Column(modifier = Modifier.fillMaxSize().testTag("SpotCardContent")) {
+              if (isPinned) {
+                Icon(
+                    imageVector = Icons.Default.PushPin,
+                    contentDescription = "PinnedParking",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier =
+                        Modifier.padding(bottom = 8.dp)
+                            .size(16.dp)
+                            .rotate(45f)
+                            .testTag("PinnedIcon")
+                            .align(Alignment.End))
+              }
               Row(
                   modifier = Modifier.fillMaxWidth(),
                   verticalAlignment = Alignment.CenterVertically,
@@ -434,6 +445,7 @@ fun SpotCard(
           }
         }
   }
+  HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
 }
 
 @Composable
@@ -441,15 +453,22 @@ fun ActionCard(
     text: String,
     icon: ImageVector,
     backgroundColor: Color,
+    left: Boolean,
     modifier: Modifier = Modifier
 ) {
   Box(
-      modifier =
-          modifier.background(backgroundColor, shape = MaterialTheme.shapes.medium).padding(8.dp),
-      contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-          Icon(icon, contentDescription = null, tint = Color.Black)
-          Text(text, color = Color.Black)
-        }
+      modifier = modifier.background(backgroundColor).padding(8.dp),
+      contentAlignment = if (left) Alignment.CenterStart else Alignment.CenterEnd) {
+        Column(
+            modifier = Modifier.fillMaxHeight(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally) {
+              Icon(icon, contentDescription = null, tint = Color.Black)
+              Text(
+                  text = text,
+                  color = Color.Black,
+                  modifier = Modifier.width(100.dp),
+              )
+            }
       }
 }
