@@ -79,10 +79,32 @@ class ParkingDetailsScreenTest {
       ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
     }
 
-    composeTestRule.onNodeWithTag("FavoriteIconContainer").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("PinAndFavoriteIconContainer").assertIsDisplayed()
     composeTestRule.onNodeWithTag("BlackOutlinedFavoriteIcon").assertIsDisplayed()
     composeTestRule.onNodeWithTag("BlackOutlinedFavoriteIcon").performClick()
     composeTestRule.onNodeWithTag("BlackOutlinedFavoriteIcon").assertIsDisplayed()
+  }
+
+  @Test
+  fun pinIconPinsAndUnpins() {
+    parkingViewModel.selectParking(TestInstancesParking.parking1)
+    userViewModel.getSelectedUserFavoriteParking()
+
+    composeTestRule.setContent {
+      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("PinIcon").assertIsDisplayed().performClick()
+    composeTestRule.waitForIdle()
+    // assert that the parking is pinned
+    assert(parkingViewModel.pinnedParkings.value.contains(TestInstancesParking.parking1))
+
+    composeTestRule.onNodeWithTag("PinIcon").assertIsDisplayed().performClick()
+    composeTestRule.waitForIdle()
+    // assert that the parking is unpinned
+    assert(!parkingViewModel.pinnedParkings.value.contains(TestInstancesParking.parking1))
+
+    composeTestRule.onNodeWithTag("PinIcon").assertIsDisplayed()
   }
 
   @Test
