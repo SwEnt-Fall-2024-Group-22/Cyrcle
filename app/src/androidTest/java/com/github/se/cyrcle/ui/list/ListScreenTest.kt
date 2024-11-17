@@ -96,8 +96,7 @@ class ListScreenTest {
           parkingViewModel,
           userViewModel,
           TestInstancesParking.parking1,
-          0.0,
-          initialIsPinned = false)
+          0.0)
     }
 
     // Verify that the PinActionCard is displayed
@@ -113,9 +112,12 @@ class ListScreenTest {
           parkingViewModel,
           userViewModel,
           TestInstancesParking.parking1,
-          0.0,
-          initialIsPinned = true)
+          0.0)
     }
+
+    // Unpin the parking
+    parkingViewModel.togglePinStatus(TestInstancesParking.parking1)
+
     composeTestRule.onNodeWithTag("PinActionCard").assertIsNotDisplayed()
     composeTestRule.onNodeWithTag("UnpinActionCard").assertIsDisplayed()
   }
@@ -128,8 +130,7 @@ class ListScreenTest {
           parkingViewModel,
           userViewModel,
           TestInstancesParking.parking3, // not in our user's favorites
-          0.0,
-          initialIsPinned = false)
+          0.0)
     }
 
     // Verify that the AddToFavoriteActionCard is displayed
@@ -145,8 +146,7 @@ class ListScreenTest {
           parkingViewModel,
           userViewModel,
           TestInstancesParking.parking1, // in our user's favorites
-          0.0,
-          initialIsPinned = false)
+          0.0)
     }
 
     // Verify that the AlreadyFavoriteActionCard is displayed
@@ -162,8 +162,7 @@ class ListScreenTest {
           parkingViewModel,
           userViewModel,
           TestInstancesParking.parking3,
-          0.0,
-          initialIsPinned = false)
+          0.0)
     }
 
     val isFavorite =
@@ -195,8 +194,7 @@ class ListScreenTest {
           parkingViewModel,
           userViewModel,
           TestInstancesParking.parking1, // already in favorites
-          0.0,
-          initialIsPinned = false)
+          0.0)
     }
 
     val isFavorite =
@@ -229,8 +227,7 @@ class ListScreenTest {
           parkingViewModel,
           userViewModel,
           TestInstancesParking.parking3,
-          0.0,
-          initialIsPinned = false)
+          0.0)
     }
 
     composeTestRule.onNodeWithTag("AddToFavoriteActionCard").assertIsDisplayed()
@@ -262,26 +259,18 @@ class ListScreenTest {
     composeTestRule.onNodeWithTag("CCTVCheckbox").assertIsDisplayed().performClick()
 
     // Verify the ViewModel was updated
-    assert(parkingViewModel.onlyWithCCTV.value == true)
+    assert(parkingViewModel.onlyWithCCTV.value)
 
     // Click again to uncheck
     composeTestRule.onNodeWithTag("CCTVCheckbox").performClick()
 
     // Verify the ViewModel was updated back to false
-    assert(parkingViewModel.onlyWithCCTV.value == false)
+    assert(!parkingViewModel.onlyWithCCTV.value)
   }
 
   @Test
   fun testCCTVCheckboxInteraction() {
-    composeTestRule.setContent {
-      FilterHeader(
-          selectedProtection = emptySet(),
-          selectedRackTypes = emptySet(),
-          selectedCapacities = emptySet(),
-          onAttributeSelected = {},
-          onlyWithCCTV = false,
-          onCCTVCheckedChange = {})
-    }
+    composeTestRule.setContent { FilterHeader(parkingViewModel) }
 
     // Show filters first
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
@@ -314,8 +303,7 @@ class ListScreenTest {
           parkingViewModel = parkingViewModel,
           userViewModel = userViewModel,
           parking = TestInstancesParking.parking1,
-          distance = 0.0,
-          initialIsPinned = false)
+          distance = 0.0)
     }
 
     composeTestRule.onNodeWithTag("SpotListItem", useUnmergedTree = true).assertIsDisplayed()
@@ -338,8 +326,7 @@ class ListScreenTest {
           parkingViewModel = parkingViewModel,
           userViewModel = userViewModel,
           parking = TestInstancesParking.parking2,
-          distance = 0.0,
-          initialIsPinned = false)
+          distance = 0.0)
     }
 
     composeTestRule
@@ -358,16 +345,7 @@ class ListScreenTest {
 
   @Test
   fun testShowFiltersButtonInitiallyDisplaysShowFilters() {
-    // Arrange
-    composeTestRule.setContent {
-      FilterHeader(
-          selectedProtection = emptySet(),
-          selectedRackTypes = emptySet(),
-          selectedCapacities = emptySet(),
-          onAttributeSelected = {},
-          onlyWithCCTV = false,
-          onCCTVCheckedChange = {})
-    }
+    composeTestRule.setContent { FilterHeader(parkingViewModel) }
 
     // Act & Assert
     composeTestRule.onNodeWithTag("ShowFiltersButton").assertIsDisplayed().assertHasClickAction()
@@ -376,16 +354,7 @@ class ListScreenTest {
   @Test
   @OptIn(ExperimentalTestApi::class)
   fun testShowFiltersButtonTogglesFilterSection() {
-    // Arrange
-    composeTestRule.setContent {
-      FilterHeader(
-          selectedProtection = emptySet(),
-          selectedRackTypes = emptySet(),
-          selectedCapacities = emptySet(),
-          onAttributeSelected = {},
-          onlyWithCCTV = false,
-          onCCTVCheckedChange = {})
-    }
+    composeTestRule.setContent { FilterHeader(parkingViewModel) }
 
     // Act: Click to show filters
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
@@ -400,20 +369,7 @@ class ListScreenTest {
   @OptIn(ExperimentalTestApi::class)
   fun testProtectionFilters() {
 
-    val selectedProtection = mutableSetOf<ParkingProtection>()
-    composeTestRule.setContent {
-      FilterHeader(
-          selectedProtection = selectedProtection,
-          selectedRackTypes = emptySet(),
-          selectedCapacities = emptySet(),
-          onAttributeSelected = {
-            when (it) {
-              is ParkingProtection -> selectedProtection.add(it)
-            }
-          },
-          onlyWithCCTV = false,
-          onCCTVCheckedChange = {})
-    }
+    composeTestRule.setContent { FilterHeader(parkingViewModel) }
 
     // Act: Click to show filters
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
@@ -432,27 +388,13 @@ class ListScreenTest {
         .assertCountEquals(ParkingProtection.entries.size)
         .assertAll(hasClickAction())
     composeTestRule.onAllNodesWithTag("ProtectionFilterItem").onFirst().performClick()
-    assert(selectedProtection.contains(ParkingProtection.entries[0]))
+    assert(parkingViewModel.selectedProtection.value.contains(ParkingProtection.entries[0]))
   }
 
   @Test
   @OptIn(ExperimentalTestApi::class)
   fun testRackTypeFilters() {
-    // Arrange
-    val selectedRackType = mutableSetOf<ParkingRackType>()
-    composeTestRule.setContent {
-      FilterHeader(
-          selectedProtection = emptySet(),
-          selectedRackTypes = selectedRackType,
-          selectedCapacities = emptySet(),
-          onAttributeSelected = {
-            when (it) {
-              is ParkingRackType -> selectedRackType.add(it)
-            }
-          },
-          onlyWithCCTV = false,
-          onCCTVCheckedChange = {})
-    }
+    composeTestRule.setContent { FilterHeader(parkingViewModel) }
 
     // Act: Click to show filters
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
@@ -468,27 +410,15 @@ class ListScreenTest {
     composeTestRule.onNodeWithTag("RackTypeFilter").assertIsDisplayed()
     composeTestRule.onAllNodesWithTag("RackTypeFilterItem").assertAll(hasClickAction())
     composeTestRule.onAllNodesWithTag("RackTypeFilterItem").onFirst().performClick()
-    assert(selectedRackType.contains(ParkingRackType.entries[0]))
+
+    // Assert that the selected rack type is updated in the ParkingViewModel
+    assert(parkingViewModel.selectedRackTypes.value.contains(ParkingRackType.entries[0]))
   }
 
   @Test
   @OptIn(ExperimentalTestApi::class)
   fun testCapacityFilters() {
-    // Arrange
-    val selectedCapacities = mutableSetOf(ParkingCapacity.XSMALL)
-    composeTestRule.setContent {
-      FilterHeader(
-          selectedProtection = emptySet(),
-          selectedRackTypes = emptySet(),
-          selectedCapacities = selectedCapacities,
-          onAttributeSelected = {
-            when (it) {
-              is ParkingCapacity -> selectedCapacities.add(it)
-            }
-          },
-          onlyWithCCTV = false,
-          onCCTVCheckedChange = {})
-    }
+    composeTestRule.setContent { FilterHeader(parkingViewModel) }
 
     // Act: Click to show filters
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
@@ -502,7 +432,7 @@ class ListScreenTest {
     composeTestRule.onNodeWithTag("CapacityFilter").assertIsDisplayed()
     composeTestRule.onAllNodesWithTag("CapacityFilterItem").assertAll(hasClickAction())
     composeTestRule.onAllNodesWithTag("CapacityFilterItem").onFirst().performClick()
-    assert(selectedCapacities.contains(ParkingCapacity.entries[0]))
+    assert(parkingViewModel.selectedCapacities.value.contains(ParkingCapacity.entries[0]))
   }
 
   @Test
@@ -513,8 +443,8 @@ class ListScreenTest {
           parkingViewModel = parkingViewModel,
           userViewModel = userViewModel,
           parking = TestInstancesParking.parking1,
-          distance = 0.5, // 500m
-          initialIsPinned = false)
+          distance = 0.5 // 500m
+          )
     }
 
     // Test meters display
@@ -531,8 +461,8 @@ class ListScreenTest {
           parkingViewModel = parkingViewModel,
           userViewModel = userViewModel,
           parking = TestInstancesParking.parking1,
-          distance = 2.5, // 2.5km
-          initialIsPinned = false)
+          distance = 2.5 // 2.5km
+          )
     }
 
     // Test kilometers display
@@ -554,8 +484,7 @@ class ListScreenTest {
           parkingViewModel = parkingViewModel,
           userViewModel = userViewModel,
           parking = longNameParking,
-          distance = 0.0,
-          initialIsPinned = false)
+          distance = 0.0)
     }
 
     composeTestRule

@@ -22,7 +22,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
@@ -57,7 +56,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.Parking
-import com.github.se.cyrcle.model.parking.ParkingAttribute
 import com.github.se.cyrcle.model.parking.ParkingCapacity
 import com.github.se.cyrcle.model.parking.ParkingProtection
 import com.github.se.cyrcle.model.parking.ParkingRackType
@@ -87,11 +85,6 @@ fun SpotListScreen(
 
   val filteredParkingSpots by parkingViewModel.closestParkings.collectAsState()
 
-  val selectedProtection by parkingViewModel.selectedProtection.collectAsState()
-  val selectedRackTypes by parkingViewModel.selectedRackTypes.collectAsState()
-  val selectedCapacities by parkingViewModel.selectedCapacities.collectAsState()
-  val onlyWithCCTV by parkingViewModel.onlyWithCCTV.collectAsState()
-
   val pinnedParkings by parkingViewModel.pinnedParkings.collectAsState()
 
   LaunchedEffect(userPosition) { parkingViewModel.setCircleCenter(userPosition) }
@@ -101,27 +94,7 @@ fun SpotListScreen(
       bottomBar = { BottomNavigationBar(navigationActions, selectedItem = Route.LIST) }) {
           innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(bottom = 16.dp)) {
-          FilterHeader(
-              selectedProtection = selectedProtection,
-              selectedRackTypes = selectedRackTypes,
-              selectedCapacities = selectedCapacities,
-              onAttributeSelected = { attribute ->
-                when (attribute) {
-                  is ParkingProtection ->
-                      parkingViewModel.setSelectedProtection(
-                          toggleSelection(selectedProtection, attribute))
-                  is ParkingRackType ->
-                      parkingViewModel.setSelectedRackTypes(
-                          toggleSelection(selectedRackTypes, attribute))
-                  is ParkingCapacity ->
-                      parkingViewModel.setSelectedCapacities(
-                          toggleSelection(selectedCapacities, attribute))
-                }
-              },
-              onlyWithCCTV = onlyWithCCTV,
-              onCCTVCheckedChange = { parkingViewModel.setOnlyWithCCTV(it) },
-              parkingViewModel = parkingViewModel)
-
+          FilterHeader(parkingViewModel = parkingViewModel)
           val listState = rememberLazyListState()
           LazyColumn(
               state = listState,
@@ -146,8 +119,7 @@ fun SpotListScreen(
                             parkingViewModel = parkingViewModel,
                             userViewModel = userViewModel,
                             parking = parking,
-                            distance = distance,
-                            initialIsPinned = true)
+                            distance = distance)
                       }
                   item {
                     Spacer(modifier = Modifier.height(16.dp))
@@ -168,8 +140,7 @@ fun SpotListScreen(
                           parkingViewModel = parkingViewModel,
                           userViewModel = userViewModel,
                           parking = parking,
-                          distance = distance,
-                          initialIsPinned = false)
+                          distance = distance)
 
                       if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1) {
                         parkingViewModel.incrementRadius()
@@ -181,20 +152,19 @@ fun SpotListScreen(
 }
 
 @Composable
-fun FilterHeader(
-    selectedProtection: Set<ParkingProtection>,
-    selectedRackTypes: Set<ParkingRackType>,
-    selectedCapacities: Set<ParkingCapacity>,
-    onAttributeSelected: (ParkingAttribute) -> Unit,
-    onlyWithCCTV: Boolean,
-    onCCTVCheckedChange: (Boolean) -> Unit,
-    parkingViewModel: ParkingViewModel = viewModel(factory = ParkingViewModel.Factory)
-) {
+fun FilterHeader(parkingViewModel: ParkingViewModel) {
   var showProtectionOptions by remember { mutableStateOf(false) }
   var showRackTypeOptions by remember { mutableStateOf(false) }
   var showCapacityOptions by remember { mutableStateOf(false) }
   var showFilters by remember { mutableStateOf(false) }
+
+  val selectedProtection by parkingViewModel.selectedProtection.collectAsState()
+  val selectedRackTypes by parkingViewModel.selectedRackTypes.collectAsState()
+  val selectedCapacities by parkingViewModel.selectedCapacities.collectAsState()
+  val onlyWithCCTV by parkingViewModel.onlyWithCCTV.collectAsState()
+
   val radius = parkingViewModel.radius.collectAsState()
+
   Column(modifier = Modifier.padding(16.dp)) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -214,6 +184,7 @@ fun FilterHeader(
         }
 
     if (showFilters) {
+      // Protection filter
       FilterSection(
           title = stringResource(R.string.list_screen_protection),
           isExpanded = showProtectionOptions,
@@ -224,7 +195,7 @@ fun FilterHeader(
                   items(ParkingProtection.entries.toTypedArray()) { option ->
                     ToggleButton(
                         text = option.description,
-                        onClick = { onAttributeSelected(option) },
+                        onClick = { parkingViewModel.toggleProtection(option) },
                         value = selectedProtection.contains(option),
                         modifier = Modifier.padding(2.dp),
                         testTag = "ProtectionFilterItem")
@@ -232,6 +203,7 @@ fun FilterHeader(
                 }
           }
 
+      // Rack type filter
       FilterSection(
           title = stringResource(R.string.list_screen_rack_type),
           isExpanded = showRackTypeOptions,
@@ -242,7 +214,7 @@ fun FilterHeader(
                   items(ParkingRackType.entries.toTypedArray()) { option ->
                     ToggleButton(
                         text = option.description,
-                        onClick = { onAttributeSelected(option) },
+                        onClick = { parkingViewModel.toggleRackType(option) },
                         value = selectedRackTypes.contains(option),
                         modifier = Modifier.padding(2.dp),
                         testTag = "RackTypeFilterItem")
@@ -250,6 +222,7 @@ fun FilterHeader(
                 }
           }
 
+      // Capacity filter
       FilterSection(
           title = stringResource(R.string.list_screen_capacity),
           isExpanded = showCapacityOptions,
@@ -260,7 +233,7 @@ fun FilterHeader(
                   items(ParkingCapacity.entries.toTypedArray()) { option ->
                     ToggleButton(
                         text = option.description,
-                        onClick = { onAttributeSelected(option) },
+                        onClick = { parkingViewModel.toggleCapacity(option) },
                         value = selectedCapacities.contains(option),
                         modifier = Modifier.padding(2.dp),
                         testTag = "CapacityFilterItem")
@@ -274,7 +247,7 @@ fun FilterHeader(
           verticalAlignment = Alignment.CenterVertically) {
             Checkbox(
                 checked = onlyWithCCTV,
-                onCheckedChange = onCCTVCheckedChange,
+                onCheckedChange = { parkingViewModel.setOnlyWithCCTV(it) },
                 modifier = Modifier.testTag("CCTVCheckbox"),
                 colors = getCheckBoxColors(ColorLevel.PRIMARY))
             Spacer(modifier = Modifier.width(4.dp))
@@ -318,15 +291,19 @@ fun SpotCard(
     parkingViewModel: ParkingViewModel,
     userViewModel: UserViewModel,
     parking: Parking,
-    distance: Double,
-    initialIsPinned: Boolean
+    distance: Double
 ) {
   val context = LocalContext.current
+
   var offsetX by remember { mutableFloatStateOf(0f) }
   val maxSwipeDistance = 150.dp
+
   val userState by userViewModel.currentUser.collectAsState()
   val userSignedIn = userViewModel.isSignedIn.collectAsState(false)
   val isFavorite = userState?.details?.favoriteParkings.orEmpty().contains(parking.uid)
+
+  val pinnedParkings by parkingViewModel.pinnedParkings.collectAsState()
+  val initialIsPinned = parking in pinnedParkings
 
   Box(modifier = Modifier.fillMaxWidth().height(120.dp).padding(4.dp)) {
     // Background actions
@@ -475,12 +452,4 @@ fun ActionCard(
           Text(text, color = Color.Black)
         }
       }
-}
-
-private fun <T> toggleSelection(set: Set<T>, item: T): Set<T> {
-  return if (set.contains(item)) {
-    set - item
-  } else {
-    set + item
-  }
 }
