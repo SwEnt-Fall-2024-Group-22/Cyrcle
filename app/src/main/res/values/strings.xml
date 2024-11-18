@@ -99,6 +99,8 @@
 
     <!-- Create Profile Screen -->
     <string name="profile_screen_title">Create your profile</string>
+    <string name="profile_screen_finish_sign_in_indication">Finish by signing in with Google to link your e-mail</string>
+    <string name="profile_screen_account_already_exists">Your account is already linked, please try with another email</string>
     <!-- View Profile Screen -->
     <string name="view_profile_screen_first_name_label">First Name</string>
     <string name="view_profile_screen_last_name_label">Last Name</string>
