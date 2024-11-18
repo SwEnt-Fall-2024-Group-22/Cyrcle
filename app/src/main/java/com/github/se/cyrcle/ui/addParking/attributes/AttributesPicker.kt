@@ -2,6 +2,7 @@ package com.github.se.cyrcle.ui.addParking.attributes
 
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,8 +18,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -57,6 +61,7 @@ import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.ui.map.MapConfig
 import com.github.se.cyrcle.ui.map.drawRectangles
 import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import com.github.se.cyrcle.ui.theme.Typography
 import com.github.se.cyrcle.ui.theme.atoms.ConditionCheckingInputText
@@ -180,11 +185,24 @@ fun AttributesPicker(
                         selectedValue = capacity,
                         label = stringResource(R.string.attributes_picker_capacity_label),
                     )
-                    EnumDropDown(
-                        options = ParkingRackType.entries.toList(),
-                        selectedValue = rackType,
-                        label = stringResource(R.string.attributes_picker_rack_type_label),
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()) {
+                          EnumDropDown(
+                              options = ParkingRackType.entries.toList(),
+                              selectedValue = rackType,
+                              label = stringResource(R.string.attributes_picker_rack_type_label),
+                              modifier = Modifier.weight(1f).fillMaxWidth())
+                          Icon(
+                              imageVector = Icons.Default.Info,
+                              contentDescription = "Info",
+                              tint = MaterialTheme.colorScheme.primary,
+                              modifier =
+                                  Modifier.padding(start = 4.dp, end = 10.dp)
+                                      .testTag("RackInfoIcon")
+                                      .clickable { navigationActions.navigateTo(Screen.RACK_INFO) })
+                        }
+
                     BooleanRadioButton(
                         question =
                             stringResource(R.string.attributes_picker_has_surveillance_question),
@@ -224,8 +242,6 @@ private fun scaledPadding(
       end = padding.calculateEndPadding(LayoutDirection.Ltr) * horizontalScaleFactor,
       bottom = padding.calculateBottomPadding() * verticalScaleFactor)
 }
-
-private const val s = "Please fill in all fields appropriately"
 
 @Composable
 fun BottomBarAddAttr(

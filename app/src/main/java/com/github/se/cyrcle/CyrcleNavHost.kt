@@ -12,6 +12,7 @@ import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.permission.PermissionHandler
 import com.github.se.cyrcle.ui.addParking.attributes.AttributesPicker
+import com.github.se.cyrcle.ui.addParking.attributes.RackTypeHelpScreen
 import com.github.se.cyrcle.ui.addParking.location.LocationPicker
 import com.github.se.cyrcle.ui.authentication.Authenticator
 import com.github.se.cyrcle.ui.authentication.SignInScreen
@@ -87,6 +88,7 @@ fun CyrcleNavHost(
       composable(Screen.ATTRIBUTES_PICKER) {
         AttributesPicker(navigationActions, parkingViewModel, mapViewModel, addressViewModel)
       }
+      composable(Screen.RACK_INFO) { RackTypeHelpScreen(navigationActions) }
     }
 
     navigation(
