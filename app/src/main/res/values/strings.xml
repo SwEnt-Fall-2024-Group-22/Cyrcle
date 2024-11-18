@@ -44,6 +44,17 @@
     <string name="attributes_picker_top_bar_set_attributes">Set the attributes of the parking spot</string>
     <string name="attributes_picker_bottom_bar_submit_button_toast">Please fill in all mandatory fields appropriately</string>
 
+    <!-- Rack Type Helper -->
+    <string name="rack_info_screen_title">Rack Types</string>
+    <string name="two_tier_rack_description">Space-efficient vertical storage with upper and lower tiers. Upper tier has a pull-out tray, but lifting bikes may be challenging for some users.</string>
+    <string name="u_rack_description">Simple, versatile stands allowing bikes to be locked at two points. Supports frame and wheels, suitable for most bike types and sizes.</string>
+    <string name="vertical_rack_description">Holds bikes upright by the front wheel, saving space. May not suit heavy bikes or those with attachments. Requires lifting the front wheel.</string>
+    <string name="wave_rack_description">Continuous, wavy design for multiple bikes. Space-efficient but works best with alternating bike directions. Securing both frame and wheel can be tricky.</string>
+    <string name="wall_butterfly_rack_description">Wall-mounted, foldable racks ideal for tight spaces. Holds bikes vertically but may not suit heavier bikes or those with attachments.</string>
+    <string name="post_and_ring_rack_description">Simple design with a ring attached to a post. Allows locking at two points and fits most bike types, but may be less space-efficient in high-density areas.</string>
+    <string name="grid_rack_description">Parallel bars for wheels to slot between. Space-efficient but primarily secures the wheel. Locking both frame and wheel can be challenging.</string>
+    <string name="other_rack_description">Other</string>
+
     <!-- Rectangle Selection -->
     <string name="rectangle_selection_lock_map">Lock Map</string>
     <string name="rectangle_selection_unlock_map">Unlock Map</string>
