@@ -20,7 +20,7 @@ class MockPermissionHandler @Inject constructor() : PermissionHandler {
 
   override fun requestPermission(permissionName: Array<String>) {}
 
-  override fun getPositionState(): StateFlow<Boolean> {
+  override fun getLocalisationPerm(): StateFlow<Boolean> {
     return authorizeLoc
   }
 }

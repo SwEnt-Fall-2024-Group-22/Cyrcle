@@ -126,7 +126,7 @@ fun MapScreen(
   var rectangleAnnotationManager by remember { mutableStateOf<PolygonAnnotationManager?>(null) }
   var pLabelAnnotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
   val selectedParking by parkingViewModel.selectedParking.collectAsState()
-  val locationEnabled by permissionHandler.getPositionState().collectAsState()
+  val locationEnabled by permissionHandler.getLocalisationPerm().collectAsState()
 
   // initialize the Gson object that will deserialize and serialize the parking to bind it to the
   // marker

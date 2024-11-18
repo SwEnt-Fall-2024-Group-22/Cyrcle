@@ -94,5 +94,5 @@ class PermissionHandlerImpl @Inject constructor() : PermissionHandler {
    *
    * @return A state flow indicating if location tracking is authorised
    */
-  override fun getPositionState(): StateFlow<Boolean> = positionGranted
+  override fun getLocalisationPerm(): StateFlow<Boolean> = positionGranted
 }

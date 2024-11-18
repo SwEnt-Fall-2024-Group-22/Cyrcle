@@ -25,5 +25,5 @@ interface PermissionHandler {
    *
    * @return A state flow indicating if location tracking is authorised
    */
-  fun getPositionState(): StateFlow<Boolean>
+  fun getLocalisationPerm(): StateFlow<Boolean>
 }

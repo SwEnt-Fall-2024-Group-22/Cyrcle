@@ -251,7 +251,7 @@ class MainActivityTest {
       composeTestRule.onNodeWithTag("ZoomControlsOut").assertIsDisplayed().assertHasClickAction()
       composeTestRule.onNodeWithTag("NavigationBar").assertIsDisplayed()
 
-      if (permissionHandler.getPositionState().value)
+      if (permissionHandler.getLocalisationPerm().value)
           composeTestRule.onNodeWithTag("recenterButton").assertIsDisplayed().assertHasClickAction()
     }
 

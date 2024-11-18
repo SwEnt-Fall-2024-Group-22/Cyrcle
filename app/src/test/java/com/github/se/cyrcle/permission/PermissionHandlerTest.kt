@@ -36,7 +36,7 @@ class PermissionHandlerTest {
         .thenReturn(mockActivityLauncher)
 
     // Check correct initialization
-    assert(!permissionHandler.getPositionState().first())
+    assert(!permissionHandler.getLocalisationPerm().first())
     permissionHandler.initHandler(mockMainActivity)
 
     verify(mockMainActivity)
