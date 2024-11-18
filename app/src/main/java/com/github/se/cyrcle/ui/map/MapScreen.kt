@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.map
 
-import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.compose.animation.core.animateFloatAsState
@@ -40,6 +39,7 @@ import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
+import com.github.se.cyrcle.permission.PermissionHandler
 import com.github.se.cyrcle.ui.map.overlay.ZoomControls
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
@@ -51,7 +51,6 @@ import com.github.se.cyrcle.ui.theme.disabledColor
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.github.se.cyrcle.ui.theme.molecules.DropDownableEnum
 import com.google.gson.Gson
-import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.common.Cancelable
 import com.mapbox.maps.CameraBoundsOptions
@@ -109,8 +108,8 @@ fun MapScreen(
     parkingViewModel: ParkingViewModel,
     userViewModel: UserViewModel,
     mapViewModel: MapViewModel,
-    zoomState: MutableState<Double> = remember { mutableDoubleStateOf(defaultZoom) },
-    activity: Activity = LocalContext.current as Activity
+    permissionHandler: PermissionHandler,
+    zoomState: MutableState<Double> = remember { mutableDoubleStateOf(defaultZoom) }
 ) {
 
   val listOfParkings by parkingViewModel.rectParkings.collectAsState()
@@ -127,7 +126,8 @@ fun MapScreen(
   var rectangleAnnotationManager by remember { mutableStateOf<PolygonAnnotationManager?>(null) }
   var pLabelAnnotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
   val selectedParking by parkingViewModel.selectedParking.collectAsState()
-  val locationEnabled = PermissionsManager.areLocationPermissionsGranted(activity)
+  val locationEnabled by permissionHandler.getLocalisationPerm().collectAsState()
+
   // initialize the Gson object that will deserialize and serialize the parking to bind it to the
   // marker
   val gson = Gson()
@@ -155,7 +155,7 @@ fun MapScreen(
 
   // Center the camera on th puck and transition to the follow puck state. Update the user
   // position to the center of the camera
-  LaunchedEffect(PermissionsManager.areLocationPermissionsGranted(activity)) {
+  LaunchedEffect(locationEnabled) {
     mapViewportState.transitionToFollowPuckState(
         FollowPuckViewportStateOptions.Builder()
             .pitch(0.0)
@@ -375,27 +375,28 @@ fun MapScreen(
             mapViewportState.setCameraOptions { zoom(mapViewportState.cameraState!!.zoom - 1.0) }
           })
 
-      IconButton(
-          icon = Icons.Default.MyLocation,
-          contentDescription = "Recenter on Location",
-          modifier =
-              Modifier.align(if (locationEnabled) Alignment.BottomEnd else Alignment.TopEnd)
-                  .alpha(if (locationEnabled) 1f else 0f)
-                  .padding(bottom = 25.dp, end = 16.dp)
-                  .scale(if (locationEnabled) 1.2f else 0.01f)
-                  .testTag("recenterButton"),
-          onClick = {
-            mapViewModel.updateTrackingMode(true)
-            mapViewportState.transitionToFollowPuckState(
-                FollowPuckViewportStateOptions.Builder()
-                    .pitch(0.0)
-                    .zoom(maxZoom)
-                    .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
-                    .build())
-          },
-          colorLevel =
-              if (mapViewModel.isTrackingModeEnable.collectAsState().value) ColorLevel.SECONDARY
-              else ColorLevel.PRIMARY)
+      if (locationEnabled) {
+        IconButton(
+            icon = Icons.Default.MyLocation,
+            contentDescription = "Recenter on Location",
+            modifier =
+                Modifier.align(Alignment.BottomEnd)
+                    .padding(bottom = 25.dp, end = 16.dp)
+                    .scale(1.2f)
+                    .testTag("recenterButton"),
+            onClick = {
+              mapViewModel.updateTrackingMode(true)
+              mapViewportState.transitionToFollowPuckState(
+                  FollowPuckViewportStateOptions.Builder()
+                      .pitch(0.0)
+                      .zoom(maxZoom)
+                      .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
+                      .build())
+            },
+            colorLevel =
+                if (mapViewModel.isTrackingModeEnable.collectAsState().value) ColorLevel.SECONDARY
+                else ColorLevel.PRIMARY)
+      }
 
       if (enableParkingAddition) {
         IconButton(

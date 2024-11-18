@@ -2,7 +2,6 @@ package com.github.se.cyrcle.ui.addParking
 
 import CyrcleNavHost
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
@@ -16,6 +15,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.AuthenticatorMock
+import com.github.se.cyrcle.di.mocks.MockPermissionHandler
 import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ImageRepository
@@ -26,6 +26,7 @@ import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserPublic
 import com.github.se.cyrcle.model.user.UserViewModel
+import com.github.se.cyrcle.permission.PermissionHandler
 import com.github.se.cyrcle.ui.addParking.attributes.AttributesPicker
 import com.github.se.cyrcle.ui.addParking.location.LocationPicker
 import com.github.se.cyrcle.ui.map.MapScreen
@@ -51,6 +52,7 @@ class AddScreensNavigationTest {
     val navigationActions = NavigationActions(navController)
 
     val mockedAuthenticator = AuthenticatorMock()
+    val mockedPermissionHandler = MockPermissionHandler()
 
     val parkingViewModel: ParkingViewModel = viewModel(factory = ParkingViewModel.Factory)
     val reviewViewModel: ReviewViewModel = viewModel(factory = ReviewViewModel.Factory)
@@ -67,14 +69,15 @@ class AddScreensNavigationTest {
         mapViewModel,
         addressViewModel,
         mockedAuthenticator,
-        LocalContext.current as android.app.Activity)
+        mockedPermissionHandler)
     return listOf(
         navigationActions,
         parkingViewModel,
         reviewViewModel,
         userViewModel,
         mapViewModel,
-        addressViewModel)
+        addressViewModel,
+        mockedPermissionHandler)
   }
 
   @OptIn(ExperimentalTestApi::class)
@@ -87,9 +90,10 @@ class AddScreensNavigationTest {
       val parkingViewModel = list[1] as ParkingViewModel
       val userViewModel = list[3] as UserViewModel
       val mapViewModel = list[4] as MapViewModel
+      val permissionHandler = list[6] as PermissionHandler
 
       userViewModel.setCurrentUser(User(UserPublic("default", "sayMyName", ""), null))
-      MapScreen(navigationActions, parkingViewModel, userViewModel, mapViewModel)
+      MapScreen(navigationActions, parkingViewModel, userViewModel, mapViewModel, permissionHandler)
     }
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("addButton"))
     // Perform click on the add button
