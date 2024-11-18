@@ -27,14 +27,11 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.compose.rememberNavController
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.ui.navigation.NavigationActions
-import com.github.se.cyrcle.ui.theme.CyrcleTheme
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
@@ -126,12 +123,4 @@ fun getRackDescriptionResource(rackType: ParkingRackType): Int {
     ParkingRackType.GRID -> R.string.grid_rack_description
     else -> R.string.other_rack_description
   }
-}
-
-@Preview
-@Composable
-fun RackTypeHelpScreenPreview() {
-  val navHostController = rememberNavController()
-  val navigationActions = NavigationActions(navHostController)
-  CyrcleTheme { RackTypeHelpScreen(navigationActions) }
 }
