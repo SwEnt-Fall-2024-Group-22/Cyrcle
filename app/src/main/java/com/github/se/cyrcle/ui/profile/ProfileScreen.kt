@@ -17,6 +17,6 @@ fun ProfileScreen(
 ) {
   val isSignedIn by userViewModel.isSignedIn.collectAsState(false)
 
-  if (isSignedIn) ViewProfileScreen(navigationActions, userViewModel, parkingViewModel, authenticator)
-  else InviteToAuthScreen(navigationActions)
+  if (isSignedIn) ViewProfileScreen(navigationActions, userViewModel, parkingViewModel,  authenticator)
+  else CreateProfileScreen(navigationActions, userViewModel)
 }
