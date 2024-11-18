@@ -36,6 +36,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -55,7 +56,6 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.Parking
@@ -78,13 +78,14 @@ import com.mapbox.turf.TurfMeasurement
 import kotlin.math.roundToInt
 
 const val CARD_HEIGHT = 120
+const val MAX_SWIPE_DISTANCE = 150
 
 @Composable
 fun SpotListScreen(
     navigationActions: NavigationActions,
-    parkingViewModel: ParkingViewModel = viewModel(factory = ParkingViewModel.Factory),
+    parkingViewModel: ParkingViewModel,
     mapViewModel: MapViewModel,
-    userViewModel: UserViewModel = viewModel(factory = UserViewModel.Factory)
+    userViewModel: UserViewModel
 ) {
   val userPosition by mapViewModel.userPosition.collectAsState()
 
@@ -152,9 +153,9 @@ fun SpotListScreen(
 
 @Composable
 fun FilterHeader(parkingViewModel: ParkingViewModel) {
-  var showProtectionOptions by remember { mutableStateOf(false) }
-  var showRackTypeOptions by remember { mutableStateOf(false) }
-  var showCapacityOptions by remember { mutableStateOf(false) }
+  val showProtectionOptions = remember { mutableStateOf(false) }
+  val showRackTypeOptions = remember { mutableStateOf(false) }
+  val showCapacityOptions = remember { mutableStateOf(false) }
   var showFilters by remember { mutableStateOf(false) }
 
   val selectedProtection by parkingViewModel.selectedProtection.collectAsState()
@@ -186,27 +187,26 @@ fun FilterHeader(parkingViewModel: ParkingViewModel) {
       // Protection filter
       FilterSection(
           title = stringResource(R.string.list_screen_protection),
-          isExpanded = showProtectionOptions,
-          onToggle = { showProtectionOptions = !showProtectionOptions }) {
-            LazyRow(
-                modifier = Modifier.fillMaxWidth().testTag("ProtectionFilter"),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                  items(ParkingProtection.entries.toTypedArray()) { option ->
-                    ToggleButton(
-                        text = option.description,
-                        onClick = { parkingViewModel.toggleProtection(option) },
-                        value = selectedProtection.contains(option),
-                        modifier = Modifier.padding(2.dp),
-                        testTag = "ProtectionFilterItem")
-                  }
-                }
-          }
+          expandedState = showProtectionOptions,
+      ) {
+        LazyRow(
+            modifier = Modifier.fillMaxWidth().testTag("ProtectionFilter"),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+              items(ParkingProtection.entries.toTypedArray()) { option ->
+                ToggleButton(
+                    text = option.description,
+                    onClick = { parkingViewModel.toggleProtection(option) },
+                    value = selectedProtection.contains(option),
+                    modifier = Modifier.padding(2.dp),
+                    testTag = "ProtectionFilterItem")
+              }
+            }
+      }
 
       // Rack type filter
       FilterSection(
           title = stringResource(R.string.list_screen_rack_type),
-          isExpanded = showRackTypeOptions,
-          onToggle = { showRackTypeOptions = !showRackTypeOptions }) {
+          expandedState = showRackTypeOptions) {
             LazyRow(
                 modifier = Modifier.fillMaxWidth().testTag("RackTypeFilter"),
                 horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -224,8 +224,7 @@ fun FilterHeader(parkingViewModel: ParkingViewModel) {
       // Capacity filter
       FilterSection(
           title = stringResource(R.string.list_screen_capacity),
-          isExpanded = showCapacityOptions,
-          onToggle = { showCapacityOptions = !showCapacityOptions }) {
+          expandedState = showCapacityOptions) {
             LazyRow(
                 modifier = Modifier.fillMaxWidth().testTag("CapacityFilter"),
                 horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -262,8 +261,7 @@ fun FilterHeader(parkingViewModel: ParkingViewModel) {
 @Composable
 fun FilterSection(
     title: String,
-    isExpanded: Boolean,
-    onToggle: () -> Unit,
+    expandedState: MutableState<Boolean>,
     content: @Composable () -> Unit
 ) {
   Column(
@@ -275,10 +273,13 @@ fun FilterSection(
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.clickable(onClick = onToggle).padding(8.dp).fillMaxWidth(),
+            modifier =
+                Modifier.clickable(onClick = { expandedState.value = !expandedState.value })
+                    .padding(8.dp)
+                    .fillMaxWidth(),
             testTag = title)
 
-        if (isExpanded) {
+        if (expandedState.value) {
           content()
         }
       }
@@ -294,51 +295,48 @@ fun SpotCard(
 ) {
   val context = LocalContext.current
 
-  var offsetX by remember { mutableFloatStateOf(0f) }
-  val maxSwipeDistance = 150.dp
-
   val userState by userViewModel.currentUser.collectAsState()
   val userSignedIn = userViewModel.isSignedIn.collectAsState(false)
   val isFavorite = userState?.details?.favoriteParkings.orEmpty().contains(parking.uid)
 
-  val pinnedParkings by parkingViewModel.pinnedParkings.collectAsState()
-  val isPinned = parking in pinnedParkings
+  val isPinned = parking in parkingViewModel.pinnedParkings.collectAsState().value
 
   Box(modifier = Modifier.fillMaxWidth().height(CARD_HEIGHT.dp)) {
     // Background actions
-    Row(
-        modifier = Modifier.fillMaxSize(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically) {
-          ActionCard(
-              text =
-                  if (isPinned) stringResource(R.string.remove_pin)
-                  else stringResource(R.string.pin_parking_spot),
-              icon = Icons.Default.PushPin,
-              backgroundColor = if (isPinned) Color.Red.copy(alpha = 0.7f) else Color.LightGray,
-              left = true,
-              modifier =
-                  Modifier.fillMaxHeight()
-                      .weight(1f)
-                      .testTag(if (isPinned) "UnpinActionCard" else "PinActionCard"))
-          if (isFavorite) {
-            ActionCard(
-                text = stringResource(R.string.already_in_favorites),
-                icon = Icons.Default.Favorite,
-                backgroundColor = Color.Gray,
-                left = false,
-                modifier = Modifier.fillMaxHeight().weight(1f).testTag("AlreadyFavoriteActionCard"))
-          } else {
-            ActionCard(
-                text = stringResource(R.string.add_to_favorites),
-                icon = Icons.Default.Favorite,
-                backgroundColor = Color.Red.copy(alpha = 0.5f),
-                left = false,
-                modifier = Modifier.fillMaxHeight().weight(1f).testTag("AddToFavoriteActionCard"))
-          }
-        }
+    Row(modifier = Modifier.fillMaxSize()) {
+      // Left action: Pin/Unpin
+      ActionCard(
+          text =
+              if (isPinned) stringResource(R.string.remove_pin)
+              else stringResource(R.string.pin_parking_spot),
+          icon = Icons.Default.PushPin,
+          backgroundColor = if (isPinned) Color.Red.copy(alpha = 0.7f) else Color.LightGray,
+          left = true,
+          modifier =
+              Modifier.fillMaxHeight()
+                  .weight(1f)
+                  .testTag(if (isPinned) "UnpinActionCard" else "PinActionCard"))
+
+      // Right action: Add to favorites or already in favorites
+      if (isFavorite) {
+        ActionCard(
+            text = stringResource(R.string.already_in_favorites),
+            icon = Icons.Default.Favorite,
+            backgroundColor = Color.Gray,
+            left = false,
+            modifier = Modifier.fillMaxHeight().weight(1f).testTag("AlreadyFavoriteActionCard"))
+      } else {
+        ActionCard(
+            text = stringResource(R.string.add_to_favorites),
+            icon = Icons.Default.Favorite,
+            backgroundColor = Color.Red.copy(alpha = 0.5f),
+            left = false,
+            modifier = Modifier.fillMaxHeight().weight(1f).testTag("AddToFavoriteActionCard"))
+      }
+    }
 
     // Main card
+    var offsetX by remember { mutableFloatStateOf(0f) }
     Card(
         modifier =
             Modifier.fillMaxWidth()
@@ -347,10 +345,10 @@ fun SpotCard(
                 .pointerInput(Unit) {
                   detectHorizontalDragGestures(
                       onDragEnd = {
-                        if (offsetX > maxSwipeDistance.toPx() / 2) {
+                        if (offsetX > MAX_SWIPE_DISTANCE.dp.toPx() / 2) {
                           // Swipe right action: Toggle pin status
                           parkingViewModel.togglePinStatus(parking)
-                        } else if (offsetX < -maxSwipeDistance.toPx() / 2) {
+                        } else if (offsetX < -MAX_SWIPE_DISTANCE.dp.toPx() / 2) {
                           // Swipe left action: Add to favorites
                           if (!isFavorite && userSignedIn.value) {
                             userState?.let {
@@ -376,7 +374,7 @@ fun SpotCard(
                         change.consume()
                         offsetX =
                             (offsetX + dragAmount).coerceIn(
-                                -maxSwipeDistance.toPx(), maxSwipeDistance.toPx())
+                                -MAX_SWIPE_DISTANCE.dp.toPx(), MAX_SWIPE_DISTANCE.dp.toPx())
                       }
                 }
                 .clickable(
@@ -387,59 +385,62 @@ fun SpotCard(
                 .testTag("SpotListItem"),
         shape = RectangleShape,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
-          Box(modifier = Modifier.fillMaxSize().padding(horizontal = 32.dp, vertical = 16.dp)) {
-            Column(modifier = Modifier.fillMaxSize().testTag("SpotCardContent")) {
-              if (isPinned) {
-                Icon(
-                    imageVector = Icons.Default.PushPin,
-                    contentDescription = "PinnedParking",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier =
-                        Modifier.padding(bottom = 8.dp)
-                            .size(16.dp)
-                            .rotate(45f)
-                            .testTag("PinnedIcon")
-                            .align(Alignment.End))
-              }
-              Row(
-                  modifier = Modifier.fillMaxWidth(),
-                  verticalAlignment = Alignment.CenterVertically,
-                  horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(
-                        text =
-                            parking.optName?.let { if (it.length > 35) it.take(32) + "..." else it }
-                                ?: stringResource(R.string.default_parking_name),
-                        style = MaterialTheme.typography.bodyLarge,
-                        testTag = "ParkingName")
-                    Text(
-                        text =
-                            if (distance < 1)
-                                stringResource(R.string.distance_m).format(distance * 1000)
-                            else stringResource(R.string.distance_km).format(distance),
-                        style = MaterialTheme.typography.bodySmall,
-                        testTag = "ParkingDistance")
-                  }
-
-              // Rating
-              Spacer(modifier = Modifier.height(8.dp))
-              if (parking.nbReviews > 0) {
-                Row {
-                  ScoreStars(
-                      parking.avgScore,
-                      scale = 0.7f,
-                      text =
-                          pluralStringResource(R.plurals.reviews_count, count = parking.nbReviews)
-                              .format(parking.nbReviews))
+          Column(
+              modifier =
+                  Modifier.fillMaxSize()
+                      .padding(horizontal = 32.dp, vertical = 16.dp)
+                      .testTag("SpotCardContent")) {
+                if (isPinned) {
+                  Icon(
+                      imageVector = Icons.Default.PushPin,
+                      contentDescription = "PinnedParking",
+                      tint = MaterialTheme.colorScheme.primary,
+                      modifier =
+                          Modifier.padding(bottom = 8.dp)
+                              .size(16.dp)
+                              .rotate(45f)
+                              .testTag("PinnedIcon")
+                              .align(Alignment.End))
                 }
-              } else {
-                Text(
-                    text = stringResource(R.string.no_reviews),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    testTag = "ParkingNoReviews")
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween) {
+                      Text(
+                          text =
+                              parking.optName?.let {
+                                if (it.length > 35) it.take(32) + "..." else it
+                              } ?: stringResource(R.string.default_parking_name),
+                          style = MaterialTheme.typography.bodyLarge,
+                          testTag = "ParkingName")
+                      Text(
+                          text =
+                              if (distance < 1)
+                                  stringResource(R.string.distance_m).format(distance * 1000)
+                              else stringResource(R.string.distance_km).format(distance),
+                          style = MaterialTheme.typography.bodySmall,
+                          testTag = "ParkingDistance")
+                    }
+
+                // Rating
+                Spacer(modifier = Modifier.height(8.dp))
+                if (parking.nbReviews > 0) {
+                  Row {
+                    ScoreStars(
+                        parking.avgScore,
+                        scale = 0.7f,
+                        text =
+                            pluralStringResource(R.plurals.reviews_count, count = parking.nbReviews)
+                                .format(parking.nbReviews))
+                  }
+                } else {
+                  Text(
+                      text = stringResource(R.string.no_reviews),
+                      style = MaterialTheme.typography.bodySmall,
+                      color = MaterialTheme.colorScheme.onSurface,
+                      testTag = "ParkingNoReviews")
+                }
               }
-            }
-          }
         }
   }
   HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
