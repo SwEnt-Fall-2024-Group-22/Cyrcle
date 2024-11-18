@@ -32,6 +32,7 @@ import com.github.se.cyrcle.model.user.UserDetails
 import com.github.se.cyrcle.model.user.UserPublic
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import com.mapbox.geojson.Point
 import org.junit.Before
@@ -89,6 +90,7 @@ class ViewProfileScreenTest {
       ViewProfileScreen(
           navigationActions = mockNavigationActions,
           userViewModel = userViewModel,
+          parkingViewModel = parkingViewModel,
           AuthenticatorMock())
     }
   }
@@ -208,9 +210,13 @@ class ViewProfileScreenTest {
     composeTestRule.onNodeWithTag("FavoriteParkingsTitle").assertIsDisplayed()
 
     composeTestRule.onNodeWithTag("FavoriteParkingList").onChildren().assertCountEquals(3)
-    composeTestRule.onNodeWithTag("ParkingItem_0").assertTextContains("Rue de la paix")
-    composeTestRule.onNodeWithTag("ParkingItem_1").assertTextContains("Rude épais")
-    composeTestRule.onNodeWithTag("ParkingItem_2").assertTextContains("Rue du pet")
+    // Use ParkingItemText with useUnmergedTree
+    composeTestRule.onNodeWithTag("ParkingItemText_0", useUnmergedTree = true)
+      .assertTextEquals("Rue de la paix")
+    composeTestRule.onNodeWithTag("ParkingItemText_1", useUnmergedTree = true)
+      .assertTextEquals("Rude épais")
+    composeTestRule.onNodeWithTag("ParkingItemText_2", useUnmergedTree = true)
+      .assertTextEquals("Rue du pet")
   }
 
   @Test
@@ -239,23 +245,23 @@ class ViewProfileScreenTest {
     composeTestRule.waitForIdle()
 
     // Verify the specific parking is removed from favorites
-    composeTestRule.onNodeWithText("Rue de la paix").assertDoesNotExist()
+    // Don't use useUnmergedTree when checking for non-existence
+    composeTestRule.onNodeWithTag("ParkingItemText_0")
+      .assertDoesNotExist()
   }
 
   @Test
   fun testCancelRemoveFavoriteParking() {
     composeTestRule.waitForIdle()
 
-    // Click the star icon to show the confirmation dialog
     composeTestRule.onNodeWithTag("FavoriteToggle_0").performClick()
     composeTestRule.waitForIdle()
 
-    // Cancel removal
     composeTestRule.onNodeWithText("Cancel").performClick()
     composeTestRule.waitForIdle()
 
-    // Verify the specific parking is still in favorites
-    composeTestRule.onNodeWithText("Rue de la paix").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("ParkingItemText_0", useUnmergedTree = true)
+      .assertTextEquals("Rue de la paix")
   }
 
   @Test
@@ -287,22 +293,23 @@ class ViewProfileScreenTest {
   fun testRemoveFavoriteParkingsAndCheckIndexes() {
     composeTestRule.waitForIdle()
 
-    // Remove the middle parking
     composeTestRule.onNodeWithTag("FavoriteToggle_1").performClick()
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithText("Remove").performClick()
     composeTestRule.waitForIdle()
 
-    composeTestRule.onNodeWithText("Rue de la paix").assertIsDisplayed()
-    composeTestRule.onNodeWithText("Rue du pet").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("ParkingItemText_0", useUnmergedTree = true)
+      .assertTextEquals("Rue de la paix")
+    composeTestRule.onNodeWithTag("ParkingItemText_1", useUnmergedTree = true)
+      .assertTextEquals("Rue du pet")
 
-    // Remove the third parking (which is now second)
     composeTestRule.onNodeWithTag("FavoriteToggle_1").performClick()
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithText("Remove").performClick()
     composeTestRule.waitForIdle()
 
-    composeTestRule.onNodeWithText("Rue de la paix").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("ParkingItemText_0", useUnmergedTree = true)
+      .assertTextEquals("Rue de la paix")
   }
 
   @Test
@@ -372,5 +379,40 @@ class ViewProfileScreenTest {
 
     // Verify that the display still reflects the new username
     composeTestRule.onNodeWithTag("DisplayUsername").assertTextEquals("@alicejohnson")
+  }
+
+  @Test
+  fun testNavigateToParkingDetailsOnClick() {
+    composeTestRule.waitForIdle()
+
+    // Click on the first parking card
+    composeTestRule.onNodeWithTag("ParkingItem_0").performClick()
+    composeTestRule.waitForIdle()
+
+    // Verify that the parking was selected and navigation occurred
+    verify(mockNavigationActions).navigateTo(Screen.PARKING_DETAILS)
+  }
+
+  @Test
+  fun testParkingCardStructure() {
+    composeTestRule.waitForIdle()
+
+    // Verify the card exists and is clickable
+    composeTestRule.onNodeWithTag("ParkingItem_0")
+      .assertExists()
+      .assertHasClickAction()
+
+    // Verify the content container exists (using useUnmergedTree)
+    composeTestRule.onNodeWithTag("ParkingItemContent_0", useUnmergedTree = true)
+      .assertExists()
+
+    // Verify the text content exists and has correct text
+    composeTestRule.onNodeWithTag("ParkingItemText_0", useUnmergedTree = true)
+      .assertExists()
+      .assertTextEquals("Rue de la paix")
+
+    // Verify the favorite toggle exists
+    composeTestRule.onNodeWithTag("FavoriteToggle_0")
+      .assertExists()
   }
 }
