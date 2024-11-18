@@ -1,16 +1,11 @@
 package com.github.se.cyrcle.ui.gambling
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -25,54 +20,91 @@ import kotlinx.coroutines.delay
 import kotlin.math.PI
 
 class GamblingScreen {
+
+    private object WheelColors {
+        val Nothing = Color.Gray
+        val Common = Color.Green
+        val Rare = Color(0xFF0066FF)    // Blue
+        val Epic = Color(0xFF800080)     // Purple
+        val Legendary = Color(0xFFFFD700) // Gold
+    }
+
+    private enum class WheelSegment {
+        NOTHING,
+        COMMON,
+        RARE,
+        EPIC,
+        LEGENDARY
+    }
+
+    private val segmentPattern = listOf(
+        WheelSegment.NOTHING,
+        WheelSegment.COMMON,
+        WheelSegment.NOTHING,
+        WheelSegment.RARE,
+        WheelSegment.NOTHING,
+        WheelSegment.COMMON,
+        WheelSegment.NOTHING,
+        WheelSegment.EPIC,
+        WheelSegment.NOTHING,
+        WheelSegment.COMMON,
+        WheelSegment.NOTHING,
+        WheelSegment.RARE,
+        WheelSegment.NOTHING,
+        WheelSegment.LEGENDARY,
+        WheelSegment.NOTHING,
+        WheelSegment.COMMON,
+    )
+
     companion object {
-        // Define our colors
-        private object WheelColors {
-            val Nothing = Color.Gray
-            val Common = Color.Green
-            val Rare = Color(0xFF0066FF)    // Blue
-            val Epic = Color(0xFF800080)     // Purple
-            val Legendary = Color(0xFFFFD700) // Gold
-        }
-
-        // Define our segments pattern
-        private enum class WheelSegment {
-            NOTHING,
-            COMMON,
-            RARE,
-            EPIC,
-            LEGENDARY
-        }
-
-        private val segmentPattern = listOf(
-            WheelSegment.NOTHING,
-            WheelSegment.COMMON,
-            WheelSegment.NOTHING,
-            WheelSegment.RARE,
-            WheelSegment.NOTHING,
-            WheelSegment.COMMON,
-            WheelSegment.NOTHING,
-            WheelSegment.EPIC,
-            WheelSegment.NOTHING,
-            WheelSegment.COMMON,
-            WheelSegment.NOTHING,
-            WheelSegment.RARE,
-            WheelSegment.NOTHING,
-            WheelSegment.LEGENDARY,
-            WheelSegment.NOTHING,
-            WheelSegment.COMMON,
-        )
+        private const val BASE_SPIN_SPEED = 0.1f     // Slow constant spin speed
+        private const val MAX_SPIN_SPEED = 20f       // Maximum speed when spinning
+        private const val MIN_SPIN_SPEED = 0.1f      // Minimum speed (same as BASE_SPIN_SPEED)
+        private const val SPIN_SLOWDOWN_FACTOR = 0.99f // How quickly the spin slows down
+        private const val PAUSE_DURATION = 4000L      // 4 seconds pause after spinning
     }
 
     @Composable
     fun GamblingScreenContent() {
         var rotationAngle by remember { mutableStateOf(0f) }
+        var isSpinning by remember { mutableStateOf(false) }
+        var isPaused by remember { mutableStateOf(false) }
+        var spinSpeed by remember { mutableStateOf(BASE_SPIN_SPEED) }
 
-        // Continuous rotation animation
+        // Combined continuous rotation animation
         LaunchedEffect(Unit) {
             while(true) {
                 delay(16) // roughly 60 FPS
-                rotationAngle = (rotationAngle + 0.5f) % 360f // Adjust speed by changing 0.5f
+
+                when {
+                    isSpinning -> {
+                        // Fast spin with slowdown
+                        rotationAngle = (rotationAngle + spinSpeed) % 360f
+                        spinSpeed *= SPIN_SLOWDOWN_FACTOR
+
+                        // Check if spin is finished
+                        if(spinSpeed <= MIN_SPIN_SPEED) {
+                            isSpinning = false
+                            isPaused = true
+                            spinSpeed = 0f // Complete stop
+
+                            // Here you could calculate and announce the prize
+                            // based on the final rotationAngle
+
+                            // Start pause timer
+                            delay(PAUSE_DURATION)
+                            isPaused = false
+                            spinSpeed = BASE_SPIN_SPEED
+                        }
+                    }
+                    isPaused -> {
+                        // Do nothing - wheel stays still
+                    }
+                    else -> {
+                        // Constant slow spin
+                        rotationAngle = (rotationAngle + BASE_SPIN_SPEED) % 360f
+                    }
+                }
             }
         }
 
@@ -82,6 +114,23 @@ class GamblingScreen {
                 contentAlignment = Alignment.Center
             ) {
                 PrizeWheel(rotationAngle = rotationAngle)
+
+                Button(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 32.dp),
+                    enabled = !isSpinning && !isPaused,  // Disable button during spin and pause
+                    onClick = {
+                        isSpinning = true
+                        spinSpeed = MAX_SPIN_SPEED
+                    }
+                ) {
+                    Text(when {
+                        isSpinning -> "Spinning..."
+                        isPaused -> "Getting Result..."
+                        else -> "SPIN!"
+                    })
+                }
             }
         }
     }
@@ -129,13 +178,11 @@ class GamblingScreen {
                         WheelSegment.LEGENDARY -> WheelColors.Legendary
                     }
 
-                    // Draw segment fill
                     drawPath(
                         path = path,
                         color = color
                     )
 
-                    // Draw segment borders
                     drawPath(
                         path = path,
                         color = Color.White,
@@ -143,14 +190,12 @@ class GamblingScreen {
                     )
                 }
 
-                // Draw outer circle
                 drawCircle(
                     color = Color.White,
                     radius = radius,
                     style = Stroke(width = 4f)
                 )
 
-                // Draw inner circle
                 drawCircle(
                     color = Color.White,
                     radius = radius * 0.1f
