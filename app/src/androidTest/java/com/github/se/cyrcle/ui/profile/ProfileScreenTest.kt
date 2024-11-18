@@ -9,6 +9,7 @@ import com.github.se.cyrcle.di.mocks.AuthenticatorMock
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.parking.ParkingRepository
+import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.model.user.UserRepository
 import com.github.se.cyrcle.model.user.UserViewModel
@@ -27,6 +28,7 @@ class ProfileScreenTest {
   private lateinit var userRepository: UserRepository
   private lateinit var parkingRepository: ParkingRepository
   private lateinit var userViewModel: UserViewModel
+  private lateinit var parkingViewModel: ParkingViewModel
 
   private lateinit var mockNavigationActions: NavigationActions
 
@@ -39,7 +41,7 @@ class ProfileScreenTest {
     userViewModel = UserViewModel(userRepository, parkingRepository)
 
     composeTestRule.setContent {
-      ProfileScreen(mockNavigationActions, userViewModel, AuthenticatorMock())
+      ProfileScreen(mockNavigationActions, userViewModel, parkingViewModel, AuthenticatorMock())
     }
   }
 
