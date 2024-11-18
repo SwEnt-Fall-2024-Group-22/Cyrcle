@@ -291,8 +291,29 @@ class ListScreenTest {
     }
 
     // Verify main screen components
-    composeTestRule.onNodeWithTag("SpotListScreen").assertExists()
-    composeTestRule.onNodeWithTag("SpotListColumn").assertExists()
+    composeTestRule.onNodeWithTag("SpotListScreen").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("SpotListColumn").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("AllSpotsTitle").assertIsDisplayed()
+  }
+
+  @Test
+  fun testPinnedSpotsTitle() {
+    composeTestRule.setContent {
+      SpotListScreen(
+          navigationActions = mockNavigationActions,
+          parkingViewModel = parkingViewModel,
+          mapViewModel = mapViewModel,
+          userViewModel = userViewModel)
+    }
+
+    // Initially, no parking is pinned
+    assert(parkingViewModel.pinnedParkings.value.isEmpty())
+    composeTestRule.onNodeWithTag("PinnedSpotsTitle").assertIsNotDisplayed()
+
+    // Pin a parking
+    parkingViewModel.togglePinStatus(TestInstancesParking.parking1)
+    assert(parkingViewModel.pinnedParkings.value.isNotEmpty())
+    composeTestRule.onNodeWithTag("PinnedSpotsTitle").assertIsDisplayed()
   }
 
   @Test

@@ -108,7 +108,8 @@ fun SpotListScreen(
                     text = stringResource(R.string.pinned_spots),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    color = MaterialTheme.colorScheme.primary)
+                    color = MaterialTheme.colorScheme.primary,
+                    testTag = "PinnedSpotsTitle")
               }
               items(
                   items = filteredParkingSpots.filter { it in pinnedParkings },
@@ -121,14 +122,16 @@ fun SpotListScreen(
                         parking = parking,
                         distance = distance)
                   }
-              item {
-                Spacer(modifier = Modifier.height(32.dp))
-                Text(
-                    text = stringResource(R.string.all_spots),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    color = MaterialTheme.colorScheme.primary)
-              }
+              item { Spacer(modifier = Modifier.height(32.dp)) }
+            }
+
+            item {
+              Text(
+                  text = stringResource(R.string.all_spots),
+                  style = MaterialTheme.typography.titleMedium,
+                  modifier = Modifier.padding(horizontal = 16.dp),
+                  color = MaterialTheme.colorScheme.primary,
+                  testTag = "AllSpotsTitle")
             }
 
             items(
