@@ -97,10 +97,15 @@
     <string name="map_screen_capacity">Capacity is %s</string>
     <string name="map_screen_mode_switch_label">Advanced</string>
 
+    <!-- Profile Commons -->
+    <string name="profile_account_already_exists">Your account is already linked, please try with another email</string>
+    <string name="profile_is_null">User is not signed in, should not happen</string>
+
     <!-- Create Profile Screen -->
     <string name="profile_screen_title">Create your profile</string>
     <string name="profile_screen_finish_sign_in_indication">Finish by signing in with Google to link your e-mail</string>
-    <string name="profile_screen_account_already_exists">Your account is already linked, please try with another email</string>
+    <string name="profile_screen_invite_to_sign_in">You need to be signed-in to modify your profile</string>
+    <string name="profile_screen_give_reasons_to_sign_in">"Sign in now to add new spots, share reviews, and help fellow cyclists find the perfect parking space."</string>
     <!-- View Profile Screen -->
     <string name="view_profile_screen_first_name_label">First Name</string>
     <string name="view_profile_screen_last_name_label">Last Name</string>
@@ -119,6 +124,9 @@
     <string name="view_profile_screen_remove_favorite_dialog_message">Are you sure you want to remove %s from your favorites?</string>
     <string name="view_profile_screen_remove_favorite_dialog_action_button">Remove</string>
     <string name="view_profile_screen_remove_favorite_dialog_cancel_button">Cancel</string>
+    <string name="view_profile_on_sign_out_toast">You\'re signed out!</string>
+    <string name="view_profile_on_fav_parking_removal_toast">Removed from Favorites!</string>
+
 
     <!-- All Reviews Screen -->
     <string name="all_review_title">All Reviews For %s</string>

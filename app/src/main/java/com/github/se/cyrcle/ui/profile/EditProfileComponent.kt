@@ -41,7 +41,7 @@ fun EditProfileComponent(
     cancelButton: @Composable () -> Unit
 ) {
   if (user == null) {
-    Text("User is not signed in, should not happen", Modifier.testTag("NullUserText"))
+    Text(stringResource(R.string.profile_is_null), Modifier.testTag("NullUserText"))
     return
   }
 

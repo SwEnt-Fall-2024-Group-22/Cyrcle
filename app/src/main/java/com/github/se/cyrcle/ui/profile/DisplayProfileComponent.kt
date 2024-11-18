@@ -26,7 +26,7 @@ import com.github.se.cyrcle.ui.theme.atoms.Text
 @Composable
 fun DisplayProfileComponent(user: User?, extras: @Composable () -> Unit) {
   if (user == null) {
-    Text("User is not signed in, should not happen")
+    Text(stringResource(R.string.profile_is_null), Modifier.testTag("NullUserText"))
     return
   }
 
