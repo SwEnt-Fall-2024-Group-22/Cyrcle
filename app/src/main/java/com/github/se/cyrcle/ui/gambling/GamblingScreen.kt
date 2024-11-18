@@ -29,12 +29,12 @@ class GamblingScreen {
         val Legendary = Color(0xFFFFD700) // Gold
     }
 
-    private enum class WheelSegment {
-        NOTHING,
-        COMMON,
-        RARE,
-        EPIC,
-        LEGENDARY
+    private enum class WheelSegment(val displayName: String) {
+        NOTHING("Nothing"),
+        COMMON("Common Prize!"),
+        RARE("Rare Prize!!"),
+        EPIC("Epic Prize!!!"),
+        LEGENDARY("LEGENDARY!!!!")
     }
 
     private val segmentPattern = listOf(
@@ -64,12 +64,21 @@ class GamblingScreen {
         private const val PAUSE_DURATION = 4000L      // 4 seconds pause after spinning
     }
 
+    private fun calculatePrize(rotationAngle: Float): WheelSegment {
+        val segmentAngle = 360f / segmentPattern.size
+        // We need to normalize the rotation angle and account for the pointer position
+        val normalizedAngle = (270 - (rotationAngle % 360)) % 360
+        val segmentIndex = (normalizedAngle / segmentAngle).toInt()
+        return segmentPattern[segmentIndex]
+    }
+
     @Composable
     fun GamblingScreenContent() {
         var rotationAngle by remember { mutableStateOf(0f) }
         var isSpinning by remember { mutableStateOf(false) }
         var isPaused by remember { mutableStateOf(false) }
         var spinSpeed by remember { mutableStateOf(BASE_SPIN_SPEED) }
+        var currentPrize by remember { mutableStateOf<WheelSegment?>(null) }
 
         // Combined continuous rotation animation
         LaunchedEffect(Unit) {
@@ -88,8 +97,8 @@ class GamblingScreen {
                             isPaused = true
                             spinSpeed = 0f // Complete stop
 
-                            // Here you could calculate and announce the prize
-                            // based on the final rotationAngle
+                            // Calculate prize only when wheel completely stops
+                            currentPrize = calculatePrize(rotationAngle)
 
                             // Start pause timer
                             delay(PAUSE_DURATION)
@@ -98,10 +107,11 @@ class GamblingScreen {
                         }
                     }
                     isPaused -> {
-                        // Do nothing - wheel stays still
+                        // Keep wheel still and prize displayed
                     }
                     else -> {
-                        // Constant slow spin
+                        // Clear prize and continue slow spin
+                        currentPrize = null
                         rotationAngle = (rotationAngle + BASE_SPIN_SPEED) % 360f
                     }
                 }
@@ -115,6 +125,23 @@ class GamblingScreen {
             ) {
                 PrizeWheel(rotationAngle = rotationAngle)
 
+                // Prize announcement text
+                currentPrize?.let { prize ->
+                    Text(
+                        text = prize.displayName,
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = 32.dp),
+                        color = when(prize) {
+                            WheelSegment.NOTHING -> Color.Gray
+                            WheelSegment.COMMON -> Color.Green
+                            WheelSegment.RARE -> Color(0xFF0066FF)
+                            WheelSegment.EPIC -> Color(0xFF800080)
+                            WheelSegment.LEGENDARY -> Color(0xFFFFD700)
+                        }
+                    )
+                }
+
                 Button(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
@@ -123,11 +150,12 @@ class GamblingScreen {
                     onClick = {
                         isSpinning = true
                         spinSpeed = MAX_SPIN_SPEED
+                        currentPrize = null
                     }
                 ) {
                     Text(when {
                         isSpinning -> "Spinning..."
-                        isPaused -> "Getting Result..."
+                        isPaused -> currentPrize?.displayName ?: "Getting Result..."
                         else -> "SPIN!"
                     })
                 }
