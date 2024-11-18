@@ -1,13 +1,12 @@
 package com.github.se.cyrcle.model.parking
 
+import com.github.se.cyrcle.model.image.ImageRepository
 import com.mapbox.geojson.Point
-import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.times
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
@@ -43,12 +42,6 @@ class ParkingViewModelTest {
 
     // Check if the parking returned is the correct one
     assert(parkingViewModel.selectedParking.value == TestInstancesParking.parking1)
-  }
-
-  @Test
-  fun fetchImageURLCallsRepository() = runTest {
-    parkingViewModel.fetchImageUrl("1")
-    verify(imageRepository).getUrl(eq("1"))
   }
 
   @Test

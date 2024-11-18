@@ -3,16 +3,17 @@ package com.github.se.cyrcle.model.parking
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
+import com.github.se.cyrcle.model.image.ImageRepository
+import com.github.se.cyrcle.model.image.ImageRepositoryCloudStorage
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 const val DEFAULT_RADIUS = 100.0
 const val MAX_RADIUS = 1000.0
@@ -61,26 +62,6 @@ class ParkingViewModel(
   // Map a tile to the parkings that are in it.
   private val tilesToParking =
       MutableStateFlow<LinkedHashMap<Tile, List<Parking>>>(LinkedHashMap(10, 1f, true))
-
-  /**
-   * Fetches the image URL from the cloud storage, This function as to be called after retrieving
-   * the path from the Firestore database.
-   *
-   * @param path the path of the image in the cloud storage (stored in Firestore)
-   * @return [StateFlow] containing the URL of the image
-   */
-  fun fetchImageUrl(path: String): StateFlow<String?> {
-    val imageUrlFlow = MutableStateFlow<String?>(null)
-    viewModelScope.launch {
-      imageUrlFlow.value =
-          try {
-            imageRepository.getUrl(path)
-          } catch (e: Exception) {
-            null
-          }
-    }
-    return imageUrlFlow
-  }
 
   /**
    * Adds a parking to the repository.
@@ -355,7 +336,8 @@ class ParkingViewModel(
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return ParkingViewModel(
-                ImageRepositoryCloudStorage(FirebaseAuth.getInstance()),
+                ImageRepositoryCloudStorage(
+                    FirebaseAuth.getInstance(), FirebaseStorage.getInstance()),
                 ParkingRepositoryFirestore(FirebaseFirestore.getInstance()))
                 as T
           }

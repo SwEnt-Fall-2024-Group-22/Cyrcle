@@ -2,8 +2,8 @@ package com.github.se.cyrcle.di
 
 import com.github.se.cyrcle.model.address.AddressRepository
 import com.github.se.cyrcle.model.address.AddressRepositoryNominatim
-import com.github.se.cyrcle.model.parking.ImageRepository
-import com.github.se.cyrcle.model.parking.ImageRepositoryCloudStorage
+import com.github.se.cyrcle.model.image.ImageRepository
+import com.github.se.cyrcle.model.image.ImageRepositoryCloudStorage
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingRepositoryFirestore
 import com.github.se.cyrcle.model.review.ReviewRepository
