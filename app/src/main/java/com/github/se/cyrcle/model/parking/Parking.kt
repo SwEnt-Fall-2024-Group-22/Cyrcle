@@ -54,6 +54,7 @@ enum class ParkingCapacity(override val description: String) : ParkingAttribute 
   XLARGE("More than 100 spots")
 }
 
+// Reasons for reporting a Parking
 enum class ParkingReportReason(override val description: String) : DropDownableEnum {
   POOR_MAINTENANCE("This Spot has Poor Maintenance"),
   INACCESSIBLE("This Spot is Inaccessible"),
