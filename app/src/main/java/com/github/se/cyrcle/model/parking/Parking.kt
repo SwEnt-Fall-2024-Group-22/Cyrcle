@@ -36,6 +36,13 @@ data class Parking(
     var avgScore: Double = 0.0
 )
 
+data class ParkingReport(
+    val uid: String,
+    val reason: ParkingReportReason,
+    val userId: String,
+    val parking: Parking
+)
+
 interface ParkingAttribute : DropDownableEnum
 
 /** Enum class representing the capacity of a parking spot. */
@@ -45,6 +52,14 @@ enum class ParkingCapacity(override val description: String) : ParkingAttribute 
   MEDIUM("26-50 spots"),
   LARGE("51-100 spots"),
   XLARGE("More than 100 spots")
+}
+
+enum class ParkingReportReason(override val description: String) : DropDownableEnum {
+  POOR_MAINTENANCE("This Spot has Poor Maintenance"),
+  INACCESSIBLE("This Spot is Inaccessible"),
+  ILLEGAL_SPOT("This Spot is in an Illegal Place"),
+  SAFETY_CONCERN("This Spot is in an Dangerous Place"),
+  INEXISTANT("This Spot does Not Exist")
 }
 
 /** Enum class representing the type of rack in a parking spot. */

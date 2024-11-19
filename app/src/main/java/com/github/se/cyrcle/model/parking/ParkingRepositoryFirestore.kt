@@ -125,6 +125,27 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
         .addOnFailureListener { onFailure(it) }
   }
 
+  override fun addReport(
+      report: ParkingReport,
+      onSuccess: (ParkingReport) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    val reportId = getNewUid() // Generate a new unique ID for the report
+    val reportData =
+        mapOf(
+            "id" to report.uid,
+            "reason" to report.reason,
+            "user" to report.userId,
+            "parking" to report.parking)
+    db.collection(collectionPath)
+        .document(report.parking.uid)
+        .collection("reports")
+        .document(reportId)
+        .set(reportData)
+        .addOnSuccessListener { onSuccess(report) }
+        .addOnFailureListener { onFailure(it) }
+  }
+
   fun serializeParking(parking: Parking): Map<String, Any> {
     val gson = GsonBuilder().registerTypeAdapter(Point::class.java, PointAdapter()).create()
     val json = gson.toJson(parking)

@@ -140,6 +140,27 @@ class ReviewRepositoryFirestore @Inject constructor(private val db: FirebaseFire
         .addOnFailureListener { onFailure(it) }
   }
 
+  override fun addReport(
+      report: ReviewReport,
+      onSuccess: (ReviewReport) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    val reportId = getNewUid() // Generate a new unique ID for the report
+    val reportData =
+        mapOf(
+            "id" to report.uid,
+            "reason" to report.reason,
+            "user" to report.userId,
+            "review" to report.review)
+    db.collection(collectionPath)
+        .document(report.review)
+        .collection("reports")
+        .document(reportId)
+        .set(reportData)
+        .addOnSuccessListener { onSuccess(report) }
+        .addOnFailureListener { onFailure(it) }
+  }
+
   private val gson: Gson =
       GsonBuilder()
           .registerTypeAdapter(

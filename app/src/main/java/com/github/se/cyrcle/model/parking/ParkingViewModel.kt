@@ -45,6 +45,10 @@ class ParkingViewModel(
   private val _selectedParking = MutableStateFlow<Parking?>(null)
   val selectedParking: StateFlow<Parking?> = _selectedParking
 
+  /** Selected parking to review/edit */
+  private val _selectedParkingReports = MutableStateFlow<List<ParkingReport>?>(null)
+  val selectedParkingReports: StateFlow<List<ParkingReport>?> = _selectedParkingReports
+
   /**
    * Radius of the circle around the center to display parkings With a public getter to display the
    * radius in the TopBar of the ListScreen The default value is DEFAULT_RADIUS stored in meters
@@ -288,6 +292,27 @@ class ParkingViewModel(
     if (_closestParkings.value.size < MIN_NB_PARKINGS || _radius.value == MAX_RADIUS) {
       incrementRadius()
     }
+  }
+
+  fun addReport(report: ParkingReport) {
+    val selectedParking = _selectedParking.value
+    if (selectedParking == null) {
+      Log.e("ParkingViewModel", "No parking selected")
+      return
+    }
+
+    parkingRepository.addReport(
+        report,
+        onSuccess = {
+          // Add the new report to the current list of reports
+          _selectedParkingReports.update { currentReports ->
+            currentReports?.plus(it) ?: listOf(it)
+          }
+          Log.d("ParkingViewModel", "Report added successfully")
+        },
+        onFailure = { exception ->
+          Log.e("ParkingViewModel", "Error adding report: ${exception.message}", exception)
+        })
   }
   // ================== Helper functions ==================
 

@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 
 class ReviewViewModel(private val reviewRepository: ReviewRepository) : ViewModel() {
 
@@ -18,6 +19,10 @@ class ReviewViewModel(private val reviewRepository: ReviewRepository) : ViewMode
 
   private val _userReviews = MutableStateFlow<List<Review?>>(emptyList())
   val userReviews: StateFlow<List<Review?>> = _userReviews
+
+  /** Selected parking to review/edit */
+  private val _selectedReviewReports = MutableStateFlow<List<ReviewReport>?>(null)
+  val selectedReviewReports: StateFlow<List<ReviewReport>?> = _selectedReviewReports
 
   fun addReview(review: Review) {
     reviewRepository.addReview(review, {}, { Log.e("ReviewViewModel", "Error adding review", it) })
@@ -46,6 +51,25 @@ class ReviewViewModel(private val reviewRepository: ReviewRepository) : ViewMode
   fun deleteReviewById(review: Review) {
     reviewRepository.deleteReviewById(
         review.uid, {}, { Log.e("ReviewViewModel", "Error deleting reviews", it) })
+  }
+
+  fun addReport(report: ReviewReport) {
+    val selectedParking = _selectedReview.value
+    if (selectedParking == null) {
+      Log.e("ParkingViewModel", "No parking selected")
+      return
+    }
+
+    reviewRepository.addReport(
+        report,
+        onSuccess = {
+          // Add the new report to the current list of reports
+          _selectedReviewReports.update { currentReports -> currentReports?.plus(it) ?: listOf(it) }
+          Log.d("ParkingViewModel", "Report added successfully")
+        },
+        onFailure = { exception ->
+          Log.e("ParkingViewModel", "Error adding report: ${exception.message}", exception)
+        })
   }
 
   /**

@@ -80,4 +80,10 @@ interface ParkingRepository {
       onSuccess: (List<Parking>) -> Unit,
       onFailure: (Exception) -> Unit
   )
+
+  fun addReport(
+      report: ParkingReport,
+      onSuccess: (ParkingReport) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
 }
