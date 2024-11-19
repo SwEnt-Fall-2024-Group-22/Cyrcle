@@ -32,6 +32,7 @@ import com.github.se.cyrcle.ui.addParking.location.LocationPicker
 import com.github.se.cyrcle.ui.map.MapScreen
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.mapbox.geojson.Point
+import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,6 +40,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
+@HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 class AddScreensNavigationTest {
   @get:Rule val composeTestRule = createComposeRule()
