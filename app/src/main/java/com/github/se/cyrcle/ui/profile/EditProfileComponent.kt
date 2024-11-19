@@ -20,9 +20,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.model.user.LocalSession
 import com.github.se.cyrcle.model.user.User
-import com.github.se.cyrcle.model.user.UserDetails
-import com.github.se.cyrcle.model.user.UserPublic
 import com.github.se.cyrcle.ui.theme.atoms.ConditionCheckingInputText
 import com.github.se.cyrcle.ui.theme.atoms.Text
 
@@ -48,18 +47,18 @@ fun EditProfileComponent(
   var username by remember { mutableStateOf(user.public.username) }
   var firstName by remember { mutableStateOf(user.details!!.firstName) }
   var lastName by remember { mutableStateOf(user.details!!.lastName) }
-  var profilePictureUrl by remember { mutableStateOf(user.public.profilePictureUrl) }
+  var profilePictureUri by remember { mutableStateOf(user.localSession?.profilePictureUri) }
 
   val imagePickerLauncher =
       rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let { profilePictureUrl = it.toString() }
+        uri?.let { profilePictureUri = it.toString() }
       }
 
   Column(
       modifier = Modifier.fillMaxSize().padding(16.dp).testTag("ProfileContent"),
       horizontalAlignment = Alignment.CenterHorizontally) {
         ProfileImageComponent(
-            url = profilePictureUrl,
+            url = profilePictureUri,
             onClick = { imagePickerLauncher.launch("image/*") },
             isEditable = true,
             modifier = Modifier.testTag("ProfileImage"))
@@ -100,9 +99,11 @@ fun EditProfileComponent(
           cancelButton()
 
           saveButton(
-              User(
-                  UserPublic(user.public.userId, username, profilePictureUrl),
-                  UserDetails(firstName, lastName, user.details!!.email)))
+              // Use .copy to not lose the locas session and avoid re-fetching the user from db.
+              user.copy(
+                  public = user.public.copy(username = username, profilePictureCloudPath = ""),
+                  details = user.details?.copy(firstName = firstName, lastName = lastName),
+                  localSession = LocalSession(profilePictureUri = profilePictureUri)))
         }
       }
 }

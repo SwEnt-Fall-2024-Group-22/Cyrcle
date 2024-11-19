@@ -5,13 +5,13 @@ package com.github.se.cyrcle.model.user
  *
  * @property userId The unique identifier of the user.
  * @property username The username of the user.
- * @property profilePictureUrl The path to the profile picture of the user on the cloud storage.
- *   (Not implemented)
+ * @property profilePictureCloudPath The path to the profile picture of the user on the cloud
+ *   storage. (Not implemented)
  */
 data class UserPublic(
     val userId: String,
     val username: String,
-    val profilePictureUrl: String = "",
+    val profilePictureCloudPath: String = "",
     // val accountCreationDate: Timestamp? = null,
     // val numberOfContributedSpots: Int = 0,
     // val userReputationScore: Int = 0
@@ -36,9 +36,26 @@ data class UserDetails(
 )
 
 /**
+ * For information that are only relevant to the session and won't be stored in the database
+ *
+ * @property profilePictureUrl The URL of the profile picture
+ * @property profilePictureUri The URI of the profile picture,(local path on the device)
+ */
+data class LocalSession(
+    val profilePictureUrl: String? = "",
+    val profilePictureUri: String? = "",
+)
+
+/**
  * Data class representing a user.
  *
  * @property public Public information of the user.
  * @property details Private information of the user.
+ * @property localSession Information that are only relevant to the session and won't be stored in
+ *   the database
  */
-data class User(val public: UserPublic, val details: UserDetails?)
+data class User(
+    val public: UserPublic,
+    val details: UserDetails?,
+    val localSession: LocalSession? = null
+)
