@@ -107,9 +107,11 @@ fun SpotListScreen(
                 Text(
                     text = stringResource(R.string.pinned_spots),
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(horizontal = 16.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 8.dp),
                     color = MaterialTheme.colorScheme.primary,
                     testTag = "PinnedSpotsTitle")
+                HorizontalDivider(
+                    thickness = 1.dp, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
               }
               items(
                   items = filteredParkingSpots.filter { it in pinnedParkings },
@@ -129,9 +131,11 @@ fun SpotListScreen(
               Text(
                   text = stringResource(R.string.all_spots),
                   style = MaterialTheme.typography.titleMedium,
-                  modifier = Modifier.padding(horizontal = 16.dp),
+                  modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 8.dp),
                   color = MaterialTheme.colorScheme.primary,
                   testTag = "AllSpotsTitle")
+              HorizontalDivider(
+                  thickness = 1.dp, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
             }
 
             items(
@@ -271,7 +275,8 @@ fun FilterSection(
       modifier =
           Modifier.padding(8.dp)
               .border(1.dp, Color.Gray, shape = MaterialTheme.shapes.medium)
-              .background(MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.medium)
+              .background(
+                  MaterialTheme.colorScheme.surfaceBright, shape = MaterialTheme.shapes.medium)
               .padding(8.dp)) {
         Text(
             text = title,
@@ -387,11 +392,15 @@ fun SpotCard(
                     })
                 .testTag("SpotListItem"),
         shape = RectangleShape,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+        colors =
+            CardDefaults.cardColors(
+                containerColor =
+                    if (isPinned) MaterialTheme.colorScheme.surfaceBright
+                    else MaterialTheme.colorScheme.surface)) {
           Column(
               modifier =
                   Modifier.fillMaxSize()
-                      .padding(horizontal = 32.dp, vertical = 16.dp)
+                      .padding(horizontal = 32.dp, vertical = 12.dp)
                       .testTag("SpotCardContent")) {
                 if (isPinned) {
                   Icon(

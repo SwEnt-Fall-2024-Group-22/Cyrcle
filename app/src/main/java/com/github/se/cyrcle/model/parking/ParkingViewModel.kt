@@ -233,7 +233,6 @@ class ParkingViewModel(
   }
   // ================== Filtering ==================
 
-
   // ================== Pins ==================
   // State for pins
   private val _pinnedParkings = MutableStateFlow<Set<Parking>>(emptySet())
