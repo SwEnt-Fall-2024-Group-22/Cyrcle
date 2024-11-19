@@ -6,7 +6,7 @@ import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReviewRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.address.AddressRepository
-import com.github.se.cyrcle.model.parking.ImageRepository
+import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.review.ReviewRepository
 import com.github.se.cyrcle.model.user.UserRepository
