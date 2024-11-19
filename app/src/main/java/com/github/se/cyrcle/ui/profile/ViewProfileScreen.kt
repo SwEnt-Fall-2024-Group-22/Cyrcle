@@ -70,7 +70,7 @@ fun ViewProfileScreen(
   val userState by userViewModel.currentUser.collectAsState()
   var isEditing by remember { mutableStateOf(false) }
 
-  val signOutToastTest = stringResource(R.string.view_profile_on_sign_out_toast)
+  val signOutToastText = stringResource(R.string.view_profile_on_sign_out_toast)
 
   Scaffold(
       modifier = Modifier.testTag("ViewProfileScreen"),
@@ -83,7 +83,7 @@ fun ViewProfileScreen(
         Box(Modifier.fillMaxSize().padding(innerPadding)) {
           authenticator.SignOutButton(Modifier.padding(10.dp).align(Alignment.TopEnd)) {
             userViewModel.setCurrentUser(null)
-            Toast.makeText(context, signOutToastTest, Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, signOutToastText, Toast.LENGTH_SHORT).show()
             navigationActions.navigateTo(TopLevelDestinations.AUTH)
           }
 
@@ -166,9 +166,6 @@ private fun FavoriteParkingsSection(userViewModel: UserViewModel) {
 @Composable
 private fun FavoriteParkingCard(parking: Parking, index: Int, onRemove: () -> Unit) {
   var showConfirmDialog by remember { mutableStateOf(false) }
-  val context = LocalContext.current
-
-  val onFavParkingRemovalText = stringResource(R.string.view_profile_on_fav_parking_removal_toast)
 
   Card(modifier = Modifier.size(120.dp).padding(8.dp), shape = MaterialTheme.shapes.medium) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -206,7 +203,6 @@ private fun FavoriteParkingCard(parking: Parking, index: Int, onRemove: () -> Un
               onClick = {
                 onRemove()
                 showConfirmDialog = false
-                Toast.makeText(context, onFavParkingRemovalText, Toast.LENGTH_SHORT).show()
               }) {
                 Text(
                     stringResource(

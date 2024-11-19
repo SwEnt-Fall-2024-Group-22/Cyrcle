@@ -97,12 +97,12 @@ fun EditProfileComponent(
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+          cancelButton()
+
           saveButton(
               User(
                   UserPublic(user.public.userId, username, profilePictureUrl),
                   UserDetails(firstName, lastName, user.details!!.email)))
-
-          cancelButton()
         }
       }
 }
