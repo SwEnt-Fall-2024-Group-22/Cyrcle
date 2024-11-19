@@ -13,13 +13,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.AddAPhoto
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -27,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -80,47 +84,70 @@ fun ParkingDetailsScreen(
                     .verticalScroll(scrollState)
                     .testTag("ParkingDetailsColumn")) {
               Box(
-                  modifier = Modifier.fillMaxWidth().height(48.dp).testTag("FavoriteIconContainer"),
+                  modifier =
+                      Modifier.fillMaxWidth().height(48.dp).testTag("PinAndFavoriteIconContainer"),
                   contentAlignment = Alignment.TopEnd) {
-                    val isFavorite =
-                        userSignedIn.value &&
-                            userViewModel.favoriteParkings
-                                .collectAsState()
-                                .value
-                                .contains(selectedParking)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                      val isPinned =
+                          parkingViewModel.pinnedParkings
+                              .collectAsState()
+                              .value
+                              .contains(selectedParking)
 
-                    Icon(
-                        imageVector =
-                            if (isFavorite) Icons.Default.Favorite
-                            else Icons.Outlined.FavoriteBorder,
-                        contentDescription = "Favorite",
-                        tint = if (isFavorite) Red else Black,
-                        modifier =
-                            Modifier.testTag(
-                                    if (isFavorite) "RedFilledFavoriteIcon"
-                                    else "BlackOutlinedFavoriteIcon")
-                                .clickable {
-                                  if (userSignedIn.value) {
-                                    if (isFavorite) {
-                                      userViewModel.removeFavoriteParkingFromSelectedUser(
-                                          selectedParking.uid)
-                                      Toast.makeText(
-                                              context,
-                                              "Removed From Favorites!",
-                                              Toast.LENGTH_SHORT)
-                                          .show()
+                      Icon(
+                          imageVector =
+                              if (isPinned) Icons.Default.PushPin else Icons.Outlined.PushPin,
+                          contentDescription = "Pin",
+                          tint = Black,
+                          modifier =
+                              Modifier.testTag("PinIcon")
+                                  .clickable { parkingViewModel.togglePinStatus(selectedParking) }
+                                  .rotate(45f) // Rotate the push pin icon
+                          )
+
+                      Spacer(modifier = Modifier.width(8.dp))
+
+                      val isFavorite =
+                          userSignedIn.value &&
+                              userViewModel.favoriteParkings
+                                  .collectAsState()
+                                  .value
+                                  .contains(selectedParking)
+
+                      Icon(
+                          imageVector =
+                              if (isFavorite) Icons.Default.Favorite
+                              else Icons.Outlined.FavoriteBorder,
+                          contentDescription = "Favorite",
+                          tint = if (isFavorite) Red else Black,
+                          modifier =
+                              Modifier.testTag(
+                                      if (isFavorite) "RedFilledFavoriteIcon"
+                                      else "BlackOutlinedFavoriteIcon")
+                                  .clickable {
+                                    if (userSignedIn.value) {
+                                      if (isFavorite) {
+                                        userViewModel.removeFavoriteParkingFromSelectedUser(
+                                            selectedParking.uid)
+                                        Toast.makeText(
+                                                context,
+                                                "Removed From Favorites!",
+                                                Toast.LENGTH_SHORT)
+                                            .show()
+                                      } else {
+                                        userViewModel.addFavoriteParkingToSelectedUser(
+                                            selectedParking.uid)
+                                        Toast.makeText(
+                                                context, "Added To Favorites!", Toast.LENGTH_SHORT)
+                                            .show()
+                                      }
+                                      userViewModel.getSelectedUserFavoriteParking()
                                     } else {
-                                      userViewModel.addFavoriteParkingToSelectedUser(
-                                          selectedParking.uid)
-                                      Toast.makeText(
-                                              context, "Added To Favorites!", Toast.LENGTH_SHORT)
+                                      Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT)
                                           .show()
                                     }
-                                    userViewModel.getSelectedUserFavoriteParking()
-                                  } else {
-                                    Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show()
-                                  }
-                                })
+                                  })
+                    }
                   }
 
               // Reviews

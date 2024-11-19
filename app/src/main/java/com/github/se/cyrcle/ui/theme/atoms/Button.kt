@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
@@ -316,7 +317,7 @@ fun ScoreStars(
         }
 
         text?.let {
-          Spacer(modifier = Modifier.size((4 * scale).dp)) // Reduced space between stars and text
+          Spacer(modifier = Modifier.width((5 * scale).dp)) // Reduced space between stars and text
           Text(text = it, color = starColor, style = MaterialTheme.typography.bodyMedium)
         }
       }

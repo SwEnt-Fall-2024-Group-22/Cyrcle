@@ -24,7 +24,7 @@ val Cerulean = Color(0xFF22799B)
 val CeruleanLowest = Color(0xFF134558)
 val CeruleanLow = Color(0xFF1B5F7A)
 val CeruleanHigh = Color(0xFF2687AE)
-val CeruleanHighest = Color(0xFF2A96C0)
+val CeruleanHighest = Color(0xFFF3FBFE)
 
 /**
  * Invert a color, without changing its alpha channel.

@@ -32,6 +32,7 @@ class ParkingViewModel(
     private val parkingRepository: ParkingRepository
 ) : ViewModel() {
 
+  // ================== Parkings ==================
   /** List of parkings within the designated area */
   private val _rectParkings = MutableStateFlow<List<Parking>>(emptyList())
   val rectParkings: StateFlow<List<Parking>> = _rectParkings
@@ -62,6 +63,15 @@ class ParkingViewModel(
   // Map a tile to the parkings that are in it.
   private val tilesToParking =
       MutableStateFlow<LinkedHashMap<Tile, List<Parking>>>(LinkedHashMap(10, 1f, true))
+
+  /**
+   * Generates a new unique identifier for a parking.
+   *
+   * @return a new unique identifier
+   */
+  fun getNewUid(): String {
+    return parkingRepository.getNewUid()
+  }
 
   /**
    * Adds a parking to the repository.
@@ -167,32 +177,63 @@ class ParkingViewModel(
     _radius.value = DEFAULT_RADIUS
     getParkingsInRadius(center, DEFAULT_RADIUS)
   }
+  // ================== Parkings ==================
 
-  // All states to move the filtering to the viewmodel :
+  // ================== Filtering ==================
   private val _selectedProtection = MutableStateFlow<Set<ParkingProtection>>(emptySet())
   val selectedProtection: StateFlow<Set<ParkingProtection>> = _selectedProtection
 
-  fun setSelectedProtection(protections: Set<ParkingProtection>) {
-    _selectedProtection.value = protections
+  /**
+   * Toggles the protection status of a parking and updates the list of closest parkings.
+   *
+   * @param protection the protection to toggle the status of
+   */
+  fun toggleProtection(protection: ParkingProtection) {
+    _selectedProtection.update { toggleSelection(it, protection) }
     updateClosestParkings(0)
   }
 
   private val _selectedRackTypes = MutableStateFlow<Set<ParkingRackType>>(emptySet())
   val selectedRackTypes: StateFlow<Set<ParkingRackType>> = _selectedRackTypes
 
-  fun setSelectedRackTypes(rackTypes: Set<ParkingRackType>) {
-    _selectedRackTypes.value = rackTypes
+  /**
+   * Toggles the rack type of a parking and updates the list of closest parkings.
+   *
+   * @param rackType the rack type to toggle the status of
+   */
+  fun toggleRackType(rackType: ParkingRackType) {
+    _selectedRackTypes.update { toggleSelection(it, rackType) }
     updateClosestParkings(0)
   }
 
   private val _selectedCapacities = MutableStateFlow<Set<ParkingCapacity>>(emptySet())
   val selectedCapacities: StateFlow<Set<ParkingCapacity>> = _selectedCapacities
 
-  fun setSelectedCapacities(capacities: Set<ParkingCapacity>) {
-    _selectedCapacities.value = capacities
+  /**
+   * Toggles the capacity of a parking and updates the list of closest parkings.
+   *
+   * @param capacity the capacity to toggle the status of
+   */
+  fun toggleCapacity(capacity: ParkingCapacity) {
+    _selectedCapacities.update { toggleSelection(it, capacity) }
     updateClosestParkings(0)
   }
 
+  private val _onlyWithCCTV = MutableStateFlow(false)
+  val onlyWithCCTV: StateFlow<Boolean> = _onlyWithCCTV
+
+  /**
+   * Set the filter to only show parkings with CCTV and updates the list of closest parkings.
+   *
+   * @param onlyWithCCTV the filter to only show parkings with CCTV
+   */
+  fun setOnlyWithCCTV(onlyWithCCTV: Boolean) {
+    _onlyWithCCTV.value = onlyWithCCTV
+    updateClosestParkings(0)
+  }
+  // ================== Filtering ==================
+
+  // ================== Pins ==================
   // State for pins
   private val _pinnedParkings = MutableStateFlow<Set<Parking>>(emptySet())
   val pinnedParkings: StateFlow<Set<Parking>> = _pinnedParkings
@@ -203,25 +244,17 @@ class ParkingViewModel(
    * @param parking the parking to toggle the pin status of
    */
   fun togglePinStatus(parking: Parking) {
-    _pinnedParkings.update { currentPinned ->
-      if (currentPinned.contains(parking)) {
-        currentPinned - parking
-      } else {
-        currentPinned + parking
-      }
+    _pinnedParkings.update { toggleSelection(it, parking) }
+  }
+  // ================== Pins ==================
+
+  // ================== Helper functions ==================
+  private fun <T> toggleSelection(set: Set<T>, item: T): Set<T> {
+    return if (set.contains(item)) {
+      set - item
+    } else {
+      set + item
     }
-  }
-
-  private val _onlyWithCCTV = MutableStateFlow(false)
-  val onlyWithCCTV: StateFlow<Boolean> = _onlyWithCCTV
-
-  fun setOnlyWithCCTV(onlyWithCCTV: Boolean) {
-    _onlyWithCCTV.value = onlyWithCCTV
-    updateClosestParkings(0)
-  }
-
-  fun getNewUid(): String {
-    return parkingRepository.getNewUid()
   }
 
   /**
@@ -256,7 +289,9 @@ class ParkingViewModel(
       incrementRadius()
     }
   }
+  // ================== Helper functions ==================
 
+  // ================== Reviews ==================
   /**
    * Handles the deletion of a review for a given parking. Adjusts the average score and the number
    * of reviews accordingly.
@@ -328,8 +363,8 @@ class ParkingViewModel(
       Log.e("ParkingViewModel", "An unexpect error occured (0 reviews)")
     }
   }
+  // ================== Reviews ==================
 
-  // create factory (imported from bootcamp)
   companion object {
     val Factory: ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
