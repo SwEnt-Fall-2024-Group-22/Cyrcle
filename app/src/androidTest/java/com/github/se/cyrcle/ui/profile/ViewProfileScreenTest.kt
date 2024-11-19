@@ -69,14 +69,14 @@ class ViewProfileScreenTest {
     userViewModel = UserViewModel(mockUserRepository, mockParkingRepository)
     parkingViewModel = ParkingViewModel(mockImageRepository, mockParkingRepository)
 
-    userViewModel.addUser(user)
+    userViewModel.signIn(user)
 
     // parking1 already added by whoever created parkingviewmodelmock on instanciation
     parkingViewModel.addParking(TestInstancesParking.parking2)
     parkingViewModel.addParking(TestInstancesParking.parking3)
 
     // Fetch the user
-    userViewModel.getUserById("1")
+    userViewModel.setCurrentUserById("1")
 
     // Add favorite parkings
     userViewModel.addFavoriteParkingToSelectedUser(TestInstancesParking.parking1.uid)

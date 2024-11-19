@@ -37,8 +37,8 @@ class UserViewModelTest {
   }
 
   @Test
-  fun addUserTest() {
-    userViewModel.addUser(TestInstancesUser.user1)
+  fun signInTest() {
+    userViewModel.signIn(TestInstancesUser.user1)
     // Check if the user was added to the repository
     verify(userRepository).addUser(eq(TestInstancesUser.user1), any(), any())
   }
@@ -52,8 +52,8 @@ class UserViewModelTest {
   }
 
   @Test
-  fun getUserByIdTest() {
-    userViewModel.getUserById("user1")
+  fun setCurrentUserByIdTest() {
+    userViewModel.setCurrentUserById("user1")
 
     // Check if the user was fetched from the repository
     verify(userRepository).getUserById(eq("user1"), any(), any())
@@ -66,7 +66,7 @@ class UserViewModelTest {
       val onSuccess = invocation.arguments[1] as (User) -> Unit
       onSuccess(TestInstancesUser.user1)
     }
-    userViewModel.getUserById("user1") { assert(it == TestInstancesUser.user1) }
+    userViewModel.setCurrentUserById("user1") { assert(it == TestInstancesUser.user1) }
     verify(userRepository).getUserById(eq("user1"), any(), any())
   }
 

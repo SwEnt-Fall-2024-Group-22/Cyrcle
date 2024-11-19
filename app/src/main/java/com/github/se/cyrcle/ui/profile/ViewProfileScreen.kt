@@ -82,7 +82,7 @@ fun ViewProfileScreen(
       }) { innerPadding ->
         Box(Modifier.fillMaxSize().padding(innerPadding)) {
           authenticator.SignOutButton(Modifier.padding(10.dp).align(Alignment.TopEnd)) {
-            userViewModel.setCurrentUser(null)
+            userViewModel.signOut()
             Toast.makeText(context, signOutToastText, Toast.LENGTH_SHORT).show()
             navigationActions.navigateTo(TopLevelDestinations.AUTH)
           }
@@ -94,9 +94,9 @@ fun ViewProfileScreen(
                   Button(
                       text = stringResource(R.string.view_profile_screen_save_button),
                       onClick = {
-                        userViewModel.updateUser(it)
-                        // don't call getUserByID or the localSession is overwritten.
-                        userViewModel.setCurrentUser(it)
+                        // take care of updating the viewmodel as well as the database
+                        userViewModel.updateUser(it, context)
+
                         isEditing = false
                       },
                       colorLevel = ColorLevel.PRIMARY,

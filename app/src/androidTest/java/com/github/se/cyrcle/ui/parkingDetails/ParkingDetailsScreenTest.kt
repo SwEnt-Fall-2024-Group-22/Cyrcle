@@ -111,8 +111,8 @@ class ParkingDetailsScreenTest {
   fun addToFavoritesWhenSignedIn() {
 
     parkingViewModel.selectParking(TestInstancesParking.parking3)
-    userViewModel.addUser(TestInstancesUser.user1)
-    userViewModel.getUserById(TestInstancesUser.user1.public.userId)
+    userViewModel.signIn(TestInstancesUser.user1)
+    userViewModel.setCurrentUserById(TestInstancesUser.user1.public.userId)
     userViewModel.getSelectedUserFavoriteParking()
 
     composeTestRule.setContent {
@@ -131,8 +131,8 @@ class ParkingDetailsScreenTest {
   @Test
   fun removeFromFavoritesWhenSignedIn() {
     parkingViewModel.selectParking(TestInstancesParking.parking1)
-    userViewModel.addUser(TestInstancesUser.user1)
-    userViewModel.getUserById(TestInstancesUser.user1.public.userId)
+    userViewModel.signIn(TestInstancesUser.user1)
+    userViewModel.setCurrentUserById(TestInstancesUser.user1.public.userId)
     userViewModel.getSelectedUserFavoriteParking()
 
     composeTestRule.setContent {
