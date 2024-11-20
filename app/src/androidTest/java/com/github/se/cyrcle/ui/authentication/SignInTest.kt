@@ -8,8 +8,10 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.AuthenticatorMock
+import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
+import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.model.user.UserRepository
@@ -34,7 +36,7 @@ class SignInTest {
   private lateinit var navigationActions: NavigationActions
   private lateinit var userRepository: UserRepository
   private lateinit var parkingRepository: ParkingRepository
-
+  private lateinit var imageRepository: ImageRepository
   private lateinit var userViewModel: UserViewModel
 
   @Before
@@ -43,7 +45,8 @@ class SignInTest {
 
     userRepository = MockUserRepository()
     parkingRepository = MockParkingRepository()
-    userViewModel = UserViewModel(userRepository, parkingRepository)
+    imageRepository = MockImageRepository()
+    userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository)
 
     val mockAuthenticator = AuthenticatorMock()
 

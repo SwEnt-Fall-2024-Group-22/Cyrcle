@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.map
 class UserViewModel(
     private val userRepository: UserRepository,
     private val parkingRepository: ParkingRepository,
-    private val imageRepository: ImageRepository
+    private val imageRepository: ImageRepository? = null
 ) : ViewModel() {
 
   private val _currentUser = MutableStateFlow<User?>(null)
@@ -34,7 +34,7 @@ class UserViewModel(
    *
    * @param user the user to set as the current user
    */
-  private fun setCurrentUser(user: User?) {
+  fun setCurrentUser(user: User?) {
     Log.d("UserViewModel", "Setting the current user in viewmodel : $user")
     _currentUser.value = user
   }
@@ -98,7 +98,7 @@ class UserViewModel(
   fun signIn(user: User) {
     // Set the user in the viewmodel even if it's incomplete as we need the ID to match to call
     // updateUser()
-    setCurrentUser(user)
+    // setCurrentUser(user)
     userRepository.addUser(
         user,
         onSuccess = { getUserById(user.public.userId) { setCurrentUser(it) } },
@@ -190,6 +190,10 @@ class UserViewModel(
    * path
    */
   private fun uploadProfilePicture(context: Context) {
+    if (imageRepository == null) {
+      Log.e("UserViewModel", "ImageRepository is null")
+      return
+    }
     val user = currentUser.value ?: return
     val fileUri = user.localSession?.profilePictureUri ?: return
     val destinationPath = "profile_pictures/${user.public.userId}"
@@ -216,6 +220,10 @@ class UserViewModel(
    * @param onSuccess the callback to call with the updated user
    */
   private fun transformPathToUrl(user: User, onSuccess: (User) -> Unit, onFailure: () -> Unit) {
+    if (imageRepository == null) {
+      Log.e("UserViewModel", "ImageRepository is null")
+      return
+    }
     val cloudPath = user.public.profilePictureCloudPath
     if (cloudPath.isBlank()) {
       Log.d("UserViewModel", "No image to fetch for user")

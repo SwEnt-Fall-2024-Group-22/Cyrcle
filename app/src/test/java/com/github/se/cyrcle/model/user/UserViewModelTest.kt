@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.model.user
 
+import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.TestInstancesParking
@@ -21,12 +22,13 @@ class UserViewModelTest {
 
   @Mock private lateinit var userRepository: UserRepository
   @Mock private lateinit var parkingRepository: ParkingRepository
+  @Mock private lateinit var imageRepository: ImageRepository
   private lateinit var userViewModel: UserViewModel
 
   @Before
   fun setUp() {
     MockitoAnnotations.openMocks(this)
-    userViewModel = UserViewModel(userRepository, parkingRepository)
+    userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository)
   }
 
   @Test
@@ -66,12 +68,13 @@ class UserViewModelTest {
       val onSuccess = invocation.arguments[1] as (User) -> Unit
       onSuccess(TestInstancesUser.user1)
     }
-    userViewModel.setCurrentUserById("user1") { assert(it == TestInstancesUser.user1) }
+    userViewModel.getUserById("user1") { assert(it == TestInstancesUser.user1) }
     verify(userRepository).getUserById(eq("user1"), any(), any())
   }
 
   @Test
   fun updateUserTest() {
+    userViewModel.setCurrentUser(TestInstancesUser.user1)
     userViewModel.updateUser(TestInstancesUser.user1)
 
     // Check if the user was updated in the repository
