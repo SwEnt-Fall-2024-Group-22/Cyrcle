@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.model.user.LocalSession
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.ui.theme.atoms.ConditionCheckingInputText
 import com.github.se.cyrcle.ui.theme.atoms.Text
@@ -106,7 +107,8 @@ fun EditProfileComponent(
               user.copy(
                   user.public.copy(username = username),
                   user.details?.copy(firstName = firstName, lastName = lastName),
-                  user.localSession?.copy(profilePictureUri = profilePictureUri)))
+                  user.localSession?.copy(profilePictureUri = profilePictureUri)
+                      ?: LocalSession(profilePictureUri = profilePictureUri)))
         }
       }
 }
