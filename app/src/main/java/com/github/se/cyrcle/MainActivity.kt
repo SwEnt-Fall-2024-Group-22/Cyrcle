@@ -3,7 +3,6 @@ package com.github.se.cyrcle
 import CyrcleNavHost
 import android.content.pm.ActivityInfo
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -50,7 +49,7 @@ class MainActivity : ComponentActivity() {
     CustomViewModelFactory { ReviewViewModel(reviewRepository) }
   }
   private val userViewModel: UserViewModel by viewModels {
-    CustomViewModelFactory { UserViewModel(userRepository, parkingRepository,imageRepository) }
+    CustomViewModelFactory { UserViewModel(userRepository, parkingRepository, imageRepository) }
   }
   private val parkingViewModel: ParkingViewModel by viewModels {
     CustomViewModelFactory { ParkingViewModel(imageRepository, parkingRepository) }
