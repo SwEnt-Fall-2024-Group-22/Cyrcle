@@ -38,7 +38,7 @@ fun CreateProfileScreen(
     val user =
         userAttempt.copy(public = userAttempt.public.copy(userId = userAuthenticated.public.userId))
 
-    userViewModel.addUser(user)
+    userViewModel.signIn(user)
 
     Toast.makeText(context, validationToastText, Toast.LENGTH_SHORT).show()
     navigationActions.navigateTo(TopLevelDestinations.MAP)
