@@ -46,7 +46,7 @@ fun SignInScreen(
 
     // TODO add checks if user is already exists
 
-    userViewModel.addUser(user)
+    userViewModel.signIn(user)
     navigationActions.navigateTo(TopLevelDestinations.MAP)
   }
   val onAuthFailure = { e: Exception ->

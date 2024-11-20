@@ -81,8 +81,8 @@ class ListScreenTest {
     // parking1 already in
     parkingViewModel.addParking(TestInstancesParking.parking2)
     parkingViewModel.addParking(TestInstancesParking.parking3)
-    userViewModel.addUser(user)
-    userViewModel.getUserById(user.public.userId)
+    userViewModel.signIn(user)
+    userViewModel.setCurrentUserById(user.public.userId)
     userViewModel.addFavoriteParkingToSelectedUser(TestInstancesParking.parking1.uid)
     userViewModel.addFavoriteParkingToSelectedUser(TestInstancesParking.parking2.uid)
     userViewModel.getSelectedUserFavoriteParking()

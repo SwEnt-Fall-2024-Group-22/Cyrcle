@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.model.user
 
+import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.TestInstancesParking
@@ -21,12 +22,13 @@ class UserViewModelTest {
 
   @Mock private lateinit var userRepository: UserRepository
   @Mock private lateinit var parkingRepository: ParkingRepository
+  @Mock private lateinit var imageRepository: ImageRepository
   private lateinit var userViewModel: UserViewModel
 
   @Before
   fun setUp() {
     MockitoAnnotations.openMocks(this)
-    userViewModel = UserViewModel(userRepository, parkingRepository)
+    userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository)
   }
 
   @Test
@@ -37,8 +39,8 @@ class UserViewModelTest {
   }
 
   @Test
-  fun addUserTest() {
-    userViewModel.addUser(TestInstancesUser.user1)
+  fun signInTest() {
+    userViewModel.signIn(TestInstancesUser.user1)
     // Check if the user was added to the repository
     verify(userRepository).addUser(eq(TestInstancesUser.user1), any(), any())
   }
@@ -52,8 +54,8 @@ class UserViewModelTest {
   }
 
   @Test
-  fun getUserByIdTest() {
-    userViewModel.getUserById("user1")
+  fun setCurrentUserByIdTest() {
+    userViewModel.setCurrentUserById("user1")
 
     // Check if the user was fetched from the repository
     verify(userRepository).getUserById(eq("user1"), any(), any())
@@ -72,6 +74,7 @@ class UserViewModelTest {
 
   @Test
   fun updateUserTest() {
+    userViewModel.setCurrentUser(TestInstancesUser.user1)
     userViewModel.updateUser(TestInstancesUser.user1)
 
     // Check if the user was updated in the repository

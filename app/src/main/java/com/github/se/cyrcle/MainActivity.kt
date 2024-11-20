@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
     permissionsHandler.initHandler(this@MainActivity)
 
     val reviewViewModel = ReviewViewModel(reviewRepository)
-    val userViewModel = UserViewModel(userRepository, parkingRepository)
+    val userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository)
     val parkingViewModel = ParkingViewModel(imageRepository, parkingRepository)
     val mapViewModel = MapViewModel()
     val addressViewModel = AddressViewModel(addressRepository)
