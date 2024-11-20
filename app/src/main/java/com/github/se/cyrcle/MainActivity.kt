@@ -5,10 +5,12 @@ import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import com.github.se.cyrcle.model.CustomViewModelFactory
 import com.github.se.cyrcle.model.address.AddressRepository
 import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.image.ImageRepository
@@ -43,17 +45,25 @@ class MainActivity : ComponentActivity() {
 
   @Inject lateinit var authenticator: Authenticator
 
+  private val reviewViewModel: ReviewViewModel by viewModels {
+    CustomViewModelFactory { ReviewViewModel(reviewRepository) }
+  }
+  private val userViewModel: UserViewModel by viewModels {
+    CustomViewModelFactory { UserViewModel(userRepository, parkingRepository, imageRepository) }
+  }
+  private val parkingViewModel: ParkingViewModel by viewModels {
+    CustomViewModelFactory { ParkingViewModel(imageRepository, parkingRepository) }
+  }
+  private val mapViewModel: MapViewModel by viewModels { CustomViewModelFactory { MapViewModel() } }
+  private val addressViewModel: AddressViewModel by viewModels {
+    CustomViewModelFactory { AddressViewModel(addressRepository) }
+  }
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
     permissionsHandler.initHandler(this@MainActivity)
-
-    val reviewViewModel = ReviewViewModel(reviewRepository)
-    val userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository)
-    val parkingViewModel = ParkingViewModel(imageRepository, parkingRepository)
-    val mapViewModel = MapViewModel()
-    val addressViewModel = AddressViewModel(addressRepository)
 
     setContent {
       CyrcleTheme {
