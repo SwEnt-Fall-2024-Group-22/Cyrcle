@@ -115,8 +115,11 @@ class UserViewModel(
    * upload the image to the cloud storage and then delete the Uri.
    *
    * @param user the user to update
+   * @param context the context used to resolve the image uri (if null the profile picture will not
+   *   upload)
+   * @param onSuccess the callback to call with the updated user
    */
-  fun updateUser(user: User, context: Context? = null) {
+  fun updateUser(user: User, context: Context? = null, onSuccess: () -> Unit = {}) {
     if (user.public.userId != currentUser.value?.public?.userId) {
       Log.e("UserViewModel", "Trying to update a user that is not the current user")
       return
@@ -129,7 +132,10 @@ class UserViewModel(
     if (user.localSession?.profilePictureUri.isNullOrBlank() || context == null) {
       userRepository.updateUser(
           user,
-          onSuccess = { Log.d("UserViewModel", "User updated in the database") },
+          onSuccess = {
+            Log.d("UserViewModel", "User updated in the database")
+            onSuccess()
+          },
           onFailure = { exception ->
             Log.e(
                 "com.github.se.cyrcle.model.user.UserViewModel",
@@ -138,6 +144,8 @@ class UserViewModel(
           })
     } else {
       Log.d("UserViewModel", "User has a profile picture to upload")
+      // Even if the upload fails, uploadProfilePicture will still call updateUser to back up the
+      // updated User.
       uploadProfilePicture(context)
     }
   }
@@ -188,10 +196,12 @@ class UserViewModel(
    * Upload the picture to the cloud storage update the user object in the database with the cloud
    * path created. update the user object in the viewmodel with the url of the image and the cloud
    * path
+   *
+   * @param context the context used to resolve the image uri
    */
   private fun uploadProfilePicture(context: Context) {
     if (imageRepository == null) {
-      Log.e("UserViewModel", "ImageRepository is null")
+      Log.e("UserViewModel", "ImageRepository is null, should not upload image")
       return
     }
     val user = currentUser.value ?: return
@@ -210,7 +220,12 @@ class UserViewModel(
                       user.localSession.copy(profilePictureUri = null, profilePictureUrl = url))
           updateUser(updatedUser)
         },
-        onFailure = { Log.e("UserViewModel", "Failed to upload image") })
+        onFailure = {
+          val updatedUser =
+              user.copy(localSession = user.localSession.copy(profilePictureUri = null))
+          updateUser(updatedUser)
+          Log.e("UserViewModel", "Failed to upload image, still updating user without the picture")
+        })
   }
 
   /**
@@ -218,6 +233,7 @@ class UserViewModel(
    *
    * @param user the user object to update (doesn't have to be the current user)
    * @param onSuccess the callback to call with the updated user
+   * @param onFailure the callback to call if the image fetching fails
    */
   private fun transformPathToUrl(user: User, onSuccess: (User) -> Unit, onFailure: () -> Unit) {
     if (imageRepository == null) {
