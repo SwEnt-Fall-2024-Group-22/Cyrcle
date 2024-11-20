@@ -48,17 +48,21 @@ fun EditProfileComponent(
   var firstName by remember { mutableStateOf(user.details!!.firstName) }
   var lastName by remember { mutableStateOf(user.details!!.lastName) }
   var profilePictureUri by remember { mutableStateOf(user.localSession?.profilePictureUri) }
+  val profilePictureUrl by remember { mutableStateOf(user.localSession?.profilePictureUrl) }
+  // To display the local profile picture when the user changes it, and hasn't uploaded (saved) it
+  var hasTemporarilyChangedProfilePicture by remember { mutableStateOf(false) }
 
   val imagePickerLauncher =
       rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let { profilePictureUri = it.toString() }
+        hasTemporarilyChangedProfilePicture = true
       }
 
   Column(
       modifier = Modifier.fillMaxSize().padding(16.dp).testTag("ProfileContent"),
       horizontalAlignment = Alignment.CenterHorizontally) {
         ProfileImageComponent(
-            url = profilePictureUri,
+            url = if (hasTemporarilyChangedProfilePicture) profilePictureUri else profilePictureUrl,
             onClick = { imagePickerLauncher.launch("image/*") },
             isEditable = true,
             modifier = Modifier.testTag("ProfileImage"))
