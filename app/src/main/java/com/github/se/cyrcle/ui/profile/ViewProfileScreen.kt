@@ -95,7 +95,8 @@ fun ViewProfileScreen(
                       text = stringResource(R.string.view_profile_screen_save_button),
                       onClick = {
                         userViewModel.updateUser(it)
-                        userViewModel.getUserById(it.public.userId)
+                        // don't call getUserByID or the localSession is overwritten.
+                        userViewModel.setCurrentUser(it)
                         isEditing = false
                       },
                       colorLevel = ColorLevel.PRIMARY,

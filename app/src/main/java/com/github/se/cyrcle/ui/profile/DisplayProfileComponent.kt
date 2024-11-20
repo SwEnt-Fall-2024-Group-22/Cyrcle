@@ -33,7 +33,7 @@ fun DisplayProfileComponent(user: User?, extras: @Composable () -> Unit) {
   val firstName = user.details?.firstName ?: ""
   val lastName = user.details?.lastName ?: ""
   val username = user.public.username
-  val profilePictureUrl = user.public.profilePictureUrl
+  val profilePictureUri = user.localSession?.profilePictureUri ?: ""
 
   Column(
       modifier = Modifier.fillMaxSize().padding(16.dp).testTag("ProfileContent"),
@@ -51,7 +51,7 @@ fun DisplayProfileComponent(user: User?, extras: @Composable () -> Unit) {
         Spacer(modifier = Modifier.height(16.dp))
 
         ProfileImageComponent(
-            url = profilePictureUrl,
+            url = profilePictureUri,
             onClick = {},
             isEditable = false,
             modifier = Modifier.testTag("ProfileImage"))

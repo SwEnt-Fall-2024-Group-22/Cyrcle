@@ -4,11 +4,7 @@ object TestInstancesUser {
 
   val user1 =
       User(
-          public =
-              UserPublic(
-                  userId = "user1",
-                  username = "john_doe",
-                  profilePictureUrl = "https://example.com/profile/john_doe.jpg"),
+          public = UserPublic(userId = "user1", username = "john_doe"),
           details =
               UserDetails(
                   firstName = "John",
@@ -19,7 +15,7 @@ object TestInstancesUser {
 
   val newUser =
       User(
-          public = UserPublic(userId = "usr", username = "new_user", profilePictureUrl = ""),
+          public = UserPublic(userId = "usr", username = "new_user"),
           details =
               UserDetails(
                   firstName = "New",
@@ -34,7 +30,7 @@ object TestInstancesUser {
               UserPublic(
                   userId = "usr",
                   username = "updated_user",
-                  profilePictureUrl = "https://example.com/profile.png"),
+              ),
           details =
               UserDetails(
                   firstName = "Updated",

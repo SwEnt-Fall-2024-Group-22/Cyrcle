@@ -28,7 +28,7 @@ import com.github.se.cyrcle.R
 
 @Composable
 fun ProfileImageComponent(
-    url: String,
+    url: String?,
     onClick: () -> Unit,
     isEditable: Boolean,
     modifier: Modifier = Modifier
@@ -38,7 +38,7 @@ fun ProfileImageComponent(
           modifier
               .testTag("ProfileImage")
               .then(if (isEditable) Modifier.clickable(onClick = onClick) else Modifier)) {
-        if (url.isBlank()) {
+        if (url.isNullOrBlank()) {
           Box(
               modifier =
                   Modifier.size(120.dp)
