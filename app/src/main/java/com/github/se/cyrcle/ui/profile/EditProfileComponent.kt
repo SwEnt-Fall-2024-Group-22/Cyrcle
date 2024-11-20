@@ -101,9 +101,9 @@ fun EditProfileComponent(
           saveButton(
               // Use .copy to not lose the locas session and avoid re-fetching the user from db.
               user.copy(
-                  public = user.public.copy(username = username, profilePictureCloudPath = ""),
-                  details = user.details?.copy(firstName = firstName, lastName = lastName),
-                  localSession = LocalSession(profilePictureUri = profilePictureUri)))
+                  user.public.copy(username = username, profilePictureCloudPath = ""),
+                  user.details?.copy(firstName = firstName, lastName = lastName),
+                  LocalSession(profilePictureUri = profilePictureUri)))
         }
       }
 }
