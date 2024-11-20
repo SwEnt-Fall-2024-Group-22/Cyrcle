@@ -7,7 +7,7 @@ import com.mapbox.geojson.Point
 import javax.inject.Inject
 
 class MockParkingRepository @Inject constructor() : ParkingRepository {
-  private var uid = 0
+  var uid = 0
   private val parkings = mutableListOf(TestInstancesParking.parking1)
 
   override fun getNewUid(): String {
@@ -16,11 +16,6 @@ class MockParkingRepository @Inject constructor() : ParkingRepository {
 
   override fun onSignIn(onSuccess: () -> Unit) {
     onSuccess()
-  }
-
-  override fun getAllParkings(onSuccess: (List<Parking>) -> Unit, onFailure: (Exception) -> Unit) {
-    if (parkings.none { it.uid == "" }) onSuccess(parkings)
-    else onFailure(Exception("Error getting parkings"))
   }
 
   override fun getParkingById(

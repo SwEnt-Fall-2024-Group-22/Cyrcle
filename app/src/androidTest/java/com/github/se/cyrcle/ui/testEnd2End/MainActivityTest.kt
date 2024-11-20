@@ -20,6 +20,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipe
 import com.github.se.cyrcle.MainActivity
+import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.TestInstancesParking
@@ -315,12 +316,13 @@ class MainActivityTest {
   // ============================================================================
 
   private fun assertParkingInRepo(repository: ParkingRepository, parking: Parking) {
-    repository.getAllParkings(
+    val mockRepository = repository as MockParkingRepository
+    repository.getParkingsByListOfIds(
+        (0 until mockRepository.uid).map { it.toString() },
         {
           val found = it.find { p -> p.optName == parking.optName }
-          if (found == null) {
-            fail("Parking not found in repository")
-          } else {
+          if (found == null) fail("Parking not found")
+          else {
             assertEquals(parking.optDescription ?: "", found.optDescription)
             assertEquals(parking.protection, found.protection)
             assertEquals(parking.capacity, found.capacity)
