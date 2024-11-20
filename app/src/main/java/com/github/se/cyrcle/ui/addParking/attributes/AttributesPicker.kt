@@ -34,6 +34,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -101,19 +102,19 @@ fun AttributesPicker(
   val topBoxHeight = screenHeight * 0.10f // 10% of screen height for top box
   val bottomBoxHeight = screenHeight * 0.15f // 15% of screen height for bottom box
 
-  val title = remember { mutableStateOf("") }
-
-  val description = remember { mutableStateOf("") }
-
-  val rackType = remember { mutableStateOf<ParkingAttribute>(ParkingRackType.TWO_TIER) }
-  val capacity = remember { mutableStateOf<ParkingAttribute>(ParkingCapacity.XSMALL) }
-  val protection = remember { mutableStateOf<ParkingAttribute>(ParkingProtection.INDOOR) }
-  val hasSecurity = remember { mutableStateOf(false) }
+  val title = rememberSaveable { mutableStateOf("") }
+  val description = rememberSaveable { mutableStateOf("") }
+  val rackType = rememberSaveable { mutableStateOf<ParkingAttribute>(ParkingRackType.TWO_TIER) }
+  val capacity = rememberSaveable { mutableStateOf<ParkingAttribute>(ParkingCapacity.XSMALL) }
+  val protection = rememberSaveable { mutableStateOf<ParkingAttribute>(ParkingProtection.NONE) }
+  val hasSecurity = rememberSaveable { mutableStateOf(false) }
 
   val location = mapViewModel.selectedLocation.collectAsState().value!!
   LaunchedEffect(location) { addressViewModel.search(location.center) }
   val suggestedAddress = addressViewModel.address.collectAsState().value
-  LaunchedEffect(suggestedAddress) { title.value = suggestedAddress.displayRelevantFields() }
+  LaunchedEffect(suggestedAddress) {
+    if (title.value.isEmpty()) title.value = suggestedAddress.displayRelevantFields()
+  }
 
   fun onSubmit() {
     val parking =
