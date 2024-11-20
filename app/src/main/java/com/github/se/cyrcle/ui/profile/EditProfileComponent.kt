@@ -20,8 +20,9 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
-import com.github.se.cyrcle.model.user.LocalSession
 import com.github.se.cyrcle.model.user.User
+import com.github.se.cyrcle.model.user.UserDetails
+import com.github.se.cyrcle.model.user.UserPublic
 import com.github.se.cyrcle.ui.theme.atoms.ConditionCheckingInputText
 import com.github.se.cyrcle.ui.theme.atoms.Text
 
@@ -112,10 +113,12 @@ fun EditProfileComponent(
           saveButton(copyUser(user))
           cancelButton()
         } else {
-          Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            cancelButton()
-            saveButton(copyUser(user))
-          }
+          Row(
+              modifier = Modifier.testTag("EditComponentButtonRow"),
+              horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                cancelButton()
+                saveButton(copyUser(user))
+              }
         }
       }
 }

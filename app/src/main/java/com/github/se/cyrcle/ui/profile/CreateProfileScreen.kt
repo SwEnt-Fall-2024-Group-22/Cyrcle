@@ -4,7 +4,9 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserDetails
@@ -50,5 +52,10 @@ fun CreateProfileScreen(
             onAuthComplete = { authCompleteCallback(userAttempt, it) },
             onAuthError = authErrorCallback)
       },
-      cancelButton = { Button("Cancel", onClick = { navigationActions.goBack() }) })
+      cancelButton = {
+        Button(
+            "Cancel",
+            modifier = Modifier.testTag("CancelButton"),
+            onClick = { navigationActions.goBack() })
+      })
 }
