@@ -204,8 +204,17 @@ class UserViewModel(
       Log.e("UserViewModel", "ImageRepository is null, should not upload image")
       return
     }
-    val user = currentUser.value ?: return
-    val fileUri = user.localSession?.profilePictureUri ?: return
+    if (currentUser.value == null) {
+      Log.e("UserViewModel", "Current user is null, should not upload image")
+      return
+    }
+    if (currentUser.value?.localSession?.profilePictureUri == null) {
+      Log.e("UserViewModel", "Profile picture uri is null, should not upload image")
+      return
+    }
+
+    val user = currentUser.value!!
+    val fileUri = user.localSession!!.profilePictureUri!!
     val destinationPath = "profile_pictures/${user.public.userId}"
     imageRepository.uploadImage(
         context = context,
