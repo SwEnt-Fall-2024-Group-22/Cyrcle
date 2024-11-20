@@ -23,7 +23,7 @@ class CreateProfileScreenTest {
   fun setUp() {
     mockNavigationActions = mock(NavigationActions::class.java)
 
-    composeTestRule.setContent { CreateProfileScreen(mockNavigationActions) }
+    composeTestRule.setContent { InviteToAuthScreen(mockNavigationActions) }
   }
 
   @Test

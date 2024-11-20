@@ -110,7 +110,7 @@ interface Authenticator {
       com.github.se.cyrcle.ui.theme.atoms.Button(
           text = stringResource(R.string.sign_in_guest_button),
           onClick = onClick,
-          colorLevel = ColorLevel.PRIMARY,
+          colorLevel = ColorLevel.TERTIARY,
           modifier =
               modifier
                   .padding(16.dp)

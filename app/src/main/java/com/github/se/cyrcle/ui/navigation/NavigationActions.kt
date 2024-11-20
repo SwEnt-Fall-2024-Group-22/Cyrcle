@@ -12,20 +12,25 @@ object Route {
   const val LIST = "List"
   const val MAP = "Map"
   const val ADD_SPOTS = "Add Spots"
-  const val PROFILE = "Profile"
+  const val VIEW_PROFILE = "Profile"
   const val REVIEW = "Review"
 }
 
 object Screen {
-  const val AUTH = "Auth Screen"
   const val LIST = "List Screen"
+
   const val MAP = "Map Screen"
+
   const val PARKING_DETAILS = "Parking Details Screen"
   const val ADD_REVIEW = "Add Review Screen"
+  const val ALL_REVIEWS = "All Reviews"
+
   const val LOCATION_PICKER = "Location Picker Screen"
   const val ATTRIBUTES_PICKER = "Attributes Picker Screen"
-  const val PROFILE = "Profile Screen"
-  const val ALL_REVIEWS = "All Reviews"
+
+  const val AUTH = "Auth Screen"
+  const val VIEW_PROFILE = "Profile Screen"
+  const val CREATE_PROFILE = "Create Profile"
 }
 
 /**
@@ -47,7 +52,7 @@ object TopLevelDestinations {
       TopLevelDestination(route = Route.MAP, icon = Icons.Outlined.LocationOn, textId = Route.MAP)
   val PROFILE =
       TopLevelDestination(
-          route = Route.PROFILE, icon = Icons.Outlined.Person, textId = Route.PROFILE)
+          route = Route.VIEW_PROFILE, icon = Icons.Outlined.Person, textId = Route.VIEW_PROFILE)
 }
 
 /** List of top level destinations in the app. */

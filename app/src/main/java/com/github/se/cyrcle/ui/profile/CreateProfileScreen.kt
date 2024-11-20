@@ -1,58 +1,54 @@
 package com.github.se.cyrcle.ui.profile
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import com.github.se.cyrcle.R
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import com.github.se.cyrcle.model.user.User
+import com.github.se.cyrcle.model.user.UserDetails
+import com.github.se.cyrcle.model.user.UserPublic
+import com.github.se.cyrcle.model.user.UserViewModel
+import com.github.se.cyrcle.ui.authentication.Authenticator
 import com.github.se.cyrcle.ui.navigation.NavigationActions
-import com.github.se.cyrcle.ui.navigation.Route
+import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.Text
-import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 
 @Composable
-fun CreateProfileScreen(navigationActions: NavigationActions) {
-  Scaffold(
-      modifier = Modifier.fillMaxSize().testTag("CreateProfileScreen"),
-      bottomBar = { BottomNavigationBar(navigationActions, selectedItem = Route.PROFILE) },
-  ) { padding ->
-    Box(modifier = Modifier.padding(padding)) {
-      Column(
-          modifier = Modifier.fillMaxSize().padding(16.dp),
-          verticalArrangement = Arrangement.Center,
-          horizontalAlignment = Alignment.CenterHorizontally,
-      ) {
-        Text(
-            stringResource(R.string.profile_screen_invite_to_sign_in),
-            style = MaterialTheme.typography.titleLarge)
+fun CreateProfileScreen(
+    navigationActions: NavigationActions,
+    authenticator: Authenticator,
+    userViewModel: UserViewModel
+) {
+  val context = LocalContext.current
+  val defaultUser = User(UserPublic("", ""), UserDetails())
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(stringResource(R.string.profile_screen_give_reasons_to_sign_in))
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Button(
-            text = "Go back to sign in",
-            onClick = {
-              // navigate to the route to not clear backstack
-              navigationActions.navigateTo(Route.AUTH)
-            })
-
-        Spacer(modifier = Modifier.height(200.dp))
-      }
-    }
+  // Uses the Auth UID as userID for our new user
+  val authCompleteCallback = { userAttempt: User, userAuthenticated: User ->
+    val user =
+        userAttempt.copy(public = userAttempt.public.copy(userId = userAuthenticated.public.userId))
+    userViewModel.addUser(user)
+    Toast.makeText(context, "Profile created successfully!", Toast.LENGTH_SHORT).show()
+    navigationActions.navigateTo(TopLevelDestinations.MAP)
   }
+
+  val authErrorCallback = { e: Exception ->
+    Log.d("CreateProfileScreen", "Error authenticating: $e")
+    Toast.makeText(context, "Error during authentication...", Toast.LENGTH_SHORT).show()
+  }
+
+  EditProfileComponent(
+      defaultUser,
+      verticalButtonDisplay = true,
+      saveButton = { userAttempt: User ->
+        Text(
+            "To complete account creation,\n please authenticate with Google to link your email.",
+            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold))
+        authenticator.AuthenticateButton(
+            onAuthComplete = { authCompleteCallback(userAttempt, it) },
+            onAuthError = authErrorCallback)
+      },
+      cancelButton = { Button("Cancel", onClick = { navigationActions.goBack() }) })
 }
