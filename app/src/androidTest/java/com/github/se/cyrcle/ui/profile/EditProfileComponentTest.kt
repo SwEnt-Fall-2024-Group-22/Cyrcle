@@ -77,7 +77,7 @@ class EditProfileComponentTest {
     val user = TestInstancesUser.user1
 
     composeTestRule.setContent {
-      EditProfileComponent(user, { SaveButton() }, { CancelButton() }, true)
+      EditProfileComponent(user, { SaveButton() }, { CancelButton() }, verticalButtonDisplay = true)
     }
 
     composeTestRule.onNodeWithTag("NullUserText").assertDoesNotExist()

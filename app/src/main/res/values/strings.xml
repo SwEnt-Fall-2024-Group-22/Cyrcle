@@ -102,10 +102,17 @@
     <string name="profile_is_null">User is not signed in, should not happen</string>
 
     <!-- Create Profile Screen -->
-    <string name="profile_screen_title">Create your profile</string>
-    <string name="profile_screen_finish_sign_in_indication">Finish by signing in with Google to link your e-mail</string>
-    <string name="profile_screen_invite_to_sign_in">You need to be signed-in to modify your profile</string>
-    <string name="profile_screen_give_reasons_to_sign_in">"Sign in now to add new spots, share reviews, and help fellow cyclists find the perfect parking space."</string>
+    <string name="create_profile_screen_title">Create your profile</string>
+    <string name="create_profile_validation_toast">Profile created successfully!</string>
+    <string name="create_profile_error_toast">Error during authentication…</string>
+    <string name="create_profile_sign_in_explanation">To complete account creation,\n please authenticate with Google to link your email.</string>
+
+    <!-- Invite to AuthScreen Screen -->
+    <string name="invite_auth_screen_to_sign_in">Go back to sign in</string>
+    <string name="invite_auth_screen_finish_sign_in_indication">Finish by signing in with Google to link your e-mail</string>
+    <string name="invite_auth_screen_invite_to_sign_in">You need to be signed-in to modify your profile</string>
+    <string name="invite_auth_screen_give_reasons_to_sign_in">"Sign in now to add new spots, share reviews, and help fellow cyclists find the perfect parking space."</string>
+
     <!-- View Profile Screen -->
     <string name="view_profile_screen_first_name_label">First Name</string>
     <string name="view_profile_screen_last_name_label">Last Name</string>

@@ -39,6 +39,7 @@ fun EditProfileComponent(
     user: User?,
     saveButton: @Composable (User) -> Unit,
     cancelButton: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
     verticalButtonDisplay: Boolean = false
 ) {
   if (user == null) {
@@ -69,7 +70,7 @@ fun EditProfileComponent(
       }
 
   Column(
-      modifier = Modifier.fillMaxSize().padding(16.dp).testTag("ProfileContent"),
+      modifier = modifier.fillMaxSize().padding(top = 15.dp).testTag("ProfileContent"),
       horizontalAlignment = Alignment.CenterHorizontally) {
         ProfileImageComponent(
             url = if (hasTemporarilyChangedProfilePicture) profilePictureUri else profilePictureUrl,

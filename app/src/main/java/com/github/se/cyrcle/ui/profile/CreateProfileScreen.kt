@@ -2,12 +2,15 @@ package com.github.se.cyrcle.ui.profile
 
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserDetails
 import com.github.se.cyrcle.model.user.UserPublic
@@ -15,8 +18,8 @@ import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.authentication.Authenticator
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
-import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.Text
+import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
 @Composable
 fun CreateProfileScreen(
@@ -27,35 +30,41 @@ fun CreateProfileScreen(
   val context = LocalContext.current
   val defaultUser = User(UserPublic("", ""), UserDetails())
 
+  val validationToastText = stringResource(R.string.create_profile_validation_toast)
+  val errorToastText = stringResource(R.string.create_profile_error_toast)
+
   // Uses the Auth UID as userID for our new user
   val authCompleteCallback = { userAttempt: User, userAuthenticated: User ->
     val user =
         userAttempt.copy(public = userAttempt.public.copy(userId = userAuthenticated.public.userId))
+
     userViewModel.addUser(user)
-    Toast.makeText(context, "Profile created successfully!", Toast.LENGTH_SHORT).show()
+
+    Toast.makeText(context, validationToastText, Toast.LENGTH_SHORT).show()
     navigationActions.navigateTo(TopLevelDestinations.MAP)
   }
 
   val authErrorCallback = { e: Exception ->
     Log.d("CreateProfileScreen", "Error authenticating: $e")
-    Toast.makeText(context, "Error during authentication...", Toast.LENGTH_SHORT).show()
+    Toast.makeText(context, errorToastText, Toast.LENGTH_SHORT).show()
   }
 
-  EditProfileComponent(
-      defaultUser,
-      verticalButtonDisplay = true,
-      saveButton = { userAttempt: User ->
-        Text(
-            "To complete account creation,\n please authenticate with Google to link your email.",
-            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold))
-        authenticator.AuthenticateButton(
-            onAuthComplete = { authCompleteCallback(userAttempt, it) },
-            onAuthError = authErrorCallback)
-      },
-      cancelButton = {
-        Button(
-            "Cancel",
-            modifier = Modifier.testTag("CancelButton"),
-            onClick = { navigationActions.goBack() })
-      })
+  Scaffold(
+      topBar = {
+        TopAppBar(navigationActions, stringResource(R.string.create_profile_screen_title))
+      }) { padding ->
+        EditProfileComponent(
+            defaultUser,
+            verticalButtonDisplay = true,
+            modifier = Modifier.padding(padding),
+            saveButton = { userAttempt: User ->
+              Text(
+                  stringResource(R.string.create_profile_sign_in_explanation),
+                  style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold))
+              authenticator.AuthenticateButton(
+                  onAuthComplete = { authCompleteCallback(userAttempt, it) },
+                  onAuthError = authErrorCallback)
+            },
+            cancelButton = {})
+      }
 }

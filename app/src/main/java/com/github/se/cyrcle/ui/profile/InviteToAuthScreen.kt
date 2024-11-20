@@ -35,17 +35,17 @@ fun InviteToAuthScreen(navigationActions: NavigationActions) {
           horizontalAlignment = Alignment.CenterHorizontally,
       ) {
         Text(
-            stringResource(R.string.profile_screen_invite_to_sign_in),
+            stringResource(R.string.invite_auth_screen_invite_to_sign_in),
             style = MaterialTheme.typography.titleLarge)
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(stringResource(R.string.profile_screen_give_reasons_to_sign_in))
+        Text(stringResource(R.string.invite_auth_screen_give_reasons_to_sign_in))
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(
-            text = "Go back to sign in",
+            text = stringResource(R.string.invite_auth_screen_to_sign_in),
             onClick = {
               // navigate to the route to not clear backstack
               navigationActions.navigateTo(Route.AUTH)
