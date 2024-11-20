@@ -43,6 +43,20 @@ class MainActivity : ComponentActivity() {
 
   @Inject lateinit var authenticator: Authenticator
 
+  private val reviewViewModel: ReviewViewModel by viewModels {
+    CustomViewModelFactory { ReviewViewModel(reviewRepository) }
+  }
+  private val userViewModel: UserViewModel by viewModels {
+    CustomViewModelFactory { UserViewModel(userRepository, parkingRepository) }
+  }
+  private val parkingViewModel: ParkingViewModel by viewModels {
+    CustomViewModelFactory { ParkingViewModel(imageRepository, parkingRepository) }
+  }
+  private val mapViewModel: MapViewModel by viewModels { CustomViewModelFactory { MapViewModel() } }
+  private val addressViewModel: AddressViewModel by viewModels {
+    CustomViewModelFactory { AddressViewModel(addressRepository) }
+  }
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
@@ -50,7 +64,7 @@ class MainActivity : ComponentActivity() {
     permissionsHandler.initHandler(this@MainActivity)
 
     val reviewViewModel = ReviewViewModel(reviewRepository)
-    val userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository)
+    val userViewModel = UserViewModel(userRepository, parkingRepository)
     val parkingViewModel = ParkingViewModel(imageRepository, parkingRepository)
     val mapViewModel = MapViewModel()
     val addressViewModel = AddressViewModel(addressRepository)
