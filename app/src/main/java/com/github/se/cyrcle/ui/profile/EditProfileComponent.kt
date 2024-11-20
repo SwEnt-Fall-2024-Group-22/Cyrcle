@@ -20,7 +20,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
-import com.github.se.cyrcle.model.user.LocalSession
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.ui.theme.atoms.ConditionCheckingInputText
 import com.github.se.cyrcle.ui.theme.atoms.Text
@@ -103,11 +102,11 @@ fun EditProfileComponent(
           cancelButton()
 
           saveButton(
-              // Use .copy to not lose the locas session and avoid re-fetching the user from db.
+              // Use .copy to not lose the local session and avoid re-fetching the user from db.
               user.copy(
-                  user.public.copy(username = username, profilePictureCloudPath = ""),
+                  user.public.copy(username = username),
                   user.details?.copy(firstName = firstName, lastName = lastName),
-                  LocalSession(profilePictureUri = profilePictureUri)))
+                  user.localSession?.copy(profilePictureUri = profilePictureUri)))
         }
       }
 }

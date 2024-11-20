@@ -126,7 +126,7 @@ class UserViewModel(
     // First update the user object in the view model.
     setCurrentUser(user)
     // Then update the user object in the database
-    if (user.localSession?.profilePictureUri == null || context == null) {
+    if (user.localSession?.profilePictureUri.isNullOrBlank() || context == null) {
       userRepository.updateUser(
           user,
           onSuccess = { Log.d("UserViewModel", "User updated in the database") },
