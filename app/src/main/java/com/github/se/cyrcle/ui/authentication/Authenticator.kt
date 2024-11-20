@@ -76,7 +76,7 @@ interface Authenticator {
           shape = RoundedCornerShape(50),
           border = BorderStroke(1.dp, Color.LightGray),
           modifier =
-              Modifier.padding(16.dp)
+              Modifier.padding(start = 16.dp, end = 16.dp)
                   .height(48.dp) // Adjust height as needed
                   .testTag("AuthenticateButton")) {
             Row(
@@ -113,7 +113,7 @@ interface Authenticator {
           colorLevel = ColorLevel.TERTIARY,
           modifier =
               modifier
-                  .padding(16.dp)
+                  .padding(start = 16.dp, end = 16.dp)
                   .border(BorderStroke(1.dp, Color.LightGray), RoundedCornerShape(50))
                   .height(48.dp),
           testTag = "AnonymousLoginButton")

@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserDetails
@@ -60,6 +61,7 @@ fun CreateProfileScreen(
             saveButton = { userAttempt: User ->
               Text(
                   stringResource(R.string.create_profile_sign_in_explanation),
+                  modifier = Modifier.padding(bottom = 5.dp),
                   style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold))
               authenticator.AuthenticateButton(
                   onAuthComplete = { authCompleteCallback(userAttempt, it) },
