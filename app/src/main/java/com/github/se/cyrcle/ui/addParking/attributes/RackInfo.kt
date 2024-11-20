@@ -112,7 +112,13 @@ fun RackText(rackType: ParkingRackType, modifier: Modifier = Modifier) {
       modifier = modifier.testTag("rackDescription_${rackType.name}"))
 }
 
-fun getRackDescriptionResource(rackType: ParkingRackType): Int {
+/*
+ * Returns the resource ID for the description of the given rack type.
+ *
+ * @param rackType The rack type for which the description resource is needed.
+ * @return The resource ID for the description of the given rack type.
+ */
+private fun getRackDescriptionResource(rackType: ParkingRackType): Int {
   return when (rackType) {
     ParkingRackType.TWO_TIER -> R.string.two_tier_rack_description
     ParkingRackType.U_RACK -> R.string.u_rack_description
