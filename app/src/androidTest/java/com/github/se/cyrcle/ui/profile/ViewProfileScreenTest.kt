@@ -32,7 +32,6 @@ import com.github.se.cyrcle.model.user.UserDetails
 import com.github.se.cyrcle.model.user.UserPublic
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
-import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import com.mapbox.geojson.Point
 import org.junit.Before
@@ -90,7 +89,6 @@ class ViewProfileScreenTest {
       ViewProfileScreen(
           navigationActions = mockNavigationActions,
           userViewModel = userViewModel,
-          parkingViewModel = parkingViewModel,
           AuthenticatorMock())
     }
   }
@@ -210,15 +208,9 @@ class ViewProfileScreenTest {
     composeTestRule.onNodeWithTag("FavoriteParkingsTitle").assertIsDisplayed()
 
     composeTestRule.onNodeWithTag("FavoriteParkingList").onChildren().assertCountEquals(3)
-    composeTestRule
-        .onNodeWithTag("ParkingItem_0", useUnmergedTree = true)
-        .assertTextContains("Rue de la paix")
-    composeTestRule
-        .onNodeWithTag("ParkingItem_1", useUnmergedTree = true)
-        .assertTextContains("Rude épais")
-    composeTestRule
-        .onNodeWithTag("ParkingItem_2", useUnmergedTree = true)
-        .assertTextContains("Rue du pet")
+    composeTestRule.onNodeWithTag("ParkingItem_0").assertTextContains("Rue de la paix")
+    composeTestRule.onNodeWithTag("ParkingItem_1").assertTextContains("Rude épais")
+    composeTestRule.onNodeWithTag("ParkingItem_2").assertTextContains("Rue du pet")
   }
 
   @Test
@@ -380,15 +372,5 @@ class ViewProfileScreenTest {
 
     // Verify that the display still reflects the new username
     composeTestRule.onNodeWithTag("DisplayUsername").assertTextEquals("@alicejohnson")
-  }
-
-  @Test
-  fun testNavigateToParkingDetailsOnClick() {
-    composeTestRule.waitForIdle()
-
-    composeTestRule.onNodeWithTag("ParkingItem_0", useUnmergedTree = true).performClick()
-    composeTestRule.waitForIdle()
-
-    verify(mockNavigationActions).navigateTo(Screen.PARKING_DETAILS)
   }
 }
