@@ -82,11 +82,6 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     animationRunnable?.let { removeCallbacks(it) }
   }
 
-  internal fun startAnimation() {
-    isAnimating = true
-    animationRunnable?.let { post(it) }
-  }
-
   private fun getSegmentAtPointer(rotation: Float): Int {
     val segmentAngle = 360f / segments.size
     val normalizedAngle = (270 - (rotation % 360)) % 360
