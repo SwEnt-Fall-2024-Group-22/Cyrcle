@@ -245,6 +245,13 @@ class UserViewModel(
    * @param onFailure the callback to call if the image fetching fails
    */
   private fun transformPathToUrl(user: User, onSuccess: (User) -> Unit, onFailure: () -> Unit) {
+    // For user with the old version of the app (i.e the M2)
+    // the new attribute profilePictureCloudPath is set to null by the deserializer.
+    // We skip the fetching of the image for those users.
+    if (user.public.profilePictureCloudPath == null) {
+      onSuccess(user)
+      return
+    }
     if (imageRepository == null) {
       Log.e("UserViewModel", "ImageRepository is null")
       return

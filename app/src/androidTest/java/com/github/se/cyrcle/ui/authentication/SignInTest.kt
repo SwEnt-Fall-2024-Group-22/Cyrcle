@@ -55,6 +55,8 @@ class SignInTest {
 
   @Test
   fun testComponentsAndFunctionality() = runTest {
+    composeTestRule.waitForIdle()
+
     composeTestRule
         .onNodeWithTag("LoginTitle")
         .assertIsDisplayed()

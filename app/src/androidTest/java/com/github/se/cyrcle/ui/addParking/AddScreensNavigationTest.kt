@@ -115,6 +115,7 @@ class AddScreensNavigationTest {
       val mapViewModel = list[4] as MapViewModel
       LocationPicker(navigationActions, mapViewModel)
     }
+    composeTestRule.waitForIdle()
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("nextButton"))
     // Perform click on the add button
     composeTestRule.onNodeWithTag("nextButton").performClick()
