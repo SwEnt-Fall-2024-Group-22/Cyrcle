@@ -4,9 +4,13 @@
 # --------------------  CORE  -----------------------
 # ---------------------------------------------------
 agp = "8.5.2"
+datastorePreferences = "1.1.1"
 kotlin = "1.9.0"
 coreKtx = "1.13.1"
 appcompat = "1.7.0"
+kotlinStdlib = "1.9.22"
+kotlinxSerializationJson = "1.6.2"
+kotlinxSerializationJsonVersion = "1.5.1"
 material = "1.12.0"
 lifecycleRuntimeKtx = "2.8.6"
 
@@ -45,6 +49,7 @@ coilCompose = "2.7.0"
 # ---------------------------------------------------
 # -------------------  TESTING  ---------------------
 # ---------------------------------------------------
+protobufJavalite = "3.25.1"
 robolectric = "4.13"
 
 junit = "4.13.2"
@@ -61,11 +66,16 @@ sonar = "4.4.1.3373"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastorePreferences" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-espresso-intents = { group = "androidx.test.espresso", name = "espresso-intents", version.ref = "espressoCore" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlinStdlib" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+kotlinx-serialization-json-v151 = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJsonVersion" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
@@ -108,6 +118,7 @@ mapbox-compose = { group = "com.mapbox.extension", name = "maps-compose", versio
 mapbox-android = { group = "com.mapbox.maps", name = "android", version.ref = "mapbox" }
 mapbox-sdk-turf = { group = "com.mapbox.mapboxsdk", name = "mapbox-sdk-turf", version.ref = "mapbox-turf" }
 
+protobuf-javalite = { module = "com.google.protobuf:protobuf-javalite", version.ref = "protobufJavalite" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 
 mockito-inline = { group = "org.mockito", name = "mockito-inline", version.ref = "mockitoInline" }
