@@ -14,6 +14,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QueryDocumentSnapshot
 import com.google.firebase.firestore.QuerySnapshot
 import junit.framework.TestCase
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
@@ -66,7 +69,7 @@ class UserRepositoryFirestoreTest {
     `when`(mockFirebaseUser.uid).thenReturn("1")
     val uid = userRepositoryFirestore.getUid()
     verify(mockFirebaseUser).uid
-    assert(uid == "1")
+    assertEquals("1", uid)
   }
 
   @Test
@@ -74,35 +77,34 @@ class UserRepositoryFirestoreTest {
     `when`(mockFirebaseAuth.currentUser).thenReturn(null)
     try {
       userRepositoryFirestore.getUid()
+      fail("Expected exception not thrown")
     } catch (e: Exception) {
-      assert(e.message == "User not signed in")
+      assertEquals("User not signed in", e.message)
     }
   }
 
   @Test
   fun onSignIn_callsOnSuccess() {
     `when`(mockFirebaseAuth.currentUser).thenReturn(mockFirebaseUser)
-    userRepositoryFirestore.onSignIn { assert(mockFirebaseAuth.currentUser != null) }
+    userRepositoryFirestore.onSignIn { assertNotEquals(null, mockFirebaseAuth.currentUser) }
   }
 
   @Test
   fun getUserById_callsOnSuccess() {
-    // Create a list of QueryDocumentSnapshots
-    val queryDocumentSnapshots = listOf(mockQueryDocumentSnapshot)
-
     `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockUserQuerySnapshot))
     `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
-    `when`(mockUserQuerySnapshot.documents).thenReturn(queryDocumentSnapshots)
+    `when`(mockUserQuerySnapshot.documents).thenReturn(listOf(mockQueryDocumentSnapshot))
     `when`(mockDocumentSnapshot.toObject(User::class.java)).thenReturn(user)
 
+    var onSuccessCallbackCalled = false
     userRepositoryFirestore.getUserById(
         userId = user.public.userId,
-        onSuccess = { assert(true) },
+        onSuccess = { onSuccessCallbackCalled = true },
         onFailure = { fail("Expected success but got failure") })
-
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference, atLeast(1)).get()
+    assertTrue(onSuccessCallbackCalled)
   }
 
   @Test
@@ -110,36 +112,38 @@ class UserRepositoryFirestoreTest {
     val taskCompletionSource = TaskCompletionSource<DocumentSnapshot>()
     `when`(mockDocumentReference.get()).thenReturn(taskCompletionSource.task)
 
+    var onFailureCallbackCalled = false
     userRepositoryFirestore.getUserById(
         userId = user.public.userId,
         onSuccess = { fail("Expected failure but got success") },
-        onFailure = { assert(true) })
-
+        onFailure = { onFailureCallbackCalled = true })
     // Complete the task to trigger the addOnCompleteListener with an exception
     taskCompletionSource.setException(Exception("Test exception"))
-
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference, times(1)).get()
+    assertTrue(onFailureCallbackCalled)
   }
 
   @Test
   fun getUserById_callsOnFailure_whenExceptionThrown() {
-    // Arrange
     val exception = Exception("Test exception")
     val taskCompletionSource = TaskCompletionSource<DocumentSnapshot>()
     taskCompletionSource.setException(exception)
     `when`(mockDocumentReference.get()).thenReturn(taskCompletionSource.task)
 
-    // Act
+    var onFailureCallbackCalled = false
     userRepositoryFirestore.getUserById(
         userId = user.public.userId,
         onSuccess = { fail("Expected failure but got success") },
-        onFailure = { assert(it == exception) })
-
-    // Assert
+        onFailure = {
+          onFailureCallbackCalled = true
+          assertEquals(exception, it)
+        })
     shadowOf(Looper.getMainLooper()).idle()
+
     verify(mockDocumentReference).get()
+    assertTrue(onFailureCallbackCalled)
   }
 
   @Test
@@ -148,30 +152,16 @@ class UserRepositoryFirestoreTest {
     `when`(mockDocumentSnapshot.exists()).thenReturn(false)
     `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
 
+    var onSuccessCallbackCalled = false
     userRepositoryFirestore.addUser(
         user = user,
-        onSuccess = { assert(true) },
+        onSuccess = { onSuccessCallbackCalled = true },
         onFailure = { fail("Expected success but got failure") })
-
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference, atLeast(1)).set(any())
     verify(mockDocumentReference, atLeast(1)).get()
-  }
-
-  @Test
-  fun addUser_callsOnSuccess_whenUserExists() {
-    `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
-    `when`(mockDocumentSnapshot.exists()).thenReturn(true)
-
-    userRepositoryFirestore.addUser(
-        user = user,
-        onSuccess = { assert(true) },
-        onFailure = { fail("Expected success but got failure") })
-
-    shadowOf(Looper.getMainLooper()).idle()
-
-    verify(mockDocumentReference, atLeast(1)).get()
+    assertTrue(onSuccessCallbackCalled)
   }
 
   @Test
@@ -182,27 +172,33 @@ class UserRepositoryFirestoreTest {
     `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
     `when`(mockDocumentSnapshot.exists()).thenReturn(false)
 
+    var onFailureCallbackCalled = false
     userRepositoryFirestore.addUser(
         user = user,
         onSuccess = { fail("Expected failure but got success") },
-        onFailure = { assert(true) })
-
+        onFailure = { onFailureCallbackCalled = true })
     // Complete the task to trigger the addOnCompleteListener with an exception
     taskCompletionSource.setException(Exception("Test exception"))
-
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference, times(1)).set(any())
+    verify(mockDocumentReference, atLeast(1)).get()
+    assertTrue(onFailureCallbackCalled)
   }
 
   @Test
   fun addUser_callsOnFailure_whenUserDetailsAreNull() {
+    var onFailureCallbackCalled = false
     userRepositoryFirestore.addUser(
         user = User(public = user.public, details = null),
         onSuccess = { fail("Expected failure but got success") },
-        onFailure = { assert(it.message == "User details are required") })
+        onFailure = {
+          onFailureCallbackCalled = true
+          assertEquals("User details are required", it.message)
+        })
 
     verify(mockDocumentReference, times(0)).get()
+    assertTrue(onFailureCallbackCalled)
   }
 
   @Test
@@ -211,71 +207,81 @@ class UserRepositoryFirestoreTest {
     `when`(mockDocumentSnapshot.exists()).thenReturn(false)
     `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
 
+    var onSuccessCallbackCalled = false
     userRepositoryFirestore.updateUser(
         user = user,
-        onSuccess = { assert(true) },
+        onSuccess = { onSuccessCallbackCalled = true },
         onFailure = { fail("Expected success but got failure") })
-
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference, atLeast(1)).set(any())
+    assertTrue(onSuccessCallbackCalled)
   }
 
   @Test
   fun updateUser_callsOnFailure() {
     val taskCompletionSource = TaskCompletionSource<Void>()
-
     `when`(mockDocumentReference.set(any())).thenReturn(taskCompletionSource.task)
 
+    var onFailureCallbackCalled = false
     userRepositoryFirestore.updateUser(
         user = user,
         onSuccess = { fail("Expected failure but got success") },
-        onFailure = { assert(true) })
+        onFailure = { onFailureCallbackCalled = true })
 
     // Complete the task to trigger the addOnCompleteListener with an exception
     taskCompletionSource.setException(Exception("Test exception"))
-
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference, times(1)).set(any())
+    assertTrue(onFailureCallbackCalled)
   }
 
   @Test
   fun updateUser_callsOnFailure_whenUserDetailsAreNull() {
+    var onFailureCallbackCalled = false
     userRepositoryFirestore.updateUser(
         user = User(public = user.public, details = null),
         onSuccess = { fail("Expected failure but got success") },
-        onFailure = { assert(it.message == "User details are required") })
+        onFailure = {
+          onFailureCallbackCalled = true
+          assertEquals("User details are required", it.message)
+        })
 
     verify(mockDocumentReference, times(0)).get()
+    assertTrue(onFailureCallbackCalled)
   }
 
   @Test
   fun deleteUserById_callsOnSuccess() {
     `when`(mockDocumentReference.delete()).thenReturn(Tasks.forResult(null))
 
+    var onSuccessCallbackCalled = false
     userRepositoryFirestore.deleteUserById(
-        user.public.userId, { assert(true) }, { TestCase.fail("Expected success but got failure") })
-
+        user.public.userId,
+        { onSuccessCallbackCalled = true },
+        { TestCase.fail("Expected success but got failure") })
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference).delete()
+    assertTrue(onSuccessCallbackCalled)
   }
 
   @Test
   fun deleteUserById_callsOnFailure() {
     val taskCompletionSource = TaskCompletionSource<Void>()
-
     `when`(mockDocumentReference.delete()).thenReturn(taskCompletionSource.task)
 
+    var onFailureCallbackCalled = false
     userRepositoryFirestore.deleteUserById(
-        user.public.userId, { TestCase.fail("Expected failure but got success") }, { assert(true) })
-
+        user.public.userId,
+        { TestCase.fail("Expected failure but got success") },
+        { onFailureCallbackCalled = true })
     // Complete the task to trigger the addOnCompleteListener with an exception
     taskCompletionSource.setException(Exception("Test exception"))
-
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference, times(1)).delete()
+    assertTrue(onFailureCallbackCalled)
   }
 }

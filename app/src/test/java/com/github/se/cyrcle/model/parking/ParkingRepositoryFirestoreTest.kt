@@ -13,6 +13,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot
 import com.google.firebase.firestore.QuerySnapshot
 import com.mapbox.geojson.Point
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertTrue
 import junit.framework.TestCase.fail
 import org.junit.Before
 import org.junit.Test
@@ -61,7 +62,7 @@ class ParkingRepositoryFirestoreTest {
     `when`(mockDocumentReference.id).thenReturn("1")
     val uid = parkingRepositoryFirestore.getNewUid()
     verify(mockDocumentReference).id
-    assert(uid == "1")
+    assertEquals("1", uid)
   }
 
   @Test
@@ -71,96 +72,101 @@ class ParkingRepositoryFirestoreTest {
     `when`(mockDocumentSnapshot.toObject(Parking::class.java)).thenReturn(parking)
     `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
 
+    var onSuccessCallbackCalled = false
     parkingRepositoryFirestore.getParkingById(
-        parking.uid, { assert(true) }, { fail("Expected success but got failure") })
-
+        parking.uid,
+        { onSuccessCallbackCalled = true },
+        { fail("Expected success but got failure") })
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference, times(1)).get()
+    assertTrue(onSuccessCallbackCalled)
   }
 
   @Test
   fun getParkingById_callsOnFailure() {
     val taskCompletionSource = TaskCompletionSource<DocumentSnapshot>()
-
     `when`(mockDocumentReference.get()).thenReturn(taskCompletionSource.task)
-    parkingRepositoryFirestore.getParkingById(
-        parking.uid, { fail("Expected failure but got success") }, { assert(true) })
 
+    var onFailureCallbackCalled = false
+    parkingRepositoryFirestore.getParkingById(
+        parking.uid,
+        { fail("Expected failure but got success") },
+        { onFailureCallbackCalled = true })
     // Complete the task to trigger the addOnCompleteListener with an exception
     taskCompletionSource.setException(Exception("Test exception"))
-
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference, times(1)).get()
+    assertTrue(onFailureCallbackCalled)
   }
 
   @Test
   fun getParkingsByListOfIds_callsOnSuccess() {
-    // Mock the QueryDocumentSnapshot
     `when`(mockQueryDocumentSnapshot.data).thenReturn(mockParkingData)
     `when`(mockQueryDocumentSnapshot.id).thenReturn(parking.uid)
-
     `when`(mockCollectionReference.whereIn(any<String>(), any()))
         .thenReturn(mockCollectionReference)
     `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockParkingQuerySnapshot))
     `when`(mockParkingQuerySnapshot.documents).thenReturn(listOf(mockQueryDocumentSnapshot))
 
+    var onSuccessCallbackCalled = false
     // Spy on the parkingRepositoryFirestore to verify deserializeParking call
     val spyParkingRepositoryFirestore = spy(parkingRepositoryFirestore)
-
     spyParkingRepositoryFirestore.getParkingsByListOfIds(
         ids = listOf(parking.uid),
         onSuccess = { parkings ->
           assertEquals(1, parkings.size)
           assertEquals(parking.uid, parkings[0].uid)
+          onSuccessCallbackCalled = true
         },
         onFailure = { fail("Expected success but got failure") })
-
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockParkingQuerySnapshot, times(1)).documents
     verify(mockQueryDocumentSnapshot, times(1)).data
     verify(spyParkingRepositoryFirestore, times(1)).deserializeParking(mockParkingData)
+    assertTrue(onSuccessCallbackCalled)
   }
 
   @Test
   fun getParkingsByListOfIds_withEmptyList_callsOnSuccess() {
+    var onSuccessCallbackCalled = false
     parkingRepositoryFirestore.getParkingsByListOfIds(
         ids = emptyList(),
-        onSuccess = { parkings -> assert(parkings.isEmpty()) },
+        onSuccess = { parkings ->
+          assert(parkings.isEmpty())
+          onSuccessCallbackCalled = true
+        },
         onFailure = { fail("Expected success but got failure") })
+
+    assertTrue(onSuccessCallbackCalled)
   }
 
   @Test
   fun getParkingsByListOfIds_callsOnFailure() {
     val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
-
     `when`(mockCollectionReference.whereIn(any<String>(), any()))
         .thenReturn(mockCollectionReference)
     `when`(mockCollectionReference.get()).thenReturn(taskCompletionSource.task)
 
+    var onFailureCallbackCalled = false
     parkingRepositoryFirestore.getParkingsByListOfIds(
         ids = listOf(parking.uid),
         onSuccess = { fail("Expected failure but got success") },
-        onFailure = { assert(true) })
-
+        onFailure = { onFailureCallbackCalled = true })
     // Complete the task to trigger the addOnCompleteListener with an exception
     taskCompletionSource.setException(Exception("Test exception"))
-
-    // Simulate the main looper being idle to process the task
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockParkingQuerySnapshot, times(0)).documents
+    assertTrue(onFailureCallbackCalled)
   }
 
   @Test
   fun getParkingsBetween_callsOnSuccess() {
-    // Mock the QueryDocumentSnapshot
     `when`(mockQueryDocumentSnapshot.data).thenReturn(mockParkingData)
     `when`(mockQueryDocumentSnapshot.id).thenReturn(parking.uid)
-
-    // Mock the QuerySnapshot to return the expected Parking object
     `when`(mockCollectionReference.whereGreaterThan(any<String>(), any()))
         .thenReturn(mockCollectionReference)
     `when`(mockCollectionReference.whereLessThanOrEqualTo(any<String>(), any()))
@@ -168,148 +174,153 @@ class ParkingRepositoryFirestoreTest {
     `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockParkingQuerySnapshot))
     `when`(mockParkingQuerySnapshot.documents).thenReturn(listOf(mockQueryDocumentSnapshot))
 
+    var onSuccessCallbackCalled = false
     // Spy on the parkingRepositoryFirestore to verify deserializeParking call
     val spyParkingRepositoryFirestore = spy(parkingRepositoryFirestore)
-
     spyParkingRepositoryFirestore.getParkingsBetween(
         start = Point.fromLngLat(6.5, 46.5),
         end = Point.fromLngLat(6.6, 46.6),
         onSuccess = { parkings ->
           assertEquals(1, parkings.size)
           assertEquals(parking.uid, parkings[0].uid)
+          onSuccessCallbackCalled = true
         },
         onFailure = { fail("Expected success but got failure") })
-
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockParkingQuerySnapshot, times(1)).documents
     verify(mockQueryDocumentSnapshot, times(1)).data
     verify(spyParkingRepositoryFirestore, times(1)).deserializeParking(mockParkingData)
+    assertTrue(onSuccessCallbackCalled)
   }
 
   @Test
   fun getParkingsBetween_withInvalidRange_callsOnFailure() {
+    var onFailureCallbackCalled = false
     parkingRepositoryFirestore.getParkingsBetween(
         start = Point.fromLngLat(6.6, 46.6),
         end = Point.fromLngLat(6.5, 46.5),
         onSuccess = { fail("Expected failure but got success") },
-        onFailure = { assert(true) })
+        onFailure = { onFailureCallbackCalled = true })
+    assertTrue(onFailureCallbackCalled)
   }
 
   @Test
   fun getParkingsBetween_callsOnFailure() {
     val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
-
     `when`(mockCollectionReference.whereGreaterThan(any<String>(), any()))
         .thenReturn(mockCollectionReference)
     `when`(mockCollectionReference.whereLessThanOrEqualTo(any<String>(), any()))
         .thenReturn(mockCollectionReference)
     `when`(mockCollectionReference.get()).thenReturn(taskCompletionSource.task)
 
+    var onFailureCallbackCalled = false
     parkingRepositoryFirestore.getParkingsBetween(
         start = Point.fromLngLat(6.5, 46.5),
         end = Point.fromLngLat(6.6, 46.6),
         onSuccess = { fail("Expected failure but got success") },
-        onFailure = { assert(true) })
-
+        onFailure = { onFailureCallbackCalled = true })
     // Complete the task to trigger the addOnCompleteListener with an exception
     taskCompletionSource.setException(Exception("Test exception"))
-
-    // Simulate the main looper being idle to process the task
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockParkingQuerySnapshot, times(0)).documents
+    assertTrue(onFailureCallbackCalled)
   }
 
   @Test
   fun addParking_callsFirestoreSet() {
     `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
 
+    var onSuccessCallbackCalled = false
     parkingRepositoryFirestore.addParking(
         parking,
-        onSuccess = { assert(true) },
+        onSuccess = { onSuccessCallbackCalled = true },
         onFailure = { fail("Expected success but got failure") })
-
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference).set(any())
+    assertTrue(onSuccessCallbackCalled)
   }
 
   @Test
   fun addParking_callsOnFailure() {
     val taskCompletionSource = TaskCompletionSource<Void>()
-
     `when`(mockDocumentReference.set(any())).thenReturn(taskCompletionSource.task)
 
+    var onFailureCallbackCalled = false
     parkingRepositoryFirestore.addParking(
-        parking, { fail("Expected failure but got success") }, { assert(true) })
-
+        parking, { fail("Expected failure but got success") }, { onFailureCallbackCalled = true })
     // Complete the task to trigger the addOnCompleteListener with an exception
     taskCompletionSource.setException(Exception("Test exception"))
-
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference, times(1)).set(any())
+    assertTrue(onFailureCallbackCalled)
   }
 
   @Test
   fun updateParking_callsFirestoreSet() {
     `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
 
+    var onSuccessCallbackCalled = false
     parkingRepositoryFirestore.updateParking(
         parking,
-        onSuccess = { assert(true) },
+        onSuccess = { onSuccessCallbackCalled = true },
         onFailure = { fail("Expected success but got failure") })
-
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference).set(any())
+    assertTrue(onSuccessCallbackCalled)
   }
 
   @Test
   fun updateParking_callsOnFailure() {
     val taskCompletionSource = TaskCompletionSource<Void>()
-
     `when`(mockDocumentReference.set(any())).thenReturn(taskCompletionSource.task)
 
+    var onFailureCallbackCalled = false
     parkingRepositoryFirestore.updateParking(
-        parking, { fail("Expected failure but got success") }, { assert(true) })
-
+        parking, { fail("Expected failure but got success") }, { onFailureCallbackCalled = true })
     // Complete the task to trigger the addOnCompleteListener with an exception
     taskCompletionSource.setException(Exception("Test exception"))
-
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference, times(1)).set(any())
+    assertTrue(onFailureCallbackCalled)
   }
 
   @Test
   fun deleteParkingById_callsFirestoreDocument() {
     `when`(mockDocumentReference.delete()).thenReturn(Tasks.forResult(null))
 
+    var onSuccessCallbackCalled = false
     parkingRepositoryFirestore.deleteParkingById(
-        parking.uid, { assert(true) }, { fail("Expected success but got failure") })
-
+        parking.uid,
+        { onSuccessCallbackCalled = true },
+        { fail("Expected success but got failure") })
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference).delete()
+    assertTrue(onSuccessCallbackCalled)
   }
 
   @Test
   fun deleteParkingById_callsOnFailure() {
     val taskCompletionSource = TaskCompletionSource<Void>()
-
     `when`(mockDocumentReference.delete()).thenReturn(taskCompletionSource.task)
 
+    var onFailureCallbackCalled = false
     parkingRepositoryFirestore.deleteParkingById(
-        parking.uid, { fail("Expected failure but got success") }, { assert(true) })
-
+        parking.uid,
+        { fail("Expected failure but got success") },
+        { onFailureCallbackCalled = true })
     // Complete the task to trigger the addOnCompleteListener with an exception
     taskCompletionSource.setException(Exception("Test exception"))
-
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference, times(1)).delete()
+    assertTrue(onFailureCallbackCalled)
   }
 
   @Test

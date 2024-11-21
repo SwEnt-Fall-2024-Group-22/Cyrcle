@@ -14,6 +14,12 @@ constructor(private val db: FirebaseFirestore, private val auth: FirebaseAuth) :
 
   private val collectionPath = "users"
 
+  override fun getUid(): String {
+    val uid = auth.currentUser?.uid ?: ""
+    if (uid.isEmpty()) throw Exception("User not signed in")
+    return uid
+  }
+
   override fun onSignIn(onSuccess: () -> Unit) {
     Firebase.auth.addAuthStateListener {
       if (it.currentUser != null) {
@@ -60,12 +66,6 @@ constructor(private val db: FirebaseFirestore, private val auth: FirebaseAuth) :
               .addOnFailureListener { onSuccess(User(userPublic, null)) }
         }
         .addOnFailureListener(onFailure)
-  }
-
-  override fun getUid(): String {
-    val uid = auth.currentUser?.uid ?: ""
-    if (uid.isEmpty()) throw Exception("User not signed in")
-    return uid
   }
 
   override fun addUser(user: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {

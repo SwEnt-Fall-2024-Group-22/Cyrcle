@@ -65,7 +65,7 @@ class ReviewRepositoryFirestoreTest {
     `when`(mockDocumentReference.id).thenReturn("1")
     val uid = reviewRepositoryFirestore.getNewUid()
     verify(mockDocumentReference).id
-    assert(uid == "1")
+    assertEquals("1", uid)
   }
 
   @Test
@@ -75,33 +75,37 @@ class ReviewRepositoryFirestoreTest {
     `when`(mockDocumentSnapshot.toObject(Review::class.java)).thenReturn(review)
     `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
 
+    var onSuccessCallbackCalled = false
     reviewRepositoryFirestore.getReviewById(
-        review.uid, { assert(true) }, { TestCase.fail("Expected success but got failure") })
-
+        review.uid,
+        { onSuccessCallbackCalled = true },
+        { TestCase.fail("Expected success but got failure") })
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference, times(1)).get()
+    assertTrue(onSuccessCallbackCalled)
   }
 
   @Test
   fun getReviewById_callsOnFailure() {
     val taskCompletionSource = TaskCompletionSource<DocumentSnapshot>()
-
     `when`(mockDocumentReference.get()).thenReturn(taskCompletionSource.task)
-    reviewRepositoryFirestore.getReviewById(
-        review.uid, { TestCase.fail("Expected failure but got success") }, { assert(true) })
 
+    var onFailureCallbackCalled = false
+    reviewRepositoryFirestore.getReviewById(
+        review.uid,
+        { TestCase.fail("Expected failure but got success") },
+        { onFailureCallbackCalled = true })
     // Complete the task to trigger the addOnCompleteListener with an exception
     taskCompletionSource.setException(Exception("Test exception"))
-
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference, times(1)).get()
+    assertTrue(onFailureCallbackCalled)
   }
 
   @Test
   fun getReviewByOwnerId_returnsCorrectValues() {
-    // Mock the QueryDocumentSnapshot
     `when`(mockQueryDocumentSnapshot.data).thenReturn(mockReviewData)
     `when`(mockQueryDocumentSnapshot.id).thenReturn(review.uid)
 
@@ -110,22 +114,23 @@ class ReviewRepositoryFirestoreTest {
     `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockReviewQuerySnapshot))
     `when`(mockReviewQuerySnapshot.documents).thenReturn(listOf(mockQueryDocumentSnapshot))
 
+    var onSuccessCallbackCalled = false
     // Spy on the repository to verify deserialization
     val spyReviewRepositoryFirestore = spy(reviewRepositoryFirestore)
-
     spyReviewRepositoryFirestore.getReviewsByOwnerId(
         ownerId = review.owner,
         onSuccess = { reviews ->
           assertEquals(1, reviews.size)
           assertEquals(review, reviews[0])
+          onSuccessCallbackCalled = true
         },
         onFailure = { fail("Expected success but got failure") })
-
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockReviewQuerySnapshot, times(1)).documents
     verify(mockQueryDocumentSnapshot, times(1)).data
     verify(spyReviewRepositoryFirestore, times(1)).deserializeReview(mockReviewData)
+    assertTrue(onSuccessCallbackCalled)
   }
 
   @Test
@@ -134,43 +139,43 @@ class ReviewRepositoryFirestoreTest {
         .thenReturn(mockCollectionReference)
     `when`(mockCollectionReference.get()).thenReturn(Tasks.forException(Exception()))
 
+    var onFailureCallbackCalled = false
     reviewRepositoryFirestore.getReviewsByOwnerId(
         ownerId = review.parking,
         onSuccess = { fail("Expected failure but got success") },
-        onFailure = { assertTrue(true) })
-
+        onFailure = { onFailureCallbackCalled = true })
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockReviewQuerySnapshot, times(0)).documents
+    assertTrue(onFailureCallbackCalled)
   }
 
   @Test
   fun getReviewsByParkingId_returnsCorrectValues() {
-    // Mock the QueryDocumentSnapshot
     `when`(mockQueryDocumentSnapshot.data).thenReturn(mockReviewData)
     `when`(mockQueryDocumentSnapshot.id).thenReturn(review.uid)
-
     `when`(mockCollectionReference.whereEqualTo(any<String>(), any()))
         .thenReturn(mockCollectionReference)
     `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockReviewQuerySnapshot))
     `when`(mockReviewQuerySnapshot.documents).thenReturn(listOf(mockQueryDocumentSnapshot))
 
-    // Spy on the repository to verify deserialization
+    var onSuccessCallbackCalled = false
+    // Spy on the repository to verify review deserialization
     val spyReviewRepositoryFirestore = spy(reviewRepositoryFirestore)
-
     spyReviewRepositoryFirestore.getReviewsByParkingId(
         parkingId = review.parking,
         onSuccess = { reviews ->
           assertEquals(1, reviews.size)
           assertEquals(review, reviews[0])
+          onSuccessCallbackCalled = true
         },
         onFailure = { fail("Expected success but got failure") })
-
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockReviewQuerySnapshot, times(1)).documents
     verify(mockQueryDocumentSnapshot, times(1)).data
     verify(spyReviewRepositoryFirestore, times(1)).deserializeReview(mockReviewData)
+    assertTrue(onSuccessCallbackCalled)
   }
 
   @Test
@@ -179,109 +184,113 @@ class ReviewRepositoryFirestoreTest {
         .thenReturn(mockCollectionReference)
     `when`(mockCollectionReference.get()).thenReturn(Tasks.forException(Exception()))
 
+    var onFailureCallbackCalled = false
     reviewRepositoryFirestore.getReviewsByParkingId(
         parkingId = review.parking,
         onSuccess = { fail("Expected failure but got success") },
-        onFailure = { assertTrue(true) })
-
+        onFailure = { onFailureCallbackCalled = true })
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockReviewQuerySnapshot, times(0)).documents
+    assertTrue(onFailureCallbackCalled)
   }
 
   @Test
   fun addReview_callsOnSuccess() {
     `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
-
+    var onSuccessCallbackCalled = false
     reviewRepositoryFirestore.addReview(
         review,
-        onSuccess = { assert(true) },
+        onSuccess = { onSuccessCallbackCalled = true },
         onFailure = { fail("Expected success but got failure") })
-
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference).set(any())
+    assertTrue(onSuccessCallbackCalled)
   }
 
   @Test
   fun addReview_callsOnFailure() {
     val taskCompletionSource = TaskCompletionSource<Void>()
-
     `when`(mockDocumentReference.set(any())).thenReturn(taskCompletionSource.task)
 
+    var onFailureCallbackCalled = false
     reviewRepositoryFirestore.addReview(
-        review, { TestCase.fail("Expected failure but got success") }, { assert(true) })
-
+        review,
+        { TestCase.fail("Expected failure but got success") },
+        { onFailureCallbackCalled = true })
     // Complete the task to trigger the addOnCompleteListener with an exception
     taskCompletionSource.setException(Exception("Test exception"))
-
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference, times(1)).set(any())
+    assertTrue(onFailureCallbackCalled)
   }
 
   @Test
   fun updateReview_callsOnSuccess() {
     `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
 
+    var onSuccessCallbackCalled = false
     reviewRepositoryFirestore.updateReview(
         review,
-        onSuccess = { assert(true) },
+        onSuccess = { onSuccessCallbackCalled = true },
         onFailure = { fail("Expected success but got failure") })
-
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference).set(any())
+    assertTrue(onSuccessCallbackCalled)
   }
 
   @Test
   fun updateReview_callsOnFailure() {
     val taskCompletionSource = TaskCompletionSource<Void>()
-
     `when`(mockDocumentReference.set(any())).thenReturn(taskCompletionSource.task)
 
+    var onFailureCallbackCalled = false
     reviewRepositoryFirestore.updateReview(
-        review, { TestCase.fail("Expected failure but got success") }, { assert(true) })
-
+        review,
+        { TestCase.fail("Expected failure but got success") },
+        { onFailureCallbackCalled = true })
     // Complete the task to trigger the addOnCompleteListener with an exception
     taskCompletionSource.setException(Exception("Test exception"))
-
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference, times(1)).set(any())
+    assertTrue(onFailureCallbackCalled)
   }
 
   @Test
   fun deleteReviewById_callsOnSuccess() {
     `when`(mockDocumentReference.delete()).thenReturn(Tasks.forResult(null))
 
+    var onSuccessCallbackCalled = false
     reviewRepositoryFirestore.deleteReviewById(
         review.uid,
-        onSuccess = { assert(true) },
+        onSuccess = { onSuccessCallbackCalled = true },
         onFailure = { fail("Expected success but got failure") })
-
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference).delete()
+    assertTrue(onSuccessCallbackCalled)
   }
 
   @Test
   fun deleteReviewById_callsOnFailure() {
     val taskCompletionSource = TaskCompletionSource<Void>()
-
     `when`(mockDocumentReference.delete()).thenReturn(taskCompletionSource.task)
 
+    var onFailureCallbackCalled = false
     reviewRepositoryFirestore.deleteReviewById(
         review.uid,
         onSuccess = { fail("Expected failure but got success") },
-        onFailure = { assert(true) })
-
+        onFailure = { onFailureCallbackCalled = true })
     // Complete the task to trigger the addOnCompleteListener with an exception
     taskCompletionSource.setException(Exception("Test exception"))
-
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference).delete()
+    assertTrue(onFailureCallbackCalled)
   }
 
   @Test
