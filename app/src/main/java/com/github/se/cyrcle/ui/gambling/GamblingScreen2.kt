@@ -3,6 +3,7 @@ package com.github.se.cyrcle.ui.gambling
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -19,19 +20,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.github.se.cyrcle.ui.theme.ColorLevel
-import com.github.se.cyrcle.ui.theme.getButtonColors
-import com.github.se.cyrcle.ui.theme.getOnColor
 import kotlin.math.cos
 import kotlin.math.sin
-
-
 
 class WheelView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
+
+    private val TAG = "WheelView"
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val segments = listOf(
@@ -50,25 +48,61 @@ class WheelView @JvmOverloads constructor(
         1.9f    // Epic: 4.5%
     )
 
+    // Range mapping for probabilities
+    private val probabilityRanges = run {
+        var currentValue = 0
+        probabilities.map { probability ->
+            val range = (probability * 10).toInt()
+            val start = currentValue
+            currentValue += range
+            start until currentValue
+        }
+    }
+
     private var rotation = 0f
     private var isSpinning = false
-    private var spinSpeed = 0f
+    private var targetRotation = 0f
+    private var currentRotation = 0f
+    private var spinStartTime = 0L
+    private var spinDuration = 0L
     private var lastUpdateTime = System.currentTimeMillis()
     private val idleRotationSpeed = -0.2f
     private var pauseAfterSpin = false
     private var pauseStartTime = 0L
     private val pauseDuration = 2000L
+    private var expectedSegment = 0 // To track expected segment for logging
 
     private data class Segment(val name: String, val color: Int)
 
     private fun getSegmentAtPointer(rotation: Float): Int {
         val segmentAngle = 360f / segments.size
         val normalizedAngle = (270 - (rotation % 360)) % 360
-        val segmentIndex = (normalizedAngle / segmentAngle).toInt()
-        return segmentIndex
+        return (normalizedAngle / segmentAngle).toInt()
+    }
+
+    private fun getSegmentName(index: Int): String {
+        return segments[index].name
+    }
+
+    private fun determineTargetSegment(): Int {
+        val randomValue = (0..999).random()
+        Log.d(TAG, "Generated random value: $randomValue")
+
+        for (i in probabilityRanges.indices) {
+            if (randomValue in probabilityRanges[i]) {
+                Log.d(TAG, "Random value $randomValue falls in range for segment: ${getSegmentName(i)}")
+                return i
+            }
+        }
+        return 0
     }
 
     init {
+        // Log probability ranges for debugging
+        probabilityRanges.forEachIndexed { index, range ->
+            Log.d(TAG, "Probability range for ${getSegmentName(index)}: ${range.first}-${range.last}")
+        }
+
         post(object : Runnable {
             override fun run() {
                 val currentTime = System.currentTimeMillis()
@@ -76,15 +110,24 @@ class WheelView @JvmOverloads constructor(
                 lastUpdateTime = currentTime
 
                 if (isSpinning) {
-                    rotation -= spinSpeed
-                    if (rotation <= -360f) rotation += 360f
-                    spinSpeed *= 0.99f
-
-                    if (spinSpeed < 0.1f) {
+                    val progress = (currentTime - spinStartTime).toFloat() / spinDuration
+                    if (progress >= 1f) {
+                        rotation = targetRotation % 360
                         isSpinning = false
                         pauseAfterSpin = true
                         pauseStartTime = currentTime
-                        spinSpeed = 0f
+
+                        // Log final landing segment
+                        val finalSegment = getSegmentAtPointer(rotation)
+                        Log.d(TAG, "Wheel stopped on segment: ${getSegmentName(finalSegment)}")
+                        Log.d(TAG, "Expected segment was: ${getSegmentName(expectedSegment)}")
+                        if (finalSegment != expectedSegment) {
+                            Log.e(TAG, "ERROR: Wheel landed on wrong segment!")
+                        }
+                    } else {
+                        // Easing function for smooth deceleration
+                        val easeOut = 1f - (1f - progress) * (1f - progress)
+                        rotation = currentRotation + (targetRotation - currentRotation) * easeOut
                     }
                 } else if (pauseAfterSpin) {
                     if (currentTime - pauseStartTime >= pauseDuration) {
@@ -178,9 +221,47 @@ class WheelView @JvmOverloads constructor(
 
     fun spin() {
         if (!isSpinning && !pauseAfterSpin) {
-            // Random number of full rotations (2-4 spins) plus random additional angle
-            val totalRotation = (kotlin.random.Random.nextFloat() * 2 + 2) * 360
-            spinSpeed = totalRotation / 50f
+            val currentSegment = getSegmentAtPointer(rotation)
+            Log.d(TAG, "Starting spin from segment: ${getSegmentName(currentSegment)}")
+
+            val targetSegment = determineTargetSegment()
+            expectedSegment = targetSegment
+            Log.d(TAG, "Target segment is: ${getSegmentName(targetSegment)}")
+
+            // Calculate required rotation to reach target segment center
+            val segmentAngle = 360f / segments.size
+            var requiredRotation = ((targetSegment - currentSegment) * segmentAngle)
+
+            // Calculate how much we can safely rotate within the target segment
+            // First, find where exactly in the target segment we'll land
+            val landingAngle = (270 - ((rotation - requiredRotation) % 360)) % 360
+            val angleWithinSegment = landingAngle % segmentAngle
+
+            // Calculate maximum safe offset in both directions
+            val maxOffsetLeft = angleWithinSegment  // distance to previous segment
+            val maxOffsetRight = segmentAngle - angleWithinSegment  // distance to next segment
+            val safeOffset = minOf(maxOffsetLeft, maxOffsetRight) * 0.9f // 90% of the minimum to be extra safe
+
+            // Generate random offset between -safeOffset and +safeOffset
+            val randomOffset = (Math.random() * 2 * safeOffset - safeOffset).toFloat()
+            requiredRotation += randomOffset
+
+            // Ensure we're always rotating clockwise
+            if (requiredRotation <= 0) requiredRotation += 360
+
+            // Add 6-7 full rotations for effect
+            val fullRotations = (6..7).random() * 360
+            targetRotation = rotation - (requiredRotation + fullRotations)
+
+            Log.d(TAG, "Landing angle within segment: $angleWithinSegment")
+            Log.d(TAG, "Safe offset range: $safeOffset degrees")
+            Log.d(TAG, "Applied random offset: $randomOffset degrees")
+            Log.d(TAG, "Required rotation: $requiredRotation degrees")
+            Log.d(TAG, "Total rotation with full spins: ${requiredRotation + fullRotations} degrees")
+
+            currentRotation = rotation
+            spinStartTime = System.currentTimeMillis()
+            spinDuration = 4000 // 4 seconds spin
             isSpinning = true
         }
     }
