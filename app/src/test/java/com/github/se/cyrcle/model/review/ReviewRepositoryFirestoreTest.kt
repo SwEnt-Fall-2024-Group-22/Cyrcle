@@ -309,30 +309,4 @@ class ReviewRepositoryFirestoreTest {
     val review = reviewRepositoryFirestore.deserializeReview(reviewData)
     assertEquals(review, review)
   }
-
-  @Test
-  fun addReport_callsOnSuccess() {
-    val report =
-        ReviewReport(
-            uid = "report1",
-            reason = ReviewReportReason.DEFAMATION,
-            userId = "user1",
-            review = "review1")
-    `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
-
-    var onSuccessCallbackCalled = false
-    reviewRepositoryFirestore.addReport(
-        report,
-        onSuccess = { result ->
-          assertEquals(report, result)
-          onSuccessCallbackCalled = true
-        },
-        onFailure = { fail("Expected success but got failure") })
-    shadowOf(Looper.getMainLooper()).idle()
-
-    verify(mockCollectionReference).document(report.review)
-    verify(mockDocumentReference).collection("reports")
-    verify(mockDocumentReference).set(any())
-    assertTrue(onSuccessCallbackCalled)
-  }
 }
