@@ -1,6 +1,7 @@
 package com.github.se.cyrcle.ui.profile
 
 import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -35,11 +36,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.Parking
+import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.authentication.Authenticator
 import com.github.se.cyrcle.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
+import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.Red
@@ -58,6 +61,7 @@ const val USERNAME_MAX_LENGTH = 32
 fun ViewProfileScreen(
     navigationActions: NavigationActions,
     userViewModel: UserViewModel,
+    parkingViewModel: ParkingViewModel,
     authenticator: Authenticator
 ) {
   fun areInputsValid(firstName: String, lastName: String, username: String): Boolean {
@@ -157,7 +161,7 @@ fun ViewProfileScreen(
 
               Spacer(modifier = Modifier.height(24.dp))
 
-              FavoriteParkingsSection(userViewModel)
+              FavoriteParkingsSection(userViewModel, parkingViewModel, navigationActions)
             }
           }
         }
@@ -165,7 +169,11 @@ fun ViewProfileScreen(
 }
 
 @Composable
-private fun FavoriteParkingsSection(userViewModel: UserViewModel) {
+private fun FavoriteParkingsSection(
+    userViewModel: UserViewModel,
+    parkingViewModel: ParkingViewModel,
+    navigationActions: NavigationActions
+) {
   val favoriteParkings = userViewModel.favoriteParkings.collectAsState().value
 
   LaunchedEffect(Unit) { userViewModel.getSelectedUserFavoriteParking() }
@@ -193,36 +201,55 @@ private fun FavoriteParkingsSection(userViewModel: UserViewModel) {
                 onRemove = {
                   userViewModel.removeFavoriteParkingFromSelectedUser(parking.uid)
                   userViewModel.getSelectedUserFavoriteParking()
-                })
+                },
+                parkingViewModel,
+                navigationActions)
           }
         }
   }
 }
 
 @Composable
-private fun FavoriteParkingCard(parking: Parking, index: Int, onRemove: () -> Unit) {
+private fun FavoriteParkingCard(
+    parking: Parking,
+    index: Int,
+    onRemove: () -> Unit,
+    parkingViewModel: ParkingViewModel,
+    navigationActions: NavigationActions
+) {
   var showConfirmDialog by remember { mutableStateOf(false) }
+  val context = LocalContext.current
 
-  Card(modifier = Modifier.size(120.dp).padding(8.dp), shape = MaterialTheme.shapes.medium) {
-    Box(modifier = Modifier.fillMaxSize()) {
-      Text(
-          text = parking.optName ?: "",
-          style = MaterialTheme.typography.bodySmall,
-          modifier = Modifier.align(Alignment.Center).padding(8.dp).testTag("ParkingItem_$index"))
+  Card(
+      modifier =
+          Modifier.size(120.dp)
+              .padding(8.dp)
+              .clickable(
+                  onClick = {
+                    parkingViewModel.selectParking(parking)
+                    navigationActions.navigateTo(Screen.PARKING_DETAILS)
+                  }),
+      shape = MaterialTheme.shapes.medium) {
+        Box(modifier = Modifier.fillMaxSize()) {
+          Text(
+              text = parking.optName ?: "",
+              style = MaterialTheme.typography.bodySmall,
+              modifier =
+                  Modifier.align(Alignment.Center).padding(8.dp).testTag("ParkingItem_$index"))
 
-      IconButton(
-          onClick = { showConfirmDialog = true },
-          modifier =
-              Modifier.align(Alignment.TopEnd).size(32.dp).testTag("FavoriteToggle_$index")) {
-            Icon(
-                imageVector = Icons.Default.Favorite,
-                contentDescription =
-                    stringResource(R.string.view_profile_screen_remove_from_favorite),
-                tint = Red,
-                modifier = Modifier.size(20.dp))
-          }
-    }
-  }
+          IconButton(
+              onClick = { showConfirmDialog = true },
+              modifier =
+                  Modifier.align(Alignment.TopEnd).size(32.dp).testTag("FavoriteToggle_$index")) {
+                Icon(
+                    imageVector = Icons.Default.Favorite,
+                    contentDescription =
+                        stringResource(R.string.view_profile_screen_remove_from_favorite),
+                    tint = Red,
+                    modifier = Modifier.size(20.dp))
+              }
+        }
+      }
 
   if (showConfirmDialog) {
     AlertDialog(
@@ -239,6 +266,7 @@ private fun FavoriteParkingCard(parking: Parking, index: Int, onRemove: () -> Un
               onClick = {
                 onRemove()
                 showConfirmDialog = false
+                Toast.makeText(context, "Removed from Favorites!", Toast.LENGTH_SHORT).show()
               }) {
                 Text(
                     stringResource(
