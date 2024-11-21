@@ -125,9 +125,14 @@ class WheelView @JvmOverloads constructor(
                             Log.e(TAG, "ERROR: Wheel landed on wrong segment!")
                         }
                     } else {
-                        // Easing function for smooth deceleration
-                        val easeOut = 1f - (1f - progress) * (1f - progress)
+                        // Quartic ease-out for more gradual slowdown
+                        val easeOut = 1f - (1f - progress) * (1f - progress) * (1f - progress) * (1f - progress)
                         rotation = currentRotation + (targetRotation - currentRotation) * easeOut
+
+                        // Optional: Log progress during spin (uncomment if needed)
+                        // if (progress % 0.1f < 0.016f) {  // Log approximately every 10% of progress
+                        //     Log.d(TAG, "Spin progress: ${(progress * 100).toInt()}%, easeOut: ${easeOut}")
+                        // }
                     }
                 } else if (pauseAfterSpin) {
                     if (currentTime - pauseStartTime >= pauseDuration) {
@@ -261,7 +266,7 @@ class WheelView @JvmOverloads constructor(
 
             currentRotation = rotation
             spinStartTime = System.currentTimeMillis()
-            spinDuration = 4000 // 4 seconds spin
+            spinDuration = 10000 // 10 seconds
             isSpinning = true
         }
     }
