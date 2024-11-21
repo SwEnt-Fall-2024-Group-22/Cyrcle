@@ -69,6 +69,7 @@ fun ViewProfileScreen(
   val context = LocalContext.current
   val userState by userViewModel.currentUser.collectAsState()
   var isEditing by remember { mutableStateOf(false) }
+  var signOut by remember { mutableStateOf(false) }
 
   val signOutToastText = stringResource(R.string.view_profile_on_sign_out_toast)
 
@@ -82,9 +83,43 @@ fun ViewProfileScreen(
       }) { innerPadding ->
         Box(Modifier.fillMaxSize().padding(innerPadding)) {
           authenticator.SignOutButton(Modifier.padding(10.dp).align(Alignment.TopEnd)) {
-            userViewModel.signOut()
-            Toast.makeText(context, signOutToastText, Toast.LENGTH_SHORT).show()
-            navigationActions.navigateTo(TopLevelDestinations.AUTH)
+            signOut = true
+          }
+
+          if (signOut) {
+            // Show sign out dialog to prevent accidental sign out
+            AlertDialog(
+                modifier = Modifier.testTag("SignOutDialog"),
+                onDismissRequest = {},
+                title = {
+                  Text(stringResource(R.string.view_profile_screen_sign_out_dialog_title))
+                },
+                text = {
+                  Text(stringResource(R.string.view_profile_screen_sign_out_dialog_message))
+                },
+                confirmButton = {
+                  TextButton(
+                      modifier = Modifier.testTag("SignOutDialogConfirmButton"),
+                      onClick = {
+                        userViewModel.signOut()
+                        Toast.makeText(context, signOutToastText, Toast.LENGTH_SHORT).show()
+                        navigationActions.navigateTo(TopLevelDestinations.AUTH)
+                        signOut = false
+                      }) {
+                        Text(
+                            stringResource(
+                                R.string.view_profile_screen_sign_out_dialog_action_button))
+                      }
+                },
+                dismissButton = {
+                  TextButton(
+                      modifier = Modifier.testTag("SignOutDialogCancelButton"),
+                      onClick = { signOut = false }) {
+                        Text(
+                            stringResource(
+                                R.string.view_profile_screen_sign_out_dialog_cancel_button))
+                      }
+                })
           }
 
           if (isEditing) {
