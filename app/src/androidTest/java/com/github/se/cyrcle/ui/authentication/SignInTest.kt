@@ -1,8 +1,10 @@
 package com.github.se.cyrcle.ui.authentication
 
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -53,8 +55,13 @@ class SignInTest {
     composeTestRule.setContent { SignInScreen(mockAuthenticator, navigationActions, userViewModel) }
   }
 
+  @OptIn(ExperimentalTestApi::class)
   @Test
   fun testComponentsAndFunctionality() = runTest {
+
+    // Trying to wait for the CI that fails.
+    composeTestRule.waitUntilAtLeastOneExists(hasTestTag("LoginTitle"))
+
     composeTestRule
         .onNodeWithTag("LoginTitle")
         .assertIsDisplayed()
