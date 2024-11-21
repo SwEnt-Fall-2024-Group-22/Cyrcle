@@ -11,7 +11,7 @@ package com.github.se.cyrcle.model.user
 data class UserPublic(
     val userId: String,
     val username: String,
-    val profilePictureCloudPath: String = "",
+    val profilePictureCloudPath: String? = "",
     // val accountCreationDate: Timestamp? = null,
     // val numberOfContributedSpots: Int = 0,
     // val userReputationScore: Int = 0
