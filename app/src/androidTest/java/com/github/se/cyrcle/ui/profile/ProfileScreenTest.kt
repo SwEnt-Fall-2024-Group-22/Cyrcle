@@ -8,9 +8,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.AuthenticatorMock
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
+import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.model.user.UserRepository
 import com.github.se.cyrcle.model.user.UserViewModel
@@ -29,6 +31,7 @@ class ProfileScreenTest {
   private lateinit var imageRepository: MockImageRepository
   private lateinit var userRepository: UserRepository
   private lateinit var parkingRepository: ParkingRepository
+  private lateinit var reportedObjectRepository: ReportedObjectRepository
   private lateinit var userViewModel: UserViewModel
   private lateinit var parkingViewModel: ParkingViewModel
 
@@ -41,8 +44,10 @@ class ProfileScreenTest {
     imageRepository = MockImageRepository()
     userRepository = MockUserRepository()
     parkingRepository = MockParkingRepository()
+    reportedObjectRepository = MockReportedObjectRepository()
     userViewModel = UserViewModel(userRepository, parkingRepository)
-    parkingViewModel = ParkingViewModel(imageRepository, parkingRepository)
+    parkingViewModel =
+        ParkingViewModel(imageRepository, parkingRepository, reportedObjectRepository)
 
     composeTestRule.setContent {
       ProfileScreen(mockNavigationActions, userViewModel, parkingViewModel, AuthenticatorMock())

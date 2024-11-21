@@ -22,6 +22,7 @@ import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserPublic
@@ -45,6 +46,7 @@ import org.mockito.MockitoAnnotations
 class AddScreensNavigationTest {
   @get:Rule val composeTestRule = createComposeRule()
 
+  @Mock lateinit var reportedObjectRepository: ReportedObjectRepository
   @Mock lateinit var mockedParkingRepository: ParkingRepository
   @Mock lateinit var mockedImageRepository: ImageRepository
 
@@ -136,7 +138,8 @@ class AddScreensNavigationTest {
     composeTestRule.setContent {
       val list = setUp()
       val navigationActions = list[0] as NavigationActions
-      val parkingViewModel = ParkingViewModel(mockedImageRepository, mockedParkingRepository)
+      val parkingViewModel =
+          ParkingViewModel(mockedImageRepository, mockedParkingRepository, reportedObjectRepository)
       val mapViewModel = list[4] as MapViewModel
       val addressViewModel = list[5] as AddressViewModel
       mapViewModel.updateLocation(Location(Point.fromLngLat(0.0, 0.0)))

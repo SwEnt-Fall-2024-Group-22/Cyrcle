@@ -6,6 +6,8 @@ import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.image.ImageRepositoryCloudStorage
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingRepositoryFirestore
+import com.github.se.cyrcle.model.report.ReportedObjectRepository
+import com.github.se.cyrcle.model.report.ReportedObjectRepositoryFirestore
 import com.github.se.cyrcle.model.review.ReviewRepository
 import com.github.se.cyrcle.model.review.ReviewRepositoryFirestore
 import com.github.se.cyrcle.model.user.UserRepository
@@ -45,6 +47,16 @@ abstract class RepoModule {
   @Singleton
   /** Binds the [UserRepositoryFirestore] implementation to the [UserRepository] interface. */
   abstract fun bindUserRepository(userRepositoryFirestore: UserRepositoryFirestore): UserRepository
+
+  @Binds
+  @Singleton
+  /**
+   * Binds the [ReportedObjectRepositoryFirestore] implementation to the [ReportedObjectRepository]
+   * interface.
+   */
+  abstract fun bindReportedObjectRepository(
+      reportedObjectRepositoryFirestore: ReportedObjectRepositoryFirestore
+  ): ReportedObjectRepository
 
   @Binds
   @Singleton

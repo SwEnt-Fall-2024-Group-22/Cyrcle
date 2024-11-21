@@ -11,12 +11,14 @@ import androidx.compose.ui.test.swipeRight
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
+import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockReviewRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
+import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.review.ReviewRepository
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.review.TestInstancesReview
@@ -43,6 +45,7 @@ class ReviewScreenTest {
   private lateinit var mockImageRepository: ImageRepository
   private lateinit var mockReviewRepository: ReviewRepository
   private lateinit var mockUserRepository: UserRepository
+  private lateinit var mockReportedObjectRepository: ReportedObjectRepository
 
   private lateinit var parkingViewModel: ParkingViewModel
   private lateinit var reviewViewModel: ReviewViewModel
@@ -56,10 +59,12 @@ class ReviewScreenTest {
     mockUserRepository = MockUserRepository()
     mockParkingRepository = MockParkingRepository()
     mockReviewRepository = MockReviewRepository()
+    mockReportedObjectRepository = MockReportedObjectRepository()
 
     userViewModel = UserViewModel(mockUserRepository, mockParkingRepository)
-    parkingViewModel = ParkingViewModel(mockImageRepository, mockParkingRepository)
-    reviewViewModel = ReviewViewModel(mockReviewRepository)
+    parkingViewModel =
+        ParkingViewModel(mockImageRepository, mockParkingRepository, mockReportedObjectRepository)
+    reviewViewModel = ReviewViewModel(mockReviewRepository, mockReportedObjectRepository)
 
     parkingViewModel.selectParking(TestInstancesParking.parking1)
     reviewViewModel.addReview(TestInstancesReview.review1)

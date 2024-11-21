@@ -19,6 +19,7 @@ import androidx.compose.ui.test.swipe
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
+import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.map.MapViewModel
@@ -28,6 +29,7 @@ import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
+import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserDetails
 import com.github.se.cyrcle.model.user.UserPublic
@@ -52,6 +54,7 @@ class ListScreenTest {
   private lateinit var mockUserRepository: UserRepository
   private lateinit var mockParkingRepository: ParkingRepository
   private lateinit var mockImageRepository: ImageRepository
+  private lateinit var mockReportedObjectRepository: ReportedObjectRepository
   private lateinit var mockNavigationActions: NavigationActions
   private lateinit var parkingViewModel: ParkingViewModel
   private lateinit var mapViewModel: MapViewModel
@@ -64,8 +67,10 @@ class ListScreenTest {
     mockUserRepository = MockUserRepository()
     mockParkingRepository = MockParkingRepository()
     mockImageRepository = MockImageRepository()
+    mockReportedObjectRepository = MockReportedObjectRepository()
 
-    parkingViewModel = ParkingViewModel(mockImageRepository, mockParkingRepository)
+    parkingViewModel =
+        ParkingViewModel(mockImageRepository, mockParkingRepository, mockReportedObjectRepository)
     mapViewModel = MapViewModel()
     userViewModel = UserViewModel(mockUserRepository, mockParkingRepository)
 

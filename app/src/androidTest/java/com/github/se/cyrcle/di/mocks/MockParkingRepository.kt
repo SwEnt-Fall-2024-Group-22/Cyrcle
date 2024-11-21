@@ -1,6 +1,8 @@
 package com.github.se.cyrcle.di.mocks
 
 import com.github.se.cyrcle.model.parking.Parking
+import com.github.se.cyrcle.model.parking.ParkingReport
+import com.github.se.cyrcle.model.parking.ParkingReportReason
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.mapbox.geojson.Point
@@ -9,6 +11,10 @@ import javax.inject.Inject
 class MockParkingRepository @Inject constructor() : ParkingRepository {
   var uid = 0
   private val parkings = mutableListOf(TestInstancesParking.parking1)
+  private val reports =
+      mutableListOf(
+          ParkingReport(
+              "1", ParkingReportReason.INEXISTANT, "1", TestInstancesParking.parking1.uid))
 
   override fun getNewUid(): String {
     return (uid++).toString()
@@ -84,5 +90,14 @@ class MockParkingRepository @Inject constructor() : ParkingRepository {
   ) {
     if (ids.any { it == "" }) onFailure(Exception("Error getting parkings"))
     else onSuccess(parkings.filter { it.uid in ids })
+  }
+
+  override fun addReport(
+      report: ParkingReport,
+      onSuccess: (ParkingReport) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    if (report.uid == "") onFailure(Exception("Error adding report"))
+    onSuccess(reports[0])
   }
 }

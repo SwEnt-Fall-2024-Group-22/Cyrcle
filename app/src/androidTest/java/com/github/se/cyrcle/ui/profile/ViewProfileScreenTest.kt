@@ -19,6 +19,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.AuthenticatorMock
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
+import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.model.parking.Parking
@@ -27,6 +28,7 @@ import com.github.se.cyrcle.model.parking.ParkingProtection
 import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
+import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserDetails
 import com.github.se.cyrcle.model.user.UserPublic
@@ -51,6 +53,7 @@ class ViewProfileScreenTest {
   private lateinit var mockUserRepository: MockUserRepository
   private lateinit var mockParkingRepository: MockParkingRepository
   private lateinit var mockImageRepository: MockImageRepository
+  private lateinit var mockReportedObjectRepository: ReportedObjectRepository
 
   private lateinit var userViewModel: UserViewModel
   private lateinit var parkingViewModel: ParkingViewModel
@@ -61,6 +64,7 @@ class ViewProfileScreenTest {
     mockUserRepository = MockUserRepository()
     mockParkingRepository = MockParkingRepository()
     mockImageRepository = MockImageRepository()
+    mockReportedObjectRepository = MockReportedObjectRepository()
 
     val user =
         User(
@@ -68,7 +72,8 @@ class ViewProfileScreenTest {
             UserDetails("Jane", "Smith", "jane.smith@example.com"))
 
     userViewModel = UserViewModel(mockUserRepository, mockParkingRepository)
-    parkingViewModel = ParkingViewModel(mockImageRepository, mockParkingRepository)
+    parkingViewModel =
+        ParkingViewModel(mockImageRepository, mockParkingRepository, mockReportedObjectRepository)
 
     userViewModel.signIn(user)
 

@@ -5,6 +5,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.image.ImageRepositoryCloudStorage
+import com.github.se.cyrcle.model.report.ReportReason
+import com.github.se.cyrcle.model.report.ReportedObject
+import com.github.se.cyrcle.model.report.ReportedObjectRepository
+import com.github.se.cyrcle.model.report.ReportedObjectRepositoryFirestore
+import com.github.se.cyrcle.model.report.ReportedObjectType
+import com.github.se.cyrcle.model.user.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -19,8 +25,10 @@ const val DEFAULT_RADIUS = 100.0
 const val MAX_RADIUS = 1000.0
 const val RADIUS_INCREMENT = 100.0
 const val MIN_NB_PARKINGS = 10
-
+const val NB_REPORTS_THRESH = 10
+const val NB_REPORTS_MAXSEVERITY_THRESH = 4
 const val PARKING_MAX_AREA = 1000.0
+const val MAX_SEVERITY = 3
 
 /**
  * ViewModel for the Parking feature.
@@ -29,7 +37,8 @@ const val PARKING_MAX_AREA = 1000.0
  */
 class ParkingViewModel(
     private val imageRepository: ImageRepository,
-    private val parkingRepository: ParkingRepository
+    private val parkingRepository: ParkingRepository,
+    private val reportedObjectRepository: ReportedObjectRepository,
 ) : ViewModel() {
 
   // ================== Parkings ==================
@@ -44,6 +53,10 @@ class ParkingViewModel(
   /** Selected parking to review/edit */
   private val _selectedParking = MutableStateFlow<Parking?>(null)
   val selectedParking: StateFlow<Parking?> = _selectedParking
+
+  /** Selected parking to review/edit */
+  private val _selectedParkingReports = MutableStateFlow<List<ParkingReport>?>(null)
+  val selectedParkingReports: StateFlow<List<ParkingReport>?> = _selectedParkingReports
 
   /**
    * Radius of the circle around the center to display parkings With a public getter to display the
@@ -289,6 +302,64 @@ class ParkingViewModel(
       incrementRadius()
     }
   }
+
+  /**
+   * Adds a report for the currently selected parking and updates the repository.
+   *
+   * This function first verifies that a parking is selected. If no parking is selected, it logs an
+   * error and returns. It then attempts to add the report to the parking repository. Upon
+   * successful addition, the report is evaluated against severity and threshold limits to determine
+   * if a `ReportedObject` should be created and added to the reported objects repository.
+   *
+   * Updates the selected parking's report count and severity metrics and ensures these changes are
+   * reflected in the repository.
+   *
+   * @param report The report to be added, which includes details such as the reason and user ID.
+   * @param user The user submitting the report, required for identifying the reporter.
+   */
+  fun addReport(report: ParkingReport, user: User) {
+    val selectedParking = _selectedParking.value
+    if (selectedParking == null) {
+      Log.e("ParkingViewModel", "No parking selected")
+      return
+    }
+
+    parkingRepository.addReport(
+        report,
+        onSuccess = {
+          // Check thresholds for reporting to `ReportedObjectRepository`
+          // i.e if it's max severity add it to the maximum severity count and check if it doesn't
+          // exceed the maximum severity threshold. Otherwise, check if it doesn't exceed
+          // the standard threshold
+          if ((report.reason.severity == MAX_SEVERITY &&
+              selectedParking.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERITY_THRESH) ||
+              (selectedParking.nbReports >= NB_REPORTS_THRESH)) {
+            reportedObjectRepository.addReportedObject(
+                ReportedObject(
+                    objectUID = selectedParking.uid,
+                    reportUID = report.uid,
+                    reason = ReportReason.Parking(report.reason),
+                    userUID = user.public.userId,
+                    objectType = ReportedObjectType.PARKING),
+                onSuccess = {},
+                onFailure = {})
+          }
+
+          // Update the local reports and parking metrics
+          _selectedParkingReports.update { currentReports ->
+            currentReports?.plus(it) ?: listOf(it)
+          }
+          if (report.reason.severity == MAX_SEVERITY) {
+            selectedParking.nbMaxSeverityReports += 1
+          }
+          selectedParking.nbReports += 1
+          parkingRepository.updateParking(selectedParking, {}, {})
+          Log.d("ParkingViewModel", "Report added successfully")
+        },
+        onFailure = { exception ->
+          Log.e("ParkingViewModel", "Error adding report: ${exception.message}", exception)
+        })
+  }
   // ================== Helper functions ==================
 
   // ================== Reviews ==================
@@ -373,7 +444,8 @@ class ParkingViewModel(
             return ParkingViewModel(
                 ImageRepositoryCloudStorage(
                     FirebaseAuth.getInstance(), FirebaseStorage.getInstance()),
-                ParkingRepositoryFirestore(FirebaseFirestore.getInstance()))
+                ParkingRepositoryFirestore(FirebaseFirestore.getInstance()),
+                ReportedObjectRepositoryFirestore(FirebaseFirestore.getInstance()))
                 as T
           }
         }

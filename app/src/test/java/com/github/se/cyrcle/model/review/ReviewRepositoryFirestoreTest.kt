@@ -38,7 +38,7 @@ class ReviewRepositoryFirestoreTest {
   @Mock private lateinit var mockReviewQuerySnapshot: QuerySnapshot
   @Mock private lateinit var mockQueryDocumentSnapshot: QueryDocumentSnapshot
 
-  private lateinit var reviewRepositoryFirestore: ReviewRepositoryFirestore
+  @Mock private lateinit var reviewRepositoryFirestore: ReviewRepositoryFirestore
 
   private val review = TestInstancesReview.review1
   private lateinit var mockReviewData: Map<String, Any>

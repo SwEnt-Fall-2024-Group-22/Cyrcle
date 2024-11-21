@@ -10,9 +10,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockPermissionHandler
+import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
@@ -33,7 +35,7 @@ class MapScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var mockNavigation: NavigationActions
-
+  private lateinit var mockReportedObjectRepository: ReportedObjectRepository
   private lateinit var parkingViewModel: ParkingViewModel
   private lateinit var userViewModel: UserViewModel
   private lateinit var mapViewModel: MapViewModel
@@ -42,12 +44,14 @@ class MapScreenTest {
   @Before
   fun setUp() {
     mockNavigation = mock(NavigationActions::class.java)
+    mockReportedObjectRepository = MockReportedObjectRepository()
 
     val imageRepository = MockImageRepository()
     val parkingRepository = MockParkingRepository()
     val userRepository = MockUserRepository()
 
-    parkingViewModel = ParkingViewModel(imageRepository, parkingRepository)
+    parkingViewModel =
+        ParkingViewModel(imageRepository, parkingRepository, mockReportedObjectRepository)
     userViewModel = UserViewModel(userRepository, parkingRepository)
     mapViewModel = MapViewModel()
     permissionHandler = MockPermissionHandler()

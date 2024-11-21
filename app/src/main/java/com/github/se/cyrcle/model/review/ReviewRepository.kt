@@ -69,4 +69,10 @@ interface ReviewRepository {
    * @param onFailure a callback that is called when an error occurs
    */
   fun deleteReviewById(id: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
+
+  fun addReport(
+      report: ReviewReport,
+      onSuccess: (ReviewReport) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
 }

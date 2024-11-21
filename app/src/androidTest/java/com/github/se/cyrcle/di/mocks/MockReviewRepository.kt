@@ -1,12 +1,18 @@
 package com.github.se.cyrcle.di.mocks
 
 import com.github.se.cyrcle.model.review.Review
+import com.github.se.cyrcle.model.review.ReviewReport
+import com.github.se.cyrcle.model.review.ReviewReportReason
 import com.github.se.cyrcle.model.review.ReviewRepository
+import com.github.se.cyrcle.model.review.TestInstancesReview
 import javax.inject.Inject
 
 class MockReviewRepository @Inject constructor() : ReviewRepository {
   private var uid = 0
   private val reviews = mutableListOf<Review>()
+  private val reports =
+      mutableListOf(
+          ReviewReport("1", ReviewReportReason.HARMFUL, "1", TestInstancesReview.review1.uid))
 
   override fun getNewUid(): String {
     return (uid++).toString()
@@ -60,5 +66,14 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
 
   override fun deleteReviewById(id: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     if (id == "") onFailure(Exception("Failed to delete review")) else onSuccess()
+  }
+
+  override fun addReport(
+      report: ReviewReport,
+      onSuccess: (ReviewReport) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    if (report.uid == "") onFailure(Exception("Error adding report"))
+    onSuccess(reports[0])
   }
 }

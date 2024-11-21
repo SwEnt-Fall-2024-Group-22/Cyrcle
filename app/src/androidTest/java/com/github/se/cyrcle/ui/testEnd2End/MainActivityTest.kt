@@ -181,12 +181,6 @@ class MainActivityTest {
       composeTestRule.onNodeWithTag("RowSecurity").assertIsDisplayed()
       composeTestRule.onNodeWithTag("ButtonsColumn").performScrollTo().assertIsDisplayed()
       composeTestRule.onNodeWithTag("ShowInMapButton").assertIsDisplayed().assertHasClickAction()
-      composeTestRule
-          .onNodeWithTag("ReportButton")
-          .assertExists()
-          .performScrollTo()
-          .assertIsDisplayed()
-          .assertHasClickAction()
     }
 
     @OptIn(ExperimentalTestApi::class)

@@ -12,6 +12,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
+import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockReviewRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.image.ImageRepository
@@ -21,6 +22,7 @@ import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
+import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.review.ReviewRepository
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.TestInstancesUser
@@ -42,6 +44,7 @@ class ParkingDetailsScreenTest {
   private lateinit var imageRepository: ImageRepository
   private lateinit var userRepository: UserRepository
   private lateinit var reviewRepository: ReviewRepository
+  private lateinit var mockReportedObjectRepository: ReportedObjectRepository
 
   private lateinit var userViewModel: UserViewModel
   private lateinit var parkingViewModel: ParkingViewModel
@@ -59,10 +62,12 @@ class ParkingDetailsScreenTest {
     imageRepository = MockImageRepository()
     userRepository = MockUserRepository()
     reviewRepository = MockReviewRepository()
+    mockReportedObjectRepository = MockReportedObjectRepository()
 
-    parkingViewModel = ParkingViewModel(imageRepository, parkingRepository)
+    parkingViewModel =
+        ParkingViewModel(imageRepository, parkingRepository, mockReportedObjectRepository)
     userViewModel = UserViewModel(userRepository, parkingRepository)
-    reviewViewModel = ReviewViewModel(reviewRepository)
+    reviewViewModel = ReviewViewModel(reviewRepository, mockReportedObjectRepository)
 
     parkingViewModel.addParking(TestInstancesParking.parking2)
     parkingViewModel.addParking(TestInstancesParking.parking3)
@@ -178,7 +183,6 @@ class ParkingDetailsScreenTest {
     // Scroll to the buttons section
     composeTestRule.onNodeWithTag("ButtonsColumn").performScrollTo().assertIsDisplayed()
     composeTestRule.onNodeWithTag("ShowInMapButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("ReportButton").assertIsDisplayed()
   }
 
   @Test

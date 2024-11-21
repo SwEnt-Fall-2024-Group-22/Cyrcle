@@ -41,6 +41,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.review.ReviewReport
+import com.github.se.cyrcle.model.review.ReviewReportReason
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
@@ -243,7 +245,11 @@ fun AllReviewsScreen(
                       items(items = sortedReviews) { curReview ->
                         val index = sortedReviews.indexOf(curReview)
                         val isExpanded = selectedCardIndex == index
-                        val cardHeight by animateDpAsState(if (isExpanded) 200.dp else 100.dp)
+                        val cardHeight by
+                            animateDpAsState(
+                                if (isExpanded) 250.dp
+                                else 150.dp) // Adjust card height to account for ReviewSize +
+                        // Report button
                         val cardColor = MaterialTheme.colorScheme.surfaceContainer
                         Card(
                             modifier =
@@ -267,6 +273,7 @@ fun AllReviewsScreen(
                                       uidOfOwner.value = it.public.username
                                     }
 
+                                    // Review details
                                     Text(
                                         text =
                                             stringResource(R.string.by_text)
@@ -292,6 +299,35 @@ fun AllReviewsScreen(
                                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                                         style = MaterialTheme.typography.bodySmall,
                                         modifier = Modifier.testTag("ReviewText$index"))
+                                    Spacer(modifier = Modifier.height(16.dp))
+
+                                    if (userViewModel.currentUser.value != null) {
+                                      FloatingActionButton(
+                                          onClick = {
+                                            reviewViewModel.selectReview(curReview)
+                                            reviewViewModel.addReport(
+                                                ReviewReport(
+                                                    "TEST0",
+                                                    ReviewReportReason.HARMFUL,
+                                                    userViewModel.currentUser.value?.public?.userId
+                                                        ?: "TESTUSER",
+                                                    curReview.uid),
+                                                userViewModel.currentUser.value!!)
+                                            Toast.makeText(
+                                                    context, "Review reported!", Toast.LENGTH_SHORT)
+                                                .show()
+                                          },
+                                          containerColor = MaterialTheme.colorScheme.error,
+                                          modifier =
+                                              Modifier.align(Alignment.CenterHorizontally)
+                                                  .height(36.dp)
+                                                  .testTag("ReportReviewButton$index")) {
+                                            Text(
+                                                text = stringResource(R.string.review_reported),
+                                                color = MaterialTheme.colorScheme.onError,
+                                                style = MaterialTheme.typography.bodySmall)
+                                          }
+                                    }
                                   }
                             }
                       }
