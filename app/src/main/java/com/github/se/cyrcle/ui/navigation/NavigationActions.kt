@@ -27,6 +27,7 @@ object Screen {
 
   const val LOCATION_PICKER = "Location Picker Screen"
   const val ATTRIBUTES_PICKER = "Attributes Picker Screen"
+  const val RACK_INFO = "Rack Info Screen"
 
   const val AUTH = "Auth Screen"
   const val VIEW_PROFILE = "Profile Screen"
@@ -73,8 +74,7 @@ open class NavigationActions(private val navController: NavHostController) {
     navController.navigate(destination.route) {
       // Pop up the whole back stack to the start destination
       popUpTo(0) { inclusive = true }
-      // Avoid multiple copies of the same destination when
-      // reselecting the same item
+      // Avoid multiple copies of the same destination when reselecting the same item
       launchSingleTop = true
       // Restore state when reselecting a previously selected item
       restoreState = true
