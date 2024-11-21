@@ -9,7 +9,9 @@ data class Review(
     val text: String,
     val rating: Double,
     val parking: String,
-    val time: Timestamp = Timestamp.now()
+    val time: Timestamp = Timestamp.now(),
+    var nbReports : Int = 0,
+    var nbMaxSeverityReports: Int = 0
 )
 
 enum class ReviewReportReason(override val description: String, val severity: Int) :

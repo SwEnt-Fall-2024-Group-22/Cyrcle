@@ -327,7 +327,7 @@ fun ParkingDetailsScreen(
                           onClick = {
                             parkingViewModel.addReport(
                                 ParkingReport(
-                                    "TEST0",
+                                    "TEST1",
                                     ParkingReportReason.INEXISTANT,
                                     userViewModel.currentUser.value?.public?.userId ?: "TESTUSER",
                                     selectedParking.uid),

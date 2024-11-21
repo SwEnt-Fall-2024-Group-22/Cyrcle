@@ -312,9 +312,12 @@ class ParkingViewModel(
     parkingRepository.addReport(
         report,
         onSuccess = {
+          Log.d("REPORT", report.reason.severity.toString())
+          Log.d("REPORT", selectedParking.nbMaxSeverityReports.toString())
           if ((report.reason.severity == 3 &&
               selectedParking.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERERITY_THRESH) ||
               (selectedParking.nbReports >= NB_REPORTS_THRESH)) {
+              Log.d("REPORT", "RIGHT PLACE")
             reportedObjectRepository.addReportedObject(
                 ReportedObject(
                     selectedParking.uid,
@@ -325,10 +328,15 @@ class ParkingViewModel(
                 {},
                 {})
           }
-
+          Log.d("REPORT", "WRONG PLACE")
           _selectedParkingReports.update { currentReports ->
             currentReports?.plus(it) ?: listOf(it)
           }
+          if(report.reason.severity == 3){
+              selectedParking.nbMaxSeverityReports += 1
+          }
+          selectedParking.nbReports += 1
+          parkingRepository.updateParking(selectedParking, {}, {})
           Log.d("ParkingViewModel", "Report added successfully")
         },
         onFailure = { exception ->

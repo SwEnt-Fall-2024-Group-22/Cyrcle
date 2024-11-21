@@ -1,7 +1,11 @@
 package com.github.se.cyrcle.model.parking
 
 import com.github.se.cyrcle.model.image.ImageRepository
+import com.github.se.cyrcle.model.report.ReportReason
+import com.github.se.cyrcle.model.report.ReportedObject
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
+import com.github.se.cyrcle.model.report.ReportedObjectType
+import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.mapbox.geojson.Point
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -102,6 +106,39 @@ class ParkingViewModelTest {
     assertEquals(2, parking.nbReviews) // Verify that the number of reviews decreased
 
     // Verify that the parking repository update method was called
+    verify(parkingRepository).updateParking(eq(parking), any(), any())
+  }
+
+  @Test
+  fun addReportTest() {
+    val parking = TestInstancesParking.parking1.copy(
+      nbReports = 0,
+      nbMaxSeverityReports = 0
+    )
+    val user = TestInstancesUser.user1
+    val report = ParkingReport(
+      uid = "report1",
+      reason = ParkingReportReason.SAFETY_CONCERN,
+      userId = user.public.userId,
+      parking = parking.uid
+    )
+
+    // Mock repository behavior for report addition
+    `when`(parkingRepository.addReport(eq(report), any(), any())).then {
+      it.getArgument<(ParkingReport) -> Unit>(1)(report)
+    }
+
+    parkingViewModel.selectParking(parking)
+    parkingViewModel.addReport(report, user)
+
+    // Verify that the report was added to the parking repository
+    verify(parkingRepository).addReport(eq(report), any(), any())
+
+    // Verify parking's report counters are updated
+    assertEquals(1, parking.nbReports) // Number of reports should increment
+    assertEquals(1, parking.nbMaxSeverityReports) // Max severity report counter should increment
+
+    // Verify the parking repository update method is called to persist changes
     verify(parkingRepository).updateParking(eq(parking), any(), any())
   }
 }
