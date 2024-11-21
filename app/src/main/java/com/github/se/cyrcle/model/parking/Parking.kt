@@ -61,7 +61,7 @@ enum class ParkingReportReason(override val description: String, val severity: I
     DropDownableEnum {
   POOR_MAINTENANCE("This Spot has Poor Maintenance", 1),
   INACCESSIBLE("This Spot is Inaccessible", 2),
-  ILLEGAL_SPOT("This Spot is in an Illegal Place", 2),
+  ILLEGAL_SPOT("This Spot is in an Illegal Place", 3),
   SAFETY_CONCERN("This Spot is in an Dangerous Place", 3),
   INEXISTANT("This Spot does Not Exist", 3)
 }
