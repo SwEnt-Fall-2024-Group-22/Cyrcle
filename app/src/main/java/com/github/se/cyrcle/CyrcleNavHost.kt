@@ -96,7 +96,7 @@ fun CyrcleNavHost(
         route = Route.VIEW_PROFILE,
     ) {
       composable(Screen.VIEW_PROFILE) {
-        ProfileScreen(navigationActions, userViewModel, authenticator)
+        ProfileScreen(navigationActions, userViewModel, parkingViewModel, authenticator)
       }
     }
   }
