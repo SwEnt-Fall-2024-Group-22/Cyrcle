@@ -94,14 +94,27 @@ class ViewProfileScreenTest {
   }
 
   @Test
-  fun testSignOut() {
+  fun testSignOutApproval() {
     composeTestRule.waitForIdle()
 
     composeTestRule.onNodeWithTag("SignOutButton").performClick()
     composeTestRule.waitForIdle()
 
-    assert(userViewModel.currentUser.value == null)
+    composeTestRule.onNodeWithTag("SignOutDialog").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("SignOutDialogConfirmButton").assertIsDisplayed().performClick()
     verify(mockNavigationActions).navigateTo(TopLevelDestinations.AUTH)
+  }
+
+  @Test
+  fun testSignOutRefuse() {
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithTag("SignOutButton").performClick()
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithTag("SignOutDialog").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("SignOutDialogCancelButton").assertIsDisplayed().performClick()
+    composeTestRule.onNodeWithTag("SignOutButton").assertIsDisplayed()
   }
 
   @Test

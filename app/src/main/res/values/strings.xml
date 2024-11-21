@@ -133,7 +133,10 @@
     <string name="view_profile_screen_remove_favorite_dialog_cancel_button">Cancel</string>
     <string name="view_profile_on_sign_out_toast">You\'re signed out!</string>
     <string name="view_profile_on_fav_parking_removal_toast">Removed from Favorites!</string>
-
+    <string name="view_profile_screen_sign_out_dialog_title">Sign Out ? </string>
+    <string name="view_profile_screen_sign_out_dialog_message">Are you sure you want to sign out?</string>
+    <string name="view_profile_screen_sign_out_dialog_action_button">Sign Out</string>
+    <string name="view_profile_screen_sign_out_dialog_cancel_button">Cancel</string>
 
     <!-- All Reviews Screen -->
     <string name="all_review_title">All Reviews For %s</string>
