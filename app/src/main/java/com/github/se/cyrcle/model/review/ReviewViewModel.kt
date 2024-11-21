@@ -3,8 +3,6 @@ package com.github.se.cyrcle.model.review
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.github.se.cyrcle.model.parking.NB_REPORTS_MAXSEVERERITY_THRESH
-import com.github.se.cyrcle.model.parking.NB_REPORTS_THRESH
 import com.github.se.cyrcle.model.report.ReportReason
 import com.github.se.cyrcle.model.report.ReportedObject
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
@@ -15,6 +13,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+
+const val NB_REPORTS_THRESH = 10
+const val NB_REPORTS_MAXSEVERITY_THRESH = 3
 
 class ReviewViewModel(
     private val reviewRepository: ReviewRepository,
@@ -75,7 +76,7 @@ class ReviewViewModel(
         report,
         onSuccess = {
           if ((report.reason.severity == 3 &&
-              selectedReview.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERERITY_THRESH) ||
+              selectedReview.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERITY_THRESH) ||
               (selectedReview.nbReports >= NB_REPORTS_THRESH)) {
             reportedObjectRepository.addReportedObject(
                 ReportedObject(
@@ -87,7 +88,6 @@ class ReviewViewModel(
                 {},
                 {})
           }
-
           if (report.reason.severity == 3) {
             selectedReview.nbMaxSeverityReports += 1
           }

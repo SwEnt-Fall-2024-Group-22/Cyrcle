@@ -26,7 +26,7 @@ const val MAX_RADIUS = 1000.0
 const val RADIUS_INCREMENT = 100.0
 const val MIN_NB_PARKINGS = 10
 const val NB_REPORTS_THRESH = 10
-const val NB_REPORTS_MAXSEVERERITY_THRESH = 4
+const val NB_REPORTS_MAXSEVERITY_THRESH = 4
 const val PARKING_MAX_AREA = 1000.0
 
 /**
@@ -312,12 +312,9 @@ class ParkingViewModel(
     parkingRepository.addReport(
         report,
         onSuccess = {
-          Log.d("REPORT", report.reason.severity.toString())
-          Log.d("REPORT", selectedParking.nbMaxSeverityReports.toString())
           if ((report.reason.severity == 3 &&
-              selectedParking.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERERITY_THRESH) ||
+              selectedParking.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERITY_THRESH) ||
               (selectedParking.nbReports >= NB_REPORTS_THRESH)) {
-            Log.d("REPORT", "RIGHT PLACE")
             reportedObjectRepository.addReportedObject(
                 ReportedObject(
                     selectedParking.uid,
@@ -328,7 +325,6 @@ class ParkingViewModel(
                 {},
                 {})
           }
-          Log.d("REPORT", "WRONG PLACE")
           _selectedParkingReports.update { currentReports ->
             currentReports?.plus(it) ?: listOf(it)
           }
