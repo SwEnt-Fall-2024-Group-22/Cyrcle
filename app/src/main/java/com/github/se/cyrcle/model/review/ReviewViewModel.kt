@@ -37,7 +37,7 @@ class ReviewViewModel(private val reviewRepository: ReviewRepository) : ViewMode
   }
 
   fun getReviewsByParking(parking: String) {
-    reviewRepository.getReviewByParking(
+    reviewRepository.getReviewsByParkingId(
         parking,
         { reviews -> _parkingReviews.value = reviews },
         { Log.e("ReviewViewModel", "Error getting reviews", it) })

@@ -26,19 +26,6 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
     return db.collection(collectionPath).document().id
   }
 
-  override fun getAllParkings(onSuccess: (List<Parking>) -> Unit, onFailure: (Exception) -> Unit) {
-    db.collection(collectionPath)
-        .get()
-        .addOnSuccessListener { querySnapshot ->
-          val parkings =
-              querySnapshot.documents.mapNotNull { document ->
-                document.data?.let { deserializeParking(it) }
-              }
-          onSuccess(parkings)
-        }
-        .addOnFailureListener { onFailure(it) }
-  }
-
   override fun getParkingById(
       id: String,
       onSuccess: (Parking) -> Unit,
@@ -138,13 +125,13 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
         .addOnFailureListener { onFailure(it) }
   }
 
-  private fun serializeParking(parking: Parking): Map<String, Any> {
+  fun serializeParking(parking: Parking): Map<String, Any> {
     val gson = GsonBuilder().registerTypeAdapter(Point::class.java, PointAdapter()).create()
     val json = gson.toJson(parking)
     return gson.fromJson(json, object : TypeToken<Map<String, Any>>() {}.type)
   }
 
-  private fun deserializeParking(map: Map<String, Any>): Parking {
+  fun deserializeParking(map: Map<String, Any>): Parking {
     val gson = GsonBuilder().registerTypeAdapter(Point::class.java, PointAdapter()).create()
     val json = gson.toJson(map)
     return gson.fromJson(json, Parking::class.java)

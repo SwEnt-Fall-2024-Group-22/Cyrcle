@@ -16,11 +16,6 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
     onSuccess()
   }
 
-  override fun getAllReviews(onSuccess: (List<Review>) -> Unit, onFailure: (Exception) -> Unit) {
-    if (reviews.none { it.uid == "" }) onSuccess(reviews)
-    else onFailure(Exception("Failed to get all reviews"))
-  }
-
   override fun getReviewById(
       id: String,
       onSuccess: (Review) -> Unit,
@@ -31,24 +26,24 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
     else onSuccess(reviews.find { it.uid == id }!!)
   }
 
-  override fun getReviewByParking(
-      id: String,
+  override fun getReviewsByParkingId(
+      parkingId: String,
       onSuccess: (List<Review>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    if (id == "" || reviews.none { it.parking == id })
+    if (parkingId == "" || reviews.none { it.parking == parkingId })
         onFailure(Exception("Failed to get review by parking id"))
-    else onSuccess(reviews.filter { it.parking == id })
+    else onSuccess(reviews.filter { it.parking == parkingId })
   }
 
-  override fun getReviewsByOwner(
-      owner: String,
+  override fun getReviewsByOwnerId(
+      ownerId: String,
       onSuccess: (List<Review>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    if (owner == "" || reviews.none { it.owner == owner })
+    if (ownerId == "" || reviews.none { it.owner == ownerId })
         onFailure(Exception("Failed to get review by parking id"))
-    else onSuccess(reviews.filter { it.owner == owner })
+    else onSuccess(reviews.filter { it.owner == ownerId })
   }
 
   override fun addReview(review: Review, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {

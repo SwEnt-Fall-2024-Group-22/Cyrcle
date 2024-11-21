@@ -16,14 +16,6 @@ interface ReviewRepository {
   fun onSignIn(onSuccess: () -> Unit)
 
   /**
-   * Get all reviews
-   *
-   * @param onSuccess a callback that is called when the reviews are retrieved
-   * @param onFailure a callback that is called when an error occurs
-   */
-  fun getAllReviews(onSuccess: (List<Review>) -> Unit, onFailure: (Exception) -> Unit)
-
-  /**
    * Get a review by its identifier
    *
    * @param id the identifier of the review
@@ -32,8 +24,8 @@ interface ReviewRepository {
    */
   fun getReviewById(id: String, onSuccess: (Review) -> Unit, onFailure: (Exception) -> Unit)
 
-  fun getReviewByParking(
-      id: String,
+  fun getReviewsByParkingId(
+      parkingId: String,
       onSuccess: (List<Review>) -> Unit,
       onFailure: (Exception) -> Unit
   )
@@ -41,12 +33,12 @@ interface ReviewRepository {
   /**
    * Get reviews for a specific owner (e.g., user or parking location)
    *
-   * @param owner the identifier of the owner (could be a user or parking location)
+   * @param ownerId the identifier of the owner (could be a user or parking location)
    * @param onSuccess a callback that is called when the reviews are retrieved
    * @param onFailure a callback that is called when an error occurs
    */
-  fun getReviewsByOwner(
-      owner: String,
+  fun getReviewsByOwnerId(
+      ownerId: String,
       onSuccess: (List<Review>) -> Unit,
       onFailure: (Exception) -> Unit
   )

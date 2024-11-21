@@ -61,19 +61,6 @@ class ReviewRepositoryFirestore @Inject constructor(private val db: FirebaseFire
     return db.collection(collectionPath).document().id
   }
 
-  override fun getAllReviews(onSuccess: (List<Review>) -> Unit, onFailure: (Exception) -> Unit) {
-    db.collection(collectionPath)
-        .get()
-        .addOnSuccessListener { querySnapshot ->
-          val reviews =
-              querySnapshot.documents.mapNotNull { document ->
-                document.data?.let { deserializeReview(it) }
-              }
-          onSuccess(reviews)
-        }
-        .addOnFailureListener { onFailure(it) }
-  }
-
   override fun getReviewById(
       id: String,
       onSuccess: (Review) -> Unit,
@@ -87,19 +74,19 @@ class ReviewRepositoryFirestore @Inject constructor(private val db: FirebaseFire
           if (review != null) {
             onSuccess(review)
           } else {
-            onFailure(Exception("Parking not found"))
+            onFailure(Exception("Review not found"))
           }
         }
         .addOnFailureListener { onFailure(it) }
   }
 
-  override fun getReviewsByOwner(
-      owner: String,
+  override fun getReviewsByOwnerId(
+      ownerId: String,
       onSuccess: (List<Review>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
     db.collection(collectionPath)
-        .whereEqualTo("owner", owner) // Querying the "owner" (UID) field in Review documents
+        .whereEqualTo("owner", ownerId) // Querying the "owner" (UID) field in Review documents
         .get()
         .addOnSuccessListener { querySnapshot ->
           val reviews =
@@ -111,13 +98,13 @@ class ReviewRepositoryFirestore @Inject constructor(private val db: FirebaseFire
         .addOnFailureListener { exception -> onFailure(exception) }
   }
 
-  override fun getReviewByParking(
-      parking: String,
+  override fun getReviewsByParkingId(
+      parkingId: String,
       onSuccess: (List<Review>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
     db.collection(collectionPath)
-        .whereEqualTo("parking", parking) // Querying the "owner" (UID) field in Review documents
+        .whereEqualTo("parking", parkingId) // Querying the "owner" (UID) field in Review documents
         .get()
         .addOnSuccessListener { querySnapshot ->
           val reviews =

@@ -27,11 +27,6 @@ class MockUserRepository @Inject constructor() : UserRepository {
     else onSuccess(_users.find { it.public.userId == userId }!!)
   }
 
-  override fun getAllUsers(onSuccess: (List<User>) -> Unit, onFailure: (Exception) -> Unit) {
-    if (_users.none { it.public.userId == "" }) onSuccess(_users)
-    else onFailure(Exception("Error getting users"))
-  }
-
   override fun addUser(user: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     if (user.public.userId == "") onFailure(Exception("Error adding user"))
     else {
