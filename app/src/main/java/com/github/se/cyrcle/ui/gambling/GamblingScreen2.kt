@@ -15,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -28,6 +29,19 @@ class WheelView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
+
+    private var isAnimating = true
+    private var animationRunnable: Runnable? = null
+
+    internal fun stopAnimation() {
+        isAnimating = false
+        animationRunnable?.let { removeCallbacks(it) }
+    }
+
+    internal fun startAnimation() {
+        isAnimating = true
+        animationRunnable?.let { post(it) }
+    }
 
     private val TAG = "WheelView"
 
@@ -312,11 +326,15 @@ fun GamblingScreen2() {
     var wheelView by remember { mutableStateOf<WheelView?>(null) }
 
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .testTag("gambling_screen"),
         contentAlignment = Alignment.Center
     ) {
         AndroidView(
-            modifier = Modifier.size(300.dp),
+            modifier = Modifier
+                .size(300.dp)
+                .testTag("wheel_view"),
             factory = { context ->
                 WheelView(context).also {
                     wheelView = it
@@ -330,7 +348,8 @@ fun GamblingScreen2() {
             },
             modifier = Modifier
                 .size(90.dp)
-                .clip(CircleShape),
+                .clip(CircleShape)
+                .testTag("spin_button"),
             colors = ButtonDefaults.buttonColors(
                 containerColor = androidx.compose.ui.graphics.Color.Red
             )
