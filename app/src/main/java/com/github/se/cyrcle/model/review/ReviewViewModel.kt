@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.update
 
 const val NB_REPORTS_THRESH = 10
 const val NB_REPORTS_MAXSEVERITY_THRESH = 3
+const val MAX_SEVERITY = 3
 
 class ReviewViewModel(
     private val reviewRepository: ReviewRepository,
@@ -92,7 +93,7 @@ class ReviewViewModel(
           // If it's a max severity report, add it to the maximum severity count and check if it
           // exceeds the maximum severity threshold. Otherwise, check if it exceeds the standard
           // threshold.
-          if ((report.reason.severity == 3 &&
+          if ((report.reason.severity == MAX_SEVERITY &&
               selectedReview.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERITY_THRESH) ||
               (selectedReview.nbReports >= NB_REPORTS_THRESH)) {
             reportedObjectRepository.addReportedObject(
@@ -107,7 +108,7 @@ class ReviewViewModel(
           }
 
           // Update the local reports and review metrics
-          if (report.reason.severity == 3) {
+          if (report.reason.severity == MAX_SEVERITY) {
             selectedReview.nbMaxSeverityReports += 1
           }
           selectedReview.nbReports += 1

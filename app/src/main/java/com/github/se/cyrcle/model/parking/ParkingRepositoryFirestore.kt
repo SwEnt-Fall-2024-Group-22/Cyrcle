@@ -131,17 +131,11 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
       onFailure: (Exception) -> Unit
   ) {
     val reportId = getNewUid() // Generate a new unique ID for the report
-    val reportData =
-        mapOf(
-            "id" to report.uid,
-            "reason" to report.reason,
-            "user" to report.userId,
-            "parking" to report.parking)
     db.collection(collectionPath)
         .document(report.parking)
         .collection("reports")
         .document(reportId)
-        .set(reportData)
+        .set(report)
         .addOnSuccessListener { onSuccess(report) }
         .addOnFailureListener { onFailure(it) }
   }

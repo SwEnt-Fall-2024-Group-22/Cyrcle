@@ -28,6 +28,7 @@ const val MIN_NB_PARKINGS = 10
 const val NB_REPORTS_THRESH = 10
 const val NB_REPORTS_MAXSEVERITY_THRESH = 4
 const val PARKING_MAX_AREA = 1000.0
+const val MAX_SEVERITY = 3
 
 /**
  * ViewModel for the Parking feature.
@@ -330,7 +331,7 @@ class ParkingViewModel(
           // i.e if it's max severity add it to the maximum severity count and check if it doesn't
           // exceed the maximum severity threshold. Otherwise, check if it doesn't exceed
           // the standard threshold
-          if ((report.reason.severity == 3 &&
+          if ((report.reason.severity == MAX_SEVERITY &&
               selectedParking.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERITY_THRESH) ||
               (selectedParking.nbReports >= NB_REPORTS_THRESH)) {
             reportedObjectRepository.addReportedObject(
@@ -348,7 +349,7 @@ class ParkingViewModel(
           _selectedParkingReports.update { currentReports ->
             currentReports?.plus(it) ?: listOf(it)
           }
-          if (report.reason.severity == 3) {
+          if (report.reason.severity == MAX_SEVERITY) {
             selectedParking.nbMaxSeverityReports += 1
           }
           selectedParking.nbReports += 1
