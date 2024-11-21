@@ -248,10 +248,8 @@ fun AllReviewsScreen(
                         val cardHeight by
                             animateDpAsState(
                                 if (isExpanded) 250.dp
-                                else
-                                    150
-                                        .dp) // Adjust card height to account for ReviewSize +
-                                             // Report button
+                                else 150.dp) // Adjust card height to account for ReviewSize +
+                        // Report button
                         val cardColor = MaterialTheme.colorScheme.surfaceContainer
                         Card(
                             modifier =
