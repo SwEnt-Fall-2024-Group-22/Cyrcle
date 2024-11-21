@@ -12,6 +12,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
+import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockReviewRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.image.ImageRepository
@@ -61,6 +62,8 @@ class ParkingDetailsScreenTest {
     imageRepository = MockImageRepository()
     userRepository = MockUserRepository()
     reviewRepository = MockReviewRepository()
+    mockReportedObjectRepository = MockReportedObjectRepository()
+
 
     parkingViewModel =
         ParkingViewModel(imageRepository, parkingRepository, mockReportedObjectRepository)
@@ -181,7 +184,6 @@ class ParkingDetailsScreenTest {
     // Scroll to the buttons section
     composeTestRule.onNodeWithTag("ButtonsColumn").performScrollTo().assertIsDisplayed()
     composeTestRule.onNodeWithTag("ShowInMapButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("ReportButton").assertIsDisplayed()
   }
 
   @Test

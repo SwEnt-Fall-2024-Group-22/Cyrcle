@@ -321,20 +321,23 @@ fun ParkingDetailsScreen(
                         colorLevel = ColorLevel.PRIMARY,
                         testTag = "ShowInMapButton")
 
-                    Button(
-                        text = stringResource(R.string.card_screen_report),
-                        onClick = {
-                          parkingViewModel.addReport(
-                              ParkingReport(
-                                  "TEST0",
-                                  ParkingReportReason.INEXISTANT,
-                                  userViewModel.currentUser.value?.public?.userId ?: "TESTUSER",
-                                  selectedParking.uid))
-                          Toast.makeText(context, "Report added!", Toast.LENGTH_LONG).show()
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        colorLevel = ColorLevel.ERROR,
-                        testTag = "ReportButton")
+                    if (userViewModel.currentUser.value != null) {
+                      Button(
+                          text = stringResource(R.string.card_screen_report),
+                          onClick = {
+                            parkingViewModel.addReport(
+                                ParkingReport(
+                                    "TEST0",
+                                    ParkingReportReason.INEXISTANT,
+                                    userViewModel.currentUser.value?.public?.userId ?: "TESTUSER",
+                                    selectedParking.uid),
+                                userViewModel.currentUser.value!!)
+                            Toast.makeText(context, "Report added!", Toast.LENGTH_LONG).show()
+                          },
+                          modifier = Modifier.fillMaxWidth(),
+                          colorLevel = ColorLevel.ERROR,
+                          testTag = "ReportButton")
+                    }
                   }
             }
       }

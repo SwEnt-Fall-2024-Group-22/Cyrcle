@@ -1,6 +1,7 @@
 package com.github.se.cyrcle.model.parking
 
 import com.github.se.cyrcle.model.image.ImageRepository
+import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.mapbox.geojson.Point
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -20,12 +21,14 @@ class ParkingViewModelTest {
   @Mock private lateinit var parkingViewModel: ParkingViewModel
   @Mock private lateinit var parkingRepository: ParkingRepository
   @Mock private lateinit var imageRepository: ImageRepository
+  @Mock private lateinit var reportedObjectRepository: ReportedObjectRepository
 
   @Before
   fun setUp() {
     MockitoAnnotations.openMocks(this)
 
-    parkingViewModel = ParkingViewModel(imageRepository, parkingRepository)
+    parkingViewModel =
+        ParkingViewModel(imageRepository, parkingRepository, reportedObjectRepository)
   }
 
   @Test

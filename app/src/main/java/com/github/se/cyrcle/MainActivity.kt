@@ -1,5 +1,6 @@
 package com.github.se.cyrcle
 
+import CyrcleNavHost
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -16,6 +17,7 @@ import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.review.ReviewRepository
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.UserRepository
@@ -40,6 +42,8 @@ class MainActivity : ComponentActivity() {
 
   @Inject lateinit var addressRepository: AddressRepository
 
+  @Inject lateinit var reportedObjectRepository: ReportedObjectRepository
+
   @Inject lateinit var permissionsHandler: PermissionHandler
 
   @Inject lateinit var authenticator: Authenticator
@@ -51,7 +55,7 @@ class MainActivity : ComponentActivity() {
     CustomViewModelFactory { UserViewModel(userRepository, parkingRepository, imageRepository) }
   }
   private val parkingViewModel: ParkingViewModel by viewModels {
-    CustomViewModelFactory { ParkingViewModel(imageRepository, parkingRepository) }
+    CustomViewModelFactory { ParkingViewModel(imageRepository, parkingRepository, reportedObjectRepository) }
   }
   private val mapViewModel: MapViewModel by viewModels { CustomViewModelFactory { MapViewModel() } }
   private val addressViewModel: AddressViewModel by viewModels {
