@@ -247,7 +247,11 @@ fun AllReviewsScreen(
                         val isExpanded = selectedCardIndex == index
                         val cardHeight by
                             animateDpAsState(
-                                if (isExpanded) 250.dp else 150.dp) // Adjust card height
+                                if (isExpanded) 250.dp
+                                else
+                                    150
+                                        .dp) // Adjust card height to account for ReviewSize +
+                                             // Report button
                         val cardColor = MaterialTheme.colorScheme.surfaceContainer
                         Card(
                             modifier =
@@ -321,8 +325,7 @@ fun AllReviewsScreen(
                                                   .height(36.dp)
                                                   .testTag("ReportReviewButton$index")) {
                                             Text(
-                                                text =
-                                                    "REPORT REVIEW", // Add this string to resources
+                                                text = stringResource(R.string.review_reported),
                                                 color = MaterialTheme.colorScheme.onError,
                                                 style = MaterialTheme.typography.bodySmall)
                                           }

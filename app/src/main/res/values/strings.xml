@@ -164,6 +164,7 @@
     <string name="add_review">Add Review</string>
     <string name="edit_review">Edit Review</string>
     <string name="review_deleted">Review Deleted!</string>
+    <string name="review_reported">Review Reported!</string>
 
     <!-- Review Screen -->
     <string name="review_screen_title_new_review">Add your review</string>
