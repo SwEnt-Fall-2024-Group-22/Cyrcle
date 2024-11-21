@@ -19,5 +19,5 @@ fun ProfileScreen(
 
   if (isSignedIn)
       ViewProfileScreen(navigationActions, userViewModel, parkingViewModel, authenticator)
-  else CreateProfileScreen(navigationActions, authenticator, userViewModel)
+  else InviteToAuthScreen(navigationActions)
 }
