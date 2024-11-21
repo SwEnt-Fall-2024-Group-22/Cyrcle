@@ -61,7 +61,7 @@ class SignInTest {
 
     // Trying to wait for the CI that fails.
     composeTestRule.waitUntilAtLeastOneExists(hasTestTag("LoginTitle"))
-
+    composeTestRule.waitForIdle()
     composeTestRule
         .onNodeWithTag("LoginTitle")
         .assertIsDisplayed()
