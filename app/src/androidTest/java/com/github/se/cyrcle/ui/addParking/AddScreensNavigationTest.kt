@@ -137,7 +137,8 @@ class AddScreensNavigationTest {
     composeTestRule.setContent {
       val list = setUp()
       val navigationActions = list[0] as NavigationActions
-      val parkingViewModel = ParkingViewModel(mockedImageRepository, mockedParkingRepository)
+      val parkingViewModel =
+          ParkingViewModel(mockedImageRepository, mockedParkingRepository, reportedObjectRepository)
       val mapViewModel = list[4] as MapViewModel
       val addressViewModel = list[5] as AddressViewModel
       mapViewModel.updateLocation(Location(Point.fromLngLat(0.0, 0.0)))

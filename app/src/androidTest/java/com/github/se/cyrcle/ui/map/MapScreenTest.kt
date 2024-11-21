@@ -13,6 +13,7 @@ import com.github.se.cyrcle.di.mocks.MockPermissionHandler
 import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
@@ -33,7 +34,7 @@ class MapScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var mockNavigation: NavigationActions
-
+  private lateinit var mockReportedObjectRepository: ReportedObjectRepository
   private lateinit var parkingViewModel: ParkingViewModel
   private lateinit var userViewModel: UserViewModel
   private lateinit var mapViewModel: MapViewModel
@@ -47,7 +48,8 @@ class MapScreenTest {
     val parkingRepository = MockParkingRepository()
     val userRepository = MockUserRepository()
 
-    parkingViewModel = ParkingViewModel(imageRepository, parkingRepository)
+    parkingViewModel =
+        ParkingViewModel(imageRepository, parkingRepository, mockReportedObjectRepository)
     userViewModel = UserViewModel(userRepository, parkingRepository)
     mapViewModel = MapViewModel()
     permissionHandler = MockPermissionHandler()

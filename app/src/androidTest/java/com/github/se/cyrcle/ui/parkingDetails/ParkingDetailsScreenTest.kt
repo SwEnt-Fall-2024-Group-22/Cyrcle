@@ -21,6 +21,7 @@ import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
+import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.review.ReviewRepository
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.TestInstancesUser
@@ -42,6 +43,7 @@ class ParkingDetailsScreenTest {
   private lateinit var imageRepository: ImageRepository
   private lateinit var userRepository: UserRepository
   private lateinit var reviewRepository: ReviewRepository
+  private lateinit var mockReportedObjectRepository: ReportedObjectRepository
 
   private lateinit var userViewModel: UserViewModel
   private lateinit var parkingViewModel: ParkingViewModel
@@ -60,7 +62,8 @@ class ParkingDetailsScreenTest {
     userRepository = MockUserRepository()
     reviewRepository = MockReviewRepository()
 
-    parkingViewModel = ParkingViewModel(imageRepository, parkingRepository)
+    parkingViewModel =
+        ParkingViewModel(imageRepository, parkingRepository, mockReportedObjectRepository)
     userViewModel = UserViewModel(userRepository, parkingRepository)
     reviewViewModel = ReviewViewModel(reviewRepository)
 

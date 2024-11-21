@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
+import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockReviewRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
@@ -30,7 +31,9 @@ class AllReviewsScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   private val navigationActions = mock(NavigationActions::class.java)
-  private val parkingViewModel = ParkingViewModel(MockImageRepository(), MockParkingRepository())
+  private val parkingViewModel =
+      ParkingViewModel(
+          MockImageRepository(), MockParkingRepository(), MockReportedObjectRepository())
   private val reviewViewModel = ReviewViewModel(MockReviewRepository())
   private val userViewModel = UserViewModel(MockUserRepository(), MockParkingRepository())
 
