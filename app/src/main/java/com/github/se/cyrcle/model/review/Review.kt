@@ -12,12 +12,13 @@ data class Review(
     val time: Timestamp = Timestamp.now()
 )
 
-enum class ReviewReportReason(override val description: String) : DropDownableEnum {
-  IRRELEVANT("This Review is Irrelevant"),
-  DUPLICATE("This Review is Spam/ Abusive Duplicate of another User's"),
-  DEFAMATION("This Review is Defamation"),
-  MISLEADING("This Review is Misleading"),
-  HARMFUL("This Review is Harmful")
+enum class ReviewReportReason(override val description: String, val severity: Int) :
+    DropDownableEnum {
+  IRRELEVANT("This Review is Irrelevant", 1),
+  DUPLICATE("This Review is Spam/ Abusive Duplicate of another User's", 2),
+  DEFAMATION("This Review is Defamation", 2),
+  MISLEADING("This Review is Misleading", 3),
+  HARMFUL("This Review is Harmful", 3)
 }
 
 data class ReviewReport(

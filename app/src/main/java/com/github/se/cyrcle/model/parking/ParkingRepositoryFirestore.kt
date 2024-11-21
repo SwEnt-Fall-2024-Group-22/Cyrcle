@@ -138,7 +138,7 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
             "user" to report.userId,
             "parking" to report.parking)
     db.collection(collectionPath)
-        .document(report.parking.uid)
+        .document(report.parking)
         .collection("reports")
         .document(reportId)
         .set(reportData)

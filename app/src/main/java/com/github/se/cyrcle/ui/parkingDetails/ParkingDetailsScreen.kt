@@ -40,6 +40,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.model.parking.ParkingReport
+import com.github.se.cyrcle.model.parking.ParkingReportReason
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
@@ -322,11 +324,13 @@ fun ParkingDetailsScreen(
                     Button(
                         text = stringResource(R.string.card_screen_report),
                         onClick = {
-                          Toast.makeText(
-                                  context,
-                                  "A report system will be added to the app later",
-                                  Toast.LENGTH_LONG)
-                              .show()
+                          parkingViewModel.addReport(
+                              ParkingReport(
+                                  "TEST0",
+                                  ParkingReportReason.INEXISTANT,
+                                  userViewModel.currentUser.value?.public?.userId ?: "TESTUSER",
+                                  selectedParking.uid))
+                          Toast.makeText(context, "Report added!", Toast.LENGTH_LONG).show()
                         },
                         modifier = Modifier.fillMaxWidth(),
                         colorLevel = ColorLevel.ERROR,
