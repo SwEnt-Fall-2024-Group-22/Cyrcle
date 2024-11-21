@@ -15,11 +15,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.github.se.cyrcle.R
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -29,33 +31,27 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     View(context, attrs, defStyleAttr) {
 
   private val TAG = "WheelView"
-
   private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+
+  private data class Segment(val name: String, val color: Int, val probability: Float)
+
   private val segments =
       listOf(
-          Segment("Nothing", Color.GRAY),
-          Segment("Legendary", Color.rgb(255, 215, 0)),
-          Segment("Common", Color.GREEN),
-          Segment("Rare", Color.BLUE),
-          Segment("Epic", Color.rgb(128, 0, 128)))
-
-  private val probabilities =
-      listOf(
-          50f, // Nothing: 50%
-          0.1f, // Legendary: 0.5%
-          32f, // Common: 30%
-          16f, // Rare: 15%
-          1.9f // Epic: 4.5%
+          Segment("Nothing", Color.GRAY, 50f), // 50%
+          Segment("Legendary", Color.rgb(255, 215, 0), 0.1f), // 0.1%
+          Segment("Common", Color.GREEN, 32f), // 32%
+          Segment("Rare", Color.BLUE, 16f), // 16%
+          Segment("Epic", Color.rgb(128, 0, 128), 1.9f) // 1.9%
           )
 
   private var isAnimating = true
-  private var animationRunnable: Runnable? = null
+  private lateinit var animationRunnable: Runnable
 
   // Range mapping for probabilities
   private val probabilityRanges = run {
     var currentValue = 0
-    probabilities.map { probability ->
-      val range = (probability * 10).toInt()
+    segments.map { segment ->
+      val range = (segment.probability * 10).toInt()
       val start = currentValue
       currentValue += range
       start until currentValue
@@ -75,16 +71,14 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
   private val pauseDuration = 2000L
   private var expectedSegment = 0 // To track expected segment for logging
 
-  private data class Segment(val name: String, val color: Int)
-
   internal fun stopAnimation() {
     isAnimating = false
-    animationRunnable?.let { removeCallbacks(it) }
+    removeCallbacks(animationRunnable)
   }
 
   private fun getSegmentAtPointer(rotation: Float): Int {
     val segmentAngle = 360f / segments.size
-    val normalizedAngle = (270 - (rotation % 360)) % 360
+    val normalizedAngle = (270 - rotation) % 360
     return (normalizedAngle / segmentAngle).toInt()
   }
 
@@ -157,7 +151,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
           }
         }
 
-    post(animationRunnable!!)
+    post(animationRunnable)
   }
 
   override fun onDraw(canvas: Canvas) {
@@ -299,14 +293,12 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
       targetRotation = rotation - (requiredRotation + fullRotations)
 
       Log.d(TAG, "Landing angle within segment: $angleWithinSegment")
-      Log.d(TAG, "Applied offset: $randomOffset degrees")
-      Log.d(TAG, "Required rotation: $requiredRotation degrees")
       Log.d(TAG, "Total rotation with full spins: ${requiredRotation + fullRotations} degrees")
       Log.d(TAG, "Near-miss triggered: $shouldTriggerNearMiss")
 
       currentRotation = rotation
       spinStartTime = System.currentTimeMillis()
-      spinDuration = 10000 // 4 seconds spin
+      spinDuration = 10000 // 10 seconds spin
       isSpinning = true
     }
   }
@@ -335,7 +327,7 @@ fun GamblingScreen(onWheelViewCreated: ((WheelView) -> Unit)? = null) {
                 ButtonDefaults.buttonColors(
                     containerColor = androidx.compose.ui.graphics.Color.Red)) {
               Text(
-                  "SPIN",
+                  text = stringResource(R.string.spin_button_text),
                   fontSize = 16.sp,
                   fontWeight = FontWeight.Bold,
                   textAlign = TextAlign.Center,

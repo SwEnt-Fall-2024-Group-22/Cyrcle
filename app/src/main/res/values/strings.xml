@@ -186,4 +186,7 @@
 
     <!-- TopAppBar -->
     <string name="top_app_bar_go_back">Go Back</string>
+
+    <!-- GamblingScreen -->
+    <string name="spin_button_text">SPIN</string>
 </resources>
