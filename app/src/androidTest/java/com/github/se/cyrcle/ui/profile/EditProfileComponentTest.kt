@@ -43,7 +43,7 @@ class EditProfileComponentTest {
   }
 
   @Test
-  fun testEditProfileComponent() {
+  fun testEditProfileComponentHorizontalButtons() {
     val user = TestInstancesUser.user1
 
     composeTestRule.setContent { EditProfileComponent(user, { SaveButton() }, { CancelButton() }) }
@@ -67,6 +67,39 @@ class EditProfileComponentTest {
         .assertIsDisplayed()
         .assertTextContains(user.public.username)
 
+    composeTestRule.onNodeWithTag("EditComponentButtonRow").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("SaveButton", useUnmergedTree = true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("CancelButton", useUnmergedTree = true).assertIsDisplayed()
+  }
+
+  @Test
+  fun testEditProfileComponentVerticalButtons() {
+    val user = TestInstancesUser.user1
+
+    composeTestRule.setContent {
+      EditProfileComponent(user, { SaveButton() }, { CancelButton() }, verticalButtonDisplay = true)
+    }
+
+    composeTestRule.onNodeWithTag("NullUserText").assertDoesNotExist()
+
+    composeTestRule.onNodeWithTag("ProfileImage").assertIsDisplayed().assertHasClickAction()
+
+    composeTestRule
+        .onNodeWithTag("FirstNameField")
+        .assertIsDisplayed()
+        .assertTextContains(user.details?.firstName ?: "")
+
+    composeTestRule
+        .onNodeWithTag("LastNameField")
+        .assertIsDisplayed()
+        .assertTextContains(user.details?.lastName ?: "")
+
+    composeTestRule
+        .onNodeWithTag("UsernameField")
+        .assertIsDisplayed()
+        .assertTextContains(user.public.username)
+
+    composeTestRule.onNodeWithTag("EditComponentButtonRow").assertDoesNotExist()
     composeTestRule.onNodeWithTag("SaveButton", useUnmergedTree = true).assertIsDisplayed()
     composeTestRule.onNodeWithTag("CancelButton", useUnmergedTree = true).assertIsDisplayed()
   }

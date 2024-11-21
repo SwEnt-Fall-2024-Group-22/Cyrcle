@@ -37,7 +37,9 @@ import com.github.se.cyrcle.ui.theme.atoms.Text
 fun EditProfileComponent(
     user: User?,
     saveButton: @Composable (User) -> Unit,
-    cancelButton: @Composable () -> Unit
+    cancelButton: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    verticalButtonDisplay: Boolean = false
 ) {
   if (user == null) {
     Text(stringResource(R.string.profile_is_null), Modifier.testTag("NullUserText"))
@@ -52,6 +54,15 @@ fun EditProfileComponent(
   // To display the local profile picture when the user changes it, and hasn't uploaded (saved) it
   var hasTemporarilyChangedProfilePicture by remember { mutableStateOf(false) }
 
+  fun copyUser(user: User): User {
+    return user.copy(
+        public = user.public.copy(username = username),
+        details = user.details?.copy(firstName = firstName, lastName = lastName),
+        localSession =
+            user.localSession?.copy(profilePictureUri = profilePictureUri)
+                ?: LocalSession(profilePictureUri = profilePictureUri))
+  }
+
   val imagePickerLauncher =
       rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let { profilePictureUri = it.toString() }
@@ -59,7 +70,7 @@ fun EditProfileComponent(
       }
 
   Column(
-      modifier = Modifier.fillMaxSize().padding(16.dp).testTag("ProfileContent"),
+      modifier = modifier.fillMaxSize().padding(top = 15.dp).testTag("ProfileContent"),
       horizontalAlignment = Alignment.CenterHorizontally) {
         ProfileImageComponent(
             url = if (hasTemporarilyChangedProfilePicture) profilePictureUri else profilePictureUrl,
@@ -99,16 +110,16 @@ fun EditProfileComponent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (verticalButtonDisplay) {
+          saveButton(copyUser(user))
           cancelButton()
-
-          saveButton(
-              // Use .copy to not lose the local session and avoid re-fetching the user from db.
-              user.copy(
-                  user.public.copy(username = username),
-                  user.details?.copy(firstName = firstName, lastName = lastName),
-                  user.localSession?.copy(profilePictureUri = profilePictureUri)
-                      ?: LocalSession(profilePictureUri = profilePictureUri)))
+        } else {
+          Row(
+              modifier = Modifier.testTag("EditComponentButtonRow"),
+              horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                cancelButton()
+                saveButton(copyUser(user))
+              }
         }
       }
 }

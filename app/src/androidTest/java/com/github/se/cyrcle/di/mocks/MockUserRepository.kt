@@ -6,7 +6,8 @@ import javax.inject.Inject
 
 class MockUserRepository @Inject constructor() : UserRepository {
   private var uid = 0
-  private val users = mutableListOf<User>()
+  private val _users = mutableListOf<User>()
+  val users: List<User> = _users
 
   override fun onSignIn(onSuccess: () -> Unit) {
     onSuccess()
@@ -21,30 +22,30 @@ class MockUserRepository @Inject constructor() : UserRepository {
       onSuccess: (User) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    if (userId == "" || users.none { it.public.userId == userId })
+    if (userId == "" || _users.none { it.public.userId == userId })
         onFailure(Exception("Error getting user"))
-    else onSuccess(users.find { it.public.userId == userId }!!)
+    else onSuccess(_users.find { it.public.userId == userId }!!)
   }
 
   override fun getAllUsers(onSuccess: (List<User>) -> Unit, onFailure: (Exception) -> Unit) {
-    if (users.none { it.public.userId == "" }) onSuccess(users)
+    if (_users.none { it.public.userId == "" }) onSuccess(_users)
     else onFailure(Exception("Error getting users"))
   }
 
   override fun addUser(user: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     if (user.public.userId == "") onFailure(Exception("Error adding user"))
     else {
-      users.add(user)
+      _users.add(user)
       onSuccess()
     }
   }
 
   override fun updateUser(user: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-    if (user.public.userId == "" || users.none { it.public.userId == user.public.userId })
+    if (user.public.userId == "" || _users.none { it.public.userId == user.public.userId })
         onFailure(Exception("Error updating user"))
     else {
-      users.remove(users.find { it.public.userId == user.public.userId })
-      users.add(user)
+      _users.remove(_users.find { it.public.userId == user.public.userId })
+      _users.add(user)
       onSuccess()
     }
   }
@@ -54,10 +55,10 @@ class MockUserRepository @Inject constructor() : UserRepository {
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    if (userId == "" || users.none { it.public.userId == userId })
+    if (userId == "" || _users.none { it.public.userId == userId })
         onFailure(Exception("Error deleting user"))
     else {
-      users.remove(users.find { it.public.userId == userId })
+      _users.remove(_users.find { it.public.userId == userId })
       onSuccess()
     }
   }

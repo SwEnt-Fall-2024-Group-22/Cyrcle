@@ -9,12 +9,18 @@ import javax.inject.Inject
 
 class AuthenticatorMock @Inject constructor() : Authenticator {
 
+  // This is a public attribute since it can be used as a parameter
+  // in tests to make the authenticator fail
+  var testUser: User? = TestInstancesUser.user1
+
   @Composable
   override fun AuthenticateButton(
       onAuthComplete: (User) -> Unit,
       onAuthError: (Exception) -> Unit
   ) {
-    Authenticator.DefaultAuthenticateButton { onAuthComplete(TestInstancesUser.user1) }
+    Authenticator.DefaultAuthenticateButton {
+      if (testUser == null) onAuthError(Exception("User not found")) else onAuthComplete(testUser!!)
+    }
   }
 
   @Composable

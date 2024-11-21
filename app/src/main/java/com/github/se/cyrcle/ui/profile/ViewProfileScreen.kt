@@ -78,7 +78,7 @@ fun ViewProfileScreen(
         BottomNavigationBar(
             navigationActions = navigationActions,
             tabList = LIST_TOP_LEVEL_DESTINATION,
-            selectedItem = Route.PROFILE)
+            selectedItem = Route.VIEW_PROFILE)
       }) { innerPadding ->
         Box(Modifier.fillMaxSize().padding(innerPadding)) {
           authenticator.SignOutButton(Modifier.padding(10.dp).align(Alignment.TopEnd)) {

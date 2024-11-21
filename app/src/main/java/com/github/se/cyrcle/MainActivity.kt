@@ -1,6 +1,5 @@
 package com.github.se.cyrcle
 
-import CyrcleNavHost
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity

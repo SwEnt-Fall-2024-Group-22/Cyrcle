@@ -2,7 +2,9 @@ package com.github.se.cyrcle.ui.authentication
 
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,11 +12,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -26,7 +31,10 @@ import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
+import com.github.se.cyrcle.ui.theme.ColorLevel
+import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.google.android.gms.common.api.ApiException
 
@@ -80,12 +88,20 @@ fun SignInScreen(
           Image(
               painter = painterResource(id = R.drawable.app_logo_name),
               contentDescription = "App Logo",
-              modifier = Modifier.size(275.dp))
-
-          Spacer(modifier = Modifier.height(20.dp))
+              modifier = Modifier.size(250.dp))
 
           // Authenticate With Google Button
           authenticator.AuthenticateButton(onAuthComplete, onAuthFailure)
+
+          Button(
+              text = "Create an account",
+              colorLevel = ColorLevel.SECONDARY,
+              modifier =
+                  Modifier.padding(16.dp)
+                      .border(BorderStroke(1.dp, Color.LightGray), RoundedCornerShape(50))
+                      .height(48.dp)
+                      .width(250.dp),
+              onClick = { navigationActions.navigateTo(Screen.CREATE_PROFILE) })
 
           // Anonymous Login Button
           authenticator.SignInAnonymouslyButton(
