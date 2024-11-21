@@ -23,7 +23,6 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
-import org.mockito.kotlin.timeout
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
@@ -67,12 +66,8 @@ class ParkingRepositoryFirestoreTest {
 
   @Test
   fun getParkingById_callsOnSuccess() {
-
-    // Create a list of QueryDocumentSnapshots
-    val queryDocumentSnapshots = listOf(mockQueryDocumentSnapshot)
-
     `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockParkingQuerySnapshot))
-    `when`(mockParkingQuerySnapshot.documents).thenReturn(queryDocumentSnapshots)
+    `when`(mockParkingQuerySnapshot.documents).thenReturn(listOf(mockQueryDocumentSnapshot))
     `when`(mockDocumentSnapshot.toObject(Parking::class.java)).thenReturn(parking)
     `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
 
@@ -156,7 +151,7 @@ class ParkingRepositoryFirestoreTest {
     // Simulate the main looper being idle to process the task
     shadowOf(Looper.getMainLooper()).idle()
 
-    verify(timeout(100).times(0)) { (mockParkingQuerySnapshot).documents }
+    verify(mockParkingQuerySnapshot, times(0)).documents
   }
 
   @Test
@@ -223,7 +218,7 @@ class ParkingRepositoryFirestoreTest {
     // Simulate the main looper being idle to process the task
     shadowOf(Looper.getMainLooper()).idle()
 
-    verify(timeout(100).times(0)) { (mockParkingQuerySnapshot).documents }
+    verify(mockParkingQuerySnapshot, times(0)).documents
   }
 
   @Test
