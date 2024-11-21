@@ -33,7 +33,9 @@ data class Parking(
     val price: Double,
     val hasSecurity: Boolean,
     var nbReviews: Int = 0,
-    var avgScore: Double = 0.0
+    var avgScore: Double = 0.0,
+    var nbReports: Int = 0,
+    var nbMaxSeverityReports: Int = 0
 )
 
 data class ParkingReport(

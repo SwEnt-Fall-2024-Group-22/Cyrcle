@@ -5,6 +5,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.image.ImageRepositoryCloudStorage
+import com.github.se.cyrcle.model.report.ReportReason
+import com.github.se.cyrcle.model.report.ReportedObject
+import com.github.se.cyrcle.model.report.ReportedObjectRepository
+import com.github.se.cyrcle.model.report.ReportedObjectRepositoryFirestore
+import com.github.se.cyrcle.model.report.ReportedObjectType
+import com.github.se.cyrcle.model.user.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -19,7 +25,8 @@ const val DEFAULT_RADIUS = 100.0
 const val MAX_RADIUS = 1000.0
 const val RADIUS_INCREMENT = 100.0
 const val MIN_NB_PARKINGS = 10
-
+const val NB_REPORTS_THRESH = 10
+const val NB_REPORTS_MAXSEVERERITY_THRESH = 4
 const val PARKING_MAX_AREA = 1000.0
 
 /**
@@ -29,7 +36,8 @@ const val PARKING_MAX_AREA = 1000.0
  */
 class ParkingViewModel(
     private val imageRepository: ImageRepository,
-    private val parkingRepository: ParkingRepository
+    private val parkingRepository: ParkingRepository,
+    private val reportedObjectRepository: ReportedObjectRepository,
 ) : ViewModel() {
 
   // ================== Parkings ==================
@@ -294,7 +302,7 @@ class ParkingViewModel(
     }
   }
 
-  fun addReport(report: ParkingReport) {
+  fun addReport(report: ParkingReport, user: User) {
     val selectedParking = _selectedParking.value
     if (selectedParking == null) {
       Log.e("ParkingViewModel", "No parking selected")
@@ -304,7 +312,20 @@ class ParkingViewModel(
     parkingRepository.addReport(
         report,
         onSuccess = {
-          // Add the new report to the current list of reports
+          if ((report.reason.severity == 3 &&
+              selectedParking.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERERITY_THRESH) ||
+              (selectedParking.nbReports >= NB_REPORTS_THRESH)) {
+            reportedObjectRepository.addReportedObject(
+                ReportedObject(
+                    selectedParking.uid,
+                    report.uid,
+                    ReportReason.Parking(report.reason),
+                    user.public.userId,
+                    ReportedObjectType.PARKING),
+                {},
+                {})
+          }
+
           _selectedParkingReports.update { currentReports ->
             currentReports?.plus(it) ?: listOf(it)
           }
@@ -398,7 +419,8 @@ class ParkingViewModel(
             return ParkingViewModel(
                 ImageRepositoryCloudStorage(
                     FirebaseAuth.getInstance(), FirebaseStorage.getInstance()),
-                ParkingRepositoryFirestore(FirebaseFirestore.getInstance()))
+                ParkingRepositoryFirestore(FirebaseFirestore.getInstance()),
+                ReportedObjectRepositoryFirestore(FirebaseFirestore.getInstance()))
                 as T
           }
         }

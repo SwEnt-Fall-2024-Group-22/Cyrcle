@@ -16,6 +16,12 @@ interface ReportedObjectRepository {
       onFailure: (Exception) -> Unit
   )
 
+  fun getReportedObjectsByObjectUID(
+      objectUID: String,
+      onSuccess: (List<ReportedObject>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
   fun getReportedObjectsByUser(
       userUID: String,
       onSuccess: (List<ReportedObject>) -> Unit,

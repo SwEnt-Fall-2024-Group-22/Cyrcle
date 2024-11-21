@@ -48,6 +48,24 @@ class ReportedObjectRepositoryFirestore @Inject constructor(private val db: Fire
         .addOnFailureListener { onFailure(it) }
   }
 
+  override fun getReportedObjectsByObjectUID(
+      objectUID: String,
+      onSuccess: (List<ReportedObject>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    db.collection(collectionPath)
+        .whereEqualTo("objectUID", objectUID)
+        .get()
+        .addOnSuccessListener { querySnapshot ->
+          val reportedObjects =
+              querySnapshot.documents.mapNotNull { document ->
+                document.data?.let { deserializeReportedObject(it) }
+              }
+          onSuccess(reportedObjects)
+        }
+        .addOnFailureListener { onFailure(it) }
+  }
+
   override fun getReportedObjectsByUser(
       userUID: String,
       onSuccess: (List<ReportedObject>) -> Unit,
