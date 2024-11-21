@@ -161,10 +161,7 @@ fun ViewProfileScreen(
 
               Spacer(modifier = Modifier.height(24.dp))
 
-              FavoriteParkingsSection(
-                  userViewModel,
-                  parkingViewModel,
-                  navigationActions)
+              FavoriteParkingsSection(userViewModel, parkingViewModel, navigationActions)
             }
           }
         }
@@ -175,7 +172,8 @@ fun ViewProfileScreen(
 private fun FavoriteParkingsSection(
     userViewModel: UserViewModel,
     parkingViewModel: ParkingViewModel,
-    navigationActions: NavigationActions) {
+    navigationActions: NavigationActions
+) {
   val favoriteParkings = userViewModel.favoriteParkings.collectAsState().value
 
   LaunchedEffect(Unit) { userViewModel.getSelectedUserFavoriteParking() }
@@ -212,35 +210,46 @@ private fun FavoriteParkingsSection(
 }
 
 @Composable
-private fun FavoriteParkingCard(parking: Parking, index: Int, onRemove: () -> Unit, parkingViewModel: ParkingViewModel, navigationActions: NavigationActions) {
+private fun FavoriteParkingCard(
+    parking: Parking,
+    index: Int,
+    onRemove: () -> Unit,
+    parkingViewModel: ParkingViewModel,
+    navigationActions: NavigationActions
+) {
   var showConfirmDialog by remember { mutableStateOf(false) }
-    val context = LocalContext.current
+  val context = LocalContext.current
 
-  Card(modifier = Modifier.size(120.dp).padding(8.dp).clickable(
-      onClick = {
-          parkingViewModel.selectParking(parking)
-          navigationActions.navigateTo(Screen.PARKING_DETAILS)
+  Card(
+      modifier =
+          Modifier.size(120.dp)
+              .padding(8.dp)
+              .clickable(
+                  onClick = {
+                    parkingViewModel.selectParking(parking)
+                    navigationActions.navigateTo(Screen.PARKING_DETAILS)
+                  }),
+      shape = MaterialTheme.shapes.medium) {
+        Box(modifier = Modifier.fillMaxSize()) {
+          Text(
+              text = parking.optName ?: "",
+              style = MaterialTheme.typography.bodySmall,
+              modifier =
+                  Modifier.align(Alignment.Center).padding(8.dp).testTag("ParkingItem_$index"))
+
+          IconButton(
+              onClick = { showConfirmDialog = true },
+              modifier =
+                  Modifier.align(Alignment.TopEnd).size(32.dp).testTag("FavoriteToggle_$index")) {
+                Icon(
+                    imageVector = Icons.Default.Favorite,
+                    contentDescription =
+                        stringResource(R.string.view_profile_screen_remove_from_favorite),
+                    tint = Red,
+                    modifier = Modifier.size(20.dp))
+              }
+        }
       }
-  ), shape = MaterialTheme.shapes.medium) {
-    Box(modifier = Modifier.fillMaxSize()) {
-      Text(
-          text = parking.optName ?: "",
-          style = MaterialTheme.typography.bodySmall,
-          modifier = Modifier.align(Alignment.Center).padding(8.dp).testTag("ParkingItem_$index"))
-
-      IconButton(
-          onClick = { showConfirmDialog = true },
-          modifier =
-              Modifier.align(Alignment.TopEnd).size(32.dp).testTag("FavoriteToggle_$index")) {
-            Icon(
-                imageVector = Icons.Default.Favorite,
-                contentDescription =
-                    stringResource(R.string.view_profile_screen_remove_from_favorite),
-                tint = Red,
-                modifier = Modifier.size(20.dp))
-          }
-    }
-  }
 
   if (showConfirmDialog) {
     AlertDialog(
@@ -257,7 +266,7 @@ private fun FavoriteParkingCard(parking: Parking, index: Int, onRemove: () -> Un
               onClick = {
                 onRemove()
                 showConfirmDialog = false
-                  Toast.makeText(context, "Removed from Favorites!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Removed from Favorites!", Toast.LENGTH_SHORT).show()
               }) {
                 Text(
                     stringResource(
