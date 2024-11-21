@@ -237,18 +237,53 @@ class WheelView @JvmOverloads constructor(
             val segmentAngle = 360f / segments.size
             var requiredRotation = ((targetSegment - currentSegment) * segmentAngle)
 
-            // Calculate how much we can safely rotate within the target segment
-            // First, find where exactly in the target segment we'll land
+            // Calculate where we'll land within the target segment
             val landingAngle = (270 - ((rotation - requiredRotation) % 360)) % 360
             val angleWithinSegment = landingAngle % segmentAngle
 
-            // Calculate maximum safe offset in both directions
-            val maxOffsetLeft = angleWithinSegment  // distance to previous segment
-            val maxOffsetRight = segmentAngle - angleWithinSegment  // distance to next segment
-            val safeOffset = minOf(maxOffsetLeft, maxOffsetRight) * 0.9f // 90% of the minimum to be extra safe
+            val shouldTriggerNearMiss = Math.random() < 0.7f  // 70% chance for near-miss
+            var randomOffset = 0f
 
-            // Generate random offset between -safeOffset and +safeOffset
-            val randomOffset = (Math.random() * 2 * safeOffset - safeOffset).toFloat()
+            when (targetSegment) {
+                0 -> { // Nothing segment
+                    if (shouldTriggerNearMiss) {
+                        // For Nothing, we want to get close to the right edge (near Legendary)
+                        val maxOffsetRight = segmentAngle - angleWithinSegment
+                        // Use 90-95% of the distance to get very close to Legendary
+                        randomOffset = maxOffsetRight * (0.90f + (Math.random() * 0.05f).toFloat())
+                        Log.d(TAG, "Triggering near-miss on Nothing segment (close to Legendary)")
+                    } else {
+                        // Normal random offset within safe bounds
+                        val maxOffsetLeft = angleWithinSegment
+                        val maxOffsetRight = segmentAngle - angleWithinSegment
+                        val safeOffset = minOf(maxOffsetLeft, maxOffsetRight) * 0.9f
+                        randomOffset = (Math.random() * 2 * safeOffset - safeOffset).toFloat()
+                    }
+                }
+                2 -> { // Common segment
+                    if (shouldTriggerNearMiss) {
+                        // For Common, we want to get close to the left edge (near Legendary)
+                        val maxOffsetLeft = angleWithinSegment
+                        // Use only 5-10% of the distance to get very close to Legendary
+                        randomOffset = -maxOffsetLeft * (0.90f + (Math.random() * 0.05f).toFloat())
+                        Log.d(TAG, "Triggering near-miss on Common segment (close to Legendary)")
+                    } else {
+                        // Normal random offset within safe bounds
+                        val maxOffsetLeft = angleWithinSegment
+                        val maxOffsetRight = segmentAngle - angleWithinSegment
+                        val safeOffset = minOf(maxOffsetLeft, maxOffsetRight) * 0.9f
+                        randomOffset = (Math.random() * 2 * safeOffset - safeOffset).toFloat()
+                    }
+                }
+                else -> {
+                    // For other segments, use normal random offset within safe bounds
+                    val maxOffsetLeft = angleWithinSegment
+                    val maxOffsetRight = segmentAngle - angleWithinSegment
+                    val safeOffset = minOf(maxOffsetLeft, maxOffsetRight) * 0.9f
+                    randomOffset = (Math.random() * 2 * safeOffset - safeOffset).toFloat()
+                }
+            }
+
             requiredRotation += randomOffset
 
             // Ensure we're always rotating clockwise
@@ -259,14 +294,14 @@ class WheelView @JvmOverloads constructor(
             targetRotation = rotation - (requiredRotation + fullRotations)
 
             Log.d(TAG, "Landing angle within segment: $angleWithinSegment")
-            Log.d(TAG, "Safe offset range: $safeOffset degrees")
-            Log.d(TAG, "Applied random offset: $randomOffset degrees")
+            Log.d(TAG, "Applied offset: $randomOffset degrees")
             Log.d(TAG, "Required rotation: $requiredRotation degrees")
             Log.d(TAG, "Total rotation with full spins: ${requiredRotation + fullRotations} degrees")
+            Log.d(TAG, "Near-miss triggered: $shouldTriggerNearMiss")
 
             currentRotation = rotation
             spinStartTime = System.currentTimeMillis()
-            spinDuration = 10000 // 10 seconds
+            spinDuration = 10000 // 4 seconds spin
             isSpinning = true
         }
     }
