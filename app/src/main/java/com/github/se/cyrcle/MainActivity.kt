@@ -1,6 +1,5 @@
 package com.github.se.cyrcle
 
-import CyrcleNavHost
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -49,7 +48,7 @@ class MainActivity : ComponentActivity() {
   @Inject lateinit var authenticator: Authenticator
 
   private val reviewViewModel: ReviewViewModel by viewModels {
-    CustomViewModelFactory { ReviewViewModel(reviewRepository) }
+    CustomViewModelFactory { ReviewViewModel(reviewRepository, reportedObjectRepository) }
   }
   private val userViewModel: UserViewModel by viewModels {
     CustomViewModelFactory { UserViewModel(userRepository, parkingRepository, imageRepository) }
