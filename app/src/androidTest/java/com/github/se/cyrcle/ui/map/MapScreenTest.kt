@@ -46,7 +46,6 @@ class MapScreenTest {
     mockNavigation = mock(NavigationActions::class.java)
     mockReportedObjectRepository = MockReportedObjectRepository()
 
-
     val imageRepository = MockImageRepository()
     val parkingRepository = MockParkingRepository()
     val userRepository = MockUserRepository()

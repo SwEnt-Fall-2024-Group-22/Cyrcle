@@ -47,8 +47,9 @@ abstract class MockRepoModule {
   @Binds
   @Singleton
   /** Binds the [MockUserRepository] implementation to the [UserRepository] interface. */
-  abstract fun bindReportedObjectsRepository(mockReportedObjectRepository: MockReportedObjectRepository): ReportedObjectRepository
-
+  abstract fun bindReportedObjectsRepository(
+      mockReportedObjectRepository: MockReportedObjectRepository
+  ): ReportedObjectRepository
 
   @Binds
   @Singleton

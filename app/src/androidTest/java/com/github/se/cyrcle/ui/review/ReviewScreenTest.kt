@@ -61,7 +61,6 @@ class ReviewScreenTest {
     mockReviewRepository = MockReviewRepository()
     mockReportedObjectRepository = MockReportedObjectRepository()
 
-
     userViewModel = UserViewModel(mockUserRepository, mockParkingRepository)
     parkingViewModel =
         ParkingViewModel(mockImageRepository, mockParkingRepository, mockReportedObjectRepository)

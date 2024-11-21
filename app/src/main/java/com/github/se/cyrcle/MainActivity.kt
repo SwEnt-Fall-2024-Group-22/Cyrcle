@@ -54,7 +54,9 @@ class MainActivity : ComponentActivity() {
     CustomViewModelFactory { UserViewModel(userRepository, parkingRepository, imageRepository) }
   }
   private val parkingViewModel: ParkingViewModel by viewModels {
-    CustomViewModelFactory { ParkingViewModel(imageRepository, parkingRepository, reportedObjectRepository) }
+    CustomViewModelFactory {
+      ParkingViewModel(imageRepository, parkingRepository, reportedObjectRepository)
+    }
   }
   private val mapViewModel: MapViewModel by viewModels { CustomViewModelFactory { MapViewModel() } }
   private val addressViewModel: AddressViewModel by viewModels {

@@ -64,7 +64,6 @@ class ParkingDetailsScreenTest {
     reviewRepository = MockReviewRepository()
     mockReportedObjectRepository = MockReportedObjectRepository()
 
-
     parkingViewModel =
         ParkingViewModel(imageRepository, parkingRepository, mockReportedObjectRepository)
     userViewModel = UserViewModel(userRepository, parkingRepository)

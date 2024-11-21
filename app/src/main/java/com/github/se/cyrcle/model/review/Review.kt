@@ -10,7 +10,7 @@ data class Review(
     val rating: Double,
     val parking: String,
     val time: Timestamp = Timestamp.now(),
-    var nbReports : Int = 0,
+    var nbReports: Int = 0,
     var nbMaxSeverityReports: Int = 0
 )
 

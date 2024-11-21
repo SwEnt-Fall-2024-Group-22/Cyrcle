@@ -96,13 +96,13 @@ class ReportedObjectRepositoryFirestore @Inject constructor(private val db: Fire
         .addOnFailureListener { onFailure(it) }
   }
 
-  private fun serializeReportedObject(reportedObject: ReportedObject): Map<String, Any> {
+  fun serializeReportedObject(reportedObject: ReportedObject): Map<String, Any> {
     val json = gson.toJson(reportedObject)
     val type = object : TypeToken<Map<String, Any>>() {}.type
     return gson.fromJson(json, type)
   }
 
-  private fun deserializeReportedObject(data: Map<String, Any>): ReportedObject {
+  fun deserializeReportedObject(data: Map<String, Any>): ReportedObject {
     val json = gson.toJson(data)
     return gson.fromJson(json, ReportedObject::class.java)
   }

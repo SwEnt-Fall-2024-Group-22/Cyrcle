@@ -317,7 +317,7 @@ class ParkingViewModel(
           if ((report.reason.severity == 3 &&
               selectedParking.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERERITY_THRESH) ||
               (selectedParking.nbReports >= NB_REPORTS_THRESH)) {
-              Log.d("REPORT", "RIGHT PLACE")
+            Log.d("REPORT", "RIGHT PLACE")
             reportedObjectRepository.addReportedObject(
                 ReportedObject(
                     selectedParking.uid,
@@ -332,8 +332,8 @@ class ParkingViewModel(
           _selectedParkingReports.update { currentReports ->
             currentReports?.plus(it) ?: listOf(it)
           }
-          if(report.reason.severity == 3){
-              selectedParking.nbMaxSeverityReports += 1
+          if (report.reason.severity == 3) {
+            selectedParking.nbMaxSeverityReports += 1
           }
           selectedParking.nbReports += 1
           parkingRepository.updateParking(selectedParking, {}, {})

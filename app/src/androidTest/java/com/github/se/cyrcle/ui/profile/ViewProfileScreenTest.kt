@@ -66,7 +66,6 @@ class ViewProfileScreenTest {
     mockImageRepository = MockImageRepository()
     mockReportedObjectRepository = MockReportedObjectRepository()
 
-
     val user =
         User(
             UserPublic("1", "janesmith", "http://example.com/jane.jpg"),

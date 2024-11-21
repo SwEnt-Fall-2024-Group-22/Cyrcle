@@ -34,7 +34,8 @@ class AllReviewsScreenTest {
   private val parkingViewModel =
       ParkingViewModel(
           MockImageRepository(), MockParkingRepository(), MockReportedObjectRepository())
-  private val reviewViewModel = ReviewViewModel(MockReviewRepository(), MockReportedObjectRepository())
+  private val reviewViewModel =
+      ReviewViewModel(MockReviewRepository(), MockReportedObjectRepository())
   private val userViewModel = UserViewModel(MockUserRepository(), MockParkingRepository())
 
   @Before

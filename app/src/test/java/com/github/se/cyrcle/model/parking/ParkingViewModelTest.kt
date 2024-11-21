@@ -1,10 +1,7 @@
 package com.github.se.cyrcle.model.parking
 
 import com.github.se.cyrcle.model.image.ImageRepository
-import com.github.se.cyrcle.model.report.ReportReason
-import com.github.se.cyrcle.model.report.ReportedObject
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
-import com.github.se.cyrcle.model.report.ReportedObjectType
 import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.mapbox.geojson.Point
 import org.junit.Assert.assertEquals
@@ -111,17 +108,14 @@ class ParkingViewModelTest {
 
   @Test
   fun addReportTest() {
-    val parking = TestInstancesParking.parking1.copy(
-      nbReports = 0,
-      nbMaxSeverityReports = 0
-    )
+    val parking = TestInstancesParking.parking1.copy(nbReports = 0, nbMaxSeverityReports = 0)
     val user = TestInstancesUser.user1
-    val report = ParkingReport(
-      uid = "report1",
-      reason = ParkingReportReason.SAFETY_CONCERN,
-      userId = user.public.userId,
-      parking = parking.uid
-    )
+    val report =
+        ParkingReport(
+            uid = "report1",
+            reason = ParkingReportReason.SAFETY_CONCERN,
+            userId = user.public.userId,
+            parking = parking.uid)
 
     // Mock repository behavior for report addition
     `when`(parkingRepository.addReport(eq(report), any(), any())).then {
