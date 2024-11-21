@@ -46,7 +46,8 @@ class ProfileScreenTest {
     parkingRepository = MockParkingRepository()
     reportedObjectRepository = MockReportedObjectRepository()
     userViewModel = UserViewModel(userRepository, parkingRepository)
-    parkingViewModel = ParkingViewModel(imageRepository, parkingRepository, reportedObjectRepository)
+    parkingViewModel =
+        ParkingViewModel(imageRepository, parkingRepository, reportedObjectRepository)
 
     composeTestRule.setContent {
       ProfileScreen(mockNavigationActions, userViewModel, parkingViewModel, AuthenticatorMock())
