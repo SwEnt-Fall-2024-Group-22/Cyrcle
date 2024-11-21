@@ -240,22 +240,30 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
       val landingAngle = (270 - ((rotation - requiredRotation) % 360)) % 360
       val angleWithinSegment = landingAngle % segmentAngle
 
-      val shouldTriggerNearMiss = Math.random() < 0.7f // 70% chance for near-miss
+      val shouldTriggerNearMiss = Math.random() < 0.33f // 30% chance for near-miss
       var randomOffset = 0f
 
       when (targetSegment) {
         0 -> { // Nothing segment
           if (shouldTriggerNearMiss) {
-            // For Nothing, we want to get close to the right edge (near Legendary)
-            val maxOffsetRight = segmentAngle - angleWithinSegment
-            // Use 90-95% of the distance to get very close to Legendary
-            randomOffset = maxOffsetRight * (0.90f + (Math.random() * 0.05f).toFloat())
-            Log.d(TAG, "Triggering near-miss on Nothing segment (close to Legendary)")
+            // For Nothing, randomly choose between getting close to Epic (left) or Legendary
+            // (right)
+            if (Math.random() < 0.6) {
+              // Get close to Epic (left edge)
+              val maxOffsetLeft = angleWithinSegment
+              randomOffset = -maxOffsetLeft * (0.85f + (Math.random() * 0.13f).toFloat())
+              Log.d(TAG, "Triggering near-miss on Nothing segment (close to Epic)")
+            } else {
+              // Get close to Legendary (right edge)
+              val maxOffsetRight = segmentAngle - angleWithinSegment
+              randomOffset = maxOffsetRight * (0.95f + (Math.random() * 0.03f).toFloat())
+              Log.d(TAG, "Triggering near-miss on Nothing segment (close to Legendary)")
+            }
           } else {
             // Normal random offset within safe bounds
             val maxOffsetLeft = angleWithinSegment
             val maxOffsetRight = segmentAngle - angleWithinSegment
-            val safeOffset = minOf(maxOffsetLeft, maxOffsetRight) * 0.9f
+            val safeOffset = minOf(maxOffsetLeft, maxOffsetRight) * 0.5f
             randomOffset = (Math.random() * 2 * safeOffset - safeOffset).toFloat()
           }
         }
@@ -263,14 +271,29 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
           if (shouldTriggerNearMiss) {
             // For Common, we want to get close to the left edge (near Legendary)
             val maxOffsetLeft = angleWithinSegment
-            // Use only 5-10% of the distance to get very close to Legendary
-            randomOffset = -maxOffsetLeft * (0.90f + (Math.random() * 0.05f).toFloat())
+            // Use only 2-20% of the distance to get very close to Legendary
+            randomOffset = -maxOffsetLeft * (0.80f + (Math.random() * 0.18f).toFloat())
             Log.d(TAG, "Triggering near-miss on Common segment (close to Legendary)")
           } else {
             // Normal random offset within safe bounds
             val maxOffsetLeft = angleWithinSegment
             val maxOffsetRight = segmentAngle - angleWithinSegment
-            val safeOffset = minOf(maxOffsetLeft, maxOffsetRight) * 0.9f
+            val safeOffset = minOf(maxOffsetLeft, maxOffsetRight) * 0.5f
+            randomOffset = (Math.random() * 2 * safeOffset - safeOffset).toFloat()
+          }
+        }
+        3 -> { // Rare segment
+          if (shouldTriggerNearMiss) {
+            // For Rare, we want to get close to the right edge (near Epic)
+            val maxOffsetRight = segmentAngle - angleWithinSegment
+            // Use 85-98% of the distance to get very close to Epic
+            randomOffset = maxOffsetRight * (0.80f + (Math.random() * 0.18f).toFloat())
+            Log.d(TAG, "Triggering near-miss on Rare segment (close to Epic)")
+          } else {
+            // Normal random offset within safe bounds
+            val maxOffsetLeft = angleWithinSegment
+            val maxOffsetRight = segmentAngle - angleWithinSegment
+            val safeOffset = minOf(maxOffsetLeft, maxOffsetRight) * 0.5f
             randomOffset = (Math.random() * 2 * safeOffset - safeOffset).toFloat()
           }
         }
@@ -278,7 +301,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
           // For other segments, use normal random offset within safe bounds
           val maxOffsetLeft = angleWithinSegment
           val maxOffsetRight = segmentAngle - angleWithinSegment
-          val safeOffset = minOf(maxOffsetLeft, maxOffsetRight) * 0.9f
+          val safeOffset = minOf(maxOffsetLeft, maxOffsetRight) * 0.5f
           randomOffset = (Math.random() * 2 * safeOffset - safeOffset).toFloat()
         }
       }
