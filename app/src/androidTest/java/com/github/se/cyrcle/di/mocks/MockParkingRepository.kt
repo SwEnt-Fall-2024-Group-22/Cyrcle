@@ -11,7 +11,10 @@ import javax.inject.Inject
 class MockParkingRepository @Inject constructor() : ParkingRepository {
   var uid = 0
   private val parkings = mutableListOf(TestInstancesParking.parking1)
-  private val reports = mutableListOf(ParkingReport("1",ParkingReportReason.INEXISTANT,"1",TestInstancesParking.parking1.uid))
+  private val reports =
+      mutableListOf(
+          ParkingReport(
+              "1", ParkingReportReason.INEXISTANT, "1", TestInstancesParking.parking1.uid))
 
   override fun getNewUid(): String {
     return (uid++).toString()
@@ -89,12 +92,12 @@ class MockParkingRepository @Inject constructor() : ParkingRepository {
     else onSuccess(parkings.filter { it.uid in ids })
   }
 
-    override fun addReport(
-        report: ParkingReport,
-        onSuccess: (ParkingReport) -> Unit,
-        onFailure: (Exception) -> Unit
-    ) {
-        if(report.uid == "") onFailure(Exception("Error adding report"))
-        onSuccess(reports[0])
-    }
+  override fun addReport(
+      report: ParkingReport,
+      onSuccess: (ParkingReport) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    if (report.uid == "") onFailure(Exception("Error adding report"))
+    onSuccess(reports[0])
+  }
 }
