@@ -30,19 +30,6 @@ class WheelView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    private var isAnimating = true
-    private var animationRunnable: Runnable? = null
-
-    internal fun stopAnimation() {
-        isAnimating = false
-        animationRunnable?.let { removeCallbacks(it) }
-    }
-
-    internal fun startAnimation() {
-        isAnimating = true
-        animationRunnable?.let { post(it) }
-    }
-
     private val TAG = "WheelView"
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -61,6 +48,9 @@ class WheelView @JvmOverloads constructor(
         16f,    // Rare: 15%
         1.9f    // Epic: 4.5%
     )
+
+    private var isAnimating = true
+    private var animationRunnable: Runnable? = null
 
     // Range mapping for probabilities
     private val probabilityRanges = run {
@@ -87,6 +77,16 @@ class WheelView @JvmOverloads constructor(
     private var expectedSegment = 0 // To track expected segment for logging
 
     private data class Segment(val name: String, val color: Int)
+
+    internal fun stopAnimation() {
+        isAnimating = false
+        animationRunnable?.let { removeCallbacks(it) }
+    }
+
+    internal fun startAnimation() {
+        isAnimating = true
+        animationRunnable?.let { post(it) }
+    }
 
     private fun getSegmentAtPointer(rotation: Float): Int {
         val segmentAngle = 360f / segments.size
@@ -117,8 +117,10 @@ class WheelView @JvmOverloads constructor(
             Log.d(TAG, "Probability range for ${getSegmentName(index)}: ${range.first}-${range.last}")
         }
 
-        post(object : Runnable {
+        animationRunnable = object : Runnable {
             override fun run() {
+                if (!isAnimating) return
+
                 val currentTime = System.currentTimeMillis()
                 val deltaTime = currentTime - lastUpdateTime
                 lastUpdateTime = currentTime
@@ -142,11 +144,6 @@ class WheelView @JvmOverloads constructor(
                         // Quartic ease-out for more gradual slowdown
                         val easeOut = 1f - (1f - progress) * (1f - progress) * (1f - progress) * (1f - progress)
                         rotation = currentRotation + (targetRotation - currentRotation) * easeOut
-
-                        // Optional: Log progress during spin (uncomment if needed)
-                        // if (progress % 0.1f < 0.016f) {  // Log approximately every 10% of progress
-                        //     Log.d(TAG, "Spin progress: ${(progress * 100).toInt()}%, easeOut: ${easeOut}")
-                        // }
                     }
                 } else if (pauseAfterSpin) {
                     if (currentTime - pauseStartTime >= pauseDuration) {
@@ -158,9 +155,13 @@ class WheelView @JvmOverloads constructor(
                 }
 
                 invalidate()
-                postDelayed(this, 16)
+                if (isAnimating) {
+                    postDelayed(this, 16)
+                }
             }
-        })
+        }
+
+        post(animationRunnable!!)
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -322,7 +323,9 @@ class WheelView @JvmOverloads constructor(
 }
 
 @Composable
-fun GamblingScreen2() {
+fun GamblingScreen2(
+    onWheelViewCreated: ((WheelView) -> Unit)? = null
+) {
     var wheelView by remember { mutableStateOf<WheelView?>(null) }
 
     Box(
@@ -338,6 +341,7 @@ fun GamblingScreen2() {
             factory = { context ->
                 WheelView(context).also {
                     wheelView = it
+                    onWheelViewCreated?.invoke(it)
                 }
             }
         )
