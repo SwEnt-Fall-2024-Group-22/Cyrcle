@@ -68,20 +68,6 @@ constructor(private val db: FirebaseFirestore, private val auth: FirebaseAuth) :
     return uid
   }
 
-  override fun getAllUsers(onSuccess: (List<User>) -> Unit, onFailure: (Exception) -> Unit) {
-    db.collection(collectionPath)
-        .get()
-        .addOnSuccessListener { querySnapshot ->
-          val users =
-              querySnapshot.documents.mapNotNull { document ->
-                val userPublic = deserializeUserPublic(document.data!!)
-                User(userPublic, null)
-              }
-          onSuccess(users)
-        }
-        .addOnFailureListener(onFailure)
-  }
-
   override fun addUser(user: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     if (user.details == null) {
       onFailure(Exception("User details are required"))
@@ -145,24 +131,6 @@ constructor(private val db: FirebaseFirestore, private val auth: FirebaseAuth) :
         .addOnFailureListener { onFailure(it) }
   }
 
-  /*
-  // TODO: add a list of contributors to the parking spot
-  override fun getUserContributedSpots(
-      userId: String,
-      onSuccess: (List<String>) -> Unit,
-      onFailure: (Exception) -> Unit
-  ) {
-    db.collection("parkings")
-        .whereArrayContains("contributors", userId)
-        .get()
-        .addOnSuccessListener { querySnapshot ->
-          val parkingIds = querySnapshot.documents.map { it.id }
-          onSuccess(parkingIds)
-        }
-        .addOnFailureListener { onFailure(it) }
-  }
-   */
-
   private fun deserializeUserPublic(data: Map<String, Any>): UserPublic {
     val gson = Gson()
     return gson.fromJson(gson.toJson(data), UserPublic::class.java)
@@ -172,6 +140,6 @@ constructor(private val db: FirebaseFirestore, private val auth: FirebaseAuth) :
     val gson = Gson()
     val json = gson.toJson(data)
     val userDetails = gson.fromJson(json, UserDetails::class.java)
-    return userDetails.copy(wallet = userDetails.wallet ?: Wallet.empty())
+    return userDetails.copy(wallet = userDetails.wallet)
   }
 }

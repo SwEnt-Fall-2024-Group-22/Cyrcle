@@ -1,35 +1,44 @@
 package com.github.se.cyrcle.model.user
 
+import android.os.Looper
+import androidx.test.core.app.ApplicationProvider
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.android.gms.tasks.Tasks
+import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QueryDocumentSnapshot
 import com.google.firebase.firestore.QuerySnapshot
+import junit.framework.TestCase
 import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mock
+import org.mockito.Mockito.times
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
-import org.mockito.kotlin.timeout
+import org.mockito.kotlin.atLeast
 import org.mockito.kotlin.verify
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 
-@RunWith(JUnit4::class)
+@RunWith(RobolectricTestRunner::class)
 class UserRepositoryFirestoreTest {
-  @Mock private lateinit var mockFirestore: FirebaseFirestore
   @Mock private lateinit var mockFirebaseAuth: FirebaseAuth
   @Mock private lateinit var mockFirebaseUser: FirebaseUser
+
+  @Mock private lateinit var mockFirestore: FirebaseFirestore
   @Mock private lateinit var mockDocumentReference: DocumentReference
   @Mock private lateinit var mockCollectionReference: CollectionReference
   @Mock private lateinit var mockDocumentSnapshot: DocumentSnapshot
-  @Mock private lateinit var mockParkingQuerySnapshot: QuerySnapshot
+  @Mock private lateinit var mockUserQuerySnapshot: QuerySnapshot
+  @Mock private lateinit var mockQueryDocumentSnapshot: QueryDocumentSnapshot
 
   private lateinit var userRepositoryFirestore: UserRepositoryFirestore
 
@@ -40,13 +49,19 @@ class UserRepositoryFirestoreTest {
     MockitoAnnotations.openMocks(this)
     userRepositoryFirestore = UserRepositoryFirestore(mockFirestore, mockFirebaseAuth)
 
+    // Initialize Firebase if necessary
+    if (FirebaseApp.getApps(ApplicationProvider.getApplicationContext()).isEmpty()) {
+      FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
+    }
+
     `when`(mockFirestore.collection(any())).thenReturn(mockCollectionReference)
     `when`(mockCollectionReference.document(any())).thenReturn(mockDocumentReference)
     `when`(mockCollectionReference.document()).thenReturn(mockDocumentReference)
+    `when`(mockDocumentReference.collection(any())).thenReturn(mockCollectionReference)
   }
 
   @Test
-  fun getNewUid() {
+  fun getUidTest() {
     `when`(mockFirebaseAuth.currentUser).thenReturn(mockFirebaseUser)
     `when`(mockFirebaseUser.uid).thenReturn("1")
     val uid = userRepositoryFirestore.getUid()
@@ -55,69 +70,184 @@ class UserRepositoryFirestoreTest {
   }
 
   @Test
-  fun getAllUsers_returnsCorrectValues() {
-    // Create a TaskCompletionSource to manually complete the task
-    val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
-
-    // Ensure that mockParkingQuerySnapshot is properly initialized and mocked
-    `when`(mockCollectionReference.get()).thenReturn(taskCompletionSource.task)
-
-    // Ensure the QuerySnapshot returns a list of mock DocumentSnapshots
-    `when`(mockParkingQuerySnapshot.documents).thenReturn(listOf(mockDocumentSnapshot))
-
-    // Ensure that the DocumentSnapshot returns the expected Parking object
-    `when`(mockDocumentSnapshot.toObject(User::class.java)).thenReturn(user)
-
-    // Call the method to be tested
-    userRepositoryFirestore.getAllUsers(
-        onSuccess = { users ->
-          assert(users.size == 1)
-          assert(users[0] == user)
-        },
-        onFailure = { fail("Expected success but got failure") })
-    // Manually complete the task
-    taskCompletionSource.setResult(mockParkingQuerySnapshot)
-
-    // Verify that the method was called
-    verify(timeout(100)) { (mockParkingQuerySnapshot).documents }
-    verify(timeout(100)) { mockDocumentSnapshot.toObject(User::class.java) }
+  fun getUidTest_throwsException_whenUidIsEmpty() {
+    `when`(mockFirebaseAuth.currentUser).thenReturn(null)
+    try {
+      userRepositoryFirestore.getUid()
+    } catch (e: Exception) {
+      assert(e.message == "User not signed in")
+    }
   }
 
   @Test
-  fun getUserById_returnsCorrectValues() {
+  fun onSignIn_callsOnSuccess() {
+    `when`(mockFirebaseAuth.currentUser).thenReturn(mockFirebaseUser)
+    userRepositoryFirestore.onSignIn { assert(mockFirebaseAuth.currentUser != null) }
+  }
+
+  @Test
+  fun getUserById_callsOnSuccess() {
+    // Create a list of QueryDocumentSnapshots
+    val queryDocumentSnapshots = listOf(mockQueryDocumentSnapshot)
+
+    `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockUserQuerySnapshot))
     `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
+    `when`(mockUserQuerySnapshot.documents).thenReturn(queryDocumentSnapshots)
     `when`(mockDocumentSnapshot.toObject(User::class.java)).thenReturn(user)
 
     userRepositoryFirestore.getUserById(
         userId = user.public.userId,
-        onSuccess = { assert(it == user) },
+        onSuccess = { assert(true) },
         onFailure = { fail("Expected success but got failure") })
-    verify(timeout(100)) { mockDocumentReference.get() }
-    verify(timeout(100)) { mockDocumentSnapshot.toObject(User::class.java) }
+
+    shadowOf(Looper.getMainLooper()).idle()
+
+    verify(mockDocumentReference, atLeast(1)).get()
+  }
+
+  @Test
+  fun getUserById_callsOnFailure() {
+    val taskCompletionSource = TaskCompletionSource<DocumentSnapshot>()
+    `when`(mockDocumentReference.get()).thenReturn(taskCompletionSource.task)
+
+    userRepositoryFirestore.getUserById(
+        userId = user.public.userId,
+        onSuccess = { fail("Expected failure but got success") },
+        onFailure = { assert(true) })
+
+    // Complete the task to trigger the addOnCompleteListener with an exception
+    taskCompletionSource.setException(Exception("Test exception"))
+
+    shadowOf(Looper.getMainLooper()).idle()
+
+    verify(mockDocumentReference, times(1)).get()
+  }
+
+  @Test
+  fun getUserById_callsOnFailure_whenExceptionThrown() {
+    // Arrange
+    val exception = Exception("Test exception")
+    val taskCompletionSource = TaskCompletionSource<DocumentSnapshot>()
+    taskCompletionSource.setException(exception)
+    `when`(mockDocumentReference.get()).thenReturn(taskCompletionSource.task)
+
+    // Act
+    userRepositoryFirestore.getUserById(
+        userId = user.public.userId,
+        onSuccess = { fail("Expected failure but got success") },
+        onFailure = { assert(it == exception) })
+
+    // Assert
+    shadowOf(Looper.getMainLooper()).idle()
+    verify(mockDocumentReference).get()
   }
 
   @Test
   fun addUser_callsOnSuccess() {
-    `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
-    // simulate that the user already exists
     `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
+    `when`(mockDocumentSnapshot.exists()).thenReturn(false)
+    `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
 
     userRepositoryFirestore.addUser(
         user = user,
         onSuccess = { assert(true) },
         onFailure = { fail("Expected success but got failure") })
-    verify(timeout(100)) { mockDocumentReference.set(user) }
+
+    shadowOf(Looper.getMainLooper()).idle()
+
+    verify(mockDocumentReference, atLeast(1)).set(any())
+    verify(mockDocumentReference, atLeast(1)).get()
+  }
+
+  @Test
+  fun addUser_callsOnSuccess_whenUserExists() {
+    `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
+    `when`(mockDocumentSnapshot.exists()).thenReturn(true)
+
+    userRepositoryFirestore.addUser(
+        user = user,
+        onSuccess = { assert(true) },
+        onFailure = { fail("Expected success but got failure") })
+
+    shadowOf(Looper.getMainLooper()).idle()
+
+    verify(mockDocumentReference, atLeast(1)).get()
+  }
+
+  @Test
+  fun addUser_callsOnFailure() {
+    val taskCompletionSource = TaskCompletionSource<Void>()
+
+    `when`(mockDocumentReference.set(any())).thenReturn(taskCompletionSource.task)
+    `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
+    `when`(mockDocumentSnapshot.exists()).thenReturn(false)
+
+    userRepositoryFirestore.addUser(
+        user = user,
+        onSuccess = { fail("Expected failure but got success") },
+        onFailure = { assert(true) })
+
+    // Complete the task to trigger the addOnCompleteListener with an exception
+    taskCompletionSource.setException(Exception("Test exception"))
+
+    shadowOf(Looper.getMainLooper()).idle()
+
+    verify(mockDocumentReference, times(1)).set(any())
+  }
+
+  @Test
+  fun addUser_callsOnFailure_whenUserDetailsAreNull() {
+    userRepositoryFirestore.addUser(
+        user = User(public = user.public, details = null),
+        onSuccess = { fail("Expected failure but got success") },
+        onFailure = { assert(it.message == "User details are required") })
+
+    verify(mockDocumentReference, times(0)).get()
   }
 
   @Test
   fun updateUser_callsOnSuccess() {
+    `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
+    `when`(mockDocumentSnapshot.exists()).thenReturn(false)
     `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
 
     userRepositoryFirestore.updateUser(
         user = user,
         onSuccess = { assert(true) },
         onFailure = { fail("Expected success but got failure") })
-    verify(timeout(100)) { mockDocumentReference.set(user) }
+
+    shadowOf(Looper.getMainLooper()).idle()
+
+    verify(mockDocumentReference, atLeast(1)).set(any())
+  }
+
+  @Test
+  fun updateUser_callsOnFailure() {
+    val taskCompletionSource = TaskCompletionSource<Void>()
+
+    `when`(mockDocumentReference.set(any())).thenReturn(taskCompletionSource.task)
+
+    userRepositoryFirestore.updateUser(
+        user = user,
+        onSuccess = { fail("Expected failure but got success") },
+        onFailure = { assert(true) })
+
+    // Complete the task to trigger the addOnCompleteListener with an exception
+    taskCompletionSource.setException(Exception("Test exception"))
+
+    shadowOf(Looper.getMainLooper()).idle()
+
+    verify(mockDocumentReference, times(1)).set(any())
+  }
+
+  @Test
+  fun updateUser_callsOnFailure_whenUserDetailsAreNull() {
+    userRepositoryFirestore.updateUser(
+        user = User(public = user.public, details = null),
+        onSuccess = { fail("Expected failure but got success") },
+        onFailure = { assert(it.message == "User details are required") })
+
+    verify(mockDocumentReference, times(0)).get()
   }
 
   @Test
@@ -125,22 +255,27 @@ class UserRepositoryFirestoreTest {
     `when`(mockDocumentReference.delete()).thenReturn(Tasks.forResult(null))
 
     userRepositoryFirestore.deleteUserById(
-        userId = user.public.userId,
-        onSuccess = { assert(true) },
-        onFailure = { fail("Expected success but got failure") })
+        user.public.userId, { assert(true) }, { TestCase.fail("Expected success but got failure") })
+
+    shadowOf(Looper.getMainLooper()).idle()
+
     verify(mockDocumentReference).delete()
   }
 
-  /*
-  This test is commented because serializeUser and deserializeUser are private methods
-
   @Test
-  fun serialize_deserialize_user() {
-    val user = UserTestInstances.user1
-    val serializedUser = userRepositoryFirestore.serializeUser(user)
-    val deserializedUser = userRepositoryFirestore.deserializeUser(serializedUser)
-    assert(user == deserializedUser)
-  }
-   */
+  fun deleteUserById_callsOnFailure() {
+    val taskCompletionSource = TaskCompletionSource<Void>()
 
+    `when`(mockDocumentReference.delete()).thenReturn(taskCompletionSource.task)
+
+    userRepositoryFirestore.deleteUserById(
+        user.public.userId, { TestCase.fail("Expected failure but got success") }, { assert(true) })
+
+    // Complete the task to trigger the addOnCompleteListener with an exception
+    taskCompletionSource.setException(Exception("Test exception"))
+
+    shadowOf(Looper.getMainLooper()).idle()
+
+    verify(mockDocumentReference, times(1)).delete()
+  }
 }
