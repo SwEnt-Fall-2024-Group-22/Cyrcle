@@ -267,6 +267,23 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
             randomOffset = (Math.random() * 2 * safeOffset - safeOffset).toFloat()
           }
         }
+        1 -> { // Legendary segment
+          if (Math.random() < 0.8f) { // 80% chance for near win effect
+            // Get very close to the edge but still within Legendary
+            val maxOffsetLeft = angleWithinSegment
+            val maxOffsetRight = segmentAngle - angleWithinSegment
+            // Use a very small offset to make it look like it almost didn't make it
+            val nearWinOffset = minOf(maxOffsetLeft, maxOffsetRight) * 0.05f
+            randomOffset = (Math.random() * 2 * nearWinOffset - nearWinOffset).toFloat()
+            Log.d(TAG, "Triggering near-win on Legendary segment")
+          } else {
+            // Land more clearly in the middle for a clear win
+            val maxOffsetLeft = angleWithinSegment
+            val maxOffsetRight = segmentAngle - angleWithinSegment
+            val safeOffset = minOf(maxOffsetLeft, maxOffsetRight) * 0.5f
+            randomOffset = (Math.random() * 2 * safeOffset - safeOffset).toFloat()
+          }
+        }
         2 -> { // Common segment
           if (shouldTriggerNearMiss) {
             // For Common, we want to get close to the left edge (near Legendary)
@@ -291,6 +308,23 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
             Log.d(TAG, "Triggering near-miss on Rare segment (close to Epic)")
           } else {
             // Normal random offset within safe bounds
+            val maxOffsetLeft = angleWithinSegment
+            val maxOffsetRight = segmentAngle - angleWithinSegment
+            val safeOffset = minOf(maxOffsetLeft, maxOffsetRight) * 0.5f
+            randomOffset = (Math.random() * 2 * safeOffset - safeOffset).toFloat()
+          }
+        }
+        4 -> { // Epic segment
+          if (Math.random() < 0.8f) { // 80% chance for near win effect
+            // Get very close to the edge but still within Epic
+            val maxOffsetLeft = angleWithinSegment
+            val maxOffsetRight = segmentAngle - angleWithinSegment
+            // Use a very small offset to make it look like it almost didn't make it
+            val nearWinOffset = minOf(maxOffsetLeft, maxOffsetRight) * 0.05f
+            randomOffset = (Math.random() * 2 * nearWinOffset - nearWinOffset).toFloat()
+            Log.d(TAG, "Triggering near-win on Epic segment")
+          } else {
+            // Land more clearly in the middle for a clear win
             val maxOffsetLeft = angleWithinSegment
             val maxOffsetRight = segmentAngle - angleWithinSegment
             val safeOffset = minOf(maxOffsetLeft, maxOffsetRight) * 0.5f
