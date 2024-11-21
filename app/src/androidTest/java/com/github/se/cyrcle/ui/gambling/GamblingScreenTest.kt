@@ -18,7 +18,7 @@ class GamblingScreenTest {
     fun gambling_screen_shows_all_elements() {
         // When: The gambling screen is launched
         composeTestRule.setContent {
-            GamblingScreen2 { wheelView ->
+            GamblingScreen { wheelView ->
                 wheelView.stopAnimation()
             }
         }
@@ -41,7 +41,7 @@ class GamblingScreenTest {
     fun spin_button_has_correct_properties() {
         // When: The gambling screen is launched
         composeTestRule.setContent {
-            GamblingScreen2 { wheelView ->
+            GamblingScreen { wheelView ->
                 wheelView.stopAnimation()
             }
         }
@@ -56,7 +56,7 @@ class GamblingScreenTest {
     fun wheel_view_has_correct_size() {
         // When: The gambling screen is launched
         composeTestRule.setContent {
-            GamblingScreen2 { wheelView ->
+            GamblingScreen { wheelView ->
                 wheelView.stopAnimation()
             }
         }
@@ -71,7 +71,7 @@ class GamblingScreenTest {
     fun spin_button_has_correct_size() {
         // When: The gambling screen is launched
         composeTestRule.setContent {
-            GamblingScreen2 { wheelView ->
+            GamblingScreen { wheelView ->
                 wheelView.stopAnimation()
             }
         }
