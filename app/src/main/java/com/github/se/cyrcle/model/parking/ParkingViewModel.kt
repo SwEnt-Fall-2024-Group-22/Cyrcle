@@ -302,6 +302,20 @@ class ParkingViewModel(
     }
   }
 
+  /**
+   * Adds a report for the currently selected parking and updates the repository.
+   *
+   * This function first verifies that a parking is selected. If no parking is selected, it logs an
+   * error and returns. It then attempts to add the report to the parking repository. Upon
+   * successful addition, the report is evaluated against severity and threshold limits to determine
+   * if a `ReportedObject` should be created and added to the reported objects repository.
+   *
+   * Updates the selected parking's report count and severity metrics and ensures these changes are
+   * reflected in the repository.
+   *
+   * @param report The report to be added, which includes details such as the reason and user ID.
+   * @param user The user submitting the report, required for identifying the reporter.
+   */
   fun addReport(report: ParkingReport, user: User) {
     val selectedParking = _selectedParking.value
     if (selectedParking == null) {
@@ -312,19 +326,25 @@ class ParkingViewModel(
     parkingRepository.addReport(
         report,
         onSuccess = {
+          // Check thresholds for reporting to `ReportedObjectRepository`
+          // i.e if it's max severity add it to the maximum severity count and check if it doesn't
+          // exceed the maximum severity threshold. Otherwise, check if it doesn't exceed
+          // the standard threshold
           if ((report.reason.severity == 3 &&
               selectedParking.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERITY_THRESH) ||
               (selectedParking.nbReports >= NB_REPORTS_THRESH)) {
             reportedObjectRepository.addReportedObject(
                 ReportedObject(
-                    selectedParking.uid,
-                    report.uid,
-                    ReportReason.Parking(report.reason),
-                    user.public.userId,
-                    ReportedObjectType.PARKING),
-                {},
-                {})
+                    objectUID = selectedParking.uid,
+                    reportUID = report.uid,
+                    reason = ReportReason.Parking(report.reason),
+                    userUID = user.public.userId,
+                    objectType = ReportedObjectType.PARKING),
+                onSuccess = {},
+                onFailure = {})
           }
+
+          // Update the local reports and parking metrics
           _selectedParkingReports.update { currentReports ->
             currentReports?.plus(it) ?: listOf(it)
           }

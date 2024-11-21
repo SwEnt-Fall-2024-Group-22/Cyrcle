@@ -65,29 +65,48 @@ class ReviewViewModel(
         review.uid, {}, { Log.e("ReviewViewModel", "Error deleting reviews", it) })
   }
 
+  /**
+   * Adds a report for the currently selected review and updates the repository.
+   *
+   * This function first verifies that a review is selected. If no review is selected, it logs an
+   * error and returns. It then attempts to add the report to the review repository. Upon successful
+   * addition, the report is evaluated against severity and threshold limits to determine if a
+   * `ReportedObject` should be created and added to the reported objects repository.
+   *
+   * Updates the selected review's report count and severity metrics and ensures these changes are
+   * reflected in the repository.
+   *
+   * @param report The report to be added, which includes details such as the reason and user ID.
+   * @param user The user submitting the report, required for identifying the reporter.
+   */
   fun addReport(report: ReviewReport, user: User) {
     val selectedReview = _selectedReview.value
     if (selectedReview == null) {
       Log.e("ReviewViewModel", "No review selected")
       return
     }
-
     reviewRepository.addReport(
         report,
         onSuccess = {
+          // Check thresholds for reporting to `ReportedObjectRepository`
+          // If it's a max severity report, add it to the maximum severity count and check if it
+          // exceeds the maximum severity threshold. Otherwise, check if it exceeds the standard
+          // threshold.
           if ((report.reason.severity == 3 &&
               selectedReview.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERITY_THRESH) ||
               (selectedReview.nbReports >= NB_REPORTS_THRESH)) {
             reportedObjectRepository.addReportedObject(
                 ReportedObject(
-                    selectedReview.uid,
-                    report.uid,
-                    ReportReason.Review(report.reason),
-                    user.public.userId,
-                    ReportedObjectType.REVIEW),
-                {},
-                {})
+                    objectUID = selectedReview.uid,
+                    reportUID = report.uid,
+                    reason = ReportReason.Review(report.reason),
+                    userUID = user.public.userId,
+                    objectType = ReportedObjectType.REVIEW),
+                onSuccess = {},
+                onFailure = {})
           }
+
+          // Update the local reports and review metrics
           if (report.reason.severity == 3) {
             selectedReview.nbMaxSeverityReports += 1
           }
