@@ -70,6 +70,14 @@ class MainActivity : ComponentActivity() {
     authenticator.init(this)
     permissionsHandler.initHandler(this@MainActivity)
 
+    // uncomment this for the spin-the-wheel game
+    /*setContent {
+      CyrcleTheme {
+        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+          GamblingScreen()
+        }
+      }
+    }*/
     setContent {
       CyrcleTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
