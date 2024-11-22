@@ -96,12 +96,7 @@ class UserViewModel(
    * @param onSuccess the callback to call with a boolean indicating if the user exists
    */
   fun doesUserExist(user: User, onSuccess: (Boolean) -> Unit) {
-    userRepository.userExists(
-        user,
-        onSuccess = onSuccess,
-        onFailure = {
-          Log.e("UserViewModel", "Failed to check if user exists: ${user.public.userId}", it)
-        })
+    userRepository.userExists(user, onSuccess = onSuccess, onFailure = {})
   }
 
   /**
