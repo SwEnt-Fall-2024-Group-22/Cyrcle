@@ -7,26 +7,13 @@ import java.io.OutputStream
 private const val END_OF_STRING_CHAR = 0.toChar()
 private const val END_OF_STREAM_CHAR = (-1).toChar()
 
-class SettingsSerializer : Serializer<Settings> {
-  override val defaultValue: Settings
-    get() = Settings("John Doe", 42, 420000, 4.2f, true)
-
-  override suspend fun readFrom(input: InputStream): Settings {
-    return Settings(
-        readString(input),
-        readInt32(input),
-        readLong64(input),
-        readFloat32(input),
-        readBoolean(input))
-  }
-
-  override suspend fun writeTo(t: Settings, output: OutputStream) {
-    writeString(output, t.userName)
-    writeInt32(output, t.age)
-    writeLong64(output, t.ageSinceEpoch)
-    writeFloat32(output, t.heightInCm)
-    writeBoolean(output, t.isDeveloper)
-  }
+/**
+ * A class to easily serialize and deserialize class with basic variables inside. An example is
+ * available in the test folder, under [Settings].
+ */
+abstract class ProtoGenericSerializer<T>(
+    override val defaultValue: T,
+) : Serializer<T> {
 
   companion object {
     private fun writeNByte(output: OutputStream, byteArray: ByteArray) {
@@ -105,8 +92,7 @@ class SettingsSerializer : Serializer<Settings> {
     fun readBoolean(input: InputStream): Boolean {
       return when (input.read()) {
         0 -> false
-        1 -> true
-        else -> true // throw IllegalArgumentException("Invalid boolean value")
+        else -> true
       }
     }
   }

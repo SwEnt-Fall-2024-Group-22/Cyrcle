@@ -45,7 +45,7 @@ class SettingsSerializerTest {
   @Test
   fun testSerialize() {
     val outStream = ByteArrayOutputStream()
-    val serializer = SettingsSerializer()
+    val serializer = Settings.Serializer()
     runBlocking { serializer.writeTo(settings, outStream) }
     assert(outStream.toByteArray().contentEquals(serializedJohnDoe)) { "Serialization failed" }
   }
@@ -53,14 +53,14 @@ class SettingsSerializerTest {
   @Test
   fun testDeserialize() {
     val inputStream = ByteArrayInputStream(serializedJohnDoe)
-    val serializer = SettingsSerializer()
+    val serializer = Settings.Serializer()
     val deserializedSettings = runBlocking { serializer.readFrom(inputStream) }
     assert(settings == deserializedSettings) { "Deserialization failed" }
   }
 
   @Test
   fun testSerializeAndDeserialize() {
-    val serializer = SettingsSerializer()
+    val serializer = Settings.Serializer()
     val outStream = ByteArrayOutputStream()
 
     runBlocking { serializer.writeTo(settings, outStream) }
