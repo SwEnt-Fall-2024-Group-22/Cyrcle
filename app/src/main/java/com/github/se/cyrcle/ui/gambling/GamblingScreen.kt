@@ -37,13 +37,19 @@ fun WheelView(
 ): () -> Unit {
   data class Segment(val name: String, val color: Color, val probability: Float)
 
+  val rarityNothing = stringResource(R.string.rarity_nothing)
+  val rarityLegendary = stringResource(R.string.rarity_legendary)
+  val rarityCommon = stringResource(R.string.rarity_common)
+  val rarityRare = stringResource(R.string.rarity_rare)
+  val rarityEpic = stringResource(R.string.rarity_epic)
+
   val segments = remember {
     listOf(
-        Segment("Nothing", Color.Gray, 50f),
-        Segment("Legendary", Color(0xFFFFD700), 0.1f),
-        Segment("Common", Color.Green, 32f),
-        Segment("Rare", Color.Blue, 16f),
-        Segment("Epic", Color(0xFF800080), 1.9f))
+        Segment(rarityNothing, Color.Gray, 50f),
+        Segment(rarityLegendary, Color(0xFFFFD700), 0.1f),
+        Segment(rarityCommon, Color.Green, 32f),
+        Segment(rarityRare, Color.Blue, 16f),
+        Segment(rarityEpic, Color(0xFF800080), 1.9f))
   }
 
   val probabilityRanges = remember {
@@ -56,13 +62,13 @@ fun WheelView(
     }
   }
 
-  var rotation by remember { mutableStateOf(0f) }
+  var rotation by remember { mutableFloatStateOf(0f) }
   var isSpinning by remember { mutableStateOf(false) }
-  var targetRotation by remember { mutableStateOf(0f) }
-  var currentRotation by remember { mutableStateOf(0f) }
-  var spinStartTime by remember { mutableStateOf(0L) }
+  var targetRotation by remember { mutableFloatStateOf(0f) }
+  var currentRotation by remember { mutableFloatStateOf(0f) }
+  var spinStartTime by remember { mutableLongStateOf(0L) }
   var pauseAfterSpin by remember { mutableStateOf(false) }
-  var expectedSegment by remember { mutableStateOf(0) }
+  var expectedSegment by remember { mutableIntStateOf(0) }
   val textMeasurer = rememberTextMeasurer()
 
   fun getSegmentAtPointer(rotation: Float): Int {
@@ -86,7 +92,7 @@ fun WheelView(
   LaunchedEffect(Unit) {
     while (true) {
       if (!isSpinning && !pauseAfterSpin) {
-        rotation += -0.2f
+        rotation -= 0.2f
         if (rotation <= -360f) rotation += 360f
       }
       delay(16)
