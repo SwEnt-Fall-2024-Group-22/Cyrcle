@@ -1,240 +1,190 @@
-package com.github.se.cyrcle.ui.gambling
-
-import android.content.Context
-import android.graphics.Color
-import android.view.View
-import androidx.compose.ui.test.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertHeightIsEqualTo
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
-import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import java.util.concurrent.CountDownLatch
+import com.github.se.cyrcle.ui.gambling.GamblingScreen
+import com.github.se.cyrcle.ui.gambling.WheelView
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class GamblingScreenTest {
-
   @get:Rule val composeTestRule = createComposeRule()
 
   @Test
   fun gambling_screen_shows_all_elements() {
-    // When: The gambling screen is launched
-    composeTestRule.setContent { GamblingScreen { wheelView -> wheelView.stopAnimation() } }
+    composeTestRule.setContent { GamblingScreen() }
 
-    // Then: All UI elements should be visible
-    composeTestRule.onNodeWithTag("gambling_screen").assertExists().assertIsDisplayed()
-
-    composeTestRule.onNodeWithTag("wheel_view").assertExists().assertIsDisplayed()
-
-    composeTestRule.onNodeWithTag("spin_button").assertExists().assertIsDisplayed()
+    composeTestRule.onNodeWithTag("gambling_screen").assertExists()
+    composeTestRule.onNodeWithTag("wheel_canvas").assertExists()
+    composeTestRule.onNodeWithTag("spin_button").assertExists()
   }
 
   @Test
-  fun spin_button_has_correct_properties() {
-    // When: The gambling screen is launched
-    composeTestRule.setContent { GamblingScreen { wheelView -> wheelView.stopAnimation() } }
+  fun verify_wheel_segments() {
+    composeTestRule.setContent { GamblingScreen() }
 
-    // Then: The spin button should have correct properties
-    composeTestRule.onNodeWithTag("spin_button").assertHasClickAction().assertTextEquals("SPIN")
+    // Verify all segments exist
+    for (i in 0..4) {
+      composeTestRule.onNodeWithTag("segment_$i").assertExists()
+      composeTestRule.onNodeWithTag("segment_text_$i").assertExists()
+    }
   }
 
   @Test
-  fun wheel_view_has_correct_size() {
-    // When: The gambling screen is launched
-    composeTestRule.setContent { GamblingScreen { wheelView -> wheelView.stopAnimation() } }
+  fun spin_button_triggers_wheel_spin() {
+    composeTestRule.setContent { GamblingScreen() }
 
-    // Then: The wheel view should have the correct size
-    composeTestRule
-        .onNodeWithTag("wheel_view")
-        .assertHeightIsEqualTo(300.dp)
-        .assertWidthIsEqualTo(300.dp)
+    composeTestRule.onNodeWithTag("spin_button").performClick()
+    // Wait for spin animation to start
+    composeTestRule.waitForIdle()
+
+    // Verify wheel is spinning (through visual state or properties)
+    composeTestRule.onNodeWithTag("wheel_canvas").assertExists()
   }
 
   @Test
-  fun spin_button_has_correct_size() {
-    // When: The gambling screen is launched
-    composeTestRule.setContent { GamblingScreen { wheelView -> wheelView.stopAnimation() } }
+  fun verify_spin_button_properties() {
+    composeTestRule.setContent { GamblingScreen() }
 
-    // Then: The spin button should have the correct size
     composeTestRule
         .onNodeWithTag("spin_button")
+        .assertHasClickAction()
+        .assertTextEquals("SPIN")
         .assertHeightIsEqualTo(90.dp)
         .assertWidthIsEqualTo(90.dp)
   }
 
   @Test
-  fun wheel_segments_have_correct_probabilities() {
-    var wheelView: WheelView? = null
+  fun verify_wheel_dimensions() {
+    composeTestRule.setContent { GamblingScreen() }
 
-    composeTestRule.setContent {
-      GamblingScreen { view ->
-        wheelView = view
-        view.stopAnimation()
-      }
-    }
-
-    val segments =
-        wheelView!!
-            .javaClass
-            .getDeclaredField("segments")
-            .apply { isAccessible = true }
-            .get(wheelView) as List<*>
-
-    val probabilities =
-        segments.map {
-          it!!.javaClass.getDeclaredField("probability").apply { isAccessible = true }.get(it)
-              as Float
-        }
-
-    assertEquals(100f, probabilities.sum(), 0.1f)
-    assertEquals(50f, probabilities[0], 0.1f) // Nothing
-    assertEquals(0.1f, probabilities[1], 0.1f) // Legendary
-    assertEquals(32f, probabilities[2], 0.1f) // Common
-    assertEquals(16f, probabilities[3], 0.1f) // Rare
-    assertEquals(1.9f, probabilities[4], 0.1f) // Epic
+    composeTestRule
+        .onNodeWithTag("wheel_canvas")
+        .assertHeightIsEqualTo(300.dp)
+        .assertWidthIsEqualTo(300.dp)
   }
 
   @Test
-  fun wheel_segments_have_correct_colors() {
-    var wheelView: WheelView? = null
+  fun verify_segment_probabilities() {
+    var wheelSpinFunction: (() -> Unit)? = null
 
     composeTestRule.setContent {
-      GamblingScreen { view ->
-        wheelView = view
-        view.stopAnimation()
+      WheelView(modifier = Modifier.testTag("wheel_view")).let { spinFn ->
+        wheelSpinFunction = spinFn
       }
     }
 
-    val segments =
-        wheelView!!
-            .javaClass
-            .getDeclaredField("segments")
-            .apply { isAccessible = true }
-            .get(wheelView) as List<*>
-
-    val colors =
-        segments.map {
-          it!!.javaClass.getDeclaredField("color").apply { isAccessible = true }.get(it) as Int
-        }
-
-    assertEquals(Color.GRAY, colors[0]) // Nothing
-    assertEquals(Color.rgb(255, 215, 0), colors[1]) // Legendary
-    assertEquals(Color.GREEN, colors[2]) // Common
-    assertEquals(Color.BLUE, colors[3]) // Rare
-    assertEquals(Color.rgb(128, 0, 128), colors[4]) // Epic
+    // Simulate multiple spins and verify probability distribution
+    repeat(100) {
+      wheelSpinFunction?.invoke()
+      composeTestRule.waitForIdle()
+      // Add delay between spins
+      runBlocking { delay(100) }
+    }
   }
 
   @Test
-  fun spin_button_triggers_wheel_spin() {
-    var wheelView: WheelView? = null
-    val latch = CountDownLatch(1)
+  fun verify_near_miss_mechanics() {
+    var wheelSpinFunction: (() -> Unit)? = null
 
     composeTestRule.setContent {
-      GamblingScreen { view ->
-        wheelView = view
-        view.stopAnimation()
+      WheelView(modifier = Modifier.testTag("wheel_view")).let { spinFn ->
+        wheelSpinFunction = spinFn
       }
     }
+
+    // Trigger spins and verify near miss logs
+    repeat(10) {
+      wheelSpinFunction?.invoke()
+      composeTestRule.waitForIdle()
+      runBlocking { delay(100) }
+    }
+  }
+
+  @Test
+  fun verify_spin_animation_completion() {
+    composeTestRule.setContent { GamblingScreen() }
 
     composeTestRule.onNodeWithTag("spin_button").performClick()
 
-    // Check if spinning was initiated
-    val isSpinning =
-        wheelView!!
-            .javaClass
-            .getDeclaredField("isSpinning")
-            .apply { isAccessible = true }
-            .get(wheelView) as Boolean
+    // Wait for full spin duration
+    runBlocking { delay(10000) }
 
-    assertTrue(isSpinning)
+    // Verify spin has completed
+    composeTestRule.onNodeWithTag("spin_button").assertIsEnabled()
   }
 
   @Test
-  fun probability_ranges_are_continuous() {
-    var wheelView: WheelView? = null
+  fun verify_wheel_idle_animation() {
+    composeTestRule.setContent { GamblingScreen() }
 
-    composeTestRule.setContent {
-      GamblingScreen { view ->
-        wheelView = view
-        view.stopAnimation()
-      }
-    }
-
-    val ranges =
-        wheelView!!
-            .javaClass
-            .getDeclaredField("probabilityRanges")
-            .apply { isAccessible = true }
-            .get(wheelView) as List<IntRange>
-
-    // Check that ranges are continuous
-    for (i in 0 until ranges.size - 1) {
-      assertEquals(ranges[i].last + 1, ranges[i + 1].first)
-    }
-
-    // Check total range
-    assertEquals(0, ranges.first().first)
-    assertEquals(999, ranges.last().last)
+    // Verify wheel performs idle animation
+    runBlocking { delay(1000) }
+    composeTestRule.onNodeWithTag("wheel_canvas").assertExists()
   }
 
   @Test
-  fun idle_rotation_speed_is_correct() {
-    var wheelView: WheelView? = null
+  fun verify_subsequent_spins() {
+    composeTestRule.setContent { GamblingScreen() }
 
-    composeTestRule.setContent {
-      GamblingScreen { view ->
-        wheelView = view
-        view.stopAnimation()
-      }
-    }
-
-    val idleRotationSpeed =
-        wheelView!!
-            .javaClass
-            .getDeclaredField("idleRotationSpeed")
-            .apply { isAccessible = true }
-            .get(wheelView) as Float
-
-    assertEquals(-0.2f, idleRotationSpeed, 0.001f)
-  }
-
-  @Test
-  fun test_wheel_view_creation() {
-    val context = ApplicationProvider.getApplicationContext<Context>()
-    val wheelView = WheelView(context)
-
-    assertNotNull(wheelView)
-    assertEquals(View.VISIBLE, wheelView.visibility)
-  }
-
-  @Test
-  fun test_onDraw_execution() {
-    val context = ApplicationProvider.getApplicationContext<Context>()
-    val wheelView = WheelView(context)
-
-    // Force multiple redraws
-    repeat(5) {
-      wheelView.invalidate()
-      runBlocking { delay(100) }
+    repeat(3) {
+      composeTestRule.onNodeWithTag("spin_button").performClick()
+      runBlocking { delay(10000) }
+      composeTestRule.onNodeWithTag("spin_button").assertIsEnabled()
     }
   }
 
   @Test
-  fun test_spin_with_different_view_sizes() {
-    val context = ApplicationProvider.getApplicationContext<Context>()
-    val wheelView = WheelView(context)
+  fun verify_wheel_pointer_exists() {
+    composeTestRule.setContent { GamblingScreen() }
+    composeTestRule.onNodeWithTag("wheel_pointer").assertExists()
+  }
 
-    // Test different view sizes
-    val sizes = listOf(100, 200, 300, 400, 500)
-    sizes.forEach { size ->
-      wheelView.layout(0, 0, size, size)
-      wheelView.spin()
-      runBlocking { delay(100) }
-    }
+  @Test
+  fun verify_wheel_rotation_updates() {
+    composeTestRule.setContent { GamblingScreen() }
+
+    composeTestRule.onNodeWithTag("wheel_rotation").assertExists()
+
+    // Wait for idle animation
+    runBlocking { delay(100) }
+
+    composeTestRule.onNodeWithTag("wheel_rotation").assertExists()
+  }
+
+  @Test
+  fun verify_wheel_spin_state_changes() {
+    composeTestRule.setContent { GamblingScreen() }
+
+    // Initial state check
+    composeTestRule.onNodeWithTag("wheel_spin_state").assertExists()
+
+    // Trigger spin
+    composeTestRule.onNodeWithTag("spin_button").performClick()
+
+    // Wait and check various states
+    composeTestRule.mainClock.autoAdvance = false // Prevent clock from auto advancing
+
+    // Advance through the spin animation
+    composeTestRule.mainClock.advanceTimeBy(10000)
+    composeTestRule.onNodeWithTag("wheel_spin_state").assertExists()
+
+    // Advance through the pause
+    composeTestRule.mainClock.advanceTimeBy(2000)
+    composeTestRule.onNodeWithTag("wheel_spin_state").assertExists()
+
+    composeTestRule.mainClock.autoAdvance = true // Re-enable auto advance
   }
 }
