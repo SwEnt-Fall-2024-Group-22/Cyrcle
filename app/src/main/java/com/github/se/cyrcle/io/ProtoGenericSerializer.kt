@@ -9,7 +9,7 @@ private const val END_OF_STREAM_CHAR = (-1).toChar()
 
 /**
  * A class to easily serialize and deserialize class with basic variables inside. An example is
- * available in the test folder, under [Settings].
+ * available in the test folder, under Settings.
  */
 abstract class ProtoGenericSerializer<T>(
     override val defaultValue: T,
