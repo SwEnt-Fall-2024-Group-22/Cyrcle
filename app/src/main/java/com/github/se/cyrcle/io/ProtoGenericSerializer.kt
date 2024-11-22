@@ -28,7 +28,7 @@ abstract class ProtoGenericSerializer<T>(
      */
     fun writeString(output: OutputStream, value: String) {
       writeNByte(output, value.toByteArray())
-      output.write(END_OF_STRING_CHAR.toInt())
+      output.write(END_OF_STRING_CHAR.code)
     }
 
     /**
