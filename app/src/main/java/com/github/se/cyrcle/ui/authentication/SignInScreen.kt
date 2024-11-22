@@ -92,7 +92,7 @@ fun SignInScreen(
           Image(
               painter = painterResource(id = R.drawable.app_logo_name),
               contentDescription = "App Logo",
-              modifier = Modifier.size(250.dp))
+              modifier = Modifier.size(250.dp).testTag("AppLogo"))
 
           // Authenticate With Google Button
           authenticator.AuthenticateButton(onAuthComplete, onAuthFailure)
@@ -105,7 +105,8 @@ fun SignInScreen(
                       .border(BorderStroke(1.dp, Color.LightGray), RoundedCornerShape(50))
                       .height(48.dp)
                       .width(250.dp),
-              onClick = { navigationActions.navigateTo(Screen.CREATE_PROFILE) })
+              onClick = { navigationActions.navigateTo(Screen.CREATE_PROFILE) },
+              testTag = "CreateAccountButton")
 
           // Anonymous Login Button
           authenticator.SignInAnonymouslyButton(
