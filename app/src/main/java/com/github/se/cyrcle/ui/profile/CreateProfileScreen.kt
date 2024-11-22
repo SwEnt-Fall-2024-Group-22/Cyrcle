@@ -33,16 +33,23 @@ fun CreateProfileScreen(
 
   val validationToastText = stringResource(R.string.create_profile_validation_toast)
   val errorToastText = stringResource(R.string.create_profile_error_toast)
+  val accountExistsToastText = stringResource(R.string.create_profile_account_already_exists)
 
   // Uses the Auth UID as userID for our new user
   val authCompleteCallback = { userAttempt: User, userAuthenticated: User ->
     val user =
         userAttempt.copy(public = userAttempt.public.copy(userId = userAuthenticated.public.userId))
 
-    userViewModel.signIn(user)
-
-    Toast.makeText(context, validationToastText, Toast.LENGTH_SHORT).show()
-    navigationActions.navigateTo(TopLevelDestinations.MAP)
+    userViewModel.doesUserExist(user) {
+      if (it) {
+        Toast.makeText(context, accountExistsToastText, Toast.LENGTH_SHORT).show()
+        navigationActions.goBack()
+      } else {
+        userViewModel.signIn(user)
+        Toast.makeText(context, validationToastText, Toast.LENGTH_SHORT).show()
+        navigationActions.navigateTo(TopLevelDestinations.MAP)
+      }
+    }
   }
 
   val authErrorCallback = { e: Exception ->

@@ -66,7 +66,7 @@ class ParkingDetailsScreenTest {
 
     parkingViewModel =
         ParkingViewModel(imageRepository, parkingRepository, mockReportedObjectRepository)
-    userViewModel = UserViewModel(userRepository, parkingRepository)
+    userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository)
     reviewViewModel = ReviewViewModel(reviewRepository, mockReportedObjectRepository)
 
     parkingViewModel.addParking(TestInstancesParking.parking2)

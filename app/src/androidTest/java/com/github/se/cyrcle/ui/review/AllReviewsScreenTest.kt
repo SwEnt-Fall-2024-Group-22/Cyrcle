@@ -30,16 +30,32 @@ class AllReviewsScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
 
-  private val navigationActions = mock(NavigationActions::class.java)
-  private val parkingViewModel =
-      ParkingViewModel(
-          MockImageRepository(), MockParkingRepository(), MockReportedObjectRepository())
-  private val reviewViewModel =
-      ReviewViewModel(MockReviewRepository(), MockReportedObjectRepository())
-  private val userViewModel = UserViewModel(MockUserRepository(), MockParkingRepository())
+  private lateinit var navigationActions: NavigationActions
+  private lateinit var parkingRepository: MockParkingRepository
+  private lateinit var reviewRepository: MockReviewRepository
+  private lateinit var userRepository: MockUserRepository
+  private lateinit var imageRepository: MockImageRepository
+  private lateinit var reportedObjectRepository: MockReportedObjectRepository
+
+  private lateinit var parkingViewModel: ParkingViewModel
+  private lateinit var reviewViewModel: ReviewViewModel
+  private lateinit var userViewModel: UserViewModel
 
   @Before
   fun setUp() {
+
+    navigationActions = mock(NavigationActions::class.java)
+    parkingRepository = MockParkingRepository()
+    reviewRepository = MockReviewRepository()
+    userRepository = MockUserRepository()
+    imageRepository = MockImageRepository()
+    reportedObjectRepository = MockReportedObjectRepository()
+
+    parkingViewModel =
+        ParkingViewModel(imageRepository, parkingRepository, reportedObjectRepository)
+    reviewViewModel = ReviewViewModel(reviewRepository, reportedObjectRepository)
+    userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository)
+
     reviewViewModel.addReview(TestInstancesReview.review4)
     reviewViewModel.addReview(TestInstancesReview.review3)
     reviewViewModel.addReview(TestInstancesReview.review2)

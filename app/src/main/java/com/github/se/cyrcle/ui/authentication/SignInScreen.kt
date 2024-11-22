@@ -48,14 +48,18 @@ fun SignInScreen(
 
   val failSignInMsg = stringResource(R.string.sign_in_failed_toast)
   val successSignInMsg = stringResource(R.string.sign_in_successful_toast)
+  val accountNotFoundToast = stringResource(R.string.sign_in_account_not_found)
 
   val onAuthComplete = { user: User ->
-    Toast.makeText(context, successSignInMsg, Toast.LENGTH_LONG).show()
-
-    // TODO add checks if user is already exists
-
-    userViewModel.signIn(user)
-    navigationActions.navigateTo(TopLevelDestinations.MAP)
+    userViewModel.doesUserExist(user) {
+      if (it) {
+        Toast.makeText(context, successSignInMsg, Toast.LENGTH_LONG).show()
+        userViewModel.signIn(user)
+        navigationActions.navigateTo(TopLevelDestinations.MAP)
+      } else {
+        Toast.makeText(context, accountNotFoundToast, Toast.LENGTH_SHORT).show()
+      }
+    }
   }
   val onAuthFailure = { e: Exception ->
     when (e) {

@@ -7,6 +7,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.AuthenticatorMock
+import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.user.TestInstancesUser
@@ -32,6 +33,7 @@ class CreateProfileScreenTest {
 
   private lateinit var mockUserRepository: MockUserRepository
   private lateinit var mockParkingRepository: MockParkingRepository
+  private lateinit var mockImageRepository: MockImageRepository
 
   @Before
   fun setUp() {
@@ -40,7 +42,8 @@ class CreateProfileScreenTest {
 
     mockUserRepository = MockUserRepository()
     mockParkingRepository = MockParkingRepository()
-    userViewModel = UserViewModel(mockUserRepository, mockParkingRepository)
+    mockImageRepository = MockImageRepository()
+    userViewModel = UserViewModel(mockUserRepository, mockParkingRepository, mockImageRepository)
 
     composeTestRule.setContent {
       CreateProfileScreen(mockNavigationActions, mockAuthenticator, userViewModel)

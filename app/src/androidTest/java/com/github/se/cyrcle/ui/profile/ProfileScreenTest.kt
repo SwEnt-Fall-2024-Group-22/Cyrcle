@@ -45,7 +45,7 @@ class ProfileScreenTest {
     userRepository = MockUserRepository()
     parkingRepository = MockParkingRepository()
     reportedObjectRepository = MockReportedObjectRepository()
-    userViewModel = UserViewModel(userRepository, parkingRepository)
+    userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository)
     parkingViewModel =
         ParkingViewModel(imageRepository, parkingRepository, reportedObjectRepository)
 
