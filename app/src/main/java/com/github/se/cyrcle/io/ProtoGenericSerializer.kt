@@ -142,7 +142,7 @@ abstract class ProtoGenericSerializer<T>(
     fun readDouble64(input: InputStream): Double {
       var value: Long = 0
       for (i in 0 until Double.SIZE_BYTES) value = value.shl(8) or input.read().toLong()
-      return value.toDouble()
+      return Double.fromBits(value)
     }
 
     /**

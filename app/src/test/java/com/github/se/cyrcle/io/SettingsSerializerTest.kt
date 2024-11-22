@@ -12,6 +12,7 @@ class SettingsSerializerTest {
           0x4B4B4B4B,
           0x4C4C4C4C4C4C4C4CL,
           Float.fromBits(0x4D4D4D4D),
+          Double.fromBits(0x4E4E4E4E4E4E4E4EL),
           true)
   private val serializedJohnDoe =
       byteArrayOf(
@@ -40,6 +41,14 @@ class SettingsSerializerTest {
           0x4d,
           0x4d,
           0x4d,
+          0x4E,
+          0x4E,
+          0x4E,
+          0x4E,
+          0x4E,
+          0x4E,
+          0x4E,
+          0x4E,
           0x01)
 
   @Test
