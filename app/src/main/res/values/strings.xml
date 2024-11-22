@@ -72,6 +72,7 @@
     <string name="sign_in_successful_toast">Login successful!</string>
     <string name="sign_in_failed_toast">Login failed!</string>
     <string name="sign_in_guest_button">Continue as Guest</string>
+    <string name="sign_in_account_not_found">Your account was not found, please create one</string>
     <string name="sign_in_google_button">Sign in with Google</string>
 
     <!-- Card Screen -->
@@ -116,6 +117,7 @@
     <string name="create_profile_screen_title">Create your profile</string>
     <string name="create_profile_validation_toast">Profile created successfully!</string>
     <string name="create_profile_error_toast">Error during authentication…</string>
+    <string name="create_profile_account_already_exists">Your account already exists, please sign in</string>
     <string name="create_profile_sign_in_explanation">To complete account creation,\n please authenticate with Google to link your email.</string>
 
     <!-- Invite to AuthScreen Screen -->

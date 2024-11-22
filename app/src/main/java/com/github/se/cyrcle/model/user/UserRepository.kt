@@ -26,6 +26,15 @@ interface UserRepository {
   fun getUserById(userId: String, onSuccess: (User) -> Unit, onFailure: (Exception) -> Unit)
 
   /**
+   * Check if a user exists
+   *
+   * @param user the user to check
+   * @param onSuccess a callback that is called with a boolean indicating if the user exists
+   * @param onFailure a callback that is called when an error occurs
+   */
+  fun userExists(user: User, onSuccess: (Boolean) -> Unit, onFailure: (Exception) -> Unit)
+
+  /**
    * Add a user
    *
    * @param user the user to add

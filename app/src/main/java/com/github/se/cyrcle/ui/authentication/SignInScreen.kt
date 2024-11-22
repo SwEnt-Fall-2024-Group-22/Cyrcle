@@ -48,14 +48,18 @@ fun SignInScreen(
 
   val failSignInMsg = stringResource(R.string.sign_in_failed_toast)
   val successSignInMsg = stringResource(R.string.sign_in_successful_toast)
+  val accountNotFoundToast = stringResource(R.string.sign_in_account_not_found)
 
   val onAuthComplete = { user: User ->
-    Toast.makeText(context, successSignInMsg, Toast.LENGTH_LONG).show()
-
-    // TODO add checks if user is already exists
-
-    userViewModel.signIn(user)
-    navigationActions.navigateTo(TopLevelDestinations.MAP)
+    userViewModel.doesUserExist(user) {
+      if (it) {
+        Toast.makeText(context, successSignInMsg, Toast.LENGTH_LONG).show()
+        userViewModel.signIn(user)
+        navigationActions.navigateTo(TopLevelDestinations.MAP)
+      } else {
+        Toast.makeText(context, accountNotFoundToast, Toast.LENGTH_SHORT).show()
+      }
+    }
   }
   val onAuthFailure = { e: Exception ->
     when (e) {
@@ -88,7 +92,7 @@ fun SignInScreen(
           Image(
               painter = painterResource(id = R.drawable.app_logo_name),
               contentDescription = "App Logo",
-              modifier = Modifier.size(250.dp))
+              modifier = Modifier.size(250.dp).testTag("AppLogo"))
 
           // Authenticate With Google Button
           authenticator.AuthenticateButton(onAuthComplete, onAuthFailure)
@@ -101,7 +105,8 @@ fun SignInScreen(
                       .border(BorderStroke(1.dp, Color.LightGray), RoundedCornerShape(50))
                       .height(48.dp)
                       .width(250.dp),
-              onClick = { navigationActions.navigateTo(Screen.CREATE_PROFILE) })
+              onClick = { navigationActions.navigateTo(Screen.CREATE_PROFILE) },
+              testTag = "CreateAccountButton")
 
           // Anonymous Login Button
           authenticator.SignInAnonymouslyButton(

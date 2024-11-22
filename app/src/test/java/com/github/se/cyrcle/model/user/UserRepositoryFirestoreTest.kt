@@ -27,6 +27,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.atLeast
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
@@ -199,6 +200,50 @@ class UserRepositoryFirestoreTest {
 
     verify(mockDocumentReference, times(0)).get()
     assertTrue(onFailureCallbackCalled)
+  }
+
+  @Test
+  fun userExists_callsOnSuccess() {
+    val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
+
+    `when`(mockCollectionReference.whereEqualTo(eq("userId"), eq(user.public.userId)))
+        .thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.get()).thenReturn(taskCompletionSource.task)
+
+    var onSuccessCalled = false
+    userRepositoryFirestore.userExists(
+        user = user,
+        onSuccess = { onSuccessCalled = true },
+        onFailure = { fail("Expected onSuccess to be called") })
+    // Complete the task to trigger the addOnCompleteListener with an exception
+    taskCompletionSource.setResult(mockUserQuerySnapshot)
+    shadowOf(Looper.getMainLooper()).idle()
+
+    verify(mockCollectionReference, times(1)).whereEqualTo(any<String>(), any())
+    verify(mockCollectionReference, times(1)).get()
+    assertTrue(onSuccessCalled)
+  }
+
+  @Test
+  fun userExists_callsOnFailure() {
+    val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
+
+    `when`(mockCollectionReference.whereEqualTo(eq("userId"), eq(user.public.userId)))
+        .thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.get()).thenReturn(taskCompletionSource.task)
+
+    var onFailureCalled = false
+    userRepositoryFirestore.userExists(
+        user = user,
+        onSuccess = { fail("Expected on failure to be called") },
+        onFailure = { onFailureCalled = true })
+    // Complete the task to trigger the addOnCompleteListener with an exception
+    taskCompletionSource.setException(Exception("Test exception"))
+    shadowOf(Looper.getMainLooper()).idle()
+
+    verify(mockCollectionReference, times(1)).whereEqualTo(any<String>(), any())
+    verify(mockCollectionReference, times(1)).get()
+    assertTrue(onFailureCalled)
   }
 
   @Test

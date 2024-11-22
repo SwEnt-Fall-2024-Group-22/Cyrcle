@@ -54,6 +54,14 @@ class UserViewModelTest {
   }
 
   @Test
+  fun testUserExists() {
+    userViewModel.doesUserExist(TestInstancesUser.user1) {}
+
+    // Check if the repository was called
+    verify(userRepository).userExists(eq(TestInstancesUser.user1), any(), any())
+  }
+
+  @Test
   fun setCurrentUserByIdTest() {
     userViewModel.setCurrentUserById("user1")
 

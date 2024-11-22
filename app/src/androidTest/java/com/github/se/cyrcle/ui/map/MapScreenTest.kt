@@ -52,7 +52,7 @@ class MapScreenTest {
 
     parkingViewModel =
         ParkingViewModel(imageRepository, parkingRepository, mockReportedObjectRepository)
-    userViewModel = UserViewModel(userRepository, parkingRepository)
+    userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository)
     mapViewModel = MapViewModel()
     permissionHandler = MockPermissionHandler()
 

@@ -68,6 +68,24 @@ constructor(private val db: FirebaseFirestore, private val auth: FirebaseAuth) :
         .addOnFailureListener(onFailure)
   }
 
+  override fun userExists(
+      user: User,
+      onSuccess: (Boolean) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    db.collection(collectionPath)
+        .whereEqualTo("userId", user.public.userId)
+        .get()
+        .addOnSuccessListener {
+          Log.d("UserRepositoryFirestore", "User exists: ${!it.isEmpty}")
+          onSuccess(!it.isEmpty)
+        }
+        .addOnFailureListener {
+          Log.d("UserRepositoryFirestore", "Failed to check user's existence: ${it.message}")
+          onFailure(it)
+        }
+  }
+
   override fun addUser(user: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     if (user.details == null) {
       onFailure(Exception("User details are required"))

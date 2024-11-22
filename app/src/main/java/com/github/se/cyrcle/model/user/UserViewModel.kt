@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.map
 class UserViewModel(
     private val userRepository: UserRepository,
     private val parkingRepository: ParkingRepository,
-    private val imageRepository: ImageRepository? = null
+    private val imageRepository: ImageRepository
 ) : ViewModel() {
 
   private val _currentUser = MutableStateFlow<User?>(null)
@@ -87,6 +87,16 @@ class UserViewModel(
               "Failed to fetch user by ID: $userId",
               exception)
         })
+  }
+
+  /**
+   * Checks if a user exists in the database.
+   *
+   * @param user the user to check
+   * @param onSuccess the callback to call with a boolean indicating if the user exists
+   */
+  fun doesUserExist(user: User, onSuccess: (Boolean) -> Unit) {
+    userRepository.userExists(user, onSuccess = onSuccess, onFailure = {})
   }
 
   /**
@@ -200,10 +210,6 @@ class UserViewModel(
    * @param context the context used to resolve the image uri
    */
   private fun uploadProfilePicture(context: Context) {
-    if (imageRepository == null) {
-      Log.e("UserViewModel", "ImageRepository is null, should not upload image")
-      return
-    }
     if (currentUser.value == null) {
       Log.e("UserViewModel", "Current user is null, should not upload image")
       return
@@ -252,10 +258,7 @@ class UserViewModel(
       onSuccess(user)
       return
     }
-    if (imageRepository == null) {
-      Log.e("UserViewModel", "ImageRepository is null")
-      return
-    }
+
     val cloudPath = user.public.profilePictureCloudPath
     if (cloudPath.isBlank()) {
       Log.d("UserViewModel", "No image to fetch for user")

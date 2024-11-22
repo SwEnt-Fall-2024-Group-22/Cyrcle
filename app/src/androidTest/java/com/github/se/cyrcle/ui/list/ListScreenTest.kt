@@ -72,7 +72,7 @@ class ListScreenTest {
     parkingViewModel =
         ParkingViewModel(mockImageRepository, mockParkingRepository, mockReportedObjectRepository)
     mapViewModel = MapViewModel()
-    userViewModel = UserViewModel(mockUserRepository, mockParkingRepository)
+    userViewModel = UserViewModel(mockUserRepository, mockParkingRepository, mockImageRepository)
 
     `when`(mockNavigationActions.currentRoute()).thenReturn(Screen.LIST)
 

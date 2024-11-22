@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.model.user
 
+import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import org.junit.Assert.*
 import org.junit.Before
@@ -9,15 +10,16 @@ import org.mockito.MockitoAnnotations
 
 class CoinViewModelTest {
 
-  @Mock private lateinit var userViewModel: UserViewModel
+  private lateinit var userViewModel: UserViewModel
   @Mock private lateinit var userRepository: UserRepository
   @Mock private lateinit var parkingRepository: ParkingRepository
+  @Mock private lateinit var imageRepository: ImageRepository
 
   @Before
   fun setUp() {
     MockitoAnnotations.openMocks(this)
 
-    userViewModel = UserViewModel(userRepository, parkingRepository)
+    userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository)
   }
 
   @Test

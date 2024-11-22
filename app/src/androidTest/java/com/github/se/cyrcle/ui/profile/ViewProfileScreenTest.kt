@@ -71,7 +71,7 @@ class ViewProfileScreenTest {
             UserPublic("1", "janesmith", "http://example.com/jane.jpg"),
             UserDetails("Jane", "Smith", "jane.smith@example.com"))
 
-    userViewModel = UserViewModel(mockUserRepository, mockParkingRepository)
+    userViewModel = UserViewModel(mockUserRepository, mockParkingRepository, mockImageRepository)
     parkingViewModel =
         ParkingViewModel(mockImageRepository, mockParkingRepository, mockReportedObjectRepository)
 

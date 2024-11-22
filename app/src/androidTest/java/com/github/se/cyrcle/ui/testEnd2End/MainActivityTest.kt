@@ -24,6 +24,7 @@ import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.TestInstancesParking
+import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.permission.PermissionHandler
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -65,6 +66,8 @@ class MainActivityTest {
 
   @Test
   fun testAddParking() {
+    composeTestRule.activity.userRepository.addUser(TestInstancesUser.user1, {}, {})
+
     authRobot.assertAuthScreen()
     authRobot.performSignIn()
 
