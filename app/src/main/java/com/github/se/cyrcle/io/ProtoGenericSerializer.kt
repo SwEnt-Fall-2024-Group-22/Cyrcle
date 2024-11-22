@@ -66,7 +66,7 @@ abstract class ProtoGenericSerializer<T>(
      * @return The [Int] read.
      */
     fun readInt32(input: InputStream): Int {
-      var value: Int = 0
+      var value = 0
       for (i in 0 until Int.SIZE_BYTES) value = value.shl(8) or input.read()
       return value
     }
@@ -115,8 +115,8 @@ abstract class ProtoGenericSerializer<T>(
      * @return The [Float] read.
      */
     fun readFloat32(input: InputStream): Float {
-      var value: Int = 0
-      for (i in 0 until Float.SIZE_BYTES) value = value.shl(8) or input.read().toInt()
+      var value = 0
+      for (i in 0 until Float.SIZE_BYTES) value = value.shl(8) or input.read()
       return Float.fromBits(value)
     }
 
