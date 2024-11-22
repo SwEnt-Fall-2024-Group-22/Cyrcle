@@ -208,8 +208,6 @@ class UserRepositoryFirestoreTest {
 
     `when`(mockCollectionReference.whereEqualTo(eq("userId"), eq(user.public.userId)))
         .thenReturn(mockCollectionReference)
-    `when`(mockCollectionReference.whereEqualTo(eq("username"), eq(user.public.username)))
-        .thenReturn(mockCollectionReference)
     `when`(mockCollectionReference.get()).thenReturn(taskCompletionSource.task)
 
     var onSuccessCalled = false
@@ -221,7 +219,7 @@ class UserRepositoryFirestoreTest {
     taskCompletionSource.setResult(mockUserQuerySnapshot)
     shadowOf(Looper.getMainLooper()).idle()
 
-    verify(mockCollectionReference, times(2)).whereEqualTo(any<String>(), any())
+    verify(mockCollectionReference, times(1)).whereEqualTo(any<String>(), any())
     verify(mockCollectionReference, times(1)).get()
     assertTrue(onSuccessCalled)
   }
@@ -231,8 +229,6 @@ class UserRepositoryFirestoreTest {
     val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
 
     `when`(mockCollectionReference.whereEqualTo(eq("userId"), eq(user.public.userId)))
-        .thenReturn(mockCollectionReference)
-    `when`(mockCollectionReference.whereEqualTo(eq("username"), eq(user.public.username)))
         .thenReturn(mockCollectionReference)
     `when`(mockCollectionReference.get()).thenReturn(taskCompletionSource.task)
 
@@ -245,7 +241,7 @@ class UserRepositoryFirestoreTest {
     taskCompletionSource.setException(Exception("Test exception"))
     shadowOf(Looper.getMainLooper()).idle()
 
-    verify(mockCollectionReference, times(2)).whereEqualTo(any<String>(), any())
+    verify(mockCollectionReference, times(1)).whereEqualTo(any<String>(), any())
     verify(mockCollectionReference, times(1)).get()
     assertTrue(onFailureCalled)
   }
