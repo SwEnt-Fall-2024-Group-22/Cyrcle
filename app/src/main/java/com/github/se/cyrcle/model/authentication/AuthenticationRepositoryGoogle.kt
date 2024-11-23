@@ -1,11 +1,7 @@
-package com.github.se.cyrcle.ui.authentication
+package com.github.se.cyrcle.model.authentication
 
 import android.content.Context
-import android.os.Build
-import androidx.annotation.RequiresApi
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.annotation.VisibleForTesting
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
@@ -18,6 +14,8 @@ import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import dagger.hilt.android.qualifiers.ActivityContext
+import dagger.hilt.android.scopes.ActivityScoped
 import java.security.MessageDigest
 import java.util.UUID
 import javax.inject.Inject
@@ -31,75 +29,24 @@ import kotlinx.coroutines.tasks.await
  * Implementation of the Authenticator interface This class uses the Firebase Authentication SDK to
  * authenticate users
  */
-class AuthenticatorImpl @Inject constructor(private val auth: FirebaseAuth) : Authenticator {
-  private lateinit var credentialManager: CredentialManager
+@ActivityScoped
+class AuthenticationRepositoryGoogle
+@Inject
+constructor(
+    @ActivityContext private val context: Context,
+    private val auth: FirebaseAuth,
+) : AuthenticationRepository {
 
-  /**
-   * Initialize the Authenticator
-   *
-   * @param context the context of the application
-   */
-  override fun init(context: Context) {
-    // Initialize the credential manager
-    credentialManager = CredentialManager.create(context)
-  }
-
-  /**
-   * Composable button that authenticates the user
-   *
-   * @param onAuthComplete callback for when authentication is successful
-   * @param onAuthError callback for when authentication fails
-   */
-  @Composable
-  @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-  override fun AuthenticateButton(
-      onAuthComplete: (User) -> Unit,
-      onAuthError: (Exception) -> Unit
-  ) {
-    val context = LocalContext.current
-    Authenticator.DefaultAuthenticateButton {
-      loginCallBack(context).invoke(onAuthComplete, onAuthError)
-    }
-  }
-
-  /**
-   * Composable button that signs the user in anonymously
-   *
-   * @param onComplete callback for when sign in is complete
-   */
-  @Composable
-  override fun SignInAnonymouslyButton(modifier: Modifier, onComplete: () -> Unit) {
-    Authenticator.DefaultAnonymousLoginButton(modifier) {
-      runBlocking { auth.signInAnonymously().await() }
-      onComplete()
-    }
-  }
-
-  /**
-   * Composable button that signs the user out
-   *
-   * @param onComplete callback for when the button is clicked
-   */
-  @Composable
-  override fun SignOutButton(modifier: Modifier, onComplete: () -> Unit) {
-    Authenticator.DefaultSignOutButton(modifier) {
-      CoroutineScope(Dispatchers.Unconfined).launch {
-        credentialManager.clearCredentialState(ClearCredentialStateRequest())
-        auth.signOut()
-        onComplete()
-      }
-    }
-  }
+  @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+  var credentialManager = CredentialManager.create(context)
 
   /**
    * Callback for when the user logs in
    *
-   * @param context the context of the application
    * @return a callback that takes two functions, The first is a callback for when the user logs in
    *   successfully The second is a callback for when the user fails to log in
    */
-  @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-  private fun loginCallBack(context: Context): ((User) -> Unit, (Exception) -> Unit) -> Unit {
+  override fun getAuthenticationCallback(): ((User) -> Unit, (Exception) -> Unit) -> Unit {
     return { onSuccess, onFailure ->
       val webClientId = context.getString(R.string.default_web_client_id)
 
@@ -117,7 +64,7 @@ class AuthenticatorImpl @Inject constructor(private val auth: FirebaseAuth) : Au
       val request =
           GetCredentialRequest.Builder().addCredentialOption(signInWithGoogleOption).build()
 
-      CoroutineScope(Dispatchers.Unconfined).launch {
+      CoroutineScope(Dispatchers.Main).launch {
         try {
           val credential = credentialManager.getCredential(context, request).credential
 
@@ -143,6 +90,31 @@ class AuthenticatorImpl @Inject constructor(private val auth: FirebaseAuth) : Au
           onFailure(e)
         }
       }
+    }
+  }
+
+  /**
+   * Callback for when the user logs in anonymously
+   *
+   * @return a callback that takes a function to be called once the user logs in anonymously
+   */
+  override fun getAnonymousAuthenticationCallback(): (() -> Unit) -> Unit {
+    return { onComplete ->
+      runBlocking { auth.signInAnonymously().await() }
+      onComplete()
+    }
+  }
+
+  /**
+   * Callback for when the user logs out
+   *
+   * @return a callback that takes a function to be called once the user logs out
+   */
+  override fun getSignOutCallback(): (() -> Unit) -> Unit {
+    return { onComplete ->
+      runBlocking { credentialManager.clearCredentialState(ClearCredentialStateRequest()) }
+      auth.signOut()
+      onComplete()
     }
   }
 }

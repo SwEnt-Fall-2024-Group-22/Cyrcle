@@ -16,7 +16,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.github.se.cyrcle.di.mocks.AuthenticatorMock
+import com.github.se.cyrcle.di.mocks.AuthenticationRepositoryMock
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
@@ -94,7 +94,7 @@ class ViewProfileScreenTest {
           navigationActions = mockNavigationActions,
           userViewModel = userViewModel,
           parkingViewModel = parkingViewModel,
-          AuthenticatorMock())
+          AuthenticationRepositoryMock())
     }
   }
 
