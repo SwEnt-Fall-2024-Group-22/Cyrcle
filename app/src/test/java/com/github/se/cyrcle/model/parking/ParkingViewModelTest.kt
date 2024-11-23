@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.model.parking
 
+import android.content.Context
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.user.TestInstancesUser
@@ -9,6 +10,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
@@ -23,6 +25,7 @@ class ParkingViewModelTest {
   @Mock private lateinit var parkingRepository: ParkingRepository
   @Mock private lateinit var imageRepository: ImageRepository
   @Mock private lateinit var reportedObjectRepository: ReportedObjectRepository
+  @Mock private lateinit var context: Context
 
   @Before
   fun setUp() {
@@ -134,5 +137,21 @@ class ParkingViewModelTest {
 
     // Verify the parking repository update method is called to persist changes
     verify(parkingRepository).updateParking(eq(parking), any(), any())
+  }
+
+  @Test
+  fun uploadImageTest() {
+    parkingViewModel.selectParking(TestInstancesParking.parking1)
+    parkingViewModel.uploadImage("localPath/image.jpg", context, {})
+    verify(imageRepository).uploadImage(any(), any(), any(), any(), any())
+  }
+
+  @Test
+  fun uploadImageWithoutParkingSelectedTest() {
+    // assert nothing is called when no parking is selected
+    val emptyParkingViewModel =
+        ParkingViewModel(imageRepository, parkingRepository, reportedObjectRepository)
+    emptyParkingViewModel.uploadImage("localPath/image.jpg", context, {})
+    verify(imageRepository, never()).uploadImage(any(), any(), any(), any(), any())
   }
 }
