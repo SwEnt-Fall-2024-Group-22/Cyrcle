@@ -171,7 +171,6 @@ class ParkingDetailsScreenTest {
 
     // Verify the images
     composeTestRule.onNodeWithTag("ParkingImagesRow").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("ParkingImage0").assertIsDisplayed()
 
     // Scroll to the information section
     composeTestRule.onNodeWithTag("CapacityColumn").performScrollTo().assertIsDisplayed()

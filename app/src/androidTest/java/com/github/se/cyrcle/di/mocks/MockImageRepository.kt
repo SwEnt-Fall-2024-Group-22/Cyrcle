@@ -14,7 +14,7 @@ class MockImageRepository @Inject constructor() : ImageRepository {
       path.contains("profilePictures") -> {
         onSuccess("https://picsum.photos/200")
       }
-      path.contains("parkingPictures") -> {
+      path.contains("parkings") -> {
         onSuccess("https://picsum.photos/id/76/200/300")
       }
       else -> {
