@@ -89,8 +89,6 @@
     <string name="card_screen_report">Report</string>
     <string name="card_screen_no_image">No images for this parking yet</string>
     <string name="card_screen_confirm_upload">Do you want to add this image to the parking spot ? </string>
-    <string name="card_screen__accept_upload">Yes</string>
-    <string name="card_screen__cancel_upload">No</string>
     <string name="free">Free</string>
 
     <!-- List Screen -->

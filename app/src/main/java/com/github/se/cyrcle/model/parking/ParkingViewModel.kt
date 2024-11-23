@@ -475,8 +475,9 @@ class ParkingViewModel(
    *
    * @param imageUri the URI of the image to upload ( local path on user device)
    * @param context the context of the application (needed to access the file)
+   * @param onSuccess a callback function to execute when the image is uploaded successfully
    */
-  fun uploadImage(imageUri: String, context: Context, onSuccess: () -> Unit) {
+  fun uploadImage(imageUri: String, context: Context, onSuccess: () -> Unit = {}) {
     if (_selectedParking.value == null) {
       Log.e("ParkingViewModel", "No parking selected while trying to upload image")
       return
@@ -491,7 +492,7 @@ class ParkingViewModel(
           selectParking(selectedParking.copy(images = selectedParking.images.plus(destinationPath)))
           parkingRepository.updateParking(
               selectedParking,
-              { onSuccess },
+              { onSuccess() },
               { Log.e("ParkingViewModel", "Error adding image path to parking firestore $it") })
         },
         onFailure = { Log.e("ParkingViewModel", "Error uploading image") },

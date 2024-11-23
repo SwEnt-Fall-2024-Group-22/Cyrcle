@@ -251,9 +251,7 @@ fun ParkingDetailsScreen(
                             items(imagesUrls) { url ->
                               Image(
                                   painter = rememberAsyncImagePainter(url),
-                                  contentDescription =
-                                      stringResource(
-                                          R.string.view_profile_screen_profile_picture), // FIXME
+                                  contentDescription = "Parking Image",
                                   modifier = Modifier.size(100.dp),
                               )
                             }
