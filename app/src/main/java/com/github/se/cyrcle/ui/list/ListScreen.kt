@@ -102,6 +102,7 @@ fun SpotListScreen(
           FilterHeader(parkingViewModel = parkingViewModel)
           val listState = rememberLazyListState()
           LazyColumn(state = listState, modifier = Modifier.testTag("SpotListColumn")) {
+            // Pinned parking spots if any (includes titles and dividers)
             if (pinnedParkings.isNotEmpty()) {
               item {
                 Text(
@@ -115,7 +116,7 @@ fun SpotListScreen(
               }
               items(
                   items = filteredParkingSpots.filter { it in pinnedParkings },
-                  key = { parking -> parking.uid }) { parking ->
+                  key = { parking -> parking.uid + "pin" }) { parking ->
                     val distance = TurfMeasurement.distance(userPosition, parking.location.center)
                     SpotCard(
                         navigationActions = navigationActions,
@@ -138,21 +139,20 @@ fun SpotListScreen(
                   thickness = 1.dp, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
             }
 
-            items(
-                items = filteredParkingSpots.filter { it !in pinnedParkings },
-                key = { parking -> parking.uid }) { parking ->
-                  val distance = TurfMeasurement.distance(userPosition, parking.location.center)
-                  SpotCard(
-                      navigationActions = navigationActions,
-                      parkingViewModel = parkingViewModel,
-                      userViewModel = userViewModel,
-                      parking = parking,
-                      distance = distance)
+            // All parking spots
+            items(items = filteredParkingSpots, key = { parking -> parking.uid }) { parking ->
+              val distance = TurfMeasurement.distance(userPosition, parking.location.center)
+              SpotCard(
+                  navigationActions = navigationActions,
+                  parkingViewModel = parkingViewModel,
+                  userViewModel = userViewModel,
+                  parking = parking,
+                  distance = distance)
 
-                  if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1) {
-                    parkingViewModel.incrementRadius()
-                  }
-                }
+              if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1) {
+                parkingViewModel.incrementRadius()
+              }
+            }
           }
         }
       }
@@ -396,60 +396,57 @@ fun SpotCard(
                 containerColor =
                     if (isPinned) MaterialTheme.colorScheme.surfaceBright
                     else MaterialTheme.colorScheme.surface)) {
-          Column(
+          Row(
               modifier =
                   Modifier.fillMaxSize()
                       .padding(horizontal = 32.dp, vertical = 12.dp)
-                      .testTag("SpotCardContent")) {
-                if (isPinned) {
-                  Icon(
-                      imageVector = Icons.Default.PushPin,
-                      contentDescription = "PinnedParking",
-                      tint = MaterialTheme.colorScheme.primary,
-                      modifier =
-                          Modifier.padding(bottom = 8.dp)
-                              .size(16.dp)
-                              .rotate(45f)
-                              .testTag("PinnedIcon")
-                              .align(Alignment.End))
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween) {
-                      Text(
-                          text =
-                              parking.optName?.let {
-                                if (it.length > 35) it.take(32) + "..." else it
-                              } ?: stringResource(R.string.default_parking_name),
-                          style = MaterialTheme.typography.bodyLarge,
-                          testTag = "ParkingName")
-                      Text(
-                          text =
-                              if (distance < 1)
-                                  stringResource(R.string.distance_m).format(distance * 1000)
-                              else stringResource(R.string.distance_km).format(distance),
-                          style = MaterialTheme.typography.bodySmall,
-                          testTag = "ParkingDistance")
-                    }
+                      .testTag("SpotCardContent"),
+              verticalAlignment = Alignment.Top,
+              horizontalArrangement = Arrangement.SpaceBetween) {
+                Column {
+                  Text(
+                      text =
+                          parking.optName?.let { if (it.length > 35) it.take(32) + "..." else it }
+                              ?: stringResource(R.string.default_parking_name),
+                      style = MaterialTheme.typography.bodyLarge,
+                      testTag = "ParkingName")
 
-                // Rating
-                Spacer(modifier = Modifier.height(8.dp))
-                if (parking.nbReviews > 0) {
-                  Row {
+                  Spacer(modifier = Modifier.height(8.dp))
+                  if (parking.nbReviews > 0) {
                     ScoreStars(
                         parking.avgScore,
                         scale = 0.7f,
                         text =
                             pluralStringResource(R.plurals.reviews_count, count = parking.nbReviews)
                                 .format(parking.nbReviews))
+                  } else {
+                    Text(
+                        text = stringResource(R.string.no_reviews),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        testTag = "ParkingNoReviews")
                   }
-                } else {
+                }
+                Column(horizontalAlignment = Alignment.End) {
                   Text(
-                      text = stringResource(R.string.no_reviews),
+                      text =
+                          if (distance < 1)
+                              stringResource(R.string.distance_m).format(distance * 1000)
+                          else stringResource(R.string.distance_km).format(distance),
                       style = MaterialTheme.typography.bodySmall,
-                      color = MaterialTheme.colorScheme.onSurface,
-                      testTag = "ParkingNoReviews")
+                      testTag = "ParkingDistance")
+                  if (isPinned) {
+                    Icon(
+                        imageVector = Icons.Default.PushPin,
+                        contentDescription = "PinnedParking",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier =
+                            Modifier.padding(top = 8.dp)
+                                .size(20.dp)
+                                .rotate(45f)
+                                .testTag("PinnedIcon")
+                                .align(Alignment.End))
+                  }
                 }
               }
         }
