@@ -12,7 +12,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
-import com.github.se.cyrcle.model.authentication.AuthenticationRepository
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserDetails
 import com.github.se.cyrcle.model.user.UserPublic
@@ -24,11 +23,7 @@ import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
 @Composable
-fun CreateProfileScreen(
-    navigationActions: NavigationActions,
-    authenticator: AuthenticationRepository,
-    userViewModel: UserViewModel
-) {
+fun CreateProfileScreen(navigationActions: NavigationActions, userViewModel: UserViewModel) {
   val context = LocalContext.current
   val defaultUser = User(UserPublic("", ""), UserDetails())
 
@@ -36,26 +31,33 @@ fun CreateProfileScreen(
   val errorToastText = stringResource(R.string.create_profile_error_toast)
   val accountExistsToastText = stringResource(R.string.create_profile_account_already_exists)
 
-  // Uses the Auth UID as userID for our new user
-  val authCompleteCallback = { userAttempt: User, userAuthenticated: User ->
-    val user =
-        userAttempt.copy(public = userAttempt.public.copy(userId = userAuthenticated.public.userId))
+  val onSignInClick = { createdUser: User ->
+    userViewModel.authenticate(
+        // On successful authentication
+        { userId ->
+          val user = createdUser.copy(public = createdUser.public.copy(userId = userId))
 
-    userViewModel.doesUserExist(user) {
-      if (it) {
-        Toast.makeText(context, accountExistsToastText, Toast.LENGTH_SHORT).show()
-        navigationActions.goBack()
-      } else {
-        userViewModel.signIn(user)
-        Toast.makeText(context, validationToastText, Toast.LENGTH_SHORT).show()
-        navigationActions.navigateTo(TopLevelDestinations.MAP)
-      }
-    }
-  }
+          // Check if user already exists
+          userViewModel.doesUserExist(user) { userExists ->
+            if (userExists) {
+              Toast.makeText(context, accountExistsToastText, Toast.LENGTH_SHORT).show()
+              navigationActions.goBack()
+            } else {
 
-  val authErrorCallback = { e: Exception ->
-    Log.d("CreateProfileScreen", "Error authenticating: $e")
-    Toast.makeText(context, errorToastText, Toast.LENGTH_SHORT).show()
+              // Add the user then continue
+              userViewModel.addUser(user) {
+                userViewModel.setCurrentUser(user)
+                Toast.makeText(context, validationToastText, Toast.LENGTH_SHORT).show()
+                navigationActions.navigateTo(TopLevelDestinations.MAP)
+              }
+            }
+          }
+        },
+        // On failed authentication
+        {
+          Log.e("CreateProfileScreen", "Error authenticating")
+          Toast.makeText(context, errorToastText, Toast.LENGTH_SHORT).show()
+        })
   }
 
   Scaffold(
@@ -71,10 +73,7 @@ fun CreateProfileScreen(
                   stringResource(R.string.create_profile_sign_in_explanation),
                   modifier = Modifier.padding(bottom = 5.dp),
                   style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold))
-              GoogleSignInButton {
-                authenticator.getAuthenticationCallback()(
-                    { authCompleteCallback(userAttempt, it) }, authErrorCallback)
-              }
+              GoogleSignInButton { onSignInClick(userAttempt) }
             },
             cancelButton = {})
       }

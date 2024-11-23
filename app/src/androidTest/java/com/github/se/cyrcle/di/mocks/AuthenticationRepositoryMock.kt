@@ -11,13 +11,15 @@ class AuthenticationRepositoryMock @Inject constructor() : AuthenticationReposit
   // in tests to make the authenticator fail
   var testUser: User? = TestInstancesUser.user1
 
-  override fun getAuthenticationCallback(): ((User) -> Unit, (Exception) -> Unit) -> Unit {
-    return { onSuccess, onFailure ->
-      if (testUser == null) onFailure(Exception("User not found")) else onSuccess(testUser!!)
-    }
+  override fun authenticate(onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
+    testUser?.let { onSuccess(it.public.userId) } ?: onFailure(Exception("User not found"))
   }
 
-  override fun getAnonymousAuthenticationCallback(): (() -> Unit) -> Unit = { it() }
+  override fun authenticateAnonymously(onComplete: () -> Unit) {
+    onComplete()
+  }
 
-  override fun getSignOutCallback(): (() -> Unit) -> Unit = { it() }
+  override fun signOut(onComplete: () -> Unit) {
+    onComplete()
+  }
 }

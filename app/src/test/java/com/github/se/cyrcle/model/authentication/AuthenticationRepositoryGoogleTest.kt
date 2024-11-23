@@ -90,9 +90,7 @@ class AuthenticationRepositoryGoogleTest {
     `when`(firebaseAuth.signInAnonymously()).thenReturn(Tasks.forResult(authResult))
 
     var invoked = false
-    val callback = authenticationRepositoryGoogle.getAnonymousAuthenticationCallback()
-
-    callback.invoke { invoked = true }
+    authenticationRepositoryGoogle.authenticateAnonymously { invoked = true }
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(firebaseAuth).signInAnonymously()

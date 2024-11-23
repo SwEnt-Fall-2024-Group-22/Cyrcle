@@ -73,11 +73,13 @@ class ViewProfileScreenTest {
             UserPublic("1", "janesmith", "http://example.com/jane.jpg"),
             UserDetails("Jane", "Smith", "jane.smith@example.com"))
 
-    userViewModel = UserViewModel(mockUserRepository, mockParkingRepository, mockImageRepository, mockAuthenticator)
+    userViewModel =
+        UserViewModel(
+            mockUserRepository, mockParkingRepository, mockImageRepository, mockAuthenticator)
     parkingViewModel =
         ParkingViewModel(mockImageRepository, mockParkingRepository, mockReportedObjectRepository)
 
-    userViewModel.signIn(user)
+    userViewModel.setCurrentUser(user)
 
     // parking1 already added by whoever created parkingviewmodelmock on instanciation
     parkingViewModel.addParking(TestInstancesParking.parking2)

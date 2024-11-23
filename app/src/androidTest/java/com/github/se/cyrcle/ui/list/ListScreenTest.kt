@@ -70,13 +70,14 @@ class ListScreenTest {
     mockUserRepository = MockUserRepository()
     mockParkingRepository = MockParkingRepository()
     mockImageRepository = MockImageRepository()
-      authenticator = AuthenticationRepositoryMock()
+    authenticator = AuthenticationRepositoryMock()
     mockReportedObjectRepository = MockReportedObjectRepository()
 
     parkingViewModel =
         ParkingViewModel(mockImageRepository, mockParkingRepository, mockReportedObjectRepository)
     mapViewModel = MapViewModel()
-    userViewModel = UserViewModel(mockUserRepository, mockParkingRepository, mockImageRepository, authenticator)
+    userViewModel =
+        UserViewModel(mockUserRepository, mockParkingRepository, mockImageRepository, authenticator)
 
     `when`(mockNavigationActions.currentRoute()).thenReturn(Screen.LIST)
 
@@ -90,7 +91,7 @@ class ListScreenTest {
     // parking1 already in
     parkingViewModel.addParking(TestInstancesParking.parking2)
     parkingViewModel.addParking(TestInstancesParking.parking3)
-    userViewModel.signIn(user)
+    userViewModel.setCurrentUser(user)
     userViewModel.setCurrentUserById(user.public.userId)
     userViewModel.addFavoriteParkingToSelectedUser(TestInstancesParking.parking1)
     userViewModel.addFavoriteParkingToSelectedUser(TestInstancesParking.parking2)

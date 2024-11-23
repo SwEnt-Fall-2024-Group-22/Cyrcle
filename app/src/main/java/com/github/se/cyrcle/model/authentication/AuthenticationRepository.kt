@@ -1,33 +1,27 @@
 package com.github.se.cyrcle.model.authentication
 
-import com.github.se.cyrcle.model.user.User
-
-/**
- * Interface for a Composable repository It provides buttons with callbacks once authentication is
- * complete This does not interface with the UserRepository or ViewModel
- */
+/** Interface for a Authentication Repository */
 interface AuthenticationRepository {
 
   /**
-   * Provides a Function capable of authenticating the user
+   * Signs in a User
    *
-   * @return A function taking two callbacks:
-   * 1. A callback to be called with the newly signed in user when authentication is successful
-   * 2. A callback to be called when authentication fails
+   * @param onSuccess a function to be called once the user is authenticated
+   * @param onFailure a function to be called if the authentication fails
    */
-  fun getAuthenticationCallback(): ((User) -> Unit, (Exception) -> Unit) -> Unit
+  fun authenticate(onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit)
 
   /**
-   * Provides a Function capable of authenticating the user anonymously
+   * Sign in a user anonymously
    *
-   * @return A function taking a callback to be called once anonymous authentication is successful
+   * @param onComplete a function to be called once the user is loged in anonymously
    */
-  fun getAnonymousAuthenticationCallback(): (() -> Unit) -> Unit
+  fun authenticateAnonymously(onComplete: () -> Unit)
 
   /**
-   * Provides a Function capable of signing out the user
+   * Sign out the user
    *
-   * @return A function taking a callback to be called once the user is signed out
+   * @param onComplete a function to be called once the user logs out
    */
-  fun getSignOutCallback(): (() -> Unit) -> Unit
+  fun signOut(onComplete: () -> Unit)
 }

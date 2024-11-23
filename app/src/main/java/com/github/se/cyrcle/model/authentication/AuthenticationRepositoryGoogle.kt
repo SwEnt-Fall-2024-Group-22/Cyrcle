@@ -7,9 +7,6 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import com.github.se.cyrcle.R
-import com.github.se.cyrcle.model.user.User
-import com.github.se.cyrcle.model.user.UserDetails
-import com.github.se.cyrcle.model.user.UserPublic
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
@@ -41,80 +38,68 @@ constructor(
   var credentialManager = CredentialManager.create(context)
 
   /**
-   * Callback for when the user logs in
+   * Signs in a User
    *
-   * @return a callback that takes two functions, The first is a callback for when the user logs in
-   *   successfully The second is a callback for when the user fails to log in
+   * @param onSuccess a function to be called once the user is authenticated
+   * @param onFailure a function to be called if the authentication fails
    */
-  override fun getAuthenticationCallback(): ((User) -> Unit, (Exception) -> Unit) -> Unit {
-    return { onSuccess, onFailure ->
-      val webClientId = context.getString(R.string.default_web_client_id)
+  override fun authenticate(onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
+    val webClientId = context.getString(R.string.default_web_client_id)
 
-      // Generate a nonce for security (a random number used once)
-      val ranNonce: String = UUID.randomUUID().toString()
-      val bytes: ByteArray = ranNonce.toByteArray()
-      val md: MessageDigest = MessageDigest.getInstance("SHA-256")
-      val digest: ByteArray = md.digest(bytes)
-      val hashedNonce: String = digest.fold("") { str, it -> str + "%02x".format(it) }
+    // Generate a nonce for security (a random number used once)
+    val ranNonce: String = UUID.randomUUID().toString()
+    val bytes: ByteArray = ranNonce.toByteArray()
+    val md: MessageDigest = MessageDigest.getInstance("SHA-256")
+    val digest: ByteArray = md.digest(bytes)
+    val hashedNonce: String = digest.fold("") { str, it -> str + "%02x".format(it) }
 
-      // Setup the options for the credential request
-      val signInWithGoogleOption =
-          GetSignInWithGoogleOption.Builder(webClientId).setNonce(hashedNonce).build()
+    // Setup the options for the credential request
+    val signInWithGoogleOption =
+        GetSignInWithGoogleOption.Builder(webClientId).setNonce(hashedNonce).build()
 
-      val request =
-          GetCredentialRequest.Builder().addCredentialOption(signInWithGoogleOption).build()
+    val request = GetCredentialRequest.Builder().addCredentialOption(signInWithGoogleOption).build()
 
-      CoroutineScope(Dispatchers.Main).launch {
-        try {
-          val credential = credentialManager.getCredential(context, request).credential
+    CoroutineScope(Dispatchers.Main).launch {
+      try {
+        val credential = credentialManager.getCredential(context, request).credential
 
-          if (credential is CustomCredential &&
-              credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+        if (credential is CustomCredential &&
+            credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
 
-            // Use googleIdTokenCredential and extract id to validate the user
-            val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
-            val authCredential =
-                GoogleAuthProvider.getCredential(googleIdTokenCredential.idToken, null)
-            val authResult = auth.signInWithCredential(authCredential).await()
+          // Use googleIdTokenCredential and extract id to validate the user
+          val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+          val authCredential =
+              GoogleAuthProvider.getCredential(googleIdTokenCredential.idToken, null)
+          val authResult = auth.signInWithCredential(authCredential).await()
 
-            val user =
-                User(
-                    UserPublic(authResult.user!!.uid, authResult.user!!.displayName!!),
-                    UserDetails(email = authResult.user!!.email!!))
-
-            onSuccess(user)
-          } else {
-            onFailure(Exception("Unexpected type of credential"))
-          }
-        } catch (e: Exception) {
-          onFailure(e)
+          onSuccess(authResult.user!!.uid)
+        } else {
+          onFailure(Exception("Unexpected type of credential"))
         }
+      } catch (e: Exception) {
+        onFailure(e)
       }
     }
   }
 
   /**
-   * Callback for when the user logs in anonymously
+   * Sign in a user anonymously
    *
-   * @return a callback that takes a function to be called once the user logs in anonymously
+   * @param onComplete a function to be called once the user is loged in anonymously
    */
-  override fun getAnonymousAuthenticationCallback(): (() -> Unit) -> Unit {
-    return { onComplete ->
-      runBlocking { auth.signInAnonymously().await() }
-      onComplete()
-    }
+  override fun authenticateAnonymously(onComplete: () -> Unit) {
+    runBlocking { auth.signInAnonymously().await() }
+    onComplete()
   }
 
   /**
-   * Callback for when the user logs out
+   * Sign out the user
    *
-   * @return a callback that takes a function to be called once the user logs out
+   * @param onComplete a function to be called once the user logs out
    */
-  override fun getSignOutCallback(): (() -> Unit) -> Unit {
-    return { onComplete ->
-      runBlocking { credentialManager.clearCredentialState(ClearCredentialStateRequest()) }
-      auth.signOut()
-      onComplete()
-    }
+  override fun signOut(onComplete: () -> Unit) {
+    runBlocking { credentialManager.clearCredentialState(ClearCredentialStateRequest()) }
+    auth.signOut()
+    onComplete()
   }
 }

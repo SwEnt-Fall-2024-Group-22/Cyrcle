@@ -1,7 +1,5 @@
 package com.github.se.cyrcle.ui.authentication
 
-import android.app.Activity
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -29,8 +27,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.cyrcle.R
-import com.github.se.cyrcle.model.authentication.AuthenticationRepository
-import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
@@ -38,44 +34,14 @@ import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.Text
-import com.google.android.gms.common.api.ApiException
 
 @Composable
-fun SignInScreen(
-    authenticator: AuthenticationRepository,
-    navigationActions: NavigationActions,
-    userViewModel: UserViewModel
-) {
+fun SignInScreen(navigationActions: NavigationActions, userViewModel: UserViewModel) {
   val context = LocalContext.current
 
   val failSignInMsg = stringResource(R.string.sign_in_failed_toast)
   val successSignInMsg = stringResource(R.string.sign_in_successful_toast)
   val accountNotFoundToast = stringResource(R.string.sign_in_account_not_found)
-
-  val anonymousCallback = authenticator.getAnonymousAuthenticationCallback()
-
-  val onAuthComplete = { user: User ->
-    userViewModel.doesUserExist(user) {
-      if (it) {
-        Toast.makeText(context, successSignInMsg, Toast.LENGTH_LONG).show()
-        userViewModel.signIn(user)
-        navigationActions.navigateTo(TopLevelDestinations.MAP)
-      } else {
-        Toast.makeText(context, accountNotFoundToast, Toast.LENGTH_SHORT).show()
-      }
-    }
-  }
-  val onAuthFailure = { e: Exception ->
-    when (e) {
-      is ApiException -> Log.e("Cyrcle", "Failed to sign in: ${e.statusCode}")
-      else -> e.printStackTrace()
-    }
-
-    // Prevents a crash when toasting on Login fails
-    (context as Activity).runOnUiThread {
-      Toast.makeText(context, failSignInMsg, Toast.LENGTH_LONG).show()
-    }
-  }
 
   // The main container for the screen
   // A surface container using the 'background' color from the theme
@@ -102,7 +68,12 @@ fun SignInScreen(
 
       // Authenticate With Google Button
       GoogleSignInButton {
-        authenticator.getAuthenticationCallback()(onAuthComplete, onAuthFailure)
+        userViewModel.signIn(
+            {
+              Toast.makeText(context, successSignInMsg, Toast.LENGTH_LONG).show()
+              navigationActions.navigateTo(TopLevelDestinations.MAP)
+            },
+            { Toast.makeText(context, accountNotFoundToast, Toast.LENGTH_SHORT).show() })
       }
 
       // Create Account Button

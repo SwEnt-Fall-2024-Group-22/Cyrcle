@@ -85,7 +85,6 @@ class MainActivity : ComponentActivity() {
               userViewModel,
               mapViewModel,
               addressViewModel,
-              authenticator,
               permissionsHandler)
         }
       }

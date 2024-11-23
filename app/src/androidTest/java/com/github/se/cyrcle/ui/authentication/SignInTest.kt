@@ -55,11 +55,11 @@ class SignInTest {
     val mockAuthenticator = AuthenticationRepositoryMock()
 
     userRepository.addUser(TestInstancesUser.user1, {}, {})
-    userViewModel.signIn(TestInstancesUser.user1)
+    userViewModel.setCurrentUser(TestInstancesUser.user1)
 
     mockAuthenticator.testUser = TestInstancesUser.user1
 
-    composeTestRule.setContent { SignInScreen(mockAuthenticator, navigationActions, userViewModel) }
+    composeTestRule.setContent { SignInScreen(navigationActions, userViewModel) }
   }
 
   @Test

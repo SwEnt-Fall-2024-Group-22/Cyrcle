@@ -15,7 +15,6 @@ import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockPermissionHandler
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
-import com.github.se.cyrcle.model.authentication.AuthenticationRepository
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
@@ -183,7 +182,7 @@ class MapScreenTest {
   @Test
   fun testAddButtonNavigatesToLocationPicker() {
     val navigationActions = mock(NavigationActions::class.java)
-    userViewModel.signIn(TestInstancesUser.user1)
+    userViewModel.setCurrentUser(TestInstancesUser.user1)
 
     composeTestRule.setContent {
       MapScreen(navigationActions, parkingViewModel, userViewModel, mapViewModel, permissionHandler)

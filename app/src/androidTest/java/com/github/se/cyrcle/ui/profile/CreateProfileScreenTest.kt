@@ -34,7 +34,6 @@ class CreateProfileScreenTest {
   private lateinit var mockUserRepository: MockUserRepository
   private lateinit var mockParkingRepository: MockParkingRepository
   private lateinit var mockImageRepository: MockImageRepository
-  private lateinit var authenticator: AuthenticationRepositoryMock
 
   @Before
   fun setUp() {
@@ -44,12 +43,11 @@ class CreateProfileScreenTest {
     mockUserRepository = MockUserRepository()
     mockParkingRepository = MockParkingRepository()
     mockImageRepository = MockImageRepository()
-      authenticator = AuthenticationRepositoryMock()
-    userViewModel = UserViewModel(mockUserRepository, mockParkingRepository, mockImageRepository, authenticator)
+    userViewModel =
+        UserViewModel(
+            mockUserRepository, mockParkingRepository, mockImageRepository, mockAuthenticator)
 
-    composeTestRule.setContent {
-      CreateProfileScreen(mockNavigationActions, mockAuthenticator, userViewModel)
-    }
+    composeTestRule.setContent { CreateProfileScreen(mockNavigationActions, userViewModel) }
   }
 
   @Test

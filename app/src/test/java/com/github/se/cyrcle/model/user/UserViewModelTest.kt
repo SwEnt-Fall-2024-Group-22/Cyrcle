@@ -42,9 +42,9 @@ class UserViewModelTest {
 
   @Test
   fun signInTest() {
-    userViewModel.signIn(TestInstancesUser.user1)
+    userViewModel.signIn({}, {})
     // Check if the user was added to the repository
-    verify(userRepository).addUser(eq(TestInstancesUser.user1), any(), any())
+    verify(authenticator).authenticate(any(), any())
   }
 
   @Test

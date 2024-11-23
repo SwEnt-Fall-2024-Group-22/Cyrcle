@@ -47,7 +47,7 @@ class ParkingDetailsScreenTest {
   private lateinit var userRepository: UserRepository
   private lateinit var reviewRepository: ReviewRepository
   private lateinit var mockReportedObjectRepository: ReportedObjectRepository
-   private lateinit var authenticator: AuthenticationRepository
+  private lateinit var authenticator: AuthenticationRepository
 
   private lateinit var userViewModel: UserViewModel
   private lateinit var parkingViewModel: ParkingViewModel
@@ -65,7 +65,7 @@ class ParkingDetailsScreenTest {
     imageRepository = MockImageRepository()
     userRepository = MockUserRepository()
     reviewRepository = MockReviewRepository()
-      authenticator = AuthenticationRepositoryMock()
+    authenticator = AuthenticationRepositoryMock()
     mockReportedObjectRepository = MockReportedObjectRepository()
 
     parkingViewModel =
@@ -119,7 +119,7 @@ class ParkingDetailsScreenTest {
   fun addToFavoritesWhenSignedIn() {
 
     parkingViewModel.selectParking(TestInstancesParking.parking3)
-    userViewModel.signIn(TestInstancesUser.user1)
+    userViewModel.setCurrentUser(TestInstancesUser.user1)
     userViewModel.setCurrentUserById(TestInstancesUser.user1.public.userId)
 
     composeTestRule.setContent {
@@ -138,7 +138,7 @@ class ParkingDetailsScreenTest {
   @Test
   fun removeFromFavoritesWhenSignedIn() {
     parkingViewModel.selectParking(TestInstancesParking.parking1)
-    userViewModel.signIn(TestInstancesUser.user1)
+    userViewModel.setCurrentUser(TestInstancesUser.user1)
     userViewModel.setCurrentUserById(TestInstancesUser.user1.public.userId)
 
     composeTestRule.setContent {
