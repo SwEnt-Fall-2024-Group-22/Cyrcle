@@ -126,7 +126,7 @@ fun AttributesPicker(
             protection = protection.value as ParkingProtection,
             hasSecurity = hasSecurity.value,
             location = location,
-            images = listOf(),
+            images = mutableListOf(),
             price = 0.0,
             uid = parkingViewModel.getNewUid())
     parkingViewModel.addParking(parking)

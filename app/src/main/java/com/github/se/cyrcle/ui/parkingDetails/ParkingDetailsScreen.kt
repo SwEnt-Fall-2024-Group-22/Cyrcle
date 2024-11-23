@@ -2,6 +2,10 @@ package com.github.se.cyrcle.ui.parkingDetails
 
 import android.annotation.SuppressLint
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -23,11 +28,18 @@ import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.AddAPhoto
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.PushPin
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -38,7 +50,9 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.ParkingReport
 import com.github.se.cyrcle.model.parking.ParkingReportReason
@@ -54,6 +68,7 @@ import com.github.se.cyrcle.ui.theme.atoms.IconButton
 import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
+import com.mapbox.maps.extension.style.expressions.dsl.generated.mod
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
@@ -65,10 +80,67 @@ fun ParkingDetailsScreen(
   val selectedParking =
       parkingViewModel.selectedParking.collectAsState().value
           ?: return Text(stringResource(R.string.no_selected_parking_error))
+  val imagesUrls by parkingViewModel.selectedParkingImagesUrls.collectAsState()
   val userSignedIn = userViewModel.isSignedIn.collectAsState(false)
   val scrollState = rememberScrollState()
   val context = LocalContext.current
   val toastMessage = stringResource(R.string.sign_in_to_add_favorites)
+  var newParkingImageLocalPath by remember { mutableStateOf("") }
+  val showDialog = remember { mutableStateOf(false) }
+
+  LaunchedEffect(Unit) {
+    // On first load of the screen, request the images
+    // This will update the imagesUrls state and trigger a recomposition
+    parkingViewModel.loadSelectedParkingImages()
+  }
+
+  val imagePickerLauncher =
+      rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let { newParkingImageLocalPath = it.toString() }
+        showDialog.value = newParkingImageLocalPath.isNotEmpty()
+      }
+
+  if (showDialog.value) {
+    AlertDialog(
+        onDismissRequest = {
+          showDialog.value = false
+          newParkingImageLocalPath = ""
+        },
+        title = { Text("Do you want to add this image to the parking spot ? ") },
+        text = {
+          Column(
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .wrapContentSize()
+                      .background(MaterialTheme.colorScheme.surfaceBright),
+              horizontalAlignment = Alignment.CenterHorizontally,
+          ) {
+            Image(
+                painter = rememberAsyncImagePainter(newParkingImageLocalPath),
+                contentDescription = stringResource(R.string.view_profile_screen_profile_picture),
+                modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally),
+                contentScale = ContentScale.Crop)
+          }
+        },
+        confirmButton = {
+          Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+            TextButton(
+                onClick = { showDialog.value = false },
+                modifier = Modifier.padding(start = 8.dp, end = 8.dp)) {
+                  Text("No", style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp))
+                }
+            // Confirmation button
+            TextButton(
+                onClick = {
+                  showDialog.value = false
+                  parkingViewModel.uploadImage(newParkingImageLocalPath, context)
+                },
+                modifier = Modifier.padding(start = 8.dp, end = 8.dp)) {
+                  Text("Yes", style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp))
+                }
+          }
+        })
+  }
 
   Scaffold(
       topBar = {
@@ -193,6 +265,7 @@ fun ParkingDetailsScreen(
                   modifier = Modifier.fillMaxWidth().testTag("ImagesRow"),
                   horizontalArrangement = Arrangement.spacedBy(8.dp),
                   verticalAlignment = Alignment.CenterVertically) {
+                    // No images
                     if (selectedParking.images.isEmpty()) {
                       Text(
                           text = stringResource(R.string.card_screen_no_image),
@@ -202,23 +275,18 @@ fun ParkingDetailsScreen(
                       IconButton(
                           icon = Icons.Outlined.AddAPhoto,
                           contentDescription = "Add Image",
-                          onClick = {
-                            Toast.makeText(
-                                    context,
-                                    "A feature to add images will be added later",
-                                    Toast.LENGTH_LONG)
-                                .show()
-                          },
+                          onClick = { imagePickerLauncher.launch("image/*") },
                           enabled = userSignedIn.value,
                           testTag = "AddImageIconButton",
                           modifier = Modifier.padding(start = 8.dp).height(32.dp).fillMaxWidth())
+                      // There are images to display
                     } else {
                       LazyRow(
                           modifier = Modifier.fillMaxWidth().testTag("ParkingImagesRow"),
                           horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            items(selectedParking.images.size) { index ->
+                            items(imagesUrls.size) { index ->
                               AsyncImage(
-                                  model = selectedParking.images[index],
+                                  model = imagesUrls[index],
                                   contentDescription = "Image $index",
                                   modifier =
                                       Modifier.size(170.dp)
