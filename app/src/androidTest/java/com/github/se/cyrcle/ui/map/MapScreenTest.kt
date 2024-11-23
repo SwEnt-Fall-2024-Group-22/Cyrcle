@@ -1,8 +1,10 @@
 package com.github.se.cyrcle.ui.map
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -173,4 +175,21 @@ class MapScreenTest {
     // Assert that the recenter button is displayed
     composeTestRule.onNodeWithTag("recenterButton").assertDoesNotExist()
   }
+
+  @OptIn(ExperimentalTestApi::class)
+  @Test
+  fun testAddButtonNavigatesToLocationPicker() {
+    val navigationActions = mock(NavigationActions::class.java)
+    userViewModel.signIn(TestInstancesUser.user1)
+
+    composeTestRule.setContent {
+      MapScreen(navigationActions, parkingViewModel, userViewModel, mapViewModel, permissionHandler)
+    }
+    composeTestRule.waitUntilExactlyOneExists(hasTestTag("addButton"))
+    // Perform click on the add button
+    composeTestRule.onNodeWithTag("addButton").performClick()
+
+    verify(navigationActions).navigateTo(Route.ADD_SPOTS)
+  }
+
 }
