@@ -5,7 +5,6 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,7 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -29,11 +27,9 @@ import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.AddAPhoto
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.PushPin
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -44,7 +40,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
@@ -52,7 +47,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.ParkingReport
@@ -105,51 +99,15 @@ fun ParkingDetailsScreen(
       }
   // Dialog to confirm the image upload with the user.
   if (showDialog.value) {
-    AlertDialog(
-        onDismissRequest = {
+    ParkingDetailsAlertDialog(
+        onDismiss = {
           showDialog.value = false
           newParkingImageLocalPath = ""
         },
-        title = { Text(stringResource(R.string.card_screen_confirm_upload)) },
-        text = {
-          Column(
-              modifier =
-                  Modifier.fillMaxWidth()
-                      .wrapContentSize()
-                      .background(MaterialTheme.colorScheme.surfaceBright),
-              horizontalAlignment = Alignment.CenterHorizontally,
-          ) {
-            Image(
-                painter = rememberAsyncImagePainter(newParkingImageLocalPath),
-                contentDescription = stringResource(R.string.view_profile_screen_profile_picture),
-                modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally),
-                contentScale = ContentScale.Crop)
-          }
-        },
-        confirmButton = {
-          Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-            // Cancel button (No)
-            TextButton(
-                onClick = { showDialog.value = false },
-                modifier = Modifier.padding(start = 8.dp, end = 8.dp)) {
-                  Text(
-                      stringResource(R.string.card_screen__cancel_upload),
-                      style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp))
-                }
-            // Confirmation button (Yes)
-            TextButton(
-                onClick = {
-                  showDialog.value = false
-                  parkingViewModel.uploadImage(newParkingImageLocalPath, context) {
-                    navigationActions.navigateTo(Screen.PARKING_DETAILS)
-                  }
-                },
-                modifier = Modifier.padding(start = 8.dp, end = 8.dp)) {
-                  Text(
-                      stringResource(R.string.card_screen__accept_upload),
-                      style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp))
-                }
-          }
+        newParkingImageLocalPath = newParkingImageLocalPath,
+        onAccept = {
+          showDialog.value = false
+          parkingViewModel.uploadImage(newParkingImageLocalPath, context) {}
         })
   }
 
