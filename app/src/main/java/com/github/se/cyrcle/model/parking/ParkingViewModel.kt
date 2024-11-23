@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.model.parking
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -304,7 +305,9 @@ class ParkingViewModel(
       incrementRadius()
     }
   }
+  // ================== Helper functions ==================
 
+  // ================== Reports ==================
   /**
    * Adds a report for the currently selected parking and updates the repository.
    *
@@ -362,7 +365,7 @@ class ParkingViewModel(
           Log.e("ParkingViewModel", "Error adding report: ${exception.message}", exception)
         })
   }
-  // ================== Helper functions ==================
+  // ================== Reports  ==================
 
   // ================== Reviews ==================
   /**
@@ -437,6 +440,68 @@ class ParkingViewModel(
     }
   }
   // ================== Reviews ==================
+
+  // ================== Images ==================
+  // Holds the URLs of the images of the selected parking, these aren't stored in the
+  // selectedParking state.
+  private val _selectedParkingImagesUrls = MutableStateFlow<List<String>>(mutableListOf())
+  val selectedParkingImagesUrls: StateFlow<List<String>> = _selectedParkingImagesUrls
+
+  /**
+   * Load the iamges of the selected parkings in the state selectedParkingImagesUrls This function
+   * transforms the paths of the images (stored into firestore) of the selected parking into URLs.
+   */
+  fun loadSelectedParkingImages() {
+    if (selectedParking.value == null) {
+      Log.e("ParkingViewModel", "No parking selected while trying to load images")
+      return
+    }
+    // clear the list of URLs each time we request the images (prevent duplicates and old images
+    // from being displayed)
+    _selectedParkingImagesUrls.value = emptyList()
+
+    _selectedParking.value!!.images.forEach { imagePath ->
+      // get the URL of each image and add it to the list of URLs state that is observed by the UI.
+      imageRepository.getUrl(
+          path = imagePath,
+          onSuccess = { url ->
+            _selectedParkingImagesUrls.value = _selectedParkingImagesUrls.value.plus(url)
+          },
+          onFailure = { Log.e("ParkingViewModel", "Error getting image URL for path") })
+    }
+  }
+
+  /**
+   * Upload an image for the selected parking. This function uploads the image to the cloud storage
+   * and updates the selected parking with the new image path.
+   *
+   * @param imageUri the URI of the image to upload ( local path on user device)
+   * @param context the context of the application (needed to access the file)
+   * @param onSuccess a callback function to execute when the image is uploaded successfully
+   */
+  fun uploadImage(imageUri: String, context: Context, onSuccess: () -> Unit = {}) {
+    if (_selectedParking.value == null) {
+      Log.e("ParkingViewModel", "No parking selected while trying to upload image")
+      return
+    }
+    val selectedParking = _selectedParking.value!!
+    val destinationPath = "parking/${selectedParking.uid}/${selectedParking.images.size}"
+    imageRepository.uploadImage(
+        context = context,
+        fileUri = imageUri,
+        destinationPath = destinationPath,
+        onSuccess = {
+          selectParking(selectedParking.copy(images = selectedParking.images.plus(destinationPath)))
+          parkingRepository.updateParking(
+              selectedParking,
+              { onSuccess() },
+              { Log.e("ParkingViewModel", "Error adding image path to parking firestore $it") })
+        },
+        onFailure = { Log.e("ParkingViewModel", "Error uploading image") },
+    )
+  }
+
+  // ================== Images ==================
 
   companion object {
     val Factory: ViewModelProvider.Factory =

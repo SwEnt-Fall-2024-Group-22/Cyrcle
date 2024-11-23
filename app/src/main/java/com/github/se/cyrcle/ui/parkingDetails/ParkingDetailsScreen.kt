@@ -2,6 +2,9 @@ package com.github.se.cyrcle.ui.parkingDetails
 
 import android.annotation.SuppressLint
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -27,18 +31,23 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.ParkingReport
 import com.github.se.cyrcle.model.parking.ParkingReportReason
@@ -69,6 +78,38 @@ fun ParkingDetailsScreen(
   val scrollState = rememberScrollState()
   val context = LocalContext.current
   val toastMessage = stringResource(R.string.sign_in_to_add_favorites)
+  // === States for the images ===
+  var newParkingImageLocalPath by remember { mutableStateOf("") }
+  val showDialog = remember { mutableStateOf(false) }
+  val imagesUrls by parkingViewModel.selectedParkingImagesUrls.collectAsState()
+  // === === === === === === ===
+
+  LaunchedEffect(Unit, selectedParking) {
+    // On first load of the screen, request the images
+    // This will update the imagesUrls state and trigger a recomposition
+    parkingViewModel.loadSelectedParkingImages()
+  }
+  // Copied from the editProfileScreen. This is the image picker launcher that set the Uri state
+  // with the selected image by the user.
+  // It also change the showDialog state to true to show the dialog with the user selected image.
+  val imagePickerLauncher =
+      rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let { newParkingImageLocalPath = it.toString() }
+        showDialog.value = newParkingImageLocalPath.isNotEmpty()
+      }
+  // Dialog to confirm the image upload with the user.
+  if (showDialog.value) {
+    ParkingDetailsAlertDialog(
+        onDismiss = {
+          showDialog.value = false
+          newParkingImageLocalPath = ""
+        },
+        newParkingImageLocalPath = newParkingImageLocalPath,
+        onAccept = {
+          showDialog.value = false
+          parkingViewModel.uploadImage(newParkingImageLocalPath, context) {}
+        })
+  }
 
   Scaffold(
       topBar = {
@@ -184,41 +225,36 @@ fun ParkingDetailsScreen(
                   modifier = Modifier.fillMaxWidth().testTag("ImagesRow"),
                   horizontalArrangement = Arrangement.spacedBy(8.dp),
                   verticalAlignment = Alignment.CenterVertically) {
+                    // No images
                     if (selectedParking.images.isEmpty()) {
                       Text(
                           text = stringResource(R.string.card_screen_no_image),
                           color = MaterialTheme.colorScheme.onSurface,
                           style = MaterialTheme.typography.bodyMedium,
+                          modifier = Modifier.weight(3f),
+                          textAlign = TextAlign.Left,
                           testTag = "NoImageText")
-                      IconButton(
-                          icon = Icons.Outlined.AddAPhoto,
-                          contentDescription = "Add Image",
-                          onClick = {
-                            Toast.makeText(
-                                    context,
-                                    "A feature to add images will be added later",
-                                    Toast.LENGTH_LONG)
-                                .show()
-                          },
-                          enabled = userSignedIn.value,
-                          testTag = "AddImageIconButton",
-                          modifier = Modifier.padding(start = 8.dp).height(32.dp).fillMaxWidth())
+                      // There are images to display
                     } else {
                       LazyRow(
-                          modifier = Modifier.fillMaxWidth().testTag("ParkingImagesRow"),
+                          modifier = Modifier.weight(2f).testTag("ParkingImagesRow"),
                           horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            items(selectedParking.images.size) { index ->
-                              AsyncImage(
-                                  model = selectedParking.images[index],
-                                  contentDescription = "Image $index",
-                                  modifier =
-                                      Modifier.size(170.dp)
-                                          .padding(4.dp)
-                                          .testTag("ParkingImage$index"),
-                                  contentScale = ContentScale.Crop)
+                            items(imagesUrls) { url ->
+                              Image(
+                                  painter = rememberAsyncImagePainter(url),
+                                  contentDescription = "Parking Image",
+                                  modifier = Modifier.size(100.dp),
+                              )
                             }
                           }
                     }
+                    IconButton(
+                        icon = Icons.Outlined.AddAPhoto,
+                        contentDescription = "Add Image",
+                        onClick = { imagePickerLauncher.launch("image/*") },
+                        enabled = userSignedIn.value,
+                        testTag = "AddImageIconButton",
+                        modifier = Modifier.padding(start = 8.dp).height(32.dp).weight(1f))
                   }
 
               // Information

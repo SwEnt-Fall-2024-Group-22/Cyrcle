@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.model.parking
 
+import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -106,6 +107,7 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
+    Log.d("ParkingRepositoryFirestore", "updateParking: $parking")
     db.collection(collectionPath)
         .document(parking.uid)
         .set(serializeParking(parking))
