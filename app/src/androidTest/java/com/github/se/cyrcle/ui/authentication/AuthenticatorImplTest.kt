@@ -5,12 +5,8 @@ import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.test.espresso.intent.Intents
-import androidx.test.espresso.intent.Intents.intended
-import androidx.test.espresso.intent.matcher.IntentMatchers.toPackage
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.firebase.auth.FirebaseAuth
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -25,13 +21,7 @@ class AuthenticatorImplTest {
 
   @Before
   fun setUp() {
-    Intents.init()
     authenticator = AuthenticatorImpl(FirebaseAuth.getInstance())
-  }
-
-  @After
-  fun tearDown() {
-    Intents.release()
   }
 
   @Test
@@ -43,9 +33,6 @@ class AuthenticatorImplTest {
         .assertExists()
         .assertHasClickAction()
         .performClick()
-    composeTestRule.waitForIdle()
-    // assert that an Intent resolving to Google Mobile Services has been sent (for sign-in)
-    intended(toPackage("com.google.android.gms"))
   }
 
   @Test

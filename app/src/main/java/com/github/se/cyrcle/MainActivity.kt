@@ -67,6 +67,7 @@ class MainActivity : ComponentActivity() {
     super.onCreate(savedInstanceState)
     requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
+    authenticator.init(this)
     permissionsHandler.initHandler(this@MainActivity)
 
     setContent {

@@ -27,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.github.se.cyrcle.MainActivity
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserViewModel
@@ -66,7 +67,11 @@ fun SignInScreen(
       is ApiException -> Log.e("Cyrcle", "Failed to sign in: ${e.statusCode}")
       else -> e.printStackTrace()
     }
-    Toast.makeText(context, failSignInMsg, Toast.LENGTH_LONG).show()
+
+    // Prevents a crash when toasting on Login fails
+    (context as MainActivity).runOnUiThread {
+      Toast.makeText(context, failSignInMsg, Toast.LENGTH_LONG).show()
+    }
   }
 
   // The main container for the screen
