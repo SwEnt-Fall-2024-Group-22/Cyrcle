@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.addParking.location
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -32,6 +33,7 @@ import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.Typography
 import com.github.se.cyrcle.ui.theme.atoms.Text
+import com.github.se.cyrcle.ui.theme.disabledColor
 import com.mapbox.maps.MapView
 
 @Composable
@@ -41,7 +43,7 @@ fun LocationPickerBottomBar(
     mapView: MutableState<MapView?>,
 ) {
   val locationPickerState by mapViewModel.locationPickerState.collectAsState()
-  val isAreaTooLarge by mapViewModel.isAreaTooLarge.collectAsState()
+  val isLocationValid by mapViewModel.isLocationValid.collectAsState(true)
   Box(Modifier.background(Color.White).height(100.dp).testTag("LocationPickerBottomBar")) {
     Row(
         Modifier.fillMaxWidth()
@@ -85,22 +87,25 @@ fun LocationPickerBottomBar(
           } else if (locationPickerState == LocationPickerState.TOP_LEFT_SET) {
             Button(
                 {
-                  if (isAreaTooLarge) {
+                  if (isLocationValid) {
+                    onBottomRightSelected(mapViewModel)
+                  } else {
                     Toast.makeText(
                             mapView.value?.context,
                             R.string.location_picker_invalid_area,
                             Toast.LENGTH_SHORT)
                         .show()
-                  } else {
-                    onBottomRightSelected(mapViewModel)
                   }
                 },
                 modifier = Modifier.testTag("nextButton"),
                 colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
+                  Log.d("LocationPickerBottomBar", "isLocationValid: $isLocationValid")
                   Text(
                       stringResource(R.string.location_picker_bottom_bar_next_button),
                       modifier = Modifier.width(100.dp),
-                      color = if (isAreaTooLarge) Color.Gray else MaterialTheme.colorScheme.primary,
+                      color =
+                          if (isLocationValid) MaterialTheme.colorScheme.primary
+                          else disabledColor(),
                       style = Typography.headlineMedium,
                       textAlign = TextAlign.Center)
                 }

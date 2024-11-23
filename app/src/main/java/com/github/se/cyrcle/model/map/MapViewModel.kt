@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.model.parking.PARKING_MAX_AREA
+import com.github.se.cyrcle.model.parking.PARKING_MAX_SIDE_LENGTH
 import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.ui.map.MapConfig
 import com.mapbox.geojson.Point
@@ -15,8 +16,10 @@ import com.mapbox.maps.MapView
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.plugin.locationcomponent.createDefault2DPuck
 import com.mapbox.maps.plugin.locationcomponent.location
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 
 class MapViewModel : ViewModel() {
 
@@ -25,6 +28,17 @@ class MapViewModel : ViewModel() {
 
   private val _selectedLocation = MutableStateFlow<Location?>(null)
   val selectedLocation: StateFlow<Location?> = _selectedLocation
+  val isLocationValid: Flow<Boolean>
+    get() =
+        selectedLocation.map {
+          it?.let { location ->
+            val area = location.computeArea()
+            val heightAndWidth = location.computeHeightAndWidth()
+            heightAndWidth.first <= PARKING_MAX_SIDE_LENGTH &&
+                heightAndWidth.second <= PARKING_MAX_SIDE_LENGTH &&
+                area <= PARKING_MAX_AREA
+          } ?: false
+        }
 
   private val _screenCoordinates = MutableStateFlow<List<ScreenCoordinate>>(listOf())
   val screenCoordinates: StateFlow<List<ScreenCoordinate>> = _screenCoordinates
@@ -34,9 +48,6 @@ class MapViewModel : ViewModel() {
 
   private val _isTrackingModeEnable = MutableStateFlow(true)
   val isTrackingModeEnable: StateFlow<Boolean> = _isTrackingModeEnable
-
-  private val _isAreaTooLarge: MutableStateFlow<Boolean> = MutableStateFlow(false)
-  val isAreaTooLarge: StateFlow<Boolean> = _isAreaTooLarge
 
   private val _userPosition = MutableStateFlow<Point>(TestInstancesParking.EPFLCenter)
   val userPosition: StateFlow<Point> = _userPosition
@@ -103,15 +114,6 @@ class MapViewModel : ViewModel() {
    */
   fun updateLocation(location: Location?) {
     _selectedLocation.value = location
-  }
-
-  /**
-   * Update the isAreaTooLarge state
-   *
-   * @param area the area of the selected parking
-   */
-  fun updateIsAreaTooLarge(area: Double) {
-    _isAreaTooLarge.value = area > PARKING_MAX_AREA
   }
 
   /**

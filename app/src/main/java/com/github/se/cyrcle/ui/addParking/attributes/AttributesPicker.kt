@@ -66,6 +66,7 @@ import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import com.github.se.cyrcle.ui.theme.Typography
 import com.github.se.cyrcle.ui.theme.atoms.ConditionCheckingInputText
+import com.github.se.cyrcle.ui.theme.disabledColor
 import com.github.se.cyrcle.ui.theme.molecules.BooleanRadioButton
 import com.github.se.cyrcle.ui.theme.molecules.EnumDropDown
 import com.mapbox.geojson.Point
@@ -288,7 +289,8 @@ fun BottomBarAddAttr(
                   colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
                     Text(
                         text = stringResource(R.string.attributes_picker_bottom_bar_submit_button),
-                        color = if (validInputs) MaterialTheme.colorScheme.primary else Color.Gray,
+                        color =
+                            if (validInputs) MaterialTheme.colorScheme.primary else disabledColor(),
                         fontWeight = FontWeight.Bold,
                         style = Typography.headlineMedium,
                         textAlign = TextAlign.Center,

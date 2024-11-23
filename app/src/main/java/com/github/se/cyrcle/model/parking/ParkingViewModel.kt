@@ -27,8 +27,10 @@ const val RADIUS_INCREMENT = 100.0
 const val MIN_NB_PARKINGS = 10
 const val NB_REPORTS_THRESH = 10
 const val NB_REPORTS_MAXSEVERITY_THRESH = 4
-const val PARKING_MAX_AREA = 1000.0
 const val MAX_SEVERITY = 3
+
+const val PARKING_MAX_AREA = 1000.0
+const val PARKING_MAX_SIDE_LENGTH = 50.0
 
 /**
  * ViewModel for the Parking feature.
