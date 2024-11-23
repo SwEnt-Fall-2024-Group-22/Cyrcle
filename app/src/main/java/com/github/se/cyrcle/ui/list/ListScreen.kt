@@ -102,6 +102,7 @@ fun SpotListScreen(
           FilterHeader(parkingViewModel = parkingViewModel)
           val listState = rememberLazyListState()
           LazyColumn(state = listState, modifier = Modifier.testTag("SpotListColumn")) {
+            // Pinned parking spots if any (includes titles and dividers)
             if (pinnedParkings.isNotEmpty()) {
               item {
                 Text(
@@ -115,7 +116,7 @@ fun SpotListScreen(
               }
               items(
                   items = filteredParkingSpots.filter { it in pinnedParkings },
-                  key = { parking -> parking.uid }) { parking ->
+                  key = { parking -> parking.uid + "pin" }) { parking ->
                     val distance = TurfMeasurement.distance(userPosition, parking.location.center)
                     SpotCard(
                         navigationActions = navigationActions,
@@ -138,21 +139,20 @@ fun SpotListScreen(
                   thickness = 1.dp, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
             }
 
-            items(
-                items = filteredParkingSpots.filter { it !in pinnedParkings },
-                key = { parking -> parking.uid }) { parking ->
-                  val distance = TurfMeasurement.distance(userPosition, parking.location.center)
-                  SpotCard(
-                      navigationActions = navigationActions,
-                      parkingViewModel = parkingViewModel,
-                      userViewModel = userViewModel,
-                      parking = parking,
-                      distance = distance)
+            // All parking spots
+            items(items = filteredParkingSpots, key = { parking -> parking.uid }) { parking ->
+              val distance = TurfMeasurement.distance(userPosition, parking.location.center)
+              SpotCard(
+                  navigationActions = navigationActions,
+                  parkingViewModel = parkingViewModel,
+                  userViewModel = userViewModel,
+                  parking = parking,
+                  distance = distance)
 
-                  if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1) {
-                    parkingViewModel.incrementRadius()
-                  }
-                }
+              if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1) {
+                parkingViewModel.incrementRadius()
+              }
+            }
           }
         }
       }
