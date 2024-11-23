@@ -9,11 +9,13 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.se.cyrcle.di.mocks.AuthenticationRepositoryMock
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockPermissionHandler
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
+import com.github.se.cyrcle.model.authentication.AuthenticationRepository
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
@@ -51,10 +53,11 @@ class MapScreenTest {
     val imageRepository = MockImageRepository()
     val parkingRepository = MockParkingRepository()
     val userRepository = MockUserRepository()
+    val authenticator = AuthenticationRepositoryMock()
 
     parkingViewModel =
         ParkingViewModel(imageRepository, parkingRepository, mockReportedObjectRepository)
-    userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository)
+    userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository, authenticator)
     mapViewModel = MapViewModel()
     permissionHandler = MockPermissionHandler()
 
@@ -191,5 +194,4 @@ class MapScreenTest {
 
     verify(navigationActions).navigateTo(Route.ADD_SPOTS)
   }
-
 }

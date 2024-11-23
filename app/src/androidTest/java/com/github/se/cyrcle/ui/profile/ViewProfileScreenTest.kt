@@ -53,6 +53,7 @@ class ViewProfileScreenTest {
   private lateinit var mockUserRepository: MockUserRepository
   private lateinit var mockParkingRepository: MockParkingRepository
   private lateinit var mockImageRepository: MockImageRepository
+  private lateinit var mockAuthenticator: AuthenticationRepositoryMock
   private lateinit var mockReportedObjectRepository: ReportedObjectRepository
 
   private lateinit var userViewModel: UserViewModel
@@ -64,6 +65,7 @@ class ViewProfileScreenTest {
     mockUserRepository = MockUserRepository()
     mockParkingRepository = MockParkingRepository()
     mockImageRepository = MockImageRepository()
+    mockAuthenticator = AuthenticationRepositoryMock()
     mockReportedObjectRepository = MockReportedObjectRepository()
 
     val user =
@@ -71,7 +73,7 @@ class ViewProfileScreenTest {
             UserPublic("1", "janesmith", "http://example.com/jane.jpg"),
             UserDetails("Jane", "Smith", "jane.smith@example.com"))
 
-    userViewModel = UserViewModel(mockUserRepository, mockParkingRepository, mockImageRepository)
+    userViewModel = UserViewModel(mockUserRepository, mockParkingRepository, mockImageRepository, mockAuthenticator)
     parkingViewModel =
         ParkingViewModel(mockImageRepository, mockParkingRepository, mockReportedObjectRepository)
 
@@ -93,8 +95,7 @@ class ViewProfileScreenTest {
       ViewProfileScreen(
           navigationActions = mockNavigationActions,
           userViewModel = userViewModel,
-          parkingViewModel = parkingViewModel,
-          AuthenticationRepositoryMock())
+          parkingViewModel = parkingViewModel)
     }
   }
 

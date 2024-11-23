@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.model.user
 
+import com.github.se.cyrcle.model.authentication.AuthenticationRepository
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingRepository
@@ -23,12 +24,13 @@ class UserViewModelTest {
   @Mock private lateinit var userRepository: UserRepository
   @Mock private lateinit var parkingRepository: ParkingRepository
   @Mock private lateinit var imageRepository: ImageRepository
+  @Mock private lateinit var authenticator: AuthenticationRepository
   private lateinit var userViewModel: UserViewModel
 
   @Before
   fun setUp() {
     MockitoAnnotations.openMocks(this)
-    userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository)
+    userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository, authenticator)
   }
 
   @Test

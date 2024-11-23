@@ -10,11 +10,13 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.se.cyrcle.di.mocks.AuthenticationRepositoryMock
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockReviewRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
+import com.github.se.cyrcle.model.authentication.AuthenticationRepository
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.parking.ParkingCapacity
 import com.github.se.cyrcle.model.parking.ParkingProtection
@@ -45,6 +47,7 @@ class ParkingDetailsScreenTest {
   private lateinit var userRepository: UserRepository
   private lateinit var reviewRepository: ReviewRepository
   private lateinit var mockReportedObjectRepository: ReportedObjectRepository
+   private lateinit var authenticator: AuthenticationRepository
 
   private lateinit var userViewModel: UserViewModel
   private lateinit var parkingViewModel: ParkingViewModel
@@ -62,11 +65,12 @@ class ParkingDetailsScreenTest {
     imageRepository = MockImageRepository()
     userRepository = MockUserRepository()
     reviewRepository = MockReviewRepository()
+      authenticator = AuthenticationRepositoryMock()
     mockReportedObjectRepository = MockReportedObjectRepository()
 
     parkingViewModel =
         ParkingViewModel(imageRepository, parkingRepository, mockReportedObjectRepository)
-    userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository)
+    userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository, authenticator)
     reviewViewModel = ReviewViewModel(reviewRepository, mockReportedObjectRepository)
 
     parkingViewModel.addParking(TestInstancesParking.parking2)

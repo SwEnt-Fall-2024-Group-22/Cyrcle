@@ -36,7 +36,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
-import com.github.se.cyrcle.model.authentication.AuthenticationRepository
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
@@ -63,7 +62,6 @@ fun ViewProfileScreen(
     navigationActions: NavigationActions,
     userViewModel: UserViewModel,
     parkingViewModel: ParkingViewModel,
-    authenticator: AuthenticationRepository
 ) {
   fun areInputsValid(firstName: String, lastName: String, username: String): Boolean {
     return firstName.length in FIRST_NAME_MIN_LENGTH..FIRST_NAME_MAX_LENGTH &&
@@ -77,7 +75,6 @@ fun ViewProfileScreen(
   var signOut by remember { mutableStateOf(false) }
 
   val signOutToastText = stringResource(R.string.view_profile_on_sign_out_toast)
-  val signOutCallback = authenticator.getSignOutCallback()
 
   Scaffold(
       modifier = Modifier.testTag("ViewProfileScreen"),
@@ -109,8 +106,7 @@ fun ViewProfileScreen(
                   TextButton(
                       modifier = Modifier.testTag("SignOutDialogConfirmButton"),
                       onClick = {
-                        signOutCallback {
-                          userViewModel.signOut()
+                        userViewModel.signOut {
                           (context as Activity).runOnUiThread {
                             Toast.makeText(context, signOutToastText, Toast.LENGTH_SHORT).show()
                           }

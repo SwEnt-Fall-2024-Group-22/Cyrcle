@@ -22,6 +22,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
+import kotlin.math.atan
 
 @RunWith(AndroidJUnit4::class)
 class ProfileScreenTest {
@@ -34,6 +35,7 @@ class ProfileScreenTest {
   private lateinit var reportedObjectRepository: ReportedObjectRepository
   private lateinit var userViewModel: UserViewModel
   private lateinit var parkingViewModel: ParkingViewModel
+  private lateinit var authenticator: AuthenticationRepositoryMock
 
   private lateinit var mockNavigationActions: NavigationActions
 
@@ -45,13 +47,14 @@ class ProfileScreenTest {
     userRepository = MockUserRepository()
     parkingRepository = MockParkingRepository()
     reportedObjectRepository = MockReportedObjectRepository()
-    userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository)
+    authenticator = AuthenticationRepositoryMock()
+    userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository, authenticator)
     parkingViewModel =
         ParkingViewModel(imageRepository, parkingRepository, reportedObjectRepository)
 
     composeTestRule.setContent {
       ProfileScreen(
-          mockNavigationActions, userViewModel, parkingViewModel, AuthenticationRepositoryMock())
+          mockNavigationActions, userViewModel, parkingViewModel)
     }
   }
 

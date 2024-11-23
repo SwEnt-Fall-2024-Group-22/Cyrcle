@@ -51,7 +51,9 @@ class MainActivity : ComponentActivity() {
     CustomViewModelFactory { ReviewViewModel(reviewRepository, reportedObjectRepository) }
   }
   private val userViewModel: UserViewModel by viewModels {
-    CustomViewModelFactory { UserViewModel(userRepository, parkingRepository, imageRepository) }
+    CustomViewModelFactory {
+      UserViewModel(userRepository, parkingRepository, imageRepository, authenticator)
+    }
   }
   private val parkingViewModel: ParkingViewModel by viewModels {
     CustomViewModelFactory {

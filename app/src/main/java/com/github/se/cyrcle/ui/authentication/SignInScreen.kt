@@ -121,7 +121,9 @@ fun SignInScreen(
       Button(
           text = stringResource(R.string.sign_in_guest_button),
           onClick = {
-            anonymousCallback { navigationActions.navigateTo(TopLevelDestinations.MAP) }
+            userViewModel.signInAnonymously {
+              navigationActions.navigateTo(TopLevelDestinations.MAP)
+            }
           },
           colorLevel = ColorLevel.TERTIARY,
           modifier =

@@ -3,7 +3,6 @@ package com.github.se.cyrcle.model.map
 import android.os.Handler
 import android.os.Looper
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.model.parking.PARKING_MAX_AREA
 import com.github.se.cyrcle.model.parking.PARKING_MAX_SIDE_LENGTH

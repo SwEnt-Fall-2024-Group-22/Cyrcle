@@ -11,6 +11,7 @@ import com.github.se.cyrcle.di.mocks.AuthenticationRepositoryMock
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
+import com.github.se.cyrcle.model.authentication.AuthenticationRepository
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.user.TestInstancesUser
@@ -38,6 +39,7 @@ class SignInTest {
   private lateinit var userRepository: UserRepository
   private lateinit var parkingRepository: ParkingRepository
   private lateinit var imageRepository: ImageRepository
+  private lateinit var authenticator: AuthenticationRepository
   private lateinit var userViewModel: UserViewModel
 
   @Before
@@ -47,7 +49,8 @@ class SignInTest {
     userRepository = MockUserRepository()
     parkingRepository = MockParkingRepository()
     imageRepository = MockImageRepository()
-    userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository)
+    authenticator = AuthenticationRepositoryMock()
+    userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository, authenticator)
 
     val mockAuthenticator = AuthenticationRepositoryMock()
 
