@@ -3,15 +3,9 @@ package com.github.se.cyrcle.model.user
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import com.github.se.cyrcle.model.image.ImageRepository
-import com.github.se.cyrcle.model.image.ImageRepositoryCloudStorage
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingRepository
-import com.github.se.cyrcle.model.parking.ParkingRepositoryFirestore
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -291,19 +285,4 @@ class UserViewModel(
         onFailure = onFailure)
   }
 
-  companion object {
-    val Factory: ViewModelProvider.Factory =
-        object : ViewModelProvider.Factory {
-          @Suppress("UNCHECKED_CAST")
-          override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return UserViewModel(
-                UserRepositoryFirestore(
-                    FirebaseFirestore.getInstance(), FirebaseAuth.getInstance()),
-                ParkingRepositoryFirestore(FirebaseFirestore.getInstance()),
-                ImageRepositoryCloudStorage(
-                    FirebaseAuth.getInstance(), FirebaseStorage.getInstance()))
-                as T
-          }
-        }
-  }
 }

@@ -219,16 +219,4 @@ class MapViewModel : ViewModel() {
     BOTTOM_RIGHT_SET,
     RECTANGLE_SET
   }
-
-  // create factory (imported from bootcamp)
-  // create factory (imported from bootcamp)
-  companion object {
-    val Factory: ViewModelProvider.Factory =
-        object : ViewModelProvider.Factory {
-          @Suppress("UNCHECKED_CAST")
-          override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return MapViewModel() as T
-          }
-        }
-  }
 }

@@ -129,17 +129,4 @@ class ReviewViewModel(
     _parkingReviews.value = emptyList()
   }
 
-  // create factory (imported from bootcamp)
-  companion object {
-    val Factory: ViewModelProvider.Factory =
-        object : ViewModelProvider.Factory {
-          @Suppress("UNCHECKED_CAST")
-          override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ReviewViewModel(
-                ReviewRepositoryFirestore(FirebaseFirestore.getInstance()),
-                ReportedObjectRepositoryFirestore(FirebaseFirestore.getInstance()))
-                as T
-          }
-        }
-  }
 }
