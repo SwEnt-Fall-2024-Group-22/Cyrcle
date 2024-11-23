@@ -397,64 +397,57 @@ fun SpotCard(
                 containerColor =
                     if (isPinned) MaterialTheme.colorScheme.surfaceBright
                     else MaterialTheme.colorScheme.surface)) {
-          Column(
+          Row(
               modifier =
                   Modifier.fillMaxSize()
                       .padding(horizontal = 32.dp, vertical = 12.dp)
-                      .testTag("SpotCardContent")) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.Top,
-                    horizontalArrangement = Arrangement.SpaceBetween) {
-                      Text(
-                          text =
-                              parking.optName?.let {
-                                if (it.length > 35) it.take(32) + "..." else it
-                              } ?: stringResource(R.string.default_parking_name),
-                          style = MaterialTheme.typography.bodyLarge,
-                          testTag = "ParkingName")
-                      Column(
-                          horizontalAlignment = Alignment.End,
-                          modifier = Modifier.fillMaxHeight()) {
-                            Text(
-                                text =
-                                    if (distance < 1)
-                                        stringResource(R.string.distance_m).format(distance * 1000)
-                                    else stringResource(R.string.distance_km).format(distance),
-                                style = MaterialTheme.typography.bodySmall,
-                                testTag = "ParkingDistance")
-                            if (isPinned) {
-                              Icon(
-                                  imageVector = Icons.Default.PushPin,
-                                  contentDescription = "PinnedParking",
-                                  tint = MaterialTheme.colorScheme.primary,
-                                  modifier =
-                                      Modifier.padding(top = 8.dp)
-                                          .size(20.dp)
-                                          .rotate(45f)
-                                          .testTag("PinnedIcon")
-                                          .align(Alignment.End))
-                            }
-                          }
-                    }
+                      .testTag("SpotCardContent"),
+              verticalAlignment = Alignment.Top,
+              horizontalArrangement = Arrangement.SpaceBetween) {
+                Column {
+                  Text(
+                      text =
+                          parking.optName?.let { if (it.length > 35) it.take(32) + "..." else it }
+                              ?: stringResource(R.string.default_parking_name),
+                      style = MaterialTheme.typography.bodyLarge,
+                      testTag = "ParkingName")
 
-                // Rating
-                Spacer(modifier = Modifier.height(8.dp))
-                if (parking.nbReviews > 0) {
-                  Row {
+                  Spacer(modifier = Modifier.height(8.dp))
+                  if (parking.nbReviews > 0) {
                     ScoreStars(
                         parking.avgScore,
                         scale = 0.7f,
                         text =
                             pluralStringResource(R.plurals.reviews_count, count = parking.nbReviews)
                                 .format(parking.nbReviews))
+                  } else {
+                    Text(
+                        text = stringResource(R.string.no_reviews),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        testTag = "ParkingNoReviews")
                   }
-                } else {
+                }
+                Column(horizontalAlignment = Alignment.End) {
                   Text(
-                      text = stringResource(R.string.no_reviews),
+                      text =
+                          if (distance < 1)
+                              stringResource(R.string.distance_m).format(distance * 1000)
+                          else stringResource(R.string.distance_km).format(distance),
                       style = MaterialTheme.typography.bodySmall,
-                      color = MaterialTheme.colorScheme.onSurface,
-                      testTag = "ParkingNoReviews")
+                      testTag = "ParkingDistance")
+                  if (isPinned) {
+                    Icon(
+                        imageVector = Icons.Default.PushPin,
+                        contentDescription = "PinnedParking",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier =
+                            Modifier.padding(top = 8.dp)
+                                .size(20.dp)
+                                .rotate(45f)
+                                .testTag("PinnedIcon")
+                                .align(Alignment.End))
+                  }
                 }
               }
         }
