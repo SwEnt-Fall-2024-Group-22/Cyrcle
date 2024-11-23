@@ -22,7 +22,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -176,8 +175,6 @@ private fun FavoriteParkingsSection(
 ) {
   val favoriteParkings = userViewModel.favoriteParkings.collectAsState().value
 
-  LaunchedEffect(Unit) { userViewModel.getSelectedUserFavoriteParking() }
-
   Text(
       text = stringResource(R.string.view_profile_screen_favorite_parking_title),
       style = MaterialTheme.typography.titleLarge,
@@ -198,10 +195,7 @@ private fun FavoriteParkingsSection(
             FavoriteParkingCard(
                 parking = parking,
                 index = index,
-                onRemove = {
-                  userViewModel.removeFavoriteParkingFromSelectedUser(parking.uid)
-                  userViewModel.getSelectedUserFavoriteParking()
-                },
+                onRemove = { userViewModel.removeFavoriteParkingFromSelectedUser(parking) },
                 parkingViewModel,
                 navigationActions)
           }
@@ -218,7 +212,6 @@ private fun FavoriteParkingCard(
     navigationActions: NavigationActions
 ) {
   var showConfirmDialog by remember { mutableStateOf(false) }
-  val context = LocalContext.current
 
   Card(
       modifier =
@@ -266,7 +259,6 @@ private fun FavoriteParkingCard(
               onClick = {
                 onRemove()
                 showConfirmDialog = false
-                Toast.makeText(context, "Removed from Favorites!", Toast.LENGTH_SHORT).show()
               }) {
                 Text(
                     stringResource(

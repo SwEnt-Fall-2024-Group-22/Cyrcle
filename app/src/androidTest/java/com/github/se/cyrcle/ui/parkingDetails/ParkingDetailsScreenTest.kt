@@ -93,7 +93,6 @@ class ParkingDetailsScreenTest {
   @Test
   fun pinIconPinsAndUnpins() {
     parkingViewModel.selectParking(TestInstancesParking.parking1)
-    userViewModel.getSelectedUserFavoriteParking()
 
     composeTestRule.setContent {
       ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
@@ -118,7 +117,6 @@ class ParkingDetailsScreenTest {
     parkingViewModel.selectParking(TestInstancesParking.parking3)
     userViewModel.signIn(TestInstancesUser.user1)
     userViewModel.setCurrentUserById(TestInstancesUser.user1.public.userId)
-    userViewModel.getSelectedUserFavoriteParking()
 
     composeTestRule.setContent {
       ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
@@ -138,7 +136,6 @@ class ParkingDetailsScreenTest {
     parkingViewModel.selectParking(TestInstancesParking.parking1)
     userViewModel.signIn(TestInstancesUser.user1)
     userViewModel.setCurrentUserById(TestInstancesUser.user1.public.userId)
-    userViewModel.getSelectedUserFavoriteParking()
 
     composeTestRule.setContent {
       ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)

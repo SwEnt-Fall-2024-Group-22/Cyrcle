@@ -360,8 +360,7 @@ fun SpotCard(
                           // Swipe left action: Add to favorites
                           if (!isFavorite && userSignedIn.value) {
                             userState?.let {
-                              userViewModel.addFavoriteParkingToSelectedUser(parking.uid)
-                              userViewModel.getSelectedUserFavoriteParking()
+                              userViewModel.addFavoriteParkingToSelectedUser(parking)
                             }
                           } else if (!userSignedIn.value) {
                             Toast.makeText(

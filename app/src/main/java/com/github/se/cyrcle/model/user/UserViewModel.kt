@@ -42,9 +42,10 @@ class UserViewModel(
   private val _favoriteParkings = MutableStateFlow<List<Parking>>(emptyList())
   val favoriteParkings: StateFlow<List<Parking>> = _favoriteParkings
 
-  /** Signs out the current user by setting the state to null */
+  /** Signs out the current user by setting the state to null and clearing the favorite parkings */
   fun signOut() {
     setCurrentUser(null)
+    _favoriteParkings.value = emptyList()
   }
 
   /**
@@ -101,7 +102,8 @@ class UserViewModel(
 
   /**
    * Sign in a User : If he doesn't have an account on the database, it will create a new user. If
-   * he does we retrieve the user from the database and set it as the current user.
+   * he does we retrieve the user from the database and set it as the current user. Additionally, it
+   * fetches the favorite parkings of the user and sets them in the favorite parkings state.
    *
    * @param user the user to add
    */
@@ -111,12 +113,14 @@ class UserViewModel(
     // setCurrentUser(user)
     userRepository.addUser(
         user,
-        onSuccess = { getUserById(user.public.userId) { setCurrentUser(it) } },
+        onSuccess = {
+          getUserById(user.public.userId) {
+            setCurrentUser(it)
+            getSelectedUserFavoriteParkings()
+          }
+        },
         onFailure = { exception ->
-          Log.e(
-              "com.github.se.cyrcle.model.user.UserViewModel",
-              "Failed to add user: ${user.public.userId}",
-              exception)
+          Log.e("UserViewModel", "Failed to add user: ${user.public.userId}", exception)
         })
   }
 
@@ -161,37 +165,43 @@ class UserViewModel(
   }
 
   /**
-   * Adds parking to the list of favorite parkings for the selected user.
+   * Adds parking to the list of favorite parkings for the selected user and updates the favorite
+   * parkings state.
    *
-   * @param parkingId the ID of the parking to add to the list of favorite parkings
+   * @param parking the parking to add to the list of favorite parkings
    */
-  fun addFavoriteParkingToSelectedUser(parkingId: String) {
+  fun addFavoriteParkingToSelectedUser(parking: Parking) {
     currentUser.value?.let { user ->
       val updatedDetails =
-          user.details?.copy(favoriteParkings = user.details.favoriteParkings + parkingId)
+          user.details?.copy(favoriteParkings = user.details.favoriteParkings + parking.uid)
       val updatedUser = user.copy(details = updatedDetails)
-      updateUser(updatedUser)
-      setCurrentUser(updatedUser)
+      updateUser(updatedUser) { _favoriteParkings.value += parking }
     }
   }
 
   /**
-   * Removes parking from the list of favorite parkings for the selected user.
+   * Removes parking from the list of favorite parkings for the selected user and updates the
+   * favorite parkings state.
    *
-   * @param parkingId the ID of the parking to remove from the list of favorite parkings
+   * @param parking the parking to remove from the list of favorite parkings
    */
-  fun removeFavoriteParkingFromSelectedUser(parkingId: String) {
+  fun removeFavoriteParkingFromSelectedUser(parking: Parking) {
     currentUser.value?.let { user ->
       val updatedDetails =
-          user.details?.copy(favoriteParkings = user.details.favoriteParkings - parkingId)
+          user.details?.copy(
+              favoriteParkings = user.details.favoriteParkings.filter { it != parking.uid })
       val updatedUser = user.copy(details = updatedDetails)
-      updateUser(updatedUser)
-      setCurrentUser(updatedUser)
+      updateUser(updatedUser) {
+        _favoriteParkings.value = _favoriteParkings.value.filter { it.uid != parking.uid }
+      }
     }
   }
 
-  /** Gets the favorite parkings of the current user and sets them in the favorite parkings state */
-  fun getSelectedUserFavoriteParking() {
+  /**
+   * Gets the favorite parkings of the current user and sets them in the favorite parkings state
+   * Should only be called once, when the user is set in the viewmodel.
+   */
+  private fun getSelectedUserFavoriteParkings() {
     currentUser.value?.details?.let { details ->
       parkingRepository.getParkingsByListOfIds(
           details.favoriteParkings,
