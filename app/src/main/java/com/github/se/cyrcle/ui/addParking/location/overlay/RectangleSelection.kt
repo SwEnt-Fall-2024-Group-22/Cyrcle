@@ -41,7 +41,7 @@ fun RectangleSelection(
     mapView: MapView?
 ) {
   val locationPickerState by mapViewModel.locationPickerState.collectAsState()
-  val isAreaTooLarge by mapViewModel.isAreaTooLarge.collectAsState()
+  val isLocationValid by mapViewModel.isLocationValid.collectAsState(true)
   val center = Offset(0.5f, 0.5f)
   var touchPosition by remember { mutableStateOf(Offset.Unspecified) }
   val hasDragged = remember { mutableStateOf(false) }
@@ -76,22 +76,19 @@ fun RectangleSelection(
 
           val listScreenCoordinates = computeCornersScreenCoordinates(canvasCenter, width, height)
           val pointsList = mapView?.mapboxMap?.coordinatesForPixels(listScreenCoordinates)
-          mapViewModel.updateIsAreaTooLarge(pointsList?.let { Location(it).computeArea() } ?: 0.0)
+          if (pointsList != null) mapViewModel.updateLocation(Location(pointsList))
 
           if (hasDragged.value) {
             // Fill of the rectangle
             drawRect(
-                color = if (isAreaTooLarge) Red.copy(alpha = 0.5f) else Cerulean.copy(alpha = 0.7f),
+                color =
+                    if (isLocationValid) Cerulean.copy(alpha = 0.7f) else Red.copy(alpha = 0.5f),
                 topLeft = canvasCenter,
                 size = rectSize)
 
             // Outline of the rectangle
             drawRect(
-                color = if (isAreaTooLarge) Red.copy(alpha = 0.5f) else Cerulean.copy(alpha = 0.7f),
-                topLeft = canvasCenter,
-                size = rectSize)
-            drawRect(
-                color = if (isAreaTooLarge) Red else Cerulean,
+                color = if (isLocationValid) Cerulean else Red,
                 topLeft = canvasCenter,
                 size = rectSize,
                 style = Stroke(width = 2f))

@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.model.parking
 
+import android.util.Log
 import com.github.se.cyrcle.ui.theme.molecules.DropDownableEnum
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.Polygon
@@ -98,6 +99,10 @@ data class Location(
    * @return The polygon representing the location.
    */
   fun toPolygon(): Polygon {
+    if (topLeft == null || topRight == null || bottomLeft == null || bottomRight == null) {
+      Log.e("Location", "Cannot convert location to polygon, some corners are null")
+      return Polygon.fromLngLats(listOf(listOf()))
+    }
     return Polygon.fromLngLats(listOf(listOf(topLeft, topRight, bottomRight, bottomLeft, topLeft)))
   }
 
@@ -109,6 +114,21 @@ data class Location(
    */
   fun computeArea(): Double {
     return TurfMeasurement.area(toPolygon())
+  }
+
+  /**
+   * Compute the height and width of the location in meters.
+   *
+   * @return A pair of the height and width of the location in meters.
+   */
+  fun computeHeightAndWidth(): Pair<Double, Double> {
+    if (topLeft == null || topRight == null || bottomLeft == null || bottomRight == null) {
+      Log.e("Location", "Cannot compute height and width of location, some corners are null")
+      return Pair(0.0, 0.0)
+    }
+    val height = TurfMeasurement.distance(topLeft, bottomLeft, "meters")
+    val width = TurfMeasurement.distance(topLeft, topRight, "meters")
+    return Pair(height, width)
   }
 
   constructor(
