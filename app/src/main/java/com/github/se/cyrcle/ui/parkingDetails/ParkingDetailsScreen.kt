@@ -1,7 +1,6 @@
 package com.github.se.cyrcle.ui.parkingDetails
 
 import android.annotation.SuppressLint
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -81,34 +80,37 @@ fun ParkingDetailsScreen(
   val selectedParking =
       parkingViewModel.selectedParking.collectAsState().value
           ?: return Text(stringResource(R.string.no_selected_parking_error))
-  val imagesUrls by parkingViewModel.selectedParkingImagesUrls.collectAsState()
   val userSignedIn = userViewModel.isSignedIn.collectAsState(false)
   val scrollState = rememberScrollState()
   val context = LocalContext.current
   val toastMessage = stringResource(R.string.sign_in_to_add_favorites)
+  // === States for the images ===
   var newParkingImageLocalPath by remember { mutableStateOf("") }
   val showDialog = remember { mutableStateOf(false) }
+  val imagesUrls by parkingViewModel.selectedParkingImagesUrls.collectAsState()
+  // === === === === === === ===
 
   LaunchedEffect(Unit) {
     // On first load of the screen, request the images
     // This will update the imagesUrls state and trigger a recomposition
     parkingViewModel.loadSelectedParkingImages()
   }
-  LaunchedEffect(imagesUrls) { Log.d("ParkingDetailsScreen", "imagesUrls: $imagesUrls") }
-
+  // Copied from the editProfileScreen. This is the image picker launcher that set the Uri state
+  // with the selected image by the user.
+  // It also change the showDialog state to true to show the dialog with the user selected image.
   val imagePickerLauncher =
       rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let { newParkingImageLocalPath = it.toString() }
         showDialog.value = newParkingImageLocalPath.isNotEmpty()
       }
-
+  // Dialog to confirm the image upload with the user.
   if (showDialog.value) {
     AlertDialog(
         onDismissRequest = {
           showDialog.value = false
           newParkingImageLocalPath = ""
         },
-        title = { Text("Do you want to add this image to the parking spot ? ") },
+        title = { Text(stringResource(R.string.card_screen_confirm_upload)) },
         text = {
           Column(
               modifier =
@@ -126,19 +128,24 @@ fun ParkingDetailsScreen(
         },
         confirmButton = {
           Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+            // Cancel button (No)
             TextButton(
                 onClick = { showDialog.value = false },
                 modifier = Modifier.padding(start = 8.dp, end = 8.dp)) {
-                  Text("No", style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp))
+                  Text(
+                      stringResource(R.string.card_screen__cancel_upload),
+                      style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp))
                 }
-            // Confirmation button
+            // Confirmation button (Yes)
             TextButton(
                 onClick = {
                   showDialog.value = false
                   parkingViewModel.uploadImage(newParkingImageLocalPath, context)
                 },
                 modifier = Modifier.padding(start = 8.dp, end = 8.dp)) {
-                  Text("Yes", style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp))
+                  Text(
+                      stringResource(R.string.card_screen__accept_upload),
+                      style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp))
                 }
           }
         })
@@ -290,7 +297,8 @@ fun ParkingDetailsScreen(
                               Image(
                                   painter = rememberAsyncImagePainter(url),
                                   contentDescription =
-                                      stringResource(R.string.view_profile_screen_profile_picture),
+                                      stringResource(
+                                          R.string.view_profile_screen_profile_picture), // FIXME
                                   modifier = Modifier.size(100.dp),
                               )
                             }

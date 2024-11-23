@@ -440,6 +440,8 @@ class ParkingViewModel(
   // ================== Reviews ==================
 
   // ================== Images ==================
+  // Holds the URLs of the images of the selected parking, these aren't stored in the
+  // selectedParking state.
   private val _selectedParkingImagesUrls = MutableStateFlow<List<String>>(mutableListOf())
   val selectedParkingImagesUrls: StateFlow<List<String>> = _selectedParkingImagesUrls
 
@@ -448,14 +450,19 @@ class ParkingViewModel(
    * transforms the paths of the images (stored into firestore) of the selected parking into URLs.
    */
   fun loadSelectedParkingImages() {
-    // clear the list of URLs each time we request the images
+    if (selectedParking.value == null) {
+      Log.e("ParkingViewModel", "No parking selected while trying to load images")
+      return
+    }
+    // clear the list of URLs each time we request the images (prevent duplicates and old images
+    // from being displayed)
     _selectedParkingImagesUrls.value = emptyList()
-    val selectedParking = _selectedParking.value ?: return
-    selectedParking.images.forEach { imagePath ->
+
+    _selectedParking.value!!.images.forEach { imagePath ->
+      // get the URL of each image and add it to the list of URLs state that is observed by the UI.
       imageRepository.getUrl(
           path = imagePath,
           onSuccess = { url ->
-            Log.d("ParkingViewModel", "got Image URL: $url")
             _selectedParkingImagesUrls.value = _selectedParkingImagesUrls.value.plus(url)
           },
           onFailure = { Log.e("ParkingViewModel", "Error getting image URL for path") })
@@ -470,7 +477,11 @@ class ParkingViewModel(
    * @param context the context of the application (needed to access the file)
    */
   fun uploadImage(imageUri: String, context: Context) {
-    val selectedParking = _selectedParking.value ?: return
+    if (_selectedParking.value == null) {
+      Log.e("ParkingViewModel", "No parking selected while trying to upload image")
+      return
+    }
+    val selectedParking = _selectedParking.value!!
     val destinationPath = "parking/${selectedParking.uid}/${selectedParking.images.size}"
     imageRepository.uploadImage(
         context = context,
@@ -478,11 +489,10 @@ class ParkingViewModel(
         destinationPath = destinationPath,
         onSuccess = {
           selectedParking.images.add(destinationPath)
-          Log.d("ParkingViewModel", selectedParking.images.toString())
           parkingRepository.updateParking(
               selectedParking,
-              { Log.d("ParkingViewModel", "image path added to parking firestore") },
-              { Log.e("ParkingViewModel", "Error adding image path to parking firestore ${it}") })
+              {},
+              { Log.e("ParkingViewModel", "Error adding image path to parking firestore $it") })
         },
         onFailure = { Log.e("ParkingViewModel", "Error uploading image") },
     )
