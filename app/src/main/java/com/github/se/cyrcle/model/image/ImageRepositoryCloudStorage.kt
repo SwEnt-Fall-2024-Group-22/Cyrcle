@@ -75,8 +75,8 @@ constructor(private val auth: FirebaseAuth, private val storage: FirebaseStorage
     do {
       outputStream.reset()
       bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream)
-      quality -= 5
-    } while (outputStream.size() > maxSize * 1024 && quality > 0)
+      quality -= if (quality > 5) 5 else 1
+    } while (outputStream.size() > maxSize * 1024 && quality > 1)
     return outputStream.toByteArray()
   }
 }
