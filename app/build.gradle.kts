@@ -166,6 +166,11 @@ dependencies {
     implementation(libs.compose.preview)
     debugImplementation(libs.compose.tooling)
 
+    implementation(libs.credentials)
+    implementation(libs.credentials.play.services.auth)
+    implementation(libs.android.googleid)
+
+
 
     // ---------------------------------------------------
     // -------------------  PLUGINS  ---------------------
@@ -173,7 +178,6 @@ dependencies {
 
     // ---------------- Firebase  ------------------
     implementation(libs.google.services)
-    implementation(libs.play.services.auth)
 
     val firebaseBom = platform(libs.firebase.bom)
     implementation(firebaseBom)

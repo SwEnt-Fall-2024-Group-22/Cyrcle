@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.authentication
 
+import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -34,6 +35,13 @@ import com.github.se.cyrcle.ui.theme.googleSignInButtonStyle
  * complete This does not interface with the UserRepository or ViewModel
  */
 interface Authenticator {
+
+  /**
+   * Initialize the Authenticator
+   *
+   * @param context the context of the application
+   */
+  fun init(context: Context)
 
   /**
    * Composable button that authenticates the user

@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.di.mocks
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.github.se.cyrcle.model.user.TestInstancesUser
@@ -12,6 +13,8 @@ class AuthenticatorMock @Inject constructor() : Authenticator {
   // This is a public attribute since it can be used as a parameter
   // in tests to make the authenticator fail
   var testUser: User? = TestInstancesUser.user1
+
+  override fun init(context: Context) {}
 
   @Composable
   override fun AuthenticateButton(
