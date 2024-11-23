@@ -26,7 +26,7 @@ data class Parking(
     val optName: String?,
     val optDescription: String?,
     val location: Location,
-    val images: MutableList<String>,
+    val images: List<String>,
     val capacity: ParkingCapacity,
     val rackType: ParkingRackType,
     val protection: ParkingProtection,

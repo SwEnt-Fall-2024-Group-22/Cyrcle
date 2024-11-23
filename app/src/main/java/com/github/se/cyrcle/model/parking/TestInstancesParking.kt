@@ -14,7 +14,7 @@ object TestInstancesParking {
           "Rue de la paix",
           null,
           Location(EPFLCenter),
-          mutableListOf("parkings/Test_spot_1/1.jpg"),
+          listOf("parkings/Test_spot_1/1.jpg"),
           ParkingCapacity.LARGE,
           ParkingRackType.TWO_TIER,
           ParkingProtection.COVERED,
@@ -28,7 +28,7 @@ object TestInstancesParking {
           "Rude épais",
           null,
           Location(Point.fromLngLat(6.7, 46.3)),
-          mutableListOf("parkings/Test_spot_2/1.jpg", "parkings/Test_spot_2/2.jpg"),
+          listOf("parkings/Test_spot_2/1.jpg", "parkings/Test_spot_2/2.jpg"),
           ParkingCapacity.SMALL,
           ParkingRackType.TWO_TIER,
           ParkingProtection.COVERED,
@@ -40,7 +40,7 @@ object TestInstancesParking {
           "Rue du pet",
           null,
           Location(Point.fromLngLat(7.1, 47.1)),
-          mutableListOf(
+          listOf(
               "https://upload.wikimedia.org/wikipedia/commons/7/78/%22G%C3%A4nsemarkt%22_in_Amance_-_panoramio.jpg"),
           ParkingCapacity.LARGE,
           ParkingRackType.TWO_TIER,
@@ -53,7 +53,7 @@ object TestInstancesParking {
           "",
           null,
           Location(Point.fromLngLat(7.111, 47.111)),
-          mutableListOf(
+          listOf(
               "https://upload.wikimedia.org/wikipedia/commons/7/78/%22G%C3%A4nsemarkt%22_in_Amance_-_panoramio.jpg"),
           ParkingCapacity.LARGE,
           ParkingRackType.TWO_TIER,
@@ -66,7 +66,7 @@ object TestInstancesParking {
           "",
           null,
           Location(Point.fromLngLat(7.112, 47.112)),
-          mutableListOf(
+          listOf(
               "https://upload.wikimedia.org/wikipedia/commons/7/78/%22G%C3%A4nsemarkt%22_in_Amance_-_panoramio.jpg"),
           ParkingCapacity.LARGE,
           ParkingRackType.TWO_TIER,

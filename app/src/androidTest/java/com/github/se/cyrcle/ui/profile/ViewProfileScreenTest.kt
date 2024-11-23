@@ -338,7 +338,7 @@ class ViewProfileScreenTest {
             "Roulade P",
             "Wazzup beijing",
             Location(Point.fromLngLat(7.19, 47.19)),
-            mutableListOf(
+            listOf(
                 "https://upload.wikimedia.org/wikipedia/commons/7/78/%22G%C3%A4nsemarkt%22_in_Amance_-_panoramio.jpg"),
             ParkingCapacity.LARGE,
             ParkingRackType.TWO_TIER,

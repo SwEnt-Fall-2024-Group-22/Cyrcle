@@ -49,6 +49,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -68,7 +69,6 @@ import com.github.se.cyrcle.ui.theme.atoms.IconButton
 import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
-import com.mapbox.maps.extension.style.expressions.dsl.generated.mod
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
@@ -90,7 +90,7 @@ fun ParkingDetailsScreen(
   val imagesUrls by parkingViewModel.selectedParkingImagesUrls.collectAsState()
   // === === === === === === ===
 
-  LaunchedEffect(Unit) {
+  LaunchedEffect(Unit, selectedParking) {
     // On first load of the screen, request the images
     // This will update the imagesUrls state and trigger a recomposition
     parkingViewModel.loadSelectedParkingImages()
@@ -140,7 +140,9 @@ fun ParkingDetailsScreen(
             TextButton(
                 onClick = {
                   showDialog.value = false
-                  parkingViewModel.uploadImage(newParkingImageLocalPath, context)
+                  parkingViewModel.uploadImage(newParkingImageLocalPath, context) {
+                    navigationActions.navigateTo(Screen.PARKING_DETAILS)
+                  }
                 },
                 modifier = Modifier.padding(start = 8.dp, end = 8.dp)) {
                   Text(
@@ -280,18 +282,13 @@ fun ParkingDetailsScreen(
                           text = stringResource(R.string.card_screen_no_image),
                           color = MaterialTheme.colorScheme.onSurface,
                           style = MaterialTheme.typography.bodyMedium,
+                          modifier = Modifier.weight(3f),
+                          textAlign = TextAlign.Left,
                           testTag = "NoImageText")
-                      IconButton(
-                          icon = Icons.Outlined.AddAPhoto,
-                          contentDescription = "Add Image",
-                          onClick = { imagePickerLauncher.launch("image/*") },
-                          enabled = userSignedIn.value,
-                          testTag = "AddImageIconButton",
-                          modifier = Modifier.padding(start = 8.dp).height(32.dp).fillMaxWidth())
                       // There are images to display
                     } else {
                       LazyRow(
-                          modifier = Modifier.fillMaxWidth().testTag("ParkingImagesRow"),
+                          modifier = Modifier.weight(2f).testTag("ParkingImagesRow"),
                           horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             items(imagesUrls) { url ->
                               Image(
@@ -304,6 +301,13 @@ fun ParkingDetailsScreen(
                             }
                           }
                     }
+                    IconButton(
+                        icon = Icons.Outlined.AddAPhoto,
+                        contentDescription = "Add Image",
+                        onClick = { imagePickerLauncher.launch("image/*") },
+                        enabled = userSignedIn.value,
+                        testTag = "AddImageIconButton",
+                        modifier = Modifier.padding(start = 8.dp).height(32.dp).weight(1f))
                   }
 
               // Information
