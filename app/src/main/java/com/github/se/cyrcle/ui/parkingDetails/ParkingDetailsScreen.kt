@@ -1,6 +1,7 @@
 package com.github.se.cyrcle.ui.parkingDetails
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -20,6 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -51,7 +53,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.ParkingReport
@@ -93,6 +94,7 @@ fun ParkingDetailsScreen(
     // This will update the imagesUrls state and trigger a recomposition
     parkingViewModel.loadSelectedParkingImages()
   }
+  LaunchedEffect(imagesUrls) { Log.d("ParkingDetailsScreen", "imagesUrls: $imagesUrls") }
 
   val imagePickerLauncher =
       rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
@@ -284,15 +286,13 @@ fun ParkingDetailsScreen(
                       LazyRow(
                           modifier = Modifier.fillMaxWidth().testTag("ParkingImagesRow"),
                           horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            items(imagesUrls.size) { index ->
-                              AsyncImage(
-                                  model = imagesUrls[index],
-                                  contentDescription = "Image $index",
-                                  modifier =
-                                      Modifier.size(170.dp)
-                                          .padding(4.dp)
-                                          .testTag("ParkingImage$index"),
-                                  contentScale = ContentScale.Crop)
+                            items(imagesUrls) { url ->
+                              Image(
+                                  painter = rememberAsyncImagePainter(url),
+                                  contentDescription =
+                                      stringResource(R.string.view_profile_screen_profile_picture),
+                                  modifier = Modifier.size(100.dp),
+                              )
                             }
                           }
                     }

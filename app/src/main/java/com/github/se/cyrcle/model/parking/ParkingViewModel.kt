@@ -440,7 +440,7 @@ class ParkingViewModel(
   // ================== Reviews ==================
 
   // ================== Images ==================
-  private val _selectedParkingImagesUrls = MutableStateFlow<MutableList<String>>(mutableListOf())
+  private val _selectedParkingImagesUrls = MutableStateFlow<List<String>>(mutableListOf())
   val selectedParkingImagesUrls: StateFlow<List<String>> = _selectedParkingImagesUrls
 
   /**
@@ -449,12 +449,15 @@ class ParkingViewModel(
    */
   fun loadSelectedParkingImages() {
     // clear the list of URLs each time we request the images
-    _selectedParkingImagesUrls.value.clear()
+    _selectedParkingImagesUrls.value = emptyList()
     val selectedParking = _selectedParking.value ?: return
     selectedParking.images.forEach { imagePath ->
       imageRepository.getUrl(
           path = imagePath,
-          onSuccess = { url -> _selectedParkingImagesUrls.value.add(url) },
+          onSuccess = { url ->
+            Log.d("ParkingViewModel", "got Image URL: $url")
+            _selectedParkingImagesUrls.value = _selectedParkingImagesUrls.value.plus(url)
+          },
           onFailure = { Log.e("ParkingViewModel", "Error getting image URL for path") })
     }
   }
