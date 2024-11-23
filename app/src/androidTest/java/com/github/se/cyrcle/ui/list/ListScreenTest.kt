@@ -88,9 +88,8 @@ class ListScreenTest {
     parkingViewModel.addParking(TestInstancesParking.parking3)
     userViewModel.signIn(user)
     userViewModel.setCurrentUserById(user.public.userId)
-    userViewModel.addFavoriteParkingToSelectedUser(TestInstancesParking.parking1.uid)
-    userViewModel.addFavoriteParkingToSelectedUser(TestInstancesParking.parking2.uid)
-    userViewModel.getSelectedUserFavoriteParking()
+    userViewModel.addFavoriteParkingToSelectedUser(TestInstancesParking.parking1)
+    userViewModel.addFavoriteParkingToSelectedUser(TestInstancesParking.parking2)
   }
 
   @Test

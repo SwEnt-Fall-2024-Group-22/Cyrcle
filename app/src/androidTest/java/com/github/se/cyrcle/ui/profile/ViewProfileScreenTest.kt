@@ -85,11 +85,9 @@ class ViewProfileScreenTest {
     userViewModel.setCurrentUserById("1")
 
     // Add favorite parkings
-    userViewModel.addFavoriteParkingToSelectedUser(TestInstancesParking.parking1.uid)
-    userViewModel.addFavoriteParkingToSelectedUser(TestInstancesParking.parking2.uid)
-    userViewModel.addFavoriteParkingToSelectedUser(TestInstancesParking.parking3.uid)
-    // Fetch favorite parkings
-    userViewModel.getSelectedUserFavoriteParking()
+    userViewModel.addFavoriteParkingToSelectedUser(TestInstancesParking.parking1)
+    userViewModel.addFavoriteParkingToSelectedUser(TestInstancesParking.parking2)
+    userViewModel.addFavoriteParkingToSelectedUser(TestInstancesParking.parking3)
 
     composeTestRule.setContent {
       ViewProfileScreen(
@@ -347,8 +345,7 @@ class ViewProfileScreenTest {
             true)
 
     parkingViewModel.addParking(parking4)
-    userViewModel.addFavoriteParkingToSelectedUser(parking4.uid)
-    userViewModel.getSelectedUserFavoriteParking()
+    userViewModel.addFavoriteParkingToSelectedUser(parking4)
 
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("FavoriteToggle_3").assertDoesNotExist()

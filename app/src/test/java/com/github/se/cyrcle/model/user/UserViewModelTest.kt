@@ -68,14 +68,15 @@ class UserViewModelTest {
     // Check if the user was fetched from the repository
     verify(userRepository).getUserById(eq("user1"), any(), any())
   }
-  // Check that the user returned is the correct one
-  // and that onSuccess is called.
+
+  @Suppress("UNCHECKED_CAST")
   @Test
   fun getUserBydWithCallbackTest() {
     `when`(userRepository.getUserById(any(), any(), any())).thenAnswer { invocation ->
       val onSuccess = invocation.arguments[1] as (User) -> Unit
       onSuccess(TestInstancesUser.user1)
     }
+    // Check that the user returned is the correct one and that onSuccess is called.
     userViewModel.getUserById("user1") { assert(it == TestInstancesUser.user1) }
     verify(userRepository).getUserById(eq("user1"), any(), any())
   }
@@ -94,7 +95,7 @@ class UserViewModelTest {
     // Set the current user and add a favorite parking to the user
     val user = TestInstancesUser.user1
     userViewModel.setCurrentUser(user)
-    userViewModel.addFavoriteParkingToSelectedUser("Test_spot_3")
+    userViewModel.addFavoriteParkingToSelectedUser(TestInstancesParking.parking3)
 
     // Create a copy of the user with the favorite parking added
     val updatedUser =
@@ -110,11 +111,26 @@ class UserViewModelTest {
     assert(userViewModel.currentUser.value == updatedUser)
   }
 
+  @Suppress("UNCHECKED_CAST")
   @Test
   fun getUserFavoriteParkingsTest() {
+    // Define the behavior of the repository needed to sign in the user
+    `when`(parkingRepository.getParkingsByListOfIds(any(), any(), any())).thenAnswer { invocation ->
+      val onSuccess = invocation.arguments[1] as (List<Parking>) -> Unit
+      onSuccess(listOf(TestInstancesParking.parking1, TestInstancesParking.parking2))
+    }
+
+    `when`(userRepository.addUser(any(), any(), any())).thenAnswer { invocation ->
+      val onSuccess = invocation.arguments[1] as () -> Unit
+      onSuccess()
+    }
+
+    `when`(userRepository.getUserById(any(), any(), any())).thenAnswer { invocation ->
+      val onSuccess = invocation.arguments[1] as (User) -> Unit
+      onSuccess(TestInstancesUser.user1)
+    }
     // Set the current user
-    userViewModel.setCurrentUser(TestInstancesUser.user1)
-    userViewModel.getSelectedUserFavoriteParking()
+    userViewModel.signIn(TestInstancesUser.user1)
     // Check if the favorite parkings were fetched from the repository
     verify(parkingRepository)
         .getParkingsByListOfIds(
@@ -123,16 +139,26 @@ class UserViewModelTest {
             any())
   }
 
+  @Suppress("UNCHECKED_CAST")
   @Test
   fun getFavoriteParkingsSetsState() {
-    // Set the current user
+    // Define the behavior of the repository needed to sign in the user
     `when`(parkingRepository.getParkingsByListOfIds(any(), any(), any())).thenAnswer { invocation ->
       val onSuccess = invocation.arguments[1] as (List<Parking>) -> Unit
       onSuccess(listOf(TestInstancesParking.parking1, TestInstancesParking.parking2))
     }
 
-    userViewModel.setCurrentUser(TestInstancesUser.user1)
-    userViewModel.getSelectedUserFavoriteParking()
+    `when`(userRepository.addUser(any(), any(), any())).thenAnswer { invocation ->
+      val onSuccess = invocation.arguments[1] as () -> Unit
+      onSuccess()
+    }
+
+    `when`(userRepository.getUserById(any(), any(), any())).thenAnswer { invocation ->
+      val onSuccess = invocation.arguments[1] as (User) -> Unit
+      onSuccess(TestInstancesUser.user1)
+    }
+
+    userViewModel.signIn(TestInstancesUser.user1)
     userViewModel.favoriteParkings.value.let {
       assert(it.contains(TestInstancesParking.parking1))
       assert(it.contains(TestInstancesParking.parking2))
@@ -144,7 +170,7 @@ class UserViewModelTest {
     // Set the current user and remove a favorite parking from the user
     val user = TestInstancesUser.user1
     userViewModel.setCurrentUser(user)
-    userViewModel.removeFavoriteParkingFromSelectedUser("Test_spot_1")
+    userViewModel.removeFavoriteParkingFromSelectedUser(TestInstancesParking.parking1)
 
     // Create a copy of the user with the favorite parking removed
     val updatedUser =
