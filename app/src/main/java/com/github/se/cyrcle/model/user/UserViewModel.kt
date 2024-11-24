@@ -287,6 +287,25 @@ class UserViewModel(
   }
 
   /**
+   * Edits the personal note of the current user for the given parking. If the new note is blank,
+   * the personal note is removed (if it exists). If it doesn't exist, the function does nothing. If
+   * the new note is not empty, the personal note is added or updated.
+   *
+   * @param parking the parking to edit the personal note for
+   * @param newNote the new personal note for the parking
+   */
+  fun editCurrentUserPersonalNoteForParking(parking: Parking, newNote: String) {
+    currentUser.value?.let { user ->
+      user.details?.let { details ->
+        val key = parking.uid
+        val updatedNotes = details.personalNotes.toMutableMap()
+        if (newNote.isBlank()) updatedNotes.remove(key) else updatedNotes[key] = newNote
+        updateUser(user.copy(details = details.copy(personalNotes = updatedNotes)))
+      }
+    }
+  }
+
+  /**
    * Upload the picture to the cloud storage update the user object in the database with the cloud
    * path created. update the user object in the viewmodel with the url of the image and the cloud
    * path

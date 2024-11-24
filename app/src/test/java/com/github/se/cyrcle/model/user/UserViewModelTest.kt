@@ -384,4 +384,61 @@ class UserViewModelTest {
     // Check if the selected user is the updated user
     assert(userViewModel.currentUser.value == updatedUser)
   }
+
+  @Test
+  fun editCurrentUserPersonalNoteForParkingTest() {
+    val user = TestInstancesUser.user1
+    val parking = TestInstancesParking.parking1
+
+    // Case 1: New note is empty while there is an existing note
+    val actualUserCase1 =
+        user.copy(
+            details = user.details?.copy(personalNotes = mapOf("Test_spot_1" to "Test note 1")))
+
+    userViewModel.setCurrentUser(actualUserCase1)
+    userViewModel.editCurrentUserPersonalNoteForParking(parking, "")
+
+    val expectedUserCase1 = user.copy(details = user.details?.copy(personalNotes = emptyMap()))
+    assert(userViewModel.currentUser.value == expectedUserCase1)
+
+    // Case 2: New note is empty while there is no existing note
+    val actualUserCase2 = user
+    userViewModel.setCurrentUser(actualUserCase2)
+    userViewModel.editCurrentUserPersonalNoteForParking(parking, "")
+
+    val expectedUserCase2 = user // We expect no change
+    assert(userViewModel.currentUser.value == expectedUserCase2)
+
+    // Case 3: New note is not empty while there is an existing note
+    val actualUserCase3 =
+        user.copy(
+            details = user.details?.copy(personalNotes = mapOf("Test_spot_1" to "Test note 1")))
+
+    userViewModel.setCurrentUser(actualUserCase3)
+    userViewModel.editCurrentUserPersonalNoteForParking(parking, "New note")
+
+    val expectedUserCase3 =
+        user.copy(details = user.details?.copy(personalNotes = mapOf("Test_spot_1" to "New note")))
+    assert(userViewModel.currentUser.value == expectedUserCase3)
+
+    // Case 4: New note is not empty while there is no existing note
+    val actualUserCase4 = user
+    userViewModel.setCurrentUser(actualUserCase4)
+    userViewModel.editCurrentUserPersonalNoteForParking(parking, "New note")
+
+    val expectedUserCase4 =
+        user.copy(details = user.details?.copy(personalNotes = mapOf("Test_spot_1" to "New note")))
+    assert(userViewModel.currentUser.value == expectedUserCase4)
+
+    // Case 0: User is null
+    userViewModel.setCurrentUser(null)
+    userViewModel.editCurrentUserPersonalNoteForParking(parking, "New note")
+    assert(userViewModel.currentUser.value == null)
+
+    // Case 0 (continued): User is not null but details is null
+    val userCase0bis = User(TestInstancesUser.user1.public, null)
+    userViewModel.setCurrentUser(userCase0bis)
+    userViewModel.editCurrentUserPersonalNoteForParking(parking, "New note")
+    assert(userViewModel.currentUser.value == userCase0bis)
+  }
 }
