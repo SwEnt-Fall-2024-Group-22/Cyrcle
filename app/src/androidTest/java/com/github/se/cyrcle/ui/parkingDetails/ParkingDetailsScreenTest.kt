@@ -10,13 +10,12 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.github.se.cyrcle.di.mocks.AuthenticationRepositoryMock
+import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockReviewRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
-import com.github.se.cyrcle.model.authentication.AuthenticationRepository
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.parking.ParkingCapacity
 import com.github.se.cyrcle.model.parking.ParkingProtection
@@ -47,7 +46,7 @@ class ParkingDetailsScreenTest {
   private lateinit var userRepository: UserRepository
   private lateinit var reviewRepository: ReviewRepository
   private lateinit var mockReportedObjectRepository: ReportedObjectRepository
-  private lateinit var authenticator: AuthenticationRepository
+  private lateinit var authenticator: MockAuthenticationRepository
 
   private lateinit var userViewModel: UserViewModel
   private lateinit var parkingViewModel: ParkingViewModel
@@ -65,7 +64,7 @@ class ParkingDetailsScreenTest {
     imageRepository = MockImageRepository()
     userRepository = MockUserRepository()
     reviewRepository = MockReviewRepository()
-    authenticator = AuthenticationRepositoryMock()
+    authenticator = MockAuthenticationRepository()
     mockReportedObjectRepository = MockReportedObjectRepository()
 
     parkingViewModel =
@@ -119,8 +118,9 @@ class ParkingDetailsScreenTest {
   fun addToFavoritesWhenSignedIn() {
 
     parkingViewModel.selectParking(TestInstancesParking.parking3)
-    userViewModel.setCurrentUser(TestInstancesUser.user1)
-    userViewModel.setCurrentUserById(TestInstancesUser.user1.public.userId)
+    userViewModel.addUser(TestInstancesUser.user1, {}, {})
+    authenticator.testUser = TestInstancesUser.user1
+    userViewModel.signIn({}, {})
 
     composeTestRule.setContent {
       ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
@@ -138,8 +138,9 @@ class ParkingDetailsScreenTest {
   @Test
   fun removeFromFavoritesWhenSignedIn() {
     parkingViewModel.selectParking(TestInstancesParking.parking1)
-    userViewModel.setCurrentUser(TestInstancesUser.user1)
-    userViewModel.setCurrentUserById(TestInstancesUser.user1.public.userId)
+    userViewModel.addUser(TestInstancesUser.user1, {}, {})
+    authenticator.testUser = TestInstancesUser.user1
+    userViewModel.signIn({}, {})
 
     composeTestRule.setContent {
       ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)

@@ -16,7 +16,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.github.se.cyrcle.di.mocks.AuthenticationRepositoryMock
+import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
@@ -53,7 +53,7 @@ class ViewProfileScreenTest {
   private lateinit var mockUserRepository: MockUserRepository
   private lateinit var mockParkingRepository: MockParkingRepository
   private lateinit var mockImageRepository: MockImageRepository
-  private lateinit var mockAuthenticator: AuthenticationRepositoryMock
+  private lateinit var mockAuthenticator: MockAuthenticationRepository
   private lateinit var mockReportedObjectRepository: ReportedObjectRepository
 
   private lateinit var userViewModel: UserViewModel
@@ -65,7 +65,7 @@ class ViewProfileScreenTest {
     mockUserRepository = MockUserRepository()
     mockParkingRepository = MockParkingRepository()
     mockImageRepository = MockImageRepository()
-    mockAuthenticator = AuthenticationRepositoryMock()
+    mockAuthenticator = MockAuthenticationRepository()
     mockReportedObjectRepository = MockReportedObjectRepository()
 
     val user =
@@ -79,7 +79,9 @@ class ViewProfileScreenTest {
     parkingViewModel =
         ParkingViewModel(mockImageRepository, mockParkingRepository, mockReportedObjectRepository)
 
-    userViewModel.setCurrentUser(user)
+    userViewModel.addUser(user, {}, {})
+    mockAuthenticator.testUser = user
+    userViewModel.signIn({}, {})
 
     // parking1 already added by whoever created parkingviewmodelmock on instanciation
     parkingViewModel.addParking(TestInstancesParking.parking2)

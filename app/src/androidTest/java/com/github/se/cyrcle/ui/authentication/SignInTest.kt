@@ -7,7 +7,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.github.se.cyrcle.di.mocks.AuthenticationRepositoryMock
+import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
@@ -49,10 +49,10 @@ class SignInTest {
     userRepository = MockUserRepository()
     parkingRepository = MockParkingRepository()
     imageRepository = MockImageRepository()
-    authenticator = AuthenticationRepositoryMock()
+    authenticator = MockAuthenticationRepository()
     userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository, authenticator)
 
-    val mockAuthenticator = AuthenticationRepositoryMock()
+    val mockAuthenticator = MockAuthenticationRepository()
 
     userRepository.addUser(TestInstancesUser.user1, {}, {})
     userViewModel.setCurrentUser(TestInstancesUser.user1)

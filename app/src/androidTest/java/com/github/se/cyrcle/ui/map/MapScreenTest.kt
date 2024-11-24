@@ -9,7 +9,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.github.se.cyrcle.di.mocks.AuthenticationRepositoryMock
+import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockPermissionHandler
@@ -52,7 +52,7 @@ class MapScreenTest {
     val imageRepository = MockImageRepository()
     val parkingRepository = MockParkingRepository()
     val userRepository = MockUserRepository()
-    val authenticator = AuthenticationRepositoryMock()
+    val authenticator = MockAuthenticationRepository()
 
     parkingViewModel =
         ParkingViewModel(imageRepository, parkingRepository, mockReportedObjectRepository)

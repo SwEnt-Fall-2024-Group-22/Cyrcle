@@ -1,6 +1,6 @@
 package com.github.se.cyrcle.di
 
-import com.github.se.cyrcle.di.mocks.AuthenticationRepositoryMock
+import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.model.authentication.AuthenticationRepository
 import dagger.Binds
 import dagger.Module
@@ -14,12 +14,12 @@ import dagger.hilt.testing.TestInstallIn
 abstract class MockAuthenticatorModule {
 
   /**
-   * Binds the [AuthenticationRepositoryMock] implementation of the [AuthenticationRepository]
+   * Binds the [MockAuthenticationRepository] implementation of the [AuthenticationRepository]
    * interface.
    */
   @Binds
   @ActivityScoped
   abstract fun bindAuthenticator(
-      authenticator: AuthenticationRepositoryMock
+      authenticator: MockAuthenticationRepository
   ): AuthenticationRepository
 }

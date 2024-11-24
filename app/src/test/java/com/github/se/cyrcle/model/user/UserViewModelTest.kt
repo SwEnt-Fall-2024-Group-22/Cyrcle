@@ -131,8 +131,13 @@ class UserViewModelTest {
       val onSuccess = invocation.arguments[1] as (User) -> Unit
       onSuccess(TestInstancesUser.user1)
     }
+
+    `when`(authenticator.authenticate(any(), any())).thenAnswer { invocation ->
+      val onSuccess = invocation.arguments[0] as (String) -> Unit
+      onSuccess(TestInstancesUser.user1.public.userId)
+    }
     // Set the current user
-    userViewModel.signIn(TestInstancesUser.user1)
+    userViewModel.signIn({}, {})
     // Check if the favorite parkings were fetched from the repository
     verify(parkingRepository)
         .getParkingsByListOfIds(
@@ -159,8 +164,13 @@ class UserViewModelTest {
       val onSuccess = invocation.arguments[1] as (User) -> Unit
       onSuccess(TestInstancesUser.user1)
     }
+    `when`(authenticator.authenticate(any(), any())).thenAnswer { invocation ->
+      val onSuccess = invocation.arguments[0] as (String) -> Unit
+      onSuccess(TestInstancesUser.user1.public.userId)
+    }
+    // Set the current user
+    userViewModel.signIn({}, {})
 
-    userViewModel.signIn(TestInstancesUser.user1)
     userViewModel.favoriteParkings.value.let {
       assert(it.contains(TestInstancesParking.parking1))
       assert(it.contains(TestInstancesParking.parking2))

@@ -17,7 +17,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipe
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.github.se.cyrcle.di.mocks.AuthenticationRepositoryMock
+import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
@@ -70,7 +70,7 @@ class ListScreenTest {
     mockUserRepository = MockUserRepository()
     mockParkingRepository = MockParkingRepository()
     mockImageRepository = MockImageRepository()
-    authenticator = AuthenticationRepositoryMock()
+    authenticator = MockAuthenticationRepository()
     mockReportedObjectRepository = MockReportedObjectRepository()
 
     parkingViewModel =

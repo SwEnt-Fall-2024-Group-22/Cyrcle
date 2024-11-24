@@ -9,7 +9,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeRight
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.github.se.cyrcle.di.mocks.AuthenticationRepositoryMock
+import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
@@ -63,7 +63,7 @@ class ReviewScreenTest {
     mockParkingRepository = MockParkingRepository()
     mockReviewRepository = MockReviewRepository()
     mockReportedObjectRepository = MockReportedObjectRepository()
-    mockAuthenticator = AuthenticationRepositoryMock()
+    mockAuthenticator = MockAuthenticationRepository()
 
     userViewModel =
         UserViewModel(

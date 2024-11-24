@@ -73,7 +73,16 @@ fun SignInScreen(navigationActions: NavigationActions, userViewModel: UserViewMo
               Toast.makeText(context, successSignInMsg, Toast.LENGTH_LONG).show()
               navigationActions.navigateTo(TopLevelDestinations.MAP)
             },
-            { Toast.makeText(context, accountNotFoundToast, Toast.LENGTH_SHORT).show() })
+            {
+              when (it) {
+                UserViewModel.SignInFailureReason.ACCOUNT_NOT_FOUND -> {
+                  Toast.makeText(context, accountNotFoundToast, Toast.LENGTH_LONG).show()
+                }
+                UserViewModel.SignInFailureReason.ERROR -> {
+                  Toast.makeText(context, failSignInMsg, Toast.LENGTH_LONG).show()
+                }
+              }
+            })
       }
 
       // Create Account Button

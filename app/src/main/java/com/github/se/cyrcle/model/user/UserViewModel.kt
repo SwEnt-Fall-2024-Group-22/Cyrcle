@@ -3,6 +3,7 @@ package com.github.se.cyrcle.model.user
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.github.se.cyrcle.model.authentication.AuthenticationRepository
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingRepository
@@ -14,7 +15,8 @@ import kotlinx.coroutines.flow.map
 class UserViewModel(
     private val userRepository: UserRepository,
     private val parkingRepository: ParkingRepository,
-    private val imageRepository: ImageRepository
+    private val imageRepository: ImageRepository,
+    private val authenticator: AuthenticationRepository
 ) : ViewModel() {
 
   private val _currentUser = MutableStateFlow<User?>(null)
@@ -35,12 +37,6 @@ class UserViewModel(
 
   private val _favoriteParkings = MutableStateFlow<List<Parking>>(emptyList())
   val favoriteParkings: StateFlow<List<Parking>> = _favoriteParkings
-
-  /** Signs out the current user by setting the state to null and clearing the favorite parkings */
-  fun signOut() {
-    setCurrentUser(null)
-    _favoriteParkings.value = emptyList()
-  }
 
   /**
    * Set the current user by fetching the user from the Firestore database with the given ID.
@@ -95,27 +91,17 @@ class UserViewModel(
   }
 
   /**
-   * Sign in a User : If he doesn't have an account on the database, it will create a new user. If
-   * he does we retrieve the user from the database and set it as the current user. Additionally, it
-   * fetches the favorite parkings of the user and sets them in the favorite parkings state.
+   * Adds a user to the database.
    *
    * @param user the user to add
+   * @param onComplete the callback to call on completion
+   * @param onFailure the callback to call if the user addition fails
    */
-  fun signIn(user: User) {
-    // Set the user in the viewmodel even if it's incomplete as we need the ID to match to call
-    // updateUser()
-    // setCurrentUser(user)
-    userRepository.addUser(
-        user,
-        onSuccess = {
-          getUserById(user.public.userId) {
-            setCurrentUser(it)
-            getSelectedUserFavoriteParkings()
-          }
-        },
-        onFailure = { exception ->
-          Log.e("UserViewModel", "Failed to add user: ${user.public.userId}", exception)
-        })
+  fun addUser(user: User, onComplete: () -> Unit, onFailure: () -> Unit) {
+    userRepository.addUser(user, onComplete) {
+      Log.e("UserViewModel", "Failed to add user: ${user.public.userId}", it)
+      onFailure()
+    }
   }
 
   /**
@@ -190,6 +176,95 @@ class UserViewModel(
       }
     }
   }
+
+  // =============================== AUTHENTICATION ===============================
+
+  /** Describes the reason for a sign in failure. */
+  enum class SignInFailureReason {
+    ACCOUNT_NOT_FOUND,
+    ERROR
+  }
+
+  /**
+   * Authenticates a user and provides the user ID to the onSuccess callback.
+   *
+   * @param onSuccess the callback to call with the userID
+   * @param onFailure the callback to call if the sign in fails
+   */
+  fun authenticate(
+      onSuccess: (String) -> Unit,
+      onFailure: () -> Unit,
+  ) {
+    authenticator.authenticate(
+        // On successful authentication
+        {
+          Log.d("UserViewModel", "User authenticated successfully, userId: $it")
+          onSuccess(it)
+        },
+        // On failed authentication
+        {
+          Log.e("UserViewModel", "Failed to sign in user", it)
+          onFailure()
+        })
+  }
+
+  /**
+   * Sign in a User : If he doesn't have an account on the database, it will create a new user. If
+   * he does we retrieve the user from the database and set it as the current user.
+   *
+   * @param onSuccess the callback to call with the user
+   * @param onFailure the callback to call if the sign in fails
+   */
+  fun signIn(onSuccess: (User) -> Unit, onFailure: (SignInFailureReason) -> Unit) {
+    // TODO differentiate between account not found and error for login
+    authenticate(
+        // On successful authentication
+        { userID ->
+          userRepository.getUserById(
+              userID,
+              // On successful user retrieval
+              {
+                Log.d("UserViewModel", "User signed in successfully, userId: $it")
+                setCurrentUser(it)
+                getSelectedUserFavoriteParkings()
+                onSuccess(it)
+              },
+              // User not found in the database
+              {
+                Log.d("UserViewModel", "User not found in the database")
+                onFailure(SignInFailureReason.ACCOUNT_NOT_FOUND)
+              })
+        },
+        // On failed authentication
+        { onFailure(SignInFailureReason.ERROR) })
+  }
+
+  /**
+   * Sign in a user anonymously.
+   *
+   * @param onComplete the callback to call on completion
+   */
+  fun signInAnonymously(onComplete: () -> Unit) {
+    authenticator.authenticateAnonymously {
+      Log.d("UserViewModel", "User signed in anonymously")
+      onComplete()
+    }
+  }
+
+  /**
+   * Signs out the current user by setting the state to null
+   *
+   * @param onComplete the callback to call on completion
+   */
+  fun signOut(onComplete: () -> Unit) {
+    authenticator.signOut {
+      setCurrentUser(null)
+      _favoriteParkings.value = emptyList()
+      onComplete()
+    }
+  }
+
+  // ============================== HELPER FUNCTIONS ==============================
 
   /**
    * Gets the favorite parkings of the current user and sets them in the favorite parkings state
@@ -284,5 +359,4 @@ class UserViewModel(
         },
         onFailure = onFailure)
   }
-
 }

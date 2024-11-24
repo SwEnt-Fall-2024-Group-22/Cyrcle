@@ -5,7 +5,7 @@ import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.model.user.User
 import javax.inject.Inject
 
-class AuthenticationRepositoryMock @Inject constructor() : AuthenticationRepository {
+class MockAuthenticationRepository @Inject constructor() : AuthenticationRepository {
 
   // This is a public attribute since it can be used as a parameter
   // in tests to make the authenticator fail

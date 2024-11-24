@@ -45,11 +45,17 @@ fun CreateProfileScreen(navigationActions: NavigationActions, userViewModel: Use
             } else {
 
               // Add the user then continue
-              userViewModel.addUser(user) {
-                userViewModel.setCurrentUser(user)
-                Toast.makeText(context, validationToastText, Toast.LENGTH_SHORT).show()
-                navigationActions.navigateTo(TopLevelDestinations.MAP)
-              }
+              userViewModel.addUser(
+                  user,
+                  {
+                    userViewModel.setCurrentUser(user)
+                    Toast.makeText(context, validationToastText, Toast.LENGTH_SHORT).show()
+                    navigationActions.navigateTo(TopLevelDestinations.MAP)
+                  },
+                  {
+                    Log.e("CreateProfileScreen", "Error adding user")
+                    Toast.makeText(context, errorToastText, Toast.LENGTH_SHORT).show()
+                  })
             }
           }
         },

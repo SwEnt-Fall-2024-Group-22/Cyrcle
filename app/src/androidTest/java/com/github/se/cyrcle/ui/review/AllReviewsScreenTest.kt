@@ -3,7 +3,7 @@ package com.github.se.cyrcle.ui.review
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.github.se.cyrcle.di.mocks.AuthenticationRepositoryMock
+import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
@@ -36,7 +36,7 @@ class AllReviewsScreenTest {
   private lateinit var reviewRepository: MockReviewRepository
   private lateinit var userRepository: MockUserRepository
   private lateinit var imageRepository: MockImageRepository
-  private lateinit var authenticator: AuthenticationRepositoryMock
+  private lateinit var authenticator: MockAuthenticationRepository
   private lateinit var reportedObjectRepository: MockReportedObjectRepository
 
   private lateinit var parkingViewModel: ParkingViewModel
@@ -51,7 +51,7 @@ class AllReviewsScreenTest {
     reviewRepository = MockReviewRepository()
     userRepository = MockUserRepository()
     imageRepository = MockImageRepository()
-    authenticator = AuthenticationRepositoryMock()
+    authenticator = MockAuthenticationRepository()
     reportedObjectRepository = MockReportedObjectRepository()
 
     parkingViewModel =
