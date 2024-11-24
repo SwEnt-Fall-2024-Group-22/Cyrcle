@@ -7,7 +7,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,12 +15,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.AddAPhoto
@@ -59,6 +60,7 @@ import com.github.se.cyrcle.ui.theme.Black
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.Red
 import com.github.se.cyrcle.ui.theme.atoms.Button
+import com.github.se.cyrcle.ui.theme.atoms.ConditionCheckingInputText
 import com.github.se.cyrcle.ui.theme.atoms.IconButton
 import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.Text
@@ -126,62 +128,126 @@ fun ParkingDetailsScreen(
                     .padding(32.dp)
                     .verticalScroll(scrollState)
                     .testTag("ParkingDetailsColumn")) {
-              Box(
+              Row(
                   modifier =
-                      Modifier.fillMaxWidth().height(48.dp).testTag("PinAndFavoriteIconContainer"),
-                  contentAlignment = Alignment.TopEnd) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                      val isPinned =
-                          parkingViewModel.pinnedParkings
-                              .collectAsState()
-                              .value
-                              .contains(selectedParking)
+                      Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("TopInteractionRow"),
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.SpaceBetween) {
+                    val parkingNote =
+                        userViewModel.currentUser
+                            .collectAsState()
+                            .value
+                            ?.details
+                            ?.personalNotes
+                            ?.get(selectedParking.uid)
 
-                      Icon(
-                          imageVector =
-                              if (isPinned) Icons.Default.PushPin else Icons.Outlined.PushPin,
-                          contentDescription = "Pin",
-                          tint = Black,
-                          modifier =
-                              Modifier.testTag("PinIcon")
-                                  .clickable { parkingViewModel.togglePinStatus(selectedParking) }
-                                  .rotate(45f) // Rotate the push pin icon
-                          )
+                    val editingNote = remember { mutableStateOf(false) }
+                    val editingNoteText = remember { mutableStateOf(parkingNote ?: "") }
 
-                      Spacer(modifier = Modifier.width(8.dp))
-
-                      val isFavorite =
-                          userSignedIn.value &&
-                              userViewModel.favoriteParkings
-                                  .collectAsState()
-                                  .value
-                                  .contains(selectedParking)
-
-                      Icon(
-                          imageVector =
-                              if (isFavorite) Icons.Default.Favorite
-                              else Icons.Outlined.FavoriteBorder,
-                          contentDescription = "Favorite",
-                          tint = if (isFavorite) Red else Black,
-                          modifier =
-                              Modifier.testTag(
-                                      if (isFavorite) "RedFilledFavoriteIcon"
-                                      else "BlackOutlinedFavoriteIcon")
-                                  .clickable {
-                                    if (userSignedIn.value) {
-                                      if (isFavorite) {
-                                        userViewModel.removeFavoriteParkingFromSelectedUser(
-                                            selectedParking)
-                                      } else {
-                                        userViewModel.addFavoriteParkingToSelectedUser(
-                                            selectedParking)
-                                      }
-                                    } else {
-                                      Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT)
-                                          .show()
-                                    }
-                                  })
+                    if (editingNote.value) {
+                      ConditionCheckingInputText(
+                          value = editingNoteText.value,
+                          onValueChange = { editingNoteText.value = it },
+                          label = stringResource(R.string.note),
+                          minCharacters = 0,
+                          maxCharacters = 32,
+                          testTag = "NoteInputText",
+                      )
+                    } else {
+                      Text(
+                          text = parkingNote ?: stringResource(R.string.no_note),
+                          style = MaterialTheme.typography.bodyLarge,
+                          textAlign = TextAlign.Left,
+                          modifier = Modifier.padding(end = 8.dp).testTag("NoteText"))
                     }
+
+                    Row(
+                        modifier = Modifier.testTag("IconsRow"),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                          if (editingNote.value) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Save Note",
+                                tint = Black,
+                                modifier =
+                                    Modifier.clickable {
+                                          userViewModel.editCurrentUserPersonalNoteForParking(
+                                              selectedParking, editingNoteText.value)
+                                          editingNote.value = false
+                                        }
+                                        .testTag("SaveNoteIcon"))
+                          } else {
+                            if (parkingNote == null) {
+                              Icon(
+                                  imageVector = Icons.Default.Add,
+                                  contentDescription = "Add Note",
+                                  tint = Black,
+                                  modifier =
+                                      Modifier.clickable { editingNote.value = true }
+                                          .testTag("AddNoteIcon"))
+                            } else {
+                              Icon(
+                                  imageVector = Icons.Default.Edit,
+                                  contentDescription = "Edit Note",
+                                  tint = Black,
+                                  modifier =
+                                      Modifier.clickable { editingNote.value = true }
+                                          .testTag("EditNoteIcon"))
+                            }
+
+                            val isPinned =
+                                parkingViewModel.pinnedParkings
+                                    .collectAsState()
+                                    .value
+                                    .contains(selectedParking)
+                            Icon(
+                                imageVector =
+                                    if (isPinned) Icons.Default.PushPin else Icons.Outlined.PushPin,
+                                contentDescription = "Pin",
+                                tint = Black,
+                                modifier =
+                                    Modifier.testTag("PinIcon")
+                                        .clickable {
+                                          parkingViewModel.togglePinStatus(selectedParking)
+                                        }
+                                        .rotate(45f) // Rotate the push pin icon
+                                )
+
+                            val isFavorite =
+                                userSignedIn.value &&
+                                    userViewModel.favoriteParkings
+                                        .collectAsState()
+                                        .value
+                                        .contains(selectedParking)
+
+                            Icon(
+                                imageVector =
+                                    if (isFavorite) Icons.Default.Favorite
+                                    else Icons.Outlined.FavoriteBorder,
+                                contentDescription = "Favorite",
+                                tint = if (isFavorite) Red else Black,
+                                modifier =
+                                    Modifier.testTag(
+                                            if (isFavorite) "RedFilledFavoriteIcon"
+                                            else "BlackOutlinedFavoriteIcon")
+                                        .clickable {
+                                          if (userSignedIn.value) {
+                                            if (isFavorite) {
+                                              userViewModel.removeFavoriteParkingFromSelectedUser(
+                                                  selectedParking)
+                                            } else {
+                                              userViewModel.addFavoriteParkingToSelectedUser(
+                                                  selectedParking)
+                                            }
+                                          } else {
+                                            Toast.makeText(
+                                                    context, toastMessage, Toast.LENGTH_SHORT)
+                                                .show()
+                                          }
+                                        })
+                          }
+                        }
                   }
 
               // Reviews

@@ -87,7 +87,7 @@ class ParkingDetailsScreenTest {
       ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
     }
 
-    composeTestRule.onNodeWithTag("PinAndFavoriteIconContainer").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("TopInteractionRow").assertIsDisplayed()
     composeTestRule.onNodeWithTag("BlackOutlinedFavoriteIcon").assertIsDisplayed()
     composeTestRule.onNodeWithTag("BlackOutlinedFavoriteIcon").performClick()
     composeTestRule.onNodeWithTag("BlackOutlinedFavoriteIcon").assertIsDisplayed()
