@@ -20,8 +20,7 @@ private const val EXTENSION_NAME = "mapbin"
 fun storeTile(zoomLevel: Int, x: Int, y: Int, tileData: ByteArray, forceWrite: Boolean = false) {
   val tileDir = File("$CACHE_DIR/$zoomLevel/$x").apply { mkdirs() }
   val tileFile = File(tileDir, "$y.$EXTENSION_NAME")
-  if (!forceWrite && tileFile.exists()) return // Tile should not change, there is no point in updating them
-  tileFile.writeBytes(tileData)
+  if (forceWrite or !tileFile.exists()) tileFile.writeBytes(tileData)
 }
 
 /**
