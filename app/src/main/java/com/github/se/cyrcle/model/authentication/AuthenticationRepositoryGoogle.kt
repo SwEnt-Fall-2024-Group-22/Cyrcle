@@ -37,6 +37,8 @@ constructor(
   @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
   var credentialManager = CredentialManager.create(context)
 
+  private val coroutineScope = CoroutineScope(Dispatchers.Main)
+
   /**
    * Signs in a User
    *
@@ -59,7 +61,7 @@ constructor(
 
     val request = GetCredentialRequest.Builder().addCredentialOption(signInWithGoogleOption).build()
 
-    CoroutineScope(Dispatchers.Main).launch {
+    coroutineScope.launch {
       try {
         val credential = credentialManager.getCredential(context, request).credential
 
@@ -98,8 +100,10 @@ constructor(
    * @param onComplete a function to be called once the user logs out
    */
   override fun signOut(onComplete: () -> Unit) {
-    runBlocking { credentialManager.clearCredentialState(ClearCredentialStateRequest()) }
-    auth.signOut()
-    onComplete()
+    coroutineScope.launch {
+      auth.signOut()
+      credentialManager.clearCredentialState(ClearCredentialStateRequest())
+      onComplete()
+    }
   }
 }

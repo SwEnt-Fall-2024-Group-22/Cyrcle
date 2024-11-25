@@ -86,8 +86,9 @@ fun ViewProfileScreen(
       }) { innerPadding ->
         Box(Modifier.fillMaxSize().padding(innerPadding)) {
           com.github.se.cyrcle.ui.theme.atoms.IconButton(
-              Icons.Filled.Outbox,
-              "Sign Out",
+              modifier = Modifier.padding(10.dp).align(Alignment.TopEnd),
+              icon = Icons.Filled.Outbox,
+              contentDescription = "Sign Out",
               testTag = "SignOutButton",
               onClick = { signOut = true })
 

@@ -238,7 +238,10 @@ class UserViewModel(
               })
         },
         // On failed authentication
-        { onFailure(SignInFailureReason.ERROR) })
+        {
+          Log.e("UserViewModel", "Failed to sign in user", it)
+          onFailure(SignInFailureReason.ERROR)
+        })
   }
 
   /**

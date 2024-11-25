@@ -45,14 +45,14 @@ class MainActivity : ComponentActivity() {
 
   @Inject lateinit var permissionsHandler: PermissionHandler
 
-  @Inject lateinit var authenticator: AuthenticationRepository
+  @Inject lateinit var authenticationRepository: AuthenticationRepository
 
   private val reviewViewModel: ReviewViewModel by viewModels {
     CustomViewModelFactory { ReviewViewModel(reviewRepository, reportedObjectRepository) }
   }
   private val userViewModel: UserViewModel by viewModels {
     CustomViewModelFactory {
-      UserViewModel(userRepository, parkingRepository, imageRepository, authenticator)
+      UserViewModel(userRepository, parkingRepository, imageRepository, authenticationRepository)
     }
   }
   private val parkingViewModel: ParkingViewModel by viewModels {

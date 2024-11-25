@@ -16,9 +16,9 @@ import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserDetails
 import com.github.se.cyrcle.model.user.UserPublic
 import com.github.se.cyrcle.model.user.UserViewModel
-import com.github.se.cyrcle.ui.authentication.GoogleSignInButton
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
+import com.github.se.cyrcle.ui.theme.atoms.GoogleSignInButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
