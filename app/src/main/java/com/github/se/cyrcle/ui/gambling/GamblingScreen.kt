@@ -251,36 +251,13 @@ fun WheelView(
               },
           color = Color.Red)
     }
-
-    segments.forEachIndexed { index, segment ->
-      Box(
-          modifier =
-              Modifier.testTag("segment_$index").semantics {
-                contentDescription = "Wheel segment ${segment.name}"
-              })
-      Box(
-          modifier =
-              Modifier.testTag("segment_text_$index").semantics {
-                contentDescription = "Segment text ${segment.name}"
-              })
-    }
-
-    Box(
-        modifier =
-            Modifier.testTag("wheel_pointer").semantics { contentDescription = "Wheel pointer" })
-
-    Box(
-        modifier =
-            Modifier.testTag("wheel_rotation").semantics {
-              contentDescription = "Current rotation: $rotation"
-            })
-
-    Box(
-        modifier =
-            Modifier.testTag("wheel_spin_state").semantics {
-              contentDescription = "Spinning: $isSpinning, Paused: $pauseAfterSpin"
-            })
   }
+
+  Box(
+      modifier =
+          Modifier.testTag("wheel_spin_state").semantics {
+            contentDescription = "Spinning: $isSpinning, Paused: $pauseAfterSpin"
+          })
 
   return spinFunction
 }
