@@ -7,7 +7,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,12 +15,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.AddAPhoto
@@ -44,6 +45,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -52,6 +54,7 @@ import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.ParkingReport
 import com.github.se.cyrcle.model.parking.ParkingReportReason
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.user.MAX_NOTE_LENGTH
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
@@ -59,6 +62,7 @@ import com.github.se.cyrcle.ui.theme.Black
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.Red
 import com.github.se.cyrcle.ui.theme.atoms.Button
+import com.github.se.cyrcle.ui.theme.atoms.ConditionCheckingInputText
 import com.github.se.cyrcle.ui.theme.atoms.IconButton
 import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.Text
@@ -74,10 +78,9 @@ fun ParkingDetailsScreen(
   val selectedParking =
       parkingViewModel.selectedParking.collectAsState().value
           ?: return Text(stringResource(R.string.no_selected_parking_error))
-  val userSignedIn = userViewModel.isSignedIn.collectAsState(false)
+  val userSignedIn by userViewModel.isSignedIn.collectAsState(false)
   val scrollState = rememberScrollState()
   val context = LocalContext.current
-  val toastMessage = stringResource(R.string.sign_in_to_add_favorites)
   // === States for the images ===
   var newParkingImageLocalPath by remember { mutableStateOf("") }
   val showDialog = remember { mutableStateOf(false) }
@@ -126,64 +129,154 @@ fun ParkingDetailsScreen(
                     .padding(32.dp)
                     .verticalScroll(scrollState)
                     .testTag("ParkingDetailsColumn")) {
-              Box(
+              Row(
                   modifier =
-                      Modifier.fillMaxWidth().height(48.dp).testTag("PinAndFavoriteIconContainer"),
-                  contentAlignment = Alignment.TopEnd) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                      val isPinned =
-                          parkingViewModel.pinnedParkings
-                              .collectAsState()
-                              .value
-                              .contains(selectedParking)
+                      Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("TopInteractionRow"),
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.SpaceBetween) {
+                    val parkingNote =
+                        userViewModel.currentUser
+                            .collectAsState()
+                            .value
+                            ?.details
+                            ?.personalNotes
+                            ?.get(selectedParking.uid)
 
-                      Icon(
-                          imageVector =
-                              if (isPinned) Icons.Default.PushPin else Icons.Outlined.PushPin,
-                          contentDescription = "Pin",
-                          tint = Black,
-                          modifier =
-                              Modifier.testTag("PinIcon")
-                                  .clickable { parkingViewModel.togglePinStatus(selectedParking) }
-                                  .rotate(45f) // Rotate the push pin icon
-                          )
+                    val editingNote = remember { mutableStateOf(false) }
+                    val editingNoteText = remember { mutableStateOf(parkingNote ?: "") }
 
-                      Spacer(modifier = Modifier.width(8.dp))
+                    // Column to handle text wrapping
+                    Column(
+                        modifier =
+                            Modifier.weight(1f) // Allow this column to take available space
+                                .padding(end = 16.dp) // Space for icons
+                        ) {
+                          if (editingNote.value) {
+                            ConditionCheckingInputText(
+                                value = editingNoteText.value,
+                                onValueChange = { editingNoteText.value = it },
+                                label = stringResource(R.string.list_screen_edit_note),
+                                minCharacters = 0,
+                                maxCharacters = MAX_NOTE_LENGTH,
+                                maxLines = 2,
+                                testTag = "NoteInputText")
+                          } else {
+                            if (userSignedIn) {
+                              Text(
+                                  text =
+                                      parkingNote ?: stringResource(R.string.list_screen_no_note),
+                                  style =
+                                      MaterialTheme.typography.bodyLarge.copy(
+                                          fontStyle =
+                                              if (parkingNote.isNullOrBlank()) FontStyle.Italic
+                                              else FontStyle.Normal),
+                                  textAlign = TextAlign.Left,
+                                  modifier = Modifier.testTag("NoteText"))
+                            }
+                          }
+                        }
 
-                      val isFavorite =
-                          userSignedIn.value &&
-                              userViewModel.favoriteParkings
+                    // Icons Row
+                    Row(
+                        modifier = Modifier.testTag("IconsRow"),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                          // Save or Add/Edit Note Icon
+                          if (editingNote.value) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Save Note",
+                                tint = Black,
+                                modifier =
+                                    Modifier.clickable {
+                                          if (editingNoteText.value.length <= MAX_NOTE_LENGTH) {
+                                            userViewModel.editCurrentUserPersonalNoteForParking(
+                                                selectedParking, editingNoteText.value)
+                                            editingNote.value = false
+                                          }
+                                        }
+                                        .testTag("SaveNoteIcon"))
+                          } else {
+                            // Add icon if no note, Edit icon if note exists
+                            if (parkingNote == null) {
+                              val toastMsgNote = stringResource(R.string.sign_in_to_add_note)
+                              Icon(
+                                  imageVector = Icons.Default.Add,
+                                  contentDescription = "Add Note",
+                                  tint = Black,
+                                  modifier =
+                                      Modifier.clickable {
+                                            if (userSignedIn) editingNote.value = true
+                                            else
+                                                Toast.makeText(
+                                                        context, toastMsgNote, Toast.LENGTH_SHORT)
+                                                    .show()
+                                          }
+                                          .testTag("AddNoteIcon"))
+                            } else {
+                              Icon(
+                                  imageVector = Icons.Default.Edit,
+                                  contentDescription = "Edit Note",
+                                  tint = Black,
+                                  modifier =
+                                      Modifier.clickable { editingNote.value = true }
+                                          .testTag("EditNoteIcon"))
+                            }
+                          }
+
+                          // Pin Icon
+                          val isPinned =
+                              parkingViewModel.pinnedParkings
                                   .collectAsState()
                                   .value
                                   .contains(selectedParking)
-
-                      Icon(
-                          imageVector =
-                              if (isFavorite) Icons.Default.Favorite
-                              else Icons.Outlined.FavoriteBorder,
-                          contentDescription = "Favorite",
-                          tint = if (isFavorite) Red else Black,
-                          modifier =
-                              Modifier.testTag(
-                                      if (isFavorite) "RedFilledFavoriteIcon"
-                                      else "BlackOutlinedFavoriteIcon")
-                                  .clickable {
-                                    if (userSignedIn.value) {
-                                      if (isFavorite) {
-                                        userViewModel.removeFavoriteParkingFromSelectedUser(
-                                            selectedParking)
-                                      } else {
-                                        userViewModel.addFavoriteParkingToSelectedUser(
-                                            selectedParking)
+                          Icon(
+                              imageVector =
+                                  if (isPinned) Icons.Default.PushPin else Icons.Outlined.PushPin,
+                              contentDescription = "Pin",
+                              tint = Black,
+                              modifier =
+                                  Modifier.clickable {
+                                        parkingViewModel.togglePinStatus(selectedParking)
                                       }
-                                    } else {
-                                      Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT)
-                                          .show()
-                                    }
-                                  })
-                    }
-                  }
+                                      .rotate(45f)
+                                      .testTag("PinIcon"))
 
+                          // Favorite Icon
+                          val isFavorite =
+                              userSignedIn &&
+                                  userViewModel.favoriteParkings
+                                      .collectAsState()
+                                      .value
+                                      .contains(selectedParking)
+                          val toastMsgFavorite = stringResource(R.string.sign_in_to_add_favorites)
+                          Icon(
+                              imageVector =
+                                  if (isFavorite) Icons.Default.Favorite
+                                  else Icons.Outlined.FavoriteBorder,
+                              contentDescription = "Favorite",
+                              tint = if (isFavorite) Red else Black,
+                              modifier =
+                                  Modifier.clickable {
+                                        if (userSignedIn) {
+                                          if (isFavorite) {
+                                            userViewModel.removeFavoriteParkingFromSelectedUser(
+                                                selectedParking)
+                                          } else {
+                                            userViewModel.addFavoriteParkingToSelectedUser(
+                                                selectedParking)
+                                          }
+                                        } else {
+                                          Toast.makeText(
+                                                  context, toastMsgFavorite, Toast.LENGTH_SHORT)
+                                              .show()
+                                        }
+                                      }
+                                      .testTag(
+                                          if (isFavorite) "RedFilledFavoriteIcon"
+                                          else "BlackOutlinedFavoriteIcon"))
+                        }
+                  }
               // Reviews
               Row(
                   modifier =
@@ -252,7 +345,7 @@ fun ParkingDetailsScreen(
                         icon = Icons.Outlined.AddAPhoto,
                         contentDescription = "Add Image",
                         onClick = { imagePickerLauncher.launch("image/*") },
-                        enabled = userSignedIn.value,
+                        enabled = userSignedIn,
                         testTag = "AddImageIconButton",
                         modifier = Modifier.padding(start = 8.dp).height(32.dp).weight(1f))
                   }

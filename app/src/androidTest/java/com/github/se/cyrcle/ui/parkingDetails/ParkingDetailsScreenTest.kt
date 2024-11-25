@@ -1,7 +1,9 @@
 package com.github.se.cyrcle.ui.parkingDetails
 
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildAt
@@ -87,7 +89,7 @@ class ParkingDetailsScreenTest {
       ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
     }
 
-    composeTestRule.onNodeWithTag("PinAndFavoriteIconContainer").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("TopInteractionRow").assertIsDisplayed()
     composeTestRule.onNodeWithTag("BlackOutlinedFavoriteIcon").assertIsDisplayed()
     composeTestRule.onNodeWithTag("BlackOutlinedFavoriteIcon").performClick()
     composeTestRule.onNodeWithTag("BlackOutlinedFavoriteIcon").assertIsDisplayed()
@@ -234,5 +236,69 @@ class ParkingDetailsScreenTest {
     composeTestRule.onNodeWithTag("SeeAllReviewsText").performClick()
 
     verify(navigationActions).navigateTo(Screen.ALL_REVIEWS)
+  }
+
+  @Test
+  fun notesWhenInitiallyEmptyTest() {
+    userViewModel.setCurrentUser(TestInstancesUser.user1)
+    parkingViewModel.selectParking(TestInstancesParking.parking1)
+    composeTestRule.setContent {
+      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("NoteText").assertIsDisplayed()
+    // User has no note for this parking. Should show "Add note" button
+    composeTestRule.onNodeWithTag("NoteInputText").assertIsNotDisplayed()
+    composeTestRule
+        .onNodeWithTag("AddNoteIcon")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+    // After clicking, the note input and save button should be displayed
+    composeTestRule.onNodeWithTag("NoteInputText").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag("SaveNoteIcon")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+    // After saving, the note input and save button should be hidden
+    composeTestRule.onNodeWithTag("NoteInputText").assertIsNotDisplayed()
+    composeTestRule.onNodeWithTag("SaveNoteIcon").assertIsNotDisplayed()
+  }
+
+  @Test
+  fun notesWhenInitiallyNotEmptyTest() {
+    val userWithNote =
+        TestInstancesUser.user1.copy(
+            details =
+                TestInstancesUser.user1.details?.copy(
+                    personalNotes = mapOf(TestInstancesParking.parking1.uid to "This is a note")))
+    userViewModel.setCurrentUser(userWithNote)
+    parkingViewModel.selectParking(TestInstancesParking.parking1)
+    composeTestRule.setContent {
+      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
+    }
+
+    composeTestRule
+        .onNodeWithTag("NoteText")
+        .assertIsDisplayed()
+        .assertTextContains("This is a note")
+    // User has a note for this parking. Should show "Edit note" button
+    composeTestRule.onNodeWithTag("NoteInputText").assertIsNotDisplayed()
+    composeTestRule
+        .onNodeWithTag("EditNoteIcon")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+    // After clicking, the note input and save button should be displayed
+    composeTestRule.onNodeWithTag("NoteInputText").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag("SaveNoteIcon")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+    // After saving, the note input and save button should be hidden
+    composeTestRule.onNodeWithTag("NoteInputText").assertIsNotDisplayed()
+    composeTestRule.onNodeWithTag("SaveNoteIcon").assertIsNotDisplayed()
   }
 }

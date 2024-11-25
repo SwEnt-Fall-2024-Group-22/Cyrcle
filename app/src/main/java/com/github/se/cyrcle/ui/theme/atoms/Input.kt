@@ -102,6 +102,7 @@ fun ConditionCheckingInputText(
     value: String = "",
     minCharacters: Int = 0,
     maxCharacters: Int = Int.MAX_VALUE,
+    maxLines: Int = Int.MAX_VALUE,
     hasClearIcon: Boolean = true,
     testTag: String = "ConditionCheckingInputText"
 ) {
@@ -113,6 +114,7 @@ fun ConditionCheckingInputText(
         onValueChange = onValueChange,
         value = value,
         singleLine = false,
+        maxLines = maxLines,
         hasClearIcon = hasClearIcon,
         testTag = testTag,
         isError = isError)

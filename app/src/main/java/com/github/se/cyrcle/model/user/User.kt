@@ -1,5 +1,7 @@
 package com.github.se.cyrcle.model.user
 
+const val MAX_NOTE_LENGTH = 48
+
 /**
  * Data class representing the public information of a user.
  *
@@ -32,7 +34,8 @@ data class UserDetails(
     val email: String = "",
     val favoriteParkings: List<String> = emptyList(),
     // val lastLoginTime: Timestamp? = null,
-    val wallet: Wallet = Wallet.empty()
+    val wallet: Wallet = Wallet.empty(),
+    val personalNotes: Map<String, String> = emptyMap()
 )
 
 /**
