@@ -80,7 +80,7 @@ class GamblingScreenTest {
     composeTestRule.setContent { GamblingScreen() }
 
     // Verify wheel performs idle animation
-    runBlocking { delay(1000) }
+    runBlocking { delay(100) }
     composeTestRule.onNodeWithTag("wheel_canvas").assertExists()
   }
 
