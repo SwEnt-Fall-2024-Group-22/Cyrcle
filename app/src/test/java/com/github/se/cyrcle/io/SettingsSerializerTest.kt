@@ -64,7 +64,19 @@ class SettingsSerializerTest {
     val inputStream = ByteArrayInputStream(serializedJohnDoe)
     val serializer = Settings.Serializer()
     val deserializedSettings = runBlocking { serializer.readFrom(inputStream) }
+    println(deserializedSettings)
+    println(settings)
     assert(settings == deserializedSettings) { "Deserialization failed" }
+  }
+
+  @Test
+  fun testDeserializeToDefault() {
+    val inputStream = ByteArrayInputStream(byteArrayOf(0x00))
+    val serializer = Settings.Serializer()
+    val deserializedSettings = runBlocking { serializer.readFrom(inputStream) }
+    println(deserializedSettings)
+    println(settings)
+    assert(serializer.defaultValue == deserializedSettings) { "Deserialization to default failed" }
   }
 
   @Test
@@ -77,6 +89,8 @@ class SettingsSerializerTest {
     val inputStream = ByteArrayInputStream(outStream.toByteArray())
     val deserializedSettings = runBlocking { serializer.readFrom(inputStream) }
 
+    println(deserializedSettings)
+    println(settings)
     assert(settings == deserializedSettings) { "Deserialized settings do not match the original" }
   }
 }

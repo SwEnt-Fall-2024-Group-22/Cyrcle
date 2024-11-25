@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.io
 
+import android.util.Log
 import java.io.InputStream
 import java.io.OutputStream
 
@@ -40,13 +41,18 @@ data class Settings(
   class Serializer :
       ProtoGenericSerializer<Settings>(Settings("John Doe", 42, 420000, 4.2f, 4.425397, true)) {
     override suspend fun readFrom(input: InputStream): Settings {
-      return Settings(
-          readString(input),
-          readInt32(input),
-          readLong64(input),
-          readFloat32(input),
-          readDouble64(input),
-          readBoolean(input))
+      return try {
+        Settings(
+            readString(input),
+            readInt32(input),
+            readLong64(input),
+            readFloat32(input),
+            readDouble64(input),
+            readBoolean(input))
+      } catch (io: java.io.IOException) {
+        Log.e("Settings.Serializer", "Error reading settings", io)
+        defaultValue
+      }
     }
 
     override suspend fun writeTo(t: Settings, output: OutputStream) {
