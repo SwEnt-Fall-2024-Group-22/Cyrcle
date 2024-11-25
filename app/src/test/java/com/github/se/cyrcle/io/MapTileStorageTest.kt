@@ -8,7 +8,7 @@ class MapTileStorageTest {
 
   private val dummyTile1 = byteArrayOf(0x00, 0x01, 0x02, 0x03)
   private val dummyTile2 = byteArrayOf(0x04, 0x05, 0x06, 0x07)
-  private val cacheDir = "./cache/map"
+  private val cacheDir = "./data/map"
   private val extensionName = "mapbin"
 
   @Before

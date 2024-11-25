@@ -3,7 +3,7 @@ package com.github.se.cyrcle.io
 import java.io.File
 import java.io.IOException
 
-private const val CACHE_DIR = "./cache/map"
+private const val CACHE_DIR = "./data/map"
 private const val EXTENSION_NAME = "mapbin"
 
 /**
