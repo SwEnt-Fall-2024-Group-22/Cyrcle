@@ -10,6 +10,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
@@ -45,6 +46,7 @@ class ParkingDetailsScreenTest {
   private lateinit var userRepository: UserRepository
   private lateinit var reviewRepository: ReviewRepository
   private lateinit var mockReportedObjectRepository: ReportedObjectRepository
+  private lateinit var authenticator: MockAuthenticationRepository
 
   private lateinit var userViewModel: UserViewModel
   private lateinit var parkingViewModel: ParkingViewModel
@@ -62,11 +64,12 @@ class ParkingDetailsScreenTest {
     imageRepository = MockImageRepository()
     userRepository = MockUserRepository()
     reviewRepository = MockReviewRepository()
+    authenticator = MockAuthenticationRepository()
     mockReportedObjectRepository = MockReportedObjectRepository()
 
     parkingViewModel =
         ParkingViewModel(imageRepository, parkingRepository, mockReportedObjectRepository)
-    userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository)
+    userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository, authenticator)
     reviewViewModel = ReviewViewModel(reviewRepository, mockReportedObjectRepository)
 
     parkingViewModel.addParking(TestInstancesParking.parking2)
@@ -115,8 +118,9 @@ class ParkingDetailsScreenTest {
   fun addToFavoritesWhenSignedIn() {
 
     parkingViewModel.selectParking(TestInstancesParking.parking3)
-    userViewModel.signIn(TestInstancesUser.user1)
-    userViewModel.setCurrentUserById(TestInstancesUser.user1.public.userId)
+    userViewModel.addUser(TestInstancesUser.user1, {}, {})
+    authenticator.testUser = TestInstancesUser.user1
+    userViewModel.signIn({}, {})
 
     composeTestRule.setContent {
       ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
@@ -134,8 +138,9 @@ class ParkingDetailsScreenTest {
   @Test
   fun removeFromFavoritesWhenSignedIn() {
     parkingViewModel.selectParking(TestInstancesParking.parking1)
-    userViewModel.signIn(TestInstancesUser.user1)
-    userViewModel.setCurrentUserById(TestInstancesUser.user1.public.userId)
+    userViewModel.addUser(TestInstancesUser.user1, {}, {})
+    authenticator.testUser = TestInstancesUser.user1
+    userViewModel.signIn({}, {})
 
     composeTestRule.setContent {
       ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)

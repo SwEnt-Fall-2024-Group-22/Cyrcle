@@ -9,11 +9,13 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeRight
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockReviewRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
+import com.github.se.cyrcle.model.authentication.AuthenticationRepository
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
@@ -45,6 +47,7 @@ class ReviewScreenTest {
   private lateinit var mockImageRepository: ImageRepository
   private lateinit var mockReviewRepository: ReviewRepository
   private lateinit var mockUserRepository: UserRepository
+  private lateinit var mockAuthenticator: AuthenticationRepository
   private lateinit var mockReportedObjectRepository: ReportedObjectRepository
 
   private lateinit var parkingViewModel: ParkingViewModel
@@ -60,8 +63,11 @@ class ReviewScreenTest {
     mockParkingRepository = MockParkingRepository()
     mockReviewRepository = MockReviewRepository()
     mockReportedObjectRepository = MockReportedObjectRepository()
+    mockAuthenticator = MockAuthenticationRepository()
 
-    userViewModel = UserViewModel(mockUserRepository, mockParkingRepository, mockImageRepository)
+    userViewModel =
+        UserViewModel(
+            mockUserRepository, mockParkingRepository, mockImageRepository, mockAuthenticator)
     parkingViewModel =
         ParkingViewModel(mockImageRepository, mockParkingRepository, mockReportedObjectRepository)
     reviewViewModel = ReviewViewModel(mockReviewRepository, mockReportedObjectRepository)

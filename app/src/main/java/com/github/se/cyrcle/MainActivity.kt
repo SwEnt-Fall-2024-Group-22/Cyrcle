@@ -12,6 +12,7 @@ import androidx.navigation.compose.rememberNavController
 import com.github.se.cyrcle.model.CustomViewModelFactory
 import com.github.se.cyrcle.model.address.AddressRepository
 import com.github.se.cyrcle.model.address.AddressViewModel
+import com.github.se.cyrcle.model.authentication.AuthenticationRepository
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingRepository
@@ -22,7 +23,6 @@ import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.UserRepository
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.permission.PermissionHandler
-import com.github.se.cyrcle.ui.authentication.Authenticator
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.CyrcleTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -45,13 +45,15 @@ class MainActivity : ComponentActivity() {
 
   @Inject lateinit var permissionsHandler: PermissionHandler
 
-  @Inject lateinit var authenticator: Authenticator
+  @Inject lateinit var authenticationRepository: AuthenticationRepository
 
   private val reviewViewModel: ReviewViewModel by viewModels {
     CustomViewModelFactory { ReviewViewModel(reviewRepository, reportedObjectRepository) }
   }
   private val userViewModel: UserViewModel by viewModels {
-    CustomViewModelFactory { UserViewModel(userRepository, parkingRepository, imageRepository) }
+    CustomViewModelFactory {
+      UserViewModel(userRepository, parkingRepository, imageRepository, authenticationRepository)
+    }
   }
   private val parkingViewModel: ParkingViewModel by viewModels {
     CustomViewModelFactory {
@@ -67,7 +69,6 @@ class MainActivity : ComponentActivity() {
     super.onCreate(savedInstanceState)
     requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
-    authenticator.init(this)
     permissionsHandler.initHandler(this@MainActivity)
 
     setContent {
@@ -84,7 +85,6 @@ class MainActivity : ComponentActivity() {
               userViewModel,
               mapViewModel,
               addressViewModel,
-              authenticator,
               permissionsHandler)
         }
       }

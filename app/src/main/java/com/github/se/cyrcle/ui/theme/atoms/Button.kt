@@ -1,10 +1,16 @@
 package com.github.se.cyrcle.ui.theme.atoms
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
@@ -26,13 +32,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.github.se.cyrcle.R
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.disabledColor
 import com.github.se.cyrcle.ui.theme.getButtonColors
 import com.github.se.cyrcle.ui.theme.getColor
 import com.github.se.cyrcle.ui.theme.getIconButtonColors
 import com.github.se.cyrcle.ui.theme.getOnColor
+import com.github.se.cyrcle.ui.theme.googleSignInButtonStyle
 import kotlin.math.floor
 import kotlin.math.round
 
@@ -348,4 +358,35 @@ fun RadioButton(
       colors =
           RadioButtonDefaults.colors(
               selectedColor = getColor(colorLevel), unselectedColor = disabledColor()))
+}
+
+@Composable
+fun GoogleSignInButton(onClick: () -> Unit) {
+  Button(
+      onClick = onClick,
+      colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+      shape = RoundedCornerShape(50),
+      border = BorderStroke(1.dp, Color.LightGray),
+      modifier =
+          Modifier.padding(start = 16.dp, end = 16.dp)
+              .height(48.dp) // Adjust height as needed
+              .testTag("AuthenticateButton")) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth()) {
+
+              // Google Logo
+              Image(
+                  painter = painterResource(id = R.drawable.google_logo),
+                  contentDescription = "Google Logo",
+                  modifier = Modifier.size(30.dp).padding(end = 8.dp))
+
+              // Text on Sign-In button
+              Text(
+                  text = stringResource(R.string.sign_in_google_button),
+                  color = Color.Black,
+                  style = googleSignInButtonStyle)
+            }
+      }
 }

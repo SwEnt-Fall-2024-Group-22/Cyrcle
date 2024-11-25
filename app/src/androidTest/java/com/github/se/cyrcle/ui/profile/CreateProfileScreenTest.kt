@@ -6,7 +6,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.github.se.cyrcle.di.mocks.AuthenticatorMock
+import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
@@ -28,7 +28,7 @@ class CreateProfileScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var mockNavigationActions: NavigationActions
-  private lateinit var mockAuthenticator: AuthenticatorMock
+  private lateinit var mockAuthenticator: MockAuthenticationRepository
   private lateinit var userViewModel: UserViewModel
 
   private lateinit var mockUserRepository: MockUserRepository
@@ -38,16 +38,16 @@ class CreateProfileScreenTest {
   @Before
   fun setUp() {
     mockNavigationActions = mock(NavigationActions::class.java)
-    mockAuthenticator = AuthenticatorMock()
+    mockAuthenticator = MockAuthenticationRepository()
 
     mockUserRepository = MockUserRepository()
     mockParkingRepository = MockParkingRepository()
     mockImageRepository = MockImageRepository()
-    userViewModel = UserViewModel(mockUserRepository, mockParkingRepository, mockImageRepository)
+    userViewModel =
+        UserViewModel(
+            mockUserRepository, mockParkingRepository, mockImageRepository, mockAuthenticator)
 
-    composeTestRule.setContent {
-      CreateProfileScreen(mockNavigationActions, mockAuthenticator, userViewModel)
-    }
+    composeTestRule.setContent { CreateProfileScreen(mockNavigationActions, userViewModel) }
   }
 
   @Test

@@ -3,7 +3,6 @@ package com.github.se.cyrcle.model.map
 import android.os.Handler
 import android.os.Looper
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.model.parking.PARKING_MAX_AREA
 import com.github.se.cyrcle.model.parking.PARKING_MAX_SIDE_LENGTH
@@ -218,17 +217,5 @@ class MapViewModel : ViewModel() {
     TOP_LEFT_SET,
     BOTTOM_RIGHT_SET,
     RECTANGLE_SET
-  }
-
-  // create factory (imported from bootcamp)
-  // create factory (imported from bootcamp)
-  companion object {
-    val Factory: ViewModelProvider.Factory =
-        object : ViewModelProvider.Factory {
-          @Suppress("UNCHECKED_CAST")
-          override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return MapViewModel() as T
-          }
-        }
   }
 }

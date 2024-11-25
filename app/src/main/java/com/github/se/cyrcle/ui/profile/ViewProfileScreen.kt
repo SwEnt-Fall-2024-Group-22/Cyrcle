@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.profile
 
+import android.app.Activity
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Outbox
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -37,7 +39,6 @@ import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
-import com.github.se.cyrcle.ui.authentication.Authenticator
 import com.github.se.cyrcle.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
@@ -61,7 +62,6 @@ fun ViewProfileScreen(
     navigationActions: NavigationActions,
     userViewModel: UserViewModel,
     parkingViewModel: ParkingViewModel,
-    authenticator: Authenticator
 ) {
   fun areInputsValid(firstName: String, lastName: String, username: String): Boolean {
     return firstName.length in FIRST_NAME_MIN_LENGTH..FIRST_NAME_MAX_LENGTH &&
@@ -85,9 +85,12 @@ fun ViewProfileScreen(
             selectedItem = Route.VIEW_PROFILE)
       }) { innerPadding ->
         Box(Modifier.fillMaxSize().padding(innerPadding)) {
-          authenticator.SignOutButton(Modifier.padding(10.dp).align(Alignment.TopEnd)) {
-            signOut = true
-          }
+          com.github.se.cyrcle.ui.theme.atoms.IconButton(
+              modifier = Modifier.padding(10.dp).align(Alignment.TopEnd),
+              icon = Icons.Filled.Outbox,
+              contentDescription = "Sign Out",
+              testTag = "SignOutButton",
+              onClick = { signOut = true })
 
           if (signOut) {
             // Show sign out dialog to prevent accidental sign out
@@ -104,10 +107,12 @@ fun ViewProfileScreen(
                   TextButton(
                       modifier = Modifier.testTag("SignOutDialogConfirmButton"),
                       onClick = {
-                        userViewModel.signOut()
-                        Toast.makeText(context, signOutToastText, Toast.LENGTH_SHORT).show()
-                        navigationActions.navigateTo(TopLevelDestinations.AUTH)
-                        signOut = false
+                        userViewModel.signOut {
+                          (context as Activity).runOnUiThread {
+                            Toast.makeText(context, signOutToastText, Toast.LENGTH_SHORT).show()
+                          }
+                          navigationActions.navigateTo(TopLevelDestinations.AUTH)
+                        }
                       }) {
                         Text(
                             stringResource(

@@ -269,9 +269,8 @@ fun AllReviewsScreen(
                                     val defaultUsername =
                                         stringResource(R.string.undefined_username)
                                     val uidOfOwner = remember { mutableStateOf(defaultUsername) }
-                                    userViewModel.getUserById(curReview.owner) {
-                                      uidOfOwner.value = it.public.username
-                                    }
+                                    userViewModel.getUserById(
+                                        curReview.owner, { uidOfOwner.value = it.public.username })
 
                                     // Review details
                                     Text(

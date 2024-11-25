@@ -14,7 +14,6 @@ import com.github.se.cyrcle.permission.PermissionHandler
 import com.github.se.cyrcle.ui.addParking.attributes.AttributesPicker
 import com.github.se.cyrcle.ui.addParking.attributes.RackTypeHelpScreen
 import com.github.se.cyrcle.ui.addParking.location.LocationPicker
-import com.github.se.cyrcle.ui.authentication.Authenticator
 import com.github.se.cyrcle.ui.authentication.SignInScreen
 import com.github.se.cyrcle.ui.list.SpotListScreen
 import com.github.se.cyrcle.ui.map.MapScreen
@@ -36,7 +35,6 @@ fun CyrcleNavHost(
     userViewModel: UserViewModel,
     mapViewModel: MapViewModel,
     addressViewModel: AddressViewModel,
-    authenticator: Authenticator,
     permissionHandler: PermissionHandler
 ) {
   NavHost(navController = navController, startDestination = Route.AUTH) {
@@ -44,10 +42,8 @@ fun CyrcleNavHost(
         startDestination = Screen.AUTH,
         route = Route.AUTH,
     ) {
-      composable(Screen.AUTH) { SignInScreen(authenticator, navigationActions, userViewModel) }
-      composable(Screen.CREATE_PROFILE) {
-        CreateProfileScreen(navigationActions, authenticator, userViewModel)
-      }
+      composable(Screen.AUTH) { SignInScreen(navigationActions, userViewModel) }
+      composable(Screen.CREATE_PROFILE) { CreateProfileScreen(navigationActions, userViewModel) }
     }
 
     navigation(
@@ -96,7 +92,7 @@ fun CyrcleNavHost(
         route = Route.VIEW_PROFILE,
     ) {
       composable(Screen.VIEW_PROFILE) {
-        ProfileScreen(navigationActions, userViewModel, parkingViewModel, authenticator)
+        ProfileScreen(navigationActions, userViewModel, parkingViewModel)
       }
     }
   }

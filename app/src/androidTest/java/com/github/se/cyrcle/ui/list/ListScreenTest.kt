@@ -17,10 +17,12 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipe
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
+import com.github.se.cyrcle.model.authentication.AuthenticationRepository
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingCapacity
@@ -54,6 +56,7 @@ class ListScreenTest {
   private lateinit var mockUserRepository: UserRepository
   private lateinit var mockParkingRepository: ParkingRepository
   private lateinit var mockImageRepository: ImageRepository
+  private lateinit var authenticator: AuthenticationRepository
   private lateinit var mockReportedObjectRepository: ReportedObjectRepository
   private lateinit var mockNavigationActions: NavigationActions
   private lateinit var parkingViewModel: ParkingViewModel
@@ -67,12 +70,14 @@ class ListScreenTest {
     mockUserRepository = MockUserRepository()
     mockParkingRepository = MockParkingRepository()
     mockImageRepository = MockImageRepository()
+    authenticator = MockAuthenticationRepository()
     mockReportedObjectRepository = MockReportedObjectRepository()
 
     parkingViewModel =
         ParkingViewModel(mockImageRepository, mockParkingRepository, mockReportedObjectRepository)
     mapViewModel = MapViewModel()
-    userViewModel = UserViewModel(mockUserRepository, mockParkingRepository, mockImageRepository)
+    userViewModel =
+        UserViewModel(mockUserRepository, mockParkingRepository, mockImageRepository, authenticator)
 
     `when`(mockNavigationActions.currentRoute()).thenReturn(Screen.LIST)
 
@@ -86,7 +91,7 @@ class ListScreenTest {
     // parking1 already in
     parkingViewModel.addParking(TestInstancesParking.parking2)
     parkingViewModel.addParking(TestInstancesParking.parking3)
-    userViewModel.signIn(user)
+    userViewModel.setCurrentUser(user)
     userViewModel.setCurrentUserById(user.public.userId)
     userViewModel.addFavoriteParkingToSelectedUser(TestInstancesParking.parking1)
     userViewModel.addFavoriteParkingToSelectedUser(TestInstancesParking.parking2)
