@@ -1,21 +1,31 @@
 package com.github.se.cyrcle.model.map
 
+import android.graphics.Bitmap
 import android.os.Handler
 import android.os.Looper
 import androidx.lifecycle.ViewModel
 import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.model.parking.PARKING_MAX_AREA
 import com.github.se.cyrcle.model.parking.PARKING_MAX_SIDE_LENGTH
+import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.ui.map.MapConfig
+import com.github.se.cyrcle.ui.theme.molecules.DropDownableEnum
+import com.google.gson.Gson
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraState
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapView
 import com.mapbox.maps.ScreenCoordinate
+import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
+import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationManager
+import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationOptions
 import com.mapbox.maps.plugin.locationcomponent.createDefault2DPuck
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.maps.viewannotation.ViewAnnotationManager
+import com.mapbox.turf.TurfMeasurement
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -51,6 +61,42 @@ class MapViewModel : ViewModel() {
 
   private val _userPosition = MutableStateFlow<Point>(TestInstancesParking.EPFLCenter)
   val userPosition: StateFlow<Point> = _userPosition
+
+  private val _userMapMode = MutableStateFlow(MapMode.MARKERS)
+  val userMapMode: StateFlow<MapMode> = _userMapMode
+
+  private val _mapMode = MutableStateFlow(MapMode.MARKERS)
+  val mapMode: StateFlow<MapMode> = _mapMode
+
+  private val _cameraRecentering = MutableStateFlow(false)
+  val cameraRecentering: StateFlow<Boolean> = _cameraRecentering
+
+  /**
+   * Update the map recentered state
+   *
+   * @param recentered the new state of the map recentered
+   */
+  fun updateMapRecentering(recentered: Boolean) {
+    _cameraRecentering.value = recentered
+  }
+
+  /**
+   * Update the map mode
+   *
+   * @param mapMode the new map mode to set
+   */
+  fun updateMapMode(mapMode: MapMode) {
+    _mapMode.value = mapMode
+  }
+
+  /**
+   * Update the user map mode.
+   *
+   * @param mapMode the new map mode to set
+   */
+  fun updateUserMapMode(mapMode: MapMode) {
+    _userMapMode.value = mapMode
+  }
 
   /**
    * Update the state of the location picker, This state is used to determine which steps of the
@@ -186,6 +232,72 @@ class MapViewModel : ViewModel() {
     }
   }
 
+  /**
+   * Draw markers on the map.
+   *
+   * @param pointAnnotationManager the PointAnnotationManager to draw the markers on
+   * @param parkingList the list of parkings to draw
+   * @param bitmap the bitmap to use for the markers
+   */
+  fun drawMarkers(
+      pointAnnotationManager: PointAnnotationManager?,
+      parkingList: List<Parking>,
+      bitmap: Bitmap,
+  ) {
+    parkingList.forEach {
+      pointAnnotationManager?.create(
+          PointAnnotationOptions()
+              .withPoint(it.location.center)
+              .withIconImage(bitmap)
+              .withIconAnchor(IconAnchor.BOTTOM)
+              .withIconOffset(listOf(0.0, bitmap.height / 12.0))
+              .withData(Gson().toJsonTree(it)))
+    }
+  }
+
+  /**
+   * Draw the rectangles on the map
+   *
+   * @param polygonAnnotationManager the polygon annotation manager
+   * @param parkingsList the list of locations to draw
+   */
+  fun drawRectangles(
+      polygonAnnotationManager: PolygonAnnotationManager?,
+      plabelAnnotationManager: PointAnnotationManager?,
+      parkingsList: List<Parking>
+  ) {
+    val annotations: MutableList<PolygonAnnotationOptions> = mutableListOf()
+    parkingsList.map { parking ->
+      val location = parking.location
+      val topLeft = location.topLeft
+      val topRight = location.topRight
+      val bottomLeft = location.bottomLeft
+      val bottomRight = location.bottomRight
+      if (topLeft != null && topRight != null && bottomLeft != null && bottomRight != null) {
+        val polygon = location.toPolygon()
+
+        val polygonAnnotationOptions =
+            PolygonAnnotationOptions()
+                .withGeometry(polygon)
+                .withFillColor("#1A4988")
+                .withFillOpacity(0.7)
+                .withData(Gson().toJsonTree(parking))
+        annotations.add(polygonAnnotationOptions)
+        val area = TurfMeasurement.area(polygon)
+        val labelAnnotationOption =
+            PointAnnotationOptions()
+                .withPoint(location.center)
+                .withTextField("P")
+                .withTextSize(if (area < 30) 5.0 else 10.0)
+                .withTextColor("#FFFFFF")
+                .withTextHaloColor("#FFFFFF")
+                .withTextHaloWidth(0.2)
+        plabelAnnotationManager?.create(labelAnnotationOption)
+      }
+    }
+    polygonAnnotationManager?.create(annotations)
+  }
+
   // ================== ViewAnnotationManager ==================
   // State to manage the preview cards on the map screen
 
@@ -217,5 +329,19 @@ class MapViewModel : ViewModel() {
     TOP_LEFT_SET,
     BOTTOM_RIGHT_SET,
     RECTANGLE_SET
+  }
+
+  /**
+   * Enum class to represent the different modes of the map
+   *
+   * @param description the description of the mode
+   * @param isAdvancedMode true if the mode is advanced, false otherwise The advanced mode is the
+   *   mode where the rectangles are displayed The simple mode is the mode where the markers are
+   *   displayed
+   */
+  enum class MapMode(override val description: String, val isAdvancedMode: Boolean) :
+      DropDownableEnum {
+    MARKERS("Simple", false),
+    RECTANGLES("Advanced", true)
   }
 }
