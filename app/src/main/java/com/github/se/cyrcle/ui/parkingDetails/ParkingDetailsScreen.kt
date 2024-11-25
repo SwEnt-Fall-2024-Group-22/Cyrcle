@@ -445,14 +445,7 @@ fun ParkingDetailsScreen(
                       Button(
                           text = stringResource(R.string.card_screen_report),
                           onClick = {
-                            parkingViewModel.addReport(
-                                ParkingReport(
-                                    "TEST1",
-                                    ParkingReportReason.INEXISTANT,
-                                    userViewModel.currentUser.value?.public?.userId ?: "TESTUSER",
-                                    selectedParking.uid),
-                                userViewModel.currentUser.value!!)
-                            Toast.makeText(context, "Report added!", Toast.LENGTH_LONG).show()
+                              navigationActions.navigateTo(Screen.PARKING_REPORT)
                           },
                           modifier = Modifier.fillMaxWidth(),
                           colorLevel = ColorLevel.ERROR,
