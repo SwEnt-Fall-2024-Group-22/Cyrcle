@@ -16,7 +16,6 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 
@@ -276,15 +275,8 @@ class UserViewModelTest {
     userViewModel.setCurrentUser(TestInstancesUser.user1)
     userViewModel.updateUser(TestInstancesUser.user1)
 
-    // Check that the user was not updated in the repository as the user is the same
-    verify(userRepository, times(0)).updateUser(any(), any(), any())
-
-    val updatedUser =
-        TestInstancesUser.user1.copy(
-            details = TestInstancesUser.user1.details?.copy(firstName = "New name"))
-    userViewModel.updateUser(updatedUser)
-    // Check that the user was updated in the repository
-    verify(userRepository).updateUser(eq(updatedUser), any(), any())
+    // Check if the user was updated in the repository
+    verify(userRepository).updateUser(eq(TestInstancesUser.user1), any(), any())
   }
 
   @Test

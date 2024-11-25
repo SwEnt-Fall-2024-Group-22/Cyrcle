@@ -122,10 +122,6 @@ class UserViewModel(
 
     Log.d("UserViewModel", "Updating user: $user")
     // First update the user object in the view model.
-    if (currentUser.value == user) {
-      Log.d("UserViewModel", "No difference between the current user and the user to update")
-      return
-    }
     setCurrentUser(user)
     // Then update the user object in the database
     if (user.localSession?.profilePictureUri.isNullOrBlank() || context == null) {
