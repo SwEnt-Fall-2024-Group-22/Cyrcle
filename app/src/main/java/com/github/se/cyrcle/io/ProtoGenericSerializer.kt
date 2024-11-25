@@ -20,7 +20,7 @@ abstract class ProtoGenericSerializer<T>(
 ) : Serializer<T> {
 
   companion object {
-    private fun writeNByte(output: OutputStream, byteArray: ByteArray) {
+    private fun writeNBytes(output: OutputStream, byteArray: ByteArray) {
       for (byte in byteArray) output.write(byte.toInt())
     }
 
@@ -31,7 +31,7 @@ abstract class ProtoGenericSerializer<T>(
      * @param value The [String] to write.
      */
     fun writeString(output: OutputStream, value: String) {
-      writeNByte(output, value.toByteArray())
+      writeNBytes(output, value.toByteArray())
       output.write(END_OF_STRING_CHAR.code)
     }
 
@@ -64,7 +64,7 @@ abstract class ProtoGenericSerializer<T>(
     fun writeInt32(output: OutputStream, value: Int) {
       val byteArray = ByteArray(Int.SIZE_BYTES)
       for (i in 0 until Int.SIZE_BYTES) byteArray[i] = (value shr 8 * i).toByte()
-      writeNByte(output, byteArray)
+      writeNBytes(output, byteArray)
     }
 
     /**
@@ -93,7 +93,7 @@ abstract class ProtoGenericSerializer<T>(
     fun writeLong64(output: OutputStream, value: Long) {
       val byteArray = ByteArray(Long.SIZE_BYTES)
       for (i in 0 until Long.SIZE_BYTES) byteArray[i] = (value shr 8 * i).toByte()
-      writeNByte(output, byteArray)
+      writeNBytes(output, byteArray)
     }
 
     /**
@@ -123,7 +123,7 @@ abstract class ProtoGenericSerializer<T>(
       val valueRaw = value.toRawBits()
       val byteArray = ByteArray(Float.SIZE_BYTES)
       for (i in 0 until Float.SIZE_BYTES) byteArray[i] = (valueRaw shr 8 * i).toByte()
-      writeNByte(output, byteArray)
+      writeNBytes(output, byteArray)
     }
 
     /**
@@ -153,7 +153,7 @@ abstract class ProtoGenericSerializer<T>(
       val valueRaw = value.toRawBits()
       val byteArray = ByteArray(Double.SIZE_BYTES)
       for (i in 0 until Double.SIZE_BYTES) byteArray[i] = (valueRaw shr 8 * i).toByte()
-      writeNByte(output, byteArray)
+      writeNBytes(output, byteArray)
     }
 
     /**
