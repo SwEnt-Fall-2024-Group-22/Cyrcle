@@ -13,13 +13,14 @@ private const val EXTENSION_NAME = "mapbin"
  * @param x The x-coordinate of the tile.
  * @param y The y-coordinate of the tile.
  * @param tileData The byte array of the tile data.
+ * @param forceWrite If true, the tile will be written even if it already exists.
  * @throws IOException If an I/O error occurs.
  */
 @Throws(IOException::class)
-fun storeTile(zoomLevel: Int, x: Int, y: Int, tileData: ByteArray) {
+fun storeTile(zoomLevel: Int, x: Int, y: Int, tileData: ByteArray, forceWrite: Boolean = false) {
   val tileDir = File("$CACHE_DIR/$zoomLevel/$x").apply { mkdirs() }
   val tileFile = File(tileDir, "$y.$EXTENSION_NAME")
-  if (tileFile.exists()) return // Tile should not change, there is no point in updating them
+  if (!forceWrite && tileFile.exists()) return // Tile should not change, there is no point in updating them
   tileFile.writeBytes(tileData)
 }
 

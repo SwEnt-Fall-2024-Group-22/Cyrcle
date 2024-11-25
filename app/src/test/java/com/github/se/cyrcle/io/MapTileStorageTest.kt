@@ -46,6 +46,21 @@ class MapTileStorageTest {
   }
 
   @Test
+  fun testStoreTileForceWrite() {
+    val x = 0
+    val y = 0
+    val zoomLevel = 0
+
+    storeTile(zoomLevel, x, y, dummyTile1, false)
+    storeTile(zoomLevel, x, y, dummyTile2, true)
+
+    val expectedTileFile = File("$cacheDir/$zoomLevel/$x/$y.$extensionName")
+    assert(expectedTileFile.exists())
+    assert(expectedTileFile.isFile)
+    assert(expectedTileFile.readBytes().contentEquals(dummyTile2))
+  }
+
+  @Test
   fun testLoadTile() {
     val x = 0
     val y = 0
