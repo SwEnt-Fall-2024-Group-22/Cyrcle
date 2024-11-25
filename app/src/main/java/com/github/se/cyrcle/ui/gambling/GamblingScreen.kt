@@ -79,10 +79,8 @@ fun WheelView(
 
   fun determineTargetSegment(): Int {
     val randomValue = (0..999).random()
-    Log.d("FAVORITE", "Random value generated: $randomValue")
     for (i in probabilityRanges.indices) {
       if (randomValue in probabilityRanges[i]) {
-        Log.d("FAVORITE", "Selected segment $i (${segments[i].name})")
         return i
       }
     }
@@ -106,11 +104,6 @@ fun WheelView(
         val targetSegment = determineTargetSegment()
         expectedSegment = targetSegment
 
-        Log.d(
-            "FAVORITE",
-            "Starting spin from segment $currentSegment (${segments[currentSegment].name})")
-        Log.d("FAVORITE", "Target segment is $targetSegment (${segments[targetSegment].name})")
-
         val segmentAngle = 360f / segments.size
         var requiredRotation = ((targetSegment - currentSegment) * segmentAngle)
         val landingAngle = (270 - ((rotation - requiredRotation) % 360)) % 360
@@ -121,21 +114,17 @@ fun WheelView(
         when (targetSegment) {
           0 -> {
             if (shouldTriggerNearMiss) {
-              Log.d("FAVORITE", "Triggering near miss for Nothing segment")
               if (Math.random() < 0.6) {
                 val maxOffsetLeft = angleWithinSegment
                 randomOffset = -maxOffsetLeft * (0.85f + (Math.random() * 0.13f).toFloat())
-                Log.d("FAVORITE", "Near miss to the left")
               } else {
                 val maxOffsetRight = segmentAngle - angleWithinSegment
                 randomOffset = maxOffsetRight * (0.95f + (Math.random() * 0.03f).toFloat())
-                Log.d("FAVORITE", "Near miss to the right")
               }
             }
           }
           1 -> {
             if (Math.random() < 0.8f) {
-              Log.d("FAVORITE", "Triggering near win for Legendary")
               val maxOffsetLeft = angleWithinSegment
               val maxOffsetRight = segmentAngle - angleWithinSegment
               val nearWinOffset = minOf(maxOffsetLeft, maxOffsetRight) * 0.05f
@@ -144,21 +133,18 @@ fun WheelView(
           }
           2 -> {
             if (shouldTriggerNearMiss) {
-              Log.d("FAVORITE", "Triggering near miss for Common")
               val maxOffsetLeft = angleWithinSegment
               randomOffset = -maxOffsetLeft * (0.80f + (Math.random() * 0.18f).toFloat())
             }
           }
           3 -> {
             if (shouldTriggerNearMiss) {
-              Log.d("FAVORITE", "Triggering near miss for Rare")
               val maxOffsetRight = segmentAngle - angleWithinSegment
               randomOffset = maxOffsetRight * (0.80f + (Math.random() * 0.18f).toFloat())
             }
           }
           4 -> {
             if (Math.random() < 0.8f) {
-              Log.d("FAVORITE", "Triggering near win for Epic")
               val maxOffsetLeft = angleWithinSegment
               val maxOffsetRight = segmentAngle - angleWithinSegment
               val nearWinOffset = minOf(maxOffsetLeft, maxOffsetRight) * 0.05f
@@ -194,9 +180,6 @@ fun WheelView(
           pauseAfterSpin = false
 
           onSegmentLanded?.invoke(segments[getSegmentAtPointer(rotation)].name)
-          Log.d(
-              "FAVORITE",
-              "Spin finished on segment ${getSegmentAtPointer(rotation)} (${segments[getSegmentAtPointer(rotation)].name})")
         }
       }
     }
