@@ -45,6 +45,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -77,10 +78,9 @@ fun ParkingDetailsScreen(
   val selectedParking =
       parkingViewModel.selectedParking.collectAsState().value
           ?: return Text(stringResource(R.string.no_selected_parking_error))
-  val userSignedIn = userViewModel.isSignedIn.collectAsState(false)
+  val userSignedIn by userViewModel.isSignedIn.collectAsState(false)
   val scrollState = rememberScrollState()
   val context = LocalContext.current
-  val toastMessage = stringResource(R.string.sign_in_to_add_favorites)
   // === States for the images ===
   var newParkingImageLocalPath by remember { mutableStateOf("") }
   val showDialog = remember { mutableStateOf(false) }
@@ -155,16 +155,24 @@ fun ParkingDetailsScreen(
                             ConditionCheckingInputText(
                                 value = editingNoteText.value,
                                 onValueChange = { editingNoteText.value = it },
-                                label = stringResource(R.string.note),
+                                label = stringResource(R.string.list_screen_edit_note),
                                 minCharacters = 0,
                                 maxCharacters = MAX_NOTE_LENGTH,
+                                maxLines = 2,
                                 testTag = "NoteInputText")
                           } else {
-                            Text(
-                                text = parkingNote ?: stringResource(R.string.no_note),
-                                style = MaterialTheme.typography.bodyLarge,
-                                textAlign = TextAlign.Left,
-                                modifier = Modifier.testTag("NoteText"))
+                            if (userSignedIn) {
+                              Text(
+                                  text =
+                                      parkingNote ?: stringResource(R.string.list_screen_no_note),
+                                  style =
+                                      MaterialTheme.typography.bodyLarge.copy(
+                                          fontStyle =
+                                              if (parkingNote.isNullOrBlank()) FontStyle.Italic
+                                              else FontStyle.Normal),
+                                  textAlign = TextAlign.Left,
+                                  modifier = Modifier.testTag("NoteText"))
+                            }
                           }
                         }
 
@@ -189,18 +197,31 @@ fun ParkingDetailsScreen(
                                         }
                                         .testTag("SaveNoteIcon"))
                           } else {
-                            Icon(
-                                imageVector =
-                                    if (parkingNote == null) Icons.Default.Add
-                                    else Icons.Default.Edit,
-                                contentDescription =
-                                    if (parkingNote == null) "Add Note" else "Edit Note",
-                                tint = Black,
-                                modifier =
-                                    Modifier.clickable { editingNote.value = true }
-                                        .testTag(
-                                            if (parkingNote == null) "AddNoteIcon"
-                                            else "EditNoteIcon"))
+                            // Add icon if no note, Edit icon if note exists
+                            if (parkingNote == null) {
+                              val toastMsgNote = stringResource(R.string.sign_in_to_add_note)
+                              Icon(
+                                  imageVector = Icons.Default.Add,
+                                  contentDescription = "Add Note",
+                                  tint = Black,
+                                  modifier =
+                                      Modifier.clickable {
+                                            if (userSignedIn) editingNote.value = true
+                                            else
+                                                Toast.makeText(
+                                                        context, toastMsgNote, Toast.LENGTH_SHORT)
+                                                    .show()
+                                          }
+                                          .testTag("AddNoteIcon"))
+                            } else {
+                              Icon(
+                                  imageVector = Icons.Default.Edit,
+                                  contentDescription = "Edit Note",
+                                  tint = Black,
+                                  modifier =
+                                      Modifier.clickable { editingNote.value = true }
+                                          .testTag("EditNoteIcon"))
+                            }
                           }
 
                           // Pin Icon
@@ -223,12 +244,12 @@ fun ParkingDetailsScreen(
 
                           // Favorite Icon
                           val isFavorite =
-                              userSignedIn.value &&
+                              userSignedIn &&
                                   userViewModel.favoriteParkings
                                       .collectAsState()
                                       .value
                                       .contains(selectedParking)
-
+                          val toastMsgFavorite = stringResource(R.string.sign_in_to_add_favorites)
                           Icon(
                               imageVector =
                                   if (isFavorite) Icons.Default.Favorite
@@ -237,7 +258,7 @@ fun ParkingDetailsScreen(
                               tint = if (isFavorite) Red else Black,
                               modifier =
                                   Modifier.clickable {
-                                        if (userSignedIn.value) {
+                                        if (userSignedIn) {
                                           if (isFavorite) {
                                             userViewModel.removeFavoriteParkingFromSelectedUser(
                                                 selectedParking)
@@ -246,7 +267,8 @@ fun ParkingDetailsScreen(
                                                 selectedParking)
                                           }
                                         } else {
-                                          Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT)
+                                          Toast.makeText(
+                                                  context, toastMsgFavorite, Toast.LENGTH_SHORT)
                                               .show()
                                         }
                                       }
@@ -323,7 +345,7 @@ fun ParkingDetailsScreen(
                         icon = Icons.Outlined.AddAPhoto,
                         contentDescription = "Add Image",
                         onClick = { imagePickerLauncher.launch("image/*") },
-                        enabled = userSignedIn.value,
+                        enabled = userSignedIn,
                         testTag = "AddImageIconButton",
                         modifier = Modifier.padding(start = 8.dp).height(32.dp).weight(1f))
                   }
