@@ -8,9 +8,15 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
+/** The preference data store. */
 val Context.preferencesDataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
-/** A class to simplify reading and writing preferences to the preference data store. */
+/**
+ * A class to simplify reading and writing preferences to the preference data store. Used to store
+ * key-value pairs of primitive types.
+ *
+ * @property context The context used to access the preference data store.
+ */
 class PreferenceStorage(private val context: Context) {
 
   /**
