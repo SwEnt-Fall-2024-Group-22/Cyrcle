@@ -53,6 +53,7 @@ import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.ParkingReport
 import com.github.se.cyrcle.model.parking.ParkingReportReason
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.user.MAX_NOTE_LENGTH
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
@@ -156,7 +157,7 @@ fun ParkingDetailsScreen(
                                 onValueChange = { editingNoteText.value = it },
                                 label = stringResource(R.string.note),
                                 minCharacters = 0,
-                                maxCharacters = 32,
+                                maxCharacters = MAX_NOTE_LENGTH,
                                 testTag = "NoteInputText")
                           } else {
                             Text(
@@ -180,9 +181,11 @@ fun ParkingDetailsScreen(
                                 tint = Black,
                                 modifier =
                                     Modifier.clickable {
-                                          userViewModel.editCurrentUserPersonalNoteForParking(
-                                              selectedParking, editingNoteText.value)
-                                          editingNote.value = false
+                                          if (editingNoteText.value.length <= MAX_NOTE_LENGTH) {
+                                            userViewModel.editCurrentUserPersonalNoteForParking(
+                                                selectedParking, editingNoteText.value)
+                                            editingNote.value = false
+                                          }
                                         }
                                         .testTag("SaveNoteIcon"))
                           } else {

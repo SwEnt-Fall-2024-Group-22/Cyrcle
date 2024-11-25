@@ -1,5 +1,7 @@
 package com.github.se.cyrcle.model.user
 
+const val MAX_NOTE_LENGTH = 48
+
 /**
  * Data class representing the public information of a user.
  *
