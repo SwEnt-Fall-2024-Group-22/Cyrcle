@@ -186,8 +186,8 @@ class UserViewModel(
   }
 
   /**
-   * Authenticates a user and provides the user ID to the onSuccess callback.
-   * The given User ID is unique to the authentication provider, it has no link to our database
+   * Authenticates a user and provides the user ID to the onSuccess callback. The given User ID is
+   * unique to the authentication provider, it has no link to our database
    *
    * @param onSuccess the callback to call with the userID
    * @param onFailure the callback to call if the sign in fails
@@ -210,22 +210,22 @@ class UserViewModel(
   }
 
   /**
-   * Sign in a User: Signs the user into the app and calls on success with it.
-   * If the user is not found in the database, it calls onFailure with ACCOUNT_NOT_FOUND.
-   * If the sign in fails, it calls onFailure with ERROR.
+   * Sign in a User: Signs the user into the app and calls on success with it. If the user is not
+   * found in the database, it calls onFailure with ACCOUNT_NOT_FOUND. If the sign in fails, it
+   * calls onFailure with ERROR.
    *
    * @param onSuccess the callback to call with the user
    * @param onFailure the callback to call if the sign in fails
    */
   fun signIn(onSuccess: (User) -> Unit, onFailure: (SignInFailureReason) -> Unit) {
-    authenticate(
+    authenticator.authenticate(
         // On successful authentication
         { userID ->
           userRepository.getUserById(
               userID,
               // On successful user retrieval
               {
-                Log.d("UserViewModel", "User signed in successfully, userId: $it")
+                Log.d("UserViewModel", "User signed in successfully, user: $it")
                 setCurrentUser(it)
                 getSelectedUserFavoriteParkings()
                 onSuccess(it)

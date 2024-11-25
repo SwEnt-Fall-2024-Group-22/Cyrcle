@@ -9,12 +9,6 @@ import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,21 +33,22 @@ class AuthenticationRepositoryGoogleTest {
   private lateinit var authenticationRepositoryGoogle: AuthenticationRepositoryGoogle
 
   @Before
-  @OptIn(ExperimentalCoroutinesApi::class)
   fun setUp() {
-    testDispatcher = StandardTestDispatcher()
-    Dispatchers.setMain(testDispatcher)
+    // testDispatcher = StandardTestDispatcher()
+    // Dispatchers.setMain(testDispatcher)
 
     MockitoAnnotations.openMocks(this)
     authenticationRepositoryGoogle = AuthenticationRepositoryGoogle(context, firebaseAuth)
     authenticationRepositoryGoogle.credentialManager = credentialManager
   }
 
-  @After
-  @OptIn(ExperimentalCoroutinesApi::class)
-  fun tearDown() {
-    Dispatchers.resetMain()
-  }
+  /* TODO If someone is inspired to make tests for this...
+  I tried for hours to test the code but coroutines make it complicated :( */
+  // @After
+  // @OptIn(ExperimentalCoroutinesApi::class)
+  // fun tearDown() {
+  //  Dispatchers.resetMain()
+  // }
 
   // @Test
   // fun testAuthentication() = runTest {

@@ -5,6 +5,7 @@ import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.TestInstancesParking
+import com.google.firebase.firestore.util.Assert.fail
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -61,6 +62,192 @@ class UserViewModelTest {
 
     // Check if the repository was called
     verify(userRepository).userExists(eq(TestInstancesUser.user1), any(), any())
+  }
+
+  @Test
+  @Suppress("UNCHECKED_CAST")
+  fun testAddUserSuccessful() {
+    `when`(userRepository.addUser(any(), any(), any())).thenAnswer { invocation ->
+      val onSuccess = invocation.arguments[1] as () -> Unit
+      onSuccess()
+    }
+
+    var calledOnSuccess = false
+    userViewModel.addUser(
+        TestInstancesUser.user1,
+        { calledOnSuccess = true },
+        { fail("Call to onFailure was not expected") })
+
+    // Check if the repository was called
+    verify(userRepository).addUser(eq(TestInstancesUser.user1), any(), any())
+    assert(calledOnSuccess)
+  }
+
+  @Test
+  @Suppress("UNCHECKED_CAST")
+  fun testAddUserError() {
+    `when`(userRepository.addUser(any(), any(), any())).thenAnswer { invocation ->
+      val onFailure = invocation.arguments[2] as (Exception) -> Unit
+      onFailure(Exception())
+    }
+
+    var calledOnFailure = false
+    userViewModel.addUser(
+        TestInstancesUser.user1,
+        { fail("Call to onSuccess was not expected") },
+        { calledOnFailure = true })
+
+    // Check if the repository was called
+    verify(userRepository).addUser(eq(TestInstancesUser.user1), any(), any())
+    assert(calledOnFailure)
+  }
+
+  @Test
+  @Suppress("UNCHECKED_CAST")
+  fun testAuthenticateSuccess() {
+    `when`(authenticator.authenticate(any(), any())).thenAnswer { invocation ->
+      val onSuccess = invocation.arguments[0] as (String) -> Unit
+      onSuccess(TestInstancesUser.user1.public.userId)
+    }
+
+    var calledOnSuccess = false
+    userViewModel.authenticate(
+        {
+          assert(it == TestInstancesUser.user1.public.userId)
+          calledOnSuccess = true
+        },
+        { fail("Call to onFailure was not expected") })
+
+    // Check if the repository was called
+    verify(authenticator).authenticate(any(), any())
+    assert(calledOnSuccess)
+  }
+
+  @Test
+  @Suppress("UNCHECKED_CAST")
+  fun testAuthenticateFailure() {
+    `when`(authenticator.authenticate(any(), any())).thenAnswer { invocation ->
+      val onFailure = invocation.arguments[1] as (Exception) -> Unit
+      onFailure(Exception())
+    }
+
+    var calledOnFailure = false
+    userViewModel.authenticate(
+        { fail("Call to onSuccess was not expected") }, { calledOnFailure = true })
+
+    // Check if the repository was called
+    verify(authenticator).authenticate(any(), any())
+    assert(calledOnFailure)
+  }
+
+  @Test
+  @Suppress("UNCHECKED_CAST")
+  fun testSignInSuccess() {
+    val testUser = TestInstancesUser.user1
+    `when`(authenticator.authenticate(any(), any())).thenAnswer { invocation ->
+      val onComplete = invocation.arguments[0] as (String) -> Unit
+      onComplete(testUser.public.userId)
+    }
+    `when`(userRepository.getUserById(eq(testUser.public.userId), any(), any())).thenAnswer {
+        invocation ->
+      val onSuccess = invocation.arguments[1] as (User) -> Unit
+      onSuccess(testUser)
+    }
+
+    var calledOnComplete = false
+    userViewModel.signIn(
+        {
+          calledOnComplete = true
+          assert(it == testUser)
+        },
+        { fail("Call to onFailure was not expected") })
+
+    // Check if the repository was called
+    verify(authenticator).authenticate(any(), any())
+    assert(calledOnComplete)
+    assert(userViewModel.currentUser.value == testUser)
+    assert(
+        userViewModel.favoriteParkings.value.all { it.uid in testUser.details!!.favoriteParkings })
+  }
+
+  @Test
+  @Suppress("UNCHECKED_CAST")
+  fun testSignInAccountNotFound() {
+    val testUser = TestInstancesUser.user1
+    `when`(authenticator.authenticate(any(), any())).thenAnswer { invocation ->
+      val onComplete = invocation.arguments[0] as (String) -> Unit
+      onComplete(testUser.public.userId)
+    }
+    `when`(userRepository.getUserById(eq(testUser.public.userId), any(), any())).thenAnswer {
+        invocation ->
+      val onFailure = invocation.arguments[2] as (Exception) -> Unit
+      onFailure(Exception())
+    }
+
+    var calledOnFailure = false
+    userViewModel.signIn(
+        { fail("Call to onFailure was not expected") },
+        {
+          calledOnFailure = true
+          assert(it == UserViewModel.SignInFailureReason.ACCOUNT_NOT_FOUND)
+        })
+
+    // Check if the repository was called
+    verify(authenticator).authenticate(any(), any())
+    assert(calledOnFailure)
+  }
+
+  @Test
+  @Suppress("UNCHECKED_CAST")
+  fun testSignInAuthenticationFailed() {
+    `when`(authenticator.authenticate(any(), any())).thenAnswer { invocation ->
+      val onFailure = invocation.arguments[1] as (Exception) -> Unit
+      onFailure(Exception())
+    }
+
+    var calledOnFailure = false
+    userViewModel.signIn(
+        { fail("Call to onFailure was not expected") },
+        {
+          calledOnFailure = true
+          assert(it == UserViewModel.SignInFailureReason.ERROR)
+        })
+
+    // Check if the repository was called
+    verify(authenticator).authenticate(any(), any())
+    assert(calledOnFailure)
+  }
+
+  @Test
+  @Suppress("UNCHECKED_CAST")
+  fun testSignInAnonymously() {
+    `when`(authenticator.authenticateAnonymously(any())).thenAnswer { invocation ->
+      val onComplete = invocation.arguments[0] as () -> Unit
+      onComplete()
+    }
+
+    var calledOnComplete = false
+    userViewModel.signInAnonymously { calledOnComplete = true }
+
+    // Check if the repository was called
+    verify(authenticator).authenticateAnonymously(any())
+    assert(calledOnComplete)
+  }
+
+  @Test
+  @Suppress("UNCHECKED_CAST")
+  fun testSignOut() {
+    `when`(authenticator.signOut(any())).thenAnswer { invocation ->
+      val onComplete = invocation.arguments[0] as () -> Unit
+      onComplete()
+    }
+
+    var calledOnComplete = false
+    userViewModel.signOut { calledOnComplete = true }
+
+    // Check if the repository was called
+    verify(authenticator).signOut(any())
+    assert(calledOnComplete)
   }
 
   @Test
