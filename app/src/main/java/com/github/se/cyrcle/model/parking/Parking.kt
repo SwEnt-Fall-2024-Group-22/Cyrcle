@@ -43,7 +43,8 @@ data class ParkingReport(
     val uid: String,
     val reason: ParkingReportReason,
     val userId: String,
-    val parking: String
+    val parking: String,
+    val description: String
 )
 
 interface ParkingAttribute : DropDownableEnum
