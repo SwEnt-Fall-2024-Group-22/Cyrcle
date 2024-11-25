@@ -383,9 +383,11 @@ fun MapScreen(
       ZoomControls(
           modifier = Modifier.align(Alignment.TopEnd),
           onZoomIn = {
+            mapViewModel.removePreviewCard()
             mapViewportState.setCameraOptions { zoom(mapViewportState.cameraState!!.zoom + 1.0) }
           },
           onZoomOut = {
+            mapViewModel.removePreviewCard()
             mapViewportState.setCameraOptions { zoom(mapViewportState.cameraState!!.zoom - 1.0) }
           })
 
@@ -399,6 +401,7 @@ fun MapScreen(
                     .scale(1.2f)
                     .testTag("recenterButton"),
             onClick = {
+              mapViewModel.removePreviewCard()
               mapViewModel.updateTrackingMode(true)
               mapViewportState.transitionToFollowPuckState(
                   FollowPuckViewportStateOptions.Builder()
