@@ -186,4 +186,12 @@
 
     <!-- TopAppBar -->
     <string name="top_app_bar_go_back">Go Back</string>
+
+    <!-- GamblingScreen -->
+    <string name="spin_button_text">SPIN</string>
+    <string name="rarity_nothing">Nothing</string>
+    <string name="rarity_legendary">Legendary</string>
+    <string name="rarity_common">Common</string>
+    <string name="rarity_rare">Rare</string>
+    <string name="rarity_epic">Epic</string>
 </resources>
