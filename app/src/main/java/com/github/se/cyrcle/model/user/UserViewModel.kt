@@ -62,7 +62,7 @@ class UserViewModel(
    * @param userId the ID of the user to get
    * @param onSuccess the callback to call with the user
    */
-  fun getUserById(userId: String, onSuccess: (User) -> Unit) {
+  fun getUserById(userId: String, onSuccess: (User) -> Unit, onFailure: () -> Unit = {}) {
     Log.d("UserViewModel", "Getting the current user by ID: $userId")
     userRepository.getUserById(
         userId,
@@ -77,6 +77,7 @@ class UserViewModel(
               "com.github.se.cyrcle.model.user.UserViewModel",
               "Failed to fetch user by ID: $userId",
               exception)
+          onFailure()
         })
   }
 
@@ -221,7 +222,7 @@ class UserViewModel(
     authenticator.authenticate(
         // On successful authentication
         { userID ->
-          userRepository.getUserById(
+          getUserById(
               userID,
               // On successful user retrieval
               {

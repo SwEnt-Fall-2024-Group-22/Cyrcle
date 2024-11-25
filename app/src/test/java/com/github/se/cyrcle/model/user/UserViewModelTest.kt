@@ -266,7 +266,7 @@ class UserViewModelTest {
       onSuccess(TestInstancesUser.user1)
     }
     // Check that the user returned is the correct one and that onSuccess is called.
-    userViewModel.getUserById("user1") { assert(it == TestInstancesUser.user1) }
+    userViewModel.getUserById("user1", { assert(it == TestInstancesUser.user1) })
     verify(userRepository).getUserById(eq("user1"), any(), any())
   }
 
