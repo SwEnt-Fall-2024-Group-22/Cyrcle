@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.gambling
 
-import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -106,7 +105,7 @@ fun WheelView(
 
         val segmentAngle = 360f / segments.size
         var requiredRotation = ((targetSegment - currentSegment) * segmentAngle)
-        val landingAngle = (270 - ((rotation - requiredRotation) % 360)) % 360
+        val landingAngle = (270 - rotation + requiredRotation) % 360
         val angleWithinSegment = landingAngle % segmentAngle
         val shouldTriggerNearMiss = Math.random() < 0.33f
         var randomOffset = 0f
