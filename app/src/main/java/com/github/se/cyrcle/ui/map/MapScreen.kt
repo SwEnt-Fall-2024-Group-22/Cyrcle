@@ -351,6 +351,8 @@ fun MapScreen(
               pLabelAnnotationManager?.deleteAll()
               rectangleAnnotationManager?.deleteAll()
               markerAnnotationManager?.deleteAll()
+              mapViewModel.removePreviewCard()
+              mapViewModel.updateViewAnnotationManager(null)
             }
           }
         }

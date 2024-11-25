@@ -197,7 +197,7 @@ class MapViewModel : ViewModel() {
    *
    * @param viewAnnotationManager the ViewAnnotationManager to update
    */
-  fun updateViewAnnotationManager(viewAnnotationManager: ViewAnnotationManager) {
+  fun updateViewAnnotationManager(viewAnnotationManager: ViewAnnotationManager?) {
     _viewAnnotationManager.value = viewAnnotationManager
   }
 
