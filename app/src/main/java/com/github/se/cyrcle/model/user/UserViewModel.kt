@@ -99,7 +99,7 @@ class UserViewModel(
    */
   fun addUser(user: User, onComplete: () -> Unit, onFailure: () -> Unit) {
     userRepository.addUser(user, onComplete) {
-      Log.e("UserViewModel", "Failed to add user: ${user.public.userId}", it)
+      Log.e("UserViewModel", "Failed to add user: $user", it)
       onFailure()
     }
   }
@@ -187,6 +187,7 @@ class UserViewModel(
 
   /**
    * Authenticates a user and provides the user ID to the onSuccess callback.
+   * The given User ID is unique to the authentication provider, it has no link to our database
    *
    * @param onSuccess the callback to call with the userID
    * @param onFailure the callback to call if the sign in fails
@@ -209,14 +210,14 @@ class UserViewModel(
   }
 
   /**
-   * Sign in a User : If he doesn't have an account on the database, it will create a new user. If
-   * he does we retrieve the user from the database and set it as the current user.
+   * Sign in a User: Signs the user into the app and calls on success with it.
+   * If the user is not found in the database, it calls onFailure with ACCOUNT_NOT_FOUND.
+   * If the sign in fails, it calls onFailure with ERROR.
    *
    * @param onSuccess the callback to call with the user
    * @param onFailure the callback to call if the sign in fails
    */
   fun signIn(onSuccess: (User) -> Unit, onFailure: (SignInFailureReason) -> Unit) {
-    // TODO differentiate between account not found and error for login
     authenticate(
         // On successful authentication
         { userID ->
@@ -252,7 +253,7 @@ class UserViewModel(
   }
 
   /**
-   * Signs out the current user by setting the state to null
+   * Signs the user out of the app
    *
    * @param onComplete the callback to call on completion
    */
