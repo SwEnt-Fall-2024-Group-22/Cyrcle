@@ -30,9 +30,7 @@ fun storeTile(zoomLevel: Int, x: Int, y: Int, tileData: ByteArray, forceWrite: B
  * @param x The x-coordinate of the tile.
  * @param y The y-coordinate of the tile.
  * @return The byte array of the tile data, or null if the tile does not exist.
- * @throws IOException If an I/O error occurs.
  */
-@Throws(IOException::class)
 fun loadTile(zoomLevel: Int, x: Int, y: Int): ByteArray? {
   val tileFile = File("$CACHE_DIR/$zoomLevel/$x/$y.$EXTENSION_NAME")
   return if (tileFile.exists()) {
