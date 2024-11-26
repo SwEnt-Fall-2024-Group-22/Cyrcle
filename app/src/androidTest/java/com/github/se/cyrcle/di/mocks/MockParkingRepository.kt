@@ -14,7 +14,7 @@ class MockParkingRepository @Inject constructor() : ParkingRepository {
   private val reports =
       mutableListOf(
           ParkingReport(
-              "1", ParkingReportReason.INEXISTANT, "1", TestInstancesParking.parking1.uid))
+              "1", ParkingReportReason.INEXISTANT, "1", TestInstancesParking.parking1.uid, ""))
 
   override fun getNewUid(): String {
     return (uid++).toString()

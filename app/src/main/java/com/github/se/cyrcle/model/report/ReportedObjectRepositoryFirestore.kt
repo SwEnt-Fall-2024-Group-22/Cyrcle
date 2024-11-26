@@ -3,8 +3,50 @@ package com.github.se.cyrcle.model.report
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonDeserializationContext
+import com.google.gson.JsonDeserializer
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
+import com.google.gson.JsonParseException
+import com.google.gson.JsonSerializationContext
+import com.google.gson.JsonSerializer
 import com.google.gson.reflect.TypeToken
+import java.lang.reflect.Type
 import javax.inject.Inject
+
+/**
+ * A Firestore-backed implementation of the ReportedObjectRepository. Manages CRUD operations for
+ * reported objects in a Firestore database.
+ *
+ * @property db The Firestore instance used for database operations.
+ */
+class ReportReasonAdapter : JsonDeserializer<ReportReason>, JsonSerializer<ReportReason> {
+  override fun serialize(
+      src: ReportReason,
+      typeOfSrc: Type,
+      context: JsonSerializationContext
+  ): JsonElement {
+    val jsonObject = JsonObject()
+    jsonObject.addProperty("type", src::class.java.simpleName)
+    jsonObject.add("data", context.serialize(src))
+    return jsonObject
+  }
+
+  override fun deserialize(
+      json: JsonElement,
+      typeOfT: Type,
+      context: JsonDeserializationContext
+  ): ReportReason {
+    val jsonObject = json.asJsonObject
+    val type = jsonObject.get("type").asString
+    val data = jsonObject.get("data")
+    return when (type) {
+      "Review" -> context.deserialize(data, ReportReason.Review::class.java)
+      "Parking" -> context.deserialize(data, ReportReason.Parking::class.java)
+      else -> throw JsonParseException("Unknown type: $type")
+    }
+  }
+}
 
 /**
  * A Firestore-backed implementation of the ReportedObjectRepository. Manages CRUD operations for
@@ -16,7 +58,8 @@ class ReportedObjectRepositoryFirestore @Inject constructor(private val db: Fire
     ReportedObjectRepository {
 
   private val collectionPath = "reported_objects"
-  private val gson: Gson = GsonBuilder().create()
+  private val gson: Gson =
+      GsonBuilder().registerTypeAdapter(ReportReason::class.java, ReportReasonAdapter()).create()
 
   /**
    * Generates a new unique identifier for a reported object.
@@ -39,10 +82,13 @@ class ReportedObjectRepositoryFirestore @Inject constructor(private val db: Fire
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    val reportData = serializeReportedObject(reportedObject)
+    val reportData = gson.toJson(reportedObject) // Serialize to JSON
+    val reportMap: Map<String, Any> =
+        gson.fromJson(reportData, object : TypeToken<Map<String, Any>>() {}.type)
+
     db.collection(collectionPath)
         .document(reportedObject.reportUID)
-        .set(reportData)
+        .set(reportMap)
         .addOnSuccessListener { onSuccess() }
         .addOnFailureListener { onFailure(it) }
   }
@@ -65,7 +111,7 @@ class ReportedObjectRepositoryFirestore @Inject constructor(private val db: Fire
         .addOnSuccessListener { querySnapshot ->
           val reportedObjects =
               querySnapshot.documents.mapNotNull { document ->
-                document.data?.let { deserializeReportedObject(it) }
+                gson.fromJson(document.data?.let { gson.toJson(it) }, ReportedObject::class.java)
               }
           onSuccess(reportedObjects)
         }
@@ -90,7 +136,7 @@ class ReportedObjectRepositoryFirestore @Inject constructor(private val db: Fire
         .addOnSuccessListener { querySnapshot ->
           val reportedObjects =
               querySnapshot.documents.mapNotNull { document ->
-                document.data?.let { deserializeReportedObject(it) }
+                gson.fromJson(document.data?.let { gson.toJson(it) }, ReportedObject::class.java)
               }
           onSuccess(reportedObjects)
         }
@@ -115,7 +161,7 @@ class ReportedObjectRepositoryFirestore @Inject constructor(private val db: Fire
         .addOnSuccessListener { querySnapshot ->
           val reportedObjects =
               querySnapshot.documents.mapNotNull { document ->
-                document.data?.let { deserializeReportedObject(it) }
+                gson.fromJson(document.data?.let { gson.toJson(it) }, ReportedObject::class.java)
               }
           onSuccess(reportedObjects)
         }
@@ -142,22 +188,20 @@ class ReportedObjectRepositoryFirestore @Inject constructor(private val db: Fire
   }
 
   /**
-   * Serializes a [ReportedObject] into a [Map] for Firestore storage.
+   * Serializes a [ReportedObject] into a JSON string.
    *
    * @param reportedObject The reported object to serialize.
-   * @return A [Map] representing the serialized data.
+   * @return A JSON string representation of the reported object.
    */
-  fun serializeReportedObject(reportedObject: ReportedObject): Map<String, Any> {
-    val json = gson.toJson(reportedObject)
-    val type = object : TypeToken<Map<String, Any>>() {}.type
-    return gson.fromJson(json, type)
+  fun serializeReportedObject(reportedObject: ReportedObject): String {
+    return gson.toJson(reportedObject)
   }
 
   /**
-   * Deserializes a Firestore [Map] into a [ReportedObject].
+   * Deserializes a JSON string into a [ReportedObject].
    *
-   * @param data The [Map] retrieved from Firestore containing the reported object data.
-   * @return A [ReportedObject] reconstructed from the serialized data.
+   * @param data A JSON string representation of a reported object.
+   * @return A [ReportedObject] instance.
    */
   fun deserializeReportedObject(data: Map<String, Any>): ReportedObject {
     val json = gson.toJson(data)

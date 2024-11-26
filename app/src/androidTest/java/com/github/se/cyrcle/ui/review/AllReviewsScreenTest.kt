@@ -67,14 +67,13 @@ class AllReviewsScreenTest {
   }
 
   @Test
-  fun allReviewsScreen_displaysTopBarAndList() {
+  fun allReviewsScreen_displaysList() {
 
     composeTestRule.setContent {
       AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
       userViewModel.setCurrentUser(TestInstancesUser.user1)
     }
 
-    composeTestRule.onNodeWithTag("AllReviewsScreenBox").assertIsDisplayed()
     composeTestRule.onNodeWithTag("ReviewCard0").assertIsDisplayed()
     composeTestRule.onNodeWithTag("ReviewCard1").assertIsDisplayed()
   }

@@ -39,69 +39,69 @@ fun CyrcleNavHost(
     addressViewModel: AddressViewModel,
     permissionHandler: PermissionHandler
 ) {
-    NavHost(navController = navController, startDestination = Route.AUTH) {
-        navigation(
-            startDestination = Screen.AUTH,
-            route = Route.AUTH,
-        ) {
-            composable(Screen.AUTH) { SignInScreen(navigationActions, userViewModel) }
-            composable(Screen.CREATE_PROFILE) { CreateProfileScreen(navigationActions, userViewModel) }
-        }
-
-        navigation(
-            startDestination = Screen.LIST,
-            route = Route.LIST,
-        ) {
-            composable(Screen.LIST) {
-                SpotListScreen(navigationActions, parkingViewModel, mapViewModel, userViewModel)
-            }
-            composable(Screen.PARKING_DETAILS) {
-                ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
-            }
-        }
-        navigation(
-            startDestination = Screen.ALL_REVIEWS,
-            route = Route.REVIEW,
-        ) {
-            composable(Screen.ADD_REVIEW) {
-                ReviewScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
-            }
-            composable(Screen.ALL_REVIEWS) {
-                AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
-            }
-            composable(Screen.PARKING_REPORT) {
-                ParkingReportScreen(navigationActions,userViewModel,parkingViewModel)
-            }
-            composable(Screen.REVIEW_REPORT) {
-                ReviewReportScreen(navigationActions,userViewModel,reviewViewModel)
-            }
-        }
-
-        navigation(
-            startDestination = Screen.MAP,
-            route = Route.MAP,
-        ) {
-            composable(Screen.MAP) {
-                MapScreen(
-                    navigationActions, parkingViewModel, userViewModel, mapViewModel, permissionHandler)
-            }
-        }
-
-        navigation(startDestination = Screen.LOCATION_PICKER, route = Route.ADD_SPOTS) {
-            composable(Screen.LOCATION_PICKER) { LocationPicker(navigationActions, mapViewModel) }
-            composable(Screen.ATTRIBUTES_PICKER) {
-                AttributesPicker(navigationActions, parkingViewModel, mapViewModel, addressViewModel)
-            }
-            composable(Screen.RACK_INFO) { RackTypeHelpScreen(navigationActions) }
-        }
-
-        navigation(
-            startDestination = Screen.VIEW_PROFILE,
-            route = Route.VIEW_PROFILE,
-        ) {
-            composable(Screen.VIEW_PROFILE) {
-                ProfileScreen(navigationActions, userViewModel, parkingViewModel)
-            }
-        }
+  NavHost(navController = navController, startDestination = Route.AUTH) {
+    navigation(
+        startDestination = Screen.AUTH,
+        route = Route.AUTH,
+    ) {
+      composable(Screen.AUTH) { SignInScreen(navigationActions, userViewModel) }
+      composable(Screen.CREATE_PROFILE) { CreateProfileScreen(navigationActions, userViewModel) }
     }
+
+    navigation(
+        startDestination = Screen.LIST,
+        route = Route.LIST,
+    ) {
+      composable(Screen.LIST) {
+        SpotListScreen(navigationActions, parkingViewModel, mapViewModel, userViewModel)
+      }
+      composable(Screen.PARKING_DETAILS) {
+        ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
+      }
+    }
+    navigation(
+        startDestination = Screen.ALL_REVIEWS,
+        route = Route.REVIEW,
+    ) {
+      composable(Screen.ADD_REVIEW) {
+        ReviewScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
+      }
+      composable(Screen.ALL_REVIEWS) {
+        AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
+      }
+      composable(Screen.PARKING_REPORT) {
+        ParkingReportScreen(navigationActions, userViewModel, parkingViewModel)
+      }
+      composable(Screen.REVIEW_REPORT) {
+        ReviewReportScreen(navigationActions, userViewModel, reviewViewModel)
+      }
+    }
+
+    navigation(
+        startDestination = Screen.MAP,
+        route = Route.MAP,
+    ) {
+      composable(Screen.MAP) {
+        MapScreen(
+            navigationActions, parkingViewModel, userViewModel, mapViewModel, permissionHandler)
+      }
+    }
+
+    navigation(startDestination = Screen.LOCATION_PICKER, route = Route.ADD_SPOTS) {
+      composable(Screen.LOCATION_PICKER) { LocationPicker(navigationActions, mapViewModel) }
+      composable(Screen.ATTRIBUTES_PICKER) {
+        AttributesPicker(navigationActions, parkingViewModel, mapViewModel, addressViewModel)
+      }
+      composable(Screen.RACK_INFO) { RackTypeHelpScreen(navigationActions) }
+    }
+
+    navigation(
+        startDestination = Screen.VIEW_PROFILE,
+        route = Route.VIEW_PROFILE,
+    ) {
+      composable(Screen.VIEW_PROFILE) {
+        ProfileScreen(navigationActions, userViewModel, parkingViewModel)
+      }
+    }
+  }
 }

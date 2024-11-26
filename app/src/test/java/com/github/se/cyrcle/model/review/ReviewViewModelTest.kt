@@ -37,7 +37,8 @@ class ReviewViewModelTest {
             uid = "report1",
             reason = ReviewReportReason.HARMFUL,
             userId = user.public.userId,
-            review = review.uid)
+            review = review.uid,
+            "")
 
     // Mock repository behavior for report addition
     `when`(reviewRepository.addReport(eq(report), any(), any())).then {

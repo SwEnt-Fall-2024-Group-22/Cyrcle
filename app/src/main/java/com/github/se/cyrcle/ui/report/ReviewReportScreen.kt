@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,8 +14,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -30,20 +27,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.cyrcle.R
-import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.review.ReviewReport
 import com.github.se.cyrcle.model.review.ReviewReportReason
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
-import com.github.se.cyrcle.ui.addParking.attributes.DESCRIPTION_MAX_LENGTH
-import com.github.se.cyrcle.ui.addParking.attributes.DESCRIPTION_MIN_LENGTH
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.atoms.ConditionCheckingInputText
 import com.github.se.cyrcle.ui.theme.disabledColor
@@ -57,162 +49,133 @@ fun ReviewReportScreen(
     userViewModel: UserViewModel,
     reviewViewModel: ReviewViewModel,
 ) {
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp
-    val screenHeight = configuration.screenHeightDp.dp
-    var showDialog = remember { mutableStateOf(false) }
+  val configuration = LocalConfiguration.current
+  val screenWidth = configuration.screenWidthDp.dp
+  val screenHeight = configuration.screenHeightDp.dp
+  var showDialog = remember { mutableStateOf(false) }
 
-    // Define padding as a percentage of screen dimensions
-    val horizontalPaddingScaleFactor = screenWidth * 0.03f
-    val topBoxHeight = screenHeight * 0.10f // 10% of screen height for top box
-    val verticalPaddingScaleFactor = screenHeight * 0.02f
+  // Define padding as a percentage of screen dimensions
+  val horizontalPaddingScaleFactor = screenWidth * 0.03f
+  val topBoxHeight = screenHeight * 0.10f // 10% of screen height for top box
+  val verticalPaddingScaleFactor = screenHeight * 0.02f
 
-    // State for report inputs
-    val selectedReason = rememberSaveable { mutableStateOf<ReviewReportReason>(ReviewReportReason.IRRELEVANT) }
-    val reviewId = reviewViewModel.selectedReview.value?.uid
-    val reportDescription = rememberSaveable { mutableStateOf("") }
-    val userId = userViewModel.currentUser.value?.public?.userId
+  // State for report inputs
+  val selectedReason = rememberSaveable {
+    mutableStateOf<ReviewReportReason>(ReviewReportReason.IRRELEVANT)
+  }
+  val reviewId = reviewViewModel.selectedReview.value?.uid
+  val reportDescription = rememberSaveable { mutableStateOf("") }
+  val userId = userViewModel.currentUser.value?.public?.userId
 
-    fun onSubmit() {
-        if (selectedReason.value != null && reviewId != null) {
-            val report = ReviewReport(
-                uid = reviewViewModel.getNewUid(),
-                reason = selectedReason.value!!,
-                userId = userId ?: "",
-                review = reviewId,
-                description = reportDescription.value
-            )
-            reviewViewModel.addReport(report, userViewModel.currentUser.value!!)
-            navigationActions.goBack()
-        }
+  fun onSubmit() {
+    if (selectedReason.value != null && reviewId != null) {
+      val report =
+          ReviewReport(
+              uid = reviewViewModel.getNewUid(),
+              reason = selectedReason.value!!,
+              userId = userId ?: "",
+              review = reviewId,
+              description = reportDescription.value)
+      reviewViewModel.addReport(report, userViewModel.currentUser.value!!)
+      navigationActions.goBack()
     }
+  }
 
-    Scaffold(
-        modifier = Modifier.testTag("ReviewReportScreen"),
-        topBar = {
-            TopAppBar(
-                navigationActions,
-                title = "Report Review: ${reviewViewModel.selectedReview.value?.text?.take(30) ?: reviewId}"
-            )
-        },
-    ) { padding ->
-        val scaledPaddingValues = PaddingValues(
-            horizontal = horizontalPaddingScaleFactor,
-            vertical = verticalPaddingScaleFactor
-        )
+  Scaffold(
+      modifier = Modifier.testTag("ReviewReportScreen"),
+      topBar = {
+        TopAppBar(
+            navigationActions,
+            title =
+                stringResource(R.string.report_a_review)
+                    .format(reviewViewModel.selectedReview.value?.text?.take(30) ?: reviewId))
+      },
+  ) { padding ->
+    val scaledPaddingValues =
+        PaddingValues(
+            horizontal = horizontalPaddingScaleFactor, vertical = verticalPaddingScaleFactor)
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
+    Column(
+        modifier =
+            Modifier.fillMaxSize()
                 .padding(scaledPaddingValues)
                 .verticalScroll(rememberScrollState())
                 .testTag("ReviewReportColumn"),
-            horizontalAlignment = Alignment.Start
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(topBoxHeight)
-                    .background(MaterialTheme.colorScheme.background)
-            )
+        horizontalAlignment = Alignment.Start) {
+          Box(
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .height(topBoxHeight)
+                      .background(MaterialTheme.colorScheme.background))
 
-            // Text Block Section
-            Text(
-                text = "The following will be submitted in your report:",
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Start
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-            )
+          // Text Block Section
+          Text(
+              text = stringResource(R.string.report_title),
+              style =
+                  MaterialTheme.typography.titleMedium.copy(
+                      fontWeight = FontWeight.Bold, textAlign = TextAlign.Start),
+              modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("ReportTitle"))
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, bottom = 16.dp), // Indent bullet points
-                verticalArrangement = Arrangement.spacedBy(8.dp) // Add space between points
-            ) {
-                BulletPoint("Your User Information")
-                BulletPoint("This Review's information")
-                BulletPoint("Reason + Description below")
-            }
+          Column(
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .padding(start = 16.dp, bottom = 16.dp) // Indent bullet points
+                      .testTag("ReportBulletPoints"),
+              verticalArrangement = Arrangement.spacedBy(8.dp) // Add space between points
+              ) {
+                BulletPoint(
+                    stringResource(R.string.report_bullet_point_1), testTag = "BulletPoint1")
+                BulletPoint(
+                    stringResource(R.string.report_bullet_point_2_review), testTag = "BulletPoint2")
+                BulletPoint(
+                    stringResource(R.string.report_bullet_point_3), testTag = "BulletPoint3")
+              }
 
-            // Select Reason
-            EnumDropDown(
-                options = ReviewReportReason.entries,
-                selectedValue = selectedReason,
-                label = "Reason for Reporting"
-            )
+          // Select Reason
+          EnumDropDown(
+              options = ReviewReportReason.entries,
+              selectedValue = selectedReason,
+              label = stringResource(R.string.report_reason),
+              modifier = Modifier.testTag("ReasonDropdown"))
 
-            // Additional Details Input
-            ConditionCheckingInputText(
-                value = reportDescription.value,
-                onValueChange = { reportDescription.value = it },
-                label = "Additional Details (Optional)",
-                minCharacters = 0,
-                maxCharacters = 256,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = horizontalPaddingScaleFactor)
-            )
+          // Additional Details Input
+          ConditionCheckingInputText(
+              value = reportDescription.value,
+              onValueChange = { reportDescription.value = it },
+              label = stringResource(R.string.report_details),
+              minCharacters = 0,
+              maxCharacters = 256,
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .padding(horizontal = horizontalPaddingScaleFactor)
+                      .testTag("DetailsInput"))
 
-            val validInputs = areInputsValid(reportDescription.value)
+          val validInputs = areInputsValid(reportDescription.value)
 
-            if (showDialog.value) {
-                ReportScreenAlertDialog(onDismiss = {
-                    showDialog.value = false
-                }, onAccept = {
-                    showDialog.value = false
-                    if (validInputs) onSubmit()
-                    navigationActions.goBack()
+          if (showDialog.value) {
+            ReportScreenAlertDialog(
+                onDismiss = { showDialog.value = false },
+                onAccept = {
+                  showDialog.value = false
+                  if (validInputs) onSubmit()
+                  navigationActions.goBack()
                 })
-            }
+          }
 
-            Button(
-                onClick = { showDialog.value = true },
-                modifier = Modifier
-                    .testTag("submitButton")
-                    .padding(top = 16.dp)
-                    .align(alignment = Alignment.CenterHorizontally),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
-            ) {
+          Button(
+              onClick = { showDialog.value = true },
+              modifier =
+                  Modifier.testTag("SubmitButton")
+                      .padding(top = 16.dp)
+                      .align(alignment = Alignment.CenterHorizontally),
+              colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
                 Text(
                     text = stringResource(R.string.attributes_picker_bottom_bar_submit_button),
                     color = if (validInputs) MaterialTheme.colorScheme.primary else disabledColor(),
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
-                    textAlign = TextAlign.Center
-                )
-            }
+                    textAlign = TextAlign.Center)
+              }
         }
-    }
-}
-
-@Composable
-fun BulletPoint(text: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth(0.85f), // Centers the content and adjusts the width
-        verticalAlignment = Alignment.Top
-    ) {
-        Text(
-            text = "\u2022",
-            style = MaterialTheme.typography.bodyLarge.copy(
-                fontSize = 18.sp,
-                color = MaterialTheme.colorScheme.primary
-            ),
-            modifier = Modifier.padding(end = 8.dp)
-        )
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
-            modifier = Modifier.weight(1f) // Ensures wrapping if the text is too long
-        )
-    }
-}
-
-private fun areInputsValid(description: String): Boolean {
-    return description.length in DESCRIPTION_MIN_LENGTH..DESCRIPTION_MAX_LENGTH
+  }
 }

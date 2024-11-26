@@ -51,8 +51,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.github.se.cyrcle.R
-import com.github.se.cyrcle.model.parking.ParkingReport
-import com.github.se.cyrcle.model.parking.ParkingReportReason
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.user.MAX_NOTE_LENGTH
 import com.github.se.cyrcle.model.user.UserViewModel
@@ -444,9 +442,7 @@ fun ParkingDetailsScreen(
                     if (userViewModel.currentUser.value != null) {
                       Button(
                           text = stringResource(R.string.card_screen_report),
-                          onClick = {
-                              navigationActions.navigateTo(Screen.PARKING_REPORT)
-                          },
+                          onClick = { navigationActions.navigateTo(Screen.PARKING_REPORT) },
                           modifier = Modifier.fillMaxWidth(),
                           colorLevel = ColorLevel.ERROR,
                           testTag = "ReportButton")

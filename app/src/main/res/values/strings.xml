@@ -170,6 +170,7 @@
     <string name="add_review">Add Review</string>
     <string name="edit_review">Edit Review</string>
     <string name="review_deleted">Review Deleted!</string>
+    <string name="report_review">Report Review</string>
     <string name="review_reported">Review Reported!</string>
 
     <!-- Review Screen -->
@@ -197,4 +198,19 @@
     <string name="rarity_common">Common</string>
     <string name="rarity_rare">Rare</string>
     <string name="rarity_epic">Epic</string>
+
+    <!-- Report Screens -->
+    <string name="report_title">The following will be submitted in your report:</string>
+    <string name="report_parking">Report Parking: %s</string>
+    <string name="report_a_review">Report Parking: %s</string>
+    <string name="report_bullet_point_1">Your User Information</string>
+    <string name="report_bullet_point_2_parking">This Parking\'s information</string>
+    <string name="report_bullet_point_2_review">This Review\'s information</string>
+    <string name="report_bullet_point_3">Reason + Description below</string>
+    <string name="report_reason">Reason for Reporting</string>
+    <string name="report_details">Additional Details (Optional)</string>
+    <string name="alert_content">We take reports very seriously. Please make sure that the information you have mentioned is accurate. If enough users also submit reports on this object, it will be flagged for administrator review. Do you still want to add this Report?</string>
+    <string name="alert_title">Are You Sure?</string>
+
+
 </resources>
