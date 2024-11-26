@@ -491,7 +491,8 @@ class ParkingViewModel(
         fileUri = imageUri,
         destinationPath = destinationPath,
         onSuccess = {
-            val updatedParking = selectedParking.copy(images = selectedParking.images.plus(destinationPath))
+          val updatedParking =
+              selectedParking.copy(images = selectedParking.images.plus(destinationPath))
           selectParking(updatedParking)
           parkingRepository.updateParking(
               updatedParking,
