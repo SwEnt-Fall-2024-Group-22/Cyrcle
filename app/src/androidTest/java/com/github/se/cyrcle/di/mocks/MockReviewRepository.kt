@@ -12,7 +12,7 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
   private val reviews = mutableListOf<Review>()
   private val reports =
       mutableListOf(
-          ReviewReport("1", ReviewReportReason.HARMFUL, "1", TestInstancesReview.review1.uid))
+          ReviewReport("1", ReviewReportReason.HARMFUL, "1", TestInstancesReview.review1.uid, ""))
 
   override fun getNewUid(): String {
     return (uid++).toString()

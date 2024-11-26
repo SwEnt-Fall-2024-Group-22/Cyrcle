@@ -14,6 +14,8 @@ object Route {
   const val ADD_SPOTS = "Add Spots"
   const val VIEW_PROFILE = "Profile"
   const val REVIEW = "Review"
+  const val PARKING_REPORT = "Report"
+  const val REVIEW_REPORT = "Report"
 }
 
 object Screen {
@@ -32,6 +34,8 @@ object Screen {
   const val AUTH = "Auth Screen"
   const val VIEW_PROFILE = "Profile Screen"
   const val CREATE_PROFILE = "Create Profile"
+  const val PARKING_REPORT = "Parking Report Screen"
+  const val REVIEW_REPORT = "Review Report Screen"
 }
 
 /**

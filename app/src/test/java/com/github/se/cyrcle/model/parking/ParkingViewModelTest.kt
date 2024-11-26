@@ -118,7 +118,8 @@ class ParkingViewModelTest {
             uid = "report1",
             reason = ParkingReportReason.SAFETY_CONCERN,
             userId = user.public.userId,
-            parking = parking.uid)
+            parking = parking.uid,
+            "")
 
     // Mock repository behavior for report addition
     `when`(parkingRepository.addReport(eq(report), any(), any())).then {

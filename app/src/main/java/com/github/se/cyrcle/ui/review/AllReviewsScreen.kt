@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,8 +42,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.ParkingViewModel
-import com.github.se.cyrcle.model.review.ReviewReport
-import com.github.se.cyrcle.model.review.ReviewReportReason
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
@@ -200,7 +199,7 @@ fun AllReviewsScreen(
 
   LaunchedEffect(Unit) {
     reviewViewModel.clearReviews()
-    reviewViewModel.getReviewsByParking(selectedParking!!.uid)
+    selectedParking?.let { reviewViewModel.getReviewsByParking(it.uid) }
   }
 
   LaunchedEffect(reviewsList) {
@@ -225,169 +224,150 @@ fun AllReviewsScreen(
                 .format(selectedParking?.optName ?: stringResource(R.string.default_parking_name)))
       },
       modifier = Modifier.testTag("AllReviewsScreen")) { innerPadding ->
-        Box(
-            modifier =
-                Modifier.fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .testTag("AllReviewsScreenBox")
-                    .padding(innerPadding)) {
-              Column {
-                // Add the FilterHeader here
-                FilterHeader(
-                    selectedSortingOption = selectedSortingOption,
-                    onSortingOptionSelected = { selectedOption ->
-                      selectedSortingOption = selectedOption
-                    })
+        Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+          // Header Section
+          FilterHeader(
+              selectedSortingOption = selectedSortingOption,
+              onSortingOptionSelected = { selectedOption ->
+                selectedSortingOption = selectedOption
+              })
 
-                LazyColumn(
-                    modifier =
-                        Modifier.fillMaxWidth().padding(horizontal = 16.dp).testTag("ReviewList")) {
-                      items(items = sortedReviews) { curReview ->
-                        val index = sortedReviews.indexOf(curReview)
-                        val isExpanded = selectedCardIndex == index
-                        val cardHeight by
-                            animateDpAsState(
-                                if (isExpanded) 250.dp
-                                else 150.dp) // Adjust card height to account for ReviewSize +
-                        // Report button
-                        val cardColor = MaterialTheme.colorScheme.surfaceContainer
-                        Card(
-                            modifier =
-                                Modifier.fillMaxWidth()
-                                    .padding(8.dp)
-                                    .height(cardHeight)
-                                    .clickable { selectedCardIndex = if (isExpanded) -1 else index }
-                                    .testTag("ReviewCard$index"),
-                            colors = CardDefaults.cardColors(containerColor = cardColor),
-                            shape = MaterialTheme.shapes.medium,
-                            elevation = CardDefaults.cardElevation(8.dp)) {
-                              Column(
-                                  modifier =
-                                      Modifier.fillMaxWidth()
-                                          .padding(16.dp)
-                                          .testTag("ReviewCardContent$index")) {
-                                    val defaultUsername =
-                                        stringResource(R.string.undefined_username)
-                                    val uidOfOwner = remember { mutableStateOf(defaultUsername) }
-                                    userViewModel.getUserById(
-                                        curReview.owner, { uidOfOwner.value = it.public.username })
+          // Scrollable Review Cards
+          LazyColumn(
+              modifier = Modifier.weight(1f).padding(horizontal = 16.dp).testTag("ReviewList"),
+              contentPadding = PaddingValues(bottom = 16.dp)) {
+                items(items = sortedReviews) { curReview ->
+                  val index = sortedReviews.indexOf(curReview)
+                  val isExpanded = selectedCardIndex == index
+                  val cardHeight by
+                      animateDpAsState(
+                          if (isExpanded) 350.dp
+                          else 150.dp) // Adjust card height based on selection
+                  val cardColor = MaterialTheme.colorScheme.surfaceContainer
 
-                                    // Review details
-                                    Text(
-                                        text =
-                                            stringResource(R.string.by_text)
-                                                .format(uidOfOwner.value),
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        modifier = Modifier.testTag("ReviewOwner$index"))
-                                    Text(
-                                        text =
-                                            stringResource(R.string.on_text)
-                                                .format(curReview.time.toFormattedDate()),
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        modifier = Modifier.testTag("ReviewDate$index"))
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    ScoreStars(
-                                        curReview.rating,
-                                        scale = 0.9f,
-                                        starColor = MaterialTheme.colorScheme.onPrimaryContainer)
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = curReview.text,
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        modifier = Modifier.testTag("ReviewText$index"))
-                                    Spacer(modifier = Modifier.height(16.dp))
+                  Card(
+                      modifier =
+                          Modifier.fillMaxWidth()
+                              .padding(8.dp)
+                              .height(cardHeight)
+                              .clickable { selectedCardIndex = if (isExpanded) -1 else index }
+                              .testTag("ReviewCard$index"),
+                      colors = CardDefaults.cardColors(containerColor = cardColor),
+                      shape = MaterialTheme.shapes.medium,
+                      elevation = CardDefaults.cardElevation(8.dp)) {
+                        Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                          Column(
+                              modifier =
+                                  Modifier.fillMaxWidth()
+                                      .align(Alignment.TopStart)
+                                      .testTag("ReviewCardContent$index")) {
+                                val defaultUsername = stringResource(R.string.undefined_username)
+                                val uidOfOwner = remember { mutableStateOf(defaultUsername) }
+                                userViewModel.getUserById(
+                                    curReview.owner, { uidOfOwner.value = it.public.username })
 
-                                    if (userViewModel.currentUser.value != null) {
-                                      FloatingActionButton(
-                                          onClick = {
-                                            reviewViewModel.selectReview(curReview)
-                                            reviewViewModel.addReport(
-                                                ReviewReport(
-                                                    "TEST0",
-                                                    ReviewReportReason.HARMFUL,
-                                                    userViewModel.currentUser.value?.public?.userId
-                                                        ?: "TESTUSER",
-                                                    curReview.uid),
-                                                userViewModel.currentUser.value!!)
-                                            Toast.makeText(
-                                                    context, "Review reported!", Toast.LENGTH_SHORT)
-                                                .show()
-                                          },
-                                          containerColor = MaterialTheme.colorScheme.error,
-                                          modifier =
-                                              Modifier.align(Alignment.CenterHorizontally)
-                                                  .height(36.dp)
-                                                  .testTag("ReportReviewButton$index")) {
-                                            Text(
-                                                text = stringResource(R.string.review_reported),
-                                                color = MaterialTheme.colorScheme.onError,
-                                                style = MaterialTheme.typography.bodySmall)
-                                          }
-                                    }
-                                  }
-                            }
-                      }
-                    }
-              }
+                                // Review details
+                                Text(
+                                    text =
+                                        stringResource(R.string.by_text).format(uidOfOwner.value),
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.testTag("ReviewOwner$index"))
+                                Text(
+                                    text =
+                                        stringResource(R.string.on_text)
+                                            .format(curReview.time.toFormattedDate()),
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.testTag("ReviewDate$index"))
+                                Spacer(modifier = Modifier.height(4.dp))
+                                ScoreStars(
+                                    curReview.rating,
+                                    scale = 0.9f,
+                                    starColor = MaterialTheme.colorScheme.onPrimaryContainer)
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = curReview.text,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.testTag("ReviewText$index"))
+                              }
 
-              if (userViewModel.currentUser.value?.public?.userId != null) {
-                val userReview =
-                    reviewsList.find { it.owner == userViewModel.currentUser.value?.public?.userId }
-                Box(
-                    modifier = Modifier.fillMaxSize().padding(16.dp),
-                    contentAlignment = Alignment.BottomEnd) {
-                      Row(
-                          modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                          horizontalArrangement = Arrangement.SpaceBetween) {
+                          // Conditionally show the Report Review button only when the card is
+                          // expanded
+                          if (isExpanded) {
                             FloatingActionButton(
                                 onClick = {
-                                  if (userReview != null) {
-                                    reviewViewModel.deleteReviewById(userReview)
-                                    parkingViewModel.handleReviewDeletion(
-                                        oldScore = userReview.rating)
-                                    Toast.makeText(context, "Review Deleted!", Toast.LENGTH_SHORT)
-                                        .show()
-                                    navigationActions.goBack()
-                                  } else {
-                                    Toast.makeText(
-                                            context, "Add A Review First!", Toast.LENGTH_SHORT)
-                                        .show()
-                                  }
+                                  reviewViewModel.selectReview(curReview)
+                                  navigationActions.navigateTo(Screen.REVIEW_REPORT)
                                 },
-                                containerColor = MaterialTheme.colorScheme.primary,
+                                containerColor = MaterialTheme.colorScheme.errorContainer,
                                 modifier =
-                                    Modifier.weight(1f)
-                                        .padding(end = 8.dp)
-                                        .height(56.dp)
-                                        .testTag("DeleteReviewButton")) {
+                                    Modifier.align(
+                                            Alignment
+                                                .BottomEnd) // Align the button to the bottom-right
+                                        // corner
+                                        .padding(16.dp)
+                                        .testTag("ReportReviewButton$index"),
+                                shape = MaterialTheme.shapes.medium) {
                                   Text(
-                                      text = stringResource(R.string.delete_review),
-                                      color = MaterialTheme.colorScheme.onPrimary,
-                                      style = MaterialTheme.typography.bodyMedium)
-                                }
-
-                            FloatingActionButton(
-                                onClick = { navigationActions.navigateTo(Screen.ADD_REVIEW) },
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                modifier =
-                                    Modifier.weight(1f)
-                                        .padding(start = 8.dp)
-                                        .height(56.dp)
-                                        .testTag("AddOrEditReviewButton")) {
-                                  Text(
-                                      text =
-                                          if (ownerHasReviewed.value)
-                                              stringResource(R.string.edit_review)
-                                          else stringResource(R.string.add_review),
-                                      color = MaterialTheme.colorScheme.onPrimary,
+                                      text = stringResource(R.string.report_review),
+                                      color = MaterialTheme.colorScheme.onErrorContainer,
                                       style = MaterialTheme.typography.bodyMedium)
                                 }
                           }
-                    }
+                        }
+                      }
+                }
               }
-            }
+
+          // Fixed Bottom Buttons
+          if (userViewModel.currentUser.value?.public?.userId != null) {
+            val userReview =
+                reviewsList.find { it.owner == userViewModel.currentUser.value?.public?.userId }
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween) {
+                  FloatingActionButton(
+                      onClick = {
+                        if (userReview != null) {
+                          reviewViewModel.deleteReviewById(userReview)
+                          parkingViewModel.handleReviewDeletion(oldScore = userReview.rating)
+                          Toast.makeText(context, "Review Deleted!", Toast.LENGTH_SHORT).show()
+                          navigationActions.goBack()
+                        } else {
+                          Toast.makeText(context, "Add A Review First!", Toast.LENGTH_SHORT).show()
+                        }
+                      },
+                      containerColor = MaterialTheme.colorScheme.primary,
+                      modifier =
+                          Modifier.weight(1f)
+                              .padding(end = 8.dp)
+                              .height(56.dp)
+                              .testTag("DeleteReviewButton")) {
+                        Text(
+                            text = stringResource(R.string.delete_review),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            style = MaterialTheme.typography.bodyMedium)
+                      }
+
+                  FloatingActionButton(
+                      onClick = { navigationActions.navigateTo(Screen.ADD_REVIEW) },
+                      containerColor = MaterialTheme.colorScheme.primary,
+                      modifier =
+                          Modifier.weight(1f)
+                              .padding(start = 8.dp)
+                              .height(56.dp)
+                              .testTag("AddOrEditReviewButton")) {
+                        Text(
+                            text =
+                                if (ownerHasReviewed.value) stringResource(R.string.edit_review)
+                                else stringResource(R.string.add_review),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            style = MaterialTheme.typography.bodyMedium)
+                      }
+                }
+          }
+        }
       }
 }

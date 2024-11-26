@@ -27,5 +27,6 @@ data class ReviewReport(
     val uid: String,
     val reason: ReviewReportReason,
     val userId: String,
-    val review: String
+    val review: String,
+    val description: String
 )
