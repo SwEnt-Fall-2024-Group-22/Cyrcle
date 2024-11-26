@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.ktfmt)
     alias(libs.plugins.gms)
+    alias(libs.plugins.sonar)
     kotlin("plugin.serialization") version "2.0.21"
     id("jacoco")
 
@@ -226,7 +227,22 @@ dependencies {
 
 jacoco {
     toolVersion = "0.8.12"
-    reportsDirectory = layout.buildDirectory.dir("../../.qodana/code-coverage")
+    //reportsDirectory = layout.buildDirectory.dir("../../.qodana/code-coverage")
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "SwEnt-Fall-2024-Group-22_Cyrcle")
+        property("sonar.projectName", "Cyrcle")
+        property("sonar.organization", "swent-fall-2024-group-22")
+        property("sonar.host.url", "https://sonarcloud.io")
+        // Comma-separated paths to the various directories containing the *.xml JUnit report files. Each path may be absolute or relative to the project base directory.
+        property("sonar.junit.reportPaths", "${project.layout.buildDirectory.get()}/test-results/testDebugUnitTest/")
+        // Paths to xml files with Android Lint issues. If the main flavor is changed, this file will have to be changed too.
+        property("sonar.androidLint.reportPaths", "${project.layout.buildDirectory.get()}/reports/lint-results-debug.xml")
+        // Paths to JaCoCo XML coverage report files.
+        property("sonar.coverage.jacoco.xmlReportPaths", "${project.layout.buildDirectory.get()}/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
+    }
 }
 
 tasks.withType<Test> {
@@ -269,6 +285,15 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     executionData.setFrom(files(
         fileTree(layout.buildDirectory) { include(listOf("**/*.exec", "**/*.ec")) }
     ))
+
+
+    doLast {
+        val reportFile = reports.xml.outputLocation.asFile.get()
+        val newContent = reportFile.readText().replace("<line[^>]+nr=\"65535\"[^>]*>".toRegex(), "")
+        reportFile.writeText(newContent)
+
+        logger.quiet("Wrote summarized jacoco test coverage report xml to ${reportFile.absolutePath}")
+    }
 }
 
 fun initLocalProps(): Properties {

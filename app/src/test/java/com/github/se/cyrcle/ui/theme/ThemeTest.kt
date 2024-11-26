@@ -3,8 +3,11 @@ package com.github.se.cyrcle.ui.theme
 import androidx.compose.ui.graphics.Color
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
-class ColorSchemeTest {
+@RunWith(RobolectricTestRunner::class)
+class ThemeTest {
   data class ColorProperty(val name: String, val color: Color)
 
   @Test
