@@ -237,9 +237,9 @@ tasks.register<JacocoReport>("jacocoTestReport") {
 
     reports {
         xml.required = true
-        xml.outputLocation = layout.projectDirectory.file("../.qodana/code-coverage/jacocoTestReport.xml")
+        xml.outputLocation = layout.projectDirectory.file(".qodana/code-coverage/jacocoTestReport.xml")
         html.required = true
-        html.outputLocation = layout.projectDirectory.dir("../.qodana/code-coverage/jacocoHTML")
+        html.outputLocation = layout.projectDirectory.dir(".qodana/code-coverage/jacocoHTML")
     }
 
     val fileFilter = listOf(
