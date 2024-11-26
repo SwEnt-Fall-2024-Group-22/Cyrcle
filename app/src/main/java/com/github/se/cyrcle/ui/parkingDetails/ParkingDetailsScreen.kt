@@ -16,8 +16,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -31,6 +29,7 @@ import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.AddAPhoto
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.PushPin
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -71,6 +70,7 @@ import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ParkingDetailsScreen(
@@ -88,6 +88,7 @@ fun ParkingDetailsScreen(
   var newParkingImageLocalPath by remember { mutableStateOf("") }
   val showDialog = remember { mutableStateOf(false) }
   val imagesUrls by parkingViewModel.selectedParkingImagesUrls.collectAsState()
+  val showDialogImage = remember { mutableStateOf<String?>(null) }
   // === === === === === === ===
 
   LaunchedEffect(Unit, selectedParking) {
@@ -115,6 +116,10 @@ fun ParkingDetailsScreen(
           showDialog.value = false
           parkingViewModel.uploadImage(newParkingImageLocalPath, context) {}
         })
+  }
+  if (showDialogImage.value != null) {
+    ParkingDetailsAlertDialogShowImage(
+        onDismiss = { showDialogImage.value = null }, imageUrl = showDialogImage.value!!)
   }
 
   Scaffold(
@@ -318,7 +323,7 @@ fun ParkingDetailsScreen(
 
               // Images
               Row(
-                  modifier = Modifier.fillMaxWidth().testTag("ImagesRow"),
+                  modifier = Modifier.height(150.dp).fillMaxWidth().testTag("ImagesRow"),
                   horizontalArrangement = Arrangement.spacedBy(8.dp),
                   verticalAlignment = Alignment.CenterVertically) {
                     // No images
@@ -333,14 +338,17 @@ fun ParkingDetailsScreen(
                       // There are images to display
                     } else {
                       LazyRow(
-                          modifier = Modifier.weight(2f).height(150.dp).testTag("ParkingImagesRow"),
+                          modifier =
+                              Modifier.weight(2f).fillMaxHeight().testTag("ParkingImagesRow"),
                           horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             items(imagesUrls) { url ->
                               Image(
                                   painter = rememberAsyncImagePainter(url),
                                   contentDescription = "Parking Image",
-                                  modifier = Modifier.aspectRatio(1.0F).fillMaxHeight(),
-                              )
+                                  modifier =
+                                      Modifier.aspectRatio(1.0F).fillMaxHeight().clickable {
+                                        showDialogImage.value = url
+                                      })
                             }
                           }
                     }
