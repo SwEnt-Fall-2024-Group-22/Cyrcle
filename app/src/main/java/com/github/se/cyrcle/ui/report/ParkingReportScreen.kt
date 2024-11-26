@@ -1,6 +1,7 @@
 package com.github.se.cyrcle.ui.report
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -12,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -43,6 +45,7 @@ fun ParkingReportScreen(
   val screenWidth = configuration.screenWidthDp.dp
   val screenHeight = configuration.screenHeightDp.dp
   var showDialog by remember { mutableStateOf(false) }
+  val context = LocalContext.current
 
   // Define padding as a percentage of screen dimensions
   val horizontalPaddingScaleFactor = screenWidth * 0.03f
@@ -50,25 +53,22 @@ fun ParkingReportScreen(
   val verticalPaddingScaleFactor = screenHeight * 0.02f
 
   // State for report inputs
-  val selectedReason = rememberSaveable {
-    mutableStateOf<ParkingReportReason>(ParkingReportReason.INEXISTANT)
-  }
+  val selectedReason = rememberSaveable { mutableStateOf(ParkingReportReason.INEXISTANT) }
   val parkingId = parkingViewModel.selectedParking.value?.uid
   val reportDescription = rememberSaveable { mutableStateOf("") }
   val userId = userViewModel.currentUser.value?.public?.userId
 
   fun onSubmit() {
-    if (selectedReason.value != null) {
-      val report =
-          ParkingReport(
-              uid = parkingViewModel.getNewUid(),
-              reason = selectedReason.value,
-              userId = userId ?: "",
-              parking = parkingId!!,
-              description = reportDescription.value)
-      parkingViewModel.addReport(report, userViewModel.currentUser.value!!)
-      navigationActions.goBack()
-    }
+    val report =
+        ParkingReport(
+            uid = parkingViewModel.getNewUid(),
+            reason = selectedReason.value,
+            userId = userId ?: "",
+            parking = parkingId!!,
+            description = reportDescription.value)
+    parkingViewModel.addReport(report, userViewModel.currentUser.value!!)
+    Toast.makeText(context, "Report added", Toast.LENGTH_SHORT).show()
+    navigationActions.goBack()
   }
 
   Scaffold(

@@ -151,7 +151,8 @@ class ReviewRepositoryFirestore @Inject constructor(private val db: FirebaseFire
             "id" to report.uid,
             "reason" to report.reason,
             "user" to report.userId,
-            "review" to report.review)
+            "review" to report.review,
+            "description" to report.description)
     db.collection(collectionPath)
         .document(report.review)
         .collection("reports")

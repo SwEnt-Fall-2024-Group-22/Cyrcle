@@ -1,6 +1,7 @@
 package com.github.se.cyrcle.ui.report
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -52,7 +54,7 @@ fun ReviewReportScreen(
   val configuration = LocalConfiguration.current
   val screenWidth = configuration.screenWidthDp.dp
   val screenHeight = configuration.screenHeightDp.dp
-  var showDialog = remember { mutableStateOf(false) }
+  val showDialog = remember { mutableStateOf(false) }
 
   // Define padding as a percentage of screen dimensions
   val horizontalPaddingScaleFactor = screenWidth * 0.03f
@@ -60,23 +62,23 @@ fun ReviewReportScreen(
   val verticalPaddingScaleFactor = screenHeight * 0.02f
 
   // State for report inputs
-  val selectedReason = rememberSaveable {
-    mutableStateOf<ReviewReportReason>(ReviewReportReason.IRRELEVANT)
-  }
+  val selectedReason = rememberSaveable { mutableStateOf(ReviewReportReason.IRRELEVANT) }
   val reviewId = reviewViewModel.selectedReview.value?.uid
   val reportDescription = rememberSaveable { mutableStateOf("") }
   val userId = userViewModel.currentUser.value?.public?.userId
+  val context = LocalContext.current
 
   fun onSubmit() {
-    if (selectedReason.value != null && reviewId != null) {
+    if (reviewId != null) {
       val report =
           ReviewReport(
               uid = reviewViewModel.getNewUid(),
-              reason = selectedReason.value!!,
+              reason = selectedReason.value,
               userId = userId ?: "",
               review = reviewId,
               description = reportDescription.value)
       reviewViewModel.addReport(report, userViewModel.currentUser.value!!)
+      Toast.makeText(context, "Report added", Toast.LENGTH_SHORT).show()
       navigationActions.goBack()
     }
   }

@@ -307,7 +307,7 @@ fun AllReviewsScreen(
                                             Alignment
                                                 .BottomEnd) // Align the button to the bottom-right
                                         // corner
-                                        .padding(8.dp)
+                                        .padding(16.dp)
                                         .testTag("ReportReviewButton$index"),
                                 shape = MaterialTheme.shapes.medium) {
                                   Text(
