@@ -61,7 +61,6 @@ import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.ui.map.MapConfig
-import com.github.se.cyrcle.ui.map.drawRectangles
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
@@ -387,7 +386,7 @@ fun AttributePickerTopBar(mapViewModel: MapViewModel, title: MutableState<String
         // we need to wrap the location in a Parking object to pass it to the drawRectangles
         // function
         val placeholderParking = TestInstancesParking.parking1.copy(location = location)
-        drawRectangles(annotationManager, null, listOf(placeholderParking))
+        mapViewModel.drawRectangles(annotationManager, null, listOf(placeholderParking))
       }
 }
 

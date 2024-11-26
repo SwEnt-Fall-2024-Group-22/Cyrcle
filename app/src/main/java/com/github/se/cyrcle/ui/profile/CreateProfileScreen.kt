@@ -49,6 +49,7 @@ fun CreateProfileScreen(navigationActions: NavigationActions, userViewModel: Use
                   user,
                   {
                     userViewModel.setCurrentUser(user)
+                    userViewModel.updateUser(user, context)
                     Toast.makeText(context, validationToastText, Toast.LENGTH_SHORT).show()
                     navigationActions.navigateTo(TopLevelDestinations.MAP)
                   },
