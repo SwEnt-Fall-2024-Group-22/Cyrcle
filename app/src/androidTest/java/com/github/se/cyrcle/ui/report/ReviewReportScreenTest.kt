@@ -68,7 +68,7 @@ class ReviewReportScreenTest {
   }
 
   @Test
-  fun reviewReportScreen_displaysCorrectly() {
+  fun reviewReportScreenDisplaysCorrectly() {
     composeTestRule.setContent {
       ReviewReportScreen(
           navigationActions = navigationActions,
@@ -94,7 +94,7 @@ class ReviewReportScreenTest {
 
   @OptIn(ExperimentalTestApi::class)
   @Test
-  fun submitButton_displaysDialog_whenClicked() {
+  fun submitButtonDisplaysDialogWhenClicked() {
     composeTestRule.setContent {
       ReviewReportScreen(
           navigationActions = navigationActions,
@@ -114,7 +114,7 @@ class ReviewReportScreenTest {
   }
 
   @Test
-  fun detailsInput_acceptsTextInput() {
+  fun detailsInputAcceptsTextInput() {
     composeTestRule.setContent {
       ReviewReportScreen(
           navigationActions = navigationActions,
@@ -129,7 +129,7 @@ class ReviewReportScreenTest {
   }
 
   @Test
-  fun reasonDropDown_isClickable() {
+  fun reasonDropDownIsClickable() {
     composeTestRule.setContent {
       ParkingReportScreen(
           navigationActions = navigationActions,

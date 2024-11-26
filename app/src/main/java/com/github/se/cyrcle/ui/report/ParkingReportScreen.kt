@@ -28,11 +28,15 @@ import com.github.se.cyrcle.ui.addParking.attributes.DESCRIPTION_MAX_LENGTH
 import com.github.se.cyrcle.ui.addParking.attributes.DESCRIPTION_MIN_LENGTH
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.Typography
+import com.github.se.cyrcle.ui.theme.atoms.BulletPoint
 import com.github.se.cyrcle.ui.theme.atoms.ConditionCheckingInputText
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.disabledColor
 import com.github.se.cyrcle.ui.theme.molecules.EnumDropDown
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
+
+const val MAX_CHARACTERS = 256
+const val MAX_LINES = 6
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
@@ -136,7 +140,8 @@ fun ParkingReportScreen(
               onValueChange = { reportDescription.value = it },
               label = stringResource(R.string.report_details),
               minCharacters = 0,
-              maxCharacters = 256,
+              maxCharacters = MAX_CHARACTERS,
+              maxLines = MAX_LINES,
               modifier =
                   Modifier.fillMaxWidth()
                       .padding(horizontal = horizontalPaddingScaleFactor)
@@ -169,17 +174,6 @@ fun ParkingReportScreen(
                     textAlign = TextAlign.Center)
               }
         }
-  }
-}
-
-@Composable
-fun BulletPoint(text: String, testTag: String) {
-  Row(modifier = Modifier.fillMaxWidth().testTag(testTag), verticalAlignment = Alignment.Top) {
-    Text(
-        text = "\u2022",
-        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-        modifier = Modifier.padding(end = 8.dp))
-    Text(text = text, style = MaterialTheme.typography.bodyLarge)
   }
 }
 

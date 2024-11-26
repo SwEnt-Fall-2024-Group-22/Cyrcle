@@ -58,6 +58,9 @@ fun CyrcleNavHost(
       composable(Screen.PARKING_DETAILS) {
         ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
       }
+      composable(Screen.PARKING_REPORT) {
+        ParkingReportScreen(navigationActions, userViewModel, parkingViewModel)
+      }
     }
     navigation(
         startDestination = Screen.ALL_REVIEWS,
@@ -68,9 +71,6 @@ fun CyrcleNavHost(
       }
       composable(Screen.ALL_REVIEWS) {
         AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
-      }
-      composable(Screen.PARKING_REPORT) {
-        ParkingReportScreen(navigationActions, userViewModel, parkingViewModel)
       }
       composable(Screen.REVIEW_REPORT) {
         ReviewReportScreen(navigationActions, userViewModel, reviewViewModel)
