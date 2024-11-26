@@ -266,7 +266,12 @@ class MapViewModel : ViewModel() {
       plabelAnnotationManager: PointAnnotationManager?,
       parkingsList: List<Parking>
   ) {
+
+    // Create a list of annotations to draw
     val annotations: MutableList<PolygonAnnotationOptions> = mutableListOf()
+
+    // For each parking, add the polygon and the label to their respective Annotation Manager and
+    // draw them.
     parkingsList.map { parking ->
       val location = parking.location
       val topLeft = location.topLeft
@@ -292,9 +297,13 @@ class MapViewModel : ViewModel() {
                 .withTextColor("#FFFFFF")
                 .withTextHaloColor("#FFFFFF")
                 .withTextHaloWidth(0.2)
+
+        // draw the labels via the labelAnnotationManager
         plabelAnnotationManager?.create(labelAnnotationOption)
       }
     }
+
+    // draw the polygons via the polygonAnnotationManager
     polygonAnnotationManager?.create(annotations)
   }
 
