@@ -17,6 +17,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
@@ -100,10 +101,10 @@ fun MapScreen(
   val enableParkingAddition by userViewModel.isSignedIn.collectAsState(false)
 
   // create a remember  state to store if the markers or the rectangles are displayed
-  val mapMode = mapViewModel.mapMode.collectAsState()
+  val mapMode: State<MapViewModel.MapMode> = mapViewModel.mapMode.collectAsState()
 
   // this is the Map mode the user selected
-  val userMapMode = mapViewModel.userMapMode.collectAsState()
+  val userMapMode: State<MapViewModel.MapMode> = mapViewModel.userMapMode.collectAsState()
 
   // Create the viewport state from the MapViewModel
   val mapViewportState = MapConfig.createMapViewPortStateFromViewModel(mapViewModel)
@@ -396,9 +397,10 @@ fun MapScreen(
                     modifier = Modifier.padding(start = 8.dp),
                     checked = mapMode.value.isAdvancedMode,
                     onCheckedChange = {
-                      mapViewModel.updateUserMapMode(
-                          if (it) MapViewModel.MapMode.RECTANGLES else MapViewModel.MapMode.MARKERS)
-                      mapViewModel.updateMapMode(userMapMode.value)
+                      val futurMapMode =
+                          if (it) MapViewModel.MapMode.RECTANGLES else MapViewModel.MapMode.MARKERS
+                      mapViewModel.updateUserMapMode(futurMapMode)
+                      mapViewModel.updateMapMode(futurMapMode)
                     },
                     colors =
                         SwitchDefaults.colors()
