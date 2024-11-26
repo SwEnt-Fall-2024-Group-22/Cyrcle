@@ -10,11 +10,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -330,13 +333,13 @@ fun ParkingDetailsScreen(
                       // There are images to display
                     } else {
                       LazyRow(
-                          modifier = Modifier.weight(2f).testTag("ParkingImagesRow"),
+                          modifier = Modifier.weight(2f).height(150.dp).testTag("ParkingImagesRow"),
                           horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             items(imagesUrls) { url ->
                               Image(
                                   painter = rememberAsyncImagePainter(url),
                                   contentDescription = "Parking Image",
-                                  modifier = Modifier.size(100.dp),
+                                  modifier = Modifier.aspectRatio(1.0F).fillMaxHeight(),
                               )
                             }
                           }
