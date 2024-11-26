@@ -119,21 +119,16 @@ jobs:
           disable-animations: true
           script: ./gradlew connectedCheck --parallel --build-cache
 
-      # This step generates the coverage report which will be uploaded to sonar
+      # This step generates the coverage report
       - name: Generate Coverage Report
         run: |
           ./gradlew jacocoTestReport
-
-      - name: Archive coverage data
-        uses: actions/upload-artifact@v4
-        with:
-          name: gradle-coverage-data-jacoco
-          path: .qodana/code-coverage
 
       - name: Qodana Scan
         uses: JetBrains/qodana-action@v2024.2
         with:
           pr-mode: false
+          args: "--coverage-dir,"
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_48627467 }}
           QODANA_ENDPOINT: 'https://qodana.cloud'

@@ -52,7 +52,7 @@ android {
     }
 
     testCoverage {
-        jacocoVersion = "0.8.8"
+        jacocoVersion = "0.8.12"
     }
 
     buildFeatures {
@@ -224,11 +224,6 @@ dependencies {
 
 }
 
-jacoco {
-    toolVersion = "0.8.12"
-    reportsDirectory = layout.buildDirectory.dir("../../.qodana/code-coverage")
-}
-
 tasks.withType<Test> {
     // Configure Jacoco for each tests
     configure<JacocoTaskExtension> {
@@ -242,7 +237,9 @@ tasks.register<JacocoReport>("jacocoTestReport") {
 
     reports {
         xml.required = true
+        xml.outputLocation = layout.projectDirectory.file("../.qodana/code-coverage/jacocoTestReport.xml")
         html.required = true
+        html.outputLocation = layout.projectDirectory.dir("../.qodana/code-coverage/jacocoHTML")
     }
 
     val fileFilter = listOf(
@@ -255,20 +252,17 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         "**/ThemePreview.kt", // Avoid considering a preview tool as actual code
     )
 
-    val debugTree = fileTree(layout.projectDirectory.dir("tmp/kotlin-classes/debug")) {
+    val debugTree = fileTree("${project.layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
         exclude(fileFilter)
     }
 
-    sourceDirectories.setFrom(
-        layout.projectDirectory
-            .dir("/src/main/java"))
-
+    val mainSrc = "${project.layout.projectDirectory}/src/main/java"
+    sourceDirectories.setFrom(files(mainSrc))
     classDirectories.setFrom(files(debugTree))
-
-    // Collect execution data from .exec and .ec files generated during test execution
-    executionData.setFrom(files(
-        fileTree(layout.buildDirectory) { include(listOf("**/*.exec", "**/*.ec")) }
-    ))
+    executionData.setFrom(fileTree(project.layout.buildDirectory.get()) {
+        include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
+        include("outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec")
+    })
 }
 
 fun initLocalProps(): Properties {
