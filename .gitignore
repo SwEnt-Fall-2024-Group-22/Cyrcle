@@ -27,6 +27,7 @@ replay_pid*
 # Config and build files / folders
 .idea/
 .vscode/
+.qodana/
 **/build
 local.properties
 keystore.properties

@@ -5,7 +5,6 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.ktfmt)
     alias(libs.plugins.gms)
-    alias(libs.plugins.sonar)
     kotlin("plugin.serialization") version "2.0.21"
     id("jacoco")
 
@@ -120,22 +119,6 @@ android {
     }
 }
 
-
-sonar {
-    properties {
-        property("sonar.projectKey", "gf_android-sample")
-        property("sonar.projectName", "Android-Sample")
-        property("sonar.organization", "gabrielfleischer")
-        property("sonar.host.url", "https://sonarcloud.io")
-        // Comma-separated paths to the various directories containing the *.xml JUnit report files. Each path may be absolute or relative to the project base directory.
-        property("sonar.junit.reportPaths", "${project.layout.buildDirectory.get()}/test-results/testDebugunitTest/")
-        // Paths to xml files with Android Lint issues. If the main flavor is changed, this file will have to be changed too.
-        property("sonar.androidLint.reportPaths", "${project.layout.buildDirectory.get()}/reports/lint-results-debug.xml")
-        // Paths to JaCoCo XML coverage report files.
-        property("sonar.coverage.jacoco.xmlReportPaths", "${project.layout.buildDirectory.get()}/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
-    }
-}
-
 // When a library is used both by robolectric and connected tests, use this function
 fun DependencyHandlerScope.globalTestImplementation(dep: Any) {
     androidTestImplementation(dep)
@@ -241,6 +224,11 @@ dependencies {
 
 }
 
+jacoco {
+    toolVersion = "0.8.12"
+    reportsDirectory = layout.buildDirectory.dir("../../.qodana/code-coverage")
+}
+
 tasks.withType<Test> {
     // Configure Jacoco for each tests
     configure<JacocoTaskExtension> {
@@ -249,7 +237,7 @@ tasks.withType<Test> {
     }
 }
 
-tasks.register("jacocoTestReport", JacocoReport::class) {
+tasks.register<JacocoReport>("jacocoTestReport") {
     mustRunAfter("testDebugUnitTest", "connectedDebugAndroidTest")
 
     reports {
@@ -267,17 +255,20 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         "**/ThemePreview.kt", // Avoid considering a preview tool as actual code
     )
 
-    val debugTree = fileTree("${project.layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
+    val debugTree = fileTree(layout.projectDirectory.dir("tmp/kotlin-classes/debug")) {
         exclude(fileFilter)
     }
 
-    val mainSrc = "${project.layout.projectDirectory}/src/main/java"
-    sourceDirectories.setFrom(files(mainSrc))
+    sourceDirectories.setFrom(
+        layout.projectDirectory
+            .dir("/src/main/java"))
+
     classDirectories.setFrom(files(debugTree))
-    executionData.setFrom(fileTree(project.layout.buildDirectory.get()) {
-        include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
-        include("outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec")
-    })
+
+    // Collect execution data from .exec and .ec files generated during test execution
+    executionData.setFrom(files(
+        fileTree(layout.buildDirectory) { include(listOf("**/*.exec", "**/*.ec")) }
+    ))
 }
 
 fun initLocalProps(): Properties {

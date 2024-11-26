@@ -190,7 +190,7 @@
     <!-- TopAppBar -->
     <string name="top_app_bar_go_back">Go Back</string>
 
-    <!-- GamblingScreen -->
+    <!-- com.github.se.cyrcle.ui.gambling.GamblingScreen -->
     <string name="spin_button_text">SPIN</string>
     <string name="rarity_nothing">Nothing</string>
     <string name="rarity_legendary">Legendary</string>
