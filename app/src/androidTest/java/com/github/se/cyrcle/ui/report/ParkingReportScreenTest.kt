@@ -10,6 +10,7 @@ import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.review.ReviewRepository
 import com.github.se.cyrcle.model.review.ReviewViewModel
+import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.model.user.UserRepository
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
@@ -54,6 +55,7 @@ class ParkingReportScreenTest {
             parkingRepository,
             MockImageRepository(),
             MockAuthenticationRepository())
+    userViewModel.setCurrentUser(TestInstancesUser.user1)
     reviewViewModel = ReviewViewModel(reviewRepository, reportedObjectRepository)
 
     parkingViewModel.addParking(TestInstancesParking.parking2)
