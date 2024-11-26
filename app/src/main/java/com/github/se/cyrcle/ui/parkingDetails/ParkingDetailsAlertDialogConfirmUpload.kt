@@ -19,8 +19,15 @@ import coil.compose.rememberAsyncImagePainter
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.ui.theme.atoms.Text
 
+/**
+ * Alert dialog to confirm the upload of a new parking image.
+ *
+ * @param onDismiss Callback when the dialog is dismissed.
+ * @param onAccept Callback when the dialog is accepted.
+ * @param newParkingImageLocalPath Local path of the new parking image.
+ */
 @Composable
-fun ParkingDetailsAlertDialog(
+fun ParkingDetailsAlertDialogConfirmUpload(
     onDismiss: () -> Unit,
     onAccept: () -> Unit,
     newParkingImageLocalPath: String,

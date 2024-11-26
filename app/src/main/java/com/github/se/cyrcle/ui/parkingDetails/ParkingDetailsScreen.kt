@@ -106,7 +106,7 @@ fun ParkingDetailsScreen(
       }
   // Dialog to confirm the image upload with the user.
   if (showDialog.value) {
-    ParkingDetailsAlertDialog(
+    ParkingDetailsAlertDialogConfirmUpload(
         onDismiss = {
           showDialog.value = false
           newParkingImageLocalPath = ""

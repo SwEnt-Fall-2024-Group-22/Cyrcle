@@ -18,7 +18,7 @@ class ParkingDetailsScreenAlertDialogTest {
     var dismissedCalled = false
     var acceptCalled = false
     composeTestRule.setContent {
-      ParkingDetailsAlertDialog(
+      ParkingDetailsAlertDialogConfirmUpload(
           onDismiss = { dismissedCalled = true },
           onAccept = { acceptCalled = true },
           newParkingImageLocalPath = "imagePath")
@@ -31,5 +31,17 @@ class ParkingDetailsScreenAlertDialogTest {
     assert(!dismissedCalled)
     composeTestRule.onNodeWithTag("cancelButton").performClick()
     assert(dismissedCalled)
+  }
+
+  @Test
+  fun testAssertDismissCloseImageDialog() {
+    var dismissedCalled = false
+    composeTestRule.setContent {
+      ParkingDetailsAlertDialogShowImage(
+          onDismiss = { dismissedCalled = true }, imageUrl = "https://picsum.photos/200/300")
+    }
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("ParkingDetailsAlertDialogShowImage").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("parkingDetailsAlertDialogImage").assertExists()
   }
 }

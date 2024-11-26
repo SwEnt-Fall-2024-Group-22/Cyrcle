@@ -11,13 +11,23 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
+import com.mapbox.maps.extension.style.expressions.dsl.generated.mod
 
+/**
+ * Alert dialog to show the image of a parking spot. This composable is displayed when the user
+ * clicks on an image of a parking spot.
+ *
+ * @param onDismiss Callback when the dialog is dismissed.
+ * @param imageUrl URL of the image to display.
+ */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun ParkingDetailsAlertDialogShowImage(onDismiss: () -> Unit, imageUrl: String) {
   BasicAlertDialog(
+      modifier = Modifier.testTag("ParkingDetailsAlertDialogShowImage"),
       onDismissRequest = onDismiss,
       content = {
         Box(
@@ -29,7 +39,7 @@ fun ParkingDetailsAlertDialogShowImage(onDismiss: () -> Unit, imageUrl: String) 
               Image(
                   painter = rememberAsyncImagePainter(imageUrl),
                   contentDescription = "Parking spot image",
-                  modifier = Modifier.fillMaxWidth())
+                  modifier = Modifier.fillMaxWidth().testTag("parkingDetailsAlertDialogImage"))
             }
       })
 }
