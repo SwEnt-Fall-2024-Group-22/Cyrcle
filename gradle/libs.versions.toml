@@ -10,7 +10,6 @@ coreKtx = "1.13.1"
 appcompat = "1.7.0"
 kotlinStdlib = "1.9.22"
 kotlinxSerializationJson = "1.6.2"
-kotlinxSerializationJsonVersion = "1.5.1"
 material = "1.12.0"
 lifecycleRuntimeKtx = "2.8.6"
 
@@ -63,7 +62,7 @@ junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 mockitoAndroid = "5.14.1"
 
-sonar = "4.4.1.3373"
+sonar = "6.0.0.5145"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -76,7 +75,6 @@ androidx-espresso-intents = { group = "androidx.test.espresso", name = "espresso
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlinStdlib" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
-kotlinx-serialization-json-v151 = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJsonVersion" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
