@@ -304,17 +304,7 @@ fun AllReviewsScreen(
                                       FloatingActionButton(
                                           onClick = {
                                             reviewViewModel.selectReview(curReview)
-                                            reviewViewModel.addReport(
-                                                ReviewReport(
-                                                    "TEST0",
-                                                    ReviewReportReason.HARMFUL,
-                                                    userViewModel.currentUser.value?.public?.userId
-                                                        ?: "TESTUSER",
-                                                    curReview.uid),
-                                                userViewModel.currentUser.value!!)
-                                            Toast.makeText(
-                                                    context, "Review reported!", Toast.LENGTH_SHORT)
-                                                .show()
+                                            navigationActions.navigateTo(Screen.REVIEW_REPORT)
                                           },
                                           containerColor = MaterialTheme.colorScheme.error,
                                           modifier =
