@@ -51,6 +51,8 @@ fun ParkingReportScreen(
   var showDialog by remember { mutableStateOf(false) }
   val context = LocalContext.current
 
+  val strRes = stringResource(R.string.report_added)
+
   // Define padding as a percentage of screen dimensions
   val horizontalPaddingScaleFactor = screenWidth * 0.03f
   val topBoxHeight = screenHeight * 0.10f // 10% of screen height for top box
@@ -60,18 +62,18 @@ fun ParkingReportScreen(
   val selectedReason = rememberSaveable { mutableStateOf(ParkingReportReason.INEXISTANT) }
   val parkingId = parkingViewModel.selectedParking.value?.uid
   val reportDescription = rememberSaveable { mutableStateOf("") }
-  val userId = userViewModel.currentUser.value?.public?.userId
+  val userId = userViewModel.currentUser.value?.public?.userId!!
 
   fun onSubmit() {
     val report =
         ParkingReport(
             uid = parkingViewModel.getNewUid(),
             reason = selectedReason.value,
-            userId = userId ?: "",
+            userId = userId,
             parking = parkingId!!,
             description = reportDescription.value)
     parkingViewModel.addReport(report, userViewModel.currentUser.value!!)
-    Toast.makeText(context, "Report added", Toast.LENGTH_SHORT).show()
+    Toast.makeText(context, strRes, Toast.LENGTH_SHORT).show()
     navigationActions.goBack()
   }
 
@@ -176,7 +178,12 @@ fun ParkingReportScreen(
         }
   }
 }
-
+/**
+ * Checks if the description
+ *
+ * @param description element to check the size of
+ * @return true if it respects size requirements
+ */
 fun areInputsValid(description: String): Boolean {
   return description.length in DESCRIPTION_MIN_LENGTH..DESCRIPTION_MAX_LENGTH
 }

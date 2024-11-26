@@ -43,7 +43,7 @@ fun ReportScreenAlertDialog(onDismiss: () -> Unit, onAccept: () -> Unit) {
                     text = stringResource(R.string.no),
                     style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp))
               }
-              // Confirmation button (Yes)
+
               TextButton(onClick = { onAccept() }, modifier = Modifier.testTag("AcceptButton")) {
                 Text(
                     text = stringResource(R.string.yes),

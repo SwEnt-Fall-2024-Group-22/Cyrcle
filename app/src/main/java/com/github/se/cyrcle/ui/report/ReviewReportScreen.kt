@@ -66,7 +66,7 @@ fun ReviewReportScreen(
   val selectedReason = rememberSaveable { mutableStateOf(ReviewReportReason.IRRELEVANT) }
   val reviewId = reviewViewModel.selectedReview.value?.uid
   val reportDescription = rememberSaveable { mutableStateOf("") }
-  val userId = userViewModel.currentUser.value?.public?.userId
+  val userId = userViewModel.currentUser.value?.public?.userId!!
   val context = LocalContext.current
 
   fun onSubmit() {
