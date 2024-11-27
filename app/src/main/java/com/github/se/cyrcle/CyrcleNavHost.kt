@@ -110,13 +110,11 @@ fun CyrcleNavHost(
       }
     }
 
-
-
     navigation(
         startDestination = Screen.GAMBLING,
         route = Route.GAMBLING,
     ) {
-        composable(Screen.GAMBLING) { GamblingScreen(navigationActions, userViewModel) }
-      }
+      composable(Screen.GAMBLING) { GamblingScreen(navigationActions, userViewModel) }
+    }
   }
 }

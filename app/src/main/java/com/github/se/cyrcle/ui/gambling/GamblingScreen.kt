@@ -250,73 +250,57 @@ fun WheelView(
 
 @Composable
 fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserViewModel) {
-    val userState by userViewModel.currentUser.collectAsState()
-    val coins = userState?.details?.wallet?.getCoins()
-    val spinCost = 10 // Cost to spin the wheel
+  val userState by userViewModel.currentUser.collectAsState()
+  val coins = userState?.details?.wallet?.getCoins()
+  val spinCost = 10 // Cost to spin the wheel
 
-    Box(
-        modifier = Modifier.fillMaxSize().testTag("gambling_screen"),
-        contentAlignment = Alignment.Center
-    ) {
+  Box(
+      modifier = Modifier.fillMaxSize().testTag("gambling_screen"),
+      contentAlignment = Alignment.Center) {
         var wheelSpinFunction by remember { mutableStateOf<(() -> Unit)?>(null) }
 
         Text(
             text = "Coins: ${coins ?: "BROKIE"}",
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 16.dp)
-                .testTag("coin_display"),
-            style = MaterialTheme.typography.headlineMedium
-        )
+            modifier =
+                Modifier.align(Alignment.TopCenter).padding(top = 16.dp).testTag("coin_display"),
+            style = MaterialTheme.typography.headlineMedium)
 
         WheelView(
-            modifier = Modifier.size(300.dp).testTag("wheel_view"),
-            onSegmentLanded = { /* Handle landing */ }
-        ).let { spinFn -> wheelSpinFunction = spinFn }
+                modifier = Modifier.size(300.dp).testTag("wheel_view"),
+                onSegmentLanded = { /* Handle landing */})
+            .let { spinFn -> wheelSpinFunction = spinFn }
 
         val canSpin = userState?.details?.wallet?.isSolvable(spinCost, -1) == true
         // I really dont like the fact that I have to put -1 as threshold,
         // but it is this way because of how André wrote the isSolvable function.
-        // If i want to put 0 here then technically all that I have to do is change the > into >= inside isSolvable
+        // If i want to put 0 here then technically all that I have to do is change the > into >=
+        // inside isSolvable
         // up for debate
-
 
         Button(
             onClick = {
-                userState?.let { user ->
-                    // Create a new wallet and debit the coins
-                    val newWallet = Wallet(user.details?.wallet?.getCoins() ?: 0)
-                    newWallet.debitCoins(spinCost)
+              userState?.let { user ->
+                // Create a new wallet and debit the coins
+                val newWallet = Wallet(user.details?.wallet?.getCoins() ?: 0)
+                newWallet.debitCoins(spinCost)
 
-                    // Create updated user with new wallet
-                    val updatedUser = user.copy(
-                        details = user.details?.copy(
-                            wallet = newWallet
-                        )
-                    )
-                    userViewModel.updateUser(updatedUser)
-                    wheelSpinFunction?.invoke()
-                }
+                // Create updated user with new wallet
+                val updatedUser = user.copy(details = user.details?.copy(wallet = newWallet))
+                userViewModel.updateUser(updatedUser)
+                wheelSpinFunction?.invoke()
+              }
             },
             enabled = canSpin,
-            modifier = Modifier
-                .size(90.dp)
-                .clip(CircleShape)
-                .testTag("spin_button"),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Red,
-                disabledContainerColor = Color.Gray
-            )
-        ) {
-            Text(
-                text = stringResource(R.string.spin_button_text),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .wrapContentSize()
-                    .testTag("spin_button_text")
-            )
-        }
-    }
+            modifier = Modifier.size(90.dp).clip(CircleShape).testTag("spin_button"),
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = Color.Red, disabledContainerColor = Color.Gray)) {
+              Text(
+                  text = stringResource(R.string.spin_button_text),
+                  fontSize = 16.sp,
+                  fontWeight = FontWeight.Bold,
+                  textAlign = TextAlign.Center,
+                  modifier = Modifier.wrapContentSize().testTag("spin_button_text"))
+            }
+      }
 }

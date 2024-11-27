@@ -39,9 +39,7 @@ fun CreateProfileScreen(navigationActions: NavigationActions, userViewModel: Use
     userViewModel.authenticate(
         // On successful authentication
         { userId ->
-            val userWithId = createdUser.copy(
-                public = createdUser.public.copy(userId = userId)
-            )
+          val userWithId = createdUser.copy(public = createdUser.public.copy(userId = userId))
 
           // Check if user already exists
           userViewModel.doesUserExist(userWithId) { userExists ->
@@ -49,11 +47,12 @@ fun CreateProfileScreen(navigationActions: NavigationActions, userViewModel: Use
               Toast.makeText(context, accountExistsToastText, Toast.LENGTH_SHORT).show()
               navigationActions.goBack()
             } else {
-                val userWithCoins = userWithId.copy(
-                    details = userWithId.details?.copy(
-                        wallet = Wallet(100)  // Start with 100 coins
-                    )
-                )
+              val userWithCoins =
+                  userWithId.copy(
+                      details =
+                          userWithId.details?.copy(
+                              wallet = Wallet(100) // Start with 100 coins
+                              ))
               // Add the user then continue
               userViewModel.addUser(
                   userWithCoins,
