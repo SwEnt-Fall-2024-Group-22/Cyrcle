@@ -152,4 +152,32 @@ class AllReviewsScreenTest {
     composeTestRule.onNodeWithTag("DeleteReviewButton").performClick()
     verify(navigationActions, times(0)).navigateTo(Screen.PARKING_DETAILS)
   }
+
+  @Test
+  fun dropdownMenu_displaysOptions() {
+    composeTestRule.setContent {
+      AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
+      userViewModel.setCurrentUser(TestInstancesUser.user1)
+    }
+    val tag0 = "MoreOptions0"
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithTag("ReviewCard0").assertIsDisplayed()
+
+    // Click the dropdown menu
+    composeTestRule
+        .onNodeWithTag("${tag0}Button")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+
+    // Verify that the dropdown menu options are displayed
+    composeTestRule.onNodeWithTag("${tag0}Menu").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag("${tag0}ReportReviewItem")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+    verify(navigationActions).navigateTo(Screen.REVIEW_REPORT)
+  }
 }

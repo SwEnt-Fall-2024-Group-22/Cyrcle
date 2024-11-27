@@ -15,17 +15,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -50,6 +47,7 @@ import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
+import com.github.se.cyrcle.ui.theme.atoms.OptionsMenu
 import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
@@ -260,20 +258,16 @@ fun AllReviewsScreen(
                       shape = MaterialTheme.shapes.medium,
                       elevation = CardDefaults.cardElevation(4.dp)) {
                         Box(modifier = Modifier.fillMaxSize()) {
-                          // Warning Icon
-                          Icon(
-                              imageVector = Icons.Outlined.WarningAmber,
-                              contentDescription = "Report Review",
-                              tint = Color.Gray,
-                              modifier =
-                                  Modifier.align(Alignment.TopEnd)
-                                      .padding(16.dp)
-                                      .size(20.dp)
-                                      .clickable {
-                                        reviewViewModel.selectReview(curReview)
-                                        navigationActions.navigateTo(Screen.REVIEW_REPORT)
-                                      }
-                                      .testTag("ReportReviewButton$index"))
+                          OptionsMenu(
+                              options =
+                                  mapOf(
+                                      stringResource(R.string.all_review_report_review_option) to
+                                          {
+                                            reviewViewModel.selectReview(curReview)
+                                            navigationActions.navigateTo(Screen.REVIEW_REPORT)
+                                          }),
+                              modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
+                              testTag = "MoreOptions$index")
 
                           Column(
                               modifier =

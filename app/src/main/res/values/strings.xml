@@ -179,7 +179,7 @@
     <string name="add_review">Add Review</string>
     <string name="edit_review">Edit Review</string>
     <string name="review_deleted">Review Deleted!</string>
-    <string name="report_review">Report Review</string>
+    <string name="all_review_report_review_option">Report Review</string>
     <string name="review_reported">Review Reported!</string>
 
     <!-- Review Screen -->
