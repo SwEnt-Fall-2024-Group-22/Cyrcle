@@ -528,7 +528,7 @@ fun MapScreen(
                     focusedContainerColor = White, unfocusedPlaceholderColor = Black),
                 trailingIcon = {
                     if (searchQuery.value.isNotEmpty()) {
-                        IconButton(onClick = { searchQuery.value = "" }, icon = Icons.Default.Clear, contentDescription = "Clear search",)
+                        IconButton(onClick = { searchQuery.value = "" }, icon = Icons.Default.Clear, contentDescription = "Clear search")
                     }
                 },
                 singleLine = true,
@@ -633,7 +633,7 @@ fun MapScreen(
                             modifier = Modifier.fillMaxSize()
 
                         ) {
-                            Text(text = "${suggestion.road},${suggestion.city},${suggestion.country}")
+                            Text(text = "${suggestion.road},${suggestion.city},${suggestion.country}",Modifier.padding(5.dp))
                         }
 
                         androidx.compose.material.Divider(Modifier.fillMaxWidth(),color= Black)
@@ -649,7 +649,9 @@ fun MapScreen(
                             .geometry(mapViewportState.cameraState!!.center)
                             .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
                             .build())
+
                     mapViewModel.updateTrackingMode(false)
+
                 mapViewportState.setCameraOptions {
                     center(Point.fromLngLat(it.longitude.toDouble(), it.latitude.toDouble()))
                 }
