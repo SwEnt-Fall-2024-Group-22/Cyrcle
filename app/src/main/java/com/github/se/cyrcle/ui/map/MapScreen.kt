@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,9 +28,9 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -66,13 +67,14 @@ import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.Black
-import com.github.se.cyrcle.ui.theme.Cerulean
 import com.github.se.cyrcle.ui.theme.ColorLevel
-import com.github.se.cyrcle.ui.theme.White
 import com.github.se.cyrcle.ui.theme.atoms.IconButton
 import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
+import com.github.se.cyrcle.ui.theme.defaultOnColor
 import com.github.se.cyrcle.ui.theme.disabledColor
+import com.github.se.cyrcle.ui.theme.getOutlinedTextFieldColorsSearchBar
+import com.github.se.cyrcle.ui.theme.invertColor
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.google.gson.Gson
 import com.mapbox.android.gestures.MoveGestureDetector
@@ -484,31 +486,21 @@ fun MapScreen(
 
           OutlinedTextField(
               value = searchQuery.value,
-              onValueChange = { it: String -> searchQuery.value = it },
-              placeholder = {
-                Text(text = stringResource(R.string.search_bar_placeholder), color = Black)
-              },
+              onValueChange = { searchQuery.value = it },
+              placeholder = { Text(text = stringResource(R.string.search_bar_placeholder)) },
               modifier =
                   Modifier.fillMaxWidth(0.9f)
                       .padding(end = 30.dp, start = 5.dp, top = 5.dp)
                       .align(Alignment.TopStart),
               shape = RoundedCornerShape(16.dp),
-              colors =
-                  OutlinedTextFieldDefaults.colors(
-                      focusedTextColor = Black,
-                      focusedLabelColor = Black,
-                      focusedBorderColor = Cerulean,
-                      unfocusedBorderColor = Cerulean,
-                      cursorColor = Black,
-                      unfocusedContainerColor = White,
-                      focusedContainerColor = White,
-                      unfocusedPlaceholderColor = Black),
+              colors = getOutlinedTextFieldColorsSearchBar(ColorLevel.PRIMARY),
               trailingIcon = {
                 if (searchQuery.value.isNotEmpty()) {
-                  IconButton(
-                      onClick = { searchQuery.value = "" },
-                      icon = Icons.Default.Clear,
-                      contentDescription = "Clear search")
+                  Icon(
+                      imageVector = Icons.Filled.Clear,
+                      contentDescription = "Clear search",
+                      tint = defaultOnColor(),
+                      modifier = Modifier.clickable { searchQuery.value = "" })
                 }
               },
               singleLine = true,
@@ -602,10 +594,10 @@ fun MapScreen(
                     },
                     colors =
                         CardColors(
-                            containerColor = White,
-                            contentColor = Black,
-                            disabledContainerColor = White,
-                            disabledContentColor = Black),
+                            containerColor = invertColor(defaultOnColor()),
+                            contentColor = defaultOnColor(),
+                            disabledContainerColor = invertColor(defaultOnColor()),
+                            disabledContentColor = defaultOnColor()),
                     modifier = Modifier.fillMaxSize()) {
                       Text(
                           text = "${suggestion.road},${suggestion.city},${suggestion.country}",
