@@ -143,8 +143,9 @@ class GamblingScreenTest {
   @Test
   fun verify_spin_animation_completion() {
     val currentUser = userViewModel.currentUser.value!!
-    currentUser.details?.wallet?.creditCoins(15)
+    currentUser.details?.wallet?.creditCoins(100)
     userViewModel.updateUser(currentUser)
+
     composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
 
     composeTestRule.mainClock.autoAdvance = false
@@ -169,7 +170,7 @@ class GamblingScreenTest {
   fun verify_subsequent_spins() {
 
     val currentUser = userViewModel.currentUser.value!!
-    currentUser.details?.wallet?.creditCoins(35)
+    currentUser.details?.wallet?.creditCoins(100)
     userViewModel.updateUser(currentUser)
 
     composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
