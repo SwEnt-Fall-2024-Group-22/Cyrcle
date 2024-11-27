@@ -16,6 +16,7 @@ object Route {
   const val REVIEW = "Review"
   const val PARKING_REPORT = "Report"
   const val REVIEW_REPORT = "Report"
+  const val GAMBLING = "Gambling"
 }
 
 object Screen {
@@ -36,6 +37,7 @@ object Screen {
   const val CREATE_PROFILE = "Create Profile"
   const val PARKING_REPORT = "Parking Report Screen"
   const val REVIEW_REPORT = "Review Report Screen"
+  const val GAMBLING = "Gambling Screen"
 }
 
 /**
