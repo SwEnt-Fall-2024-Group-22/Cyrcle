@@ -77,6 +77,7 @@ class GamblingScreenTest {
     composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
 
     composeTestRule.onNodeWithTag("coin_display").assertTextEquals("Coins: 0")
+    composeTestRule.onNodeWithTag("spin_button").assertIsNotEnabled()
     composeTestRule.onNodeWithTag("gambling_screen").assertExists()
     composeTestRule.onNodeWithTag("wheel_canvas").assertExists()
     composeTestRule.onNodeWithTag("spin_button").assertExists()
