@@ -10,11 +10,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -28,6 +29,7 @@ import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.AddAPhoto
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.PushPin
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -41,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
@@ -66,6 +69,7 @@ import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ParkingDetailsScreen(
@@ -83,6 +87,7 @@ fun ParkingDetailsScreen(
   var newParkingImageLocalPath by remember { mutableStateOf("") }
   val showDialog = remember { mutableStateOf(false) }
   val imagesUrls by parkingViewModel.selectedParkingImagesUrls.collectAsState()
+  val showDialogImage = remember { mutableStateOf<String?>(null) }
   // === === === === === === ===
 
   LaunchedEffect(Unit, selectedParking) {
@@ -100,7 +105,7 @@ fun ParkingDetailsScreen(
       }
   // Dialog to confirm the image upload with the user.
   if (showDialog.value) {
-    ParkingDetailsAlertDialog(
+    ParkingDetailsAlertDialogConfirmUpload(
         onDismiss = {
           showDialog.value = false
           newParkingImageLocalPath = ""
@@ -110,6 +115,10 @@ fun ParkingDetailsScreen(
           showDialog.value = false
           parkingViewModel.uploadImage(newParkingImageLocalPath, context) {}
         })
+  }
+  if (showDialogImage.value != null) {
+    ParkingDetailsAlertDialogShowImage(
+        onDismiss = { showDialogImage.value = null }, imageUrl = showDialogImage.value!!)
   }
 
   Scaffold(
@@ -313,7 +322,7 @@ fun ParkingDetailsScreen(
 
               // Images
               Row(
-                  modifier = Modifier.fillMaxWidth().testTag("ImagesRow"),
+                  modifier = Modifier.height(150.dp).fillMaxWidth().testTag("ImagesRow"),
                   horizontalArrangement = Arrangement.spacedBy(8.dp),
                   verticalAlignment = Alignment.CenterVertically) {
                     // No images
@@ -328,14 +337,18 @@ fun ParkingDetailsScreen(
                       // There are images to display
                     } else {
                       LazyRow(
-                          modifier = Modifier.weight(2f).testTag("ParkingImagesRow"),
+                          modifier =
+                              Modifier.weight(2f).fillMaxHeight().testTag("ParkingImagesRow"),
                           horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             items(imagesUrls) { url ->
                               Image(
                                   painter = rememberAsyncImagePainter(url),
                                   contentDescription = "Parking Image",
-                                  modifier = Modifier.size(100.dp),
-                              )
+                                  contentScale = ContentScale.Crop,
+                                  modifier =
+                                      Modifier.fillMaxHeight().width(150.dp).clickable {
+                                        showDialogImage.value = url
+                                      })
                             }
                           }
                     }

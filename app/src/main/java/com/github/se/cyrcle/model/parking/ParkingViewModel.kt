@@ -491,9 +491,11 @@ class ParkingViewModel(
         fileUri = imageUri,
         destinationPath = destinationPath,
         onSuccess = {
-          selectParking(selectedParking.copy(images = selectedParking.images.plus(destinationPath)))
+          val updatedParking =
+              selectedParking.copy(images = selectedParking.images.plus(destinationPath))
+          selectParking(updatedParking)
           parkingRepository.updateParking(
-              selectedParking,
+              updatedParking,
               { onSuccess() },
               { Log.e("ParkingViewModel", "Error adding image path to parking firestore $it") })
         },
