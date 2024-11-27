@@ -41,6 +41,7 @@ import com.github.se.cyrcle.ui.theme.disabledColor
 import com.github.se.cyrcle.ui.theme.getButtonColors
 import com.github.se.cyrcle.ui.theme.getColor
 import com.github.se.cyrcle.ui.theme.getIconButtonColors
+import com.github.se.cyrcle.ui.theme.getInvertedIconButtonColors
 import com.github.se.cyrcle.ui.theme.getOnColor
 import com.github.se.cyrcle.ui.theme.googleSignInButtonStyle
 import kotlin.math.floor
@@ -271,18 +272,21 @@ fun IconButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     colorLevel: ColorLevel = ColorLevel.PRIMARY,
-    testTag: String = "IconButton"
+    testTag: String = "IconButton",
+    inverted: Boolean = false
 ) {
   androidx.compose.material3.IconButton(
       modifier = modifier.testTag(testTag),
       onClick = onClick,
       enabled = enabled,
-      colors = getIconButtonColors(colorLevel)) {
+      colors =
+          if (inverted) getInvertedIconButtonColors(colorLevel)
+          else getIconButtonColors(colorLevel)) {
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
             modifier = Modifier.testTag("${testTag}Icon"),
-            tint = getOnColor(colorLevel))
+            tint = if (inverted) getColor(colorLevel) else getOnColor(colorLevel))
       }
 }
 

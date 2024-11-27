@@ -3,18 +3,24 @@ package com.github.se.cyrcle.ui.parkingDetails
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
-import com.mapbox.maps.extension.style.expressions.dsl.generated.mod
+import com.github.se.cyrcle.ui.theme.atoms.IconButton
 
 /**
  * Alert dialog to show the image of a parking spot. This composable is displayed when the user
@@ -26,20 +32,40 @@ import com.mapbox.maps.extension.style.expressions.dsl.generated.mod
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun ParkingDetailsAlertDialogShowImage(onDismiss: () -> Unit, imageUrl: String) {
+  val alertDialogMaxHeight = LocalConfiguration.current.screenHeightDp.dp * 0.8f
+  val pushingDialogOnTopBy = LocalConfiguration.current.screenHeightDp.dp * 0.1f
+
   BasicAlertDialog(
-      modifier = Modifier.testTag("ParkingDetailsAlertDialogShowImage"),
+      modifier =
+          Modifier.testTag("ParkingDetailsAlertDialogShowImage").padding(0.dp).wrapContentSize(),
       onDismissRequest = onDismiss,
       content = {
         Box(
             modifier =
-                Modifier.fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(16.dp)
+                Modifier.heightIn(max = alertDialogMaxHeight)
+                    .wrapContentSize()
+                    // .background(MaterialTheme.colorScheme.background, MaterialTheme.shapes.small)
+                    // // Set the background color
+                    // .border(3.dp, MaterialTheme.colorScheme.primary, MaterialTheme.shapes.small)
+                    // // Add a border
                     .wrapContentSize()) {
               Image(
                   painter = rememberAsyncImagePainter(imageUrl),
                   contentDescription = "Parking spot image",
-                  modifier = Modifier.fillMaxWidth().testTag("parkingDetailsAlertDialogImage"))
+                  modifier =
+                      Modifier.wrapContentWidth()
+                          .background(
+                              MaterialTheme.colorScheme.background,
+                              MaterialTheme.shapes.small) // Set the background color
+                          .padding(4.dp)
+                          .testTag("parkingDetailsAlertDialogImage"))
+              IconButton(
+                  modifier = Modifier.padding(8.dp),
+                  icon = Icons.AutoMirrored.Filled.ArrowBack,
+                  contentDescription = "Back",
+                  onClick = onDismiss,
+                  inverted = true)
             }
+        Spacer(modifier = Modifier.height(pushingDialogOnTopBy))
       })
 }

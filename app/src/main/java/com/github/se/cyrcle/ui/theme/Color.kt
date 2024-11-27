@@ -155,6 +155,15 @@ fun getIconButtonColors(colorLevel: ColorLevel): IconButtonColors {
       disabledContentColor = onDisabledColor())
 }
 
+@Composable
+fun getInvertedIconButtonColors(colorLevel: ColorLevel): IconButtonColors {
+  return IconButtonDefaults.iconButtonColors(
+      containerColor = getOnColor(colorLevel),
+      contentColor = getColor(colorLevel),
+      disabledContainerColor = disabledColor(),
+      disabledContentColor = onDisabledColor())
+}
+
 /**
  * Get the colors for a text field from a ColorScheme.
  *
