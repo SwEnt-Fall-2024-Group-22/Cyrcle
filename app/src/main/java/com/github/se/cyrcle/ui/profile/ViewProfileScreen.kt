@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Outbox
 import androidx.compose.material3.AlertDialog
@@ -76,100 +77,112 @@ fun ViewProfileScreen(
 
   val signOutToastText = stringResource(R.string.view_profile_on_sign_out_toast)
 
-  Scaffold(
-      modifier = Modifier.testTag("ViewProfileScreen"),
-      bottomBar = {
-        BottomNavigationBar(
-            navigationActions = navigationActions,
-            tabList = LIST_TOP_LEVEL_DESTINATION,
-            selectedItem = Route.VIEW_PROFILE)
-      }) { innerPadding ->
-        Box(Modifier.fillMaxSize().padding(innerPadding)) {
-          com.github.se.cyrcle.ui.theme.atoms.IconButton(
-              modifier = Modifier.padding(10.dp).align(Alignment.TopEnd),
-              icon = Icons.Filled.Outbox,
-              contentDescription = "Sign Out",
-              testTag = "SignOutButton",
-              onClick = { signOut = true })
-
-          if (signOut) {
-            // Show sign out dialog to prevent accidental sign out
-            AlertDialog(
-                modifier = Modifier.testTag("SignOutDialog"),
-                onDismissRequest = {},
-                title = {
-                  Text(stringResource(R.string.view_profile_screen_sign_out_dialog_title))
-                },
-                text = {
-                  Text(stringResource(R.string.view_profile_screen_sign_out_dialog_message))
-                },
-                confirmButton = {
-                  TextButton(
-                      modifier = Modifier.testTag("SignOutDialogConfirmButton"),
-                      onClick = {
-                        userViewModel.signOut {
-                          (context as Activity).runOnUiThread {
-                            Toast.makeText(context, signOutToastText, Toast.LENGTH_SHORT).show()
-                          }
-                          navigationActions.navigateTo(TopLevelDestinations.AUTH)
-                        }
-                      }) {
-                        Text(
-                            stringResource(
-                                R.string.view_profile_screen_sign_out_dialog_action_button))
-                      }
-                },
-                dismissButton = {
-                  TextButton(
-                      modifier = Modifier.testTag("SignOutDialogCancelButton"),
-                      onClick = { signOut = false }) {
-                        Text(
-                            stringResource(
-                                R.string.view_profile_screen_sign_out_dialog_cancel_button))
-                      }
-                })
-          }
-
-          if (isEditing) {
-            EditProfileComponent(
-                user = userState,
-                saveButton = {
-                  Button(
-                      text = stringResource(R.string.view_profile_screen_save_button),
-                      onClick = {
-                        // take care of updating the viewmodel as well as the database
-                        userViewModel.updateUser(it, context)
-
-                        isEditing = false
-                      },
-                      colorLevel = ColorLevel.PRIMARY,
-                      enabled =
-                          areInputsValid(
-                              it.details!!.lastName, it.details.firstName, it.public.username),
-                      testTag = "SaveButton")
-                },
-                cancelButton = {
-                  Button(
-                      text = stringResource(R.string.view_profile_screen_cancel_button),
-                      onClick = { isEditing = false },
-                      colorLevel = ColorLevel.SECONDARY,
-                      testTag = "CancelButton")
-                })
-          } else {
-            DisplayProfileComponent(userState) {
-              Button(
-                  text = stringResource(R.string.view_profile_screen_modify_profile_button),
-                  onClick = { isEditing = true },
-                  colorLevel = ColorLevel.TERTIARY,
-                  testTag = "EditButton")
-
-              Spacer(modifier = Modifier.height(24.dp))
-
-              FavoriteParkingsSection(userViewModel, parkingViewModel, navigationActions)
-            }
-          }
+    Scaffold(
+        modifier = Modifier.testTag("ViewProfileScreen"),
+        bottomBar = {
+            BottomNavigationBar(
+                navigationActions = navigationActions,
+                tabList = LIST_TOP_LEVEL_DESTINATION,
+                selectedItem = Route.VIEW_PROFILE)
         }
-      }
+    ) { innerPadding ->
+        Box(Modifier.fillMaxSize().padding(innerPadding)) {
+            com.github.se.cyrcle.ui.theme.atoms.IconButton(
+                modifier = Modifier.padding(10.dp).align(Alignment.TopEnd),
+                icon = Icons.Filled.Outbox,
+                contentDescription = "Sign Out",
+                testTag = "SignOutButton",
+                onClick = { signOut = true }
+            )
+
+            com.github.se.cyrcle.ui.theme.atoms.IconButton(
+                modifier = Modifier.padding(10.dp).align(Alignment.TopStart),
+                icon = Icons.Filled.AttachMoney, // or Icons.Filled.Paid
+                contentDescription = "Go to Gambling Screen",
+                testTag = "GamblingButton",
+                onClick = { navigationActions.navigateTo(Screen.GAMBLING) }
+            )
+
+            if (signOut) {
+                AlertDialog(
+                    modifier = Modifier.testTag("SignOutDialog"),
+                    onDismissRequest = {},
+                    title = {
+                        Text(stringResource(R.string.view_profile_screen_sign_out_dialog_title))
+                    },
+                    text = {
+                        Text(stringResource(R.string.view_profile_screen_sign_out_dialog_message))
+                    },
+                    confirmButton = {
+                        TextButton(
+                            modifier = Modifier.testTag("SignOutDialogConfirmButton"),
+                            onClick = {
+                                userViewModel.signOut {
+                                    (context as Activity).runOnUiThread {
+                                        Toast.makeText(context, signOutToastText, Toast.LENGTH_SHORT).show()
+                                    }
+                                    navigationActions.navigateTo(TopLevelDestinations.AUTH)
+                                }
+                            }
+                        ) {
+                            Text(stringResource(R.string.view_profile_screen_sign_out_dialog_action_button))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            modifier = Modifier.testTag("SignOutDialogCancelButton"),
+                            onClick = { signOut = false }
+                        ) {
+                            Text(stringResource(R.string.view_profile_screen_sign_out_dialog_cancel_button))
+                        }
+                    }
+                )
+            }
+
+            if (isEditing) {
+                EditProfileComponent(
+                    user = userState,
+                    saveButton = {
+                        Button(
+                            text = stringResource(R.string.view_profile_screen_save_button),
+                            onClick = {
+                                userViewModel.updateUser(it, context)
+                                isEditing = false
+                            },
+                            colorLevel = ColorLevel.PRIMARY,
+                            enabled = areInputsValid(
+                                it.details!!.lastName,
+                                it.details.firstName,
+                                it.public.username
+                            ),
+                            testTag = "SaveButton"
+                        )
+                    },
+                    cancelButton = {
+                        Button(
+                            text = stringResource(R.string.view_profile_screen_cancel_button),
+                            onClick = { isEditing = false },
+                            colorLevel = ColorLevel.SECONDARY,
+                            testTag = "CancelButton"
+                        )
+                    }
+                )
+            } else {
+                DisplayProfileComponent(userState) {
+                    Button(
+                        text = stringResource(R.string.view_profile_screen_modify_profile_button),
+                        onClick = { isEditing = true },
+                        colorLevel = ColorLevel.TERTIARY,
+                        testTag = "EditButton"
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    FavoriteParkingsSection(userViewModel, parkingViewModel, navigationActions)
+                }
+            }
+        }
+    }
 }
 
 @Composable
