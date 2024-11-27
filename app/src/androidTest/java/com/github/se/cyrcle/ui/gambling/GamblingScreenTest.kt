@@ -2,6 +2,7 @@ import androidx.compose.ui.semantics.text
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -79,6 +80,36 @@ class GamblingScreenTest {
     composeTestRule.onNodeWithTag("gambling_screen").assertExists()
     composeTestRule.onNodeWithTag("wheel_canvas").assertExists()
     composeTestRule.onNodeWithTag("spin_button").assertExists()
+  }
+
+  @Test
+  fun verify_spins_with_wallet_restrictions() {
+    // Add 25 coins to user's wallet
+    val currentUser = userViewModel.currentUser.value!!
+    currentUser.details?.wallet?.creditCoins(25)
+    userViewModel.updateUser(currentUser)
+
+    composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
+
+    composeTestRule.mainClock.autoAdvance = false
+
+    composeTestRule.onNodeWithTag("coin_display").assertTextEquals("Coins: 25")
+    // First spin (25 coins -> 15 coins)
+    composeTestRule.onNodeWithTag("spin_button").assertIsEnabled()
+    composeTestRule.onNodeWithTag("spin_button").performClick()
+    composeTestRule.mainClock.advanceTimeBy(10000)
+
+    // Second spin (15 coins -> 5 coins)
+    composeTestRule.onNodeWithTag("coin_display").assertTextEquals("Coins: 15")
+    composeTestRule.onNodeWithTag("spin_button").assertIsEnabled()
+    composeTestRule.onNodeWithTag("spin_button").performClick()
+    composeTestRule.mainClock.advanceTimeBy(10000)
+
+    // Third spin attempt (5 coins, should be disabled)
+    composeTestRule.onNodeWithTag("coin_display").assertTextEquals("Coins: 5")
+    composeTestRule.onNodeWithTag("spin_button").assertIsNotEnabled()
+
+    composeTestRule.mainClock.autoAdvance = true
   }
 
   @Test
