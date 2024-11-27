@@ -345,18 +345,17 @@ class ParkingViewModel(
     _closestParkings.value =
         _rectParkings.value
             .filter { parking ->
-              TurfMeasurement.distance(
-                  _circleCenter.value!!, parking.location.center, TurfConstants.UNIT_METERS) <=
-                  _radius.value
-            }
-            .sortedBy { parking ->
-              TurfMeasurement.distance(_circleCenter.value!!, parking.location.center)
-            }
-            .filter { parking ->
-              _selectedProtection.value.contains(parking.protection) &&
+              val distance =
+                  TurfMeasurement.distance(
+                      _circleCenter.value!!, parking.location.center, TurfConstants.UNIT_METERS)
+              distance <= _radius.value &&
+                  _selectedProtection.value.contains(parking.protection) &&
                   _selectedRackTypes.value.contains(parking.rackType) &&
                   _selectedCapacities.value.contains(parking.capacity) &&
                   (!_onlyWithCCTV.value || parking.hasSecurity)
+            }
+            .sortedBy { parking ->
+              TurfMeasurement.distance(_circleCenter.value!!, parking.location.center)
             }
     if (_closestParkings.value.size < MIN_NB_PARKINGS || _radius.value == MAX_RADIUS) {
       incrementRadius()

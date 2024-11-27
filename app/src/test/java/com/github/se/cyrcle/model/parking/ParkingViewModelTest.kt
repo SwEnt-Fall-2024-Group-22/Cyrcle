@@ -230,14 +230,8 @@ class ParkingViewModelTest {
 
   // Helper functions to assert the state of the filter options
   private fun assertEmpty(protection: Boolean, rackTypes: Boolean, capacities: Boolean) {
-    if (protection) {
-      assert(parkingViewModel.selectedProtection.value == emptySet<ParkingProtection>())
-    }
-    if (rackTypes) {
-      assert(parkingViewModel.selectedRackTypes.value == emptySet<ParkingRackType>())
-    }
-    if (capacities) {
-      assert(parkingViewModel.selectedCapacities.value == emptySet<ParkingCapacity>())
-    }
+    if (protection) assert(parkingViewModel.selectedProtection.value.isEmpty())
+    if (rackTypes) assert(parkingViewModel.selectedRackTypes.value.isEmpty())
+    if (capacities) assert(parkingViewModel.selectedCapacities.value.isEmpty())
   }
 }

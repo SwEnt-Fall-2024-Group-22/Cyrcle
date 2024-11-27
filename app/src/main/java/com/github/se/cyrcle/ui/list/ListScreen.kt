@@ -331,8 +331,7 @@ fun FilterSection(
                   style =
                       MaterialTheme.typography.labelSmall.copy(
                           color = MaterialTheme.colorScheme.primary),
-                  modifier =
-                      Modifier.padding(horizontal = 4.dp).testTag("Apply" + title + "Button"))
+                  modifier = Modifier.padding(horizontal = 4.dp).testTag("Apply${title}Button"))
             }
 
         if (expandedState.value) {
