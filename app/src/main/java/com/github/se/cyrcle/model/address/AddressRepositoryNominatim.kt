@@ -63,7 +63,10 @@ class AddressRepositoryNominatim @Inject constructor(private val client: OkHttpC
       if(jsonArray.getJSONObject(i) != null){
         val jsonObject = jsonArray.getJSONObject(i)
         val address = jsonObject.getJSONObject("address")
-        addressList.add(Gson().fromJson(address.toString(), Address::class.java))
+        val deserializedAdress = Gson().fromJson(address.toString(), Address::class.java)
+          deserializedAdress.latitude = jsonObject.getString("lat")
+            deserializedAdress.longitude = jsonObject.getString("lon")
+        addressList.add(deserializedAdress)
       }
         else{
             break

@@ -5,10 +5,12 @@ import android.graphics.BitmapFactory
 import android.graphics.drawable.Icon
 import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,6 +31,7 @@ import androidx.compose.material.icons.filled.Settings
 
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -64,6 +67,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.databinding.ItemCalloutViewBinding
@@ -73,6 +77,7 @@ import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.permission.PermissionHandler
+import com.github.se.cyrcle.ui.list.ActionCard
 import com.github.se.cyrcle.ui.map.overlay.ZoomControls
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
@@ -89,6 +94,7 @@ import com.github.se.cyrcle.ui.theme.disabledColor
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.google.gson.Gson
 import com.mapbox.android.gestures.MoveGestureDetector
+import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraBoundsOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.StyleLoadedCallback
@@ -610,40 +616,43 @@ fun MapScreen(
                             onClick = {
                                 showSuggestions.value = false
 
-                                runBlocking {
-                                    mapViewportState.setCameraOptions {
-                                        center(suggestion.location)
-                                    }
-                                    Log.e("Selected Location",suggestion.location.toString())
-                                }
-
                                 mapViewportState.transitionToOverviewState(
                                     OverviewViewportStateOptions.Builder()
                                         .geometry(mapViewportState.cameraState!!.center)
                                         .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
                                         .build())
                                 mapViewModel.updateTrackingMode(false)
-                            }
+
+                                    mapViewportState.setCameraOptions {
+                                        center(Point.fromLngLat(suggestion.longitude.toDouble(), suggestion.latitude.toDouble()))
+                                    }
+                                    Log.e("Selected Location",Point.fromLngLat(suggestion.longitude.toDouble(), suggestion.latitude.toDouble()).toString())
+
+                            },
+                            colors = CardColors(containerColor = White, contentColor = Black, disabledContainerColor = White, disabledContentColor = Black),
+                            modifier = Modifier.fillMaxSize()
 
                         ) {
                             Text(text = "${suggestion.road},${suggestion.city},${suggestion.country}")
                         }
+
+                        androidx.compose.material.Divider(Modifier.fillMaxWidth(),color= Black)
                     }
                 }
             }
         }
       else if (showSuggestions.value && listOfSuggestions.value.size == 1) {
             chosenLocation.value.let {
-                runBlocking {
+
+                    mapViewportState.transitionToOverviewState(
+                        OverviewViewportStateOptions.Builder()
+                            .geometry(mapViewportState.cameraState!!.center)
+                            .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
+                            .build())
+                    mapViewModel.updateTrackingMode(false)
                 mapViewportState.setCameraOptions {
-                    center(it.location)
-                }}
-                mapViewportState.transitionToOverviewState(
-                    OverviewViewportStateOptions.Builder()
-                        .geometry(mapViewportState.cameraState!!.center)
-                        .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
-                        .build())
-                mapViewModel.updateTrackingMode(false)
+                    center(Point.fromLngLat(it.longitude.toDouble(), it.latitude.toDouble()))
+                }
             }
           showSuggestions.value = false
       }

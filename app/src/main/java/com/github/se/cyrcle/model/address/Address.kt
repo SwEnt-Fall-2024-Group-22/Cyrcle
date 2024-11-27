@@ -66,7 +66,8 @@ data class Address(
     val region: String = "",
     @SerializedName("country") val country: String = "",
     @SerializedName("continent") val continent: String = "",
-    @SerializedName("location") val location: Point = Point.fromLngLat(0.0, 0.0)
+    @SerializedName("lat") var latitude: String = "0.0",
+    @SerializedName("lon") var longitude: String = "0.0"
 ) {
   /**
    * Among the fields of the address, we choose the most relevant ones to display. The order of the
