@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.disabledColor
@@ -332,7 +333,10 @@ fun ScoreStars(
 
         text?.let {
           Spacer(modifier = Modifier.width((5 * scale).dp)) // Reduced space between stars and text
-          Text(text = it, color = starColor, style = MaterialTheme.typography.bodyMedium)
+          Text(
+              text = it,
+              color = starColor,
+              style = MaterialTheme.typography.bodyMedium.copy(fontSize = round(scale * 18).sp))
         }
       }
 }
