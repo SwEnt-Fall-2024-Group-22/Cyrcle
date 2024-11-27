@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import kotlin.math.*
 import kotlinx.coroutines.*
@@ -246,11 +248,25 @@ fun WheelView(
 }
 
 @Composable
-fun GamblingScreen(navigationActions: NavigationActions) {
+fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserViewModel) {
+
+  val userState by userViewModel.currentUser.collectAsState()
+  val coins = userState?.details?.wallet?.getCoins()
+
   Box(
       modifier = Modifier.fillMaxSize().testTag("gambling_screen"),
       contentAlignment = Alignment.Center) {
         var wheelSpinFunction by remember { mutableStateOf<(() -> Unit)?>(null) }
+
+
+      Text(
+          text = "Coins: ${coins ?: "BROKIE"}",
+          modifier = Modifier
+              .align(Alignment.TopCenter)
+              .padding(top = 16.dp)
+              .testTag("coin_display"),
+          style = MaterialTheme.typography.headlineMedium
+      )
 
         WheelView(
                 modifier = Modifier.size(300.dp).testTag("wheel_view"),
