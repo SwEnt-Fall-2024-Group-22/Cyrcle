@@ -2,18 +2,41 @@ package com.github.se.cyrcle.ui.map
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.drawable.Icon
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
+
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -28,13 +51,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.databinding.ItemCalloutViewBinding
+import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
@@ -44,8 +73,13 @@ import com.github.se.cyrcle.ui.map.overlay.ZoomControls
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
+import com.github.se.cyrcle.ui.theme.Black
+import com.github.se.cyrcle.ui.theme.Cerulean
 import com.github.se.cyrcle.ui.theme.ColorLevel
+import com.github.se.cyrcle.ui.theme.White
+import com.github.se.cyrcle.ui.theme.atoms.FloatingActionButton
 import com.github.se.cyrcle.ui.theme.atoms.IconButton
+import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.disabledColor
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
@@ -53,6 +87,7 @@ import com.google.gson.Gson
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.maps.CameraBoundsOptions
 import com.mapbox.maps.EdgeInsets
+import com.mapbox.maps.StyleLoadedCallback
 import com.mapbox.maps.ViewAnnotationAnchor
 import com.mapbox.maps.extension.compose.DisposableMapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
@@ -68,6 +103,8 @@ import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.createPolygonAnnotationManager
 import com.mapbox.maps.plugin.gestures.OnMoveListener
 import com.mapbox.maps.plugin.gestures.gestures
+import com.mapbox.maps.plugin.scalebar.ScaleBarPlugin
+import com.mapbox.maps.plugin.scalebar.scalebar
 import com.mapbox.maps.plugin.viewport.data.FollowPuckViewportStateOptions
 import com.mapbox.maps.plugin.viewport.data.OverviewViewportStateOptions
 import com.mapbox.maps.viewannotation.annotatedLayerFeature
@@ -84,6 +121,9 @@ const val LAYER_ID_RECT = "0129"
 const val ADVANCED_MODE_ZOOM_THRESHOLD = 15.5
 const val CLUSTER_COLORS = "#1A4988"
 
+
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(
     navigationActions: NavigationActions,
@@ -91,11 +131,15 @@ fun MapScreen(
     userViewModel: UserViewModel,
     mapViewModel: MapViewModel,
     permissionHandler: PermissionHandler,
+    addressViewModel: AddressViewModel,
     zoomState: MutableState<Double> = remember { mutableDoubleStateOf(defaultZoom) }
 ) {
 
   // Collect the list of parkings from the ParkingViewModel as a state
   val listOfParkings by parkingViewModel.rectParkings.collectAsState()
+
+  // Create a remember state to store the search query of the search bar as a mutable state
+  val searchQuery = remember { mutableStateOf("") }
 
   // Collect the boolean to enable the parking addition from the UserViewModel as a state
   val enableParkingAddition by userViewModel.isSignedIn.collectAsState(false)
@@ -127,6 +171,15 @@ fun MapScreen(
   // Prevent the camera from recentering when the user exit and come back to the map by disabling
   // the related launchedEffect
   val cameraRecentering = mapViewModel.cameraRecentering.collectAsState()
+
+    // Mutable state to store the visibility of the settings menu
+  val showSettings = remember { mutableStateOf(false) }
+
+    // Initialize FocusManager
+    val focusManager = LocalFocusManager.current
+
+//  // Get the virtual keyboard controller
+//  val virtualKeyboard : SoftwareKeyboardController = LocalSoftwareKeyboardController.current
 
   // initialize the Gson object that will deserialize and serialize the parking to bind it to the
   // marker
@@ -178,7 +231,10 @@ fun MapScreen(
             })
       }) { padding ->
         MapboxMap(
-            Modifier.fillMaxSize().padding(padding).testTag("MapScreen"),
+            Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .testTag("MapScreen"),
             mapViewportState = mapViewportState,
             style = { MapConfig.DefaultStyle() }) {
               DisposableMapEffect { mapView ->
@@ -191,7 +247,7 @@ fun MapScreen(
                     CameraBoundsOptions.Builder().minZoom(minZoom).maxZoom(maxZoom).build()
                 mapView.mapboxMap.setBounds(cameraBoundsOptions)
 
-                // Get parkings in the current view
+                  // Get parkings in the current view
                 val (loadedBottomLeft, loadedTopRight) = mapViewModel.getScreenCorners(mapView)
                 parkingViewModel.getParkingsInRect(loadedBottomLeft, loadedTopRight)
 
@@ -238,7 +294,11 @@ fun MapScreen(
                       override fun onMoveBegin(detector: MoveGestureDetector) {
                         // Remove any preview card displayed
                         mapViewModel.removePreviewCard()
+
+                        // remove focus on the Search Bar
+                        focusManager.clearFocus()
                         if (mapViewModel.isTrackingModeEnable.value) {
+
                           mapViewportState.transitionToOverviewState(
                               OverviewViewportStateOptions.Builder()
                                   .geometry(mapViewportState.cameraState!!.center)
@@ -381,58 +441,21 @@ fun MapScreen(
             }
 
         // ======================= OVERLAY =======================
-        Box(modifier = Modifier.padding(padding).fillMaxSize()) {
+        Box(modifier = Modifier
+            .padding(padding)
+            .fillMaxSize()) {
           // A switch to change the display mode
-          Row(
-              modifier =
-                  Modifier.align(Alignment.TopStart)
-                      .padding(start = 8.dp, top = 32.dp)
-                      .alpha(alpha),
-              verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    stringResource(R.string.map_screen_mode_switch_label),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold))
-                Switch(
-                    modifier = Modifier.padding(start = 8.dp),
-                    checked = mapMode.value.isAdvancedMode,
-                    onCheckedChange = {
-                      val futurMapMode =
-                          if (it) MapViewModel.MapMode.RECTANGLES else MapViewModel.MapMode.MARKERS
-                      mapViewModel.updateUserMapMode(futurMapMode)
-                      mapViewModel.updateMapMode(futurMapMode)
-                    },
-                    colors =
-                        SwitchDefaults.colors()
-                            .copy(
-                                uncheckedTrackColor = disabledColor(),
-                            ))
-              }
-
-          ZoomControls(
-              modifier = Modifier.align(Alignment.TopEnd),
-              onZoomIn = {
-                mapViewModel.removePreviewCard()
-                mapViewportState.setCameraOptions {
-                  zoom(mapViewportState.cameraState!!.zoom + 1.0)
-                }
-              },
-              onZoomOut = {
-                mapViewModel.removePreviewCard()
-                mapViewportState.setCameraOptions {
-                  zoom(mapViewportState.cameraState!!.zoom - 1.0)
-                }
-              })
 
           if (locationEnabled) {
             IconButton(
                 icon = Icons.Default.MyLocation,
                 contentDescription = "Recenter on Location",
                 modifier =
-                    Modifier.align(Alignment.BottomEnd)
-                        .padding(bottom = 25.dp, end = 16.dp)
-                        .scale(1.2f)
-                        .testTag("recenterButton"),
+                Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(bottom = 25.dp, end = 16.dp)
+                    .scale(1.2f)
+                    .testTag("recenterButton"),
                 onClick = {
                   mapViewModel.removePreviewCard()
                   mapViewModel.updateTrackingMode(true)
@@ -454,9 +477,10 @@ fun MapScreen(
                 icon = Icons.Default.Add,
                 contentDescription = "Add parking spots",
                 modifier =
-                    Modifier.align(Alignment.BottomStart)
-                        .scale(1.2f)
-                        .padding(bottom = 25.dp, start = 16.dp),
+                Modifier
+                    .align(Alignment.BottomStart)
+                    .scale(1.2f)
+                    .padding(bottom = 25.dp, start = 16.dp),
                 onClick = {
                   mapViewModel.updateCameraPosition(mapViewportState.cameraState!!)
                   navigationActions.navigateTo(Route.ADD_SPOTS)
@@ -464,6 +488,91 @@ fun MapScreen(
                 colorLevel = ColorLevel.PRIMARY,
                 testTag = "addButton")
           }
+
+            OutlinedTextField(
+                value = searchQuery.value,
+                onValueChange = { it:String -> searchQuery.value = it },
+                placeholder = { Text(text = "Search for a location", color = Black) },
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .padding(end = 30.dp, start = 5.dp,top = 5.dp)
+                    .align(Alignment.TopStart),
+                shape = RoundedCornerShape(16.dp),
+                colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Black, focusedLabelColor = Black,
+                    focusedBorderColor = Cerulean, unfocusedBorderColor = Cerulean, cursorColor = Black, unfocusedContainerColor = White,
+                    focusedContainerColor = White, unfocusedPlaceholderColor = Black),
+                trailingIcon = {
+                    if (searchQuery.value.isNotEmpty()) {
+                        IconButton(onClick = { searchQuery.value = "" }, icon = Icons.Default.Clear, contentDescription = "Clear search",)
+                    }
+                },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(onSearch = {
+                    //addressViewModel.search(searchQuery.value)
+                    //virtualKeyboard.hide()
+                })
+            )
+
+            SmallFloatingActionButton(modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = 5.dp, end = 5.dp),
+                onClick = {
+                    if (showSettings.value) showSettings.value = false else showSettings.value = true
+                },
+                icon = Icons.Filled.Settings,
+                contentDescription = "Settings",
+            )
         }
+
+
+
+      // ======================= SETTINGS MENU=======================
+
+      if(showSettings.value) {
+          Box(
+              modifier = Modifier
+                  .fillMaxSize()
+                  .padding(16.dp),
+              contentAlignment = Alignment.TopEnd
+          ) {
+              Card(
+                  modifier = Modifier
+                      .width(300.dp)
+                      .height(400.dp)
+                      .align(Alignment.Center)
+              ) {
+                  Column(
+                      modifier = Modifier.padding(16.dp)
+                  ) {
+                      Text(text = "Settings")
+                      Spacer(modifier = Modifier.height(16.dp))
+
+                      // Advanced Mode
+                      Row(
+                          verticalAlignment = Alignment.CenterVertically
+                      ) {
+                          Text(text = "Advanced Mode")
+                          Spacer(modifier = Modifier.weight(1f))
+                          Switch(
+                              modifier = Modifier.padding(start = 8.dp),
+                              checked = mapMode.value.isAdvancedMode,
+                              onCheckedChange = {
+                                  val futurMapMode =
+                                      if (it) MapViewModel.MapMode.RECTANGLES else MapViewModel.MapMode.MARKERS
+                                  mapViewModel.updateUserMapMode(futurMapMode)
+                                  mapViewModel.updateMapMode(futurMapMode)
+                              },
+                              colors =
+                              SwitchDefaults.colors()
+                                  .copy(
+                                      uncheckedTrackColor = disabledColor(),
+                                  )
+                          )
+                      }
+                  }
+              }
+          }
       }
+  }
 }
