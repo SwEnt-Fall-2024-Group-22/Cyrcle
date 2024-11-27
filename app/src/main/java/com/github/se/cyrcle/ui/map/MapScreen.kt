@@ -491,7 +491,8 @@ fun MapScreen(
               modifier =
                   Modifier.fillMaxWidth(0.9f)
                       .padding(end = 30.dp, start = 5.dp, top = 5.dp)
-                      .align(Alignment.TopStart),
+                      .align(Alignment.TopStart)
+                      .testTag("SearchBar"),
               shape = RoundedCornerShape(16.dp),
               colors = getOutlinedTextFieldColorsSearchBar(ColorLevel.PRIMARY),
               trailingIcon = {
@@ -516,7 +517,10 @@ fun MapScreen(
                       }))
 
           SmallFloatingActionButton(
-              modifier = Modifier.align(Alignment.TopEnd).padding(top = 5.dp, end = 5.dp),
+              modifier =
+                  Modifier.align(Alignment.TopEnd)
+                      .padding(top = 5.dp, end = 5.dp)
+                      .testTag("SettingsMenuButton"),
               onClick = {
                 if (showSettings.value) showSettings.value = false else showSettings.value = true
               },
@@ -531,33 +535,39 @@ fun MapScreen(
           Box(
               modifier = Modifier.fillMaxSize().padding(16.dp),
               contentAlignment = Alignment.TopEnd) {
-                Card(modifier = Modifier.width(300.dp).height(400.dp).align(Alignment.Center)) {
-                  Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = stringResource(R.string.settings))
-                    Spacer(modifier = Modifier.height(16.dp))
+                Card(
+                    modifier =
+                        Modifier.width(300.dp)
+                            .height(400.dp)
+                            .align(Alignment.Center)
+                            .testTag("SettingsMenu")) {
+                      Column(modifier = Modifier.padding(16.dp)) {
+                        Text(text = stringResource(R.string.settings))
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                    // Advanced Mode
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                      Text(text = stringResource(R.string.map_screen_mode_switch_label))
-                      Spacer(modifier = Modifier.weight(1f))
-                      Switch(
-                          modifier = Modifier.padding(start = 8.dp),
-                          checked = mapMode.value.isAdvancedMode,
-                          onCheckedChange = {
-                            val futurMapMode =
-                                if (it) MapViewModel.MapMode.RECTANGLES
-                                else MapViewModel.MapMode.MARKERS
-                            mapViewModel.updateUserMapMode(futurMapMode)
-                            mapViewModel.updateMapMode(futurMapMode)
-                          },
-                          colors =
-                              SwitchDefaults.colors()
-                                  .copy(
-                                      uncheckedTrackColor = disabledColor(),
-                                  ))
+                        // Advanced Mode
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                          Text(text = stringResource(R.string.map_screen_mode_switch_label))
+                          Spacer(modifier = Modifier.weight(1f))
+                          Switch(
+                              modifier =
+                                  Modifier.padding(start = 8.dp).testTag("advancedModeSwitch"),
+                              checked = mapMode.value.isAdvancedMode,
+                              onCheckedChange = {
+                                val futurMapMode =
+                                    if (it) MapViewModel.MapMode.RECTANGLES
+                                    else MapViewModel.MapMode.MARKERS
+                                mapViewModel.updateUserMapMode(futurMapMode)
+                                mapViewModel.updateMapMode(futurMapMode)
+                              },
+                              colors =
+                                  SwitchDefaults.colors()
+                                      .copy(
+                                          uncheckedTrackColor = disabledColor(),
+                                      ))
+                        }
+                      }
                     }
-                  }
-                }
               }
         }
 
@@ -566,48 +576,53 @@ fun MapScreen(
         if (showSuggestions.value &&
             listOfSuggestions.value.size != 1 &&
             listOfSuggestions.value.isNotEmpty()) {
-          ModalBottomSheet(onDismissRequest = { showSuggestions.value = false }) {
-            LazyColumn {
-              items(listOfSuggestions.value) { suggestion ->
-                Card(
-                    onClick = {
-                      showSuggestions.value = false
+          ModalBottomSheet(
+              onDismissRequest = { showSuggestions.value = false },
+              modifier = Modifier.testTag("SuggestionsMenu")) {
+                LazyColumn {
+                  items(listOfSuggestions.value) { suggestion ->
+                    Card(
+                        onClick = {
+                          showSuggestions.value = false
 
-                      mapViewportState.transitionToOverviewState(
-                          OverviewViewportStateOptions.Builder()
-                              .geometry(mapViewportState.cameraState!!.center)
-                              .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
-                              .build())
-                      mapViewModel.updateTrackingMode(false)
+                          mapViewportState.transitionToOverviewState(
+                              OverviewViewportStateOptions.Builder()
+                                  .geometry(mapViewportState.cameraState!!.center)
+                                  .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
+                                  .build())
+                          mapViewModel.updateTrackingMode(false)
 
-                      mapViewportState.setCameraOptions {
-                        center(
-                            Point.fromLngLat(
-                                suggestion.longitude.toDouble(), suggestion.latitude.toDouble()))
-                      }
+                          mapViewportState.setCameraOptions {
+                            center(
+                                Point.fromLngLat(
+                                    suggestion.longitude.toDouble(),
+                                    suggestion.latitude.toDouble()))
+                          }
 
-                      Log.e(
-                          "Selected Location",
-                          Point.fromLngLat(
-                                  suggestion.longitude.toDouble(), suggestion.latitude.toDouble())
-                              .toString())
-                    },
-                    colors =
-                        CardColors(
-                            containerColor = invertColor(defaultOnColor()),
-                            contentColor = defaultOnColor(),
-                            disabledContainerColor = invertColor(defaultOnColor()),
-                            disabledContentColor = defaultOnColor()),
-                    modifier = Modifier.fillMaxSize()) {
-                      Text(
-                          text = "${suggestion.road},${suggestion.city},${suggestion.country}",
-                          Modifier.padding(5.dp))
-                    }
+                          Log.e(
+                              "Selected Location",
+                              Point.fromLngLat(
+                                      suggestion.longitude.toDouble(),
+                                      suggestion.latitude.toDouble())
+                                  .toString())
+                        },
+                        colors =
+                            CardColors(
+                                containerColor = invertColor(defaultOnColor()),
+                                contentColor = defaultOnColor(),
+                                disabledContainerColor = invertColor(defaultOnColor()),
+                                disabledContentColor = defaultOnColor()),
+                        modifier =
+                            Modifier.fillMaxSize().testTag("suggestionCard${suggestion.city}")) {
+                          Text(
+                              text = "${suggestion.road},${suggestion.city},${suggestion.country}",
+                              Modifier.padding(5.dp))
+                        }
 
-                androidx.compose.material.Divider(Modifier.fillMaxWidth(), color = Black)
+                    androidx.compose.material.Divider(Modifier.fillMaxWidth(), color = Black)
+                  }
+                }
               }
-            }
-          }
         } else if (showSuggestions.value && listOfSuggestions.value.size == 1) {
           chosenLocation.value.let {
             mapViewportState.transitionToOverviewState(
