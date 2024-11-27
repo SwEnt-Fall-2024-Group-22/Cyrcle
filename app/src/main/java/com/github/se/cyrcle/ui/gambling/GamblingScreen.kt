@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.ui.navigation.NavigationActions
 import kotlin.math.*
 import kotlinx.coroutines.*
 
@@ -245,7 +246,7 @@ fun WheelView(
 }
 
 @Composable
-fun GamblingScreen() {
+fun GamblingScreen(navigationActions: NavigationActions) {
   Box(
       modifier = Modifier.fillMaxSize().testTag("gambling_screen"),
       contentAlignment = Alignment.Center) {
