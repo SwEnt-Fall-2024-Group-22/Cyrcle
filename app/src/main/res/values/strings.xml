@@ -36,9 +36,6 @@
     <string name="attributes_picker_rack_type_label">Which type of rack is in the parking spot?</string>
     <string name="attributes_picker_has_surveillance_question">Is the parking spot under camera surveillance ?</string>
     <string name="attributes_picker_description_label">Description (Optional)</string>
-    <string name="attributes_picker_parking_added_with_reward_toast">Parking spot added!\n+%d coins for contributing to the community!</string>
-
-
     <!-- Attributes Picker > BottomBarAddAttr -->
     <string name="attributes_picker_bottom_bar_cancel_button">Cancel</string>
     <string name="attributes_picker_bottom_bar_submit_button">Submit</string>
@@ -118,9 +115,7 @@
 
     <!-- Map Screen -->
     <string name="map_screen_capacity">Capacity is %s</string>
-    <string name="map_screen_mode_switch_label">Advanced Mode</string>
-    <string name="settings">Settings</string>
-    <string name="search_bar_placeholder">Search for a location</string>
+    <string name="map_screen_mode_switch_label">Advanced</string>
 
     <!-- Profile Commons -->
     <string name="profile_account_already_exists">Your account is already linked, please try with another email</string>
@@ -132,7 +127,7 @@
     <string name="create_profile_error_toast">Error during authentication…</string>
     <string name="create_profile_account_already_exists">Your account already exists, please sign in</string>
     <string name="create_profile_sign_in_explanation">To complete account creation,\n please authenticate with Google to link your email.</string>
-    <string name="create_profile_welcome_bonus_toast">Welcome bonus: %d coins added to your wallet!</string>
+    <string name="welcome_bonus_toast">Welcome bonus: 100 coins added to your wallet!</string>
 
     <!-- Invite to AuthScreen Screen -->
     <string name="invite_auth_screen_to_sign_in">Go back to sign in</string>
@@ -198,7 +193,7 @@
     <string name="review_screen_submit_toast">Review added!</string>
     <string name="review_screen_update_toast">Review Updated!</string>
     <string name="review_screen_default_review_owner">default</string>
-    <string name="review_screen_reward_toast">+%d coins for submitting a review!</string>
+    <string name="review_screen_reward_toast">+10 coins for submitting a review!</string>
 
 
     <!-- TopAppBar -->
@@ -211,9 +206,6 @@
     <string name="rarity_common">Common</string>
     <string name="rarity_rare">Rare</string>
     <string name="rarity_epic">Epic</string>
-    <string name="gambling_screen_title">Gambling</string>
-    <string name="gambling_screen_coins_display">Coins: %d</string>
-
 
     <!-- Report Screens -->
     <string name="report_title">The following will be submitted in your report:</string>
