@@ -3,8 +3,6 @@ package com.github.se.cyrcle.ui.parkingDetails
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
@@ -33,22 +31,14 @@ import com.github.se.cyrcle.ui.theme.atoms.IconButton
 @OptIn(ExperimentalMaterial3Api::class)
 fun ParkingDetailsAlertDialogShowImage(onDismiss: () -> Unit, imageUrl: String) {
   val alertDialogMaxHeight = LocalConfiguration.current.screenHeightDp.dp * 0.8f
-  val pushingDialogOnTopBy = LocalConfiguration.current.screenHeightDp.dp * 0.1f
 
   BasicAlertDialog(
-      modifier =
-          Modifier.testTag("ParkingDetailsAlertDialogShowImage").padding(0.dp).wrapContentSize(),
+      modifier = Modifier.testTag("ParkingDetailsAlertDialogShowImage").wrapContentSize(),
       onDismissRequest = onDismiss,
       content = {
         Box(
             modifier =
-                Modifier.heightIn(max = alertDialogMaxHeight)
-                    .wrapContentSize()
-                    // .background(MaterialTheme.colorScheme.background, MaterialTheme.shapes.small)
-                    // // Set the background color
-                    // .border(3.dp, MaterialTheme.colorScheme.primary, MaterialTheme.shapes.small)
-                    // // Add a border
-                    .wrapContentSize()) {
+                Modifier.heightIn(max = alertDialogMaxHeight).wrapContentSize().wrapContentSize()) {
               Image(
                   painter = rememberAsyncImagePainter(imageUrl),
                   contentDescription = "Parking spot image",
@@ -66,6 +56,5 @@ fun ParkingDetailsAlertDialogShowImage(onDismiss: () -> Unit, imageUrl: String) 
                   onClick = onDismiss,
                   inverted = true)
             }
-        Spacer(modifier = Modifier.height(pushingDialogOnTopBy))
       })
 }
