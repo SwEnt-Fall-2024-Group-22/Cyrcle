@@ -2,7 +2,6 @@ package com.github.se.cyrcle.model.address
 
 import android.util.Log
 import com.google.gson.annotations.SerializedName
-import com.mapbox.geojson.Point
 
 /**
  * Represents an address.

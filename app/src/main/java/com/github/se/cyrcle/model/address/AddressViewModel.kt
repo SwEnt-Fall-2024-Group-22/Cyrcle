@@ -30,7 +30,7 @@ class AddressViewModel(private val repository: AddressRepository) : ViewModel() 
     val query = "${point.latitude()},${point.longitude()}"
     repository.search(
         query,
-        onSuccess = { _address.value = it.first()},
+        onSuccess = { _address.value = it.first() },
         onFailure = { Log.e("AddressViewModel", "Failed to search for address", it) })
   }
 
@@ -39,7 +39,6 @@ class AddressViewModel(private val repository: AddressRepository) : ViewModel() 
    *
    * @param query The query to search for.
    */
-
   fun search(query: String) {
     repository.search(
         query,
