@@ -75,7 +75,7 @@ fun CyrcleNavHost(
     ) {
       composable(Screen.MAP) {
         MapScreen(
-            navigationActions, parkingViewModel, userViewModel, mapViewModel, permissionHandler)
+            navigationActions, parkingViewModel, userViewModel, mapViewModel, permissionHandler,addressViewModel)
       }
     }
 

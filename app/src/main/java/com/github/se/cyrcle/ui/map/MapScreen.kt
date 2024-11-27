@@ -3,6 +3,7 @@ package com.github.se.cyrcle.ui.map
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Icon
+import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -29,6 +32,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -111,6 +115,7 @@ import com.mapbox.maps.viewannotation.annotatedLayerFeature
 import com.mapbox.maps.viewannotation.annotationAnchor
 import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
+import kotlinx.coroutines.runBlocking
 
 const val defaultZoom = 16.0
 const val maxZoom = 18.0
@@ -177,6 +182,20 @@ fun MapScreen(
 
     // Initialize FocusManager
     val focusManager = LocalFocusManager.current
+
+    // Initialize the keyboard controller
+    val virtualKeyboardManager = LocalSoftwareKeyboardController.current
+
+    // List of suggestions from NominatimAPI
+    val listOfSuggestions = addressViewModel.addressList.collectAsState()
+
+
+    // Show suggestions screen
+    val showSuggestions = remember { mutableStateOf(false) }
+
+    // Chosen location by the user
+    val chosenLocation = addressViewModel.address.collectAsState()
+
 
 //  // Get the virtual keyboard controller
 //  val virtualKeyboard : SoftwareKeyboardController = LocalSoftwareKeyboardController.current
@@ -509,8 +528,13 @@ fun MapScreen(
                 singleLine = true,
                 keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
                 keyboardActions = KeyboardActions(onSearch = {
-                    //addressViewModel.search(searchQuery.value)
-                    //virtualKeyboard.hide()
+                    virtualKeyboardManager?.hide()
+
+                    runBlocking {
+                    addressViewModel.search(searchQuery.value)
+                    }
+
+                    showSuggestions.value = true
                 })
             )
 
@@ -573,6 +597,55 @@ fun MapScreen(
                   }
               }
           }
+      }
+
+      // ======================= SUGGESTION MENU=======================
+
+        if(showSuggestions.value && listOfSuggestions.value.size != 1 && listOfSuggestions.value.isNotEmpty()) {
+            ModalBottomSheet(onDismissRequest = { showSuggestions.value = false })
+            {
+                LazyColumn {
+                    items(listOfSuggestions.value) { suggestion ->
+                        Card(
+                            onClick = {
+                                showSuggestions.value = false
+
+                                runBlocking {
+                                    mapViewportState.setCameraOptions {
+                                        center(suggestion.location)
+                                    }
+                                    Log.e("Selected Location",suggestion.location.toString())
+                                }
+
+                                mapViewportState.transitionToOverviewState(
+                                    OverviewViewportStateOptions.Builder()
+                                        .geometry(mapViewportState.cameraState!!.center)
+                                        .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
+                                        .build())
+                                mapViewModel.updateTrackingMode(false)
+                            }
+
+                        ) {
+                            Text(text = "${suggestion.road},${suggestion.city},${suggestion.country}")
+                        }
+                    }
+                }
+            }
+        }
+      else if (showSuggestions.value && listOfSuggestions.value.size == 1) {
+            chosenLocation.value.let {
+                runBlocking {
+                mapViewportState.setCameraOptions {
+                    center(it.location)
+                }}
+                mapViewportState.transitionToOverviewState(
+                    OverviewViewportStateOptions.Builder()
+                        .geometry(mapViewportState.cameraState!!.center)
+                        .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
+                        .build())
+                mapViewModel.updateTrackingMode(false)
+            }
+          showSuggestions.value = false
       }
   }
 }
