@@ -192,8 +192,11 @@
     <string name="review_screen_rating">Rating: %.1f</string>
     <string name="review_screen_write_review_label">Write your review</string>
     <string name="review_screen_submit_button">Save my review</string>
-    <string name="review_screen_submit_button_toast">Review added!</string>
+    <string name="review_screen_submit_toast">Review added!</string>
+    <string name="review_screen_update_toast">Review Updated!</string>
     <string name="review_screen_default_review_owner">default</string>
+    <string name="review_screen_reward_toast">+10 coins for submitting a review!</string>
+
 
     <!-- TopAppBar -->
     <string name="top_app_bar_go_back">Go Back</string>
