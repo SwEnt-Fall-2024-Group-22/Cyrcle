@@ -60,6 +60,7 @@ import com.github.se.cyrcle.model.parking.ParkingProtection
 import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
+import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.map.MapConfig
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
@@ -89,7 +90,8 @@ fun AttributesPicker(
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel,
     mapViewModel: MapViewModel,
-    addressViewModel: AddressViewModel
+    addressViewModel: AddressViewModel,
+    userViewModel: UserViewModel
 ) {
   val configuration = LocalConfiguration.current
   val screenWidth = configuration.screenWidthDp.dp
@@ -116,6 +118,8 @@ fun AttributesPicker(
   LaunchedEffect(suggestedAddress) {
     if (title.value.isEmpty()) title.value = suggestedAddress.displayRelevantFields()
   }
+  val context = LocalContext.current
+  val parkingAddedWithRewardText = stringResource(R.string.parking_added_with_reward_toast)
 
   fun onSubmit() {
     val parking =
@@ -131,6 +135,15 @@ fun AttributesPicker(
             price = 0.0,
             uid = parkingViewModel.getNewUid())
     parkingViewModel.addParking(parking)
+
+    // Credit coins to user
+    userViewModel.currentUser.value?.let { currentUser ->
+      currentUser.details?.wallet?.creditCoins(100)
+      userViewModel.updateUser(currentUser)
+    }
+
+    Toast.makeText(context, parkingAddedWithRewardText, Toast.LENGTH_LONG).show()
+
     navigationActions.navigateTo(TopLevelDestinations.MAP)
   }
 

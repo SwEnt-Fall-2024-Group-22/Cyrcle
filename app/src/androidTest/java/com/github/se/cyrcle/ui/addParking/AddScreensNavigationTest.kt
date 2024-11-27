@@ -9,13 +9,16 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockAddressRepository
+import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
+import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.addParking.attributes.AttributesPicker
 import com.github.se.cyrcle.ui.addParking.location.LocationPicker
 import com.github.se.cyrcle.ui.navigation.NavigationActions
@@ -37,25 +40,33 @@ class AddScreensNavigationTest {
   @Mock lateinit var navigationActions: NavigationActions
 
   private lateinit var reportedObjectRepository: MockReportedObjectRepository
-  private lateinit var mockedParkingRepository: MockParkingRepository
-  private lateinit var mockedImageRepository: MockImageRepository
+  private lateinit var mockParkingRepository: MockParkingRepository
+  private lateinit var mockImageRepository: MockImageRepository
   private lateinit var addressRepository: MockAddressRepository
+  private lateinit var userRepository: MockUserRepository
+  private lateinit var mockAuthenticator: MockAuthenticationRepository
 
   private lateinit var parkingViewModel: ParkingViewModel
   private lateinit var mapViewModel: MapViewModel
   private lateinit var addressViewModel: AddressViewModel
+  private lateinit var userViewModel: UserViewModel
 
   @Before
   fun setUp() {
     MockitoAnnotations.openMocks(this)
 
     reportedObjectRepository = MockReportedObjectRepository()
-    mockedParkingRepository = MockParkingRepository()
-    mockedImageRepository = MockImageRepository()
+    mockParkingRepository = MockParkingRepository()
+    mockImageRepository = MockImageRepository()
     addressRepository = MockAddressRepository()
+    userRepository = MockUserRepository()
+    mockAuthenticator = MockAuthenticationRepository()
+
+    userViewModel =
+        UserViewModel(userRepository, mockParkingRepository, mockImageRepository, mockAuthenticator)
 
     parkingViewModel =
-        ParkingViewModel(mockedImageRepository, mockedParkingRepository, reportedObjectRepository)
+        ParkingViewModel(mockImageRepository, mockParkingRepository, reportedObjectRepository)
     mapViewModel = MapViewModel()
     addressViewModel = AddressViewModel(addressRepository)
   }
@@ -83,7 +94,8 @@ class AddScreensNavigationTest {
     mapViewModel.updateLocation(Location(Point.fromLngLat(0.0, 0.0)))
 
     composeTestRule.setContent {
-      AttributesPicker(navigationActions, parkingViewModel, mapViewModel, addressViewModel)
+      AttributesPicker(
+          navigationActions, parkingViewModel, mapViewModel, addressViewModel, userViewModel)
     }
 
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("AttributesPickerTitle"))
@@ -105,7 +117,8 @@ class AddScreensNavigationTest {
     mapViewModel.updateLocation(Location(Point.fromLngLat(0.0, 0.0)))
 
     composeTestRule.setContent {
-      AttributesPicker(navigationActions, parkingViewModel, mapViewModel, addressViewModel)
+      AttributesPicker(
+          navigationActions, parkingViewModel, mapViewModel, addressViewModel, userViewModel)
     }
 
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("cancelButton"))

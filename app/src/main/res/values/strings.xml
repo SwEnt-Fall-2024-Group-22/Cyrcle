@@ -36,6 +36,8 @@
     <string name="attributes_picker_rack_type_label">Which type of rack is in the parking spot?</string>
     <string name="attributes_picker_has_surveillance_question">Is the parking spot under camera surveillance ?</string>
     <string name="attributes_picker_description_label">Description (Optional)</string>
+    <string name="parking_added_with_reward_toast">Parking spot added!\n+100 coins for contributing to the community!</string>
+
     <!-- Attributes Picker > BottomBarAddAttr -->
     <string name="attributes_picker_bottom_bar_cancel_button">Cancel</string>
     <string name="attributes_picker_bottom_bar_submit_button">Submit</string>
