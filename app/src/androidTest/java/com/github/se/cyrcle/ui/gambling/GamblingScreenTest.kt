@@ -1,4 +1,3 @@
-import androidx.compose.ui.semantics.text
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsEnabled
@@ -14,9 +13,6 @@ import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
-import com.github.se.cyrcle.model.parking.ParkingViewModel
-import com.github.se.cyrcle.model.parking.TestInstancesParking
-import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserDetails
 import com.github.se.cyrcle.model.user.UserPublic
@@ -26,8 +22,6 @@ import com.github.se.cyrcle.ui.gambling.GamblingScreen
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -56,14 +50,13 @@ class GamblingScreenTest {
 
     val wallet = Wallet.empty()
     val user =
-      User(
-        UserPublic("1", "janesmith", "http://example.com/jane.jpg"),
-        UserDetails("Jane", "Smith", "jane.smith@example.com", wallet = wallet)
-      )
+        User(
+            UserPublic("1", "janesmith", "http://example.com/jane.jpg"),
+            UserDetails("Jane", "Smith", "jane.smith@example.com", wallet = wallet))
 
     userViewModel =
-      UserViewModel(
-        mockUserRepository, mockParkingRepository, mockImageRepository, mockAuthenticator)
+        UserViewModel(
+            mockUserRepository, mockParkingRepository, mockImageRepository, mockAuthenticator)
 
     userViewModel.addUser(user, {}, {})
     mockAuthenticator.testUser = user
@@ -149,6 +142,9 @@ class GamblingScreenTest {
 
   @Test
   fun verify_spin_animation_completion() {
+    val currentUser = userViewModel.currentUser.value!!
+    currentUser.details?.wallet?.creditCoins(15)
+    userViewModel.updateUser(currentUser)
     composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
 
     composeTestRule.mainClock.autoAdvance = false
@@ -171,6 +167,11 @@ class GamblingScreenTest {
 
   @Test
   fun verify_subsequent_spins() {
+
+    val currentUser = userViewModel.currentUser.value!!
+    currentUser.details?.wallet?.creditCoins(35)
+    userViewModel.updateUser(currentUser)
+
     composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
 
     composeTestRule.mainClock.autoAdvance = false
