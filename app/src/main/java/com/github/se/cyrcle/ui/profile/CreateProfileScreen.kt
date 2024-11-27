@@ -12,7 +12,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
-import com.github.se.cyrcle.model.user.ACCOUNT_CREATION_REWARD
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserDetails
 import com.github.se.cyrcle.model.user.UserPublic
@@ -30,8 +29,7 @@ fun CreateProfileScreen(navigationActions: NavigationActions, userViewModel: Use
   val defaultUser = User(UserPublic("", ""), UserDetails())
 
   val validationToastText = stringResource(R.string.create_profile_validation_toast)
-  val welcomeBonusText =
-      stringResource(R.string.create_profile_welcome_bonus_toast, ACCOUNT_CREATION_REWARD)
+  val welcomeBonusText = stringResource(R.string.welcome_bonus_toast)
   val combinedToastText = "$validationToastText\n$welcomeBonusText"
 
   val errorToastText = stringResource(R.string.create_profile_error_toast)
@@ -53,12 +51,13 @@ fun CreateProfileScreen(navigationActions: NavigationActions, userViewModel: Use
                   userWithId.copy(
                       details =
                           userWithId.details?.copy(
-                              wallet = Wallet() // Start with 100 coins
+                              wallet = Wallet(100) // Start with 100 coins
                               ))
               // Add the user then continue
               userViewModel.addUser(
                   userWithCoins,
                   {
+                    userViewModel.setCurrentUser(userWithCoins)
                     userViewModel.updateUser(userWithCoins, context)
                     Toast.makeText(context, combinedToastText, Toast.LENGTH_LONG).show()
                     navigationActions.navigateTo(TopLevelDestinations.MAP)

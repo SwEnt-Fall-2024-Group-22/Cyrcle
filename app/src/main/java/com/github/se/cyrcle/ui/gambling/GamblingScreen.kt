@@ -6,7 +6,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,10 +27,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.cyrcle.R
-import com.github.se.cyrcle.model.user.SPIN_COST
 import com.github.se.cyrcle.model.user.UserViewModel
+import com.github.se.cyrcle.model.user.Wallet
 import com.github.se.cyrcle.ui.navigation.NavigationActions
-import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 import kotlin.math.*
 import kotlinx.coroutines.*
 
@@ -253,57 +251,56 @@ fun WheelView(
 @Composable
 fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserViewModel) {
   val userState by userViewModel.currentUser.collectAsState()
-  var coins by remember { mutableStateOf(userState?.details?.wallet?.getCoins()) }
+  val coins = userState?.details?.wallet?.getCoins()
+  val spinCost = 10 // Cost to spin the wheel
 
-  Scaffold(
-      topBar = {
-        TopAppBar(
-            navigationActions = navigationActions,
-            title = stringResource(R.string.gambling_screen_title),
-            testTag = "gambling_screen_top_bar")
-      }) { paddingValues ->
-        Box(
-            modifier = Modifier.fillMaxSize().padding(paddingValues).testTag("gambling_screen"),
-            contentAlignment = Alignment.Center) {
-              var wheelSpinFunction by remember { mutableStateOf<(() -> Unit)?>(null) }
+  Box(
+      modifier = Modifier.fillMaxSize().testTag("gambling_screen"),
+      contentAlignment = Alignment.Center) {
+        var wheelSpinFunction by remember { mutableStateOf<(() -> Unit)?>(null) }
 
+        Text(
+            text = "Coins: ${coins ?: "BROKIE"}",
+            modifier =
+                Modifier.align(Alignment.TopCenter).padding(top = 16.dp).testTag("coin_display"),
+            style = MaterialTheme.typography.headlineMedium)
+
+        WheelView(
+                modifier = Modifier.size(300.dp).testTag("wheel_view"),
+                onSegmentLanded = { /* Handle landing */})
+            .let { spinFn -> wheelSpinFunction = spinFn }
+
+        val canSpin = userState?.details?.wallet?.isSolvable(spinCost, -1) == true
+        // I really dont like the fact that I have to put -1 as threshold,
+        // but it is this way because of how André wrote the isSolvable function.
+        // If i want to put 0 here then technically all that I have to do is change the > into >=
+        // inside isSolvable
+        // up for debate
+
+        Button(
+            onClick = {
+              userState?.let { user ->
+                // Create a new wallet and debit the coins
+                val newWallet = Wallet(user.details?.wallet?.getCoins() ?: 0)
+                newWallet.debitCoins(spinCost)
+
+                // Create updated user with new wallet
+                val updatedUser = user.copy(details = user.details?.copy(wallet = newWallet))
+                userViewModel.updateUser(updatedUser)
+                wheelSpinFunction?.invoke()
+              }
+            },
+            enabled = canSpin,
+            modifier = Modifier.size(90.dp).clip(CircleShape).testTag("spin_button"),
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = Color.Red, disabledContainerColor = Color.Gray)) {
               Text(
-                  text = stringResource(R.string.gambling_screen_coins_display, coins ?: 0),
-                  modifier =
-                      Modifier.align(Alignment.TopCenter)
-                          .padding(top = 16.dp)
-                          .testTag("coin_display"),
-                  style = MaterialTheme.typography.headlineMedium)
-
-              WheelView(
-                      modifier = Modifier.size(300.dp).testTag("wheel_view"),
-                      onSegmentLanded = { /* Handle landing */})
-                  .let { spinFn -> wheelSpinFunction = spinFn }
-
-              val canSpin = userState?.details?.wallet?.isSolvable(SPIN_COST, 0) == true
-
-              Button(
-                  onClick = {
-                    userViewModel.tryDebitCoinsFromCurrentUser(
-                        SPIN_COST,
-                        0,
-                        onSuccess = {
-                          coins = userState?.details?.wallet?.getCoins()
-                          wheelSpinFunction?.invoke()
-                        })
-                  },
-                  enabled = canSpin,
-                  modifier = Modifier.size(90.dp).clip(CircleShape).testTag("spin_button"),
-                  colors =
-                      ButtonDefaults.buttonColors(
-                          containerColor = Color.Red, disabledContainerColor = Color.Gray)) {
-                    Text(
-                        text = stringResource(R.string.spin_button_text),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.wrapContentSize().testTag("spin_button_text"))
-                  }
+                  text = stringResource(R.string.spin_button_text),
+                  fontSize = 16.sp,
+                  fontWeight = FontWeight.Bold,
+                  textAlign = TextAlign.Center,
+                  modifier = Modifier.wrapContentSize().testTag("spin_button_text"))
             }
       }
 }

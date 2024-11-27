@@ -27,7 +27,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.verify
 
 @RunWith(AndroidJUnit4::class)
 class GamblingScreenTest {
@@ -49,10 +48,11 @@ class GamblingScreenTest {
     mockImageRepository = MockImageRepository()
     mockAuthenticator = MockAuthenticationRepository()
 
+    val wallet = Wallet.empty()
     val user =
         User(
             UserPublic("1", "janesmith", "http://example.com/jane.jpg"),
-            UserDetails("Jane", "Smith", "jane.smith@example.com", wallet = Wallet.empty()))
+            UserDetails("Jane", "Smith", "jane.smith@example.com", wallet = wallet))
 
     userViewModel =
         UserViewModel(
@@ -79,7 +79,9 @@ class GamblingScreenTest {
   @Test
   fun verify_spins_with_wallet_restrictions() {
     // Add 25 coins to user's wallet
-    userViewModel.creditCoinsToCurrentUser(25)
+    val currentUser = userViewModel.currentUser.value!!
+    currentUser.details?.wallet?.creditCoins(25)
+    userViewModel.updateUser(currentUser)
 
     composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
 
@@ -140,8 +142,9 @@ class GamblingScreenTest {
 
   @Test
   fun verify_spin_animation_completion() {
-    userViewModel.creditCoinsToCurrentUser(100000000)
-
+    val currentUser = userViewModel.currentUser.value!!
+    currentUser.details?.wallet?.creditCoins(15)
+    userViewModel.updateUser(currentUser)
     composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
 
     composeTestRule.mainClock.autoAdvance = false
@@ -165,7 +168,9 @@ class GamblingScreenTest {
   @Test
   fun verify_subsequent_spins() {
 
-    userViewModel.creditCoinsToCurrentUser(100000)
+    val currentUser = userViewModel.currentUser.value!!
+    currentUser.details?.wallet?.creditCoins(35)
+    userViewModel.updateUser(currentUser)
 
     composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
 
@@ -202,20 +207,5 @@ class GamblingScreenTest {
     composeTestRule.onNodeWithTag("wheel_spin_state").assertExists()
 
     composeTestRule.mainClock.autoAdvance = true // Re-enable auto advance
-  }
-
-  @Test
-  fun verify_back_navigation() {
-    composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
-
-    // Find and click the back button
-    composeTestRule
-        .onNodeWithTag("gambling_screen_top_barGoBackButton")
-        .assertExists()
-        .assertHasClickAction()
-        .performClick()
-
-    // Verify that navigationActions.goBack() was called
-    verify(mockNavigationActions).goBack()
   }
 }
