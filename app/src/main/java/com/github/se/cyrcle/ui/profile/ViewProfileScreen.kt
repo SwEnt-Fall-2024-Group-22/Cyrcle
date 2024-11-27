@@ -15,8 +15,10 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.Diamond
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Outbox
+import androidx.compose.material.icons.filled.Paid
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -77,7 +79,7 @@ fun ViewProfileScreen(
 
   val signOutToastText = stringResource(R.string.view_profile_on_sign_out_toast)
 
-    Scaffold(
+  Scaffold(
         modifier = Modifier.testTag("ViewProfileScreen"),
         bottomBar = {
             BottomNavigationBar(
@@ -97,7 +99,7 @@ fun ViewProfileScreen(
 
             com.github.se.cyrcle.ui.theme.atoms.IconButton(
                 modifier = Modifier.padding(10.dp).align(Alignment.TopStart),
-                icon = Icons.Filled.AttachMoney, // or Icons.Filled.Paid
+                icon = Icons.Filled.Diamond, // or Icons.Filled.Paid or Icons.Filled.AttachMoney etc...
                 contentDescription = "Go to Gambling Screen",
                 testTag = "GamblingButton",
                 onClick = { navigationActions.navigateTo(Screen.GAMBLING) }

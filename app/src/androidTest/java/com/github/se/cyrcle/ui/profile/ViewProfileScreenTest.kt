@@ -128,6 +128,16 @@ class ViewProfileScreenTest {
   }
 
   @Test
+  fun testGamblingNavigation() {
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithTag("GamblingButton").assertIsDisplayed().performClick()
+    composeTestRule.waitForIdle()
+
+    verify(mockNavigationActions).navigateTo(Screen.GAMBLING)
+  }
+
+  @Test
   fun testInitialDisplayMode() {
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("ProfileImage").assertIsDisplayed()
