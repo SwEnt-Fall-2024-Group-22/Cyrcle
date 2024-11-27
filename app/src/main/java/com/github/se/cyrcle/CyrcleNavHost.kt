@@ -8,6 +8,7 @@ import androidx.navigation.navigation
 import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.report.ReportedObjectViewModel
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.permission.PermissionHandler
@@ -24,6 +25,7 @@ import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.parkingDetails.ParkingDetailsScreen
 import com.github.se.cyrcle.ui.profile.CreateProfileScreen
 import com.github.se.cyrcle.ui.profile.ProfileScreen
+import com.github.se.cyrcle.ui.report.AdminScreen
 import com.github.se.cyrcle.ui.report.ParkingReportScreen
 import com.github.se.cyrcle.ui.report.ReviewReportScreen
 import com.github.se.cyrcle.ui.review.AllReviewsScreen
@@ -38,6 +40,7 @@ fun CyrcleNavHost(
     userViewModel: UserViewModel,
     mapViewModel: MapViewModel,
     addressViewModel: AddressViewModel,
+    reportedObjectViewModel: ReportedObjectViewModel,
     permissionHandler: PermissionHandler
 ) {
   NavHost(navController = navController, startDestination = Route.AUTH) {
@@ -77,6 +80,7 @@ fun CyrcleNavHost(
         ReviewReportScreen(navigationActions, userViewModel, reviewViewModel)
       }
     }
+    navigation(startDestination = Screen.MAP, route = Route.MAP) {}
 
     navigation(
         startDestination = Screen.MAP,
@@ -109,6 +113,7 @@ fun CyrcleNavHost(
       composable(Screen.VIEW_PROFILE) {
         ProfileScreen(navigationActions, userViewModel, parkingViewModel)
       }
+      composable(Screen.ADMIN) { AdminScreen(navigationActions, reportedObjectViewModel) }
     }
 
     navigation(

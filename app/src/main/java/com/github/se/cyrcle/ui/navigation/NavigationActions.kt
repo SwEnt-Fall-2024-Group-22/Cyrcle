@@ -21,23 +21,20 @@ object Route {
 
 object Screen {
   const val LIST = "List Screen"
-
   const val MAP = "Map Screen"
-
   const val PARKING_DETAILS = "Parking Details Screen"
   const val ADD_REVIEW = "Add Review Screen"
   const val ALL_REVIEWS = "All Reviews"
-
   const val LOCATION_PICKER = "Location Picker Screen"
   const val ATTRIBUTES_PICKER = "Attributes Picker Screen"
   const val RACK_INFO = "Rack Info Screen"
-
   const val AUTH = "Auth Screen"
   const val VIEW_PROFILE = "Profile Screen"
   const val CREATE_PROFILE = "Create Profile"
   const val PARKING_REPORT = "Parking Report Screen"
   const val REVIEW_REPORT = "Review Report Screen"
   const val GAMBLING = "Gambling Screen"
+  const val ADMIN = "Admin Screen"
 }
 
 /**

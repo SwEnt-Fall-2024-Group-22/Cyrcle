@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Outbox
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -84,6 +85,17 @@ fun ViewProfileScreen(
             navigationActions = navigationActions,
             tabList = LIST_TOP_LEVEL_DESTINATION,
             selectedItem = Route.VIEW_PROFILE)
+      },
+      floatingActionButton = {
+        FloatingActionButton(
+            onClick = {
+              navigationActions.navigateTo(Screen.ADMIN)
+              Toast.makeText(context, "Admin FAB clicked!", Toast.LENGTH_SHORT).show()
+            },
+            modifier = Modifier.testTag("AdminFAB"),
+            containerColor = MaterialTheme.colorScheme.primary) {
+              Text(text = "Admin", color = MaterialTheme.colorScheme.onPrimary)
+            }
       }) { innerPadding ->
         Box(Modifier.fillMaxSize().padding(innerPadding)) {
           com.github.se.cyrcle.ui.theme.atoms.IconButton(
