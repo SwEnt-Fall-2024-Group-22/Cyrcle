@@ -9,19 +9,29 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.ui.gambling.GamblingScreen
+import com.github.se.cyrcle.ui.navigation.NavigationActions
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
 
 @RunWith(AndroidJUnit4::class)
 class GamblingScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
+  private lateinit var mockNavigationActions: NavigationActions
+
+  @Before
+  fun setUp() {
+    mockNavigationActions = mock(NavigationActions::class.java)
+  }
+
   @Test
   fun gambling_screen_shows_all_elements() {
-    composeTestRule.setContent { GamblingScreen() }
+    composeTestRule.setContent { GamblingScreen(mockNavigationActions) }
 
     composeTestRule.onNodeWithTag("gambling_screen").assertExists()
     composeTestRule.onNodeWithTag("wheel_canvas").assertExists()
@@ -30,7 +40,7 @@ class GamblingScreenTest {
 
   @Test
   fun spin_button_triggers_wheel_spin() {
-    composeTestRule.setContent { GamblingScreen() }
+    composeTestRule.setContent { GamblingScreen(mockNavigationActions) }
 
     composeTestRule.onNodeWithTag("spin_button").performClick()
     // Wait for spin animation to start
@@ -42,7 +52,7 @@ class GamblingScreenTest {
 
   @Test
   fun verify_spin_button_properties() {
-    composeTestRule.setContent { GamblingScreen() }
+    composeTestRule.setContent { GamblingScreen(mockNavigationActions) }
 
     composeTestRule
         .onNodeWithTag("spin_button")
@@ -54,7 +64,7 @@ class GamblingScreenTest {
 
   @Test
   fun verify_wheel_dimensions() {
-    composeTestRule.setContent { GamblingScreen() }
+    composeTestRule.setContent { GamblingScreen(mockNavigationActions) }
 
     composeTestRule
         .onNodeWithTag("wheel_canvas")
@@ -64,7 +74,7 @@ class GamblingScreenTest {
 
   @Test
   fun verify_spin_animation_completion() {
-    composeTestRule.setContent { GamblingScreen() }
+    composeTestRule.setContent { GamblingScreen(mockNavigationActions) }
 
     composeTestRule.mainClock.autoAdvance = false
 
@@ -77,7 +87,7 @@ class GamblingScreenTest {
 
   @Test
   fun verify_wheel_idle_animation() {
-    composeTestRule.setContent { GamblingScreen() }
+    composeTestRule.setContent { GamblingScreen(mockNavigationActions) }
 
     // Verify wheel performs idle animation
     runBlocking { delay(100) }
@@ -86,7 +96,7 @@ class GamblingScreenTest {
 
   @Test
   fun verify_subsequent_spins() {
-    composeTestRule.setContent { GamblingScreen() }
+    composeTestRule.setContent { GamblingScreen(mockNavigationActions) }
 
     composeTestRule.mainClock.autoAdvance = false
 
@@ -101,7 +111,7 @@ class GamblingScreenTest {
 
   @Test
   fun verify_wheel_spin_state_changes() {
-    composeTestRule.setContent { GamblingScreen() }
+    composeTestRule.setContent { GamblingScreen(mockNavigationActions) }
 
     // Initial state check
     composeTestRule.onNodeWithTag("wheel_spin_state").assertExists()
