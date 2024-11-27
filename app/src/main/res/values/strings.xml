@@ -127,6 +127,7 @@
     <string name="create_profile_error_toast">Error during authentication…</string>
     <string name="create_profile_account_already_exists">Your account already exists, please sign in</string>
     <string name="create_profile_sign_in_explanation">To complete account creation,\n please authenticate with Google to link your email.</string>
+    <string name="welcome_bonus_toast">Welcome bonus: 100 coins added to your wallet!</string>
 
     <!-- Invite to AuthScreen Screen -->
     <string name="invite_auth_screen_to_sign_in">Go back to sign in</string>
