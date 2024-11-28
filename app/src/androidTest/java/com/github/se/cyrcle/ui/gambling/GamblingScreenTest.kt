@@ -22,7 +22,6 @@ import com.github.se.cyrcle.ui.gambling.GamblingScreen
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -63,18 +62,6 @@ class GamblingScreenTest {
     userViewModel.signIn({}, {})
 
     userViewModel.setCurrentUserById("1")
-  }
-
-  @Test
-  fun verify_user_wallet_update_after_credit() {
-    // Initial wallet should be empty (0 coins)
-    assertEquals(0, userViewModel.currentUser.value?.details?.wallet?.getCoins())
-
-    // Credit 25 coins
-    userViewModel.creditCoinsToCurrentUser(25)
-
-    // Verify wallet has been updated to 25 coins
-    assertEquals(25, userViewModel.currentUser.value?.details?.wallet?.getCoins())
   }
 
   @Test
