@@ -556,6 +556,14 @@ fun MapScreen(
       }
 }
 
+/**
+ * Composable function to display the suggestion menu.
+ *
+ * @param showSuggestions The state of the suggestion menu.
+ * @param listOfSuggestions The list of suggestions extracted from the NominatimAPI.
+ * @param mapViewportState The viewport state of the map.
+ * @param mapViewModel The ViewModel for managing map-related data and actions.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SuggestionMenu(
@@ -610,6 +618,12 @@ fun SuggestionMenu(
       }
 }
 
+/**
+ * Composable function to display the settings menu.
+ *
+ * @param mapMode The current map mode state.
+ * @param mapViewModel The ViewModel for managing map-related data and actions.
+ */
 @Composable
 fun SettingsMenu(mapMode: State<MapViewModel.MapMode>, mapViewModel: MapViewModel) {
   Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.TopEnd) {
