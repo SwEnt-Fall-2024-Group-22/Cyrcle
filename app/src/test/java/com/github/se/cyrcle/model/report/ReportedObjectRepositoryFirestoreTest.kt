@@ -260,26 +260,103 @@ class ReportedObjectRepositoryFirestoreTest {
   }
 
   @Test
-  fun getObjectUIDAddsNewDocumentWhenNotExist() {
+  fun checkIfObjectExists_whenObjectExists_callsOnSuccess() {
     val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
     `when`(mockCollectionReference.whereEqualTo(any<String>(), any()))
         .thenReturn(mockCollectionReference)
     `when`(mockCollectionReference.get()).thenReturn(taskCompletionSource.task)
+    `when`(mockQuerySnapshot.documents).thenReturn(listOf(mock()))
+
+    var onSuccessCalled = false
+    reportedObjectRepositoryFirestore.checkIfObjectExists(
+        objectUID = "existing-object",
+        onSuccess = { documentId -> onSuccessCalled = true },
+        onFailure = { fail("Expected success but got failure") })
+
+    taskCompletionSource.setResult(mockQuerySnapshot)
+    shadowOf(Looper.getMainLooper()).idle()
+
+    verify(mockCollectionReference).whereEqualTo("objectUID", "existing-object")
+    assertTrue(onSuccessCalled)
+  }
+
+  @Test
+  fun checkIfObjectExists_whenObjectDoesNotExist_callsOnSuccessWithNull() {
+    val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
+    `when`(mockCollectionReference.whereEqualTo(any<String>(), any()))
+        .thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.get()).thenReturn(taskCompletionSource.task)
+    `when`(mockQuerySnapshot.documents).thenReturn(emptyList())
+
+    var onSuccessCalled = false
+    reportedObjectRepositoryFirestore.checkIfObjectExists(
+        objectUID = "non-existing-object",
+        onSuccess = { documentId ->
+          assertTrue(documentId == null)
+          onSuccessCalled = true
+        },
+        onFailure = { fail("Expected success but got failure") })
+
+    taskCompletionSource.setResult(mockQuerySnapshot)
+    shadowOf(Looper.getMainLooper()).idle()
+
+    verify(mockCollectionReference).whereEqualTo("objectUID", "non-existing-object")
+    assertTrue(onSuccessCalled)
+  }
+
+  @Test
+  fun updateReportedObject_whenDocumentDoesNotExist_callsOnFailure() {
+    val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
+    `when`(mockCollectionReference.whereEqualTo(any<String>(), any()))
+        .thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.get()).thenReturn(taskCompletionSource.task)
+    `when`(mockQuerySnapshot.documents).thenReturn(emptyList())
+
+    var onFailureCalled = false
+    reportedObjectRepositoryFirestore.updateReportedObject(
+        objectUID = "non-existing-object",
+        updatedObject = reportedObject,
+        onSuccess = { fail("Expected failure but got success") },
+        onFailure = { onFailureCalled = true })
+
+    taskCompletionSource.setResult(mockQuerySnapshot)
+    shadowOf(Looper.getMainLooper()).idle()
+
+    verify(mockCollectionReference).whereEqualTo("objectUID", "non-existing-object")
+    assertTrue(onFailureCalled)
+  }
+
+  @Test
+  fun addReportedObject_callsOnSuccess() {
     `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
 
     var onSuccessCalled = false
-    reportedObjectRepositoryFirestore.getObjectUID(
-        objectUID = "new-object-id",
+    reportedObjectRepositoryFirestore.addReportedObject(
         reportedObject = reportedObject,
-        shouldAddIfNotExist = true,
         onSuccess = { onSuccessCalled = true },
         onFailure = { fail("Expected success but got failure") })
-    taskCompletionSource.setResult(mockQuerySnapshot)
-    `when`(mockQuerySnapshot.isEmpty).thenReturn(true)
 
     shadowOf(Looper.getMainLooper()).idle()
-    verify(mockCollectionReference).whereEqualTo("objectUID", "new-object-id")
+
     verify(mockDocumentReference).set(any())
     assertTrue(onSuccessCalled)
+  }
+
+  @Test
+  fun addReportedObject_callsOnFailure() {
+    val taskCompletionSource = TaskCompletionSource<Void>()
+    `when`(mockDocumentReference.set(any())).thenReturn(taskCompletionSource.task)
+
+    var onFailureCalled = false
+    reportedObjectRepositoryFirestore.addReportedObject(
+        reportedObject = reportedObject,
+        onSuccess = { fail("Expected failure but got success") },
+        onFailure = { onFailureCalled = true })
+
+    taskCompletionSource.setException(Exception("Test exception"))
+    shadowOf(Looper.getMainLooper()).idle()
+
+    verify(mockDocumentReference).set(any())
+    assertTrue(onFailureCalled)
   }
 }

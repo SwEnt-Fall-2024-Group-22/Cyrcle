@@ -436,18 +436,33 @@ class ParkingViewModel(
                   userUID = user.public.userId,
                   objectType = ReportedObjectType.PARKING,
               )
-          reportedObjectRepository.getObjectUID(
+
+          reportedObjectRepository.checkIfObjectExists(
               objectUID = selectedParking.uid,
-              reportedObject = newReportedObject,
-              shouldAddIfNotExist =
-                  ((report.reason.severity == MAX_SEVERITY &&
-                      selectedParking.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERITY_THRESH) ||
-                      (selectedParking.nbReports >= NB_REPORTS_THRESH)),
-              onSuccess = { updateLocalParkingAndMetrics(report, selectedParking) },
-              onFailure = {
-                Log.d("ParkingViewModel", "Error adding to ReportedObjects")
-                updateLocalParkingAndMetrics(report, selectedParking)
-              })
+              onSuccess = { documentId ->
+                if (documentId != null) {
+                  reportedObjectRepository.updateReportedObject(
+                      documentId = documentId,
+                      updatedObject = newReportedObject,
+                      onSuccess = { updateLocalParkingAndMetrics(report, selectedParking) },
+                      onFailure = { Log.d("ParkingViewModel", "Error updating ReportedObject") })
+                } else {
+                  val shouldAdd =
+                      (report.reason.severity == MAX_SEVERITY &&
+                          selectedParking.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERITY_THRESH) ||
+                          (selectedParking.nbReports >= NB_REPORTS_THRESH)
+
+                  if (shouldAdd) {
+                    reportedObjectRepository.addReportedObject(
+                        reportedObject = newReportedObject,
+                        onSuccess = { updateLocalParkingAndMetrics(report, selectedParking) },
+                        onFailure = { Log.d("ParkingViewModel", "Error adding ReportedObject") })
+                  } else {
+                    Log.d("ParkingViewModel", "Document does not exist, addition not allowed")
+                  }
+                }
+              },
+              onFailure = { Log.d("ParkingViewModel", "Error checking for ReportedObject") })
         },
         onFailure = {
           Log.d("ParkingViewModel", "Report not added")

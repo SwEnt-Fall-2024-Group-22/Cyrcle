@@ -81,8 +81,6 @@ fun CyrcleNavHost(
         ReviewReportScreen(navigationActions, userViewModel, reviewViewModel)
       }
     }
-    navigation(startDestination = Screen.MAP, route = Route.MAP) {}
-
     navigation(
         startDestination = Screen.MAP,
         route = Route.MAP,

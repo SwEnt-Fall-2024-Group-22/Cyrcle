@@ -47,7 +47,7 @@ class MockReportedObjectRepository @Inject constructor() : ReportedObjectReposit
       // Check if the object already exists to avoid duplicates
       val existingObject = reportedObjects.find { it.reportUID == reportedObject.reportUID }
       if (existingObject != null) {
-        throw IllegalArgumentException("ReportedObject with the same ReportUID already exists.")
+        onFailure(Exception("Error in adding ReportedObject"))
       }
 
       // Add the object to the list
@@ -110,27 +110,49 @@ class MockReportedObjectRepository @Inject constructor() : ReportedObjectReposit
     }
   }
 
-  override fun getObjectUID(
+  override fun checkIfObjectExists(
       objectUID: String,
-      reportedObject: ReportedObject,
-      shouldAddIfNotExist: Boolean,
-      onSuccess: () -> Unit,
+      onSuccess: (documentId: String?) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
     val existingObject = reportedObjects.find { it.objectUID == objectUID }
     if (existingObject != null) {
-      // Object exists, so update it
-      updateReportedObject(
-          objectUID = objectUID,
-          updatedObject = reportedObject,
-          onSuccess = onSuccess,
-          onFailure = onFailure)
-    } else if (shouldAddIfNotExist) {
-      // Object does not exist, so add it
-      addReportedObject(
-          reportedObject = reportedObject, onSuccess = onSuccess, onFailure = onFailure)
+      onSuccess(existingObject.reportUID)
     } else {
-      onFailure(Exception("Document does not exist, and addition is not allowed."))
+      onSuccess(null)
+    }
+  }
+
+  fun updateObject(
+      documentId: String,
+      updatedObject: ReportedObject,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    val index = reportedObjects.indexOfFirst { it.reportUID == documentId }
+    if (index != -1) {
+      reportedObjects[index] = updatedObject
+      onSuccess()
+    } else {
+      onFailure(Exception("No ReportedObject found with reportUID: $documentId"))
+    }
+  }
+
+  fun addObject(
+      objectUID: String,
+      reportedObject: ReportedObject,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    try {
+      // Check for duplicates
+      if (reportedObjects.any { it.objectUID == objectUID }) {
+        throw IllegalArgumentException("ReportedObject with the same ObjectUID already exists.")
+      }
+      reportedObjects.add(reportedObject)
+      onSuccess()
+    } catch (e: Exception) {
+      onFailure(e)
     }
   }
 }

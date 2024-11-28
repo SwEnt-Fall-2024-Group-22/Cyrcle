@@ -177,7 +177,7 @@ fun AdminScreen(
     parkingViewModel: ParkingViewModel,
     reviewViewModel: ReviewViewModel
 ) {
-  reportedObjectViewModel.fetchAllReportedObjects()
+  LaunchedEffect(Unit) { reportedObjectViewModel.fetchAllReportedObjects() }
   val selectedObject by reportedObjectViewModel.selectedObject.collectAsState()
   val reportsList by reportedObjectViewModel.reportsList.collectAsState()
   var selectedCardIndex by remember { mutableStateOf(-1) }

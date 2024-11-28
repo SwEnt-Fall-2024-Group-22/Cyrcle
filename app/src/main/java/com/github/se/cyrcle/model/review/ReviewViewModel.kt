@@ -109,6 +109,8 @@ class ReviewViewModel(
       return
     }
 
+    Log.d("ReviewViewModel", "${selectedReview.nbReports}, ${selectedReview.nbMaxSeverityReports}")
+
     reviewRepository.addReport(
         report,
         onSuccess = {
@@ -125,28 +127,39 @@ class ReviewViewModel(
                   objectType = ReportedObjectType.REVIEW,
               )
 
-          Log.d(
-              "ReviewViewModel",
-              "${selectedReview.nbReports}, ${selectedReview.nbMaxSeverityReports}")
-
-          reportedObjectRepository.getObjectUID(
+          reportedObjectRepository.checkIfObjectExists(
               objectUID = selectedReview.uid,
-              reportedObject = newReportedObject,
-              shouldAddIfNotExist =
-                  ((report.reason.severity == MAX_SEVERITY &&
-                      selectedReview.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERITY_THRESH) ||
-                      (selectedReview.nbReports >= NB_REPORTS_THRESH)),
-              onSuccess = { updateLocalReviewAndMetrics(report, selectedReview) },
-              onFailure = {
-                updateLocalReviewAndMetrics(report, selectedReview)
-                Log.e("ReviewViewModel", "Not adding to ReportedObjects")
-              })
+              onSuccess = { documentId ->
+                if (documentId != null) {
+                  reportedObjectRepository.updateReportedObject(
+                      documentId = documentId,
+                      updatedObject = newReportedObject,
+                      onSuccess = { updateLocalReviewAndMetrics(report, selectedReview) },
+                      onFailure = { Log.d("ReviewViewModel", "Error updating ReportedObject") })
+                } else {
+                  val shouldAdd =
+                      (report.reason.severity == MAX_SEVERITY &&
+                          selectedReview.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERITY_THRESH) ||
+                          (selectedReview.nbReports >= NB_REPORTS_THRESH)
+
+                  if (shouldAdd) {
+                    reportedObjectRepository.addReportedObject(
+                        reportedObject = newReportedObject,
+                        onSuccess = { updateLocalReviewAndMetrics(report, selectedReview) },
+                        onFailure = { Log.d("ReviewViewModel", "Error adding ReportedObject") })
+                  } else {
+                    Log.d("ReviewViewModel", "Document does not exist, addition not allowed")
+                  }
+                }
+              },
+              onFailure = { Log.d("ReviewViewModel", "Error checking for ReportedObject") })
         },
         onFailure = {
-          Log.e("ReviewViewModel", "Report not added")
+          Log.d("ReviewViewModel", "Report not added")
           updateLocalReviewAndMetrics(report, selectedReview)
         })
   }
+
   /** Updates the local review and metrics after a report is added or updated. */
   private fun updateLocalReviewAndMetrics(report: ReviewReport, selectedReview: Review) {
     // Update the local reports and review metrics

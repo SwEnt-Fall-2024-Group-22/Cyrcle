@@ -29,8 +29,33 @@ class ReportedObjectViewModel(private val reportedObjectRepository: ReportedObje
     reportedObjectRepository.deleteReportedObject(uid, {}, {})
   }
 
+  fun checkIfObjectExists(
+      objectUID: String,
+      onSuccess: (documentId: String?) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    reportedObjectRepository.checkIfObjectExists(objectUID, onSuccess, onFailure)
+  }
+
   fun selectObject(reportedObject: ReportedObject) {
     _selectedObject.value = reportedObject
+  }
+
+  fun updateReportedObject(
+      objectUID: String,
+      updatedObject: ReportedObject,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    reportedObjectRepository.updateReportedObject(objectUID, updatedObject, onSuccess, onFailure)
+  }
+
+  fun addReportedObject(
+      reportedObject: ReportedObject,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    reportedObjectRepository.addReportedObject(reportedObject, onSuccess, onFailure)
   }
 
   fun clearSelectedObject() {

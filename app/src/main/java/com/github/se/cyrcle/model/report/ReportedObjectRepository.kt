@@ -2,7 +2,7 @@ package com.github.se.cyrcle.model.report
 
 /**
  * Interface for managing reported objects in the system. Defines the operations for adding,
- * retrieving, and deleting reported objects.
+ * retrieving, updating, and deleting reported objects.
  */
 interface ReportedObjectRepository {
 
@@ -27,6 +27,35 @@ interface ReportedObjectRepository {
   )
 
   /**
+   * Checks if a reported object exists in the repository by its objectUID.
+   *
+   * @param objectUID The unique identifier of the object to check.
+   * @param onSuccess A callback invoked with the document ID if the object exists, or null if it
+   *   does not exist.
+   * @param onFailure A callback invoked when the operation fails with an exception.
+   */
+  fun checkIfObjectExists(
+      objectUID: String,
+      onSuccess: (documentId: String?) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  /**
+   * Updates a reported object with a given document ID in the Firestore collection.
+   *
+   * @param documentId The document ID of the object to update.
+   * @param updatedObject The updated [ReportedObject] instance.
+   * @param onSuccess A callback invoked when the operation is successful.
+   * @param onFailure A callback invoked when the operation fails with an exception.
+   */
+  fun updateReportedObject(
+      documentId: String,
+      updatedObject: ReportedObject,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  /**
    * Retrieves all reported objects from the Firestore collection.
    *
    * @param onSuccess A callback invoked with a list of all reported objects when successful.
@@ -36,6 +65,7 @@ interface ReportedObjectRepository {
       onSuccess: (List<ReportedObject>) -> Unit,
       onFailure: (Exception) -> Unit
   )
+
   /**
    * Retrieves all reported objects of a specific type (e.g., PARKING or REVIEW).
    *
@@ -46,36 +76,6 @@ interface ReportedObjectRepository {
   fun getReportedObjectsByType(
       type: ReportedObjectType,
       onSuccess: (List<ReportedObject>) -> Unit,
-      onFailure: (Exception) -> Unit
-  )
-
-  /**
-   * Retrieves all reported objects associated with a specific object UID.
-   *
-   * @param objectUID The unique identifier of the object being reported.
-   * @param onSuccess A callback invoked with a list of reported objects when successful.
-   * @param onFailure A callback invoked with an exception when the operation fails.
-   */
-  fun getObjectUID(
-      objectUID: String,
-      reportedObject: ReportedObject,
-      shouldAddIfNotExist: Boolean, // New parameter
-      onSuccess: () -> Unit,
-      onFailure: (Exception) -> Unit
-  )
-
-  /**
-   * Updates a reported object with a certain objectUID in the Firestore collection.
-   *
-   * @param objectUID The unique identifier of the object to update.
-   * @param updatedObject The updated [ReportedObject] instance.
-   * @param onSuccess A callback invoked when the operation is successful.
-   * @param onFailure A callback invoked when the operation fails with an exception.
-   */
-  fun updateReportedObject(
-      objectUID: String,
-      updatedObject: ReportedObject,
-      onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   )
 

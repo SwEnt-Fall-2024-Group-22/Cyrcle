@@ -147,54 +147,19 @@ class ReportedObjectRepositoryFirestore @Inject constructor(private val db: Fire
         .addOnFailureListener { onFailure(it) }
   }
 
-  /**
-   * Adds or updates a reported object in the Firestore collection based on `objectUID`.
-   * - If the object already exists, it merges the update.
-   * - If the object does not exist, it creates a new one.
-   *
-   * @param objectUID The unique identifier of the object being reported.
-   * @param reportedObject The reported object to save.
-   * @param onSuccess A callback invoked on successful addition or update.
-   * @param onFailure A callback invoked when the operation fails.
-   */
-  override fun getObjectUID(
+  override fun checkIfObjectExists(
       objectUID: String,
-      reportedObject: ReportedObject,
-      shouldAddIfNotExist: Boolean, // New parameter
-      onSuccess: () -> Unit,
+      onSuccess: (documentId: String?) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
     db.collection(collectionPath)
         .whereEqualTo("objectUID", objectUID)
         .get()
         .addOnSuccessListener { querySnapshot ->
-          if (querySnapshot.documents.isNotEmpty()) {
-            // Document exists: update it
-            val documentId = querySnapshot.documents.first().id
-            db.collection(collectionPath)
-                .document(documentId)
-                .set(reportedObject, com.google.firebase.firestore.SetOptions.merge())
-                .addOnSuccessListener { onSuccess() }
-                .addOnFailureListener { onFailure(it) }
-          } else {
-            // Document does not exist
-            if (shouldAddIfNotExist) {
-              // Add the document if the condition allows it
-              db.collection(collectionPath)
-                  .document(objectUID)
-                  .set(reportedObject)
-                  .addOnSuccessListener { onSuccess() }
-                  .addOnFailureListener { onFailure(it) }
-            } else {
-              // Fail if the condition does not allow adding a new document
-              onFailure(Exception("Document does not exist, and addition is not allowed."))
-            }
-          }
+          val documentId = querySnapshot.documents.firstOrNull()?.id
+          onSuccess(documentId)
         }
-        .addOnFailureListener { exception ->
-          // Handle query failure
-          onFailure(exception)
-        }
+        .addOnFailureListener(onFailure)
   }
 
   /**

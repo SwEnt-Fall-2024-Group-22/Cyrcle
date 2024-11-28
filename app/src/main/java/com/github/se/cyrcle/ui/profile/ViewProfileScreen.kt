@@ -88,10 +88,7 @@ fun ViewProfileScreen(
       },
       floatingActionButton = {
         FloatingActionButton(
-            onClick = {
-              navigationActions.navigateTo(Screen.ADMIN)
-              Toast.makeText(context, "Admin FAB clicked!", Toast.LENGTH_SHORT).show()
-            },
+            onClick = { navigationActions.navigateTo(Screen.ADMIN) },
             modifier = Modifier.testTag("AdminFAB"),
             containerColor = MaterialTheme.colorScheme.primary) {
               Text(text = "Admin", color = MaterialTheme.colorScheme.onPrimary)

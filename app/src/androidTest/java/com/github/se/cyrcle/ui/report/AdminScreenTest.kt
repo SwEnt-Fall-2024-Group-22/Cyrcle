@@ -2,6 +2,7 @@ package com.github.se.cyrcle.ui.report
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.*
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.report.ReportedObject
@@ -12,8 +13,10 @@ import com.github.se.cyrcle.ui.navigation.NavigationActions
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 
+@RunWith(AndroidJUnit4::class)
 class AdminScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
