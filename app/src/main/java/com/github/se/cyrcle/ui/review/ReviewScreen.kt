@@ -32,6 +32,7 @@ import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.review.Review
 import com.github.se.cyrcle.model.review.ReviewViewModel
+import com.github.se.cyrcle.model.user.PARKING_REVIEW_REWARD
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.ColorLevel
@@ -80,7 +81,7 @@ fun ReviewScreen(
 
   val context = LocalContext.current
   val reviewAddedText = stringResource(R.string.review_screen_submit_toast)
-  val reviewRewardText = stringResource(R.string.review_screen_reward_toast)
+  val reviewRewardText = stringResource(R.string.review_screen_reward_toast, PARKING_REVIEW_REWARD)
   val reviewUpdateText = stringResource(R.string.review_screen_update_toast)
   val combinedToastText = "$reviewAddedText\n$reviewRewardText"
 

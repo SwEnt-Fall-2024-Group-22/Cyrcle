@@ -60,6 +60,7 @@ import com.github.se.cyrcle.model.parking.ParkingProtection
 import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
+import com.github.se.cyrcle.model.user.PARKING_CREATION_REWARD
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.map.MapConfig
 import com.github.se.cyrcle.ui.navigation.NavigationActions
@@ -119,7 +120,9 @@ fun AttributesPicker(
     if (title.value.isEmpty()) title.value = suggestedAddress.displayRelevantFields()
   }
   val context = LocalContext.current
-  val parkingAddedWithRewardText = stringResource(R.string.parking_added_with_reward_toast)
+  val parkingAddedWithRewardText =
+      stringResource(R.string.attributes_picker_parking_added_with_reward_toast,
+          PARKING_CREATION_REWARD)
 
   fun onSubmit() {
     val parking =
