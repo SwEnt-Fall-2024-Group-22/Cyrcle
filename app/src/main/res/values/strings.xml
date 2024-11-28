@@ -229,5 +229,28 @@
     <string name="alert_title">Are You Sure?</string>
     <string name="report_added">Report added</string>
 
+    <!-- Admin Screen -->
+    <string name="admin_topappbar_title">All %s Reports</string>
+    <string name="admin_lastreportedby">Last Reported By:</string>
+    <string name="admin_timesbeenreported">Has been reported %d times</string>
+    <string name="admin_timesbeenmaxreported">Has been reported at max level %d times</string>
+    <string name="check_reports">Check Reports</string>
+    <string name="parking_reports">Parking Reports</string>
+    <string name="review_reports">Review Reports</string>
+    <string name="sort_reported_parkings">Get Reported Parkings (Most Reported First)</string>
+    <string name="sort_reported_reviews">Get Reported Reviews (Most Reported First)</string>
+    <string name="view_reports">View Reports</string>
+    <string name="sort_reports">Get Reported Reviews (Most Reported First)</string>
+    <string name="choose_parkingorreview">Parkings or Reports?</string>
+    <string name="object_deleted">Object Deleted in all Repositories</string>
+    <string name="delete_object">Delete Object</string>
+    <string name="no_reports_available">No Reports Available.</string>
+    <string name="admin_reason">Reason: %s</string>
+    <string name="admin_reportedBy">Reported By: %s</string>
+    <string name="admin_description">Description: %s</string>
+
+
+
+
 
 </resources>

@@ -58,6 +58,12 @@ interface ParkingRepository {
    */
   fun updateParking(parking: Parking, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
 
+  fun getReportsForParking(
+      parkingId: String,
+      onSuccess: (List<ParkingReport>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
   /**
    * Delete a parking by its identifier
    *

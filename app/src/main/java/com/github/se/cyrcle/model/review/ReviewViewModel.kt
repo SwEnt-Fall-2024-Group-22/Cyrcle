@@ -2,7 +2,6 @@ package com.github.se.cyrcle.model.review
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.github.se.cyrcle.model.report.ReportReason
 import com.github.se.cyrcle.model.report.ReportedObject
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.report.ReportedObjectType
@@ -31,19 +30,45 @@ class ReviewViewModel(
   val userReviews: StateFlow<List<Review?>> = _userReviews
 
   /** Selected parking to review/edit */
-  private val _selectedReviewReports = MutableStateFlow<List<ReviewReport>?>(null)
-  val selectedReviewReports: StateFlow<List<ReviewReport>?> = _selectedReviewReports
+  private val _selectedReviewReports = MutableStateFlow<List<ReviewReport>>(emptyList())
+  val selectedReviewReports: StateFlow<List<ReviewReport>> = _selectedReviewReports
 
   fun addReview(review: Review) {
     reviewRepository.addReview(review, {}, { Log.e("ReviewViewModel", "Error adding review", it) })
+  }
+
+  fun selectReviewAdminScreen(review: Review) {
+    _selectedReview.value = review
+    loadReportsForSelectedReview()
   }
 
   fun selectReview(review: Review) {
     _selectedReview.value = review
   }
 
+  fun getReviewById(id: String, onSuccess: (Review) -> Unit, onFailure: (Exception) -> Unit) {
+    reviewRepository.getReviewById(id, onSuccess, onFailure)
+  }
+
   fun getNewUid(): String {
     return reviewRepository.getNewUid()
+  }
+
+  fun clearSelectedReview() {
+    _selectedReview.value = null
+    _selectedReviewReports.value = emptyList()
+  }
+
+  private fun loadReportsForSelectedReview() {
+    reviewRepository.getReportsForReview(
+        reviewId = selectedReview.value?.uid!!,
+        onSuccess = { reports ->
+          _selectedReviewReports.value = reports // Update the state with fetched reports
+          Log.d("ReviewViewModel", "Reports loaded successfully: ${reports.size}")
+        },
+        onFailure = { exception ->
+          Log.e("ReviewViewModel", "Error loading reports: ${exception.message}")
+        })
   }
 
   fun updateReview(review: Review) {
@@ -58,9 +83,9 @@ class ReviewViewModel(
         { Log.e("ReviewViewModel", "Error getting reviews", it) })
   }
 
-  fun deleteReviewById(review: Review) {
+  fun deleteReviewById(uid: String) {
     reviewRepository.deleteReviewById(
-        review.uid, {}, { Log.e("ReviewViewModel", "Error deleting reviews", it) })
+        uid, {}, { Log.e("ReviewViewModel", "Error deleting reviews", it) })
   }
 
   /**
@@ -83,39 +108,70 @@ class ReviewViewModel(
       Log.e("ReviewViewModel", "No review selected")
       return
     }
+
+    Log.d("ReviewViewModel", "${selectedReview.nbReports}, ${selectedReview.nbMaxSeverityReports}")
+
     reviewRepository.addReport(
         report,
         onSuccess = {
-          // Check thresholds for reporting to `ReportedObjectRepository`
-          // If it's a max severity report, add it to the maximum severity count and check if it
-          // exceeds the maximum severity threshold. Otherwise, check if it exceeds the standard
-          // threshold.
-          if ((report.reason.severity == MAX_SEVERITY &&
-              selectedReview.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERITY_THRESH) ||
-              (selectedReview.nbReports >= NB_REPORTS_THRESH)) {
-            reportedObjectRepository.addReportedObject(
-                ReportedObject(
-                    objectUID = selectedReview.uid,
-                    reportUID = report.uid,
-                    reason = ReportReason.Review(report.reason),
-                    userUID = user.public.userId,
-                    objectType = ReportedObjectType.REVIEW),
-                onSuccess = {},
-                onFailure = {})
-          }
+          val newReportedObject =
+              ReportedObject(
+                  objectUID = selectedReview.uid,
+                  reportUID = report.uid,
+                  nbOfTimesReported = selectedReview.nbReports + 1,
+                  nbOfTimesMaxSeverityReported =
+                      if (report.reason.severity == MAX_SEVERITY)
+                          selectedReview.nbMaxSeverityReports + 1
+                      else selectedReview.nbMaxSeverityReports,
+                  userUID = user.public.userId,
+                  objectType = ReportedObjectType.REVIEW,
+              )
 
-          // Update the local reports and review metrics
-          if (report.reason.severity == MAX_SEVERITY) {
-            selectedReview.nbMaxSeverityReports += 1
-          }
-          selectedReview.nbReports += 1
-          reviewRepository.updateReview(selectedReview, {}, {})
-          _selectedReviewReports.update { currentReports -> currentReports?.plus(it) ?: listOf(it) }
-          Log.d("ReviewViewModel", "Report added successfully")
+          reportedObjectRepository.checkIfObjectExists(
+              objectUID = selectedReview.uid,
+              onSuccess = { documentId ->
+                if (documentId != null) {
+                  reportedObjectRepository.updateReportedObject(
+                      documentId = documentId,
+                      updatedObject = newReportedObject,
+                      onSuccess = { updateLocalReviewAndMetrics(report, selectedReview) },
+                      onFailure = { Log.d("ReviewViewModel", "Error updating ReportedObject") })
+                } else {
+                  val shouldAdd =
+                      (report.reason.severity == MAX_SEVERITY &&
+                          selectedReview.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERITY_THRESH) ||
+                          (selectedReview.nbReports >= NB_REPORTS_THRESH)
+
+                  if (shouldAdd) {
+                    reportedObjectRepository.addReportedObject(
+                        reportedObject = newReportedObject,
+                        onSuccess = { updateLocalReviewAndMetrics(report, selectedReview) },
+                        onFailure = { Log.d("ReviewViewModel", "Error adding ReportedObject") })
+                  } else {
+                    Log.d("ReviewViewModel", "Document does not exist, addition not allowed")
+                  }
+                }
+              },
+              onFailure = { Log.d("ReviewViewModel", "Error checking for ReportedObject") })
         },
-        onFailure = { exception ->
-          Log.e("ReviewViewModel", "Error adding report: ${exception.message}", exception)
+        onFailure = {
+          Log.d("ReviewViewModel", "Report not added")
+          updateLocalReviewAndMetrics(report, selectedReview)
         })
+  }
+
+  /** Updates the local review and metrics after a report is added or updated. */
+  private fun updateLocalReviewAndMetrics(report: ReviewReport, selectedReview: Review) {
+    // Update the local reports and review metrics
+    _selectedReviewReports.update { currentReports ->
+      currentReports.plus(report) ?: listOf(report)
+    }
+    if (report.reason.severity == MAX_SEVERITY) {
+      selectedReview.nbMaxSeverityReports += 1
+    }
+    selectedReview.nbReports += 1
+    reviewRepository.updateReview(selectedReview, {}, {})
+    Log.d("ReviewViewModel", "Review and metrics updated successfully: ${selectedReview.nbReports}")
   }
 
   /**

@@ -2,7 +2,6 @@ package com.github.se.cyrcle.model.report
 
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
-import com.github.se.cyrcle.model.review.ReviewReportReason
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.FirebaseApp
@@ -71,6 +70,27 @@ class ReportedObjectRepositoryFirestoreTest {
 
     verify(mockDocumentReference).set(any())
     assertTrue(onSuccessCallbackCalled)
+  }
+
+  @Test
+  fun deleteReportedObjectHandlesNonExistentDocument() {
+    val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
+    `when`(mockCollectionReference.whereEqualTo(any<String>(), any()))
+        .thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.limit(anyLong())).thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.get()).thenReturn(taskCompletionSource.task)
+
+    var onFailureCalled = false
+    reportedObjectRepositoryFirestore.deleteReportedObject(
+        reportUID = "non-existent-id",
+        onSuccess = { fail("Expected failure but got success") },
+        onFailure = { onFailureCalled = true })
+    taskCompletionSource.setResult(mockQuerySnapshot)
+    `when`(mockQuerySnapshot.isEmpty).thenReturn(true)
+
+    shadowOf(Looper.getMainLooper()).idle()
+    verify(mockCollectionReference).whereEqualTo("objectUID", "non-existent-id")
+    assertTrue(onFailureCalled)
   }
 
   @Test
@@ -171,37 +191,42 @@ class ReportedObjectRepositoryFirestoreTest {
   }
 
   @Test
-  fun serializeAndDeserializeReportedObjectWithAbstractFields() {
-    val reportReason = ReportReason.Review(ReviewReportReason.HARMFUL)
-    val reportedObjectWithReason = reportedObject.copy(reason = reportReason)
+  fun serializeAndDeserializeReportedObject() {
+    // Create a sample ReportedObject with all properties set
+    val reportedObject =
+        ReportedObject(
+            objectUID = "object123",
+            reportUID = "report123",
+            nbOfTimesReported = 10,
+            nbOfTimesMaxSeverityReported = 3,
+            userUID = "user123",
+            objectType = ReportedObjectType.REVIEW)
 
     // Serialize the object
-    val serialized =
-        reportedObjectRepositoryFirestore.serializeReportedObject(reportedObjectWithReason)
+    val serialized = reportedObjectRepositoryFirestore.serializeReportedObject(reportedObject)
 
-    // Deserialize the object
+    // Deserialize the object back into a ReportedObject instance
     val deserializedMap: Map<String, Any> =
         gson.fromJson(serialized, object : TypeToken<Map<String, Any>>() {}.type)
     val deserialized = reportedObjectRepositoryFirestore.deserializeReportedObject(deserializedMap)
 
-    // Assert that the deserialized reason is of the expected type
-    assertTrue(deserialized.reason is ReportReason.Review)
-
-    // Check the specific properties of the reason to ensure correctness
-    val deserializedReason = deserialized.reason as ReportReason.Review
-    assertEquals(ReviewReportReason.HARMFUL, deserializedReason.reason)
+    // Assertions to verify correctness
+    assertEquals(reportedObject.objectUID, deserialized.objectUID)
+    assertEquals(reportedObject.reportUID, deserialized.reportUID)
+    assertEquals(reportedObject.nbOfTimesReported, deserialized.nbOfTimesReported)
+    assertEquals(
+        reportedObject.nbOfTimesMaxSeverityReported, deserialized.nbOfTimesMaxSeverityReported)
+    assertEquals(reportedObject.userUID, deserialized.userUID)
+    assertEquals(reportedObject.objectType, deserialized.objectType)
   }
 
   @Test
-  fun getReportedObjectsByObjectUIDReturnsEmptyListIfNoMatches() {
-    `when`(mockCollectionReference.whereEqualTo(any<String>(), any()))
-        .thenReturn(mockCollectionReference)
+  fun getAllReportedObjectsHandlesEmptyCollection() {
     `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockQuerySnapshot))
     `when`(mockQuerySnapshot.documents).thenReturn(emptyList())
 
     var onSuccessCalled = false
-    reportedObjectRepositoryFirestore.getReportedObjectsByObjectUID(
-        objectUID = "non-existent-id",
+    reportedObjectRepositoryFirestore.getAllReportedObjects(
         onSuccess = { reportedObjects ->
           assertTrue(reportedObjects.isEmpty())
           onSuccessCalled = true
@@ -209,41 +234,129 @@ class ReportedObjectRepositoryFirestoreTest {
         onFailure = { fail("Expected success but got failure") })
     shadowOf(Looper.getMainLooper()).idle()
 
-    verify(mockCollectionReference).whereEqualTo("objectUID", "non-existent-id")
+    verify(mockCollectionReference).get()
     assertTrue(onSuccessCalled)
   }
 
   @Test
-  fun getReportedObjectsByObjectUIDHandlesFailure() {
+  fun updateReportedObjectFailsWhenDocumentDoesNotExist() {
     val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
     `when`(mockCollectionReference.whereEqualTo(any<String>(), any()))
         .thenReturn(mockCollectionReference)
     `when`(mockCollectionReference.get()).thenReturn(taskCompletionSource.task)
 
     var onFailureCalled = false
-    reportedObjectRepositoryFirestore.getReportedObjectsByObjectUID(
-        objectUID = "test-id",
+    reportedObjectRepositoryFirestore.updateReportedObject(
+        objectUID = "non-existent-id",
+        updatedObject = reportedObject,
         onSuccess = { fail("Expected failure but got success") },
         onFailure = { onFailureCalled = true })
-    taskCompletionSource.setException(Exception("Test exception"))
-    shadowOf(Looper.getMainLooper()).idle()
+    taskCompletionSource.setResult(mockQuerySnapshot)
+    `when`(mockQuerySnapshot.isEmpty).thenReturn(true)
 
-    verify(mockCollectionReference).whereEqualTo("objectUID", "test-id")
+    shadowOf(Looper.getMainLooper()).idle()
+    verify(mockCollectionReference).whereEqualTo("objectUID", "non-existent-id")
     assertTrue(onFailureCalled)
   }
 
   @Test
-  fun deleteReportedObjectHandlesNonExistentReportUID() {
-    `when`(mockDocumentReference.delete()).thenReturn(Tasks.forResult(null))
+  fun checkIfObjectExists_whenObjectExists_callsOnSuccess() {
+    val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
+    `when`(mockCollectionReference.whereEqualTo(any<String>(), any()))
+        .thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.get()).thenReturn(taskCompletionSource.task)
+    `when`(mockQuerySnapshot.documents).thenReturn(listOf(mock()))
 
     var onSuccessCalled = false
-    reportedObjectRepositoryFirestore.deleteReportedObject(
-        reportUID = "non-existent-id",
-        onSuccess = { onSuccessCalled = true },
+    reportedObjectRepositoryFirestore.checkIfObjectExists(
+        objectUID = "existing-object",
+        onSuccess = { documentId -> onSuccessCalled = true },
         onFailure = { fail("Expected success but got failure") })
+
+    taskCompletionSource.setResult(mockQuerySnapshot)
     shadowOf(Looper.getMainLooper()).idle()
 
-    verify(mockDocumentReference).delete()
+    verify(mockCollectionReference).whereEqualTo("objectUID", "existing-object")
     assertTrue(onSuccessCalled)
+  }
+
+  @Test
+  fun checkIfObjectExists_whenObjectDoesNotExist_callsOnSuccessWithNull() {
+    val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
+    `when`(mockCollectionReference.whereEqualTo(any<String>(), any()))
+        .thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.get()).thenReturn(taskCompletionSource.task)
+    `when`(mockQuerySnapshot.documents).thenReturn(emptyList())
+
+    var onSuccessCalled = false
+    reportedObjectRepositoryFirestore.checkIfObjectExists(
+        objectUID = "non-existing-object",
+        onSuccess = { documentId ->
+          assertTrue(documentId == null)
+          onSuccessCalled = true
+        },
+        onFailure = { fail("Expected success but got failure") })
+
+    taskCompletionSource.setResult(mockQuerySnapshot)
+    shadowOf(Looper.getMainLooper()).idle()
+
+    verify(mockCollectionReference).whereEqualTo("objectUID", "non-existing-object")
+    assertTrue(onSuccessCalled)
+  }
+
+  @Test
+  fun updateReportedObject_whenDocumentDoesNotExist_callsOnFailure() {
+    val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
+    `when`(mockCollectionReference.whereEqualTo(any<String>(), any()))
+        .thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.get()).thenReturn(taskCompletionSource.task)
+    `when`(mockQuerySnapshot.documents).thenReturn(emptyList())
+
+    var onFailureCalled = false
+    reportedObjectRepositoryFirestore.updateReportedObject(
+        objectUID = "non-existing-object",
+        updatedObject = reportedObject,
+        onSuccess = { fail("Expected failure but got success") },
+        onFailure = { onFailureCalled = true })
+
+    taskCompletionSource.setResult(mockQuerySnapshot)
+    shadowOf(Looper.getMainLooper()).idle()
+
+    verify(mockCollectionReference).whereEqualTo("objectUID", "non-existing-object")
+    assertTrue(onFailureCalled)
+  }
+
+  @Test
+  fun addReportedObject_callsOnSuccess() {
+    `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
+
+    var onSuccessCalled = false
+    reportedObjectRepositoryFirestore.addReportedObject(
+        reportedObject = reportedObject,
+        onSuccess = { onSuccessCalled = true },
+        onFailure = { fail("Expected success but got failure") })
+
+    shadowOf(Looper.getMainLooper()).idle()
+
+    verify(mockDocumentReference).set(any())
+    assertTrue(onSuccessCalled)
+  }
+
+  @Test
+  fun addReportedObject_callsOnFailure() {
+    val taskCompletionSource = TaskCompletionSource<Void>()
+    `when`(mockDocumentReference.set(any())).thenReturn(taskCompletionSource.task)
+
+    var onFailureCalled = false
+    reportedObjectRepositoryFirestore.addReportedObject(
+        reportedObject = reportedObject,
+        onSuccess = { fail("Expected failure but got success") },
+        onFailure = { onFailureCalled = true })
+
+    taskCompletionSource.setException(Exception("Test exception"))
+    shadowOf(Looper.getMainLooper()).idle()
+
+    verify(mockDocumentReference).set(any())
+    assertTrue(onFailureCalled)
   }
 }

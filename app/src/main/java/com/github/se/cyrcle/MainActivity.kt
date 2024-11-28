@@ -18,6 +18,7 @@ import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
+import com.github.se.cyrcle.model.report.ReportedObjectViewModel
 import com.github.se.cyrcle.model.review.ReviewRepository
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.UserRepository
@@ -60,6 +61,9 @@ class MainActivity : ComponentActivity() {
       ParkingViewModel(imageRepository, parkingRepository, reportedObjectRepository)
     }
   }
+  private val reportedObjectViewModel: ReportedObjectViewModel by viewModels {
+    CustomViewModelFactory { ReportedObjectViewModel(reportedObjectRepository) }
+  }
   private val mapViewModel: MapViewModel by viewModels { CustomViewModelFactory { MapViewModel() } }
   private val addressViewModel: AddressViewModel by viewModels {
     CustomViewModelFactory { AddressViewModel(addressRepository) }
@@ -85,6 +89,7 @@ class MainActivity : ComponentActivity() {
               userViewModel,
               mapViewModel,
               addressViewModel,
+              reportedObjectViewModel,
               permissionsHandler)
         }
       }

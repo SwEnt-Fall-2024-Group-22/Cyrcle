@@ -331,7 +331,7 @@ fun AllReviewsScreen(
                   FloatingActionButton(
                       onClick = {
                         if (userReview != null) {
-                          reviewViewModel.deleteReviewById(userReview)
+                          reviewViewModel.deleteReviewById(userReview.uid)
                           parkingViewModel.handleReviewDeletion(oldScore = userReview.rating)
                           Toast.makeText(context, "Review Deleted!", Toast.LENGTH_SHORT).show()
                           navigationActions.goBack()

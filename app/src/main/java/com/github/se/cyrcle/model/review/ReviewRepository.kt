@@ -24,6 +24,12 @@ interface ReviewRepository {
    */
   fun getReviewById(id: String, onSuccess: (Review) -> Unit, onFailure: (Exception) -> Unit)
 
+  fun getReportsForReview(
+      reviewId: String,
+      onSuccess: (List<ReviewReport>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
   fun getReviewsByParkingId(
       parkingId: String,
       onSuccess: (List<Review>) -> Unit,

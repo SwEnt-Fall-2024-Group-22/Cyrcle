@@ -69,19 +69,18 @@ fun ReviewReportScreen(
   val userId = userViewModel.currentUser.value?.public?.userId!!
   val context = LocalContext.current
 
+  val strResToast = stringResource(R.string.report_added)
   fun onSubmit() {
-    if (reviewId != null) {
-      val report =
-          ReviewReport(
-              uid = reviewViewModel.getNewUid(),
-              reason = selectedReason.value,
-              userId = userId ?: "",
-              review = reviewId,
-              description = reportDescription.value)
-      reviewViewModel.addReport(report, userViewModel.currentUser.value!!)
-      Toast.makeText(context, "Report added", Toast.LENGTH_SHORT).show()
-      navigationActions.goBack()
-    }
+    val report =
+        ReviewReport(
+            uid = reviewViewModel.getNewUid(),
+            reason = selectedReason.value,
+            userId = userId,
+            review = reviewId!!,
+            description = reportDescription.value)
+    reviewViewModel.addReport(report, userViewModel.currentUser.value!!)
+    Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
+    navigationActions.goBack()
   }
 
   Scaffold(

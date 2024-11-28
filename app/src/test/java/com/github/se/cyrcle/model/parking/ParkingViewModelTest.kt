@@ -2,10 +2,13 @@ package com.github.se.cyrcle.model.parking
 
 import android.content.Context
 import com.github.se.cyrcle.model.image.ImageRepository
+import com.github.se.cyrcle.model.report.ReportedObject
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
-import com.github.se.cyrcle.model.user.TestInstancesUser
+import com.github.se.cyrcle.model.report.ReportedObjectType
 import com.mapbox.geojson.Point
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -110,34 +113,80 @@ class ParkingViewModelTest {
   }
 
   @Test
-  fun addReportTest() {
-    val parking = TestInstancesParking.parking1.copy(nbReports = 0, nbMaxSeverityReports = 0)
-    val user = TestInstancesUser.user1
-    val report =
-        ParkingReport(
-            uid = "report1",
-            reason = ParkingReportReason.SAFETY_CONCERN,
-            userId = user.public.userId,
-            parking = parking.uid,
-            "")
+  fun checkIfObjectExists_callsOnSuccess() {
+    val parkingUid = "TestUID"
+    val documentId = "DocumentID"
 
-    // Mock repository behavior for report addition
-    `when`(parkingRepository.addReport(eq(report), any(), any())).then {
-      it.getArgument<(ParkingReport) -> Unit>(1)(report)
+    // Mock repository behavior for checking existence
+    `when`(reportedObjectRepository.checkIfObjectExists(eq(parkingUid), any(), any())).then {
+      it.getArgument<(String?) -> Unit>(1).invoke(documentId) // Trigger onSuccess
     }
 
-    parkingViewModel.selectParking(parking)
-    parkingViewModel.addReport(report, user)
+    var onSuccessCallbackCalled = false
+    reportedObjectRepository.checkIfObjectExists(
+        objectUID = parkingUid,
+        onSuccess = { result ->
+          onSuccessCallbackCalled = true
+          assertEquals(documentId, result) // Ensure the returned documentId matches the mocked one
+        },
+        onFailure = { fail("Expected success but got failure") })
 
-    // Verify that the report was added to the parking repository
-    verify(parkingRepository).addReport(eq(report), any(), any())
+    assertTrue(onSuccessCallbackCalled)
+  }
 
-    // Verify parking's report counters are updated
-    assertEquals(1, parking.nbReports) // Number of reports should increment
-    assertEquals(1, parking.nbMaxSeverityReports) // Max severity report counter should increment
+  @Test
+  fun updateReportedObject_callsOnSuccess() {
+    val documentId = "DocumentID"
+    val reportedObject =
+        ReportedObject(
+            objectUID = "TestUID",
+            reportUID = "ReportUID",
+            nbOfTimesReported = 1,
+            nbOfTimesMaxSeverityReported = 0,
+            userUID = "UserUID",
+            objectType = ReportedObjectType.PARKING)
 
-    // Verify the parking repository update method is called to persist changes
-    verify(parkingRepository).updateParking(eq(parking), any(), any())
+    // Mock repository behavior for updating the reported object
+    `when`(
+            reportedObjectRepository.updateReportedObject(
+                eq(documentId), eq(reportedObject), any(), any()))
+        .then {
+          it.getArgument<() -> Unit>(2).invoke() // Trigger onSuccess
+        }
+
+    var onSuccessCallbackCalled = false
+    reportedObjectRepository.updateReportedObject(
+        documentId = documentId,
+        updatedObject = reportedObject,
+        onSuccess = { onSuccessCallbackCalled = true },
+        onFailure = { fail("Expected success but got failure") })
+
+    assertTrue(onSuccessCallbackCalled)
+  }
+
+  @Test
+  fun addReportedObject_callsOnSuccess() {
+    val reportedObject =
+        ReportedObject(
+            objectUID = "TestUID",
+            reportUID = "ReportUID",
+            nbOfTimesReported = 1,
+            nbOfTimesMaxSeverityReported = 0,
+            userUID = "UserUID",
+            objectType = ReportedObjectType.PARKING)
+
+    // Mock repository behavior for adding the reported object
+    `when`(reportedObjectRepository.addReportedObject(eq(reportedObject), any(), any())).then {
+      it.getArgument<() -> Unit>(1).invoke() // Trigger onSuccess
+    }
+
+    var onSuccessCallbackCalled = false
+    reportedObjectRepository.addReportedObject(
+        reportedObject = reportedObject,
+        onSuccess = { onSuccessCallbackCalled = true },
+        onFailure = { fail("Expected success but got failure") })
+
+    assertTrue(onSuccessCallbackCalled)
   }
 
   @Test

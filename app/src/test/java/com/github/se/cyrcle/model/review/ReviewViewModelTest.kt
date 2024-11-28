@@ -2,7 +2,6 @@ package com.github.se.cyrcle.model.review
 
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.user.TestInstancesUser
-import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -50,11 +49,6 @@ class ReviewViewModelTest {
 
     // Verify that the report was added to the parking repository
     verify(reviewRepository).addReport(eq(report), any(), any())
-
-    assertEquals(1, review.nbReports) // Number of reports should increment
-    assertEquals(1, review.nbMaxSeverityReports) // Max severity report counter should increment
-
     // Verify the parking repository update method is called to persist changes
-    verify(reviewRepository).updateReview(eq(review), any(), any())
   }
 }

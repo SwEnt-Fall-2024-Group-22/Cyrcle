@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.model.review
 
+import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.auth
@@ -70,8 +71,9 @@ class ReviewRepositoryFirestore @Inject constructor(private val db: FirebaseFire
         .document(id)
         .get()
         .addOnSuccessListener { document ->
-          val review = document.data?.let { deserializeReview(it) }
-          if (review != null) {
+          val data = document.data
+          if (data != null) {
+            val review = deserializeReview(data) // Use explicit deserialization
             onSuccess(review)
           } else {
             onFailure(Exception("Review not found"))
@@ -133,11 +135,59 @@ class ReviewRepositoryFirestore @Inject constructor(private val db: FirebaseFire
   }
 
   override fun deleteReviewById(id: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-    db.collection(collectionPath)
-        .document(id)
-        .delete()
-        .addOnSuccessListener { onSuccess() }
-        .addOnFailureListener { onFailure(it) }
+    val reviewDocRef = db.collection(collectionPath).document(id)
+    val reportsCollectionRef = reviewDocRef.collection("reports")
+
+    // Fetch and delete all reports in the subcollection
+    reportsCollectionRef
+        .get()
+        .addOnSuccessListener { querySnapshot ->
+          val batch = db.batch()
+
+          // Add delete operations for each document in the reports subcollection
+          for (document in querySnapshot.documents) {
+            batch.delete(document.reference)
+          }
+
+          // Commit the batch to delete all reports
+          batch
+              .commit()
+              .addOnSuccessListener {
+                // After deleting reports, delete the review document
+                reviewDocRef
+                    .delete()
+                    .addOnSuccessListener { onSuccess() }
+                    .addOnFailureListener { onFailure(it) }
+              }
+              .addOnFailureListener { exception ->
+                onFailure(exception) // Handle batch failure
+              }
+        }
+        .addOnFailureListener { exception ->
+          onFailure(exception) // Handle fetching reports failure
+        }
+  }
+
+  override fun getReportsForReview(
+      reviewId: String,
+      onSuccess: (List<ReviewReport>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    db.collection(collectionPath) // Access the "reviews" collection
+        .document(reviewId) // Access the specific review by its ID
+        .collection("reports") // Access the "reports" sub-collection
+        .get()
+        .addOnSuccessListener { querySnapshot ->
+          val reports =
+              querySnapshot.documents.mapNotNull { document ->
+                document.toObject(ReviewReport::class.java) // Convert each document to ReviewReport
+              }
+          onSuccess(reports) // Pass the list of reports to the success callback
+        }
+        .addOnFailureListener { exception ->
+          Log.e("ReviewRepository", "Error fetching reports for review: ${exception.message}")
+          onFailure(exception) // Pass the error to the failure callback
+        }
   }
 
   override fun addReport(
@@ -146,18 +196,11 @@ class ReviewRepositoryFirestore @Inject constructor(private val db: FirebaseFire
       onFailure: (Exception) -> Unit
   ) {
     val reportId = getNewUid() // Generate a new unique ID for the report
-    val reportData =
-        mapOf(
-            "id" to report.uid,
-            "reason" to report.reason,
-            "user" to report.userId,
-            "review" to report.review,
-            "description" to report.description)
     db.collection(collectionPath)
         .document(report.review)
         .collection("reports")
         .document(reportId)
-        .set(reportData)
+        .set(report)
         .addOnSuccessListener { onSuccess(report) }
         .addOnFailureListener { onFailure(it) }
   }
@@ -184,8 +227,17 @@ class ReviewRepositoryFirestore @Inject constructor(private val db: FirebaseFire
         processedData["time"] = timestamp
       }
     }
+
+    // Ensure default values for missing fields
+    val nbReports = (data["nbReports"] as? Number)?.toInt() ?: 0
+    val nbMaxSeverityReports = (data["nbMaxSeverityReports"] as? Number)?.toInt() ?: 0
+
+    // Convert the map to JSON, then deserialize into a Review object
     val json = gson.toJson(processedData)
-    return gson.fromJson(json, Review::class.java)
+    val review = gson.fromJson(json, Review::class.java)
+
+    // Set default values for missing fields directly in the Review object
+    return review.copy(nbReports = nbReports, nbMaxSeverityReports = nbMaxSeverityReports)
   }
 
   fun createTimestamp(timeAttributes: Map<String, Any>): Timestamp? {
