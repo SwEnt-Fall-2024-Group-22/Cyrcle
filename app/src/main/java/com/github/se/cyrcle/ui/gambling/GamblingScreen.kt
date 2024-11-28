@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.sp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.user.SPIN_COST
 import com.github.se.cyrcle.model.user.UserViewModel
-import com.github.se.cyrcle.model.user.Wallet
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import kotlin.math.*
 import kotlinx.coroutines.*
@@ -252,7 +251,7 @@ fun WheelView(
 @Composable
 fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserViewModel) {
   val userState by userViewModel.currentUser.collectAsState()
-  val coins = userState?.details?.wallet?.getCoins()
+  var coins by remember { mutableStateOf(userState?.details?.wallet?.getCoins()) }
 
   Box(
       modifier = Modifier.fillMaxSize().testTag("gambling_screen"),
@@ -274,9 +273,14 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
 
         Button(
             onClick = {
-                userViewModel.tryDebitCoinsFromCurrentUser(SPIN_COST,0)
-                wheelSpinFunction?.invoke()
-              },
+              userViewModel.tryDebitCoinsFromCurrentUser(
+                  SPIN_COST,
+                  0,
+                  onSuccess = {
+                    coins = userState?.details?.wallet?.getCoins()
+                    wheelSpinFunction?.invoke()
+                  })
+            },
             enabled = canSpin,
             modifier = Modifier.size(90.dp).clip(CircleShape).testTag("spin_button"),
             colors =
