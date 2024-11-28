@@ -211,6 +211,9 @@
     <string name="rarity_common">Common</string>
     <string name="rarity_rare">Rare</string>
     <string name="rarity_epic">Epic</string>
+    <string name="gambling_screen_title">Gambling</string>
+    <string name="gambling_screen_coins_display">Coins: %d</string>
+
 
     <!-- Report Screens -->
     <string name="report_title">The following will be submitted in your report:</string>
