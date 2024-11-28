@@ -27,6 +27,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
 
 @RunWith(AndroidJUnit4::class)
 class GamblingScreenTest {
@@ -201,5 +202,20 @@ class GamblingScreenTest {
     composeTestRule.onNodeWithTag("wheel_spin_state").assertExists()
 
     composeTestRule.mainClock.autoAdvance = true // Re-enable auto advance
+  }
+
+  @Test
+  fun verify_back_navigation() {
+    composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
+
+    // Find and click the back button
+    composeTestRule
+        .onNodeWithTag("gambling_screen_top_barGoBackButton")
+        .assertExists()
+        .assertHasClickAction()
+        .performClick()
+
+    // Verify that navigationActions.goBack() was called
+    verify(mockNavigationActions).goBack()
   }
 }
