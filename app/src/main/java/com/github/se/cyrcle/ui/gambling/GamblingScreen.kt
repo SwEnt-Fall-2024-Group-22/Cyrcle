@@ -27,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.model.user.SPIN_COST
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.model.user.Wallet
 import com.github.se.cyrcle.ui.navigation.NavigationActions
@@ -252,7 +253,6 @@ fun WheelView(
 fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserViewModel) {
   val userState by userViewModel.currentUser.collectAsState()
   val coins = userState?.details?.wallet?.getCoins()
-  val spinCost = 10 // Cost to spin the wheel
 
   Box(
       modifier = Modifier.fillMaxSize().testTag("gambling_screen"),
@@ -260,7 +260,7 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
         var wheelSpinFunction by remember { mutableStateOf<(() -> Unit)?>(null) }
 
         Text(
-            text = "Coins: ${coins ?: "BROKIE"}",
+            text = "Coins: $coins",
             modifier =
                 Modifier.align(Alignment.TopCenter).padding(top = 16.dp).testTag("coin_display"),
             style = MaterialTheme.typography.headlineMedium)
@@ -270,26 +270,13 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
                 onSegmentLanded = { /* Handle landing */})
             .let { spinFn -> wheelSpinFunction = spinFn }
 
-        val canSpin = userState?.details?.wallet?.isSolvable(spinCost, -1) == true
-        // I really dont like the fact that I have to put -1 as threshold,
-        // but it is this way because of how André wrote the isSolvable function.
-        // If i want to put 0 here then technically all that I have to do is change the > into >=
-        // inside isSolvable
-        // up for debate
+        val canSpin = userState?.details?.wallet?.isSolvable(SPIN_COST, 0) == true
 
         Button(
             onClick = {
-              userState?.let { user ->
-                // Create a new wallet and debit the coins
-                val newWallet = Wallet(user.details?.wallet?.getCoins() ?: 0)
-                newWallet.debitCoins(spinCost)
-
-                // Create updated user with new wallet
-                val updatedUser = user.copy(details = user.details?.copy(wallet = newWallet))
-                userViewModel.updateUser(updatedUser)
+                userViewModel.tryDebitCoinsFromCurrentUser(SPIN_COST,0)
                 wheelSpinFunction?.invoke()
-              }
-            },
+              },
             enabled = canSpin,
             modifier = Modifier.size(90.dp).clip(CircleShape).testTag("spin_button"),
             colors =
