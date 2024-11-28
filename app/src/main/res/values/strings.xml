@@ -36,7 +36,7 @@
     <string name="attributes_picker_rack_type_label">Which type of rack is in the parking spot?</string>
     <string name="attributes_picker_has_surveillance_question">Is the parking spot under camera surveillance ?</string>
     <string name="attributes_picker_description_label">Description (Optional)</string>
-    <string name="attributes_picker_parking_added_with_reward_toast">Parking spot added!\n+%d coins for contributing to the community!</string>
+    <string name="attributes_picker_parking_added_with_reward_toast">Parking spot added!\n+%d coins !</string>
 
 
     <!-- Attributes Picker > BottomBarAddAttr -->
@@ -198,7 +198,7 @@
     <string name="review_screen_submit_toast">Review added!</string>
     <string name="review_screen_update_toast">Review Updated!</string>
     <string name="review_screen_default_review_owner">default</string>
-    <string name="review_screen_reward_toast">+%d coins for submitting a review!</string>
+    <string name="review_screen_reward_toast">+%d coins !</string>
 
 
     <!-- TopAppBar -->
