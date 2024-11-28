@@ -177,7 +177,6 @@ fun getOutlinedTextFieldColors(colorLevel: ColorLevel): TextFieldColors {
  * @param colorLevel The chosen ColorScheme
  * @return The `TextFieldColors` from the `colorScheme`
  */
-
 @Composable
 fun getOutlinedTextFieldColorsSearchBar(colorLevel: ColorLevel): TextFieldColors {
   return OutlinedTextFieldDefaults.colors(
