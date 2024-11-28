@@ -133,7 +133,10 @@ class ReviewViewModel(
                       selectedReview.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERITY_THRESH) ||
                       (selectedReview.nbReports >= NB_REPORTS_THRESH)),
               onSuccess = { updateLocalReviewAndMetrics(report, selectedReview) },
-              onFailure = { Log.e("ReviewViewModel", "Error adding to ReportedObjects") })
+              onFailure = {
+                  updateLocalReviewAndMetrics(report, selectedReview)
+                  Log.e("ReviewViewModel", "Not adding to ReportedObjects")
+              })
         },
         onFailure = {
           Log.e("ReviewViewModel", "Report not added")
