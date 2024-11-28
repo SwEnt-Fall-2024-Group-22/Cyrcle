@@ -15,7 +15,7 @@ const val NB_REPORTS_MAXSEVERITY_THRESH = 3
 const val MAX_SEVERITY = 3
 
 class ReviewViewModel(
-    val reviewRepository: ReviewRepository,
+    private val reviewRepository: ReviewRepository,
     private val reportedObjectRepository: ReportedObjectRepository
 ) : ViewModel() {
 
@@ -42,13 +42,9 @@ class ReviewViewModel(
     loadReportsForSelectedReview()
   }
 
-    fun getReviewById(
-        id: String,
-        onSuccess: (Review) -> Unit,
-        onFailure: (Exception) -> Unit
-    ) {
-        reviewRepository.getReviewById(id, onSuccess, onFailure)
-    }
+  fun getReviewById(id: String, onSuccess: (Review) -> Unit, onFailure: (Exception) -> Unit) {
+    reviewRepository.getReviewById(id, onSuccess, onFailure)
+  }
 
   fun getNewUid(): String {
     return reviewRepository.getNewUid()
@@ -111,8 +107,6 @@ class ReviewViewModel(
 
     reviewRepository.addReport(
         report,
-        // If the report was successfully added, check if the associated object is already in
-        // reported objects
         onSuccess = {
           val newReportedObject =
               ReportedObject(
@@ -120,45 +114,32 @@ class ReviewViewModel(
                   reportUID = report.uid,
                   nbOfTimesReported = selectedReview.nbReports + 1,
                   nbOfTimesMaxSeverityReported =
-                      if (report.reason.severity == 3) selectedReview.nbMaxSeverityReports + 1
+                      if (report.reason.severity == MAX_SEVERITY)
+                          selectedReview.nbMaxSeverityReports + 1
                       else selectedReview.nbMaxSeverityReports,
                   userUID = user.public.userId,
-                  objectType = ReportedObjectType.REVIEW)
-            reportedObjectRepository.getObjectUID(
-                objectUID = selectedReview.uid,
-                reportedObject = newReportedObject,
-                onSuccess = {
-                    Log.d("ReviewViewModel", "Reported object added/updated successfully")
-                    updateLocalReviewAndMetrics(report, selectedReview)
-                },
-              // If the object is NOT in reported objects, check if it fulfills the criterion
-              // to be a reported object. If so, add it to the ReportedObjects
-              onFailure = {
-                // Check thresholds before proceeding
-                if ((report.reason.severity == MAX_SEVERITY &&
-                    selectedReview.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERITY_THRESH) ||
-                    (selectedReview.nbReports >= NB_REPORTS_THRESH)) {
-                  reportedObjectRepository.addReportedObject(
-                      newReportedObject,
-                      onSuccess = {
-                        Log.d("ReviewViewModel", "Reported object added successfully")
-                        updateLocalReviewAndMetrics(report, selectedReview)
-                      },
-                      onFailure = { addException ->
-                        Log.e(
-                            "ReviewViewModel",
-                            "Error adding reported object: ${addException.message}")
-                      })
-                } else {
-                  updateLocalReviewAndMetrics(report, selectedReview)
-                }
-              })
+                  objectType = ReportedObjectType.REVIEW,
+              )
+
+          Log.d(
+              "ReviewViewModel",
+              "${selectedReview.nbReports}, ${selectedReview.nbMaxSeverityReports}")
+
+          reportedObjectRepository.getObjectUID(
+              objectUID = selectedReview.uid,
+              reportedObject = newReportedObject,
+              shouldAddIfNotExist =
+                  ((report.reason.severity == MAX_SEVERITY &&
+                      selectedReview.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERITY_THRESH) ||
+                      (selectedReview.nbReports >= NB_REPORTS_THRESH)),
+              onSuccess = { updateLocalReviewAndMetrics(report, selectedReview) },
+              onFailure = { Log.e("ReviewViewModel", "Error adding to ReportedObjects") })
         },
-        onFailure = { exception ->
-          Log.e("ReviewViewModel", "Error adding report: ${exception.message}", exception)
+        onFailure = {
+          Log.e("ReviewViewModel", "Report not added")
+          updateLocalReviewAndMetrics(report, selectedReview)
         })
   }
-
   /** Updates the local review and metrics after a report is added or updated. */
   private fun updateLocalReviewAndMetrics(report: ReviewReport, selectedReview: Review) {
     // Update the local reports and review metrics

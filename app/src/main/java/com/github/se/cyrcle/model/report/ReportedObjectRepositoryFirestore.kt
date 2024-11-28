@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.model.report
 
-import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -148,48 +147,55 @@ class ReportedObjectRepositoryFirestore @Inject constructor(private val db: Fire
         .addOnFailureListener { onFailure(it) }
   }
 
-    /**
-     * Adds or updates a reported object in the Firestore collection based on `objectUID`.
-     *
-     * - If the object already exists, it merges the update.
-     * - If the object does not exist, it creates a new one.
-     *
-     * @param objectUID The unique identifier of the object being reported.
-     * @param reportedObject The reported object to save.
-     * @param onSuccess A callback invoked on successful addition or update.
-     * @param onFailure A callback invoked when the operation fails.
-     */
-    override fun getObjectUID(
-        objectUID: String,
-        reportedObject: ReportedObject,
-        onSuccess: () -> Unit,
-        onFailure: (Exception) -> Unit
-    ) {
-        db.collection(collectionPath)
-            .whereEqualTo("objectUID", objectUID)
-            .get()
-            .addOnSuccessListener { querySnapshot ->
-                if (querySnapshot.documents.isNotEmpty()) {
-                    // Document exists: update it
-                    val documentId = querySnapshot.documents.first().id
-                    db.collection(collectionPath)
-                        .document(documentId)
-                        .set(reportedObject, com.google.firebase.firestore.SetOptions.merge())
-                        .addOnSuccessListener { onSuccess() }
-                        .addOnFailureListener { onFailure(it) }
-                } else {
-                    // Document does not exist: create it
-                    db.collection(collectionPath)
-                        .document(objectUID)
-                        .set(reportedObject)
-                        .addOnSuccessListener { onSuccess() }
-                        .addOnFailureListener { onFailure(it) }
-                }
+  /**
+   * Adds or updates a reported object in the Firestore collection based on `objectUID`.
+   * - If the object already exists, it merges the update.
+   * - If the object does not exist, it creates a new one.
+   *
+   * @param objectUID The unique identifier of the object being reported.
+   * @param reportedObject The reported object to save.
+   * @param onSuccess A callback invoked on successful addition or update.
+   * @param onFailure A callback invoked when the operation fails.
+   */
+  override fun getObjectUID(
+      objectUID: String,
+      reportedObject: ReportedObject,
+      shouldAddIfNotExist: Boolean, // New parameter
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    db.collection(collectionPath)
+        .whereEqualTo("objectUID", objectUID)
+        .get()
+        .addOnSuccessListener { querySnapshot ->
+          if (querySnapshot.documents.isNotEmpty()) {
+            // Document exists: update it
+            val documentId = querySnapshot.documents.first().id
+            db.collection(collectionPath)
+                .document(documentId)
+                .set(reportedObject, com.google.firebase.firestore.SetOptions.merge())
+                .addOnSuccessListener { onSuccess() }
+                .addOnFailureListener { onFailure(it) }
+          } else {
+            // Document does not exist
+            if (shouldAddIfNotExist) {
+              // Add the document if the condition allows it
+              db.collection(collectionPath)
+                  .document(objectUID)
+                  .set(reportedObject)
+                  .addOnSuccessListener { onSuccess() }
+                  .addOnFailureListener { onFailure(it) }
+            } else {
+              // Fail if the condition does not allow adding a new document
+              onFailure(Exception("Document does not exist, and addition is not allowed."))
             }
-            .addOnFailureListener { exception ->
-                onFailure(exception)
-            }
-    }
+          }
+        }
+        .addOnFailureListener { exception ->
+          // Handle query failure
+          onFailure(exception)
+        }
+  }
 
   /**
    * Retrieves all reported objects submitted by a specific user.

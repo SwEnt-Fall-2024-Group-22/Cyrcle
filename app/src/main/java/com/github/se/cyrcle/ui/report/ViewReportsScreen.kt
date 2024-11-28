@@ -13,6 +13,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -28,7 +30,6 @@ import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
-@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ViewReportsScreen(
     navigationActions: NavigationActions,
@@ -36,7 +37,7 @@ fun ViewReportsScreen(
     parkingViewModel: ParkingViewModel,
     reviewViewModel: ReviewViewModel
 ) {
-  val currentObject = reportedObjectViewModel.selectedObject.value
+  val currentObject by reportedObjectViewModel.selectedObject.collectAsState()
   val context = LocalContext.current
   val selType = currentObject?.objectType ?: ReportedObjectType.PARKING
   val successDeleteText = stringResource(R.string.object_deleted)
@@ -78,7 +79,7 @@ fun ViewReportsScreen(
         // Handle Parking or Review reports rendering
         Box(modifier = Modifier.padding(paddingValues)) {
           if (selType == ReportedObjectType.PARKING) {
-            val reports = parkingViewModel.selectedParkingReports.value
+            val reports by parkingViewModel.selectedParkingReports.collectAsState()
             Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
               if (reports.isEmpty()) {
                 Text(
@@ -94,7 +95,7 @@ fun ViewReportsScreen(
               }
             }
           } else {
-            val reports = reviewViewModel.selectedReviewReports.value
+            val reports by reviewViewModel.selectedReviewReports.collectAsState()
             Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
               if (reports.isEmpty()) {
                 Text(

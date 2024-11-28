@@ -15,7 +15,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.mapbox.geojson.Point
-import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -90,9 +89,8 @@ class ParkingViewModel(
   }
 
   fun deleteParkingByUid(uid: String) {
-    parkingRepository.deleteParkingById(uid, {}, {
-        Log.d("ParkingViewModel", "Error deleting Parking")
-    })
+    parkingRepository.deleteParkingById(
+        uid, {}, { Log.d("ParkingViewModel", "Error deleting Parking") })
   }
 
   fun clearSelectedParking() {
@@ -144,9 +142,9 @@ class ParkingViewModel(
     loadSelectedParkingReports()
   }
 
-    fun getParkingById(id: String, onSuccess: (Parking) -> Unit, onFailure: (Exception) -> Unit) {
-        parkingRepository.getParkingById(id, onSuccess, onFailure)
-    }
+  fun getParkingById(id: String, onSuccess: (Parking) -> Unit, onFailure: (Exception) -> Unit) {
+    parkingRepository.getParkingById(id, onSuccess, onFailure)
+  }
 
   /**
    * Retrieves parkings within a rectangle defined by two opposite corners, regardless of their
@@ -420,6 +418,9 @@ class ParkingViewModel(
       return
     }
 
+    Log.d(
+        "ParkingViewModel", "${selectedParking.nbReports}, ${selectedParking.nbMaxSeverityReports}")
+
     parkingRepository.addReport(
         report,
         onSuccess = {
@@ -429,44 +430,30 @@ class ParkingViewModel(
                   reportUID = report.uid,
                   nbOfTimesReported = selectedParking.nbReports + 1,
                   nbOfTimesMaxSeverityReported =
-                      if (report.reason.severity == MAX_SEVERITY) selectedParking.nbMaxSeverityReports + 1
+                      if (report.reason.severity == MAX_SEVERITY)
+                          selectedParking.nbMaxSeverityReports + 1
                       else selectedParking.nbMaxSeverityReports,
                   userUID = user.public.userId,
                   objectType = ReportedObjectType.PARKING,
               )
-
-            reportedObjectRepository.getObjectUID(
-                objectUID = selectedParking.uid,
-                reportedObject = newReportedObject,
-                onSuccess = {
-                    Log.d("ReviewViewModel", "Reported object added/updated successfully")
-                    updateLocalParkingAndMetrics(report,selectedParking)
-                },
-                onFailure = {
-                if ((report.reason.severity == MAX_SEVERITY &&
-                    selectedParking.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERITY_THRESH) ||
-                    (selectedParking.nbReports >= NB_REPORTS_THRESH)) {
-                  reportedObjectRepository.addReportedObject(
-                      newReportedObject,
-                      onSuccess = {
-                        Log.d("ParkingViewModel", "Reported object added successfully")
-                        updateLocalParkingAndMetrics(report, selectedParking)
-                      },
-                      onFailure = { addException ->
-                        Log.e(
-                            "ParkingViewModel",
-                            "Error adding reported object: ${addException.message}")
-                      })
-                } else {
-                  updateLocalParkingAndMetrics(report, selectedParking)
-                }
+          reportedObjectRepository.getObjectUID(
+              objectUID = selectedParking.uid,
+              reportedObject = newReportedObject,
+              shouldAddIfNotExist =
+                  ((report.reason.severity == MAX_SEVERITY &&
+                      selectedParking.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERITY_THRESH) ||
+                      (selectedParking.nbReports >= NB_REPORTS_THRESH)),
+              onSuccess = { updateLocalParkingAndMetrics(report, selectedParking) },
+              onFailure = {
+                Log.d("ParkingViewModel", "Error adding to ReportedObjects")
+                updateLocalParkingAndMetrics(report, selectedParking)
               })
         },
-        onFailure = { exception ->
-          Log.e("ParkingViewModel", "Error adding report: ${exception.message}", exception)
+        onFailure = {
+          Log.d("ParkingViewModel", "Report not added")
+          updateLocalParkingAndMetrics(report, selectedParking)
         })
   }
-
   /** Updates the local parking and metrics after a report is added or updated. */
   private fun updateLocalParkingAndMetrics(report: ParkingReport, selectedParking: Parking) {
     // Update the local reports and parking metrics

@@ -40,12 +40,8 @@ class ReportedObjectViewModel(private val reportedObjectRepository: ReportedObje
   /** Fetches all reported objects from the repository and updates the reports list. */
   fun fetchAllReportedObjects() {
     reportedObjectRepository.getAllReportedObjects(
-        onSuccess = { reportedObjects ->
-          // Update the _reportsList with the fetched data
-          _reportsList.value = reportedObjects
-        },
+        onSuccess = { reportedObjects -> _reportsList.value = reportedObjects },
         onFailure = { exception ->
-          // Handle failure (log the exception, notify the user, etc.)
           println("Failed to fetch reported objects: ${exception.message}")
         })
   }

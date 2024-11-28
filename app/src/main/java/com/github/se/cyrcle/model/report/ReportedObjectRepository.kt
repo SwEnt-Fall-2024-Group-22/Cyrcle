@@ -1,7 +1,5 @@
 package com.github.se.cyrcle.model.report
 
-import com.google.firebase.firestore.DocumentReference
-
 /**
  * Interface for managing reported objects in the system. Defines the operations for adding,
  * retrieving, and deleting reported objects.
@@ -61,6 +59,7 @@ interface ReportedObjectRepository {
   fun getObjectUID(
       objectUID: String,
       reportedObject: ReportedObject,
+      shouldAddIfNotExist: Boolean, // New parameter
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   )
