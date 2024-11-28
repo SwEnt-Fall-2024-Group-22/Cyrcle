@@ -28,6 +28,7 @@ import com.github.se.cyrcle.ui.profile.ProfileScreen
 import com.github.se.cyrcle.ui.report.AdminScreen
 import com.github.se.cyrcle.ui.report.ParkingReportScreen
 import com.github.se.cyrcle.ui.report.ReviewReportScreen
+import com.github.se.cyrcle.ui.report.ViewReportsScreen
 import com.github.se.cyrcle.ui.review.AllReviewsScreen
 import com.github.se.cyrcle.ui.review.ReviewScreen
 
@@ -113,7 +114,13 @@ fun CyrcleNavHost(
       composable(Screen.VIEW_PROFILE) {
         ProfileScreen(navigationActions, userViewModel, parkingViewModel)
       }
-      composable(Screen.ADMIN) { AdminScreen(navigationActions, reportedObjectViewModel) }
+      composable(Screen.ADMIN) {
+        AdminScreen(navigationActions, reportedObjectViewModel, parkingViewModel, reviewViewModel)
+      }
+      composable(Screen.VIEW_REPORTS) {
+        ViewReportsScreen(
+            navigationActions, reportedObjectViewModel, parkingViewModel, reviewViewModel)
+      }
     }
 
     navigation(

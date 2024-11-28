@@ -127,6 +127,26 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
         .addOnFailureListener { onFailure(it) }
   }
 
+  override fun getReportsForParking(
+      parkingId: String,
+      onSuccess: (List<ParkingReport>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    FirebaseFirestore.getInstance()
+        .collection("parkings")
+        .document(parkingId)
+        .collection("reports")
+        .get()
+        .addOnSuccessListener { querySnapshot ->
+          val reports =
+              querySnapshot.documents.mapNotNull { document ->
+                document.toObject(ParkingReport::class.java)
+              }
+          onSuccess(reports)
+        }
+        .addOnFailureListener { exception -> onFailure(exception) }
+  }
+
   override fun addReport(
       report: ParkingReport,
       onSuccess: (ParkingReport) -> Unit,

@@ -1,5 +1,7 @@
 package com.github.se.cyrcle.model.report
 
+import com.google.firebase.firestore.DocumentReference
+
 /**
  * Interface for managing reported objects in the system. Defines the operations for adding,
  * retrieving, and deleting reported objects.
@@ -27,6 +29,16 @@ interface ReportedObjectRepository {
   )
 
   /**
+   * Retrieves all reported objects from the Firestore collection.
+   *
+   * @param onSuccess A callback invoked with a list of all reported objects when successful.
+   * @param onFailure A callback invoked with an exception when the operation fails.
+   */
+  fun getAllReportedObjects(
+      onSuccess: (List<ReportedObject>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+  /**
    * Retrieves all reported objects of a specific type (e.g., PARKING or REVIEW).
    *
    * @param type The type of the reported objects to fetch (e.g., [ReportedObjectType.PARKING]).
@@ -46,9 +58,24 @@ interface ReportedObjectRepository {
    * @param onSuccess A callback invoked with a list of reported objects when successful.
    * @param onFailure A callback invoked with an exception when the operation fails.
    */
-  fun getReportedObjectsByObjectUID(
+  fun getDocumentReferenceByObjectUID(
       objectUID: String,
-      onSuccess: (List<ReportedObject>) -> Unit,
+      onSuccess: (DocumentReference) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  /**
+   * Updates a reported object with a certain objectUID in the Firestore collection.
+   *
+   * @param objectUID The unique identifier of the object to update.
+   * @param updatedObject The updated [ReportedObject] instance.
+   * @param onSuccess A callback invoked when the operation is successful.
+   * @param onFailure A callback invoked when the operation fails with an exception.
+   */
+  fun updateReportedObject(
+      objectUID: String,
+      updatedObject: ReportedObject,
+      onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   )
 

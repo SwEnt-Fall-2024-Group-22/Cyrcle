@@ -35,6 +35,7 @@ object Screen {
   const val REVIEW_REPORT = "Review Report Screen"
   const val GAMBLING = "Gambling Screen"
   const val ADMIN = "Admin Screen"
+  const val VIEW_REPORTS = "View Reports Screen"
 }
 
 /**

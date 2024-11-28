@@ -40,11 +40,11 @@ data class Parking(
 )
 
 data class ParkingReport(
-    val uid: String,
-    val reason: ParkingReportReason,
-    val userId: String,
-    val parking: String,
-    val description: String
+    val uid: String = "",
+    val reason: ParkingReportReason = ParkingReportReason.UNKNOWN,
+    val userId: String = "",
+    val parking: String = "",
+    val description: String = ""
 )
 
 interface ParkingAttribute : DropDownableEnum
@@ -65,7 +65,8 @@ enum class ParkingReportReason(override val description: String, val severity: I
   INACCESSIBLE("This Spot is Inaccessible", 2),
   ILLEGAL_SPOT("This Spot is in an Illegal Place", 3),
   SAFETY_CONCERN("This Spot is in an Dangerous Place", 3),
-  INEXISTANT("This Spot does Not Exist", 3)
+  INEXISTANT("This Spot does Not Exist", 3),
+  UNKNOWN("UNKNOWN", 1)
 }
 
 /** Enum class representing the type of rack in a parking spot. */

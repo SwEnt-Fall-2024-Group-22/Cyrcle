@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.image.ImageRepositoryCloudStorage
-import com.github.se.cyrcle.model.report.ReportReason
 import com.github.se.cyrcle.model.report.ReportedObject
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.report.ReportedObjectRepositoryFirestore
@@ -40,7 +39,7 @@ const val PARKING_MAX_SIDE_LENGTH = 50.0
  */
 class ParkingViewModel(
     private val imageRepository: ImageRepository,
-    private val parkingRepository: ParkingRepository,
+    val parkingRepository: ParkingRepository,
     private val reportedObjectRepository: ReportedObjectRepository,
 ) : ViewModel() {
 
@@ -58,8 +57,8 @@ class ParkingViewModel(
   val selectedParking: StateFlow<Parking?> = _selectedParking
 
   /** Selected parking to review/edit */
-  private val _selectedParkingReports = MutableStateFlow<List<ParkingReport>?>(null)
-  val selectedParkingReports: StateFlow<List<ParkingReport>?> = _selectedParkingReports
+  private val _selectedParkingReports = MutableStateFlow<List<ParkingReport>>(emptyList())
+  val selectedParkingReports: StateFlow<List<ParkingReport>> = _selectedParkingReports
 
   /**
    * Radius of the circle around the center to display parkings With a public getter to display the
@@ -89,6 +88,15 @@ class ParkingViewModel(
     return parkingRepository.getNewUid()
   }
 
+  fun deleteParkingByUid(uid: String) {
+    parkingRepository.deleteParkingById(uid, {}, {})
+  }
+
+  fun clearSelectedParking() {
+    _selectedParking.value = null
+    _selectedParkingReports.value = emptyList()
+  }
+
   /**
    * Adds a parking to the repository.
    *
@@ -104,6 +112,25 @@ class ParkingViewModel(
         { Log.e("ParkingViewModel", "Error adding parking", it) })
   }
 
+  private fun loadSelectedParkingReports() {
+    val parking = _selectedParking.value
+    if (parking == null) {
+      Log.e("ParkingViewModel", "No parking selected while trying to load reports")
+      return
+    }
+
+    parkingRepository.getReportsForParking(
+        parkingId = parking.uid,
+        onSuccess = { reports ->
+          // Update the selectedParkingReports state with the fetched reports
+          _selectedParkingReports.value = reports
+          Log.d("ParkingViewModel", "Reports loaded successfully: ${reports.size}")
+        },
+        onFailure = { exception ->
+          Log.e("ParkingViewModel", "Error loading reports: ${exception.message}")
+        })
+  }
+
   /**
    * Select a parking to review/edit.
    *
@@ -111,6 +138,7 @@ class ParkingViewModel(
    */
   fun selectParking(parking: Parking) {
     _selectedParking.value = parking
+    loadSelectedParkingReports()
   }
 
   /**
@@ -388,40 +416,72 @@ class ParkingViewModel(
     parkingRepository.addReport(
         report,
         onSuccess = {
-          // Check thresholds for reporting to `ReportedObjectRepository`
-          // i.e if it's max severity add it to the maximum severity count and check if it doesn't
-          // exceed the maximum severity threshold. Otherwise, check if it doesn't exceed
-          // the standard threshold
-          if ((report.reason.severity == MAX_SEVERITY &&
-              selectedParking.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERITY_THRESH) ||
-              (selectedParking.nbReports >= NB_REPORTS_THRESH)) {
-            reportedObjectRepository.addReportedObject(
-                ReportedObject(
-                    objectUID = selectedParking.uid,
-                    reportUID = report.uid,
-                    reason = ReportReason.Parking(report.reason),
-                    userUID = user.public.userId,
-                    objectType = ReportedObjectType.PARKING),
-                onSuccess = {},
-                onFailure = {})
-          }
+          val newReportedObject =
+              ReportedObject(
+                  objectUID = selectedParking.uid,
+                  reportUID = report.uid,
+                  nbOfTimesReported = selectedParking.nbReports + 1,
+                  nbOfTimesMaxSeverityReported =
+                      if (report.reason.severity == 3) selectedParking.nbMaxSeverityReports + 1
+                      else selectedParking.nbMaxSeverityReports,
+                  userUID = user.public.userId,
+                  objectType = ReportedObjectType.PARKING,
+              )
 
-          // Update the local reports and parking metrics
-          _selectedParkingReports.update { currentReports ->
-            currentReports?.plus(it) ?: listOf(it)
-          }
-          if (report.reason.severity == MAX_SEVERITY) {
-            selectedParking.nbMaxSeverityReports += 1
-          }
-          selectedParking.nbReports += 1
-          parkingRepository.updateParking(selectedParking, {}, {})
-          Log.d("ParkingViewModel", "Report added successfully")
+          reportedObjectRepository.getDocumentReferenceByObjectUID(
+              objectUID = selectedParking.uid,
+              onSuccess = { documentRef ->
+                // If the document exists, update it
+                documentRef
+                    .set(newReportedObject, com.google.firebase.firestore.SetOptions.merge())
+                    .addOnSuccessListener {
+                      Log.d("ParkingViewModel", "Reported object updated successfully")
+                      updateLocalParkingAndMetrics(report, selectedParking)
+                    }
+                    .addOnFailureListener { exception ->
+                      Log.e(
+                          "ParkingViewModel",
+                          "Error updating reported object: ${exception.message}")
+                    }
+              },
+              onFailure = {
+                if ((report.reason.severity == MAX_SEVERITY &&
+                    selectedParking.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERITY_THRESH) ||
+                    (selectedParking.nbReports >= NB_REPORTS_THRESH)) {
+                  reportedObjectRepository.addReportedObject(
+                      newReportedObject,
+                      onSuccess = {
+                        Log.d("ParkingViewModel", "Reported object added successfully")
+                        updateLocalParkingAndMetrics(report, selectedParking)
+                      },
+                      onFailure = { addException ->
+                        Log.e(
+                            "ParkingViewModel",
+                            "Error adding reported object: ${addException.message}")
+                      })
+                } else {
+                  updateLocalParkingAndMetrics(report, selectedParking)
+                }
+              })
         },
         onFailure = { exception ->
           Log.e("ParkingViewModel", "Error adding report: ${exception.message}", exception)
         })
   }
-  // ================== Reports  ==================
+
+  /** Updates the local parking and metrics after a report is added or updated. */
+  private fun updateLocalParkingAndMetrics(report: ParkingReport, selectedParking: Parking) {
+    // Update the local reports and parking metrics
+    _selectedParkingReports.update { currentReports ->
+      currentReports?.plus(report) ?: listOf(report)
+    }
+    if (report.reason.severity == MAX_SEVERITY) {
+      selectedParking.nbMaxSeverityReports += 1
+    }
+    selectedParking.nbReports += 1
+    parkingRepository.updateParking(selectedParking, {}, {})
+    Log.d("ParkingViewModel", "Parking and metrics updated successfully")
+  }
 
   // ================== Reviews ==================
   /**
