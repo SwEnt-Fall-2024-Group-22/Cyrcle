@@ -139,12 +139,7 @@ fun AttributesPicker(
             uid = parkingViewModel.getNewUid())
     parkingViewModel.addParking(parking)
 
-    // Credit coins to user
-    userViewModel.currentUser.value?.let { currentUser ->
-      currentUser.details?.wallet?.creditCoins(100)
-      userViewModel.updateUser(currentUser)
-    }
-
+    userViewModel.creditCoinsToCurrentUser(PARKING_CREATION_REWARD)
     Toast.makeText(context, parkingAddedWithRewardText, Toast.LENGTH_LONG).show()
 
     navigationActions.navigateTo(TopLevelDestinations.MAP)

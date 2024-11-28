@@ -20,6 +20,8 @@ const val PARKING_CREATION_REWARD: Coin = 100
 const val PARKING_REVIEW_REWARD: Coin = 10
 const val ACCOUNT_CREATION_REWARD: Coin = 100
 
+const val SPIN_COST: Coin = 10
+
 /**
  * A class that represent a [Coin] container (hence the name), which can be used to store and
  * manipulate the amount of coins a user has.
