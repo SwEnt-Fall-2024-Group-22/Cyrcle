@@ -250,13 +250,6 @@ fun AdminScreen(
                                       .testTag("ReportCardContent$index")) {
                                 Text(
                                     text =
-                                        stringResource(R.string.admin_lastreportedby)
-                                            .format(curReport.userUID),
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    modifier = Modifier.testTag("ReviewOwner$index"))
-                                Text(
-                                    text =
                                         stringResource(R.string.admin_timesbeenmaxreported)
                                             .format(curReport.nbOfTimesMaxSeverityReported),
                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -285,11 +278,7 @@ fun AdminScreen(
                                                   parkingViewModel.selectParking(parking)
                                                   navigationActions.navigateTo(Screen.VIEW_REPORTS)
                                                 },
-                                                onFailure = {
-                                                  Log.e(
-                                                      "AdminScreen",
-                                                      "Error fetching parking: ${it.message}")
-                                                })
+                                                onFailure = {})
                                           } else {
                                             reviewViewModel.reviewRepository.getReviewById(
                                                 curReport.objectUID,
@@ -297,11 +286,7 @@ fun AdminScreen(
                                                   reviewViewModel.selectReview(review)
                                                   navigationActions.navigateTo(Screen.VIEW_REPORTS)
                                                 },
-                                                onFailure = {
-                                                  Log.e(
-                                                      "AdminScreen",
-                                                      "Error fetching review: ${it.message}")
-                                                })
+                                                onFailure = {})
                                           }
                                         } else {
                                           Log.e("AdminScreen", "Failed to set selectedObject")

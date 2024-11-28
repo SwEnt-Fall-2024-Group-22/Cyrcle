@@ -1,6 +1,7 @@
 package com.github.se.cyrcle.ui.report
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -14,7 +15,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.report.Report
 import com.github.se.cyrcle.model.report.ReportedObjectType
@@ -33,17 +37,18 @@ fun ViewReportsScreen(
     reviewViewModel: ReviewViewModel
 ) {
   val currentObject = reportedObjectViewModel.selectedObject.value
-
+  val context = LocalContext.current
   val selType = currentObject?.objectType ?: ReportedObjectType.PARKING
+  val successDeleteText = stringResource(R.string.object_deleted)
   Scaffold(
       topBar = {
         TopAppBar(
             navigationActions,
             title =
                 if (selType == ReportedObjectType.PARKING) {
-                  "Parking Reports"
+                  stringResource(R.string.parking_reports)
                 } else {
-                  "Review Reports"
+                  stringResource(R.string.review_reports)
                 })
       },
       floatingActionButton = {
@@ -57,13 +62,14 @@ fun ViewReportsScreen(
                 } else {
                   reviewViewModel.deleteReviewById(uidOfObject)
                 }
+                Toast.makeText(context, successDeleteText, Toast.LENGTH_LONG).show()
                 navigationActions.navigateTo(Screen.ADMIN)
               }
             },
             modifier = Modifier.padding(16.dp),
-            containerColor = MaterialTheme.colorScheme.primary) {
+            containerColor = MaterialTheme.colorScheme.errorContainer) {
               Text(
-                  text = "Back",
+                  text = stringResource(R.string.delete_object),
                   color = MaterialTheme.colorScheme.onPrimary,
                   style = MaterialTheme.typography.bodyLarge)
             }
@@ -76,7 +82,7 @@ fun ViewReportsScreen(
             Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
               if (reports.isEmpty()) {
                 Text(
-                    text = "No reports available.",
+                    text = stringResource(R.string.no_reports_available),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.align(Alignment.CenterHorizontally))
               } else {
@@ -92,7 +98,7 @@ fun ViewReportsScreen(
             Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
               if (reports.isEmpty()) {
                 Text(
-                    text = "No reports available.",
+                    text = stringResource(R.string.no_reports_available),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.align(Alignment.CenterHorizontally))
               } else {
@@ -117,15 +123,18 @@ fun ReportCard(report: Report) {
           elevation = CardDefaults.cardElevation(4.dp)) {
             Column(modifier = Modifier.padding(16.dp)) {
               Text(
-                  text = "Reason: ${report.parkingReport.reason}",
+                  text = stringResource(R.string.admin_reason).format(report.parkingReport.reason),
                   style = MaterialTheme.typography.bodyMedium,
                   modifier = Modifier.padding(top = 4.dp))
               Text(
-                  text = "Reported By: ${report.parkingReport.userId}",
+                  text =
+                      stringResource(R.string.admin_reportedBy).format(report.parkingReport.userId),
                   style = MaterialTheme.typography.bodyMedium,
                   modifier = Modifier.padding(top = 4.dp))
               Text(
-                  text = "Description: ${report.parkingReport.description}",
+                  text =
+                      stringResource(R.string.admin_description)
+                          .format(report.parkingReport.description),
                   style = MaterialTheme.typography.bodyMedium,
                   modifier = Modifier.padding(top = 4.dp))
             }
@@ -137,15 +146,18 @@ fun ReportCard(report: Report) {
           elevation = CardDefaults.cardElevation(4.dp)) {
             Column(modifier = Modifier.padding(16.dp)) {
               Text(
-                  text = "Reason: ${report.reviewReport.reason}",
+                  text = stringResource(R.string.admin_reason).format(report.reviewReport.reason),
                   style = MaterialTheme.typography.bodyMedium,
                   modifier = Modifier.padding(top = 4.dp))
               Text(
-                  text = "Reported By: ${report.reviewReport.userId}",
+                  text =
+                      stringResource(R.string.admin_reportedBy).format(report.reviewReport.userId),
                   style = MaterialTheme.typography.bodyMedium,
                   modifier = Modifier.padding(top = 4.dp))
               Text(
-                  text = "Description: ${report.reviewReport.description}",
+                  text =
+                      stringResource(R.string.admin_description)
+                          .format(report.reviewReport.description),
                   style = MaterialTheme.typography.bodyMedium,
                   modifier = Modifier.padding(top = 4.dp))
             }
