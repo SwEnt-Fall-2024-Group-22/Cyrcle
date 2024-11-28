@@ -36,7 +36,8 @@
     <string name="attributes_picker_rack_type_label">Which type of rack is in the parking spot?</string>
     <string name="attributes_picker_has_surveillance_question">Is the parking spot under camera surveillance ?</string>
     <string name="attributes_picker_description_label">Description (Optional)</string>
-    <string name="parking_added_with_reward_toast">Parking spot added!\n+100 coins for contributing to the community!</string>
+    <string name="attributes_picker_parking_added_with_reward_toast">Parking spot added!\n+%d coins for contributing to the community!</string>
+
 
     <!-- Attributes Picker > BottomBarAddAttr -->
     <string name="attributes_picker_bottom_bar_cancel_button">Cancel</string>
@@ -131,7 +132,7 @@
     <string name="create_profile_error_toast">Error during authentication…</string>
     <string name="create_profile_account_already_exists">Your account already exists, please sign in</string>
     <string name="create_profile_sign_in_explanation">To complete account creation,\n please authenticate with Google to link your email.</string>
-    <string name="welcome_bonus_toast">Welcome bonus: 100 coins added to your wallet!</string>
+    <string name="create_profile_welcome_bonus_toast">Welcome bonus: %d coins added to your wallet!</string>
 
     <!-- Invite to AuthScreen Screen -->
     <string name="invite_auth_screen_to_sign_in">Go back to sign in</string>
@@ -197,7 +198,7 @@
     <string name="review_screen_submit_toast">Review added!</string>
     <string name="review_screen_update_toast">Review Updated!</string>
     <string name="review_screen_default_review_owner">default</string>
-    <string name="review_screen_reward_toast">+10 coins for submitting a review!</string>
+    <string name="review_screen_reward_toast">+%d coins for submitting a review!</string>
 
 
     <!-- TopAppBar -->
