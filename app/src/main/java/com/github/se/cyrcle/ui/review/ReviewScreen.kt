@@ -151,8 +151,7 @@ fun ReviewScreen(
                               rating = sliderToValue,
                               uid = reviewViewModel.getNewUid()))
 
-
-                        userViewModel.creditCoinsToCurrentUser(PARKING_REVIEW_REWARD)
+                      userViewModel.creditCoinsToCurrentUser(PARKING_REVIEW_REWARD)
                       // Show combined toast
                       Toast.makeText(context, combinedToastText, Toast.LENGTH_LONG).show()
                     } else {

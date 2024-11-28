@@ -30,7 +30,8 @@ fun CreateProfileScreen(navigationActions: NavigationActions, userViewModel: Use
   val defaultUser = User(UserPublic("", ""), UserDetails())
 
   val validationToastText = stringResource(R.string.create_profile_validation_toast)
-  val welcomeBonusText = stringResource(R.string.create_profile_welcome_bonus_toast, ACCOUNT_CREATION_REWARD)
+  val welcomeBonusText =
+      stringResource(R.string.create_profile_welcome_bonus_toast, ACCOUNT_CREATION_REWARD)
   val combinedToastText = "$validationToastText\n$welcomeBonusText"
 
   val errorToastText = stringResource(R.string.create_profile_error_toast)
