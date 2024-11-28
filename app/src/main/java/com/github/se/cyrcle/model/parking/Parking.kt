@@ -41,7 +41,7 @@ data class Parking(
 
 data class ParkingReport(
     val uid: String = "",
-    val reason: ParkingReportReason = ParkingReportReason.UNKNOWN,
+    val reason: ParkingReportReason = ParkingReportReason.OTHER,
     val userId: String = "",
     val parking: String = "",
     val description: String = ""
@@ -66,7 +66,7 @@ enum class ParkingReportReason(override val description: String, val severity: I
   ILLEGAL_SPOT("This Spot is in an Illegal Place", 3),
   SAFETY_CONCERN("This Spot is in an Dangerous Place", 3),
   INEXISTANT("This Spot does Not Exist", 3),
-  UNKNOWN("UNKNOWN", 1)
+  OTHER("OTHER", 1)
 }
 
 /** Enum class representing the type of rack in a parking spot. */

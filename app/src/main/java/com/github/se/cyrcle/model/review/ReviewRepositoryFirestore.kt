@@ -135,11 +135,37 @@ class ReviewRepositoryFirestore @Inject constructor(private val db: FirebaseFire
   }
 
   override fun deleteReviewById(id: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-    db.collection(collectionPath)
-        .document(id)
-        .delete()
-        .addOnSuccessListener { onSuccess() }
-        .addOnFailureListener { onFailure(it) }
+    val reviewDocRef = db.collection(collectionPath).document(id)
+    val reportsCollectionRef = reviewDocRef.collection("reports")
+
+    // Fetch and delete all reports in the subcollection
+    reportsCollectionRef
+        .get()
+        .addOnSuccessListener { querySnapshot ->
+          val batch = db.batch()
+
+          // Add delete operations for each document in the reports subcollection
+          for (document in querySnapshot.documents) {
+            batch.delete(document.reference)
+          }
+
+          // Commit the batch to delete all reports
+          batch
+              .commit()
+              .addOnSuccessListener {
+                // After deleting reports, delete the review document
+                reviewDocRef
+                    .delete()
+                    .addOnSuccessListener { onSuccess() }
+                    .addOnFailureListener { onFailure(it) }
+              }
+              .addOnFailureListener { exception ->
+                onFailure(exception) // Handle batch failure
+              }
+        }
+        .addOnFailureListener { exception ->
+          onFailure(exception) // Handle fetching reports failure
+        }
   }
 
   override fun getReportsForReview(

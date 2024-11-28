@@ -40,19 +40,6 @@ class MockReportedObjectRepository @Inject constructor() : ReportedObjectReposit
     }
   }
 
-  override fun getReportedObjectsByObjectUID(
-      objectUID: String,
-      onSuccess: (List<ReportedObject>) -> Unit,
-      onFailure: (Exception) -> Unit
-  ) {
-    val filtered = reportedObjects.filter { it.objectUID == objectUID }
-    if (filtered.isNotEmpty()) {
-      onSuccess(filtered)
-    } else {
-      onFailure(Exception("No ReportedObjects found for objectUID: $objectUID"))
-    }
-  }
-
   override fun getReportedObjectsByUser(
       userUID: String,
       onSuccess: (List<ReportedObject>) -> Unit,
@@ -76,6 +63,56 @@ class MockReportedObjectRepository @Inject constructor() : ReportedObjectReposit
       onSuccess()
     } else {
       onFailure(Exception("No ReportedObject found with reportUID: $reportUID"))
+    }
+  }
+
+  override fun getAllReportedObjects(
+      onSuccess: (List<ReportedObject>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    if (reportedObjects.isNotEmpty()) {
+      onSuccess(reportedObjects)
+    } else {
+      onFailure(Exception("No ReportedObjects found"))
+    }
+  }
+
+  override fun updateReportedObject(
+      objectUID: String,
+      updatedObject: ReportedObject,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    val index = reportedObjects.indexOfFirst { it.objectUID == objectUID }
+    if (index != -1) {
+      reportedObjects[index] = updatedObject
+      onSuccess()
+    } else {
+      onFailure(Exception("No ReportedObject found with objectUID: $objectUID"))
+    }
+  }
+
+  override fun getObjectUID(
+      objectUID: String,
+      reportedObject: ReportedObject,
+      shouldAddIfNotExist: Boolean,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    val existingObject = reportedObjects.find { it.objectUID == objectUID }
+    if (existingObject != null) {
+      // Object exists, so update it
+      updateReportedObject(
+          objectUID = objectUID,
+          updatedObject = reportedObject,
+          onSuccess = onSuccess,
+          onFailure = onFailure)
+    } else if (shouldAddIfNotExist) {
+      // Object does not exist, so add it
+      addReportedObject(
+          reportedObject = reportedObject, onSuccess = onSuccess, onFailure = onFailure)
+    } else {
+      onFailure(Exception("Document does not exist, and addition is not allowed."))
     }
   }
 }

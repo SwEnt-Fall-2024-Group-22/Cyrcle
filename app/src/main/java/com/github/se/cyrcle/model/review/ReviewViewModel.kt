@@ -37,9 +37,13 @@ class ReviewViewModel(
     reviewRepository.addReview(review, {}, { Log.e("ReviewViewModel", "Error adding review", it) })
   }
 
-  fun selectReview(review: Review) {
+  fun selectReviewAdminScreen(review: Review) {
     _selectedReview.value = review
     loadReportsForSelectedReview()
+  }
+
+  fun selectReview(review: Review) {
+    _selectedReview.value = review
   }
 
   fun getReviewById(id: String, onSuccess: (Review) -> Unit, onFailure: (Exception) -> Unit) {
@@ -134,8 +138,8 @@ class ReviewViewModel(
                       (selectedReview.nbReports >= NB_REPORTS_THRESH)),
               onSuccess = { updateLocalReviewAndMetrics(report, selectedReview) },
               onFailure = {
-                  updateLocalReviewAndMetrics(report, selectedReview)
-                  Log.e("ReviewViewModel", "Not adding to ReportedObjects")
+                updateLocalReviewAndMetrics(report, selectedReview)
+                Log.e("ReviewViewModel", "Not adding to ReportedObjects")
               })
         },
         onFailure = {

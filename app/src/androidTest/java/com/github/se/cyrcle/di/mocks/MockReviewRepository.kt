@@ -12,7 +12,11 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
   private val reviews = mutableListOf<Review>()
   private val reports =
       mutableListOf(
-          ReviewReport("1", ReviewReportReason.HARMFUL, "1", TestInstancesReview.review1.uid, ""))
+          ReviewReport(
+              "1", ReviewReportReason.IRRELEVANT, "1", TestInstancesReview.review1.uid, ""),
+          ReviewReport(
+              "2", ReviewReportReason.DEFAMATION, "2", TestInstancesReview.review1.uid, ""),
+          ReviewReport("3", ReviewReportReason.HARMFUL, "3", "nonexistent-review-id", ""))
 
   override fun getNewUid(): String {
     return (uid++).toString()
@@ -74,6 +78,26 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
       onFailure: (Exception) -> Unit
   ) {
     if (report.uid == "") onFailure(Exception("Error adding report"))
-    onSuccess(reports[0])
+    else {
+      reports.add(report)
+      onSuccess(report)
+    }
+  }
+
+  override fun getReportsForReview(
+      reviewId: String,
+      onSuccess: (List<ReviewReport>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    if (reviewId == "") {
+      onFailure(Exception("Review ID is empty"))
+    } else {
+      val filteredReports = reports.filter { it.uid == reviewId }
+      if (filteredReports.isNotEmpty()) {
+        onSuccess(filteredReports)
+      } else {
+        onFailure(Exception("No reports found for review ID: $reviewId"))
+      }
+    }
   }
 }

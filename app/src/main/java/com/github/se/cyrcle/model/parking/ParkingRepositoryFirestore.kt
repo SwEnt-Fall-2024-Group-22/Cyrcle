@@ -3,6 +3,7 @@ package com.github.se.cyrcle.model.parking
 import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.*
 import com.google.gson.reflect.TypeToken
@@ -120,11 +121,53 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    db.collection(collectionPath)
-        .document(id)
-        .delete()
-        .addOnSuccessListener { onSuccess() }
-        .addOnFailureListener { onFailure(it) }
+    val parkingDocRef = db.collection(collectionPath).document(id)
+    val reportsCollectionRef = parkingDocRef.collection("reports")
+
+    // Recursive function to delete all documents in a collection
+    fun deleteSubcollection(
+        collectionRef: CollectionReference,
+        onComplete: () -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+      collectionRef
+          .get()
+          .addOnSuccessListener { querySnapshot ->
+            val batch = db.batch()
+
+            for (document in querySnapshot.documents) {
+              batch.delete(document.reference)
+            }
+
+            batch
+                .commit()
+                .addOnSuccessListener {
+                  if (querySnapshot.size() < 500) {
+                    // Fewer than 500 documents: subcollection is cleared
+                    onComplete()
+                  } else {
+                    // More documents may exist; repeat the process
+                    deleteSubcollection(collectionRef, onComplete, onError)
+                  }
+                }
+                .addOnFailureListener(onError)
+          }
+          .addOnFailureListener(onError)
+    }
+
+    // Delete the reports subcollection first
+    deleteSubcollection(
+        reportsCollectionRef,
+        onComplete = {
+          // Once reports are deleted, delete the parking document
+          parkingDocRef
+              .delete()
+              .addOnSuccessListener { onSuccess() }
+              .addOnFailureListener { onFailure(it) }
+        },
+        onError = { exception ->
+          onFailure(exception) // Handle errors during subcollection deletion
+        })
   }
 
   override fun getReportsForParking(

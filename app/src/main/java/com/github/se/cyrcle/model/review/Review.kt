@@ -21,12 +21,12 @@ enum class ReviewReportReason(override val description: String, val severity: In
   DEFAMATION("This Review is Defamation", 2),
   MISLEADING("This Review is Misleading", 3),
   HARMFUL("This Review is Harmful", 3),
-  UNKNOWN("Unknown", 1)
+  OTHER("OTHER", 1)
 }
 
 data class ReviewReport(
     val uid: String = "",
-    val reason: ReviewReportReason = ReviewReportReason.UNKNOWN,
+    val reason: ReviewReportReason = ReviewReportReason.OTHER,
     val userId: String = "",
     val review: String = "",
     val description: String = ""

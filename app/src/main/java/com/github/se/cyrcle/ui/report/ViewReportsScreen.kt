@@ -1,7 +1,7 @@
 package com.github.se.cyrcle.ui.report
 
-import android.annotation.SuppressLint
 import android.widget.Toast
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,10 +21,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.model.parking.ParkingReport
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.report.Report
 import com.github.se.cyrcle.model.report.ReportedObjectType
 import com.github.se.cyrcle.model.report.ReportedObjectViewModel
+import com.github.se.cyrcle.model.review.ReviewReport
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
@@ -76,39 +78,34 @@ fun ViewReportsScreen(
             }
       },
       floatingActionButtonPosition = FabPosition.End) { paddingValues ->
-        // Handle Parking or Review reports rendering
         Box(modifier = Modifier.padding(paddingValues)) {
-          if (selType == ReportedObjectType.PARKING) {
-            val reports by parkingViewModel.selectedParkingReports.collectAsState()
-            Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-              if (reports.isEmpty()) {
-                Text(
-                    text = stringResource(R.string.no_reports_available),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.align(Alignment.CenterHorizontally))
-              } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(vertical = 8.dp)) {
-                      items(reports) { report -> ReportCard(Report.Parking(report)) }
-                    }
+          val selParkRep by parkingViewModel.selectedParkingReports.collectAsState()
+          val selRevRep by parkingViewModel.selectedParkingReports.collectAsState()
+          val reports =
+              when (selType) {
+                ReportedObjectType.PARKING -> selParkRep
+                ReportedObjectType.REVIEW -> selRevRep
               }
-            }
-          } else {
-            val reports by reviewViewModel.selectedReviewReports.collectAsState()
-            Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-              if (reports.isEmpty()) {
-                Text(
-                    text = stringResource(R.string.no_reports_available),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.align(Alignment.CenterHorizontally))
-              } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(vertical = 8.dp)) {
-                      items(reports) { report -> ReportCard(Report.Review(report)) }
+
+          Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+            if (reports.isEmpty()) {
+              Text(
+                  text = stringResource(R.string.no_reports_available),
+                  style = MaterialTheme.typography.bodyMedium,
+                  modifier = Modifier.align(Alignment.CenterHorizontally))
+            } else {
+              LazyColumn(
+                  modifier = Modifier.fillMaxSize(),
+                  contentPadding = PaddingValues(vertical = 8.dp)) {
+                    items(reports) { report ->
+                      val reportType =
+                          when (selType) {
+                            ReportedObjectType.PARKING -> Report.Parking(report as ParkingReport)
+                            ReportedObjectType.REVIEW -> Report.Review(report as ReviewReport)
+                          }
+                      ReportCard(reportType)
                     }
-              }
+                  }
             }
           }
         }
@@ -117,52 +114,35 @@ fun ViewReportsScreen(
 
 @Composable
 fun ReportCard(report: Report) {
-  when (report) {
-    is Report.Parking -> {
-      Card(
-          modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-          elevation = CardDefaults.cardElevation(4.dp)) {
-            Column(modifier = Modifier.padding(16.dp)) {
-              Text(
-                  text = stringResource(R.string.admin_reason).format(report.parkingReport.reason),
-                  style = MaterialTheme.typography.bodyMedium,
-                  modifier = Modifier.padding(top = 4.dp))
-              Text(
-                  text =
-                      stringResource(R.string.admin_reportedBy).format(report.parkingReport.userId),
-                  style = MaterialTheme.typography.bodyMedium,
-                  modifier = Modifier.padding(top = 4.dp))
-              Text(
-                  text =
-                      stringResource(R.string.admin_description)
-                          .format(report.parkingReport.description),
-                  style = MaterialTheme.typography.bodyMedium,
-                  modifier = Modifier.padding(top = 4.dp))
-            }
-          }
-    }
-    is Report.Review -> {
-      Card(
-          modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-          elevation = CardDefaults.cardElevation(4.dp)) {
-            Column(modifier = Modifier.padding(16.dp)) {
-              Text(
-                  text = stringResource(R.string.admin_reason).format(report.reviewReport.reason),
-                  style = MaterialTheme.typography.bodyMedium,
-                  modifier = Modifier.padding(top = 4.dp))
-              Text(
-                  text =
-                      stringResource(R.string.admin_reportedBy).format(report.reviewReport.userId),
-                  style = MaterialTheme.typography.bodyMedium,
-                  modifier = Modifier.padding(top = 4.dp))
-              Text(
-                  text =
-                      stringResource(R.string.admin_description)
-                          .format(report.reviewReport.description),
-                  style = MaterialTheme.typography.bodyMedium,
-                  modifier = Modifier.padding(top = 4.dp))
-            }
-          }
-    }
-  }
+  val (reason, userId, description) =
+      when (report) {
+        is Report.Parking ->
+            Triple(
+                report.parkingReport.reason.description,
+                report.parkingReport.userId,
+                report.parkingReport.description)
+        is Report.Review ->
+            Triple(
+                report.reviewReport.reason.description,
+                report.reviewReport.userId,
+                report.reviewReport.description)
+      }
+
+  Card(
+      modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+      elevation = CardDefaults.cardElevation(4.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
+          ReportText(label = R.string.admin_reason, value = reason)
+          ReportText(label = R.string.admin_reportedBy, value = userId)
+          ReportText(label = R.string.admin_description, value = description)
+        }
+      }
+}
+
+@Composable
+fun ReportText(@StringRes label: Int, value: String) {
+  Text(
+      text = stringResource(label).format(value),
+      style = MaterialTheme.typography.bodyMedium,
+      modifier = Modifier.padding(top = 4.dp))
 }

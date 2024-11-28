@@ -69,6 +69,7 @@ fun ReviewReportScreen(
   val userId = userViewModel.currentUser.value?.public?.userId!!
   val context = LocalContext.current
 
+  val strResToast = stringResource(R.string.report_added)
   fun onSubmit() {
     val report =
         ReviewReport(
@@ -78,7 +79,7 @@ fun ReviewReportScreen(
             review = reviewId!!,
             description = reportDescription.value)
     reviewViewModel.addReport(report, userViewModel.currentUser.value!!)
-    Toast.makeText(context, "Report added", Toast.LENGTH_SHORT).show()
+    Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
     navigationActions.goBack()
   }
 

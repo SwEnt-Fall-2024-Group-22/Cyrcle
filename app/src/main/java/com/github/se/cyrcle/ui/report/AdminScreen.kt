@@ -283,7 +283,7 @@ fun AdminScreen(
                                             reviewViewModel.getReviewById(
                                                 curReport.objectUID,
                                                 onSuccess = { review ->
-                                                  reviewViewModel.selectReview(review)
+                                                  reviewViewModel.selectReviewAdminScreen(review)
                                                   navigationActions.navigateTo(Screen.VIEW_REPORTS)
                                                 },
                                                 onFailure = {})
