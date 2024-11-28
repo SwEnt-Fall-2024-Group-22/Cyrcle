@@ -237,7 +237,7 @@ fun AllReviewsScreen(
                 items(items = sortedReviews) { curReview ->
                   val index = sortedReviews.indexOf(curReview)
                   val isExpanded = selectedCardIndex == index
-
+                  val signInToReport = stringResource(R.string.sign_in_to_report_review)
                   ReviewCard(
                       review = curReview,
                       index = index,
@@ -247,8 +247,13 @@ fun AllReviewsScreen(
                           mapOf(
                               stringResource(R.string.all_review_report_review_option) to
                                   {
-                                    reviewViewModel.selectReview(curReview)
-                                    navigationActions.navigateTo(Screen.REVIEW_REPORT)
+                                    if (userSignedIn) {
+                                      reviewViewModel.selectReview(curReview)
+                                      navigationActions.navigateTo(Screen.REVIEW_REPORT)
+                                    } else {
+                                      Toast.makeText(context, signInToReport, Toast.LENGTH_SHORT)
+                                          .show()
+                                    }
                                   }),
                       userViewModel = userViewModel)
                 }
