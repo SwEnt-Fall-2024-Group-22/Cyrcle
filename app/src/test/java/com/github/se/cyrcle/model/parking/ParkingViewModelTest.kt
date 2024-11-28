@@ -155,4 +155,83 @@ class ParkingViewModelTest {
     emptyParkingViewModel.uploadImage("localPath/image.jpg", context, {})
     verify(imageRepository, never()).uploadImage(any(), any(), any(), any(), any())
   }
+
+  @Test
+  fun filterOptionsParkingsTest() {
+    assertFull(protection = true, rackTypes = true, capacities = true)
+
+    parkingViewModel.toggleProtection(ParkingProtection.COVERED)
+    assert(
+        parkingViewModel.selectedProtection.value ==
+            (ParkingProtection.entries.toSet() - ParkingProtection.COVERED))
+    assertFull(protection = false, rackTypes = true, capacities = true)
+
+    parkingViewModel.toggleRackType(ParkingRackType.GRID)
+    assert(
+        parkingViewModel.selectedRackTypes.value ==
+            (ParkingRackType.entries.toSet() - ParkingRackType.GRID))
+    assertFull(protection = false, rackTypes = false, capacities = true)
+
+    parkingViewModel.toggleCapacity(ParkingCapacity.SMALL)
+    assert(
+        parkingViewModel.selectedCapacities.value ==
+            (ParkingCapacity.entries.toSet() - ParkingCapacity.SMALL))
+    assertFull(protection = false, rackTypes = false, capacities = false)
+
+    parkingViewModel.clearCapacity()
+    assertEmpty(protection = false, rackTypes = false, capacities = true)
+
+    parkingViewModel.clearProtection()
+    assertEmpty(protection = true, rackTypes = false, capacities = true)
+
+    parkingViewModel.clearRackType()
+    assertEmpty(protection = true, rackTypes = true, capacities = true)
+
+    parkingViewModel.toggleProtection(ParkingProtection.COVERED)
+    assert(parkingViewModel.selectedProtection.value == setOf(ParkingProtection.COVERED))
+    assertEmpty(protection = false, rackTypes = true, capacities = true)
+
+    parkingViewModel.toggleRackType(ParkingRackType.GRID)
+    assert(parkingViewModel.selectedRackTypes.value == setOf(ParkingRackType.GRID))
+    assertEmpty(protection = false, rackTypes = false, capacities = true)
+
+    parkingViewModel.toggleCapacity(ParkingCapacity.SMALL)
+    assert(parkingViewModel.selectedCapacities.value == setOf(ParkingCapacity.SMALL))
+    assertEmpty(protection = false, rackTypes = false, capacities = false)
+
+    parkingViewModel.selectAllProtection()
+    assertFull(protection = true, rackTypes = false, capacities = false)
+
+    parkingViewModel.selectAllRackTypes()
+    assertFull(protection = true, rackTypes = true, capacities = false)
+
+    parkingViewModel.selectAllCapacities()
+    assertFull(protection = true, rackTypes = true, capacities = true)
+
+    parkingViewModel.clearAllFilterOptions()
+    assertEmpty(protection = true, rackTypes = true, capacities = true)
+
+    parkingViewModel.selectAllFilterOptions()
+    assertFull(protection = true, rackTypes = true, capacities = true)
+  }
+
+  // Helper functions to assert the state of the filter options
+  private fun assertFull(protection: Boolean, rackTypes: Boolean, capacities: Boolean) {
+    if (protection) {
+      assert(parkingViewModel.selectedProtection.value == ParkingProtection.entries.toSet())
+    }
+    if (rackTypes) {
+      assert(parkingViewModel.selectedRackTypes.value == ParkingRackType.entries.toSet())
+    }
+    if (capacities) {
+      assert(parkingViewModel.selectedCapacities.value == ParkingCapacity.entries.toSet())
+    }
+  }
+
+  // Helper functions to assert the state of the filter options
+  private fun assertEmpty(protection: Boolean, rackTypes: Boolean, capacities: Boolean) {
+    if (protection) assert(parkingViewModel.selectedProtection.value.isEmpty())
+    if (rackTypes) assert(parkingViewModel.selectedRackTypes.value.isEmpty())
+    if (capacities) assert(parkingViewModel.selectedCapacities.value.isEmpty())
+  }
 }

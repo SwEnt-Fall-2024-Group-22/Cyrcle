@@ -389,6 +389,16 @@ class ListScreenTest {
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("ShowFiltersButton"))
 
+    // Assert that clear all and apply all buttons are displayed and behave as expected
+    composeTestRule.onNodeWithTag("ClearAllFiltersButton").assertIsDisplayed().performClick()
+    assert(parkingViewModel.selectedCapacities.value.isEmpty())
+    assert(parkingViewModel.selectedProtection.value.isEmpty())
+    assert(parkingViewModel.selectedRackTypes.value.isEmpty())
+    composeTestRule.onNodeWithTag("ApplyAllFiltersButton").assertIsDisplayed().performClick()
+    assert(parkingViewModel.selectedCapacities.value.isNotEmpty())
+    assert(parkingViewModel.selectedProtection.value.isNotEmpty())
+    assert(parkingViewModel.selectedRackTypes.value.isNotEmpty())
+
     // Act: Click to hide filters
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("ShowFiltersButton"))
@@ -417,7 +427,15 @@ class ListScreenTest {
         .assertCountEquals(ParkingProtection.entries.size)
         .assertAll(hasClickAction())
     composeTestRule.onAllNodesWithTag("ProtectionFilterItem").onFirst().performClick()
-    assert(parkingViewModel.selectedProtection.value.contains(ParkingProtection.entries[0]))
+    assert(
+        parkingViewModel.selectedProtection.value.containsAll(
+            ParkingProtection.entries.toSet() - ParkingProtection.entries[0]))
+
+    // Assert that clear and apply buttons work
+    composeTestRule.onNodeWithTag("ClearProtectionButton").assertIsDisplayed().performClick()
+    assert(parkingViewModel.selectedProtection.value.isEmpty())
+    composeTestRule.onNodeWithTag("ApplyProtectionButton").assertIsDisplayed().performClick()
+    assert(parkingViewModel.selectedProtection.value.isNotEmpty())
   }
 
   @Test
@@ -441,7 +459,15 @@ class ListScreenTest {
     composeTestRule.onAllNodesWithTag("RackTypeFilterItem").onFirst().performClick()
 
     // Assert that the selected rack type is updated in the ParkingViewModel
-    assert(parkingViewModel.selectedRackTypes.value.contains(ParkingRackType.entries[0]))
+    assert(
+        parkingViewModel.selectedRackTypes.value.containsAll(
+            ParkingRackType.entries.toSet() - ParkingRackType.entries[0]))
+
+    // Assert that clear and apply buttons work
+    composeTestRule.onNodeWithTag("ClearRack TypeButton").assertIsDisplayed().performClick()
+    assert(parkingViewModel.selectedRackTypes.value.isEmpty())
+    composeTestRule.onNodeWithTag("ApplyRack TypeButton").assertIsDisplayed().performClick()
+    assert(parkingViewModel.selectedRackTypes.value.isNotEmpty())
   }
 
   @Test
@@ -461,7 +487,15 @@ class ListScreenTest {
     composeTestRule.onNodeWithTag("CapacityFilter").assertIsDisplayed()
     composeTestRule.onAllNodesWithTag("CapacityFilterItem").assertAll(hasClickAction())
     composeTestRule.onAllNodesWithTag("CapacityFilterItem").onFirst().performClick()
-    assert(parkingViewModel.selectedCapacities.value.contains(ParkingCapacity.entries[0]))
+    assert(
+        parkingViewModel.selectedCapacities.value.containsAll(
+            ParkingCapacity.entries.toSet() - ParkingCapacity.entries[0]))
+
+    // Assert that clear and apply buttons work
+    composeTestRule.onNodeWithTag("ClearCapacityButton").assertIsDisplayed().performClick()
+    assert(parkingViewModel.selectedCapacities.value.isEmpty())
+    composeTestRule.onNodeWithTag("ApplyCapacityButton").assertIsDisplayed().performClick()
+    assert(parkingViewModel.selectedCapacities.value.isNotEmpty())
   }
 
   @Test

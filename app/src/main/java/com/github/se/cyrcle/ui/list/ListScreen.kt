@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
@@ -54,6 +55,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
@@ -174,12 +176,12 @@ fun FilterHeader(parkingViewModel: ParkingViewModel) {
 
   Column(modifier = Modifier.padding(16.dp)) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically) {
           Text(
               text = stringResource(R.string.all_parkings_radius, radius.value.toInt()),
-              modifier = Modifier.weight(1f),
+              modifier = Modifier.weight(1f).padding(end = 8.dp),
               style = MaterialTheme.typography.headlineMedium,
               color = MaterialTheme.colorScheme.onSurface)
 
@@ -191,29 +193,51 @@ fun FilterHeader(parkingViewModel: ParkingViewModel) {
         }
 
     if (showFilters) {
+      Row(
+          modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+          horizontalArrangement = Arrangement.SpaceBetween) {
+            ClickableText(
+                text = AnnotatedString(stringResource(R.string.list_screen_clear_all)),
+                onClick = { parkingViewModel.clearAllFilterOptions() },
+                style =
+                    MaterialTheme.typography.labelMedium.copy(
+                        color = MaterialTheme.colorScheme.primary),
+                modifier = Modifier.padding(horizontal = 8.dp).testTag("ClearAllFiltersButton"))
+            ClickableText(
+                text = AnnotatedString(stringResource(R.string.list_screen_apply_all)),
+                onClick = { parkingViewModel.selectAllFilterOptions() },
+                style =
+                    MaterialTheme.typography.labelMedium.copy(
+                        color = MaterialTheme.colorScheme.primary),
+                modifier = Modifier.padding(horizontal = 8.dp).testTag("ApplyAllFiltersButton"))
+          }
+
       // Protection filter
       FilterSection(
           title = stringResource(R.string.list_screen_protection),
           expandedState = showProtectionOptions,
-      ) {
-        LazyRow(
-            modifier = Modifier.fillMaxWidth().testTag("ProtectionFilter"),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-              items(ParkingProtection.entries.toTypedArray()) { option ->
-                ToggleButton(
-                    text = option.description,
-                    onClick = { parkingViewModel.toggleProtection(option) },
-                    value = selectedProtection.contains(option),
-                    modifier = Modifier.padding(2.dp),
-                    testTag = "ProtectionFilterItem")
-              }
-            }
-      }
+          onReset = { parkingViewModel.clearProtection() },
+          onApply = { parkingViewModel.selectAllProtection() }) {
+            LazyRow(
+                modifier = Modifier.fillMaxWidth().testTag("ProtectionFilter"),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                  items(ParkingProtection.entries.toTypedArray()) { option ->
+                    ToggleButton(
+                        text = option.description,
+                        onClick = { parkingViewModel.toggleProtection(option) },
+                        value = selectedProtection.contains(option),
+                        modifier = Modifier.padding(2.dp),
+                        testTag = "ProtectionFilterItem")
+                  }
+                }
+          }
 
       // Rack type filter
       FilterSection(
           title = stringResource(R.string.list_screen_rack_type),
-          expandedState = showRackTypeOptions) {
+          expandedState = showRackTypeOptions,
+          onReset = { parkingViewModel.clearRackType() },
+          onApply = { parkingViewModel.selectAllRackTypes() }) {
             LazyRow(
                 modifier = Modifier.fillMaxWidth().testTag("RackTypeFilter"),
                 horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -231,7 +255,9 @@ fun FilterHeader(parkingViewModel: ParkingViewModel) {
       // Capacity filter
       FilterSection(
           title = stringResource(R.string.list_screen_capacity),
-          expandedState = showCapacityOptions) {
+          expandedState = showCapacityOptions,
+          onReset = { parkingViewModel.clearCapacity() },
+          onApply = { parkingViewModel.selectAllCapacities() }) {
             LazyRow(
                 modifier = Modifier.fillMaxWidth().testTag("CapacityFilter"),
                 horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -248,14 +274,14 @@ fun FilterHeader(parkingViewModel: ParkingViewModel) {
 
       // CCTV filter with checkbox
       Row(
-          modifier = Modifier.fillMaxWidth().padding(8.dp),
+          modifier = Modifier.fillMaxWidth().padding(12.dp),
           verticalAlignment = Alignment.CenterVertically) {
             Checkbox(
                 checked = onlyWithCCTV,
                 onCheckedChange = { parkingViewModel.setOnlyWithCCTV(it) },
                 modifier = Modifier.testTag("CCTVCheckbox"),
                 colors = getCheckBoxColors(ColorLevel.PRIMARY))
-            Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = stringResource(R.string.list_screen_display_only_cctv),
                 style = MaterialTheme.typography.bodyMedium,
@@ -269,26 +295,47 @@ fun FilterHeader(parkingViewModel: ParkingViewModel) {
 fun FilterSection(
     title: String,
     expandedState: MutableState<Boolean>,
+    onReset: () -> Unit,
+    onApply: () -> Unit,
     content: @Composable () -> Unit
 ) {
   Column(
       modifier =
-          Modifier.padding(8.dp)
+          Modifier.padding(vertical = 8.dp)
               .border(1.dp, Color.Gray, shape = MaterialTheme.shapes.medium)
               .background(
                   MaterialTheme.colorScheme.surfaceBright, shape = MaterialTheme.shapes.medium)
               .padding(8.dp)) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            modifier =
-                Modifier.clickable(onClick = { expandedState.value = !expandedState.value })
-                    .padding(8.dp)
-                    .fillMaxWidth(),
-            testTag = title)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically) {
+              ClickableText(
+                  text = AnnotatedString(stringResource(R.string.list_screen_clear)),
+                  onClick = { onReset() },
+                  style =
+                      MaterialTheme.typography.labelSmall.copy(
+                          color = MaterialTheme.colorScheme.primary),
+                  modifier =
+                      Modifier.padding(horizontal = 4.dp).testTag("Clear" + title + "Button"))
+              Text(
+                  text = title,
+                  style = MaterialTheme.typography.titleMedium,
+                  modifier =
+                      Modifier.clickable(onClick = { expandedState.value = !expandedState.value })
+                          .padding(6.dp),
+                  testTag = title)
+              ClickableText(
+                  text = AnnotatedString(stringResource(R.string.list_screen_apply)),
+                  onClick = { onApply() },
+                  style =
+                      MaterialTheme.typography.labelSmall.copy(
+                          color = MaterialTheme.colorScheme.primary),
+                  modifier = Modifier.padding(horizontal = 4.dp).testTag("Apply${title}Button"))
+            }
 
         if (expandedState.value) {
-          content()
+          Box(modifier = Modifier.padding(top = 8.dp)) { content() }
         }
       }
 }

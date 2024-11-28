@@ -196,7 +196,7 @@ class ParkingViewModel(
   // ================== Parkings ==================
 
   // ================== Filtering ==================
-  private val _selectedProtection = MutableStateFlow<Set<ParkingProtection>>(emptySet())
+  private val _selectedProtection = MutableStateFlow(ParkingProtection.entries.toSet())
   val selectedProtection: StateFlow<Set<ParkingProtection>> = _selectedProtection
 
   /**
@@ -209,7 +209,19 @@ class ParkingViewModel(
     updateClosestParkings(0)
   }
 
-  private val _selectedRackTypes = MutableStateFlow<Set<ParkingRackType>>(emptySet())
+  /** Clear the protection filter and update the list of closest parkings. */
+  fun clearProtection() {
+    _selectedProtection.value = emptySet()
+    updateClosestParkings(0)
+  }
+
+  /** Select all the protection options and update the list of closest parkings. */
+  fun selectAllProtection() {
+    _selectedProtection.value = ParkingProtection.entries.toSet()
+    updateClosestParkings(0)
+  }
+
+  private val _selectedRackTypes = MutableStateFlow(ParkingRackType.entries.toSet())
   val selectedRackTypes: StateFlow<Set<ParkingRackType>> = _selectedRackTypes
 
   /**
@@ -222,7 +234,19 @@ class ParkingViewModel(
     updateClosestParkings(0)
   }
 
-  private val _selectedCapacities = MutableStateFlow<Set<ParkingCapacity>>(emptySet())
+  /** Clear the rack type filter and update the list of closest parkings. */
+  fun clearRackType() {
+    _selectedRackTypes.value = emptySet()
+    updateClosestParkings(0)
+  }
+
+  /** Select all the rack type options and update the list of closest parkings. */
+  fun selectAllRackTypes() {
+    _selectedRackTypes.value = ParkingRackType.entries.toSet()
+    updateClosestParkings(0)
+  }
+
+  private val _selectedCapacities = MutableStateFlow(ParkingCapacity.entries.toSet())
   val selectedCapacities: StateFlow<Set<ParkingCapacity>> = _selectedCapacities
 
   /**
@@ -232,6 +256,18 @@ class ParkingViewModel(
    */
   fun toggleCapacity(capacity: ParkingCapacity) {
     _selectedCapacities.update { toggleSelection(it, capacity) }
+    updateClosestParkings(0)
+  }
+
+  /** Clear the capacity filter and update the list of closest parkings. */
+  fun clearCapacity() {
+    _selectedCapacities.value = emptySet()
+    updateClosestParkings(0)
+  }
+
+  /** Select all the capacity options and update the list of closest parkings. */
+  fun selectAllCapacities() {
+    _selectedCapacities.value = ParkingCapacity.entries.toSet()
     updateClosestParkings(0)
   }
 
@@ -247,6 +283,30 @@ class ParkingViewModel(
     _onlyWithCCTV.value = onlyWithCCTV
     updateClosestParkings(0)
   }
+
+  /**
+   * Select all the filter options and update the list of closest parkings. In other words, this
+   * will display all the parkings without any filter. This function does not affect the
+   * onlyWithCCTV filter
+   */
+  fun selectAllFilterOptions() {
+    _selectedProtection.value = ParkingProtection.entries.toSet()
+    _selectedRackTypes.value = ParkingRackType.entries.toSet()
+    _selectedCapacities.value = ParkingCapacity.entries.toSet()
+    updateClosestParkings(0)
+  }
+
+  /**
+   * Deselect all the filter options and update the list of closest parkings. In other words, this
+   * will display no parkings. This function does not affect the onlyWithCCTV filter
+   */
+  fun clearAllFilterOptions() {
+    _selectedProtection.value = emptySet()
+    _selectedRackTypes.value = emptySet()
+    _selectedCapacities.value = emptySet()
+    updateClosestParkings(0)
+  }
+
   // ================== Filtering ==================
 
   // ================== Pins ==================
@@ -285,21 +345,17 @@ class ParkingViewModel(
     _closestParkings.value =
         _rectParkings.value
             .filter { parking ->
-              TurfMeasurement.distance(
-                  _circleCenter.value!!, parking.location.center, TurfConstants.UNIT_METERS) <=
-                  _radius.value
+              val distance =
+                  TurfMeasurement.distance(
+                      _circleCenter.value!!, parking.location.center, TurfConstants.UNIT_METERS)
+              distance <= _radius.value &&
+                  _selectedProtection.value.contains(parking.protection) &&
+                  _selectedRackTypes.value.contains(parking.rackType) &&
+                  _selectedCapacities.value.contains(parking.capacity) &&
+                  (!_onlyWithCCTV.value || parking.hasSecurity)
             }
             .sortedBy { parking ->
               TurfMeasurement.distance(_circleCenter.value!!, parking.location.center)
-            }
-            .filter { parking ->
-              (_selectedProtection.value.isEmpty() ||
-                  _selectedProtection.value.contains(parking.protection)) &&
-                  (selectedRackTypes.value.isEmpty() ||
-                      _selectedRackTypes.value.contains(parking.rackType)) &&
-                  (_selectedCapacities.value.isEmpty() ||
-                      _selectedCapacities.value.contains(parking.capacity)) &&
-                  (!_onlyWithCCTV.value || parking.hasSecurity)
             }
     if (_closestParkings.value.size < MIN_NB_PARKINGS || _radius.value == MAX_RADIUS) {
       incrementRadius()
