@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.report
 
-import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
@@ -171,7 +170,6 @@ fun SortingOptionSelector(
   }
 }
 
-@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun AdminScreen(
     navigationActions: NavigationActions,
@@ -185,6 +183,7 @@ fun AdminScreen(
   var selectedCardIndex by remember { mutableStateOf(-1) }
   val context = LocalContext.current
   var selectedSortingOption by remember { mutableStateOf(ReportSortingOption.Parking) }
+
   // Filter and sort reports based on the selected sorting option
   val sortedReports =
       remember(reportsList, selectedSortingOption) {
@@ -195,22 +194,21 @@ fun AdminScreen(
               ReportSortingOption.Review ->
                   reportsList.filter { it.objectType == ReportedObjectType.REVIEW }
             }
-        // Perform sorting on the filtered reports
         when (selectedSortingOption) {
-          ReportSortingOption.Parking ->
-              filteredReports.sortedByDescending { it.nbOfTimesReported } // Example sorting
-          ReportSortingOption.Review ->
-              filteredReports.sortedByDescending { it.nbOfTimesReported } // Example sorting
+          ReportSortingOption.Parking -> filteredReports.sortedByDescending { it.nbOfTimesReported }
+          ReportSortingOption.Review -> filteredReports.sortedByDescending { it.nbOfTimesReported }
         }
       }
 
   Scaffold(
       topBar = {
         TopAppBar(
-            navigationActions,
-            stringResource(R.string.admin_topappbar_title).format(selectedSortingOption.name))
+            navigationActions = navigationActions,
+            title =
+                stringResource(R.string.admin_topappbar_title).format(selectedSortingOption.name),
+        )
       },
-      modifier = Modifier.testTag("AllReviewsScreen")) { innerPadding ->
+      modifier = Modifier.testTag("AdminScreen")) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
           // Header Section
           FilterHeader(
@@ -221,7 +219,7 @@ fun AdminScreen(
 
           // Scrollable Review Cards
           LazyColumn(
-              modifier = Modifier.weight(1f).padding(horizontal = 16.dp).testTag("ReviewList"),
+              modifier = Modifier.weight(1f).padding(horizontal = 16.dp).testTag("ReportList"),
               contentPadding = PaddingValues(bottom = 16.dp)) {
                 items(items = sortedReports) { curReport ->
                   val index = sortedReports.indexOf(curReport)
@@ -253,15 +251,18 @@ fun AdminScreen(
                                         stringResource(R.string.admin_timesbeenmaxreported)
                                             .format(curReport.nbOfTimesMaxSeverityReported),
                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    style = MaterialTheme.typography.bodySmall)
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.testTag("TimesMaxSeverityReported$index"))
                                 Text(
                                     text =
                                         stringResource(R.string.admin_timesbeenreported)
                                             .format(curReport.nbOfTimesReported),
                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    style = MaterialTheme.typography.bodySmall)
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.testTag("TimesReported$index"))
 
                                 // Conditionally show the Report Review button only when the card is
+                                // expanded
                                 if (isExpanded) {
                                   FloatingActionButton(
                                       onClick = {
@@ -293,7 +294,8 @@ fun AdminScreen(
                                         }
                                       },
                                       containerColor = MaterialTheme.colorScheme.errorContainer,
-                                      shape = MaterialTheme.shapes.medium) {
+                                      shape = MaterialTheme.shapes.medium,
+                                      modifier = Modifier.testTag("CheckReportsButton$index")) {
                                         Text(
                                             text = stringResource(R.string.check_reports),
                                             color = MaterialTheme.colorScheme.onErrorContainer,

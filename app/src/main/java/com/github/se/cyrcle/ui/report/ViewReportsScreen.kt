@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
@@ -43,6 +44,7 @@ fun ViewReportsScreen(
   val context = LocalContext.current
   val selType = currentObject?.objectType ?: ReportedObjectType.PARKING
   val successDeleteText = stringResource(R.string.object_deleted)
+
   Scaffold(
       topBar = {
         TopAppBar(
@@ -69,7 +71,7 @@ fun ViewReportsScreen(
                 navigationActions.navigateTo(Screen.ADMIN)
               }
             },
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(16.dp).testTag("DeleteFloatingActionButton"),
             containerColor = MaterialTheme.colorScheme.errorContainer) {
               Text(
                   text = stringResource(R.string.delete_object),
@@ -80,22 +82,22 @@ fun ViewReportsScreen(
       floatingActionButtonPosition = FabPosition.End) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
           val selParkRep by parkingViewModel.selectedParkingReports.collectAsState()
-          val selRevRep by parkingViewModel.selectedParkingReports.collectAsState()
+          val selRevRep by reviewViewModel.selectedReviewReports.collectAsState()
           val reports =
               when (selType) {
                 ReportedObjectType.PARKING -> selParkRep
                 ReportedObjectType.REVIEW -> selRevRep
               }
 
-          Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+          Column(modifier = Modifier.fillMaxSize().padding(16.dp).testTag("ReportsContent")) {
             if (reports.isEmpty()) {
               Text(
                   text = stringResource(R.string.no_reports_available),
                   style = MaterialTheme.typography.bodyMedium,
-                  modifier = Modifier.align(Alignment.CenterHorizontally))
+                  modifier = Modifier.align(Alignment.CenterHorizontally).testTag("NoReportsText"))
             } else {
               LazyColumn(
-                  modifier = Modifier.fillMaxSize(),
+                  modifier = Modifier.fillMaxSize().testTag("ReportsList"),
                   contentPadding = PaddingValues(vertical = 8.dp)) {
                     items(reports) { report ->
                       val reportType =
@@ -129,7 +131,7 @@ fun ReportCard(report: Report) {
       }
 
   Card(
-      modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+      modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).testTag("ReportCard"),
       elevation = CardDefaults.cardElevation(4.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
           ReportText(label = R.string.admin_reason, value = reason)
@@ -144,5 +146,5 @@ fun ReportText(@StringRes label: Int, value: String) {
   Text(
       text = stringResource(label).format(value),
       style = MaterialTheme.typography.bodyMedium,
-      modifier = Modifier.padding(top = 4.dp))
+      modifier = Modifier.padding(top = 4.dp).testTag("ReportText_$label"))
 }

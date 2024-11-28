@@ -2,26 +2,33 @@ package com.github.se.cyrcle.ui.report
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
-import com.github.se.cyrcle.di.mocks.*
+import com.github.se.cyrcle.di.mocks.MockImageRepository
+import com.github.se.cyrcle.di.mocks.MockParkingRepository
+import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
+import com.github.se.cyrcle.di.mocks.MockReviewRepository
+import com.github.se.cyrcle.model.parking.ParkingReport
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.model.report.ReportedObject
 import com.github.se.cyrcle.model.report.ReportedObjectType
 import com.github.se.cyrcle.model.report.ReportedObjectViewModel
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.github.se.cyrcle.ui.navigation.Screen
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
 
-class AdminScreenTest {
+class ViewReportsScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var navigationActions: NavigationActions
+  private lateinit var reportedObjectViewModel: ReportedObjectViewModel
   private lateinit var parkingViewModel: ParkingViewModel
   private lateinit var reviewViewModel: ReviewViewModel
-  private lateinit var reportedObjectViewModel: ReportedObjectViewModel
 
   @Before
   fun setUp() {
@@ -58,89 +65,59 @@ class AdminScreenTest {
   }
 
   @Test
-  fun testAdminScreenRendersCorrectly() {
+  fun testDisplaysNoReportsWhenListIsEmpty() {
     composeTestRule.setContent {
-      AdminScreen(
+      ViewReportsScreen(
           navigationActions = navigationActions,
           reportedObjectViewModel = reportedObjectViewModel,
           parkingViewModel = parkingViewModel,
           reviewViewModel = reviewViewModel)
     }
 
-    // Check if the top bar is displayed
-    composeTestRule.onNodeWithTag("TopAppBar").assertExists()
-
-    // Check if the report list is displayed
-    composeTestRule.onNodeWithTag("ReportList").assertExists()
+    composeTestRule.onNodeWithTag("NoReportsText").assertExists()
   }
 
   @Test
-  fun testReportCardDisplaysCorrectly() {
+  fun testDisplaysReportsListWhenNotEmpty() {
 
-    // Act: Set the content
     composeTestRule.setContent {
-      AdminScreen(
+      ViewReportsScreen(
           navigationActions = navigationActions,
           reportedObjectViewModel = reportedObjectViewModel,
           parkingViewModel = parkingViewModel,
           reviewViewModel = reviewViewModel)
     }
 
-    // Assert: Check if the text is displayed correctly
-    composeTestRule
-        .onNodeWithTag("TimesMaxSeverityReported0", useUnmergedTree = true)
-        .assertTextContains("Has been reported at max level 2 times")
+    val parkingReport = ParkingReport()
+    parkingViewModel.selectParking(TestInstancesParking.parking1)
+    composeTestRule.onRoot(useUnmergedTree = true).printToLog("ViewReportsScreen")
 
-    composeTestRule
-        .onNodeWithTag("TimesReported0", useUnmergedTree = true)
-        .assertTextContains("Has been reported 5 times")
+    composeTestRule.onNodeWithTag("ReportsList").assertExists()
+    composeTestRule.onNodeWithTag("ReportCard").assertExists()
   }
 
   @Test
-  fun testFilterSectionTogglesCorrectly() {
+  fun testDeleteFloatingActionButtonNavigatesBack() {
+    val mockReport =
+        ReportedObject(
+            objectUID = "mockUID",
+            reportUID = "mockReportUID",
+            userUID = "mockUserUID",
+            nbOfTimesReported = 3,
+            nbOfTimesMaxSeverityReported = 1,
+            objectType = ReportedObjectType.PARKING)
+    reportedObjectViewModel.selectObject(mockReport)
+
     composeTestRule.setContent {
-      AdminScreen(
+      ViewReportsScreen(
           navigationActions = navigationActions,
           reportedObjectViewModel = reportedObjectViewModel,
           parkingViewModel = parkingViewModel,
           reviewViewModel = reviewViewModel)
     }
 
-    // Verify initial state: Filter button exists and filters are hidden
-    composeTestRule.onNodeWithTag("ShowFiltersButton").assertExists()
-    composeTestRule.onNodeWithTag("ViewReports").assertDoesNotExist() // Ensure filters are hidden
-  }
+    composeTestRule.onNodeWithTag("DeleteFloatingActionButton").performClick()
 
-  @Test
-  fun testSortingOptionSelectorWorksCorrectly() {
-    composeTestRule.setContent {
-      AdminScreen(
-          navigationActions = navigationActions,
-          reportedObjectViewModel = reportedObjectViewModel,
-          parkingViewModel = parkingViewModel,
-          reviewViewModel = reviewViewModel)
-    }
-
-    // Click on sort by Parking
-    composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
-    composeTestRule.onNodeWithText("Get Reported Parkings (Most Reported First)").performClick()
-
-    // Check if the list is sorted by Parking
-    val firstReportCard = composeTestRule.onNodeWithTag("ReportCard0")
-    firstReportCard.assertTextContains("Has been reported at max level 2 times")
-  }
-
-  @Test
-  fun testNavigationOpensCheckReportsButton() {
-    composeTestRule.setContent {
-      AdminScreen(
-          navigationActions = navigationActions,
-          reportedObjectViewModel = reportedObjectViewModel,
-          parkingViewModel = parkingViewModel,
-          reviewViewModel = reviewViewModel)
-    }
-
-    composeTestRule.onNodeWithTag("ReportCard0").performClick()
-    composeTestRule.onNodeWithTag("CheckReportsButton0").performClick()
+    verify(navigationActions).navigateTo(Screen.ADMIN)
   }
 }

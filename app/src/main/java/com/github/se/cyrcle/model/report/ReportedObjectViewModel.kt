@@ -18,7 +18,7 @@ class ReportedObjectViewModel(private val reportedObjectRepository: ReportedObje
   private val _selectedObject = MutableStateFlow<ReportedObject?>(null)
   val selectedObject: StateFlow<ReportedObject?> = _selectedObject
 
-  private val _reportsList = MutableStateFlow<List<ReportedObject>>(emptyList())
+  val _reportsList = MutableStateFlow<List<ReportedObject>>(emptyList())
   val reportsList: StateFlow<List<ReportedObject>> = _reportsList
 
   fun getNewUid(): String {

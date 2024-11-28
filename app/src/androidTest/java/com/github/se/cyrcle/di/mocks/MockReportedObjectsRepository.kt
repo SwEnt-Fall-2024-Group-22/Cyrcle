@@ -14,19 +14,6 @@ class MockReportedObjectRepository @Inject constructor() : ReportedObjectReposit
     return (uid++).toString()
   }
 
-  override fun addReportedObject(
-      reportedObject: ReportedObject,
-      onSuccess: () -> Unit,
-      onFailure: (Exception) -> Unit
-  ) {
-    if (reportedObject.reportUID.isEmpty() || reportedObject.objectUID.isEmpty()) {
-      onFailure(Exception("Invalid ReportedObject data"))
-    } else {
-      reportedObjects.add(reportedObject)
-      onSuccess()
-    }
-  }
-
   override fun getReportedObjectsByType(
       type: ReportedObjectType,
       onSuccess: (List<ReportedObject>) -> Unit,
@@ -37,6 +24,37 @@ class MockReportedObjectRepository @Inject constructor() : ReportedObjectReposit
       onSuccess(filtered)
     } else {
       onFailure(Exception("No ReportedObjects found for type: $type"))
+    }
+  }
+
+  override fun addReportedObject(
+      reportedObject: ReportedObject,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    try {
+      // Validate the reportedObject fields
+      if (reportedObject.reportUID.isBlank()) {
+        throw IllegalArgumentException("ReportUID cannot be blank.")
+      }
+      if (reportedObject.objectUID.isBlank()) {
+        throw IllegalArgumentException("ObjectUID cannot be blank.")
+      }
+      if (reportedObject.userUID.isBlank()) {
+        throw IllegalArgumentException("UserUID cannot be blank.")
+      }
+
+      // Check if the object already exists to avoid duplicates
+      val existingObject = reportedObjects.find { it.reportUID == reportedObject.reportUID }
+      if (existingObject != null) {
+        throw IllegalArgumentException("ReportedObject with the same ReportUID already exists.")
+      }
+
+      // Add the object to the list
+      reportedObjects.add(reportedObject)
+      onSuccess()
+    } catch (e: Exception) {
+      onFailure(e)
     }
   }
 
