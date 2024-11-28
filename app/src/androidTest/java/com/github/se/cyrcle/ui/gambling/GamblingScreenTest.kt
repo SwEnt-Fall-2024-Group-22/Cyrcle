@@ -22,6 +22,7 @@ import com.github.se.cyrcle.ui.gambling.GamblingScreen
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -48,11 +49,10 @@ class GamblingScreenTest {
     mockImageRepository = MockImageRepository()
     mockAuthenticator = MockAuthenticationRepository()
 
-    val wallet = Wallet.empty()
     val user =
         User(
             UserPublic("1", "janesmith", "http://example.com/jane.jpg"),
-            UserDetails("Jane", "Smith", "jane.smith@example.com", wallet = wallet))
+            UserDetails("Jane", "Smith", "jane.smith@example.com", wallet = Wallet.empty()))
 
     userViewModel =
         UserViewModel(
@@ -63,6 +63,18 @@ class GamblingScreenTest {
     userViewModel.signIn({}, {})
 
     userViewModel.setCurrentUserById("1")
+  }
+
+  @Test
+  fun verify_user_wallet_update_after_credit() {
+    // Initial wallet should be empty (0 coins)
+    assertEquals(0, userViewModel.currentUser.value?.details?.wallet?.getCoins())
+
+    // Credit 25 coins
+    userViewModel.creditCoinsToCurrentUser(25)
+
+    // Verify wallet has been updated to 25 coins
+    assertEquals(25, userViewModel.currentUser.value?.details?.wallet?.getCoins())
   }
 
   @Test
@@ -79,9 +91,7 @@ class GamblingScreenTest {
   @Test
   fun verify_spins_with_wallet_restrictions() {
     // Add 25 coins to user's wallet
-    val currentUser = userViewModel.currentUser.value!!
-    currentUser.details?.wallet?.creditCoins(25)
-    userViewModel.updateUser(currentUser)
+    userViewModel.creditCoinsToCurrentUser(25)
 
     composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
 
@@ -142,9 +152,7 @@ class GamblingScreenTest {
 
   @Test
   fun verify_spin_animation_completion() {
-    val currentUser = userViewModel.currentUser.value!!
-    currentUser.details?.wallet?.creditCoins(100)
-    userViewModel.updateUser(currentUser)
+    userViewModel.creditCoinsToCurrentUser(100000000)
 
     composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
 
@@ -169,9 +177,7 @@ class GamblingScreenTest {
   @Test
   fun verify_subsequent_spins() {
 
-    val currentUser = userViewModel.currentUser.value!!
-    currentUser.details?.wallet?.creditCoins(100)
-    userViewModel.updateUser(currentUser)
+    userViewModel.creditCoinsToCurrentUser(100000)
 
     composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
 

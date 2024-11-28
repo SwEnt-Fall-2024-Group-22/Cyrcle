@@ -121,8 +121,8 @@ fun AttributesPicker(
   }
   val context = LocalContext.current
   val parkingAddedWithRewardText =
-      stringResource(R.string.attributes_picker_parking_added_with_reward_toast,
-          PARKING_CREATION_REWARD)
+      stringResource(
+          R.string.attributes_picker_parking_added_with_reward_toast, PARKING_CREATION_REWARD)
 
   fun onSubmit() {
     val parking =

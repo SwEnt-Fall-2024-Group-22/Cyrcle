@@ -6,9 +6,7 @@ package com.github.se.cyrcle.model.user
  */
 typealias Coin = Int
 
-/**
- * Coin rewards that the user can get with multiple actions.
- */
+/** Coin rewards that the user can get with multiple actions. */
 const val PARKING_CREATION_REWARD: Coin = 100
 const val PARKING_REVIEW_REWARD: Coin = 10
 const val ACCOUNT_CREATION_REWARD: Coin = 100
