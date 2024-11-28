@@ -245,8 +245,6 @@ class MainActivityTest {
 
     fun assertMapScreen() {
       composeTestRule.onNodeWithTag("MapScreen").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("ZoomControlsIn").assertIsDisplayed().assertHasClickAction()
-      composeTestRule.onNodeWithTag("ZoomControlsOut").assertIsDisplayed().assertHasClickAction()
       composeTestRule.onNodeWithTag("NavigationBar").assertIsDisplayed()
 
       if (permissionHandler.getLocalisationPerm().value)

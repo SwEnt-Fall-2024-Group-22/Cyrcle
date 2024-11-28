@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.map
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
@@ -92,40 +91,7 @@ class MapScreenTest {
 
     composeTestRule.onNodeWithTag("MapScreen").assertIsDisplayed()
     composeTestRule.onNodeWithTag("NavigationBar").assertIsDisplayed()
-
-    // Assert that the zoom controls are displayed
-    composeTestRule.onNodeWithTag("ZoomControlsIn").assertIsDisplayed().assertHasClickAction()
-    composeTestRule.onNodeWithTag("ZoomControlsOut").assertIsDisplayed().assertHasClickAction()
-  }
-
-  /**
-   * Test to verify that the internal state of the zoom level decreases correctly.
-   *
-   * This test sets the content to the `MapScreen` with an initial zoom level state, performs zoom
-   * out actions, and asserts that the state value matches the minimum zoom level.
-   */
-  @Test
-  fun testInternalStateOut() {
-
-    val state = mutableStateOf(defaultZoom)
-
-    composeTestRule.setContent {
-      MapScreen(
-          mockNavigation,
-          parkingViewModel,
-          userViewModel,
-          mapViewModel,
-          permissionHandler,
-          addressViewModel,
-          state)
-    }
-
-    for (i in 0..(defaultZoom - minZoom).toInt()) {
-      composeTestRule.onNodeWithTag("ZoomControlsOut").performClick()
-    }
-
-    // Assert the state value
-    assert(state.value == minZoom)
+    composeTestRule.onNodeWithTag("SearchBar").assertIsDisplayed()
   }
 
   @Test
@@ -149,36 +115,6 @@ class MapScreenTest {
     // Check that the add button has a click action when there is a user
     composeTestRule.onNodeWithTag("addButton").performClick()
     verify(mockNavigation).navigateTo(Route.ADD_SPOTS)
-  }
-
-  /**
-   * Test to verify that the internal state of the zoom level increases correctly.
-   *
-   * This test sets the content to the `MapScreen` with an initial zoom level state, performs zoom
-   * in actions, and asserts that the state value matches the maximum zoom level.
-   */
-  @Test
-  fun testInternalStateIn() {
-
-    val state = mutableStateOf(defaultZoom)
-
-    composeTestRule.setContent {
-      MapScreen(
-          mockNavigation,
-          parkingViewModel,
-          userViewModel,
-          mapViewModel,
-          permissionHandler,
-          addressViewModel,
-          state)
-    }
-
-    for (i in 0..(maxZoom - defaultZoom).toInt()) {
-      composeTestRule.onNodeWithTag("ZoomControlsIn").performClick()
-    }
-
-    // Assert the state value
-    assert(state.value == maxZoom)
   }
 
   /**
