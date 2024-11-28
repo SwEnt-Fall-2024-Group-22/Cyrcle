@@ -15,6 +15,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.mapbox.geojson.Point
+import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,7 +40,7 @@ const val PARKING_MAX_SIDE_LENGTH = 50.0
  */
 class ParkingViewModel(
     private val imageRepository: ImageRepository,
-    val parkingRepository: ParkingRepository,
+    private val parkingRepository: ParkingRepository,
     private val reportedObjectRepository: ReportedObjectRepository,
 ) : ViewModel() {
 
@@ -89,7 +90,9 @@ class ParkingViewModel(
   }
 
   fun deleteParkingByUid(uid: String) {
-    parkingRepository.deleteParkingById(uid, {}, {})
+    parkingRepository.deleteParkingById(uid, {}, {
+        Log.d("ParkingViewModel", "Error deleting Parking")
+    })
   }
 
   fun clearSelectedParking() {
@@ -140,6 +143,10 @@ class ParkingViewModel(
     _selectedParking.value = parking
     loadSelectedParkingReports()
   }
+
+    fun getParkingById(id: String, onSuccess: (Parking) -> Unit, onFailure: (Exception) -> Unit) {
+        parkingRepository.getParkingById(id, onSuccess, onFailure)
+    }
 
   /**
    * Retrieves parkings within a rectangle defined by two opposite corners, regardless of their
@@ -422,29 +429,20 @@ class ParkingViewModel(
                   reportUID = report.uid,
                   nbOfTimesReported = selectedParking.nbReports + 1,
                   nbOfTimesMaxSeverityReported =
-                      if (report.reason.severity == 3) selectedParking.nbMaxSeverityReports + 1
+                      if (report.reason.severity == MAX_SEVERITY) selectedParking.nbMaxSeverityReports + 1
                       else selectedParking.nbMaxSeverityReports,
                   userUID = user.public.userId,
                   objectType = ReportedObjectType.PARKING,
               )
 
-          reportedObjectRepository.getDocumentReferenceByObjectUID(
-              objectUID = selectedParking.uid,
-              onSuccess = { documentRef ->
-                // If the document exists, update it
-                documentRef
-                    .set(newReportedObject, com.google.firebase.firestore.SetOptions.merge())
-                    .addOnSuccessListener {
-                      Log.d("ParkingViewModel", "Reported object updated successfully")
-                      updateLocalParkingAndMetrics(report, selectedParking)
-                    }
-                    .addOnFailureListener { exception ->
-                      Log.e(
-                          "ParkingViewModel",
-                          "Error updating reported object: ${exception.message}")
-                    }
-              },
-              onFailure = {
+            reportedObjectRepository.getObjectUID(
+                objectUID = selectedParking.uid,
+                reportedObject = newReportedObject,
+                onSuccess = {
+                    Log.d("ReviewViewModel", "Reported object added/updated successfully")
+                    updateLocalParkingAndMetrics(report,selectedParking)
+                },
+                onFailure = {
                 if ((report.reason.severity == MAX_SEVERITY &&
                     selectedParking.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERITY_THRESH) ||
                     (selectedParking.nbReports >= NB_REPORTS_THRESH)) {

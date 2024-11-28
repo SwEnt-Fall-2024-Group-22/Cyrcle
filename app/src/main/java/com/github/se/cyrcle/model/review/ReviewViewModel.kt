@@ -42,6 +42,14 @@ class ReviewViewModel(
     loadReportsForSelectedReview()
   }
 
+    fun getReviewById(
+        id: String,
+        onSuccess: (Review) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        reviewRepository.getReviewById(id, onSuccess, onFailure)
+    }
+
   fun getNewUid(): String {
     return reviewRepository.getNewUid()
   }
@@ -116,23 +124,13 @@ class ReviewViewModel(
                       else selectedReview.nbMaxSeverityReports,
                   userUID = user.public.userId,
                   objectType = ReportedObjectType.REVIEW)
-          Log.d("AAAAAAAAAAAAAAA", selectedReview.nbReports.toString())
-
-          reportedObjectRepository.getDocumentReferenceByObjectUID(
-              objectUID = selectedReview.uid,
-              onSuccess = { documentRef ->
-                // If the document exists, update it
-                documentRef
-                    .set(newReportedObject, com.google.firebase.firestore.SetOptions.merge())
-                    .addOnSuccessListener {
-                      Log.d("ReviewViewModel", "Reported object updated successfully")
-                      updateLocalReviewAndMetrics(report, selectedReview)
-                    }
-                    .addOnFailureListener { exception ->
-                      Log.e(
-                          "ReviewViewModel", "Error updating reported object: ${exception.message}")
-                    }
-              },
+            reportedObjectRepository.getObjectUID(
+                objectUID = selectedReview.uid,
+                reportedObject = newReportedObject,
+                onSuccess = {
+                    Log.d("ReviewViewModel", "Reported object added/updated successfully")
+                    updateLocalReviewAndMetrics(report, selectedReview)
+                },
               // If the object is NOT in reported objects, check if it fulfills the criterion
               // to be a reported object. If so, add it to the ReportedObjects
               onFailure = {
@@ -165,7 +163,7 @@ class ReviewViewModel(
   private fun updateLocalReviewAndMetrics(report: ReviewReport, selectedReview: Review) {
     // Update the local reports and review metrics
     _selectedReviewReports.update { currentReports ->
-      currentReports?.plus(report) ?: listOf(report)
+      currentReports.plus(report) ?: listOf(report)
     }
     if (report.reason.severity == MAX_SEVERITY) {
       selectedReview.nbMaxSeverityReports += 1

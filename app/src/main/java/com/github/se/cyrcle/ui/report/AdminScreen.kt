@@ -272,7 +272,7 @@ fun AdminScreen(
                                             reportedObjectViewModel.selectedObject.value
                                         if (currentObject != null) {
                                           if (curReport.objectType == ReportedObjectType.PARKING) {
-                                            parkingViewModel.parkingRepository.getParkingById(
+                                            parkingViewModel.getParkingById(
                                                 curReport.objectUID,
                                                 onSuccess = { parking ->
                                                   parkingViewModel.selectParking(parking)
@@ -280,7 +280,7 @@ fun AdminScreen(
                                                 },
                                                 onFailure = {})
                                           } else {
-                                            reviewViewModel.reviewRepository.getReviewById(
+                                            reviewViewModel.getReviewById(
                                                 curReport.objectUID,
                                                 onSuccess = { review ->
                                                   reviewViewModel.selectReview(review)

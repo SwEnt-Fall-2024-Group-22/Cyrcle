@@ -58,9 +58,10 @@ interface ReportedObjectRepository {
    * @param onSuccess A callback invoked with a list of reported objects when successful.
    * @param onFailure A callback invoked with an exception when the operation fails.
    */
-  fun getDocumentReferenceByObjectUID(
+  fun getObjectUID(
       objectUID: String,
-      onSuccess: (DocumentReference) -> Unit,
+      reportedObject: ReportedObject,
+      onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   )
 

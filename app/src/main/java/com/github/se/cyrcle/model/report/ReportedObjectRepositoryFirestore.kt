@@ -148,31 +148,48 @@ class ReportedObjectRepositoryFirestore @Inject constructor(private val db: Fire
         .addOnFailureListener { onFailure(it) }
   }
 
-  /**
-   * Retrieves a reference to a reported object associated with a specific object UID.
-   *
-   * @param objectUID The unique identifier of the object being reported.
-   * @param onSuccess A callback invoked with a DocumentReference when successful.
-   * @param onFailure A callback invoked with an exception when the operation fails.
-   */
-  override fun getDocumentReferenceByObjectUID(
-      objectUID: String,
-      onSuccess: (DocumentReference) -> Unit,
-      onFailure: (Exception) -> Unit
-  ) {
-    db.collection(collectionPath)
-        .whereEqualTo("objectUID", objectUID)
-        .get()
-        .addOnSuccessListener { querySnapshot ->
-          if (querySnapshot.documents.isNotEmpty()) {
-            val documentRef = querySnapshot.documents.first().reference
-            onSuccess(documentRef) // Return the reference of the matching document
-          } else {
-            onFailure(Exception("No document found with objectUID: $objectUID"))
-          }
-        }
-        .addOnFailureListener { exception -> onFailure(exception) }
-  }
+    /**
+     * Adds or updates a reported object in the Firestore collection based on `objectUID`.
+     *
+     * - If the object already exists, it merges the update.
+     * - If the object does not exist, it creates a new one.
+     *
+     * @param objectUID The unique identifier of the object being reported.
+     * @param reportedObject The reported object to save.
+     * @param onSuccess A callback invoked on successful addition or update.
+     * @param onFailure A callback invoked when the operation fails.
+     */
+    override fun getObjectUID(
+        objectUID: String,
+        reportedObject: ReportedObject,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        db.collection(collectionPath)
+            .whereEqualTo("objectUID", objectUID)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                if (querySnapshot.documents.isNotEmpty()) {
+                    // Document exists: update it
+                    val documentId = querySnapshot.documents.first().id
+                    db.collection(collectionPath)
+                        .document(documentId)
+                        .set(reportedObject, com.google.firebase.firestore.SetOptions.merge())
+                        .addOnSuccessListener { onSuccess() }
+                        .addOnFailureListener { onFailure(it) }
+                } else {
+                    // Document does not exist: create it
+                    db.collection(collectionPath)
+                        .document(objectUID)
+                        .set(reportedObject)
+                        .addOnSuccessListener { onSuccess() }
+                        .addOnFailureListener { onFailure(it) }
+                }
+            }
+            .addOnFailureListener { exception ->
+                onFailure(exception)
+            }
+    }
 
   /**
    * Retrieves all reported objects submitted by a specific user.

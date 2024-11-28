@@ -132,8 +132,7 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
       onSuccess: (List<ParkingReport>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    FirebaseFirestore.getInstance()
-        .collection("parkings")
+    db.collection("parkings")
         .document(parkingId)
         .collection("reports")
         .get()

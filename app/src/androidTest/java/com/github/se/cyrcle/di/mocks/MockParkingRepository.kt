@@ -24,6 +24,23 @@ class MockParkingRepository @Inject constructor() : ParkingRepository {
     onSuccess()
   }
 
+    override fun getReportsForParking(
+        parkingId: String,
+        onSuccess: (List<ParkingReport>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        if (parkingId.isEmpty()) {
+            onFailure(Exception("Parking ID cannot be empty"))
+        } else {
+            val associatedReports = reports.filter { it.parking == parkingId }
+            if (associatedReports.isEmpty()) {
+                onFailure(Exception("No reports found for the given parking ID"))
+            } else {
+                onSuccess(associatedReports)
+            }
+        }
+    }
+
   override fun getParkingById(
       id: String,
       onSuccess: (Parking) -> Unit,
