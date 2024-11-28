@@ -180,9 +180,6 @@ fun MapScreen(
   // Chosen location by the user
   val chosenLocation = addressViewModel.address.collectAsState()
 
-  //  // Get the virtual keyboard controller
-  //  val virtualKeyboard : SoftwareKeyboardController = LocalSoftwareKeyboardController.current
-
   // initialize the Gson object that will deserialize and serialize the parking to bind it to the
   // marker
   val gson = Gson()

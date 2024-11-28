@@ -191,7 +191,7 @@ class MapScreenTest {
           addressViewModel)
     }
 
-    composeTestRule.onNodeWithTag("SettingsMenuButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("SettingsMenuButton").assertIsDisplayed().assertHasClickAction()
     composeTestRule.onNodeWithTag("SettingsMenuButton").performClick()
 
     composeTestRule.onNodeWithTag("SettingsMenu").assertIsDisplayed()
