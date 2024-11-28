@@ -57,6 +57,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.databinding.ItemCalloutViewBinding
+import com.github.se.cyrcle.model.address.Address
 import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.Parking
@@ -84,6 +85,7 @@ import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.ViewAnnotationAnchor
 import com.mapbox.maps.extension.compose.DisposableMapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
+import com.mapbox.maps.extension.compose.animation.viewport.MapViewportState
 import com.mapbox.maps.plugin.annotation.AnnotationConfig
 import com.mapbox.maps.plugin.annotation.AnnotationSourceOptions
 import com.mapbox.maps.plugin.annotation.ClusterOptions
@@ -526,100 +528,15 @@ fun MapScreen(
           )
         }
 
-        // ======================= SETTINGS MENU=======================
-
         if (showSettings.value) {
-          Box(
-              modifier = Modifier.fillMaxSize().padding(16.dp),
-              contentAlignment = Alignment.TopEnd) {
-                Card(
-                    modifier =
-                        Modifier.width(300.dp)
-                            .height(400.dp)
-                            .align(Alignment.Center)
-                            .testTag("SettingsMenu")) {
-                      Column(modifier = Modifier.padding(16.dp)) {
-                        Text(text = stringResource(R.string.settings))
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Advanced Mode
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                          Text(text = stringResource(R.string.map_screen_mode_switch_label))
-                          Spacer(modifier = Modifier.weight(1f))
-                          Switch(
-                              modifier =
-                                  Modifier.padding(start = 8.dp).testTag("advancedModeSwitch"),
-                              checked = mapMode.value.isAdvancedMode,
-                              onCheckedChange = {
-                                val futurMapMode =
-                                    if (it) MapViewModel.MapMode.RECTANGLES
-                                    else MapViewModel.MapMode.MARKERS
-                                mapViewModel.updateUserMapMode(futurMapMode)
-                                mapViewModel.updateMapMode(futurMapMode)
-                              },
-                              colors =
-                                  SwitchDefaults.colors()
-                                      .copy(
-                                          uncheckedTrackColor = disabledColor(),
-                                      ))
-                        }
-                      }
-                    }
-              }
+          SettingsMenu(mapMode, mapViewModel)
         }
-
-        // ======================= SUGGESTION MENU=======================
 
         if (showSuggestions.value &&
             listOfSuggestions.value.size != 1 &&
             listOfSuggestions.value.isNotEmpty()) {
-          ModalBottomSheet(
-              onDismissRequest = { showSuggestions.value = false },
-              modifier = Modifier.testTag("SuggestionsMenu")) {
-                LazyColumn {
-                  items(listOfSuggestions.value) { suggestion ->
-                    Card(
-                        onClick = {
-                          showSuggestions.value = false
 
-                          mapViewportState.transitionToOverviewState(
-                              OverviewViewportStateOptions.Builder()
-                                  .geometry(mapViewportState.cameraState!!.center)
-                                  .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
-                                  .build())
-                          mapViewModel.updateTrackingMode(false)
-
-                          mapViewportState.setCameraOptions {
-                            center(
-                                Point.fromLngLat(
-                                    suggestion.longitude.toDouble(),
-                                    suggestion.latitude.toDouble()))
-                          }
-
-                          Log.e(
-                              "Selected Location",
-                              Point.fromLngLat(
-                                      suggestion.longitude.toDouble(),
-                                      suggestion.latitude.toDouble())
-                                  .toString())
-                        },
-                        colors =
-                            CardColors(
-                                containerColor = invertColor(defaultOnColor()),
-                                contentColor = defaultOnColor(),
-                                disabledContainerColor = invertColor(defaultOnColor()),
-                                disabledContentColor = defaultOnColor()),
-                        modifier =
-                            Modifier.fillMaxSize().testTag("suggestionCard${suggestion.city}")) {
-                          Text(
-                              text = "${suggestion.road},${suggestion.city},${suggestion.country}",
-                              Modifier.padding(5.dp))
-                        }
-
-                    androidx.compose.material.Divider(Modifier.fillMaxWidth(), color = Black)
-                  }
-                }
-              }
+          SuggestionMenu(showSuggestions, listOfSuggestions, mapViewportState, mapViewModel)
         } else if (showSuggestions.value && listOfSuggestions.value.size == 1) {
           chosenLocation.value.let {
             mapViewportState.transitionToOverviewState(
@@ -637,4 +554,92 @@ fun MapScreen(
           showSuggestions.value = false
         }
       }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SuggestionMenu(
+    showSuggestions: MutableState<Boolean>,
+    listOfSuggestions: State<List<Address>>,
+    mapViewportState: MapViewportState,
+    mapViewModel: MapViewModel
+) {
+  ModalBottomSheet(
+      onDismissRequest = { showSuggestions.value = false },
+      modifier = Modifier.testTag("SuggestionsMenu")) {
+        LazyColumn {
+          items(listOfSuggestions.value) { suggestion ->
+            Card(
+                onClick = {
+                  showSuggestions.value = false
+
+                  mapViewportState.transitionToOverviewState(
+                      OverviewViewportStateOptions.Builder()
+                          .geometry(mapViewportState.cameraState!!.center)
+                          .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
+                          .build())
+                  mapViewModel.updateTrackingMode(false)
+
+                  mapViewportState.setCameraOptions {
+                    center(
+                        Point.fromLngLat(
+                            suggestion.longitude.toDouble(), suggestion.latitude.toDouble()))
+                  }
+
+                  Log.e(
+                      "Selected Location",
+                      Point.fromLngLat(
+                              suggestion.longitude.toDouble(), suggestion.latitude.toDouble())
+                          .toString())
+                },
+                colors =
+                    CardColors(
+                        containerColor = invertColor(defaultOnColor()),
+                        contentColor = defaultOnColor(),
+                        disabledContainerColor = invertColor(defaultOnColor()),
+                        disabledContentColor = defaultOnColor()),
+                modifier = Modifier.fillMaxSize().testTag("suggestionCard${suggestion.city}")) {
+                  Text(
+                      text = "${suggestion.road},${suggestion.city},${suggestion.country}",
+                      Modifier.padding(5.dp))
+                }
+
+            androidx.compose.material.Divider(Modifier.fillMaxWidth(), color = Black)
+          }
+        }
+      }
+}
+
+@Composable
+fun SettingsMenu(mapMode: State<MapViewModel.MapMode>, mapViewModel: MapViewModel) {
+  Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.TopEnd) {
+    Card(
+        modifier =
+            Modifier.width(300.dp).height(400.dp).align(Alignment.Center).testTag("SettingsMenu")) {
+          Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = stringResource(R.string.settings))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Advanced Mode
+            Row(verticalAlignment = Alignment.CenterVertically) {
+              Text(text = stringResource(R.string.map_screen_mode_switch_label))
+              Spacer(modifier = Modifier.weight(1f))
+              Switch(
+                  modifier = Modifier.padding(start = 8.dp).testTag("advancedModeSwitch"),
+                  checked = mapMode.value.isAdvancedMode,
+                  onCheckedChange = {
+                    val futurMapMode =
+                        if (it) MapViewModel.MapMode.RECTANGLES else MapViewModel.MapMode.MARKERS
+                    mapViewModel.updateUserMapMode(futurMapMode)
+                    mapViewModel.updateMapMode(futurMapMode)
+                  },
+                  colors =
+                      SwitchDefaults.colors()
+                          .copy(
+                              uncheckedTrackColor = disabledColor(),
+                          ))
+            }
+          }
+        }
+  }
 }
