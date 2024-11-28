@@ -90,7 +90,8 @@ class AddressRepositoryNominatimTest {
     setupMockResponse(mockResponse)
 
     var resultAddress: Address? = null
-    addressRepositoryNominatim.search(whiteHouseString, { address -> resultAddress = address }, {})
+    addressRepositoryNominatim.search(
+        whiteHouseString, { address -> resultAddress = address.first() }, {})
 
     assertNotNull(resultAddress)
 
@@ -139,7 +140,7 @@ class AddressRepositoryNominatimTest {
     setupMockResponse(mockResponse)
 
     var resultAddress: Address? = null
-    addressRepositoryNominatim.search("0.0,0.0", { address -> resultAddress = address }, {})
+    addressRepositoryNominatim.search("0.0,0.0", { address -> resultAddress = address.first() }, {})
 
     assertNotNull(resultAddress)
     assertEquals(Address(), resultAddress)
