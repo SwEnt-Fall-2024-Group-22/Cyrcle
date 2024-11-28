@@ -1,20 +1,24 @@
 package com.github.se.cyrcle.ui.map
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performImeAction
+import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.se.cyrcle.di.mocks.MockAddressRepository
 import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockPermissionHandler
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
+import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
@@ -43,6 +47,7 @@ class MapScreenTest {
   private lateinit var userViewModel: UserViewModel
   private lateinit var mapViewModel: MapViewModel
   private lateinit var permissionHandler: MockPermissionHandler
+  private lateinit var addressViewModel: AddressViewModel
 
   @Before
   fun setUp() {
@@ -53,6 +58,7 @@ class MapScreenTest {
     val parkingRepository = MockParkingRepository()
     val userRepository = MockUserRepository()
     val authenticationRepository = MockAuthenticationRepository()
+    val addressRepository = MockAddressRepository()
 
     parkingViewModel =
         ParkingViewModel(imageRepository, parkingRepository, mockReportedObjectRepository)
@@ -60,6 +66,7 @@ class MapScreenTest {
         UserViewModel(userRepository, parkingRepository, imageRepository, authenticationRepository)
     mapViewModel = MapViewModel()
     permissionHandler = MockPermissionHandler()
+    addressViewModel = AddressViewModel(addressRepository)
 
     `when`(mockNavigation.currentRoute()).thenReturn(Screen.MAP)
   }
@@ -73,45 +80,30 @@ class MapScreenTest {
   @Test
   fun testMapIsDisplayed() {
     composeTestRule.setContent {
-      MapScreen(mockNavigation, parkingViewModel, userViewModel, mapViewModel, permissionHandler)
+      MapScreen(
+          mockNavigation,
+          parkingViewModel,
+          userViewModel,
+          mapViewModel,
+          permissionHandler,
+          addressViewModel)
     }
 
     composeTestRule.onNodeWithTag("MapScreen").assertIsDisplayed()
     composeTestRule.onNodeWithTag("NavigationBar").assertIsDisplayed()
-
-    // Assert that the zoom controls are displayed
-    composeTestRule.onNodeWithTag("ZoomControlsIn").assertIsDisplayed().assertHasClickAction()
-    composeTestRule.onNodeWithTag("ZoomControlsOut").assertIsDisplayed().assertHasClickAction()
-  }
-
-  /**
-   * Test to verify that the internal state of the zoom level decreases correctly.
-   *
-   * This test sets the content to the `MapScreen` with an initial zoom level state, performs zoom
-   * out actions, and asserts that the state value matches the minimum zoom level.
-   */
-  @Test
-  fun testInternalStateOut() {
-
-    val state = mutableStateOf(defaultZoom)
-
-    composeTestRule.setContent {
-      MapScreen(
-          mockNavigation, parkingViewModel, userViewModel, mapViewModel, permissionHandler, state)
-    }
-
-    for (i in 0..(defaultZoom - minZoom).toInt()) {
-      composeTestRule.onNodeWithTag("ZoomControlsOut").performClick()
-    }
-
-    // Assert the state value
-    assert(state.value == minZoom)
+    composeTestRule.onNodeWithTag("SearchBar").assertIsDisplayed()
   }
 
   @Test
   fun testAddParkingRules() {
     composeTestRule.setContent {
-      MapScreen(mockNavigation, parkingViewModel, userViewModel, mapViewModel, permissionHandler)
+      MapScreen(
+          mockNavigation,
+          parkingViewModel,
+          userViewModel,
+          mapViewModel,
+          permissionHandler,
+          addressViewModel)
     }
 
     // Check that the add button has no click action when there is no user
@@ -126,30 +118,6 @@ class MapScreenTest {
   }
 
   /**
-   * Test to verify that the internal state of the zoom level increases correctly.
-   *
-   * This test sets the content to the `MapScreen` with an initial zoom level state, performs zoom
-   * in actions, and asserts that the state value matches the maximum zoom level.
-   */
-  @Test
-  fun testInternalStateIn() {
-
-    val state = mutableStateOf(defaultZoom)
-
-    composeTestRule.setContent {
-      MapScreen(
-          mockNavigation, parkingViewModel, userViewModel, mapViewModel, permissionHandler, state)
-    }
-
-    for (i in 0..(maxZoom - defaultZoom).toInt()) {
-      composeTestRule.onNodeWithTag("ZoomControlsIn").performClick()
-    }
-
-    // Assert the state value
-    assert(state.value == maxZoom)
-  }
-
-  /**
    * Test to verify that the recenter button has a click action.
    *
    * This test sets the content to the `MapScreen` and checks if the recenter button has a click
@@ -159,7 +127,13 @@ class MapScreenTest {
   @Test
   fun testRecenterButton() {
     composeTestRule.setContent {
-      MapScreen(mockNavigation, parkingViewModel, userViewModel, mapViewModel, permissionHandler)
+      MapScreen(
+          mockNavigation,
+          parkingViewModel,
+          userViewModel,
+          mapViewModel,
+          permissionHandler,
+          addressViewModel)
     }
 
     // Start with enabled location
@@ -186,12 +160,94 @@ class MapScreenTest {
     userViewModel.setCurrentUser(TestInstancesUser.user1)
 
     composeTestRule.setContent {
-      MapScreen(navigationActions, parkingViewModel, userViewModel, mapViewModel, permissionHandler)
+      MapScreen(
+          navigationActions,
+          parkingViewModel,
+          userViewModel,
+          mapViewModel,
+          permissionHandler,
+          addressViewModel)
     }
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("addButton"))
     // Perform click on the add button
     composeTestRule.onNodeWithTag("addButton").performClick()
 
     verify(navigationActions).navigateTo(Route.ADD_SPOTS)
+  }
+
+  /**
+   * Test to verify that settings menu is displayed and advanced mode switch is displayed when
+   * settings button is clicked.
+   */
+  @Test
+  fun testSettingsMenu() {
+    composeTestRule.setContent {
+      MapScreen(
+          mockNavigation,
+          parkingViewModel,
+          userViewModel,
+          mapViewModel,
+          permissionHandler,
+          addressViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("SettingsMenuButton").assertIsDisplayed().assertHasClickAction()
+    composeTestRule.onNodeWithTag("SettingsMenuButton").performClick()
+
+    composeTestRule.onNodeWithTag("SettingsMenu").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("advancedModeSwitch").assertIsDisplayed()
+  }
+
+  /** Test that verify that the Search Bar works */
+  @Test
+  fun testSearchBar() {
+    composeTestRule.setContent {
+      MapScreen(
+          mockNavigation,
+          parkingViewModel,
+          userViewModel,
+          mapViewModel,
+          permissionHandler,
+          addressViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("SearchBar").assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag("SearchBar").performTextInput("Test Location")
+    composeTestRule.onNodeWithTag("SearchBar").assertTextEquals("Test Location")
+  }
+
+  /**
+   * Test that verifies that using the search bar to look for a location triggers the apparition of
+   * the Suggestion Menu
+   */
+  @Test
+  fun testSuggestionsMenu() {
+    composeTestRule.setContent {
+      MapScreen(
+          mockNavigation,
+          parkingViewModel,
+          userViewModel,
+          mapViewModel,
+          permissionHandler,
+          addressViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("SearchBar").assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag("SearchBar").performTextInput("Mock Park Location")
+
+    composeTestRule.onNodeWithTag("SearchBar").performImeAction()
+
+    composeTestRule.onNodeWithTag("SuggestionsMenu").assertIsDisplayed()
+
+    composeTestRule
+        .onNodeWithTag("suggestionCardMock City")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+    composeTestRule
+        .onNodeWithTag("suggestionCardMock City 2")
+        .assertIsDisplayed()
+        .assertHasClickAction()
   }
 }

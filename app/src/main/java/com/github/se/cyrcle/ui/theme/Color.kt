@@ -181,6 +181,25 @@ fun getOutlinedTextFieldColors(colorLevel: ColorLevel): TextFieldColors {
 }
 
 /**
+ * Get the colors for a text field from a ColorScheme (Destined for Search Text Fields).
+ *
+ * @param colorLevel The chosen ColorScheme
+ * @return The `TextFieldColors` from the `colorScheme`
+ */
+@Composable
+fun getOutlinedTextFieldColorsSearchBar(colorLevel: ColorLevel): TextFieldColors {
+  return OutlinedTextFieldDefaults.colors(
+      focusedTextColor = defaultOnColor(),
+      focusedLabelColor = defaultOnColor(),
+      focusedBorderColor = getColor(colorLevel),
+      unfocusedBorderColor = getColor(colorLevel),
+      cursorColor = defaultOnColor(),
+      unfocusedContainerColor = invertColor(defaultOnColor()),
+      focusedContainerColor = invertColor(defaultOnColor()),
+      unfocusedPlaceholderColor = defaultOnColor())
+}
+
+/**
  * Get the colors for a checkbox from a ColorScheme.
  *
  * @param colorLevel The chosen ColorScheme

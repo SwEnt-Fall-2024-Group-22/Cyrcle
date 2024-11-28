@@ -2,15 +2,35 @@ package com.github.se.cyrcle.ui.map
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.MyLocation
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -26,36 +46,46 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.databinding.ItemCalloutViewBinding
+import com.github.se.cyrcle.model.address.Address
+import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.permission.PermissionHandler
-import com.github.se.cyrcle.ui.map.overlay.ZoomControls
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
+import com.github.se.cyrcle.ui.theme.Black
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.IconButton
+import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
+import com.github.se.cyrcle.ui.theme.defaultOnColor
 import com.github.se.cyrcle.ui.theme.disabledColor
+import com.github.se.cyrcle.ui.theme.getOutlinedTextFieldColorsSearchBar
+import com.github.se.cyrcle.ui.theme.invertColor
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.google.gson.Gson
 import com.mapbox.android.gestures.MoveGestureDetector
+import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraBoundsOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.ViewAnnotationAnchor
 import com.mapbox.maps.extension.compose.DisposableMapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
+import com.mapbox.maps.extension.compose.animation.viewport.MapViewportState
 import com.mapbox.maps.plugin.annotation.AnnotationConfig
 import com.mapbox.maps.plugin.annotation.AnnotationSourceOptions
 import com.mapbox.maps.plugin.annotation.ClusterOptions
@@ -74,6 +104,7 @@ import com.mapbox.maps.viewannotation.annotatedLayerFeature
 import com.mapbox.maps.viewannotation.annotationAnchor
 import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
+import kotlinx.coroutines.runBlocking
 
 const val defaultZoom = 16.0
 const val maxZoom = 18.0
@@ -84,6 +115,7 @@ const val LAYER_ID_RECT = "0129"
 const val ADVANCED_MODE_ZOOM_THRESHOLD = 15.5
 const val CLUSTER_COLORS = "#1A4988"
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(
     navigationActions: NavigationActions,
@@ -91,11 +123,15 @@ fun MapScreen(
     userViewModel: UserViewModel,
     mapViewModel: MapViewModel,
     permissionHandler: PermissionHandler,
+    addressViewModel: AddressViewModel,
     zoomState: MutableState<Double> = remember { mutableDoubleStateOf(defaultZoom) }
 ) {
 
   // Collect the list of parkings from the ParkingViewModel as a state
   val listOfParkings by parkingViewModel.rectParkings.collectAsState()
+
+  // Create a remember state to store the search query of the search bar as a mutable state
+  val searchQuery = remember { mutableStateOf("") }
 
   // Collect the boolean to enable the parking addition from the UserViewModel as a state
   val enableParkingAddition by userViewModel.isSignedIn.collectAsState(false)
@@ -127,6 +163,24 @@ fun MapScreen(
   // Prevent the camera from recentering when the user exit and come back to the map by disabling
   // the related launchedEffect
   val cameraRecentering = mapViewModel.cameraRecentering.collectAsState()
+
+  // Mutable state to store the visibility of the settings menu
+  val showSettings = remember { mutableStateOf(false) }
+
+  // Initialize FocusManager
+  val focusManager = LocalFocusManager.current
+
+  // Initialize the keyboard controller
+  val virtualKeyboardManager = LocalSoftwareKeyboardController.current
+
+  // List of suggestions from NominatimAPI
+  val listOfSuggestions = addressViewModel.addressList.collectAsState()
+
+  // Show suggestions screen
+  val showSuggestions = remember { mutableStateOf(false) }
+
+  // Chosen location by the user
+  val chosenLocation = addressViewModel.address.collectAsState()
 
   // initialize the Gson object that will deserialize and serialize the parking to bind it to the
   // marker
@@ -238,7 +292,11 @@ fun MapScreen(
                       override fun onMoveBegin(detector: MoveGestureDetector) {
                         // Remove any preview card displayed
                         mapViewModel.removePreviewCard()
+
+                        // remove focus on the Search Bar
+                        focusManager.clearFocus()
                         if (mapViewModel.isTrackingModeEnable.value) {
+
                           mapViewportState.transitionToOverviewState(
                               OverviewViewportStateOptions.Builder()
                                   .geometry(mapViewportState.cameraState!!.center)
@@ -383,46 +441,6 @@ fun MapScreen(
         // ======================= OVERLAY =======================
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
           // A switch to change the display mode
-          Row(
-              modifier =
-                  Modifier.align(Alignment.TopStart)
-                      .padding(start = 8.dp, top = 32.dp)
-                      .alpha(alpha),
-              verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    stringResource(R.string.map_screen_mode_switch_label),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold))
-                Switch(
-                    modifier = Modifier.padding(start = 8.dp),
-                    checked = mapMode.value.isAdvancedMode,
-                    onCheckedChange = {
-                      val futurMapMode =
-                          if (it) MapViewModel.MapMode.RECTANGLES else MapViewModel.MapMode.MARKERS
-                      mapViewModel.updateUserMapMode(futurMapMode)
-                      mapViewModel.updateMapMode(futurMapMode)
-                    },
-                    colors =
-                        SwitchDefaults.colors()
-                            .copy(
-                                uncheckedTrackColor = disabledColor(),
-                            ))
-              }
-
-          ZoomControls(
-              modifier = Modifier.align(Alignment.TopEnd),
-              onZoomIn = {
-                mapViewModel.removePreviewCard()
-                mapViewportState.setCameraOptions {
-                  zoom(mapViewportState.cameraState!!.zoom + 1.0)
-                }
-              },
-              onZoomOut = {
-                mapViewModel.removePreviewCard()
-                mapViewportState.setCameraOptions {
-                  zoom(mapViewportState.cameraState!!.zoom - 1.0)
-                }
-              })
 
           if (locationEnabled) {
             IconButton(
@@ -464,6 +482,178 @@ fun MapScreen(
                 colorLevel = ColorLevel.PRIMARY,
                 testTag = "addButton")
           }
+
+          OutlinedTextField(
+              value = searchQuery.value,
+              onValueChange = { searchQuery.value = it },
+              placeholder = { Text(text = stringResource(R.string.search_bar_placeholder)) },
+              modifier =
+                  Modifier.fillMaxWidth(0.9f)
+                      .padding(end = 30.dp, start = 5.dp, top = 5.dp)
+                      .align(Alignment.TopStart)
+                      .testTag("SearchBar"),
+              shape = RoundedCornerShape(16.dp),
+              colors = getOutlinedTextFieldColorsSearchBar(ColorLevel.PRIMARY),
+              trailingIcon = {
+                if (searchQuery.value.isNotEmpty()) {
+                  Icon(
+                      imageVector = Icons.Filled.Clear,
+                      contentDescription = "Clear search",
+                      tint = defaultOnColor(),
+                      modifier = Modifier.clickable { searchQuery.value = "" })
+                }
+              },
+              singleLine = true,
+              keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
+              keyboardActions =
+                  KeyboardActions(
+                      onSearch = {
+                        virtualKeyboardManager?.hide()
+
+                        runBlocking { addressViewModel.search(searchQuery.value) }
+
+                        showSuggestions.value = true
+                      }))
+
+          SmallFloatingActionButton(
+              modifier =
+                  Modifier.align(Alignment.TopEnd)
+                      .padding(top = 5.dp, end = 5.dp)
+                      .testTag("SettingsMenuButton"),
+              onClick = {
+                if (showSettings.value) showSettings.value = false else showSettings.value = true
+              },
+              icon = Icons.Filled.Settings,
+              contentDescription = "Settings",
+          )
+        }
+
+        if (showSettings.value) {
+          SettingsMenu(mapMode, mapViewModel)
+        }
+
+        if (showSuggestions.value &&
+            listOfSuggestions.value.size != 1 &&
+            listOfSuggestions.value.isNotEmpty()) {
+
+          SuggestionMenu(showSuggestions, listOfSuggestions, mapViewportState, mapViewModel)
+        } else if (showSuggestions.value && listOfSuggestions.value.size == 1) {
+          chosenLocation.value.let {
+            mapViewportState.transitionToOverviewState(
+                OverviewViewportStateOptions.Builder()
+                    .geometry(mapViewportState.cameraState!!.center)
+                    .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
+                    .build())
+
+            mapViewModel.updateTrackingMode(false)
+
+            mapViewportState.setCameraOptions {
+              center(Point.fromLngLat(it.longitude.toDouble(), it.latitude.toDouble()))
+            }
+          }
+          showSuggestions.value = false
         }
       }
+}
+
+/**
+ * Composable function to display the suggestion menu.
+ *
+ * @param showSuggestions The state of the suggestion menu.
+ * @param listOfSuggestions The list of suggestions extracted from the NominatimAPI.
+ * @param mapViewportState The viewport state of the map.
+ * @param mapViewModel The ViewModel for managing map-related data and actions.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SuggestionMenu(
+    showSuggestions: MutableState<Boolean>,
+    listOfSuggestions: State<List<Address>>,
+    mapViewportState: MapViewportState,
+    mapViewModel: MapViewModel
+) {
+  ModalBottomSheet(
+      onDismissRequest = { showSuggestions.value = false },
+      modifier = Modifier.testTag("SuggestionsMenu")) {
+        LazyColumn {
+          items(listOfSuggestions.value) { suggestion ->
+            Card(
+                onClick = {
+                  showSuggestions.value = false
+
+                  mapViewportState.transitionToOverviewState(
+                      OverviewViewportStateOptions.Builder()
+                          .geometry(mapViewportState.cameraState!!.center)
+                          .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
+                          .build())
+                  mapViewModel.updateTrackingMode(false)
+
+                  mapViewportState.setCameraOptions {
+                    center(
+                        Point.fromLngLat(
+                            suggestion.longitude.toDouble(), suggestion.latitude.toDouble()))
+                  }
+
+                  Log.e(
+                      "Selected Location",
+                      Point.fromLngLat(
+                              suggestion.longitude.toDouble(), suggestion.latitude.toDouble())
+                          .toString())
+                },
+                colors =
+                    CardColors(
+                        containerColor = invertColor(defaultOnColor()),
+                        contentColor = defaultOnColor(),
+                        disabledContainerColor = invertColor(defaultOnColor()),
+                        disabledContentColor = defaultOnColor()),
+                modifier = Modifier.fillMaxSize().testTag("suggestionCard${suggestion.city}")) {
+                  Text(
+                      text = "${suggestion.road},${suggestion.city},${suggestion.country}",
+                      Modifier.padding(5.dp))
+                }
+
+            androidx.compose.material.Divider(Modifier.fillMaxWidth(), color = Black)
+          }
+        }
+      }
+}
+
+/**
+ * Composable function to display the settings menu.
+ *
+ * @param mapMode The current map mode state.
+ * @param mapViewModel The ViewModel for managing map-related data and actions.
+ */
+@Composable
+fun SettingsMenu(mapMode: State<MapViewModel.MapMode>, mapViewModel: MapViewModel) {
+  Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.TopEnd) {
+    Card(
+        modifier =
+            Modifier.width(300.dp).height(400.dp).align(Alignment.Center).testTag("SettingsMenu")) {
+          Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = stringResource(R.string.settings))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Advanced Mode
+            Row(verticalAlignment = Alignment.CenterVertically) {
+              Text(text = stringResource(R.string.map_screen_mode_switch_label))
+              Spacer(modifier = Modifier.weight(1f))
+              Switch(
+                  modifier = Modifier.padding(start = 8.dp).testTag("advancedModeSwitch"),
+                  checked = mapMode.value.isAdvancedMode,
+                  onCheckedChange = {
+                    val futurMapMode =
+                        if (it) MapViewModel.MapMode.RECTANGLES else MapViewModel.MapMode.MARKERS
+                    mapViewModel.updateUserMapMode(futurMapMode)
+                    mapViewModel.updateMapMode(futurMapMode)
+                  },
+                  colors =
+                      SwitchDefaults.colors()
+                          .copy(
+                              uncheckedTrackColor = disabledColor(),
+                          ))
+            }
+          }
+        }
+  }
 }

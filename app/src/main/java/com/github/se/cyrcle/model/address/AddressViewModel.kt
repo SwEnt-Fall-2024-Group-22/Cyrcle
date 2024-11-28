@@ -12,9 +12,14 @@ import kotlinx.coroutines.flow.StateFlow
  * @property repository The repository for searching addresses.
  */
 class AddressViewModel(private val repository: AddressRepository) : ViewModel() {
+
   private val _address = MutableStateFlow(Address())
   val address: StateFlow<Address>
     get() = _address
+
+  private val _addressList = MutableStateFlow(listOf<Address>())
+  val addressList: StateFlow<List<Address>>
+    get() = _addressList
 
   /**
    * Searches for an address and updates the address state.
@@ -25,7 +30,19 @@ class AddressViewModel(private val repository: AddressRepository) : ViewModel() 
     val query = "${point.latitude()},${point.longitude()}"
     repository.search(
         query,
-        onSuccess = { _address.value = it },
+        onSuccess = { _address.value = it.first() },
+        onFailure = { Log.e("AddressViewModel", "Failed to search for address", it) })
+  }
+
+  /**
+   * Searches for an address and updates the address_list state.
+   *
+   * @param query The query to search for.
+   */
+  fun search(query: String) {
+    repository.search(
+        query,
+        onSuccess = { _addressList.value = it },
         onFailure = { Log.e("AddressViewModel", "Failed to search for address", it) })
   }
 }

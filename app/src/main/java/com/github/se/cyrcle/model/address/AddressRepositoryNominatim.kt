@@ -8,7 +8,11 @@ import org.json.JSONArray
 
 class AddressRepositoryNominatim @Inject constructor(private val client: OkHttpClient) :
     AddressRepository {
-  override fun search(query: String, onSuccess: (Address) -> Unit, onFailure: (Exception) -> Unit) {
+  override fun search(
+      query: String,
+      onSuccess: (List<Address>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
     val url =
         HttpUrl.Builder()
             .scheme("https")
@@ -37,24 +41,39 @@ class AddressRepositoryNominatim @Inject constructor(private val client: OkHttpC
 
                   val body = response.body?.string()
                   if (body != null) {
-                    val address = addressFromBody(body)
-                    onSuccess(address)
+                    onSuccess(addressFromBody(body))
                   } else {
-                    onSuccess(Address())
+                    onSuccess(listOf(Address()))
                   }
                 }
               }
             })
   }
+  /**
+   * Extracts an address list from the response body.
+   *
+   * @param body The response body.
+   * @return The list of addresses.
+   */
+  private fun addressFromBody(body: String): List<Address> {
 
-  /** Extracts an address from the response body. */
-  private fun addressFromBody(body: String): Address {
     val jsonArray = JSONArray(body)
     if (jsonArray.length() == 0) {
-      return Address()
+      return listOf(Address())
     }
-    val jsonObject = jsonArray.getJSONObject(0)
-    val address = jsonObject.getJSONObject("address")
-    return Gson().fromJson(address.toString(), Address::class.java)
+    val addressList = mutableListOf<Address>()
+    for (i in 0 until jsonArray.length()) {
+      if (jsonArray.getJSONObject(i) != null) {
+        val jsonObject = jsonArray.getJSONObject(i)
+        val address = jsonObject.getJSONObject("address")
+        val deserializedAdress = Gson().fromJson(address.toString(), Address::class.java)
+        deserializedAdress.latitude = jsonObject.getString("lat")
+        deserializedAdress.longitude = jsonObject.getString("lon")
+        addressList.add(deserializedAdress)
+      } else {
+        break
+      }
+    }
+    return addressList
   }
 }
