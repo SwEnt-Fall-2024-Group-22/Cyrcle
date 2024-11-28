@@ -151,12 +151,8 @@ fun ReviewScreen(
                               rating = sliderToValue,
                               uid = reviewViewModel.getNewUid()))
 
-                      // Credit coins to user
-                      userViewModel.currentUser.value?.let { currentUser ->
-                        currentUser.details?.wallet?.creditCoins(10) // Add 10 coins bonus
-                        userViewModel.updateUser(currentUser)
-                      }
 
+                        userViewModel.creditCoinsToCurrentUser(PARKING_REVIEW_REWARD)
                       // Show combined toast
                       Toast.makeText(context, combinedToastText, Toast.LENGTH_LONG).show()
                     } else {

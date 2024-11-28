@@ -52,7 +52,7 @@ fun CreateProfileScreen(navigationActions: NavigationActions, userViewModel: Use
                   userWithId.copy(
                       details =
                           userWithId.details?.copy(
-                              wallet = Wallet(100) // Start with 100 coins
+                              wallet = Wallet() // Start with 100 coins
                               ))
               // Add the user then continue
               userViewModel.addUser(
