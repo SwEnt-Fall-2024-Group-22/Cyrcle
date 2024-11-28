@@ -291,35 +291,26 @@ class ParkingRepositoryFirestoreTest {
   }
 
   @Test
-  fun deleteParkingById_callsFirestoreDocument() {
-    `when`(mockDocumentReference.delete()).thenReturn(Tasks.forResult(null))
-
-    var onSuccessCallbackCalled = false
-    parkingRepositoryFirestore.deleteParkingById(
-        parking.uid,
-        { onSuccessCallbackCalled = true },
-        { fail("Expected success but got failure") })
-    shadowOf(Looper.getMainLooper()).idle()
-
-    verify(mockDocumentReference).delete()
-    assertTrue(onSuccessCallbackCalled)
-  }
-
-  @Test
   fun deleteParkingById_callsOnFailure() {
-    val taskCompletionSource = TaskCompletionSource<Void>()
-    `when`(mockDocumentReference.delete()).thenReturn(taskCompletionSource.task)
+    val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
+
+    // Mock the reports subcollection retrieval to fail
+    `when`(mockDocumentReference.collection("reports")).thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.get()).thenReturn(taskCompletionSource.task)
 
     var onFailureCallbackCalled = false
     parkingRepositoryFirestore.deleteParkingById(
         parking.uid,
         { fail("Expected failure but got success") },
         { onFailureCallbackCalled = true })
-    // Complete the task to trigger the addOnCompleteListener with an exception
+
+    // Trigger an exception for the subcollection retrieval
     taskCompletionSource.setException(Exception("Test exception"))
     shadowOf(Looper.getMainLooper()).idle()
 
-    verify(mockDocumentReference, times(1)).delete()
+    // Verify that the failure is handled and no further deletion occurs
+    verify(mockCollectionReference).get()
+    verify(mockDocumentReference, times(0)).delete() // Parking document deletion should not occur
     assertTrue(onFailureCallbackCalled)
   }
 

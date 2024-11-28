@@ -11,6 +11,7 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QueryDocumentSnapshot
 import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.WriteBatch
 import junit.framework.TestCase
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -19,6 +20,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.times
 import org.mockito.Mockito.`when`
@@ -70,16 +72,18 @@ class ReviewRepositoryFirestoreTest {
 
   @Test
   fun getReviewById_callsOnSuccess() {
-    `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockReviewQuerySnapshot))
-    `when`(mockReviewQuerySnapshot.documents).thenReturn(listOf(mockQueryDocumentSnapshot))
-    `when`(mockDocumentSnapshot.toObject(Review::class.java)).thenReturn(review)
-    `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
+    val taskCompletionSource = TaskCompletionSource<DocumentSnapshot>()
+    `when`(mockDocumentReference.get()).thenReturn(taskCompletionSource.task)
+    `when`(mockDocumentSnapshot.data).thenReturn(mockReviewData) // Include the mocked review data
 
     var onSuccessCallbackCalled = false
     reviewRepositoryFirestore.getReviewById(
         review.uid,
         { onSuccessCallbackCalled = true },
         { TestCase.fail("Expected success but got failure") })
+
+    // Complete the task to trigger the addOnCompleteListener with a successful result
+    taskCompletionSource.setResult(mockDocumentSnapshot)
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference, times(1)).get()
@@ -262,6 +266,17 @@ class ReviewRepositoryFirestoreTest {
 
   @Test
   fun deleteReviewById_callsOnSuccess() {
+    // Mock subcollection fetching
+    `when`(mockDocumentReference.collection("reports")).thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockReviewQuerySnapshot))
+    `when`(mockReviewQuerySnapshot.documents).thenReturn(emptyList()) // No reports to delete
+
+    // Mock Firestore batch
+    val mockWriteBatch = mock(WriteBatch::class.java)
+    `when`(mockFirestore.batch()).thenReturn(mockWriteBatch)
+    `when`(mockWriteBatch.commit()).thenReturn(Tasks.forResult(null)) // Batch commit succeeds
+
+    // Mock deleting the review document
     `when`(mockDocumentReference.delete()).thenReturn(Tasks.forResult(null))
 
     var onSuccessCallbackCalled = false
@@ -272,24 +287,30 @@ class ReviewRepositoryFirestoreTest {
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference).delete()
+    verify(mockWriteBatch).commit() // Verify batch commit
     assertTrue(onSuccessCallbackCalled)
   }
 
   @Test
   fun deleteReviewById_callsOnFailure() {
-    val taskCompletionSource = TaskCompletionSource<Void>()
-    `when`(mockDocumentReference.delete()).thenReturn(taskCompletionSource.task)
+    // Mock subcollection fetching
+    `when`(mockDocumentReference.collection("reports")).thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockReviewQuerySnapshot))
+    `when`(mockReviewQuerySnapshot.documents).thenReturn(emptyList()) // No reports to delete
+
+    // Mock Firestore batch
+    val mockWriteBatch = mock(WriteBatch::class.java)
+    `when`(mockFirestore.batch()).thenReturn(mockWriteBatch)
+    `when`(mockWriteBatch.commit()).thenReturn(Tasks.forException(Exception("Batch commit failed")))
 
     var onFailureCallbackCalled = false
     reviewRepositoryFirestore.deleteReviewById(
         review.uid,
         onSuccess = { fail("Expected failure but got success") },
         onFailure = { onFailureCallbackCalled = true })
-    // Complete the task to trigger the addOnCompleteListener with an exception
-    taskCompletionSource.setException(Exception("Test exception"))
     shadowOf(Looper.getMainLooper()).idle()
 
-    verify(mockDocumentReference).delete()
+    verify(mockWriteBatch).commit() // Verify batch commit
     assertTrue(onFailureCallbackCalled)
   }
 

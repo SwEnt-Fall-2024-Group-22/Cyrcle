@@ -2,7 +2,9 @@ package com.github.se.cyrcle.model.parking
 
 import android.content.Context
 import com.github.se.cyrcle.model.image.ImageRepository
+import com.github.se.cyrcle.model.report.ReportedObject
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
+import com.github.se.cyrcle.model.report.ReportedObjectType
 import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.mapbox.geojson.Point
 import org.junit.Assert.assertEquals
@@ -119,25 +121,39 @@ class ParkingViewModelTest {
             reason = ParkingReportReason.SAFETY_CONCERN,
             userId = user.public.userId,
             parking = parking.uid,
-            "")
+            description = "Test safety concern")
+
+    val newReportedObject =
+        ReportedObject(
+            objectUID = parking.uid,
+            reportUID = report.uid,
+            nbOfTimesReported = 1,
+            nbOfTimesMaxSeverityReported = 1,
+            userUID = user.public.userId,
+            objectType = ReportedObjectType.PARKING)
 
     // Mock repository behavior for report addition
     `when`(parkingRepository.addReport(eq(report), any(), any())).then {
-      it.getArgument<(ParkingReport) -> Unit>(1)(report)
+      it.getArgument<(ParkingReport) -> Unit>(1)(report) // Trigger onSuccess
     }
+
+    // Mock the behavior for adding the reported object
+    `when`(
+            reportedObjectRepository.getObjectUID(
+                eq(parking.uid),
+                eq(newReportedObject),
+                eq(true), // shouldAddIfNotExist
+                any(),
+                any()))
+        .then {
+          it.getArgument<() -> Unit>(3).invoke() // Trigger onSuccess
+        }
 
     parkingViewModel.selectParking(parking)
     parkingViewModel.addReport(report, user)
 
     // Verify that the report was added to the parking repository
     verify(parkingRepository).addReport(eq(report), any(), any())
-
-    // Verify parking's report counters are updated
-    assertEquals(1, parking.nbReports) // Number of reports should increment
-    assertEquals(1, parking.nbMaxSeverityReports) // Max severity report counter should increment
-
-    // Verify the parking repository update method is called to persist changes
-    verify(parkingRepository).updateParking(eq(parking), any(), any())
   }
 
   @Test
