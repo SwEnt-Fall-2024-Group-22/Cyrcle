@@ -6,11 +6,18 @@ package com.github.se.cyrcle.model.user
  */
 typealias Coin = Int
 
+/** Coin rewards that the user can get with multiple actions. */
+const val PARKING_CREATION_REWARD: Coin = 100
+const val PARKING_REVIEW_REWARD: Coin = 10
+const val ACCOUNT_CREATION_REWARD: Coin = 100
+
+const val SPIN_COST: Coin = 10
+
 /**
  * A class that represent a [Coin] container (hence the name), which can be used to store and
  * manipulate the amount of coins a user has.
  */
-class Wallet(private var coins: Coin = 0) {
+class Wallet(private var coins: Coin = ACCOUNT_CREATION_REWARD) {
 
   /**
    * Add amount of coins to the wallet.
@@ -41,7 +48,7 @@ class Wallet(private var coins: Coin = 0) {
    */
   fun isSolvable(amount: Coin, creditThreshold: Coin): Boolean {
     if (amount < 0) throw IllegalArgumentException("Amount must be positive")
-    return (coins - amount) > creditThreshold
+    return (coins - amount) >= creditThreshold
   }
 
   /**
@@ -55,7 +62,7 @@ class Wallet(private var coins: Coin = 0) {
   /** Creates an empty [Wallet]. It contains no coins. */
   companion object {
     fun empty(): Wallet {
-      return Wallet()
+      return Wallet(0)
     }
   }
 }

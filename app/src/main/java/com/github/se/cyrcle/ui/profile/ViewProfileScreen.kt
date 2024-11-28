@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Diamond
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Outbox
 import androidx.compose.material3.AlertDialog
@@ -92,8 +93,15 @@ fun ViewProfileScreen(
               testTag = "SignOutButton",
               onClick = { signOut = true })
 
+          com.github.se.cyrcle.ui.theme.atoms.IconButton(
+              modifier = Modifier.padding(10.dp).align(Alignment.TopStart),
+              icon =
+                  Icons.Filled.Diamond, // or Icons.Filled.Paid or Icons.Filled.AttachMoney etc...
+              contentDescription = "Go to Gambling Screen",
+              testTag = "GamblingButton",
+              onClick = { navigationActions.navigateTo(Screen.GAMBLING) })
+
           if (signOut) {
-            // Show sign out dialog to prevent accidental sign out
             AlertDialog(
                 modifier = Modifier.testTag("SignOutDialog"),
                 onDismissRequest = {},
@@ -137,9 +145,7 @@ fun ViewProfileScreen(
                   Button(
                       text = stringResource(R.string.view_profile_screen_save_button),
                       onClick = {
-                        // take care of updating the viewmodel as well as the database
                         userViewModel.updateUser(it, context)
-
                         isEditing = false
                       },
                       colorLevel = ColorLevel.PRIMARY,

@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,6 +28,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.model.user.SPIN_COST
+import com.github.se.cyrcle.model.user.UserViewModel
+import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 import kotlin.math.*
 import kotlinx.coroutines.*
 
@@ -245,27 +251,59 @@ fun WheelView(
 }
 
 @Composable
-fun GamblingScreen() {
-  Box(
-      modifier = Modifier.fillMaxSize().testTag("gambling_screen"),
-      contentAlignment = Alignment.Center) {
-        var wheelSpinFunction by remember { mutableStateOf<(() -> Unit)?>(null) }
+fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserViewModel) {
+  val userState by userViewModel.currentUser.collectAsState()
+  var coins by remember { mutableStateOf(userState?.details?.wallet?.getCoins()) }
 
-        WheelView(
-                modifier = Modifier.size(300.dp).testTag("wheel_view"),
-                onSegmentLanded = { /* Handle landing */})
-            .let { spinFn -> wheelSpinFunction = spinFn }
+  Scaffold(
+      topBar = {
+        TopAppBar(
+            navigationActions = navigationActions,
+            title = stringResource(R.string.gambling_screen_title),
+            testTag = "gambling_screen_top_bar")
+      }) { paddingValues ->
+        Box(
+            modifier = Modifier.fillMaxSize().padding(paddingValues).testTag("gambling_screen"),
+            contentAlignment = Alignment.Center) {
+              var wheelSpinFunction by remember { mutableStateOf<(() -> Unit)?>(null) }
 
-        Button(
-            onClick = { wheelSpinFunction?.invoke() },
-            modifier = Modifier.size(90.dp).clip(CircleShape).testTag("spin_button"),
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Red)) {
               Text(
-                  text = stringResource(R.string.spin_button_text),
-                  fontSize = 16.sp,
-                  fontWeight = FontWeight.Bold,
-                  textAlign = TextAlign.Center,
-                  modifier = Modifier.wrapContentSize().testTag("spin_button_text"))
+                  text = stringResource(R.string.gambling_screen_coins_display, coins ?: 0),
+                  modifier =
+                      Modifier.align(Alignment.TopCenter)
+                          .padding(top = 16.dp)
+                          .testTag("coin_display"),
+                  style = MaterialTheme.typography.headlineMedium)
+
+              WheelView(
+                      modifier = Modifier.size(300.dp).testTag("wheel_view"),
+                      onSegmentLanded = { /* Handle landing */})
+                  .let { spinFn -> wheelSpinFunction = spinFn }
+
+              val canSpin = userState?.details?.wallet?.isSolvable(SPIN_COST, 0) == true
+
+              Button(
+                  onClick = {
+                    userViewModel.tryDebitCoinsFromCurrentUser(
+                        SPIN_COST,
+                        0,
+                        onSuccess = {
+                          coins = userState?.details?.wallet?.getCoins()
+                          wheelSpinFunction?.invoke()
+                        })
+                  },
+                  enabled = canSpin,
+                  modifier = Modifier.size(90.dp).clip(CircleShape).testTag("spin_button"),
+                  colors =
+                      ButtonDefaults.buttonColors(
+                          containerColor = Color.Red, disabledContainerColor = Color.Gray)) {
+                    Text(
+                        text = stringResource(R.string.spin_button_text),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.wrapContentSize().testTag("spin_button_text"))
+                  }
             }
       }
 }

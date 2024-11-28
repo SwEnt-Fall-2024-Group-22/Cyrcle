@@ -383,4 +383,59 @@ class UserViewModel(
         },
         onFailure = onFailure)
   }
+
+  // ============================== WALLET FUNCTIONS ==============================
+
+  /**
+   * Credits coins to the current user's wallet and updates the user in the database.
+   *
+   * @param amount the amount of coins to credit
+   * @param onSuccess callback called when the operation is successful
+   */
+  fun creditCoinsToCurrentUser(amount: Coin, onSuccess: () -> Unit = {}) {
+    currentUser.value?.let { user ->
+      try {
+        user.details?.wallet?.creditCoins(amount)
+        updateUser(
+            user,
+            onSuccess = {
+              Log.d("UserViewModel", "Successfully credited $amount coins to user")
+              onSuccess()
+            })
+      } catch (e: IllegalArgumentException) {
+        Log.e("UserViewModel", "Failed to credit coins: ${e.message}")
+      }
+    } ?: Log.e("UserViewModel", "Attempted to credit coins but no current user")
+  }
+
+  /**
+   * Checks if the current user can afford a transaction and debits the coins if possible.
+   *
+   * @param amount the amount of coins needed for the transaction
+   * @param creditThreshold the minimum amount of coins that should remain after the transaction
+   * @param onSuccess callback called when the transaction is successful
+   */
+  fun tryDebitCoinsFromCurrentUser(
+      amount: Coin,
+      creditThreshold: Coin = 0,
+      onSuccess: () -> Unit = {}
+  ) {
+    currentUser.value?.let { user ->
+      try {
+        if (user.details?.wallet?.isSolvable(amount, creditThreshold) == true) {
+          user.details.wallet.debitCoins(amount)
+          updateUser(
+              user,
+              onSuccess = {
+                Log.d("UserViewModel", "Successfully debited $amount coins from user")
+                onSuccess()
+              })
+        } else {
+          Log.d("UserViewModel", "User cannot afford transaction of $amount coins")
+        }
+      } catch (e: IllegalArgumentException) {
+        Log.e("UserViewModel", "Failed to debit coins: ${e.message}")
+      }
+    } ?: Log.e("UserViewModel", "Attempted to debit coins but no current user")
+  }
 }

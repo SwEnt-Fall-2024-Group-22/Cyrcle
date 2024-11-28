@@ -15,6 +15,7 @@ import com.github.se.cyrcle.ui.addParking.attributes.AttributesPicker
 import com.github.se.cyrcle.ui.addParking.attributes.RackTypeHelpScreen
 import com.github.se.cyrcle.ui.addParking.location.LocationPicker
 import com.github.se.cyrcle.ui.authentication.SignInScreen
+import com.github.se.cyrcle.ui.gambling.GamblingScreen
 import com.github.se.cyrcle.ui.list.SpotListScreen
 import com.github.se.cyrcle.ui.map.MapScreen
 import com.github.se.cyrcle.ui.navigation.NavigationActions
@@ -95,7 +96,8 @@ fun CyrcleNavHost(
     navigation(startDestination = Screen.LOCATION_PICKER, route = Route.ADD_SPOTS) {
       composable(Screen.LOCATION_PICKER) { LocationPicker(navigationActions, mapViewModel) }
       composable(Screen.ATTRIBUTES_PICKER) {
-        AttributesPicker(navigationActions, parkingViewModel, mapViewModel, addressViewModel)
+        AttributesPicker(
+            navigationActions, parkingViewModel, mapViewModel, addressViewModel, userViewModel)
       }
       composable(Screen.RACK_INFO) { RackTypeHelpScreen(navigationActions) }
     }
@@ -107,6 +109,13 @@ fun CyrcleNavHost(
       composable(Screen.VIEW_PROFILE) {
         ProfileScreen(navigationActions, userViewModel, parkingViewModel)
       }
+    }
+
+    navigation(
+        startDestination = Screen.GAMBLING,
+        route = Route.GAMBLING,
+    ) {
+      composable(Screen.GAMBLING) { GamblingScreen(navigationActions, userViewModel) }
     }
   }
 }

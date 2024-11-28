@@ -8,7 +8,7 @@ class WalletTest {
 
   @Test
   fun creditCoins_increasesCoinCount() {
-    val wallet = Wallet()
+    val wallet = Wallet.empty()
     wallet.creditCoins(10)
     assertEquals(10, wallet.getCoins())
   }
@@ -22,13 +22,13 @@ class WalletTest {
 
   @Test
   fun creditCoins_throwsExceptionForNegativeAmount() {
-    val wallet = Wallet()
+    val wallet = Wallet.empty()
     assertThrows(IllegalArgumentException::class.java) { wallet.creditCoins(-5) }
   }
 
   @Test
   fun debitCoins_throwsExceptionForNegativeAmount() {
-    val wallet = Wallet()
+    val wallet = Wallet.empty()
     assertThrows(IllegalArgumentException::class.java) { wallet.debitCoins(-5) }
   }
 
@@ -36,5 +36,11 @@ class WalletTest {
   fun empty_returnsWalletWithZeroCoins() {
     val wallet = Wallet.empty()
     assertEquals(0, wallet.getCoins())
+  }
+
+  @Test
+  fun newWalletHasHundredCoins() {
+    val wallet = Wallet()
+    assertEquals(100, wallet.getCoins())
   }
 }

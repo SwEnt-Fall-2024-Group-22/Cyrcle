@@ -32,6 +32,7 @@ import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.review.Review
 import com.github.se.cyrcle.model.review.ReviewViewModel
+import com.github.se.cyrcle.model.user.PARKING_REVIEW_REWARD
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.ColorLevel
@@ -79,6 +80,10 @@ fun ReviewScreen(
   var textValue by remember { mutableStateOf(if (ownerHasReviewed) matchingReview?.text!! else "") }
 
   val context = LocalContext.current
+  val reviewAddedText = stringResource(R.string.review_screen_submit_toast)
+  val reviewRewardText = stringResource(R.string.review_screen_reward_toast, PARKING_REVIEW_REWARD)
+  val reviewUpdateText = stringResource(R.string.review_screen_update_toast)
+  val combinedToastText = "$reviewAddedText\n$reviewRewardText"
 
   Scaffold(
       topBar = {
@@ -134,7 +139,6 @@ fun ReviewScreen(
               Button(
                   text = stringResource(R.string.review_screen_submit_button),
                   onClick = {
-                    Toast.makeText(context, "Review Added!", Toast.LENGTH_SHORT).show()
                     val sliderToValue = (sliderValue * 100).toInt() / 100.0
 
                     if (!ownerHasReviewed) {
@@ -146,6 +150,10 @@ fun ReviewScreen(
                               parking = selectedParking.uid,
                               rating = sliderToValue,
                               uid = reviewViewModel.getNewUid()))
+
+                      userViewModel.creditCoinsToCurrentUser(PARKING_REVIEW_REWARD)
+                      // Show combined toast
+                      Toast.makeText(context, combinedToastText, Toast.LENGTH_LONG).show()
                     } else {
                       parkingViewModel.handleReviewUpdate(
                           newScore = sliderToValue, oldScore = matchingReview?.rating!!)
@@ -156,6 +164,7 @@ fun ReviewScreen(
                               parking = selectedParking.uid,
                               rating = sliderToValue,
                               uid = reviewViewModel.selectedReview.value?.uid!!))
+                      Toast.makeText(context, reviewUpdateText, Toast.LENGTH_SHORT).show()
                     }
                     navigationActions.goBack()
                   },

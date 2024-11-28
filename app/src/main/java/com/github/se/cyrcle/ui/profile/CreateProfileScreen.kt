@@ -12,10 +12,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.model.user.ACCOUNT_CREATION_REWARD
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserDetails
 import com.github.se.cyrcle.model.user.UserPublic
 import com.github.se.cyrcle.model.user.UserViewModel
+import com.github.se.cyrcle.model.user.Wallet
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import com.github.se.cyrcle.ui.theme.atoms.GoogleSignInButton
@@ -28,6 +30,10 @@ fun CreateProfileScreen(navigationActions: NavigationActions, userViewModel: Use
   val defaultUser = User(UserPublic("", ""), UserDetails())
 
   val validationToastText = stringResource(R.string.create_profile_validation_toast)
+  val welcomeBonusText =
+      stringResource(R.string.create_profile_welcome_bonus_toast, ACCOUNT_CREATION_REWARD)
+  val combinedToastText = "$validationToastText\n$welcomeBonusText"
+
   val errorToastText = stringResource(R.string.create_profile_error_toast)
   val accountExistsToastText = stringResource(R.string.create_profile_account_already_exists)
 
@@ -35,22 +41,26 @@ fun CreateProfileScreen(navigationActions: NavigationActions, userViewModel: Use
     userViewModel.authenticate(
         // On successful authentication
         { userId ->
-          val user = createdUser.copy(public = createdUser.public.copy(userId = userId))
+          val userWithId = createdUser.copy(public = createdUser.public.copy(userId = userId))
 
           // Check if user already exists
-          userViewModel.doesUserExist(user) { userExists ->
+          userViewModel.doesUserExist(userWithId) { userExists ->
             if (userExists) {
               Toast.makeText(context, accountExistsToastText, Toast.LENGTH_SHORT).show()
               navigationActions.goBack()
             } else {
-
+              val userWithCoins =
+                  userWithId.copy(
+                      details =
+                          userWithId.details?.copy(
+                              wallet = Wallet() // Start with 100 coins
+                              ))
               // Add the user then continue
               userViewModel.addUser(
-                  user,
+                  userWithCoins,
                   {
-                    userViewModel.setCurrentUser(user)
-                    userViewModel.updateUser(user, context)
-                    Toast.makeText(context, validationToastText, Toast.LENGTH_SHORT).show()
+                    userViewModel.updateUser(userWithCoins, context)
+                    Toast.makeText(context, combinedToastText, Toast.LENGTH_LONG).show()
                     navigationActions.navigateTo(TopLevelDestinations.MAP)
                   },
                   {
