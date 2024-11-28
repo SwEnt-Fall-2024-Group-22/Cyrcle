@@ -174,14 +174,16 @@
     <string name="sort_reviews">Sort Reviews</string>
     <string name="sort_by_rating">Sort By Rating (Best Rated First)</string>
     <string name="sort_by_date">Sort By Date (Most Recent First)</string>
-    <string name="delete_review">Delete Review</string>
+    <string name="all_reviews_delete_review">Delete Review</string>
     <string name="add_review_first">Add A Review First!</string>
-    <string name="add_review">Add Review</string>
-    <string name="edit_review">Edit Review</string>
+    <string name="all_reviews_add_review">Add Review</string>
+    <string name="all_reviews_edit_review">Edit Review</string>
     <string name="review_deleted">Review Deleted!</string>
     <string name="all_review_report_review_option">Report Review</string>
     <string name="review_reported">Review Reported!</string>
     <string name="sign_in_to_report_review">Please sign in to report reviews</string>
+    <string name="all_reviews_your_review">Your Review</string>
+    <string name="all_reviews_other_reviews">Other Reviews</string>
 
     <!-- Review Screen -->
     <string name="review_screen_title_new_review">Add your review</string>
