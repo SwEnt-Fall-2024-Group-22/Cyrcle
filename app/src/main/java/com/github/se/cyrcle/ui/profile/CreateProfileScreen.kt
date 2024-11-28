@@ -12,6 +12,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.model.user.ACCOUNT_CREATION_REWARD
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserDetails
 import com.github.se.cyrcle.model.user.UserPublic
@@ -29,7 +30,7 @@ fun CreateProfileScreen(navigationActions: NavigationActions, userViewModel: Use
   val defaultUser = User(UserPublic("", ""), UserDetails())
 
   val validationToastText = stringResource(R.string.create_profile_validation_toast)
-  val welcomeBonusText = stringResource(R.string.welcome_bonus_toast)
+  val welcomeBonusText = stringResource(R.string.create_profile_welcome_bonus_toast, ACCOUNT_CREATION_REWARD)
   val combinedToastText = "$validationToastText\n$welcomeBonusText"
 
   val errorToastText = stringResource(R.string.create_profile_error_toast)
