@@ -6,9 +6,12 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextClearance
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.ui.theme.atoms.Button
+import junit.framework.TestCase.assertFalse
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -30,7 +33,10 @@ class EditProfileComponentTest {
 
   @Test
   fun testNullEditProfileComponent() {
-    composeTestRule.setContent { EditProfileComponent(null, { SaveButton() }, { CancelButton() }) }
+    composeTestRule.setContent {
+      EditProfileComponent(null, { _, _ -> SaveButton() }, { CancelButton() })
+    }
+    composeTestRule.waitForIdle()
 
     composeTestRule.onNodeWithTag("NullUserText").assertIsDisplayed()
 
@@ -46,7 +52,10 @@ class EditProfileComponentTest {
   fun testEditProfileComponentHorizontalButtons() {
     val user = TestInstancesUser.user1
 
-    composeTestRule.setContent { EditProfileComponent(user, { SaveButton() }, { CancelButton() }) }
+    composeTestRule.setContent {
+      EditProfileComponent(user, { _, _ -> SaveButton() }, { CancelButton() })
+    }
+    composeTestRule.waitForIdle()
 
     composeTestRule.onNodeWithTag("NullUserText").assertDoesNotExist()
 
@@ -77,8 +86,10 @@ class EditProfileComponentTest {
     val user = TestInstancesUser.user1
 
     composeTestRule.setContent {
-      EditProfileComponent(user, { SaveButton() }, { CancelButton() }, verticalButtonDisplay = true)
+      EditProfileComponent(
+          user, { _, _ -> SaveButton() }, { CancelButton() }, verticalButtonDisplay = true)
     }
+    composeTestRule.waitForIdle()
 
     composeTestRule.onNodeWithTag("NullUserText").assertDoesNotExist()
 
@@ -102,5 +113,27 @@ class EditProfileComponentTest {
     composeTestRule.onNodeWithTag("EditComponentButtonRow").assertDoesNotExist()
     composeTestRule.onNodeWithTag("SaveButton", useUnmergedTree = true).assertIsDisplayed()
     composeTestRule.onNodeWithTag("CancelButton", useUnmergedTree = true).assertIsDisplayed()
+  }
+
+  @Test
+  fun testCreateWithEmptyFields() {
+    val user = TestInstancesUser.user1
+
+    var validInputs = true
+    composeTestRule.setContent {
+      EditProfileComponent(
+          user,
+          { _, b ->
+            SaveButton()
+            validInputs = b
+          },
+          { CancelButton() })
+    }
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithTag("UsernameField").performTextClearance()
+    composeTestRule.onNodeWithTag("SaveButton", useUnmergedTree = true).performClick()
+
+    assertFalse(validInputs)
   }
 }

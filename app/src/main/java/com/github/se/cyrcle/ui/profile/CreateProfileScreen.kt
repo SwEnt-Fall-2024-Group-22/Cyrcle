@@ -36,6 +36,7 @@ fun CreateProfileScreen(navigationActions: NavigationActions, userViewModel: Use
 
   val errorToastText = stringResource(R.string.create_profile_error_toast)
   val accountExistsToastText = stringResource(R.string.create_profile_account_already_exists)
+  val incorrectFieldsToastText = stringResource(R.string.create_profile_incorrect_field_inputs)
 
   val onSignInClick = { createdUser: User ->
     userViewModel.authenticate(
@@ -59,6 +60,10 @@ fun CreateProfileScreen(navigationActions: NavigationActions, userViewModel: Use
               userViewModel.addUser(
                   userWithCoins,
                   {
+                    // setCurrentUser needs to be called even though it is done in the update since
+                    // there is first a check in the UserViewModel that does not pass if the user is
+                    // not set before
+                    userViewModel.setCurrentUser(userWithCoins)
                     userViewModel.updateUser(userWithCoins, context)
                     Toast.makeText(context, combinedToastText, Toast.LENGTH_LONG).show()
                     navigationActions.navigateTo(TopLevelDestinations.MAP)
@@ -85,12 +90,15 @@ fun CreateProfileScreen(navigationActions: NavigationActions, userViewModel: Use
             defaultUser,
             verticalButtonDisplay = true,
             modifier = Modifier.padding(padding),
-            saveButton = { userAttempt: User ->
+            saveButton = { userAttempt: User, validInputs: Boolean ->
               Text(
                   stringResource(R.string.create_profile_sign_in_explanation),
                   modifier = Modifier.padding(bottom = 5.dp),
                   style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold))
-              GoogleSignInButton { onSignInClick(userAttempt) }
+              GoogleSignInButton {
+                if (validInputs) onSignInClick(userAttempt)
+                else Toast.makeText(context, incorrectFieldsToastText, Toast.LENGTH_SHORT).show()
+              }
             },
             cancelButton = {})
       }
