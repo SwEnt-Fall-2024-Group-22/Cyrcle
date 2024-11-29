@@ -142,6 +142,12 @@ class MapViewModel : ViewModel() {
     _cameraPosition.value = newCameraState
   }
 
+  fun unZoomActualCamera() {
+    val actualCamera = _cameraPosition.value!!
+    _cameraPosition.value =
+        CameraState(actualCamera.center, EdgeInsets(0.0, 0.0, 0.0, 0.0), 10.0, 0.0, 0.0)
+  }
+
   /**
    * Update the screen coordinates states
    *

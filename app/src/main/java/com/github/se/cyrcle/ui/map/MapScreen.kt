@@ -438,6 +438,7 @@ fun MapScreen(
                   markerAnnotationManager?.deleteAll()
                   mapViewModel.removePreviewCard()
                   mapViewModel.updateViewAnnotationManager(null)
+                  mapViewModel.updateCameraPosition(mapViewportState.cameraState!!)
                 }
               }
             }

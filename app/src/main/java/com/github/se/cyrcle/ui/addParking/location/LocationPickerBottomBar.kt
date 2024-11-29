@@ -44,72 +44,76 @@ fun LocationPickerBottomBar(
 ) {
   val locationPickerState by mapViewModel.locationPickerState.collectAsState()
   val isLocationValid by mapViewModel.isLocationValid.collectAsState(true)
-  Box(Modifier.background(Color.White).height(100.dp).testTag("LocationPickerBottomBar")) {
-    Row(
-        Modifier.fillMaxWidth()
-            .wrapContentHeight()
-            .padding(16.dp)
-            .background(MaterialTheme.colorScheme.background),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically) {
-          Button(
-              {
-                mapViewModel.updateCameraPositionWithoutBearing(
-                    mapView.value?.mapboxMap?.cameraState!!)
-                navigationActions.navigateTo(Screen.MAP)
-              },
-              modifier = Modifier.testTag("cancelButton"),
-              colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
-                Text(
-                    stringResource(R.string.location_picker_bottom_bar_cancel_button),
-                    modifier = Modifier.width(100.dp),
-                    color = MaterialTheme.colorScheme.primary,
-                    style = Typography.headlineMedium,
-                    textAlign = TextAlign.Center)
-              }
-          VerticalDivider(
-              color = MaterialTheme.colorScheme.primary,
-              modifier = Modifier.height(32.dp).width(1.dp),
-              thickness = 2.dp)
-
-          if (locationPickerState == LocationPickerState.NONE_SET) {
-            Button(
-                { onTopLeftSelected(mapViewModel) },
-                modifier = Modifier.testTag("nextButton"),
-                colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
-                  Text(
-                      stringResource(R.string.location_picker_bottom_bar_next_button),
-                      modifier = Modifier.width(100.dp),
-                      color = MaterialTheme.colorScheme.primary,
-                      style = Typography.headlineMedium,
-                      textAlign = TextAlign.Center)
-                }
-          } else if (locationPickerState == LocationPickerState.TOP_LEFT_SET) {
-            Button(
-                {
-                  if (isLocationValid) {
-                    onBottomRightSelected(mapViewModel)
-                  } else {
-                    Toast.makeText(
-                            mapView.value?.context,
-                            R.string.location_picker_invalid_area,
-                            Toast.LENGTH_SHORT)
-                        .show()
+  Box(
+      Modifier.background(Color.White).height(100.dp).testTag("LocationPickerBottomBar"),
+      contentAlignment = Alignment.Center) {
+        Row(
+            Modifier.fillMaxWidth()
+                .wrapContentHeight()
+                .padding(16.dp)
+                .background(MaterialTheme.colorScheme.background),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically) {
+              Button(
+                  {
+                    mapViewModel.updateCameraPositionWithoutBearing(
+                        mapView.value?.mapboxMap?.cameraState!!)
+                    navigationActions.navigateTo(Screen.MAP)
+                  },
+                  modifier = Modifier.testTag("cancelButton"),
+                  colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
+                    Text(
+                        stringResource(R.string.location_picker_bottom_bar_cancel_button),
+                        modifier = Modifier.width(100.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        style = Typography.headlineMedium,
+                        textAlign = TextAlign.Center)
                   }
-                },
-                modifier = Modifier.testTag("nextButton"),
-                colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
-                  Log.d("LocationPickerBottomBar", "isLocationValid: $isLocationValid")
-                  Text(
-                      stringResource(R.string.location_picker_bottom_bar_next_button),
-                      modifier = Modifier.width(100.dp),
-                      color =
-                          if (isLocationValid) MaterialTheme.colorScheme.primary
-                          else disabledColor(),
-                      style = Typography.headlineMedium,
-                      textAlign = TextAlign.Center)
-                }
-          }
-        }
-  }
+              VerticalDivider(
+                  color = MaterialTheme.colorScheme.primary,
+                  modifier = Modifier.height(32.dp).width(1.dp),
+                  thickness = 2.dp)
+
+              if (locationPickerState == LocationPickerState.NONE_SET) {
+                Button(
+                    { onTopLeftSelected(mapViewModel) },
+                    modifier = Modifier.testTag("nextButton"),
+                    colors =
+                        ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
+                      Text(
+                          stringResource(R.string.location_picker_bottom_bar_next_button),
+                          modifier = Modifier.width(100.dp),
+                          color = MaterialTheme.colorScheme.primary,
+                          style = Typography.headlineMedium,
+                          textAlign = TextAlign.Center)
+                    }
+              } else if (locationPickerState == LocationPickerState.TOP_LEFT_SET) {
+                Button(
+                    {
+                      if (isLocationValid) {
+                        onBottomRightSelected(mapViewModel)
+                      } else {
+                        Toast.makeText(
+                                mapView.value?.context,
+                                R.string.location_picker_invalid_area,
+                                Toast.LENGTH_SHORT)
+                            .show()
+                      }
+                    },
+                    modifier = Modifier.testTag("nextButton"),
+                    colors =
+                        ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
+                      Log.d("LocationPickerBottomBar", "isLocationValid: $isLocationValid")
+                      Text(
+                          stringResource(R.string.location_picker_bottom_bar_next_button),
+                          modifier = Modifier.width(100.dp),
+                          color =
+                              if (isLocationValid) MaterialTheme.colorScheme.primary
+                              else disabledColor(),
+                          style = Typography.headlineMedium,
+                          textAlign = TextAlign.Center)
+                    }
+              }
+            }
+      }
 }
