@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.profile
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
@@ -125,7 +124,6 @@ class EditProfileComponentTest {
       EditProfileComponent(
           user,
           { _, b ->
-            Log.d("EditProfileComponentTest", "Valid inputs: $b")
             SaveButton()
             validInputs = b
           },
