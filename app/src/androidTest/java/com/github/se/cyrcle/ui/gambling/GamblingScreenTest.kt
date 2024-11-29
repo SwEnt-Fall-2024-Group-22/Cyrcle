@@ -107,6 +107,7 @@ class GamblingScreenTest {
 
   @Test
   fun spin_button_triggers_wheel_spin() {
+    userViewModel.creditCoinsToCurrentUser(1000000)
     composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
 
     composeTestRule.onNodeWithTag("spin_button").performClick()
@@ -192,6 +193,7 @@ class GamblingScreenTest {
 
   @Test
   fun verify_wheel_spin_state_changes() {
+    userViewModel.creditCoinsToCurrentUser(1000000)
     composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
 
     // Initial state check
