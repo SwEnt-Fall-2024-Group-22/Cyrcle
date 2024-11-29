@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -38,10 +39,14 @@ import com.mapbox.maps.ScreenCoordinate
 fun RectangleSelection(
     mapViewModel: MapViewModel,
     paddingValues: PaddingValues,
-    mapView: MapView?
+    mapView: MapView?,
+    restrictSelectionSize: Boolean = true
 ) {
   val locationPickerState by mapViewModel.locationPickerState.collectAsState()
-  val isLocationValid by mapViewModel.isLocationValid.collectAsState(true)
+  val isLocationValid by
+      mapViewModel.isLocationValid.collectAsState(initial = true).let { locationValidState ->
+        derivedStateOf { !restrictSelectionSize || locationValidState.value }
+      }
   val center = Offset(0.5f, 0.5f)
   var touchPosition by remember { mutableStateOf(Offset.Unspecified) }
   val hasDragged = remember { mutableStateOf(false) }
