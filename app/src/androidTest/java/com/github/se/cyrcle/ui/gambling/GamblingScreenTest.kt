@@ -15,7 +15,6 @@ import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
-import com.github.se.cyrcle.model.user.SPIN_COST
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserDetails
 import com.github.se.cyrcle.model.user.UserPublic
@@ -71,7 +70,6 @@ class GamblingScreenTest {
   fun gambling_screen_shows_all_elements() {
     composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
 
-    Thread.sleep(10000)
     composeTestRule.onNodeWithTag("coin_display").assertTextEquals("Coins: 0")
     composeTestRule.onNodeWithTag("spin_button").assertIsNotEnabled()
     composeTestRule.onNodeWithTag("gambling_screen").assertExists()
@@ -124,20 +122,20 @@ class GamblingScreenTest {
     composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
 
     composeTestRule
-      .onNodeWithTag("spin_button")
-      .assertHasClickAction()
-      .assertHeightIsEqualTo(90.dp)
-      .assertWidthIsEqualTo(90.dp)
+        .onNodeWithTag("spin_button")
+        .assertHasClickAction()
+        .assertHeightIsEqualTo(90.dp)
+        .assertWidthIsEqualTo(90.dp)
 
     composeTestRule
-      .onNodeWithTag("spin_button_text", useUnmergedTree = true)
-      .assertExists()
-      .assertTextEquals("SPIN")
+        .onNodeWithTag("spin_button_text", useUnmergedTree = true)
+        .assertExists()
+        .assertTextEquals("SPIN")
 
     composeTestRule
-      .onNodeWithTag("spin_cost_text", useUnmergedTree = true)
-      .assertExists()
-      .assertTextEquals("(10 coins)")
+        .onNodeWithTag("spin_cost_text", useUnmergedTree = true)
+        .assertExists()
+        .assertTextEquals("(10 coins)")
   }
 
   @Test
