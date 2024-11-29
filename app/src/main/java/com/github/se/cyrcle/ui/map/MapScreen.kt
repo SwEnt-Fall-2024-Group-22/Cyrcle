@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,13 +24,16 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -529,7 +534,7 @@ fun MapScreen(
         }
 
         if (showSettings.value) {
-          SettingsMenu(mapMode, mapViewModel)
+          SettingsMenu(mapMode, mapViewModel, navigationActions)
         }
 
         if (showSuggestions.value &&
@@ -623,21 +628,27 @@ fun SuggestionMenu(
  *
  * @param mapMode The current map mode state.
  * @param mapViewModel The ViewModel for managing map-related data and actions.
+ * @param navigationActions The actions to navigate to different screens.
  */
 @Composable
-fun SettingsMenu(mapMode: State<MapViewModel.MapMode>, mapViewModel: MapViewModel) {
+fun SettingsMenu(
+    mapMode: State<MapViewModel.MapMode>,
+    mapViewModel: MapViewModel,
+    navigationActions: NavigationActions
+) {
   Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.TopEnd) {
     Card(
         modifier =
             Modifier.width(300.dp).height(400.dp).align(Alignment.Center).testTag("SettingsMenu")) {
-          Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = stringResource(R.string.settings))
+          Column(
+              modifier = Modifier.padding(16.dp),
+              horizontalAlignment = Alignment.CenterHorizontally,
+          ) {
+            Text(text = stringResource(R.string.settings), style = MaterialTheme.typography.headlineMedium)
             Spacer(modifier = Modifier.height(16.dp))
-
             // Advanced Mode
             Row(verticalAlignment = Alignment.CenterVertically) {
-              Text(text = stringResource(R.string.map_screen_mode_switch_label))
-              Spacer(modifier = Modifier.weight(1f))
+
               Switch(
                   modifier = Modifier.padding(start = 8.dp).testTag("advancedModeSwitch"),
                   checked = mapMode.value.isAdvancedMode,
@@ -652,6 +663,26 @@ fun SettingsMenu(mapMode: State<MapViewModel.MapMode>, mapViewModel: MapViewMode
                           .copy(
                               uncheckedTrackColor = disabledColor(),
                           ))
+                Spacer(modifier = Modifier.weight(1f))
+                Text(text = stringResource(R.string.map_screen_mode_switch_label))
+
+            }
+              HorizontalDivider(thickness = 1.dp, modifier = Modifier.fillMaxWidth(0.9f).padding(16.dp), color= MaterialTheme.colorScheme.onBackground)
+            // Offline Map Management
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.clickable {
+                 navigationActions.navigateTo(Route.ZONE)
+                })
+             {
+                // Icon with offline world
+                Icon(
+                    imageVector = Icons.Filled.CloudDownload,
+                    contentDescription = "Search",
+                    tint = defaultOnColor(),
+                    modifier = Modifier.padding(start = 8.dp).size(40.dp))
+                Spacer(Modifier.weight(1f))
+              Text(text = stringResource(R.string.map_screen_settings_to_zone))
             }
           }
         }
