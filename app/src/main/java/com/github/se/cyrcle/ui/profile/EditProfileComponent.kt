@@ -25,6 +25,13 @@ import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.ui.theme.atoms.ConditionCheckingInputText
 import com.github.se.cyrcle.ui.theme.atoms.Text
 
+const val FIRST_NAME_MIN_LENGTH = 0
+const val FIRST_NAME_MAX_LENGTH = 32
+const val LAST_NAME_MIN_LENGTH = 0
+const val LAST_NAME_MAX_LENGTH = 32
+const val USERNAME_MIN_LENGTH = 4
+const val USERNAME_MAX_LENGTH = 32
+
 /**
  * Edit the profile content of the user. This composable is a component meant to be used within
  * other screens
@@ -36,11 +43,18 @@ import com.github.se.cyrcle.ui.theme.atoms.Text
 @Composable
 fun EditProfileComponent(
     user: User?,
-    saveButton: @Composable (User) -> Unit,
+    saveButton: @Composable (User, Boolean) -> Unit,
     cancelButton: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     verticalButtonDisplay: Boolean = false
 ) {
+
+  fun areInputsValid(firstName: String, lastName: String, username: String): Boolean {
+    return firstName.length in FIRST_NAME_MIN_LENGTH..FIRST_NAME_MAX_LENGTH &&
+        lastName.length in LAST_NAME_MIN_LENGTH..LAST_NAME_MAX_LENGTH &&
+        username.length in USERNAME_MIN_LENGTH..USERNAME_MAX_LENGTH
+  }
+
   if (user == null) {
     Text(stringResource(R.string.profile_is_null), Modifier.testTag("NullUserText"))
     return
@@ -110,15 +124,16 @@ fun EditProfileComponent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        val validUserInput = areInputsValid(firstName, lastName, username)
         if (verticalButtonDisplay) {
-          saveButton(copyUser(user))
+          saveButton(copyUser(user), validUserInput)
           cancelButton()
         } else {
           Row(
               modifier = Modifier.testTag("EditComponentButtonRow"),
               horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 cancelButton()
-                saveButton(copyUser(user))
+                saveButton(copyUser(user), validUserInput)
               }
         }
       }

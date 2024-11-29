@@ -1,3 +1,5 @@
+package com.github.se.cyrcle.ui.gambling
+
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsEnabled
@@ -18,7 +20,6 @@ import com.github.se.cyrcle.model.user.UserDetails
 import com.github.se.cyrcle.model.user.UserPublic
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.model.user.Wallet
-import com.github.se.cyrcle.ui.gambling.GamblingScreen
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking

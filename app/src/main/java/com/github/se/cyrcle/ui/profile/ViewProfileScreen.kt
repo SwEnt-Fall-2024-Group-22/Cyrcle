@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.cyrcle.ui.navigation.NavigationActions
@@ -52,24 +53,12 @@ import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 
-const val FIRST_NAME_MIN_LENGTH = 0
-const val FIRST_NAME_MAX_LENGTH = 32
-const val LAST_NAME_MIN_LENGTH = 0
-const val LAST_NAME_MAX_LENGTH = 32
-const val USERNAME_MIN_LENGTH = 4
-const val USERNAME_MAX_LENGTH = 32
-
 @Composable
 fun ViewProfileScreen(
     navigationActions: NavigationActions,
     userViewModel: UserViewModel,
     parkingViewModel: ParkingViewModel,
 ) {
-  fun areInputsValid(firstName: String, lastName: String, username: String): Boolean {
-    return firstName.length in FIRST_NAME_MIN_LENGTH..FIRST_NAME_MAX_LENGTH &&
-        lastName.length in LAST_NAME_MIN_LENGTH..LAST_NAME_MAX_LENGTH &&
-        username.length in USERNAME_MIN_LENGTH..USERNAME_MAX_LENGTH
-  }
 
   val context = LocalContext.current
   val userState by userViewModel.currentUser.collectAsState()
@@ -150,17 +139,15 @@ fun ViewProfileScreen(
           if (isEditing) {
             EditProfileComponent(
                 user = userState,
-                saveButton = {
+                saveButton = { editedUser: User, validInputs: Boolean ->
                   Button(
                       text = stringResource(R.string.view_profile_screen_save_button),
                       onClick = {
-                        userViewModel.updateUser(it, context)
+                        userViewModel.updateUser(editedUser, context)
                         isEditing = false
                       },
                       colorLevel = ColorLevel.PRIMARY,
-                      enabled =
-                          areInputsValid(
-                              it.details!!.lastName, it.details.firstName, it.public.username),
+                      enabled = validInputs,
                       testTag = "SaveButton")
                 },
                 cancelButton = {
