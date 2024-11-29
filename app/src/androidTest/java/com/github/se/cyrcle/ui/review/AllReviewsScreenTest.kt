@@ -88,8 +88,18 @@ class AllReviewsScreenTest {
     composeTestRule.onNodeWithTag("ReviewCard0").performClick()
     composeTestRule.onNodeWithText("New Review.").assertIsDisplayed()
 
-    composeTestRule.onNodeWithTag("YourReviewTitle").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("YourReviewTitle").assertIsNotDisplayed()
     composeTestRule.onNodeWithTag("OtherReviewsTitle").assertIsDisplayed()
+  }
+
+  @Test
+  fun signedInUser_seesTwoSectionTitles() {
+    composeTestRule.setContent {
+      AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
+      userViewModel.setCurrentUser(TestInstancesUser.user1)
+    }
+
+    composeTestRule.onNodeWithTag("YourReviewTitle").assertIsDisplayed()
   }
 
   @Test

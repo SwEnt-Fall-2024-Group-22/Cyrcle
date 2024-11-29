@@ -187,25 +187,21 @@ fun AllReviewsScreen(
     userViewModel: UserViewModel
 ) {
   val selectedParking by parkingViewModel.selectedParking.collectAsState()
-  val currentUser by userViewModel.currentUser.collectAsState()
-  val userSignedIn by userViewModel.isSignedIn.collectAsState(false)
   val reviewsList by reviewViewModel.parkingReviews.collectAsState()
-  val ownerHasReviewed = remember { mutableStateOf(false) }
-  var selectedCardIndex by remember { mutableIntStateOf(-1) }
-  val context = LocalContext.current
-  var selectedSortingOption by remember { mutableStateOf(ReviewSortingOption.DateTime) }
-
   LaunchedEffect(Unit) {
     reviewViewModel.clearReviews()
     selectedParking?.let { reviewViewModel.getReviewsByParking(it.uid) }
   }
 
-  LaunchedEffect(reviewsList) {
-    ownerHasReviewed.value =
-        reviewsList.any { it.owner == userViewModel.currentUser.value?.public?.userId }
+  val currentUser by userViewModel.currentUser.collectAsState()
+  val userSignedIn by userViewModel.isSignedIn.collectAsState(false)
+  val currentUserHasReviewed = remember { mutableStateOf(false) }
+  LaunchedEffect(reviewsList, currentUser) {
+    currentUserHasReviewed.value = reviewsList.any { it.owner == currentUser?.public?.userId }
   }
 
   // Sort reviews based on the selected sorting option
+  var selectedSortingOption by remember { mutableStateOf(ReviewSortingOption.DateTime) }
   val sortedReviews =
       remember(reviewsList, selectedSortingOption) {
         when (selectedSortingOption) {
@@ -213,6 +209,9 @@ fun AllReviewsScreen(
           ReviewSortingOption.Rating -> reviewsList.sortedByDescending { it.rating }
         }
       }
+
+  var selectedCardIndex by remember { mutableIntStateOf(-1) }
+  val context = LocalContext.current
 
   Scaffold(
       topBar = {
@@ -234,65 +233,70 @@ fun AllReviewsScreen(
           LazyColumn(
               modifier = Modifier.weight(1f).padding(horizontal = 16.dp).testTag("ReviewList"),
               contentPadding = PaddingValues(bottom = 16.dp)) {
-                // If I reviewed the parking, show my review first
-                item {
-                  Column {
-                    Text(
-                        text = stringResource(R.string.all_reviews_your_review),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        testTag = "YourReviewTitle")
+                // Only display "Your Review" section if user is signed in
+                if (userSignedIn) {
+                  item {
+                    Column {
+                      Text(
+                          text = stringResource(R.string.all_reviews_your_review),
+                          style = MaterialTheme.typography.titleMedium,
+                          color = MaterialTheme.colorScheme.primary,
+                          testTag = "YourReviewTitle")
 
-                    if (ownerHasReviewed.value) {
-                      val userReview = reviewsList.find { it.owner == currentUser?.public?.userId }
-                      userReview?.let {
-                        ReviewCard(
-                            review = it,
-                            index = -1,
-                            isExpanded = true,
-                            onCardClick = {},
-                            options =
-                                mapOf(
-                                    // Edit review option
-                                    stringResource(R.string.all_reviews_edit_review) to
-                                        {
-                                          reviewViewModel.selectReview(it)
-                                          navigationActions.navigateTo(Screen.ADD_REVIEW)
-                                        },
-                                    // Delete review option
-                                    stringResource(R.string.all_reviews_delete_review) to
-                                        {
-                                          reviewViewModel.deleteReviewById(it.uid)
-                                          parkingViewModel.handleReviewDeletion(
-                                              oldScore = it.rating)
-                                          navigationActions.goBack()
-                                        }),
-                            userViewModel = userViewModel)
+                      if (currentUserHasReviewed.value) {
+                        val userReview =
+                            reviewsList.find { it.owner == currentUser?.public?.userId }
+                        userReview?.let {
+                          ReviewCard(
+                              review = it,
+                              index = -1,
+                              isExpanded = true,
+                              onCardClick = {},
+                              options =
+                                  mapOf(
+                                      // Edit review option
+                                      stringResource(R.string.all_reviews_edit_review) to
+                                          {
+                                            reviewViewModel.selectReview(it)
+                                            navigationActions.navigateTo(Screen.ADD_REVIEW)
+                                          },
+                                      // Delete review option
+                                      stringResource(R.string.all_reviews_delete_review) to
+                                          {
+                                            reviewViewModel.deleteReviewById(it.uid)
+                                            parkingViewModel.handleReviewDeletion(
+                                                oldScore = it.rating)
+                                            navigationActions.goBack()
+                                          }),
+                              userViewModel = userViewModel)
+                        }
+                      } else {
+                        // Add review button
+                        FloatingActionButton(
+                            onClick = { navigationActions.navigateTo(Screen.ADD_REVIEW) },
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .height(56.dp)
+                                    .padding(top = 8.dp)
+                                    .testTag("AddReviewButton")) {
+                              Text(
+                                  text = stringResource(R.string.all_reviews_add_review),
+                                  color = MaterialTheme.colorScheme.onPrimary,
+                                  style = MaterialTheme.typography.bodyMedium)
+                            }
                       }
-                    } else {
-                      // Add review button
-                      FloatingActionButton(
-                          onClick = { navigationActions.navigateTo(Screen.ADD_REVIEW) },
-                          containerColor = MaterialTheme.colorScheme.primary,
-                          modifier =
-                              Modifier.fillMaxWidth()
-                                  .height(56.dp)
-                                  .padding(top = 8.dp)
-                                  .testTag("AddReviewButton")) {
-                            Text(
-                                text = stringResource(R.string.all_reviews_add_review),
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                style = MaterialTheme.typography.bodyMedium)
-                          }
-                    }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                      Spacer(modifier = Modifier.height(16.dp))
+                    }
                   }
                 }
 
                 item {
                   Text(
-                      text = stringResource(R.string.all_reviews_other_reviews),
+                      text =
+                          if (userSignedIn) stringResource(R.string.all_reviews_other_reviews)
+                          else stringResource(R.string.all_reviews_all_reviews),
                       style = MaterialTheme.typography.titleMedium,
                       color = MaterialTheme.colorScheme.primary,
                       modifier = Modifier.padding(top = 16.dp),

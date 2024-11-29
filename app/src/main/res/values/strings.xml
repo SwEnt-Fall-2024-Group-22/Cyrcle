@@ -184,6 +184,7 @@
     <string name="sign_in_to_report_review">Please sign in to report reviews</string>
     <string name="all_reviews_your_review">Your Review</string>
     <string name="all_reviews_other_reviews">Other Reviews</string>
+    <string name="all_reviews_all_reviews">All Reviews</string>
 
     <!-- Review Screen -->
     <string name="review_screen_title_new_review">Add your review</string>
