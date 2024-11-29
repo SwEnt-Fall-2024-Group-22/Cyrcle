@@ -16,16 +16,11 @@ import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 @Composable
 fun ZoneSelectionScreen(navigationActions: NavigationActions) {
   Scaffold(
-    topBar = {
-      TopAppBar(title = stringResource(R.string.zone_selection_screen_title), navigationActions = navigationActions)
-    }
-  ) { padding ->
-    Box(
-      modifier = Modifier.padding(padding).fillMaxSize()
-    ) {
-      Text("TODO")
-    }
-  }
+      topBar = {
+        TopAppBar(
+            title = stringResource(R.string.zone_selection_screen_title),
+            navigationActions = navigationActions)
+      }) { padding ->
+        Box(modifier = Modifier.padding(padding).fillMaxSize()) { Text("TODO") }
+      }
 }
-
-

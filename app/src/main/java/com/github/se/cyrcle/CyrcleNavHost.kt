@@ -133,12 +133,8 @@ fun CyrcleNavHost(
         startDestination = Screen.ZONE_MANAGER,
         route = Route.ZONE,
     ) {
-      composable(Screen.ZONE_MANAGER) {
-          ZoneManagerScreen(navigationActions)
-      }
-        composable(Screen.ZONE_SELECTION) {
-        ZoneSelectionScreen(navigationActions)
-      }
+      composable(Screen.ZONE_MANAGER) { ZoneManagerScreen(navigationActions) }
+      composable(Screen.ZONE_SELECTION) { ZoneSelectionScreen(navigationActions) }
     }
   }
 }

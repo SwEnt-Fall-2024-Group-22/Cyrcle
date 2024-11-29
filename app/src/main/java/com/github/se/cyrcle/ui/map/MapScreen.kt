@@ -4,7 +4,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -644,11 +643,12 @@ fun SettingsMenu(
               modifier = Modifier.padding(16.dp),
               horizontalAlignment = Alignment.CenterHorizontally,
           ) {
-            Text(text = stringResource(R.string.settings), style = MaterialTheme.typography.headlineMedium)
+            Text(
+                text = stringResource(R.string.settings),
+                style = MaterialTheme.typography.headlineMedium)
             Spacer(modifier = Modifier.height(16.dp))
             // Advanced Mode
             Row(verticalAlignment = Alignment.CenterVertically) {
-
               Switch(
                   modifier = Modifier.padding(start = 8.dp).testTag("advancedModeSwitch"),
                   checked = mapMode.value.isAdvancedMode,
@@ -663,27 +663,30 @@ fun SettingsMenu(
                           .copy(
                               uncheckedTrackColor = disabledColor(),
                           ))
-                Spacer(modifier = Modifier.weight(1f))
-                Text(text = stringResource(R.string.map_screen_mode_switch_label))
-
+              Spacer(modifier = Modifier.weight(1f))
+              Text(text = stringResource(R.string.map_screen_mode_switch_label))
             }
-              HorizontalDivider(thickness = 1.dp, modifier = Modifier.fillMaxWidth(0.9f).padding(16.dp), color= MaterialTheme.colorScheme.onBackground)
+            HorizontalDivider(
+                thickness = 1.dp,
+                modifier = Modifier.fillMaxWidth(0.9f).padding(16.dp),
+                color = MaterialTheme.colorScheme.onBackground)
             // Offline Map Management
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.clickable {
-                 navigationActions.navigateTo(Route.ZONE)
-                })
-             {
-                // Icon with offline world
-                Icon(
-                    imageVector = Icons.Filled.CloudDownload,
-                    contentDescription = "Search",
-                    tint = defaultOnColor(),
-                    modifier = Modifier.padding(start = 8.dp).size(40.dp))
-                Spacer(Modifier.weight(1f))
-              Text(text = stringResource(R.string.map_screen_settings_to_zone))
-            }
+                modifier =
+                    Modifier.testTag("SettingsToZoneRow").clickable {
+                      navigationActions.navigateTo(Route.ZONE)
+                    }) {
+                  // Icon with offline world
+                  Icon(
+                      imageVector = Icons.Filled.CloudDownload,
+                      contentDescription = "Search",
+                      tint = defaultOnColor(),
+                      modifier = Modifier.padding(start = 8.dp).size(40.dp))
+
+                  Spacer(Modifier.weight(1f))
+                  Text(text = stringResource(R.string.map_screen_settings_to_zone))
+                }
           }
         }
   }

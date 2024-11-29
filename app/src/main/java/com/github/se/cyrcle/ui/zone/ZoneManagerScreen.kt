@@ -23,31 +23,31 @@ import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 /** Screen where users can manage their downloaded zones. and access the zone selection screen. */
 @Composable
 fun ZoneManagerScreen(navigationActions: NavigationActions) {
-    Scaffold(
-        topBar = {TopAppBar(title = stringResource(R.string.zone_manager_screen_title), navigationActions = navigationActions)}
-    ) { padding ->
+  Scaffold(
+      topBar = {
+        TopAppBar(
+            title = stringResource(R.string.zone_manager_screen_title),
+            navigationActions = navigationActions)
+      }) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
-            AddZoneButton(navigationActions)
-            Text("TODO")
+          AddZoneButton(navigationActions)
+          Text("TODO")
         }
-    }
+      }
 }
-
 
 @Composable
 fun AddZoneButton(navigationActions: NavigationActions) {
-    Box(modifier = Modifier.fillMaxSize())
-    {
-        IconButton(
-            icon = Icons.Default.Add,
-            contentDescription = "Add new Zone",
-            modifier =
+  Box(modifier = Modifier.fillMaxSize()) {
+    IconButton(
+        icon = Icons.Default.Add,
+        contentDescription = "Add new Zone",
+        modifier =
             Modifier.align(Alignment.BottomStart)
                 .scale(1.2f)
                 .padding(bottom = 25.dp, start = 16.dp),
-            onClick = { navigationActions.navigateTo(Screen.ZONE_SELECTION) },
-            colorLevel = ColorLevel.PRIMARY,
-            testTag = "addButton"
-        )
-    }
+        onClick = { navigationActions.navigateTo(Screen.ZONE_SELECTION) },
+        colorLevel = ColorLevel.PRIMARY,
+        testTag = "AddButton")
+  }
 }
