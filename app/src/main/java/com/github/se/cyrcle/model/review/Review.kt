@@ -11,7 +11,9 @@ data class Review(
     val parking: String,
     val time: Timestamp = Timestamp.now(),
     var nbReports: Int = 0,
-    var nbMaxSeverityReports: Int = 0
+    var nbMaxSeverityReports: Int = 0,
+    val likedBy: List<String> = emptyList(), // List of user ids
+    val dislikedBy: List<String> = emptyList() // List of user ids
 )
 
 enum class ReviewReportReason(override val description: String, val severity: Int) :
