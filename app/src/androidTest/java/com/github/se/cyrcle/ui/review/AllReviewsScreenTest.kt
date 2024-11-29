@@ -73,9 +73,10 @@ class AllReviewsScreenTest {
       AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
       userViewModel.setCurrentUser(TestInstancesUser.user1)
     }
+    userViewModel.setCurrentUser(TestInstancesUser.user1)
 
     composeTestRule.onNodeWithTag("ReviewCard0").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("ReviewCard1").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("ReviewCard-1").assertIsDisplayed()
   }
 
   @Test
@@ -86,6 +87,19 @@ class AllReviewsScreenTest {
 
     composeTestRule.onNodeWithTag("ReviewCard0").performClick()
     composeTestRule.onNodeWithText("New Review.").assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag("YourReviewTitle").assertIsNotDisplayed()
+    composeTestRule.onNodeWithTag("OtherReviewsTitle").assertIsDisplayed()
+  }
+
+  @Test
+  fun signedInUser_seesTwoSectionTitles() {
+    composeTestRule.setContent {
+      AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
+      userViewModel.setCurrentUser(TestInstancesUser.user1)
+    }
+
+    composeTestRule.onNodeWithTag("YourReviewTitle").assertIsDisplayed()
   }
 
   @Test
@@ -111,7 +125,7 @@ class AllReviewsScreenTest {
       AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
       userViewModel.setCurrentUser(TestInstancesUser.user1)
     }
-    composeTestRule.onNodeWithTag("ReviewCard1").performClick()
+    composeTestRule.onNodeWithTag("ReviewCard-1").performClick()
     composeTestRule.onNodeWithText("Bad Parking.").assertIsDisplayed()
   }
 
@@ -130,14 +144,28 @@ class AllReviewsScreenTest {
   }
 
   @Test
-  fun clickingAddEditReviewButton_navigatesToReviewScreen() {
+  fun clickingEditReviewButton_navigatesToReviewScreen() {
     composeTestRule.setContent {
       AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
       userViewModel.setCurrentUser(TestInstancesUser.user1)
     }
 
-    // Click the "Add/Edit Review" button
-    composeTestRule.onNodeWithTag("AddOrEditReviewButton").performClick()
+    // Click the "Edit Review" button
+    composeTestRule.onNodeWithTag("MoreOptions-1Button").performClick()
+    composeTestRule.onNodeWithTag("MoreOptions-1EditReviewItem").performClick()
+
+    verify(navigationActions).navigateTo(Screen.ADD_REVIEW)
+  }
+
+  @Test
+  fun clickingAddReviewButton_navigatesToReviewScreen() {
+    composeTestRule.setContent {
+      AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
+      userViewModel.setCurrentUser(TestInstancesUser.newUser)
+    }
+
+    // Click the "Add Review" button
+    composeTestRule.onNodeWithTag("AddReviewButton").performClick()
 
     verify(navigationActions).navigateTo(Screen.ADD_REVIEW)
   }
@@ -148,8 +176,37 @@ class AllReviewsScreenTest {
       AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
       userViewModel.setCurrentUser(TestInstancesUser.user1)
     }
-    composeTestRule.onNodeWithTag("ReviewCard0").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("DeleteReviewButton").performClick()
+    composeTestRule.onNodeWithTag("ReviewCard-1").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("MoreOptions-1Button").performClick()
+    composeTestRule.onNodeWithTag("MoreOptions-1DeleteReviewItem").performClick()
     verify(navigationActions, times(0)).navigateTo(Screen.PARKING_DETAILS)
+  }
+
+  @Test
+  fun dropdownMenu_displaysOptions() {
+    composeTestRule.setContent {
+      AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
+      userViewModel.setCurrentUser(TestInstancesUser.user1)
+    }
+    val tag0 = "MoreOptions0"
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithTag("ReviewCard0").assertIsDisplayed()
+
+    // Click the dropdown menu
+    composeTestRule
+        .onNodeWithTag("${tag0}Button")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+
+    // Verify that the dropdown menu options are displayed
+    composeTestRule.onNodeWithTag("${tag0}Menu").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag("${tag0}ReportReviewItem")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+    verify(navigationActions).navigateTo(Screen.REVIEW_REPORT)
   }
 }
