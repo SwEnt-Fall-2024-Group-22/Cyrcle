@@ -31,6 +31,8 @@ import com.github.se.cyrcle.ui.report.ReviewReportScreen
 import com.github.se.cyrcle.ui.report.ViewReportsScreen
 import com.github.se.cyrcle.ui.review.AllReviewsScreen
 import com.github.se.cyrcle.ui.review.ReviewScreen
+import com.github.se.cyrcle.ui.zone.ZoneManagerScreen
+import com.github.se.cyrcle.ui.zone.ZoneSelectionScreen
 
 @Composable
 fun CyrcleNavHost(
@@ -126,6 +128,13 @@ fun CyrcleNavHost(
         route = Route.GAMBLING,
     ) {
       composable(Screen.GAMBLING) { GamblingScreen(navigationActions, userViewModel) }
+    }
+    navigation(
+        startDestination = Screen.ZONE_MANAGER,
+        route = Route.ZONE,
+    ) {
+      composable(Screen.ZONE_MANAGER) { ZoneManagerScreen(navigationActions) }
+      composable(Screen.ZONE_SELECTION) { ZoneSelectionScreen(navigationActions) }
     }
   }
 }

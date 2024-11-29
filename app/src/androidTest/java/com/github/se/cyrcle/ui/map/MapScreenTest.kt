@@ -196,6 +196,8 @@ class MapScreenTest {
 
     composeTestRule.onNodeWithTag("SettingsMenu").assertIsDisplayed()
     composeTestRule.onNodeWithTag("advancedModeSwitch").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("SettingsToZoneRow").assertIsDisplayed().performClick()
+    verify(mockNavigation).navigateTo(Route.ZONE)
   }
 
   /** Test that verify that the Search Bar works */

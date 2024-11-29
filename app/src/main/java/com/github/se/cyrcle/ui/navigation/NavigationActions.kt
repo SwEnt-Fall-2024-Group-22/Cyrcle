@@ -14,9 +14,8 @@ object Route {
   const val ADD_SPOTS = "Add Spots"
   const val VIEW_PROFILE = "Profile"
   const val REVIEW = "Review"
-  const val PARKING_REPORT = "Report"
-  const val REVIEW_REPORT = "Report"
   const val GAMBLING = "Gambling"
+  const val ZONE = "Zone"
 }
 
 object Screen {
@@ -36,6 +35,8 @@ object Screen {
   const val GAMBLING = "Gambling Screen"
   const val ADMIN = "Admin Screen"
   const val VIEW_REPORTS = "View Reports Screen"
+  const val ZONE_SELECTION = "Zone Selection Screen"
+  const val ZONE_MANAGER = "Zone Manager Screen"
 }
 
 /**
