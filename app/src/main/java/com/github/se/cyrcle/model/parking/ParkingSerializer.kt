@@ -12,6 +12,27 @@ import com.google.gson.reflect.TypeToken
 import com.mapbox.geojson.Point
 import java.lang.reflect.Type
 
+/** Adapter for serializing and deserializing sets of Parking objects. */
+class ParkingSetAdapter {
+
+  private val gson =
+      GsonBuilder().registerTypeAdapter(Parking::class.java, ParkingAdapter()).create()
+
+  @TypeConverter
+  fun serialize(parkings: MutableSet<Parking>): String {
+    return gson.toJson(parkings)
+  }
+
+  @TypeConverter
+  fun deserialize(data: String): MutableSet<Parking> {
+    if (data.isBlank()) return mutableSetOf()
+
+    val listType = object : TypeToken<MutableSet<Parking>>() {}.type
+
+    return gson.fromJson(data, listType)
+  }
+}
+
 /** Adapter for serializing and deserializing Parking objects. */
 class ParkingAdapter : JsonSerializer<Parking>, JsonDeserializer<Parking> {
 

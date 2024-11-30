@@ -1,5 +1,9 @@
 package com.github.se.cyrcle.model.parking
 
+import android.annotation.SuppressLint
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.PrimaryKey
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMeasurement
 import java.math.BigDecimal
@@ -14,9 +18,16 @@ const val DECIMALS = 2
  * @param bottomLeft the bottom left corner of the tile
  * @param topRight the top right corner of the tile
  */
-data class Tile(val bottomLeft: Point, val topRight: Point) {
+@Entity
+data class Tile(
+    @Ignore val bottomLeft: Point,
+    @Ignore val topRight: Point,
+    val set: MutableSet<Parking> = mutableSetOf(),
+    @PrimaryKey val uid: String = getUidForPoint(bottomLeft)
+) {
   override fun toString(): String {
-    return "Tile(bottomLeft=${bottomLeft.longitude()},${bottomLeft.latitude()}, topRight=${topRight.longitude()},${topRight.latitude()})"
+    return "Tile(bottomLeft=${bottomLeft.longitude()},${bottomLeft.latitude()}, topRight=${topRight.longitude()},${topRight.latitude()})" +
+        "    with ${set.size} parkings"
   }
 
   companion object {
@@ -31,7 +42,12 @@ data class Tile(val bottomLeft: Point, val topRight: Point) {
       val roundingFactor = 10.0.pow(decimals)
       return (value * roundingFactor).toInt() / roundingFactor
     }
-    /** Rounds the tile to the nearest 0.01 */
+    /**
+     * Rounds the tile to the nearest 0.01
+     *
+     * @param tile Tile to round up
+     * @return the rounded tile
+     */
     private fun roundTiles(tile: Tile): Tile {
 
       val roundedBottomLeft =
@@ -43,6 +59,22 @@ data class Tile(val bottomLeft: Point, val topRight: Point) {
               roundDouble(tile.topRight.longitude(), DECIMALS),
               roundDouble(tile.topRight.latitude(), DECIMALS))
       return Tile(roundedBottomLeft, roundedTopRight)
+    }
+
+    /**
+     * For a given point, returns the UID of the tile it is in
+     *
+     * @param point Point used to create the unique ID
+     * @return a string in the format "<longitude>.xx_<latitude>.xx"
+     */
+    @SuppressLint("DefaultLocale")
+    fun getUidForPoint(point: Point): String {
+      val x = (point.longitude() / TILE_SIZE).toInt() * TILE_SIZE
+      val y = (point.latitude() / TILE_SIZE).toInt() * TILE_SIZE
+
+      val firstCoordinate = String.format("%.${DECIMALS}f", roundDouble(x, DECIMALS))
+      val secondCoordinate = String.format("%.${DECIMALS}f", roundDouble(y, DECIMALS))
+      return "${firstCoordinate}_${secondCoordinate}"
     }
 
     /**

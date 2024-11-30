@@ -7,7 +7,21 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class ParkingSerializerTest {
 
+  private val parkingSetAdapter = ParkingSetAdapter()
   private val parkingAdapter = ParkingAdapter()
+
+  @Test
+  fun convertSetsOfParkingsTest() {
+    fun testSet(parkings: MutableSet<Parking>) {
+      val serializedParking1 = parkingSetAdapter.serialize(parkings)
+      val deserializedParking1 = parkingSetAdapter.deserialize(serializedParking1)
+      assert(parkings == deserializedParking1)
+    }
+
+    testSet(mutableSetOf())
+    testSet(mutableSetOf(TestInstancesParking.parking1))
+    testSet(mutableSetOf(TestInstancesParking.parking1, TestInstancesParking.parking2))
+  }
 
   @Test
   fun convertParkingAdapterTest() {
