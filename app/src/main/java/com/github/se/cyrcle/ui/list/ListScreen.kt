@@ -1,7 +1,11 @@
 package com.github.se.cyrcle.ui.list
 
+import android.annotation.SuppressLint
 import android.widget.Toast
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -18,51 +22,86 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.model.address.Address
+import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.Parking
+import com.github.se.cyrcle.model.parking.ParkingCapacity
+import com.github.se.cyrcle.model.parking.ParkingProtection
+import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
+import com.github.se.cyrcle.permission.PermissionHandler
+import com.github.se.cyrcle.ui.map.MapConfig
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
+import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
+import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
+import com.github.se.cyrcle.ui.theme.atoms.ToggleButton
+import com.github.se.cyrcle.ui.theme.defaultOnColor
+import com.github.se.cyrcle.ui.theme.getCheckBoxColors
+import com.github.se.cyrcle.ui.theme.getOutlinedTextFieldColorsSearchBar
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.github.se.cyrcle.ui.theme.molecules.FilterPanel
+import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMeasurement
 import kotlin.math.roundToInt
+import kotlinx.coroutines.runBlocking
 
 const val CARD_HEIGHT = 120
 const val MAX_SWIPE_DISTANCE = 150
@@ -72,14 +111,37 @@ fun SpotListScreen(
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel,
     mapViewModel: MapViewModel,
-    userViewModel: UserViewModel
+    userViewModel: UserViewModel,
+    addressViewModel: AddressViewModel,
+    permissionHandler: PermissionHandler
 ) {
   val userPosition by mapViewModel.userPosition.collectAsState()
 
   val filteredParkingSpots by parkingViewModel.closestParkings.collectAsState()
   val pinnedParkings by parkingViewModel.pinnedParkings.collectAsState()
 
-  LaunchedEffect(userPosition) { parkingViewModel.setCircleCenter(userPosition) }
+  // chosen location by the user for the list Screen
+  val chosenLocation: MutableState<Address> = remember {
+    mutableStateOf(
+        Address(
+            latitude = MapConfig.defaultCameraState().center.latitude().toString(),
+            longitude = MapConfig.defaultCameraState().center.longitude().toString()))
+  }
+
+  // value that says wether the user clicked on my Location Suggestion or not
+  val myLocation = remember { mutableStateOf(true) }
+
+  // location permission from location manager
+  val locPermission = permissionHandler.getLocalisationPerm().value
+
+  LaunchedEffect(userPosition, myLocation) {
+    if (locPermission && myLocation.value) parkingViewModel.setCircleCenter(userPosition)
+    else
+        parkingViewModel.setCircleCenter(
+            Point.fromLngLat(
+                chosenLocation.value.longitude.toDouble(),
+                chosenLocation.value.latitude.toDouble()))
+  }
 
   Scaffold(
       modifier = Modifier.testTag("SpotListScreen"),

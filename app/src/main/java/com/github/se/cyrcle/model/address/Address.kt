@@ -3,6 +3,8 @@ package com.github.se.cyrcle.model.address
 import android.util.Log
 import com.google.gson.annotations.SerializedName
 
+const val maxDisplayNameLength = 32
+
 /**
  * Represents an address.
  *
@@ -77,7 +79,8 @@ data class Address(
   fun displayRelevantFields(): String {
     val fieldPriorities =
         listOf(publicName, road, house, cityBlock, neighbourhood, hamlet, suburb, city)
-    return shortenString(fieldPriorities.filter { it.isNotEmpty() }.take(3).joinToString(", "), 32)
+    return shortenString(
+        fieldPriorities.filter { it.isNotEmpty() }.take(3).joinToString(", "), maxDisplayNameLength)
   }
 
   /**
@@ -97,5 +100,12 @@ data class Address(
       return string
     }
     return shortenString(string.substring(0, lastComma), length)
+  }
+
+  /** Function that format the Address to display its suggestion name. */
+  fun suggestionFormatDisplayName(): String {
+    val fieldPriorities = listOf(publicName, road, city, country)
+    return shortenString(
+        fieldPriorities.filter { it.isNotEmpty() }.joinToString(", "), maxDisplayNameLength)
   }
 }
