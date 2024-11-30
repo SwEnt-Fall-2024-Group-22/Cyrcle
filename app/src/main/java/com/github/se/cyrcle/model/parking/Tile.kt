@@ -8,6 +8,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMeasurement
 import java.math.BigDecimal
 import java.math.RoundingMode
+import kotlin.math.floor
 import kotlin.math.pow
 
 const val TILE_SIZE = 0.1
@@ -22,17 +23,17 @@ const val DECIMALS = 2
 data class Tile(
     @Ignore val bottomLeft: Point,
     @Ignore val topRight: Point,
-    val set: MutableSet<Parking> = mutableSetOf(),
+    val parkings: MutableSet<Parking> = mutableSetOf(),
     @PrimaryKey val uid: String = getUidForPoint(bottomLeft)
 ) {
   override fun toString(): String {
     return "Tile(bottomLeft=${bottomLeft.longitude()},${bottomLeft.latitude()}, topRight=${topRight.longitude()},${topRight.latitude()})" +
-        "    with ${set.size} parkings"
+        "    with ${parkings.size} parkings"
   }
 
   companion object {
     /**
-     * Rounds the tile to the nearest decimals
+     * Rounds the double to the smallest decimal value that is closest to it
      *
      * @param value the value to round
      * @param decimals the number of decimals to round to
@@ -40,7 +41,7 @@ data class Tile(
      */
     private fun roundDouble(value: Double, decimals: Int): Double {
       val roundingFactor = 10.0.pow(decimals)
-      return (value * roundingFactor).toInt() / roundingFactor
+      return floor(value * roundingFactor) / roundingFactor
     }
     /**
      * Rounds the tile to the nearest 0.01
