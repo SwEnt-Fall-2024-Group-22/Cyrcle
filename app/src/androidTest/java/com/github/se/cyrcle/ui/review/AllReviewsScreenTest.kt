@@ -111,7 +111,7 @@ class AllReviewsScreenTest {
     val firstReviewCardB4 = composeTestRule.onNodeWithTag("ReviewCard0")
     // Open filter and select sorting by rating
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
-    composeTestRule.onNodeWithText("Sort By Rating (Best Rated First)").performClick()
+    composeTestRule.onNodeWithText("Sort By Score (Highest Score First)").performClick()
 
     // Verify if the reviews are sorted by rating by checking the order of ReviewCards
     val firstReviewCardAfter = composeTestRule.onNodeWithTag("ReviewCard0")
@@ -139,8 +139,12 @@ class AllReviewsScreenTest {
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
 
     // Verify that the filter options are displayed
-    composeTestRule.onNodeWithText("Sort By Rating (Best Rated First)").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Sort By Score (Highest Score First)").assertIsDisplayed()
     composeTestRule.onNodeWithText("Sort By Date (Most Recent First)").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Sort By Helpful (Most Helpful First)").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithText("Sort By Interactions (Most Interactions First)")
+        .assertIsDisplayed()
   }
 
   @Test
@@ -217,6 +221,50 @@ class AllReviewsScreenTest {
         .onNodeWithTag("LikeCount0", useUnmergedTree = true)
         .assertIsDisplayed()
         .assertTextEquals("0")
+  }
+
+  @Test
+  fun sortReviewsByHelpfulAndInteractionsTest() {
+    composeTestRule.setContent {
+      AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
+      userViewModel.setCurrentUser(TestInstancesUser.newUser)
+    }
+    composeTestRule.waitForIdle()
+
+    // Filter by likes
+    composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
+    composeTestRule.onNodeWithText("Sort By Helpful (Most Helpful First)").performClick()
+
+    // Normally the two first reviews should have 0 likes and dislikes. Let's assert that.
+    composeTestRule.onNodeWithTag("LikeCount0", useUnmergedTree = true).assertTextEquals("0")
+    composeTestRule.onNodeWithTag("DislikeCount0", useUnmergedTree = true).assertTextEquals("0")
+    composeTestRule.onNodeWithTag("LikeCount1", useUnmergedTree = true).assertTextEquals("0")
+    composeTestRule.onNodeWithTag("DislikeCount1", useUnmergedTree = true).assertTextEquals("0")
+
+    // We like the review with index 1
+    composeTestRule.onNodeWithTag("LikeButton1", useUnmergedTree = true).performClick()
+
+    // Now that review 1 has 1 like, it should be the first review
+    composeTestRule.onNodeWithTag("LikeCount0", useUnmergedTree = true).assertTextEquals("1")
+    composeTestRule.onNodeWithTag("DislikeCount0", useUnmergedTree = true).assertTextEquals("0")
+    composeTestRule.onNodeWithTag("LikeCount1", useUnmergedTree = true).assertTextEquals("0")
+    composeTestRule.onNodeWithTag("DislikeCount1", useUnmergedTree = true).assertTextEquals("0")
+
+    // Filter by interactions
+    composeTestRule.onNodeWithText("Sort By Interactions (Most Interactions First)").performClick()
+
+    // We check that the first review is still first
+    composeTestRule.onNodeWithTag("LikeCount0", useUnmergedTree = true).assertTextEquals("1")
+    composeTestRule.onNodeWithTag("DislikeCount0", useUnmergedTree = true).assertTextEquals("0")
+    composeTestRule.onNodeWithTag("LikeCount1", useUnmergedTree = true).assertTextEquals("0")
+    composeTestRule.onNodeWithTag("DislikeCount1", useUnmergedTree = true).assertTextEquals("0")
+  }
+
+  @Test
+  fun sortReviewsByInteractionTest() {
+    composeTestRule.setContent {
+      AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
+    }
   }
 
   @Test

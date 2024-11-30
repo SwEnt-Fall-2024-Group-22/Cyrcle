@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.review
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -63,48 +62,15 @@ import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-fun Timestamp?.toFormattedDate(): String {
-  return if (this != null) {
-    val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-    dateFormat.format(this.toDate())
-  } else {
-    "Date not available"
-  }
-}
-
 enum class ReviewSortingOption {
-  Rating,
-  DateTime
+  ReviewScore,
+  DateTime,
+  Interactions,
+  Helpful
 }
 
 @Composable
-fun FilterSection(
-    title: String,
-    isExpanded: Boolean,
-    onToggle: () -> Unit,
-    content: @Composable () -> Unit
-) {
-  Column(
-      modifier =
-          Modifier.padding(8.dp)
-              .border(1.dp, Color.Gray, shape = MaterialTheme.shapes.medium)
-              .background(MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.medium)
-              .padding(8.dp)) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.clickable(onClick = onToggle).padding(8.dp).fillMaxWidth(),
-            color = MaterialTheme.colorScheme.onSurface,
-            testTag = title)
-
-        if (isExpanded) {
-          content()
-        }
-      }
-}
-
-@Composable
-fun FilterHeader(
+fun SortHeader(
     selectedSortingOption: ReviewSortingOption,
     onSortingOptionSelected: (ReviewSortingOption) -> Unit
 ) {
@@ -123,65 +89,65 @@ fun FilterHeader(
         }
 
     if (showFilters) {
-      FilterSection(
-          title = stringResource(R.string.sort_reviews), // "Sort Reviews" title
-          isExpanded = true,
-          onToggle = { /* No toggle needed for always-visible sorting options */}) {
-            SortingOptionSelector(
-                selectedSortingOption = selectedSortingOption,
-                onOptionSelected = onSortingOptionSelected)
+      Column(
+          modifier =
+              Modifier.padding(vertical = 8.dp)
+                  .border(1.dp, Color.Gray, shape = MaterialTheme.shapes.medium)
+                  .background(
+                      MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.medium)
+                  .padding(8.dp)) {
+            Text(
+                text = stringResource(R.string.sort_reviews),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(8.dp),
+                color = MaterialTheme.colorScheme.onSurface,
+                testTag = stringResource(R.string.sort_reviews))
+            Column(modifier = Modifier.fillMaxWidth()) {
+              ReviewSortingOption.entries.forEach { option ->
+                SortingOptionItem(
+                    option = option,
+                    isSelected = selectedSortingOption == option,
+                    onOptionSelected = onSortingOptionSelected)
+              }
+            }
           }
     }
   }
 }
 
 @Composable
-fun SortingOptionSelector(
-    selectedSortingOption: ReviewSortingOption,
+fun SortingOptionItem(
+    option: ReviewSortingOption,
+    isSelected: Boolean,
     onOptionSelected: (ReviewSortingOption) -> Unit
 ) {
-  Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-    Row(
-        modifier =
-            Modifier.fillMaxWidth()
-                .padding(vertical = 4.dp)
-                .clickable { onOptionSelected(ReviewSortingOption.Rating) }
-                .background(
-                    color =
-                        if (selectedSortingOption == ReviewSortingOption.Rating)
-                            MaterialTheme.colorScheme.secondaryContainer
-                        else Color.Transparent,
-                    shape = MaterialTheme.shapes.small)
-                .padding(12.dp)) {
-          Text(
-              text = stringResource(R.string.sort_by_rating),
-              style = MaterialTheme.typography.bodyMedium,
-              color =
-                  if (selectedSortingOption == ReviewSortingOption.Rating)
-                      MaterialTheme.colorScheme.onSecondaryContainer
-                  else MaterialTheme.colorScheme.primary)
-        }
+  Row(
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(vertical = 4.dp)
+              .clickable { onOptionSelected(option) }
+              .background(
+                  color =
+                      if (isSelected) MaterialTheme.colorScheme.secondaryContainer
+                      else Color.Transparent,
+                  shape = MaterialTheme.shapes.small)
+              .padding(12.dp)) {
+        Text(
+            text = getSortingOptionText(option),
+            style = MaterialTheme.typography.bodyMedium,
+            color =
+                if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer
+                else MaterialTheme.colorScheme.primary)
+      }
+}
 
-    Row(
-        modifier =
-            Modifier.fillMaxWidth()
-                .padding(vertical = 4.dp)
-                .clickable { onOptionSelected(ReviewSortingOption.DateTime) }
-                .background(
-                    color =
-                        if (selectedSortingOption == ReviewSortingOption.DateTime)
-                            MaterialTheme.colorScheme.secondaryContainer
-                        else Color.Transparent,
-                    shape = MaterialTheme.shapes.small)
-                .padding(12.dp)) {
-          Text(
-              text = stringResource(R.string.sort_by_date),
-              style = MaterialTheme.typography.bodyMedium,
-              color =
-                  if (selectedSortingOption == ReviewSortingOption.DateTime)
-                      MaterialTheme.colorScheme.onSecondaryContainer
-                  else MaterialTheme.colorScheme.primary)
-        }
+@Composable
+fun getSortingOptionText(option: ReviewSortingOption): String {
+  return when (option) {
+    ReviewSortingOption.ReviewScore -> stringResource(R.string.all_reviews_sort_by_rating)
+    ReviewSortingOption.DateTime -> stringResource(R.string.all_reviews_sort_by_date)
+    ReviewSortingOption.Interactions -> stringResource(R.string.all_reviews_sort_by_interactions)
+    ReviewSortingOption.Helpful -> stringResource(R.string.all_reviews_sort_by_helpful)
   }
 }
 
@@ -204,7 +170,6 @@ fun AllReviewsScreen(
   val currentUserHasReviewed = remember { mutableStateOf(false) }
   LaunchedEffect(reviewsList, currentUser) {
     currentUserHasReviewed.value = reviewsList.any { it.owner == currentUser?.public?.userId }
-    Log.d("AllReviewsScreen", "Recomposition for currentUserHasReviewed")
   }
 
   // Sort reviews based on the selected sorting option
@@ -213,7 +178,11 @@ fun AllReviewsScreen(
       remember(reviewsList, selectedSortingOption) {
         when (selectedSortingOption) {
           ReviewSortingOption.DateTime -> reviewsList.sortedByDescending { it.time.nanoseconds }
-          ReviewSortingOption.Rating -> reviewsList.sortedByDescending { it.rating }
+          ReviewSortingOption.ReviewScore -> reviewsList.sortedByDescending { it.rating }
+          ReviewSortingOption.Interactions ->
+              reviewsList.sortedByDescending { it.likedBy.size + it.dislikedBy.size }
+          ReviewSortingOption.Helpful ->
+              reviewsList.sortedByDescending { it.likedBy.size - it.dislikedBy.size }
         }
       }
 
@@ -230,7 +199,7 @@ fun AllReviewsScreen(
       modifier = Modifier.testTag("AllReviewsScreen")) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
           // Header Section
-          FilterHeader(
+          SortHeader(
               selectedSortingOption = selectedSortingOption,
               onSortingOptionSelected = { selectedOption ->
                 selectedSortingOption = selectedOption
@@ -354,7 +323,6 @@ fun ReviewCard(
 ) {
   val currentUser by userViewModel.currentUser.collectAsState()
   val userSignedIn by userViewModel.isSignedIn.collectAsState(false)
-  Log.d("ReviewCard", "Recomposition for ReviewCard $index")
 
   Card(
       modifier =
@@ -476,4 +444,13 @@ fun ReviewCard(
               }
         }
       }
+}
+
+fun Timestamp?.toFormattedDate(): String {
+  return if (this != null) {
+    val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+    dateFormat.format(this.toDate())
+  } else {
+    "Date not available"
+  }
 }
