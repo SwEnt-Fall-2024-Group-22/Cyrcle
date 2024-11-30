@@ -27,6 +27,9 @@ composeNavigation = "2.7.7"
 # Hilt
 hilt = "2.52"
 
+# Room
+room = "2.6.1"
+
 # Firebase
 gms = "4.4.2"
 credentials = "1.3.0"
@@ -76,7 +79,6 @@ androidx-espresso-intents = { group = "androidx.test.espresso", name = "espresso
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlinStdlib" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
-kotlinx-serialization-json-v151 = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJsonVersion" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
@@ -101,6 +103,8 @@ credentials = { group = "androidx.credentials", name = "credentials", version.re
 credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials" }
 android-googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 
+androidx-room = { group = "androidx.room", name = "room-ktx", version.ref = "room"}
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room"}
 
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom"}
 firebase-auth = { group = "com.google.firebase" , name = "firebase-auth" }

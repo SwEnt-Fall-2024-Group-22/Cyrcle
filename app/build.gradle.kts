@@ -206,6 +206,11 @@ dependencies {
     kapt(libs.hilt.compiler)
     implementation(libs.hilt.android)
 
+    // ------------     Room      --------------
+    kapt(libs.androidx.room.compiler)
+    implementation(libs.androidx.room)
+
+
     // ---------------- MapBox ------------------
     implementation(libs.mapbox.compose)
     implementation(libs.mapbox.android)
