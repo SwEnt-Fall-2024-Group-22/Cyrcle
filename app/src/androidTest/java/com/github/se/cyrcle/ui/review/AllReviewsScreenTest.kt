@@ -234,6 +234,7 @@ class AllReviewsScreenTest {
     // Filter by likes
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
     composeTestRule.onNodeWithText("Sort By Helpful (Most Helpful First)").performClick()
+    composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
 
     // Normally the two first reviews should have 0 likes and dislikes. Let's assert that.
     composeTestRule.onNodeWithTag("LikeCount0", useUnmergedTree = true).assertTextEquals("0")
@@ -251,7 +252,9 @@ class AllReviewsScreenTest {
     composeTestRule.onNodeWithTag("DislikeCount1", useUnmergedTree = true).assertTextEquals("0")
 
     // Filter by interactions
+    composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
     composeTestRule.onNodeWithText("Sort By Interactions (Most Interactions First)").performClick()
+    composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
 
     // We check that the first review is still first
     composeTestRule.onNodeWithTag("LikeCount0", useUnmergedTree = true).assertTextEquals("1")
