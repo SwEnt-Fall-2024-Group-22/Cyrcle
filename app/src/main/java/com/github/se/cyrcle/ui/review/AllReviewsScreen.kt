@@ -366,59 +366,71 @@ fun ReviewCard(
       shape = MaterialTheme.shapes.medium,
       elevation = CardDefaults.cardElevation(4.dp)) {
         Box(modifier = Modifier.fillMaxSize()) {
-          Row(
-              modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
-              horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                val currentUserHasLiked =
-                    currentUser?.public?.userId?.let { review.likedBy.contains(it) } ?: false
-                val currentUserHasDisliked =
-                    currentUser?.public?.userId?.let { review.dislikedBy.contains(it) } ?: false
-                IconButton(
-                    onClick = {
-                      if (userSignedIn) {
-                        currentUser?.public?.let {
-                          reviewViewModel.handleInteraction(review, it.userId, true)
-                        }
-                      }
-                    },
-                    enabled = userSignedIn) {
-                      Icon(
-                          imageVector = Icons.Outlined.ThumbUp,
-                          contentDescription = "Like",
-                          tint =
-                              if (currentUserHasLiked) MaterialTheme.colorScheme.primary else Black)
-                    }
-                IconButton(
-                    onClick = {
-                      if (userSignedIn) {
-                        reviewViewModel.handleInteraction(
-                            review, currentUser?.public?.userId ?: "", false)
-                      }
-                    },
-                    enabled = userSignedIn) {
-                      Icon(
-                          imageVector = Icons.Outlined.ThumbDown,
-                          contentDescription = "Dislike",
-                          tint =
-                              if (currentUserHasDisliked) MaterialTheme.colorScheme.primary
-                              else Black)
-                    }
-                OptionsMenu(options = options, testTag = "MoreOptions$index")
-              }
-
           Column(
               modifier =
-                  Modifier.fillMaxWidth().padding(16.dp).testTag("ReviewCardContent$index")) {
-                val defaultUsername = stringResource(R.string.undefined_username)
-                val ownerUsername = remember { mutableStateOf(defaultUsername) }
-                userViewModel.getUserById(
-                    review.owner, onSuccess = { ownerUsername.value = it.public.username })
+                  Modifier.fillMaxWidth()
+                      .padding(horizontal = 16.dp, vertical = 8.dp)
+                      .testTag("ReviewCardContent$index")) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically) {
+                      val defaultUsername = stringResource(R.string.undefined_username)
+                      val ownerUsername = remember { mutableStateOf(defaultUsername) }
+                      userViewModel.getUserById(
+                          review.owner, onSuccess = { ownerUsername.value = it.public.username })
 
-                Text(
-                    text = stringResource(R.string.by_text).format(ownerUsername.value),
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.testTag("ReviewOwner$index"))
-                Spacer(modifier = Modifier.height(4.dp))
+                      androidx.compose.material3.Text(
+                          text = stringResource(R.string.by_text).format(ownerUsername.value),
+                          style = MaterialTheme.typography.bodySmall,
+                          modifier = Modifier.weight(1f).testTag("ReviewOwner$index"),
+                          maxLines = 1,
+                          overflow = TextOverflow.Ellipsis)
+
+                      Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        val currentUserHasLiked =
+                            currentUser?.public?.userId?.let { review.likedBy.contains(it) }
+                                ?: false
+                        val currentUserHasDisliked =
+                            currentUser?.public?.userId?.let { review.dislikedBy.contains(it) }
+                                ?: false
+
+                        IconButton(
+                            onClick = {
+                              if (userSignedIn) {
+                                currentUser?.public?.let {
+                                  reviewViewModel.handleInteraction(review, it.userId, true)
+                                }
+                              }
+                            },
+                            enabled = userSignedIn) {
+                              Icon(
+                                  imageVector = Icons.Outlined.ThumbUp,
+                                  contentDescription = "Like",
+                                  tint =
+                                      if (currentUserHasLiked) MaterialTheme.colorScheme.primary
+                                      else Black)
+                            }
+                        IconButton(
+                            onClick = {
+                              if (userSignedIn) {
+                                reviewViewModel.handleInteraction(
+                                    review, currentUser?.public?.userId ?: "", false)
+                              }
+                            },
+                            enabled = userSignedIn) {
+                              Icon(
+                                  imageVector = Icons.Outlined.ThumbDown,
+                                  contentDescription = "Dislike",
+                                  tint =
+                                      if (currentUserHasDisliked) MaterialTheme.colorScheme.primary
+                                      else Black)
+                            }
+                        OptionsMenu(options = options, testTag = "MoreOptions$index")
+                      }
+                    }
+
+                Spacer(modifier = Modifier.height(2.dp))
                 ScoreStars(
                     review.rating,
                     scale = 0.6f,
