@@ -44,7 +44,7 @@ class ZoneSelectionScreenTest {
   fun verifyAlertDialog() {
     composeTestRule.setContent { AlertDialogPickZoneName() }
     composeTestRule.onNodeWithTag("AlertDialogTitle").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("InputText").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("ConditionCheckingInputText").assertIsDisplayed()
     composeTestRule
         .onNodeWithTag("AlertDialogButtonAccept")
         .assertIsDisplayed()

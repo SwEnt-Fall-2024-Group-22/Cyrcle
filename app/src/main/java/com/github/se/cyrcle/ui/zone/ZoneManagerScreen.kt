@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -60,10 +62,6 @@ fun ZoneManagerScreen(mapViewModel: MapViewModel, navigationActions: NavigationA
             navigationActions = navigationActions)
       }) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
-          // === Overlay ===
-          AddZoneButton(mapViewModel, navigationActions)
-          // ===  === ===  ===
-
           // === Content ===
           Column(Modifier.fillMaxWidth()) {
             ZoneHeader()
@@ -72,20 +70,24 @@ fun ZoneManagerScreen(mapViewModel: MapViewModel, navigationActions: NavigationA
                   text = stringResource(R.string.zone_manager_no_zones),
                   modifier = Modifier.padding(16.dp))
             }
-            zones.value.forEach { zone ->
-              ZoneCard(zone, zones)
-              if (zone != zones.value.last()) {
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.onBackground.copy(0.5f),
-                    thickness = 1.dp,
-                    modifier =
-                        Modifier.padding(horizontal = 16.dp)
-                            .fillMaxWidth(0.75f)
-                            .align(Alignment.CenterHorizontally))
+            LazyColumn(modifier = Modifier.fillMaxSize().padding(bottom = 8.dp)) {
+              items(zones.value) { zone ->
+                ZoneCard(zone, zones)
+                if (zone != zones.value.last()) {
+                  HorizontalDivider(
+                      color = MaterialTheme.colorScheme.onBackground.copy(0.5f),
+                      thickness = 1.dp,
+                      modifier =
+                          Modifier.padding(horizontal = 16.dp)
+                              .fillMaxWidth(0.75f)
+                              .align(Alignment.CenterHorizontally))
+                }
               }
             }
           }
-          // ===  ===  ===  ===
+          // === Overlay ===
+          AddZoneButton(mapViewModel, navigationActions)
+          // ===  === ===  ===
         }
       }
 }
