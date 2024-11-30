@@ -387,66 +387,75 @@ fun ReviewCard(
                           maxLines = 1,
                           overflow = TextOverflow.Ellipsis)
 
-                      Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        val currentUserHasLiked =
-                            currentUser?.public?.userId?.let { review.likedBy.contains(it) }
-                                ?: false
-                        val currentUserHasDisliked =
-                            currentUser?.public?.userId?.let { review.dislikedBy.contains(it) }
-                                ?: false
+                      // Icon buttons for like, dislike, and more options
+                      Row(
+                          horizontalArrangement = Arrangement.spacedBy(4.dp),
+                          modifier = Modifier.testTag("ReviewActions$index")) {
+                            val currentUserHasLiked =
+                                currentUser?.public?.userId?.let { review.likedBy.contains(it) }
+                                    ?: false
+                            val currentUserHasDisliked =
+                                currentUser?.public?.userId?.let { review.dislikedBy.contains(it) }
+                                    ?: false
 
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                          IconButton(
-                              onClick = {
-                                if (userSignedIn) {
-                                  currentUser?.public?.let {
-                                    reviewViewModel.handleInteraction(review, it.userId, true)
+                            // Like button and count
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                              IconButton(
+                                  onClick = {
+                                    if (userSignedIn) {
+                                      currentUser?.public?.let {
+                                        reviewViewModel.handleInteraction(review, it.userId, true)
+                                      }
+                                    }
+                                  },
+                                  modifier = Modifier.testTag("LikeButton$index"),
+                                  enabled = userSignedIn) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.ThumbUp,
+                                        contentDescription = "Like",
+                                        tint =
+                                            if (currentUserHasLiked)
+                                                MaterialTheme.colorScheme.primary
+                                            else Black)
                                   }
-                                }
-                              },
-                              enabled = userSignedIn) {
-                                Icon(
-                                    imageVector = Icons.Outlined.ThumbUp,
-                                    contentDescription = "Like",
-                                    tint =
-                                        if (currentUserHasLiked) MaterialTheme.colorScheme.primary
-                                        else Black)
-                              }
-                          Text(
-                              text = review.likedBy.size.toString(),
-                              style = MaterialTheme.typography.bodySmall,
-                              color =
-                                  if (currentUserHasLiked) MaterialTheme.colorScheme.primary
-                                  else Black)
-                        }
+                              Text(
+                                  text = review.likedBy.size.toString(),
+                                  style = MaterialTheme.typography.bodySmall,
+                                  color =
+                                      if (currentUserHasLiked) MaterialTheme.colorScheme.primary
+                                      else Black,
+                                  testTag = "LikeCount$index")
+                            }
+                            // Dislike button and count
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                              IconButton(
+                                  onClick = {
+                                    if (userSignedIn) {
+                                      reviewViewModel.handleInteraction(
+                                          review, currentUser?.public?.userId ?: "", false)
+                                    }
+                                  },
+                                  modifier = Modifier.testTag("DislikeButton$index"),
+                                  enabled = userSignedIn) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.ThumbDown,
+                                        contentDescription = "Dislike",
+                                        tint =
+                                            if (currentUserHasDisliked)
+                                                MaterialTheme.colorScheme.primary
+                                            else Black)
+                                  }
+                              Text(
+                                  text = review.dislikedBy.size.toString(),
+                                  style = MaterialTheme.typography.bodySmall,
+                                  color =
+                                      if (currentUserHasDisliked) MaterialTheme.colorScheme.primary
+                                      else Black,
+                                  testTag = "DislikeCount$index")
+                            }
 
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                          IconButton(
-                              onClick = {
-                                if (userSignedIn) {
-                                  reviewViewModel.handleInteraction(
-                                      review, currentUser?.public?.userId ?: "", false)
-                                }
-                              },
-                              enabled = userSignedIn) {
-                                Icon(
-                                    imageVector = Icons.Outlined.ThumbDown,
-                                    contentDescription = "Dislike",
-                                    tint =
-                                        if (currentUserHasDisliked)
-                                            MaterialTheme.colorScheme.primary
-                                        else Black)
-                              }
-                          Text(
-                              text = review.dislikedBy.size.toString(),
-                              style = MaterialTheme.typography.bodySmall,
-                              color =
-                                  if (currentUserHasDisliked) MaterialTheme.colorScheme.primary
-                                  else Black)
-                        }
-
-                        OptionsMenu(options = options, testTag = "MoreOptions$index")
-                      }
+                            OptionsMenu(options = options, testTag = "MoreOptions$index")
+                          }
                     }
 
                 Spacer(modifier = Modifier.height(2.dp))

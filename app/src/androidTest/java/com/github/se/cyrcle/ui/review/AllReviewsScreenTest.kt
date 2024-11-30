@@ -183,6 +183,43 @@ class AllReviewsScreenTest {
   }
 
   @Test
+  fun addingLikeAndDislikesToReview_updatesReview() {
+    composeTestRule.setContent {
+      AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
+      userViewModel.setCurrentUser(TestInstancesUser.user1)
+    }
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("ReviewCard0").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("ReviewCardContent0", useUnmergedTree = true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("ReviewActions0", useUnmergedTree = true).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag("LikeCount0", useUnmergedTree = true)
+        .assertIsDisplayed()
+        .assertTextEquals("0")
+    composeTestRule
+        .onNodeWithTag("LikeButton0", useUnmergedTree = true)
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+    composeTestRule.onNodeWithTag("LikeCount0", useUnmergedTree = true).assertTextEquals("1")
+
+    composeTestRule
+        .onNodeWithTag("DislikeCount0", useUnmergedTree = true)
+        .assertIsDisplayed()
+        .assertTextEquals("0")
+    composeTestRule
+        .onNodeWithTag("DislikeButton0", useUnmergedTree = true)
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+    composeTestRule.onNodeWithTag("DislikeCount0", useUnmergedTree = true).assertTextEquals("1")
+    composeTestRule
+        .onNodeWithTag("LikeCount0", useUnmergedTree = true)
+        .assertIsDisplayed()
+        .assertTextEquals("0")
+  }
+
+  @Test
   fun dropdownMenu_displaysOptions() {
     composeTestRule.setContent {
       AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
