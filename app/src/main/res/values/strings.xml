@@ -260,6 +260,12 @@
     <string name ="zone_manager_no_zones">Nothing downloaded yet</string>
     <string name ="zone_manager_header_area">Map Name</string>
     <string name ="zone_manager_header_lastRefreshed">Last Refreshed</string>
+    <string name ="zone_selection_alert_tilte">Please name the Area you are about to download</string>
+    <string name ="zone_selection_button_when_none_set">Set top left corner</string>
+    <string name ="zone_selection_button_when_top_left_set">Download Area</string>
+    <string name ="zone_selection_button_when_both_set">Please wait...</string>
+    <string name ="zone_selection_button_accept">Confirm</string>
+    <string name ="zone_selection_button_cancel">Cancel</string>
 
 
 

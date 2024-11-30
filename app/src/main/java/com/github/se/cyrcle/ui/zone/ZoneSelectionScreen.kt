@@ -51,7 +51,7 @@ import com.mapbox.maps.plugin.gestures.gestures
 fun ZoneSelectionScreen(
     navigationActions: NavigationActions,
     mapViewModel: MapViewModel,
-    addressViewModel: AddressViewModel
+    addressViewModel: AddressViewModel // Possibility to use this to suggest a name for the zone.
 ) {
   val showAlertDialogPickName = remember { mutableStateOf(false) }
   val boundingBox = remember { mutableStateOf<BoundingBox?>(null) }
@@ -60,10 +60,10 @@ fun ZoneSelectionScreen(
   val locationPickerState by
       mapViewModel.locationPickerState
           .collectAsState() // state representing where the user is in the location selection
-                            // process
+  // process
   mapViewModel
       .unZoomActualCamera() // automatically zoom out and reset bearing, because no one want to
-                            // download a zone that is too zoomed in.
+  // download a zone that is too zoomed in.
   val mapViewportState = MapConfig.createMapViewPortStateFromViewModel(mapViewModel)
   LaunchedEffect(Unit) {
     // Needs to be in a launchedEffect to not be called every time the locationPickerState changes,
@@ -151,9 +151,10 @@ fun ZoneSelectionButton(mapViewModel: MapViewModel, locationPickerState: Locatio
   // Define the text of the button depending on the state of the location picker.
   val buttonText =
       when (locationPickerState) {
-        LocationPickerState.NONE_SET -> "Set top left corner"
-        LocationPickerState.TOP_LEFT_SET -> "Download Area "
-        else -> "Please wait..."
+        LocationPickerState.NONE_SET -> stringResource(R.string.zone_selection_button_when_none_set)
+        LocationPickerState.TOP_LEFT_SET ->
+            stringResource(R.string.zone_selection_button_when_top_left_set)
+        else -> stringResource(R.string.zone_selection_button_when_both_set)
       }
   // The button itself
   Box(modifier = Modifier.fillMaxSize()) {
@@ -183,9 +184,9 @@ fun AlertDialogPickZoneName(
                 Modifier.padding(16.dp)
                     .background(MaterialTheme.colorScheme.background, MaterialTheme.shapes.small)) {
               Text(
-                  text = "Please name the Area you are about to download",
+                  text = stringResource(R.string.zone_selection_alert_tilte),
                   style = MaterialTheme.typography.bodyLarge,
-                  modifier = Modifier.padding(16.dp))
+                  modifier = Modifier.padding(16.dp).testTag("AlertDialogTitle"))
               Spacer(modifier = Modifier.padding(8.dp))
               InputText(
                   value = zoneName.value,
@@ -197,10 +198,14 @@ fun AlertDialogPickZoneName(
                   modifier = Modifier.padding(16.dp).fillMaxWidth(),
                   horizontalArrangement = Arrangement.SpaceEvenly) {
                     Button(
-                        text = "Cancel",
+                        text = stringResource(R.string.zone_selection_button_cancel),
+                        modifier = Modifier.testTag("AlertDialogButtonCancel"),
                         onClick = { onDismiss() },
                     )
-                    Button(text = "Confirm", onClick = { onConfirm(zoneName.value) })
+                    Button(
+                        text = stringResource(R.string.zone_selection_button_accept),
+                        modifier = Modifier.testTag("AlertDialogButtonAccept"),
+                        onClick = { onConfirm(zoneName.value) })
                   }
             }
       })

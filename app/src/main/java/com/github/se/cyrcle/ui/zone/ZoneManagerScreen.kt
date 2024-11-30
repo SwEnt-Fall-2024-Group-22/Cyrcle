@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -108,7 +109,7 @@ fun AddZoneButton(navigationActions: NavigationActions) {
 fun ZoneCard(zone: Zone, zones: MutableState<List<Zone>>) {
   val context = LocalContext.current
   Row(
-      modifier = Modifier.padding(16.dp).fillMaxWidth(),
+      modifier = Modifier.padding(16.dp).fillMaxWidth().testTag("ZoneCard"),
       horizontalArrangement = Arrangement.SpaceBetween) {
         Text(text = zone.name, textAlign = TextAlign.Left, modifier = Modifier.weight(2f))
         Text(text = zone.lastRefreshed.toString(), modifier = Modifier.weight(1f))
@@ -123,7 +124,7 @@ fun ZoneCard(zone: Zone, zones: MutableState<List<Zone>>) {
                 })
         Icon(
             Icons.Outlined.Delete,
-            contentDescription = "Add",
+            contentDescription = "Delete",
             modifier =
                 Modifier.weight(0.2f).clickable {
                   Zone.deleteZone(zone, context)
@@ -136,16 +137,16 @@ fun ZoneCard(zone: Zone, zones: MutableState<List<Zone>>) {
 @Composable
 fun ZoneHeader() {
   Row(
-      modifier = Modifier.padding(16.dp).fillMaxWidth(),
+      modifier = Modifier.padding(16.dp).fillMaxWidth().testTag("ZoneManagerHeader"),
       horizontalArrangement = Arrangement.SpaceBetween) {
         Text(
             text = stringResource(R.string.zone_manager_header_area),
             textAlign = TextAlign.Left,
-            modifier = Modifier.weight(2f),
+            modifier = Modifier.weight(2f).testTag("ZoneManagerHeaderArea"),
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold))
         Text(
             text = stringResource(R.string.zone_manager_header_lastRefreshed),
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).testTag("ZoneManagerHeaderLastRefreshed"),
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold))
         Icon(
             Icons.Filled.Refresh,
@@ -153,7 +154,7 @@ fun ZoneHeader() {
             modifier = Modifier.weight(0.2f).alpha(0.0f))
         Icon(
             Icons.Filled.Delete,
-            contentDescription = "Add",
+            contentDescription = "Delete",
             modifier = Modifier.weight(0.2f).alpha(0.0f))
       }
 }
