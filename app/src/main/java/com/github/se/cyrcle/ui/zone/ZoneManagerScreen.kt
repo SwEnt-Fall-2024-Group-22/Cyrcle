@@ -1,28 +1,44 @@
 package com.github.se.cyrcle.ui.zone
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.model.zone.Zone
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.IconButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
+import java.io.File
 
 /** Screen where users can manage their downloaded zones. and access the zone selection screen. */
 @Composable
 fun ZoneManagerScreen(navigationActions: NavigationActions) {
+   val context = LocalContext.current
+    val zones = remember { mutableStateOf<List<Zone>>(emptyList()) }
+    LaunchedEffect(Unit) {
+        val zoneDir = File(context.filesDir, "zones")
+        zones.value = Zone.loadZones(zoneDir)
+        Log.d("ZoneManagerScreen", "Zones: ${zones.value}")
+    }
+
   Scaffold(
       topBar = {
         TopAppBar(
@@ -31,7 +47,11 @@ fun ZoneManagerScreen(navigationActions: NavigationActions) {
       }) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
           AddZoneButton(navigationActions)
-          Text("TODO")
+         Column {
+            zones.value.forEach { zone ->
+              Text(text = zone.name, modifier = Modifier.padding(16.dp))
+            }
+          }
         }
       }
 }
