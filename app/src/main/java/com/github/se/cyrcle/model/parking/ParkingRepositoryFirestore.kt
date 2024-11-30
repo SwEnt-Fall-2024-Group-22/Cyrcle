@@ -5,16 +5,14 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.gson.*
-import com.google.gson.reflect.TypeToken
 import com.mapbox.geojson.Point
-import java.lang.reflect.Type
 import javax.inject.Inject
 
 class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFirestore) :
     ParkingRepository {
 
   private val collectionPath = "parkings"
+  private val parkingSerializer = ParkingAdapter()
 
   override fun onSignIn(onSuccess: () -> Unit) {
     Firebase.auth.addAuthStateListener {
@@ -37,7 +35,7 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
         .document(id)
         .get()
         .addOnSuccessListener { document ->
-          val parking = document.data?.let { deserializeParking(it) }
+          val parking = document.data?.let(parkingSerializer::deserializeParking)
           if (parking != null) {
             onSuccess(parking)
           } else {
@@ -62,7 +60,7 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
         .addOnSuccessListener { querySnapshot ->
           val parkings =
               querySnapshot.documents.mapNotNull { document ->
-                document.data?.let { deserializeParking(it) }
+                document.data?.let(parkingSerializer::deserializeParking)
               }
           onSuccess(parkings)
         }
@@ -88,7 +86,7 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
         .addOnSuccessListener { querySnapshot ->
           val parkings =
               querySnapshot.documents.mapNotNull { document ->
-                document.data?.let { deserializeParking(it) }
+                document.data?.let(parkingSerializer::deserializeParking)
               }
           onSuccess(parkings)
         }
@@ -98,7 +96,7 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
   override fun addParking(parking: Parking, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     db.collection(collectionPath)
         .document(parking.uid)
-        .set(serializeParking(parking))
+        .set(parkingSerializer.serializeParking(parking))
         .addOnSuccessListener { onSuccess() }
         .addOnFailureListener { onFailure(it) }
   }
@@ -111,7 +109,7 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
     Log.d("ParkingRepositoryFirestore", "updateParking: $parking")
     db.collection(collectionPath)
         .document(parking.uid)
-        .set(serializeParking(parking))
+        .set(parkingSerializer.serializeParking(parking))
         .addOnSuccessListener { onSuccess() }
         .addOnFailureListener { onFailure(it) }
   }
@@ -202,46 +200,5 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
         .set(report)
         .addOnSuccessListener { onSuccess(report) }
         .addOnFailureListener { onFailure(it) }
-  }
-
-  fun serializeParking(parking: Parking): Map<String, Any> {
-    val gson = GsonBuilder().registerTypeAdapter(Point::class.java, PointAdapter()).create()
-    val json = gson.toJson(parking)
-    return gson.fromJson(json, object : TypeToken<Map<String, Any>>() {}.type)
-  }
-
-  fun deserializeParking(map: Map<String, Any>): Parking {
-    val gson = GsonBuilder().registerTypeAdapter(Point::class.java, PointAdapter()).create()
-    val json = gson.toJson(map)
-    return gson.fromJson(json, Parking::class.java)
-  }
-}
-
-/**
- * Adapter for serializing and deserializing Point objects. This is necessary as we need to store
- * the points as an object with two fields, longitude and latitude, in Firestore to be able to make
- * complex queries.
- */
-class PointAdapter : JsonSerializer<Point>, JsonDeserializer<Point> {
-  override fun serialize(
-      src: Point,
-      typeOfSrc: Type,
-      context: JsonSerializationContext
-  ): JsonElement {
-    return JsonObject().apply {
-      addProperty("longitude", src.longitude())
-      addProperty("latitude", src.latitude())
-    }
-  }
-
-  override fun deserialize(
-      json: JsonElement,
-      typeOfT: Type,
-      context: JsonDeserializationContext
-  ): Point {
-    val jsonObject = json.asJsonObject
-    val longitude = jsonObject.get("longitude").asDouble
-    val latitude = jsonObject.get("latitude").asDouble
-    return Point.fromLngLat(longitude, latitude)
   }
 }
