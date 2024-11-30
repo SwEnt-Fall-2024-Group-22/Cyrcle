@@ -395,37 +395,56 @@ fun ReviewCard(
                             currentUser?.public?.userId?.let { review.dislikedBy.contains(it) }
                                 ?: false
 
-                        IconButton(
-                            onClick = {
-                              if (userSignedIn) {
-                                currentUser?.public?.let {
-                                  reviewViewModel.handleInteraction(review, it.userId, true)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                          IconButton(
+                              onClick = {
+                                if (userSignedIn) {
+                                  currentUser?.public?.let {
+                                    reviewViewModel.handleInteraction(review, it.userId, true)
+                                  }
                                 }
+                              },
+                              enabled = userSignedIn) {
+                                Icon(
+                                    imageVector = Icons.Outlined.ThumbUp,
+                                    contentDescription = "Like",
+                                    tint =
+                                        if (currentUserHasLiked) MaterialTheme.colorScheme.primary
+                                        else Black)
                               }
-                            },
-                            enabled = userSignedIn) {
-                              Icon(
-                                  imageVector = Icons.Outlined.ThumbUp,
-                                  contentDescription = "Like",
-                                  tint =
-                                      if (currentUserHasLiked) MaterialTheme.colorScheme.primary
-                                      else Black)
-                            }
-                        IconButton(
-                            onClick = {
-                              if (userSignedIn) {
-                                reviewViewModel.handleInteraction(
-                                    review, currentUser?.public?.userId ?: "", false)
+                          Text(
+                              text = review.likedBy.size.toString(),
+                              style = MaterialTheme.typography.bodySmall,
+                              color =
+                                  if (currentUserHasLiked) MaterialTheme.colorScheme.primary
+                                  else Black)
+                        }
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                          IconButton(
+                              onClick = {
+                                if (userSignedIn) {
+                                  reviewViewModel.handleInteraction(
+                                      review, currentUser?.public?.userId ?: "", false)
+                                }
+                              },
+                              enabled = userSignedIn) {
+                                Icon(
+                                    imageVector = Icons.Outlined.ThumbDown,
+                                    contentDescription = "Dislike",
+                                    tint =
+                                        if (currentUserHasDisliked)
+                                            MaterialTheme.colorScheme.primary
+                                        else Black)
                               }
-                            },
-                            enabled = userSignedIn) {
-                              Icon(
-                                  imageVector = Icons.Outlined.ThumbDown,
-                                  contentDescription = "Dislike",
-                                  tint =
-                                      if (currentUserHasDisliked) MaterialTheme.colorScheme.primary
-                                      else Black)
-                            }
+                          Text(
+                              text = review.dislikedBy.size.toString(),
+                              style = MaterialTheme.typography.bodySmall,
+                              color =
+                                  if (currentUserHasDisliked) MaterialTheme.colorScheme.primary
+                                  else Black)
+                        }
+
                         OptionsMenu(options = options, testTag = "MoreOptions$index")
                       }
                     }
