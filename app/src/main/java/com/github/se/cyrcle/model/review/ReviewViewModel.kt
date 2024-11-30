@@ -73,7 +73,12 @@ class ReviewViewModel(
 
   fun updateReview(review: Review) {
     reviewRepository.updateReview(
-        review, {}, { Log.e("ReviewViewModel", "Error adding review", it) })
+        review,
+        {
+          _parkingReviews.value =
+              _parkingReviews.value.map { if (it.uid == review.uid) review else it }
+        },
+        { Log.e("ReviewViewModel", "Error adding review", it) })
   }
 
   fun getReviewsByParking(parking: String) {
@@ -103,10 +108,7 @@ class ReviewViewModel(
     doing two separate updates for each list. This is to ensure that the review is not
     properly updated if one of the updates fails.
     */
-    reviewRepository.updateReview(
-        review.copy(likedBy = newLikedBy, dislikedBy = newDislikedBy),
-        {},
-        { Log.e("ReviewViewModel", "Error adding like to review", it) })
+    updateReview(review.copy(likedBy = newLikedBy, dislikedBy = newDislikedBy))
   }
 
   /**
@@ -116,10 +118,8 @@ class ReviewViewModel(
    * @param userId The user ID of the user removing the like.
    */
   private fun removeLikeFromReview(review: Review, userId: String) {
-    reviewRepository.updateReview(
-        review.copy(likedBy = review.likedBy.filter { it != userId }),
-        {},
-        { Log.e("ReviewViewModel", "Error removing like from review", it) })
+    val newLikedBy = review.likedBy.filter { it != userId }
+    updateReview(review.copy(likedBy = newLikedBy))
   }
 
   /**
@@ -137,10 +137,7 @@ class ReviewViewModel(
     doing two separate updates for each list. This is to ensure that the review is not
     properly updated if one of the updates fails.
     */
-    reviewRepository.updateReview(
-        review.copy(dislikedBy = newDislikedBy, likedBy = newLikedBy),
-        {},
-        { Log.e("ReviewViewModel", "Error adding dislike to review", it) })
+    updateReview(review.copy(likedBy = newLikedBy, dislikedBy = newDislikedBy))
   }
 
   /**
@@ -150,10 +147,8 @@ class ReviewViewModel(
    * @param userId The user ID of the user removing the dislike.
    */
   private fun removeDislikeFromReview(review: Review, userId: String) {
-    reviewRepository.updateReview(
-        review.copy(dislikedBy = review.dislikedBy.filter { it != userId }),
-        {},
-        { Log.e("ReviewViewModel", "Error removing dislike from review", it) })
+    val newDislikedBy = review.dislikedBy.filter { it != userId }
+    updateReview(review.copy(dislikedBy = newDislikedBy))
   }
 
   /**
