@@ -2,6 +2,7 @@ package com.github.se.cyrcle.model.parking
 
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
+import com.github.se.cyrcle.io.serializer.ParkingAdapter
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.FirebaseApp

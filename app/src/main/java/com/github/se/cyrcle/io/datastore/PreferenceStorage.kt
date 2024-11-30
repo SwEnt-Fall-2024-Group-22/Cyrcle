@@ -1,4 +1,4 @@
-package com.github.se.cyrcle.io
+package com.github.se.cyrcle.io.datastore
 
 import android.content.Context
 import androidx.datastore.core.DataStore

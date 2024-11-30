@@ -1,6 +1,7 @@
 package com.github.se.cyrcle.model.parking
 
 import android.util.Log
+import com.github.se.cyrcle.io.serializer.ParkingAdapter
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.CollectionReference

@@ -2,7 +2,6 @@ package com.github.se.cyrcle.model.parking
 
 import android.annotation.SuppressLint
 import androidx.room.Entity
-import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMeasurement
@@ -11,18 +10,16 @@ import java.math.RoundingMode
 import kotlin.math.floor
 import kotlin.math.pow
 
-const val TILE_SIZE = 0.1
-const val DECIMALS = 2
 /**
  * Represents a tile in the map.
  *
  * @param bottomLeft the bottom left corner of the tile
  * @param topRight the top right corner of the tile
  */
-@Entity
+@Entity(tableName = "tiles")
 data class Tile(
-    @Ignore val bottomLeft: Point,
-    @Ignore val topRight: Point,
+    val bottomLeft: Point,
+    val topRight: Point,
     val parkings: MutableSet<Parking> = mutableSetOf(),
     @PrimaryKey val uid: String = getUidForPoint(bottomLeft)
 ) {
@@ -32,6 +29,10 @@ data class Tile(
   }
 
   companion object {
+
+    private val TILE_SIZE = 0.1
+    private val DECIMALS = 2
+
     /**
      * Rounds the double to the smallest decimal value that is closest to it
      *
@@ -70,8 +71,8 @@ data class Tile(
      */
     @SuppressLint("DefaultLocale")
     fun getUidForPoint(point: Point): String {
-      val x = (point.longitude() / TILE_SIZE).toInt() * TILE_SIZE
-      val y = (point.latitude() / TILE_SIZE).toInt() * TILE_SIZE
+      val x = floor(point.longitude() / TILE_SIZE) * TILE_SIZE
+      val y = floor(point.latitude() / TILE_SIZE) * TILE_SIZE
 
       val firstCoordinate = String.format("%.${DECIMALS}f", roundDouble(x, DECIMALS))
       val secondCoordinate = String.format("%.${DECIMALS}f", roundDouble(y, DECIMALS))

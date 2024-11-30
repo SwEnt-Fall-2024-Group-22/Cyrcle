@@ -10,6 +10,7 @@ import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.github.se.cyrcle.io.datastore.PreferenceStorage
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test

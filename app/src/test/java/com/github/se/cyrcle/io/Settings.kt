@@ -1,6 +1,7 @@
 package com.github.se.cyrcle.io
 
 import android.util.Log
+import com.github.se.cyrcle.io.datastore.ProtoGenericSerializer
 import java.io.InputStream
 import java.io.OutputStream
 
