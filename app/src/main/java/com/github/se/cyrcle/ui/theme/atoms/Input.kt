@@ -104,6 +104,7 @@ fun ConditionCheckingInputText(
     maxCharacters: Int = Int.MAX_VALUE,
     maxLines: Int = Int.MAX_VALUE,
     hasClearIcon: Boolean = true,
+    smallText: Boolean = false,
     testTag: String = "ConditionCheckingInputText"
 ) {
   Column {
@@ -121,20 +122,30 @@ fun ConditionCheckingInputText(
     // Display error message below the text field if the input is not valid
     if (isError) {
       Row(
-          modifier = Modifier.padding(top = 4.dp).testTag("${testTag}ErrorRow"),
+          modifier = modifier.padding(top = 4.dp).testTag("${testTag}ErrorRow"),
           verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Filled.WarningAmber,
-                contentDescription = "Error",
-                tint = MaterialTheme.colorScheme.error,
-                modifier = Modifier.size(16.dp),
-            )
+            if (!smallText) {
+              Icon(
+                  imageVector = Icons.Filled.WarningAmber,
+                  contentDescription = "Error",
+                  tint = MaterialTheme.colorScheme.error,
+                  modifier = Modifier.size(16.dp),
+              )
+            }
             Text(
                 text =
                     if (value.length < minCharacters) {
-                      stringResource(R.string.input_min_characters, minCharacters, value.length)
+                      if (smallText) {
+                        stringResource(R.string.input_min_characters_small, minCharacters)
+                      } else {
+                        stringResource(R.string.input_min_characters, minCharacters, value.length)
+                      }
                     } else {
-                      stringResource(R.string.input_max_characters, maxCharacters, value.length)
+                      if (smallText) {
+                        stringResource(R.string.input_max_characters_small, maxCharacters)
+                      } else {
+                        stringResource(R.string.input_max_characters, maxCharacters, value.length)
+                      }
                     },
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,

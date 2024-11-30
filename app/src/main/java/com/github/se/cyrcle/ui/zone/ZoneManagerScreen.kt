@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.zone.Zone
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
@@ -44,7 +45,7 @@ import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
 /** Screen where users can manage their downloaded zones. and access the zone selection screen. */
 @Composable
-fun ZoneManagerScreen(navigationActions: NavigationActions) {
+fun ZoneManagerScreen(mapViewModel: MapViewModel, navigationActions: NavigationActions) {
   val context = LocalContext.current
   val zones = remember { mutableStateOf<List<Zone>>(emptyList()) }
   LaunchedEffect(Unit) {
@@ -60,7 +61,7 @@ fun ZoneManagerScreen(navigationActions: NavigationActions) {
       }) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
           // === Overlay ===
-          AddZoneButton(navigationActions)
+          AddZoneButton(mapViewModel, navigationActions)
           // ===  === ===  ===
 
           // === Content ===
@@ -90,7 +91,7 @@ fun ZoneManagerScreen(navigationActions: NavigationActions) {
 }
 // The overlaid button that allows the user to add a new zone.
 @Composable
-fun AddZoneButton(navigationActions: NavigationActions) {
+fun AddZoneButton(mapViewModel: MapViewModel, navigationActions: NavigationActions) {
   Box(modifier = Modifier.fillMaxSize()) {
     IconButton(
         icon = Icons.Default.Add,
@@ -99,7 +100,10 @@ fun AddZoneButton(navigationActions: NavigationActions) {
             Modifier.align(Alignment.BottomStart)
                 .scale(1.2f)
                 .padding(bottom = 25.dp, start = 16.dp),
-        onClick = { navigationActions.navigateTo(Screen.ZONE_SELECTION) },
+        onClick = {
+          mapViewModel.updateLocationPickerState(MapViewModel.LocationPickerState.NONE_SET)
+          navigationActions.navigateTo(Screen.ZONE_SELECTION)
+        },
         colorLevel = ColorLevel.PRIMARY,
         testTag = "AddButton")
   }

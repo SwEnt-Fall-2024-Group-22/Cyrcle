@@ -9,6 +9,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.zone.Zone
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
@@ -22,6 +23,7 @@ import org.mockito.kotlin.verify
 class ZoneManagerScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
   private lateinit var navigationActions: NavigationActions
+  val mapViewModel = MapViewModel()
 
   @Before
   fun setUp() {
@@ -31,7 +33,7 @@ class ZoneManagerScreenTest {
   @OptIn(ExperimentalTestApi::class)
   @Test
   fun checkAllUIElementsAreDisplayedWithNoZones() {
-    composeTestRule.setContent { ZoneManagerScreen(navigationActions) }
+    composeTestRule.setContent { ZoneManagerScreen(mapViewModel, navigationActions) }
 
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("TopAppBar"))
     composeTestRule.onNodeWithTag("TopAppBar").assertIsDisplayed()

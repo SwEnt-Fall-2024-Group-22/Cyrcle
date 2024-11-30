@@ -37,7 +37,7 @@ import com.github.se.cyrcle.ui.addParking.location.overlay.RectangleSelection
 import com.github.se.cyrcle.ui.map.MapConfig
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.atoms.Button
-import com.github.se.cyrcle.ui.theme.atoms.InputText
+import com.github.se.cyrcle.ui.theme.atoms.ConditionCheckingInputText
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 import com.mapbox.geojson.BoundingBox
@@ -46,6 +46,8 @@ import com.mapbox.maps.extension.compose.DisposableMapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.plugin.gestures.gestures
 
+const val MAX_ZONE_NAME_LENGTH = 32
+const val MIN_ZONE_NAME_LENGTH = 1
 /** Screen where users can select a new zone to download. */
 @Composable
 fun ZoneSelectionScreen(
@@ -176,6 +178,7 @@ fun AlertDialogPickZoneName(
     onDismiss: () -> Unit = {}
 ) {
   val zoneName = remember { mutableStateOf(defaultName) }
+  val isNameValid = zoneName.value.length in MIN_ZONE_NAME_LENGTH..MAX_ZONE_NAME_LENGTH
   BasicAlertDialog(
       onDismissRequest = { onDismiss() },
       content = {
@@ -188,11 +191,17 @@ fun AlertDialogPickZoneName(
                   style = MaterialTheme.typography.bodyLarge,
                   modifier = Modifier.padding(16.dp).testTag("AlertDialogTitle"))
               Spacer(modifier = Modifier.padding(8.dp))
-              InputText(
+
+              ConditionCheckingInputText(
                   value = zoneName.value,
                   onValueChange = { zoneName.value = it },
                   label = "Zone name",
-                  modifier = Modifier.padding(16.dp))
+                  modifier = Modifier.padding(horizontal = 16.dp),
+                  maxLines = 1,
+                  minCharacters = MIN_ZONE_NAME_LENGTH,
+                  maxCharacters = MAX_ZONE_NAME_LENGTH,
+                  smallText = true,
+              )
               Spacer(modifier = Modifier.padding(8.dp))
               Row(
                   modifier = Modifier.padding(16.dp).fillMaxWidth(),
@@ -205,6 +214,7 @@ fun AlertDialogPickZoneName(
                     Button(
                         text = stringResource(R.string.zone_selection_button_accept),
                         modifier = Modifier.testTag("AlertDialogButtonAccept"),
+                        enabled = isNameValid,
                         onClick = { onConfirm(zoneName.value) })
                   }
             }

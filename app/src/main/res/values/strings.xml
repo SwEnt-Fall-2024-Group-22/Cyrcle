@@ -28,7 +28,8 @@
     <!-- Error Messages -->
     <string name="input_min_characters">Minimum %1$d characters required (current: %2$d)</string>
     <string name="input_max_characters">Maximum %1$d characters allowed (current: %2$d)</string>
-
+    <string name="input_min_characters_small">Minimum %1$d characters required </string>
+    <string name="input_max_characters_small">Maximum %1$d characters allowed </string>
     <!-- Attributes Picker -->
     <string name="attributes_picker_title_label">Title</string>
     <string name="attributes_picker_protection_label">How protected from the weather is the spot?</string>
