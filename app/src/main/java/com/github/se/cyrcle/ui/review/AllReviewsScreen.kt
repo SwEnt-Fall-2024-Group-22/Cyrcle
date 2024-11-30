@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.review
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -19,9 +20,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.outlined.ThumbDown
+import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -48,6 +53,7 @@ import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
+import com.github.se.cyrcle.ui.theme.Black
 import com.github.se.cyrcle.ui.theme.atoms.OptionsMenu
 import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
@@ -198,6 +204,7 @@ fun AllReviewsScreen(
   val currentUserHasReviewed = remember { mutableStateOf(false) }
   LaunchedEffect(reviewsList, currentUser) {
     currentUserHasReviewed.value = reviewsList.any { it.owner == currentUser?.public?.userId }
+    Log.d("AllReviewsScreen", "Recomposition for currentUserHasReviewed")
   }
 
   // Sort reviews based on the selected sorting option
@@ -268,7 +275,8 @@ fun AllReviewsScreen(
                                                 oldScore = it.rating)
                                             navigationActions.goBack()
                                           }),
-                              userViewModel = userViewModel)
+                              userViewModel = userViewModel,
+                              reviewViewModel = reviewViewModel)
                         }
                       } else {
                         // Add review button
@@ -326,7 +334,8 @@ fun AllReviewsScreen(
                                               .show()
                                         }
                                       }),
-                          userViewModel = userViewModel)
+                          userViewModel = userViewModel,
+                          reviewViewModel = reviewViewModel)
                     }
               }
         }
@@ -340,8 +349,13 @@ fun ReviewCard(
     isExpanded: Boolean,
     onCardClick: () -> Unit,
     options: Map<String, () -> Unit>,
-    userViewModel: UserViewModel
+    userViewModel: UserViewModel,
+    reviewViewModel: ReviewViewModel
 ) {
+  val currentUser by userViewModel.currentUser.collectAsState()
+  val userSignedIn by userViewModel.isSignedIn.collectAsState(false)
+  Log.d("ReviewCard", "Recomposition for ReviewCard $index")
+
   Card(
       modifier =
           Modifier.fillMaxWidth()
@@ -352,10 +366,45 @@ fun ReviewCard(
       shape = MaterialTheme.shapes.medium,
       elevation = CardDefaults.cardElevation(4.dp)) {
         Box(modifier = Modifier.fillMaxSize()) {
-          OptionsMenu(
-              options = options,
+          Row(
               modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
-              testTag = "MoreOptions$index")
+              horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                val currentUserHasLiked =
+                    currentUser?.public?.userId?.let { review.likedBy.contains(it) } ?: false
+                val currentUserHasDisliked =
+                    currentUser?.public?.userId?.let { review.dislikedBy.contains(it) } ?: false
+                IconButton(
+                    onClick = {
+                      if (userSignedIn) {
+                        currentUser?.public?.let {
+                          reviewViewModel.handleInteraction(review, it.userId, true)
+                        }
+                      }
+                    },
+                    enabled = userSignedIn) {
+                      Icon(
+                          imageVector = Icons.Outlined.ThumbUp,
+                          contentDescription = "Like",
+                          tint =
+                              if (currentUserHasLiked) MaterialTheme.colorScheme.primary else Black)
+                    }
+                IconButton(
+                    onClick = {
+                      if (userSignedIn) {
+                        reviewViewModel.handleInteraction(
+                            review, currentUser?.public?.userId ?: "", false)
+                      }
+                    },
+                    enabled = userSignedIn) {
+                      Icon(
+                          imageVector = Icons.Outlined.ThumbDown,
+                          contentDescription = "Dislike",
+                          tint =
+                              if (currentUserHasDisliked) MaterialTheme.colorScheme.primary
+                              else Black)
+                    }
+                OptionsMenu(options = options, testTag = "MoreOptions$index")
+              }
 
           Column(
               modifier =
