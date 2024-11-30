@@ -93,8 +93,7 @@ data class Zone(
       if (!zoneDir.exists()) {
         zoneDir.mkdirs()
       }
-      return zoneDir.listFiles()?.map { file -> fromJson(file.readText()) }?.filterNotNull()
-          ?: emptyList()
+      return zoneDir.listFiles()?.mapNotNull { file -> fromJson(file.readText()) } ?: emptyList()
     }
 
     /**
