@@ -15,6 +15,8 @@ import kotlin.math.pow
  *
  * @param bottomLeft the bottom left corner of the tile
  * @param topRight the top right corner of the tile
+ * @param parkings the parkings in the tile
+ * @param uid the unique identifier of the tile
  */
 @Entity(tableName = "tiles")
 data class Tile(
@@ -30,8 +32,8 @@ data class Tile(
 
   companion object {
 
-    private val TILE_SIZE = 0.1
-    private val DECIMALS = 2
+    private const val TILE_SIZE = 0.1
+    private const val DECIMALS = 2
 
     /**
      * Rounds the double to the smallest decimal value that is closest to it
