@@ -76,7 +76,7 @@ class ParkingViewModel(
   // List of tiles to display
   private var tilesToDisplay: Set<Tile> = emptySet()
   // Map a tile to the parkings that are in it.
-  private val tileCache = MutableStateFlow<LinkedHashMap<String, Tile>>(LinkedHashMap(10, 1f, true))
+  private val tileCache = LinkedHashMap<String, Tile>(10, 1f, true)
 
   /**
    * Generates a new unique identifier for a parking.
@@ -107,10 +107,9 @@ class ParkingViewModel(
         parking,
         {
           val tileID = Tile.getUidForPoint(parking.location.center)
-          val tile = tileCache.value[tileID] ?: Tile.getTileFromPoint(parking.location.center)
-
+          val tile = tileCache[tileID] ?: Tile.getTileFromPoint(parking.location.center)
           tile.parkings.add(parking)
-          tileCache.value[tileID] = tile
+          tileCache[tileID] = tile
         },
         { Log.e("ParkingViewModel", "Error adding parking", it) })
   }
@@ -179,14 +178,14 @@ class ParkingViewModel(
     tilesToDisplay.forEach { tile ->
 
       // Get parkings from memory cache
-      if (tileCache.value.containsKey(tile.uid)) {
-        _rectParkings.value += tileCache.value[tile.uid]!!.parkings
+      if (tileCache.containsKey(tile.uid)) {
+        _rectParkings.value += tileCache[tile.uid]!!.parkings
         updateClosestParkings(--nbRequestLeft)
 
         // Get parkings from repository
       } else {
         // Cache tile
-        tileCache.value[tile.uid] = tile
+        tileCache[tile.uid] = tile
         Log.d("ParkingViewModel", "Requesting parkings for tile ${tile.uid}")
         parkingRepository.getParkingsBetween(
             tile.bottomLeft,
@@ -194,7 +193,7 @@ class ParkingViewModel(
             { parkings ->
               Log.d("ParkingViewModel", "For tile ${tile.uid}, got ${parkings.size} parkings")
 
-              tileCache.value[tile.uid]!!.parkings.addAll(parkings)
+              tileCache[tile.uid]!!.parkings.addAll(parkings)
               _rectParkings.value += parkings
               updateClosestParkings(--nbRequestLeft)
             },
