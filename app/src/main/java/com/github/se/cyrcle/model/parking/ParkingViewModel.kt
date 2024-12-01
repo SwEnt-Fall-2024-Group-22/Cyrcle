@@ -487,10 +487,14 @@ class ParkingViewModel(
                         onFailure = { Log.d("ParkingViewModel", "Error adding ReportedObject") })
                   } else {
                     Log.d("ParkingViewModel", "Document does not exist, addition not allowed")
+                    updateLocalParkingAndMetrics(report, selectedParking)
                   }
                 }
               },
-              onFailure = { Log.d("ParkingViewModel", "Error checking for ReportedObject") })
+              onFailure = {
+                Log.d("ParkingViewModel", "Error checking for ReportedObject")
+                updateLocalParkingAndMetrics(report, selectedParking)
+              })
         },
         onFailure = {
           Log.d("ParkingViewModel", "Report not added")

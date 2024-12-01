@@ -208,6 +208,7 @@ class ReviewViewModel(
     reviewRepository.addReport(
         report,
         onSuccess = {
+          Log.d("AAAAAAAA", "HOORAY")
           val newReportedObject =
               ReportedObject(
                   objectUID = selectedReview.uid,
@@ -242,11 +243,16 @@ class ReviewViewModel(
                         onSuccess = { updateLocalReviewAndMetrics(report, selectedReview) },
                         onFailure = { Log.d("ReviewViewModel", "Error adding ReportedObject") })
                   } else {
+                    updateLocalReviewAndMetrics(report, selectedReview)
                     Log.d("ReviewViewModel", "Document does not exist, addition not allowed")
+                    updateLocalReviewAndMetrics(report, selectedReview)
                   }
                 }
               },
-              onFailure = { Log.d("ReviewViewModel", "Error checking for ReportedObject") })
+              onFailure = {
+                Log.d("ReviewViewModel", "Error checking for ReportedObject")
+                updateLocalReviewAndMetrics(report, selectedReview)
+              })
         },
         onFailure = {
           Log.d("ReviewViewModel", "Report not added")
