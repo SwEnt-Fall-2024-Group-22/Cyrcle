@@ -264,13 +264,6 @@ class AllReviewsScreenTest {
   }
 
   @Test
-  fun sortReviewsByInteractionTest() {
-    composeTestRule.setContent {
-      AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
-    }
-  }
-
-  @Test
   fun dropdownMenu_displaysOptions() {
     composeTestRule.setContent {
       AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
