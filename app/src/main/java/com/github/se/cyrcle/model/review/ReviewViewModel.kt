@@ -73,7 +73,12 @@ class ReviewViewModel(
 
   fun updateReview(review: Review) {
     reviewRepository.updateReview(
-        review, {}, { Log.e("ReviewViewModel", "Error adding review", it) })
+        review,
+        {
+          _parkingReviews.value =
+              _parkingReviews.value.map { if (it.uid == review.uid) review else it }
+        },
+        { Log.e("ReviewViewModel", "Error adding review", it) })
   }
 
   fun getReviewsByParking(parking: String) {
@@ -86,6 +91,95 @@ class ReviewViewModel(
   fun deleteReviewById(uid: String) {
     reviewRepository.deleteReviewById(
         uid, {}, { Log.e("ReviewViewModel", "Error deleting reviews", it) })
+  }
+
+  /**
+   * Adds a like to a given review by a given user and updates the repository. This function also
+   * removes the user from the dislikedBy list if they are present. This ensures that a user cannot
+   * like and dislike a review at the same time.
+   *
+   * @param review The review to add a like to.
+   * @param userId The user ID of the user adding the like.
+   */
+  private fun addLikeToReview(review: Review, userId: String) {
+    val newLikedBy = review.likedBy.plus(userId)
+    val newDislikedBy = review.dislikedBy.filter { it != userId }
+    /* Note: The review is updated with the new lists of likedBy and dislikedBy rather than
+    doing two separate updates for each list. This is to ensure that the review is not
+    properly updated if one of the updates fails.
+    */
+    updateReview(review.copy(likedBy = newLikedBy, dislikedBy = newDislikedBy))
+  }
+
+  /**
+   * Removes a like from a given review by a given user and updates the repository.
+   *
+   * @param review The review to remove a like from.
+   * @param userId The user ID of the user removing the like.
+   */
+  private fun removeLikeFromReview(review: Review, userId: String) {
+    val newLikedBy = review.likedBy.filter { it != userId }
+    updateReview(review.copy(likedBy = newLikedBy))
+  }
+
+  /**
+   * Adds a dislike to a given review by a given user and updates the repository. This function also
+   * removes the user from the likedBy list if they are present. This ensures that a user cannot
+   * like and dislike a review at the same time.
+   *
+   * @param review The review to add a dislike to.
+   * @param userId The user ID of the user adding the dislike.
+   */
+  private fun addDislikeToReview(review: Review, userId: String) {
+    val newDislikedBy = review.dislikedBy.plus(userId)
+    val newLikedBy = review.likedBy.filter { it != userId }
+    /* Note: The review is updated with the new lists of likedBy and dislikedBy rather than
+    doing two separate updates for each list. This is to ensure that the review is not
+    properly updated if one of the updates fails.
+    */
+    updateReview(review.copy(likedBy = newLikedBy, dislikedBy = newDislikedBy))
+  }
+
+  /**
+   * Removes a dislike from a given review by a given user and updates the repository.
+   *
+   * @param review The review to remove a dislike from.
+   * @param userId The user ID of the user removing the dislike.
+   */
+  private fun removeDislikeFromReview(review: Review, userId: String) {
+    val newDislikedBy = review.dislikedBy.filter { it != userId }
+    updateReview(review.copy(dislikedBy = newDislikedBy))
+  }
+
+  /**
+   * Handles a user interaction with a review, either adding or removing a like or dislike.
+   *
+   * If the user presses the like button, the function checks if the user has already liked the
+   * review. If they have, the like is removed. If they have not, the like is added. The same logic
+   * applies to dislikes.
+   *
+   * @param review The review to interact with.
+   * @param userId The user ID of the user interacting with the review.
+   * @param isLike Whether the interaction is a like or dislike. (true for like, false for dislike)
+   */
+  fun handleInteraction(
+      review: Review,
+      userId: String,
+      isLike: Boolean,
+  ) {
+    if (isLike) {
+      if (review.likedBy.contains(userId)) {
+        removeLikeFromReview(review, userId)
+      } else {
+        addLikeToReview(review, userId)
+      }
+    } else {
+      if (review.dislikedBy.contains(userId)) {
+        removeDislikeFromReview(review, userId)
+      } else {
+        addDislikeToReview(review, userId)
+      }
+    }
   }
 
   /**

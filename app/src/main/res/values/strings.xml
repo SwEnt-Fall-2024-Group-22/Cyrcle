@@ -174,8 +174,10 @@
     <string name="by_text">By: %s</string>
     <string name="undefined_username">Unknown user</string>
     <string name="sort_reviews">Sort Reviews</string>
-    <string name="sort_by_rating">Sort By Rating (Best Rated First)</string>
-    <string name="sort_by_date">Sort By Date (Most Recent First)</string>
+    <string name="all_reviews_sort_by_rating">Sort By Score (Highest Score First)</string>
+    <string name="all_reviews_sort_by_date">Sort By Date (Most Recent First)</string>
+    <string name="all_reviews_sort_by_helpful">Sort By Helpful (Most Helpful First)</string>
+    <string name="all_reviews_sort_by_interactions">Sort By Interactions (Most Interactions First)</string>
     <string name="all_reviews_delete_review">Delete Review</string>
     <string name="add_review_first">Add A Review First!</string>
     <string name="all_reviews_add_review">Add Review</string>

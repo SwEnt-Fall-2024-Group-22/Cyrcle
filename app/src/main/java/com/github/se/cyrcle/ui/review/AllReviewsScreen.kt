@@ -19,9 +19,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.outlined.ThumbDown
+import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -48,6 +52,7 @@ import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
+import com.github.se.cyrcle.ui.theme.Black
 import com.github.se.cyrcle.ui.theme.atoms.OptionsMenu
 import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
@@ -57,48 +62,15 @@ import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-fun Timestamp?.toFormattedDate(): String {
-  return if (this != null) {
-    val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-    dateFormat.format(this.toDate())
-  } else {
-    "Date not available"
-  }
-}
-
 enum class ReviewSortingOption {
-  Rating,
-  DateTime
+  ReviewScore,
+  DateTime,
+  Interactions,
+  Helpful
 }
 
 @Composable
-fun FilterSection(
-    title: String,
-    isExpanded: Boolean,
-    onToggle: () -> Unit,
-    content: @Composable () -> Unit
-) {
-  Column(
-      modifier =
-          Modifier.padding(8.dp)
-              .border(1.dp, Color.Gray, shape = MaterialTheme.shapes.medium)
-              .background(MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.medium)
-              .padding(8.dp)) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.clickable(onClick = onToggle).padding(8.dp).fillMaxWidth(),
-            color = MaterialTheme.colorScheme.onSurface,
-            testTag = title)
-
-        if (isExpanded) {
-          content()
-        }
-      }
-}
-
-@Composable
-fun FilterHeader(
+fun SortHeader(
     selectedSortingOption: ReviewSortingOption,
     onSortingOptionSelected: (ReviewSortingOption) -> Unit
 ) {
@@ -117,65 +89,65 @@ fun FilterHeader(
         }
 
     if (showFilters) {
-      FilterSection(
-          title = stringResource(R.string.sort_reviews), // "Sort Reviews" title
-          isExpanded = true,
-          onToggle = { /* No toggle needed for always-visible sorting options */}) {
-            SortingOptionSelector(
-                selectedSortingOption = selectedSortingOption,
-                onOptionSelected = onSortingOptionSelected)
+      Column(
+          modifier =
+              Modifier.padding(vertical = 8.dp)
+                  .border(1.dp, Color.Gray, shape = MaterialTheme.shapes.medium)
+                  .background(
+                      MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.medium)
+                  .padding(8.dp)) {
+            Text(
+                text = stringResource(R.string.sort_reviews),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(8.dp),
+                color = MaterialTheme.colorScheme.onSurface,
+                testTag = stringResource(R.string.sort_reviews))
+            Column(modifier = Modifier.fillMaxWidth()) {
+              ReviewSortingOption.entries.forEach { option ->
+                SortingOptionItem(
+                    option = option,
+                    isSelected = selectedSortingOption == option,
+                    onOptionSelected = onSortingOptionSelected)
+              }
+            }
           }
     }
   }
 }
 
 @Composable
-fun SortingOptionSelector(
-    selectedSortingOption: ReviewSortingOption,
+fun SortingOptionItem(
+    option: ReviewSortingOption,
+    isSelected: Boolean,
     onOptionSelected: (ReviewSortingOption) -> Unit
 ) {
-  Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-    Row(
-        modifier =
-            Modifier.fillMaxWidth()
-                .padding(vertical = 4.dp)
-                .clickable { onOptionSelected(ReviewSortingOption.Rating) }
-                .background(
-                    color =
-                        if (selectedSortingOption == ReviewSortingOption.Rating)
-                            MaterialTheme.colorScheme.secondaryContainer
-                        else Color.Transparent,
-                    shape = MaterialTheme.shapes.small)
-                .padding(12.dp)) {
-          Text(
-              text = stringResource(R.string.sort_by_rating),
-              style = MaterialTheme.typography.bodyMedium,
-              color =
-                  if (selectedSortingOption == ReviewSortingOption.Rating)
-                      MaterialTheme.colorScheme.onSecondaryContainer
-                  else MaterialTheme.colorScheme.primary)
-        }
+  Row(
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(vertical = 4.dp)
+              .clickable { onOptionSelected(option) }
+              .background(
+                  color =
+                      if (isSelected) MaterialTheme.colorScheme.secondaryContainer
+                      else Color.Transparent,
+                  shape = MaterialTheme.shapes.small)
+              .padding(12.dp)) {
+        Text(
+            text = getSortingOptionText(option),
+            style = MaterialTheme.typography.bodyMedium,
+            color =
+                if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer
+                else MaterialTheme.colorScheme.primary)
+      }
+}
 
-    Row(
-        modifier =
-            Modifier.fillMaxWidth()
-                .padding(vertical = 4.dp)
-                .clickable { onOptionSelected(ReviewSortingOption.DateTime) }
-                .background(
-                    color =
-                        if (selectedSortingOption == ReviewSortingOption.DateTime)
-                            MaterialTheme.colorScheme.secondaryContainer
-                        else Color.Transparent,
-                    shape = MaterialTheme.shapes.small)
-                .padding(12.dp)) {
-          Text(
-              text = stringResource(R.string.sort_by_date),
-              style = MaterialTheme.typography.bodyMedium,
-              color =
-                  if (selectedSortingOption == ReviewSortingOption.DateTime)
-                      MaterialTheme.colorScheme.onSecondaryContainer
-                  else MaterialTheme.colorScheme.primary)
-        }
+@Composable
+fun getSortingOptionText(option: ReviewSortingOption): String {
+  return when (option) {
+    ReviewSortingOption.ReviewScore -> stringResource(R.string.all_reviews_sort_by_rating)
+    ReviewSortingOption.DateTime -> stringResource(R.string.all_reviews_sort_by_date)
+    ReviewSortingOption.Interactions -> stringResource(R.string.all_reviews_sort_by_interactions)
+    ReviewSortingOption.Helpful -> stringResource(R.string.all_reviews_sort_by_helpful)
   }
 }
 
@@ -206,7 +178,11 @@ fun AllReviewsScreen(
       remember(reviewsList, selectedSortingOption) {
         when (selectedSortingOption) {
           ReviewSortingOption.DateTime -> reviewsList.sortedByDescending { it.time.nanoseconds }
-          ReviewSortingOption.Rating -> reviewsList.sortedByDescending { it.rating }
+          ReviewSortingOption.ReviewScore -> reviewsList.sortedByDescending { it.rating }
+          ReviewSortingOption.Interactions ->
+              reviewsList.sortedByDescending { it.likedBy.size + it.dislikedBy.size }
+          ReviewSortingOption.Helpful ->
+              reviewsList.sortedByDescending { it.likedBy.size - it.dislikedBy.size }
         }
       }
 
@@ -223,7 +199,7 @@ fun AllReviewsScreen(
       modifier = Modifier.testTag("AllReviewsScreen")) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
           // Header Section
-          FilterHeader(
+          SortHeader(
               selectedSortingOption = selectedSortingOption,
               onSortingOptionSelected = { selectedOption ->
                 selectedSortingOption = selectedOption
@@ -268,7 +244,8 @@ fun AllReviewsScreen(
                                                 oldScore = it.rating)
                                             navigationActions.goBack()
                                           }),
-                              userViewModel = userViewModel)
+                              userViewModel = userViewModel,
+                              reviewViewModel = reviewViewModel)
                         }
                       } else {
                         // Add review button
@@ -326,7 +303,8 @@ fun AllReviewsScreen(
                                               .show()
                                         }
                                       }),
-                          userViewModel = userViewModel)
+                          userViewModel = userViewModel,
+                          reviewViewModel = reviewViewModel)
                     }
               }
         }
@@ -340,8 +318,12 @@ fun ReviewCard(
     isExpanded: Boolean,
     onCardClick: () -> Unit,
     options: Map<String, () -> Unit>,
-    userViewModel: UserViewModel
+    userViewModel: UserViewModel,
+    reviewViewModel: ReviewViewModel
 ) {
+  val currentUser by userViewModel.currentUser.collectAsState()
+  val userSignedIn by userViewModel.isSignedIn.collectAsState(false)
+
   Card(
       modifier =
           Modifier.fillMaxWidth()
@@ -352,24 +334,99 @@ fun ReviewCard(
       shape = MaterialTheme.shapes.medium,
       elevation = CardDefaults.cardElevation(4.dp)) {
         Box(modifier = Modifier.fillMaxSize()) {
-          OptionsMenu(
-              options = options,
-              modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
-              testTag = "MoreOptions$index")
-
           Column(
               modifier =
-                  Modifier.fillMaxWidth().padding(16.dp).testTag("ReviewCardContent$index")) {
-                val defaultUsername = stringResource(R.string.undefined_username)
-                val ownerUsername = remember { mutableStateOf(defaultUsername) }
-                userViewModel.getUserById(
-                    review.owner, onSuccess = { ownerUsername.value = it.public.username })
+                  Modifier.fillMaxWidth()
+                      .padding(horizontal = 16.dp, vertical = 8.dp)
+                      .testTag("ReviewCardContent$index")) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically) {
+                      val defaultUsername = stringResource(R.string.undefined_username)
+                      val ownerUsername = remember { mutableStateOf(defaultUsername) }
+                      userViewModel.getUserById(
+                          review.owner, onSuccess = { ownerUsername.value = it.public.username })
 
-                Text(
-                    text = stringResource(R.string.by_text).format(ownerUsername.value),
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.testTag("ReviewOwner$index"))
-                Spacer(modifier = Modifier.height(4.dp))
+                      androidx.compose.material3.Text(
+                          text = stringResource(R.string.by_text).format(ownerUsername.value),
+                          style = MaterialTheme.typography.bodySmall,
+                          modifier = Modifier.weight(1f).testTag("ReviewOwner$index"),
+                          maxLines = 1,
+                          overflow = TextOverflow.Ellipsis)
+
+                      // Icon buttons for like, dislike, and more options
+                      Row(
+                          horizontalArrangement = Arrangement.spacedBy(4.dp),
+                          modifier = Modifier.testTag("ReviewActions$index")) {
+                            val currentUserHasLiked =
+                                currentUser?.public?.userId?.let { review.likedBy.contains(it) }
+                                    ?: false
+                            val currentUserHasDisliked =
+                                currentUser?.public?.userId?.let { review.dislikedBy.contains(it) }
+                                    ?: false
+
+                            // Like button and count
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                              IconButton(
+                                  onClick = {
+                                    if (userSignedIn) {
+                                      currentUser?.public?.let {
+                                        reviewViewModel.handleInteraction(review, it.userId, true)
+                                      }
+                                    }
+                                  },
+                                  modifier = Modifier.testTag("LikeButton$index"),
+                                  enabled = userSignedIn) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.ThumbUp,
+                                        contentDescription = "Like",
+                                        tint =
+                                            if (currentUserHasLiked)
+                                                MaterialTheme.colorScheme.primary
+                                            else Black)
+                                  }
+                              Text(
+                                  text = review.likedBy.size.toString(),
+                                  style = MaterialTheme.typography.bodySmall,
+                                  color =
+                                      if (currentUserHasLiked) MaterialTheme.colorScheme.primary
+                                      else Black,
+                                  testTag = "LikeCount$index")
+                            }
+                            // Dislike button and count
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                              IconButton(
+                                  onClick = {
+                                    if (userSignedIn) {
+                                      reviewViewModel.handleInteraction(
+                                          review, currentUser?.public?.userId ?: "", false)
+                                    }
+                                  },
+                                  modifier = Modifier.testTag("DislikeButton$index"),
+                                  enabled = userSignedIn) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.ThumbDown,
+                                        contentDescription = "Dislike",
+                                        tint =
+                                            if (currentUserHasDisliked)
+                                                MaterialTheme.colorScheme.primary
+                                            else Black)
+                                  }
+                              Text(
+                                  text = review.dislikedBy.size.toString(),
+                                  style = MaterialTheme.typography.bodySmall,
+                                  color =
+                                      if (currentUserHasDisliked) MaterialTheme.colorScheme.primary
+                                      else Black,
+                                  testTag = "DislikeCount$index")
+                            }
+
+                            OptionsMenu(options = options, testTag = "MoreOptions$index")
+                          }
+                    }
+
+                Spacer(modifier = Modifier.height(2.dp))
                 ScoreStars(
                     review.rating,
                     scale = 0.6f,
@@ -387,4 +444,13 @@ fun ReviewCard(
               }
         }
       }
+}
+
+fun Timestamp?.toFormattedDate(): String {
+  return if (this != null) {
+    val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+    dateFormat.format(this.toDate())
+  } else {
+    "Date not available"
+  }
 }
