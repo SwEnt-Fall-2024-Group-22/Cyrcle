@@ -79,7 +79,6 @@ class MainActivity : ComponentActivity() {
     super.onCreate(savedInstanceState)
     requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
-
     permissionsHandler.initHandler(this@MainActivity)
 
     ConnectivityObserver(userViewModel, mapViewModel, parkingViewModel).init(this)
@@ -89,7 +88,6 @@ class MainActivity : ComponentActivity() {
         Surface(modifier = Modifier.fillMaxSize()) {
           val navController = rememberNavController()
           val navigationActions = NavigationActions(navController)
-
 
           CyrcleNavHost(
               navigationActions,
