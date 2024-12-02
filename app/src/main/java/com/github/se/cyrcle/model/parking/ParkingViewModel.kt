@@ -21,6 +21,7 @@ import com.mapbox.turf.TurfMeasurement
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -50,17 +51,27 @@ class ParkingViewModel(
   // ================== Parkings ==================
   /** List of parkings within the designated area */
   private val _rectParkings = MutableStateFlow<List<Parking>>(emptyList())
-  // Maps the list of all "rect" parkings to a filtered list of "rect" parkings
+
+  /**
+   * List of parkings within the designated area, filtered by the selected options. The flow is
+   * updated whenever one of the selected options changes or when the list of parkings in the
+   * rectangle changes.
+   */
   val filteredRectParkings: Flow<List<Parking>>
     get() =
-        _rectParkings.map { parkings ->
-          parkings.filter { parking ->
-            selectedProtection.value.contains(parking.protection) &&
-                selectedRackTypes.value.contains(parking.rackType) &&
-                selectedCapacities.value.contains(parking.capacity) &&
-                (!onlyWithCCTV.value || parking.hasSecurity)
-          }
-        }
+        combine(
+            _rectParkings,
+            selectedProtection,
+            selectedRackTypes,
+            selectedCapacities,
+            onlyWithCCTV) { parkings, protections, rackTypes, capacities, cctv ->
+              parkings.filter { parking ->
+                protections.contains(parking.protection) &&
+                    rackTypes.contains(parking.rackType) &&
+                    capacities.contains(parking.capacity) &&
+                    (!cctv || parking.hasSecurity)
+              }
+            }
 
   /** List of parkings in the circle of radius _radius around _circleCenter */
   private val _closestParkings = MutableStateFlow<List<Parking>>(emptyList())
@@ -263,6 +274,7 @@ class ParkingViewModel(
    * @param protection the protection to toggle the status of
    */
   fun toggleProtection(protection: ParkingProtection) {
+    Log.d("Debug not drawing", "Toggling protection: $protection")
     _selectedProtection.update { toggleSelection(it, protection) }
     updateClosestParkings(0)
   }
