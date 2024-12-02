@@ -31,6 +31,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 
+const val DEFAULT_ZOOM_FOR_ZONE_SELECTION = 10.0
+
 class MapViewModel : ViewModel() {
 
   private val _cameraPosition = MutableStateFlow<CameraState?>(MapConfig.defaultCameraState())
@@ -142,10 +144,19 @@ class MapViewModel : ViewModel() {
     _cameraPosition.value = newCameraState
   }
 
-  fun unZoomActualCamera() {
+  /**
+   * Unzooms the camera, to show a large are of the map to the user selecting a zone to download
+   * offline.
+   */
+  fun setCameraForZoneSelection() {
     val actualCamera = _cameraPosition.value!!
     _cameraPosition.value =
-        CameraState(actualCamera.center, EdgeInsets(0.0, 0.0, 0.0, 0.0), 10.0, 0.0, 0.0)
+        CameraState(
+            actualCamera.center,
+            EdgeInsets(0.0, 0.0, 0.0, 0.0),
+            DEFAULT_ZOOM_FOR_ZONE_SELECTION,
+            0.0,
+            0.0)
   }
 
   /**

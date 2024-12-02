@@ -64,7 +64,8 @@ fun ZoneSelectionScreen(
           .collectAsState() // state representing where the user is in the location selection
   // process
   mapViewModel
-      .unZoomActualCamera() // automatically zoom out and reset bearing, because no one want to
+      .setCameraForZoneSelection() // automatically zoom out and reset bearing, because no one want
+  // to
   // download a zone that is too zoomed in.
   val mapViewportState = MapConfig.createMapViewPortStateFromViewModel(mapViewModel)
   LaunchedEffect(Unit) {
