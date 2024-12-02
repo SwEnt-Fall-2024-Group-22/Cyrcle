@@ -58,6 +58,9 @@ import com.github.se.cyrcle.ui.theme.getCheckBoxColors
  */
 @Composable
 fun FilterPanel(parkingViewModel: ParkingViewModel, displayHeader: Boolean) {
+  // Mutable state to determine if filters in general, and each filter section, are expanded or
+  // collapsed. Initialized to true if the displayHeader is false, as we want to display the filters
+  // expanded if the header is not displayed.
   val showProtectionOptions = remember { mutableStateOf(!displayHeader) }
   val showRackTypeOptions = remember { mutableStateOf(!displayHeader) }
   val showCapacityOptions = remember { mutableStateOf(!displayHeader) }

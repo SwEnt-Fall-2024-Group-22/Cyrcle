@@ -542,11 +542,15 @@ fun MapScreen(
               }
         }
 
+        // Settings alert dialog is shown when the showSettings state is true, until the user
+        // dismisses it by clicking the close button or outside the dialog.
         if (showSettings.value) {
           SettingsDialog(
               mapMode, mapViewModel, navigationActions, onDismiss = { showSettings.value = false })
         }
 
+        // Filter dialog is shown when the showFilter state is true, until the user dismisses it by
+        // clicking the close button or outside the dialog.
         if (showFilter.value) {
           FilterDialog(parkingViewModel, onDismiss = { showFilter.value = false })
         }
@@ -744,7 +748,7 @@ fun FilterDialog(parkingViewModel: ParkingViewModel, onDismiss: () -> Unit) {
       },
       confirmButton = {
         TextButton(onClick = onDismiss, modifier = Modifier.testTag("FilterMenuClose")) {
-          Text("Close")
+          Text(stringResource(R.string.close))
         }
       },
       containerColor = MaterialTheme.colorScheme.surface,

@@ -274,7 +274,6 @@ class ParkingViewModel(
    * @param protection the protection to toggle the status of
    */
   fun toggleProtection(protection: ParkingProtection) {
-    Log.d("Debug not drawing", "Toggling protection: $protection")
     _selectedProtection.update { toggleSelection(it, protection) }
     updateClosestParkings(0)
   }
