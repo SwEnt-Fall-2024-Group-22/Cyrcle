@@ -7,10 +7,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.ClickableText
@@ -32,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.ParkingCapacity
@@ -45,11 +44,11 @@ import com.github.se.cyrcle.ui.theme.atoms.ToggleButton
 import com.github.se.cyrcle.ui.theme.getCheckBoxColors
 
 @Composable
-fun FilterHeader(parkingViewModel: ParkingViewModel) {
+fun FilterHeader(parkingViewModel: ParkingViewModel, displayHeader: Boolean = true) {
   val showProtectionOptions = remember { mutableStateOf(false) }
   val showRackTypeOptions = remember { mutableStateOf(false) }
   val showCapacityOptions = remember { mutableStateOf(false) }
-  var showFilters by remember { mutableStateOf(false) }
+  var showFilters by remember { mutableStateOf(!displayHeader) }
 
   val selectedProtection by parkingViewModel.selectedProtection.collectAsState()
   val selectedRackTypes by parkingViewModel.selectedRackTypes.collectAsState()
@@ -58,25 +57,27 @@ fun FilterHeader(parkingViewModel: ParkingViewModel) {
 
   val radius = parkingViewModel.radius.collectAsState()
 
-  Column(modifier = Modifier.padding(16.dp)) {
+  Column(modifier = Modifier.padding(if (displayHeader) 16.dp else 0.dp)) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically) {
-          Text(
-              text = stringResource(R.string.all_parkings_radius, radius.value.toInt()),
-              modifier = Modifier.weight(1f).padding(end = 8.dp),
-              style = MaterialTheme.typography.headlineMedium,
-              color = MaterialTheme.colorScheme.onSurface)
+          if (displayHeader) {
+            Text(
+                text = stringResource(R.string.all_parkings_radius, radius.value.toInt()),
+                modifier = Modifier.weight(1f).padding(end = 8.dp),
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurface)
 
-          SmallFloatingActionButton(
-              onClick = { showFilters = !showFilters },
-              icon = if (showFilters) Icons.Default.Close else Icons.Default.FilterList,
-              contentDescription = "Filter",
-              testTag = "ShowFiltersButton")
+            SmallFloatingActionButton(
+                onClick = { showFilters = !showFilters },
+                icon = if (showFilters) Icons.Default.Close else Icons.Default.FilterList,
+                contentDescription = "Filter",
+                testTag = "ShowFiltersButton")
+          }
         }
 
-    if (showFilters) {
+    if (showFilters || !displayHeader) {
       Row(
           modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
           horizontalArrangement = Arrangement.SpaceBetween) {
@@ -110,7 +111,6 @@ fun FilterHeader(parkingViewModel: ParkingViewModel) {
                         text = option.description,
                         onClick = { parkingViewModel.toggleProtection(option) },
                         value = selectedProtection.contains(option),
-                        modifier = Modifier.padding(2.dp),
                         testTag = "ProtectionFilterItem")
                   }
                 }
@@ -130,7 +130,6 @@ fun FilterHeader(parkingViewModel: ParkingViewModel) {
                         text = option.description,
                         onClick = { parkingViewModel.toggleRackType(option) },
                         value = selectedRackTypes.contains(option),
-                        modifier = Modifier.padding(2.dp),
                         testTag = "RackTypeFilterItem")
                   }
                 }
@@ -150,7 +149,6 @@ fun FilterHeader(parkingViewModel: ParkingViewModel) {
                         text = option.description,
                         onClick = { parkingViewModel.toggleCapacity(option) },
                         value = selectedCapacities.contains(option),
-                        modifier = Modifier.padding(2.dp),
                         testTag = "CapacityFilterItem")
                   }
                 }
@@ -158,17 +156,18 @@ fun FilterHeader(parkingViewModel: ParkingViewModel) {
 
       // CCTV filter with checkbox
       Row(
-          modifier = Modifier.fillMaxWidth().padding(12.dp),
-          verticalAlignment = Alignment.CenterVertically) {
+          modifier = Modifier.fillMaxWidth(),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             Checkbox(
                 checked = onlyWithCCTV,
                 onCheckedChange = { parkingViewModel.setOnlyWithCCTV(it) },
                 modifier = Modifier.testTag("CCTVCheckbox"),
                 colors = getCheckBoxColors(ColorLevel.PRIMARY))
-            Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = stringResource(R.string.list_screen_display_only_cctv),
                 style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Start,
                 modifier = Modifier.testTag("CCTVCheckboxLabel"))
           }
     }

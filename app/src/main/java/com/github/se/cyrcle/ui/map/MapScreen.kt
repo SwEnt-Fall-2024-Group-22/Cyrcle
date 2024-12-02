@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,9 +17,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
@@ -79,6 +82,7 @@ import com.github.se.cyrcle.ui.theme.defaultOnColor
 import com.github.se.cyrcle.ui.theme.getOutlinedTextFieldColorsSearchBar
 import com.github.se.cyrcle.ui.theme.invertColor
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
+import com.github.se.cyrcle.ui.theme.molecules.FilterHeader
 import com.google.gson.Gson
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.geojson.Point
@@ -528,7 +532,11 @@ fun MapScreen(
 
         if (showSettings.value) {
           SettingsDialog(
-              mapMode, mapViewModel, navigationActions, onDismiss = { showSettings.value = false })
+              mapMode,
+              mapViewModel,
+              navigationActions,
+              parkingViewModel,
+              onDismiss = { showSettings.value = false })
         }
 
         if (showSuggestions.value &&
@@ -630,6 +638,7 @@ fun SettingsDialog(
     mapMode: State<MapViewModel.MapMode>,
     mapViewModel: MapViewModel,
     navigationActions: NavigationActions,
+    parkingViewModel: ParkingViewModel,
     onDismiss: () -> Unit
 ) {
   AlertDialog(
@@ -642,63 +651,61 @@ fun SettingsDialog(
       },
       text = {
         Column(
-            modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-              // Advanced Mode
-              Row(
-                  verticalAlignment = Alignment.CenterVertically,
-                  modifier = Modifier.fillMaxWidth()) {
-                    Box(
-                        modifier = Modifier.width(64.dp),
-                        contentAlignment = Alignment.CenterStart) {
-                          Switch(
-                              modifier = Modifier.testTag("advancedModeSwitch"),
-                              checked = mapMode.value.isAdvancedMode,
-                              onCheckedChange = {
-                                val futureMapMode =
-                                    if (it) MapViewModel.MapMode.RECTANGLES
-                                    else MapViewModel.MapMode.MARKERS
-                                mapViewModel.updateUserMapMode(futureMapMode)
-                                mapViewModel.updateMapMode(futureMapMode)
-                              },
-                              colors =
-                                  SwitchDefaults.colors(
-                                      uncheckedTrackColor =
-                                          MaterialTheme.colorScheme.surfaceVariant))
-                        }
-                    Text(
-                        text = stringResource(R.string.map_screen_mode_switch_label),
-                        style = MaterialTheme.typography.bodyLarge)
-                  }
+            modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+          // Filter molecule without title, icon and padding
+          FilterHeader(parkingViewModel, displayHeader = false)
+          Spacer(modifier = Modifier.height(32.dp))
 
-              HorizontalDivider(
-                  thickness = 1.dp,
-                  modifier = Modifier.fillMaxWidth(),
-                  color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
-
-              // Offline Map Management
-              Row(
-                  verticalAlignment = Alignment.CenterVertically,
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .clickable {
-                            navigationActions.navigateTo(Route.ZONE)
-                            onDismiss()
-                          }
-                          .testTag("SettingsToZoneRow")) {
-                    Box(
-                        modifier = Modifier.width(64.dp),
-                        contentAlignment = Alignment.CenterStart) {
-                          Icon(
-                              imageVector = Icons.Filled.CloudDownload,
-                              contentDescription = "Offline Maps",
-                              tint = MaterialTheme.colorScheme.primary,
-                              modifier = Modifier.size(46.dp))
-                        }
-                    Text(
-                        text = stringResource(R.string.map_screen_settings_to_zone),
-                        style = MaterialTheme.typography.bodyLarge)
-                  }
+          // Advanced Mode
+          Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            Box(modifier = Modifier.width(64.dp), contentAlignment = Alignment.CenterStart) {
+              Switch(
+                  modifier = Modifier.testTag("advancedModeSwitch"),
+                  checked = mapMode.value.isAdvancedMode,
+                  onCheckedChange = {
+                    val futureMapMode =
+                        if (it) MapViewModel.MapMode.RECTANGLES else MapViewModel.MapMode.MARKERS
+                    mapViewModel.updateUserMapMode(futureMapMode)
+                    mapViewModel.updateMapMode(futureMapMode)
+                  },
+                  colors =
+                      SwitchDefaults.colors(
+                          uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant))
             }
+            Text(
+                text = stringResource(R.string.map_screen_mode_switch_label),
+                style = MaterialTheme.typography.bodyLarge)
+          }
+
+          HorizontalDivider(
+              thickness = 1.dp,
+              modifier = Modifier.fillMaxWidth(),
+              color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
+
+          // Offline Map Management
+          Row(
+              verticalAlignment = Alignment.CenterVertically,
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .clickable {
+                        navigationActions.navigateTo(Route.ZONE)
+                        onDismiss()
+                      }
+                      .testTag("SettingsToZoneRow")) {
+                Box(modifier = Modifier.width(64.dp), contentAlignment = Alignment.CenterStart) {
+                  Icon(
+                      imageVector = Icons.Filled.CloudDownload,
+                      contentDescription = "Offline Maps",
+                      tint = MaterialTheme.colorScheme.primary,
+                      modifier = Modifier.size(46.dp))
+                }
+                Text(
+                    text = stringResource(R.string.map_screen_settings_to_zone),
+                    style = MaterialTheme.typography.bodyLarge)
+              }
+        }
       },
       confirmButton = { TextButton(onClick = onDismiss) { Text("Close") } },
       containerColor = MaterialTheme.colorScheme.surface,
