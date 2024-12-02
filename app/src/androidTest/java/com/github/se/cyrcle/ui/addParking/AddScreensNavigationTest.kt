@@ -11,6 +11,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockAddressRepository
 import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
+import com.github.se.cyrcle.di.mocks.MockOfflineParkingRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
@@ -41,6 +42,7 @@ class AddScreensNavigationTest {
 
   private lateinit var reportedObjectRepository: MockReportedObjectRepository
   private lateinit var mockParkingRepository: MockParkingRepository
+  private lateinit var mockOfflineParkingRepository: MockOfflineParkingRepository
   private lateinit var mockImageRepository: MockImageRepository
   private lateinit var addressRepository: MockAddressRepository
   private lateinit var userRepository: MockUserRepository
@@ -57,6 +59,7 @@ class AddScreensNavigationTest {
 
     reportedObjectRepository = MockReportedObjectRepository()
     mockParkingRepository = MockParkingRepository()
+    mockOfflineParkingRepository = MockOfflineParkingRepository()
     mockImageRepository = MockImageRepository()
     addressRepository = MockAddressRepository()
     userRepository = MockUserRepository()
@@ -66,7 +69,11 @@ class AddScreensNavigationTest {
         UserViewModel(userRepository, mockParkingRepository, mockImageRepository, mockAuthenticator)
 
     parkingViewModel =
-        ParkingViewModel(mockImageRepository, mockParkingRepository, reportedObjectRepository)
+        ParkingViewModel(
+            mockImageRepository,
+            mockParkingRepository,
+            mockOfflineParkingRepository,
+            reportedObjectRepository)
     mapViewModel = MapViewModel()
     addressViewModel = AddressViewModel(addressRepository)
   }

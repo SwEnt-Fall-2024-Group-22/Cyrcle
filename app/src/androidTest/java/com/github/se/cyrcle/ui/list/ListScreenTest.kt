@@ -12,12 +12,17 @@ import androidx.compose.ui.test.swipe
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
+import com.github.se.cyrcle.di.mocks.MockOfflineParkingRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.authentication.AuthenticationRepository
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.map.MapViewModel
+import com.github.se.cyrcle.model.parking.OfflineParkingRepository
+import com.github.se.cyrcle.model.parking.ParkingCapacity
+import com.github.se.cyrcle.model.parking.ParkingProtection
+import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
@@ -45,6 +50,7 @@ class ListScreenTest {
 
   private lateinit var mockUserRepository: UserRepository
   private lateinit var mockParkingRepository: ParkingRepository
+  private lateinit var mockOfflineParkingRepository: OfflineParkingRepository
   private lateinit var mockImageRepository: ImageRepository
   private lateinit var authenticator: AuthenticationRepository
   private lateinit var mockReportedObjectRepository: ReportedObjectRepository
@@ -59,12 +65,17 @@ class ListScreenTest {
     mockNavigationActions = mock(NavigationActions::class.java)
     mockUserRepository = MockUserRepository()
     mockParkingRepository = MockParkingRepository()
+    mockOfflineParkingRepository = MockOfflineParkingRepository()
     mockImageRepository = MockImageRepository()
     authenticator = MockAuthenticationRepository()
     mockReportedObjectRepository = MockReportedObjectRepository()
 
     parkingViewModel =
-        ParkingViewModel(mockImageRepository, mockParkingRepository, mockReportedObjectRepository)
+        ParkingViewModel(
+            mockImageRepository,
+            mockParkingRepository,
+            mockOfflineParkingRepository,
+            mockReportedObjectRepository)
     mapViewModel = MapViewModel()
     userViewModel =
         UserViewModel(mockUserRepository, mockParkingRepository, mockImageRepository, authenticator)

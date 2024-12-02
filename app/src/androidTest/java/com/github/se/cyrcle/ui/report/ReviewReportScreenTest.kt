@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
+import com.github.se.cyrcle.di.mocks.MockOfflineParkingRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockReviewRepository
@@ -53,7 +54,11 @@ class ReviewReportScreenTest {
     reportedObjectRepository = MockReportedObjectRepository()
 
     parkingViewModel =
-        ParkingViewModel(MockImageRepository(), parkingRepository, reportedObjectRepository)
+        ParkingViewModel(
+            MockImageRepository(),
+            parkingRepository,
+            MockOfflineParkingRepository(),
+            reportedObjectRepository)
     userViewModel =
         UserViewModel(
             userRepository,

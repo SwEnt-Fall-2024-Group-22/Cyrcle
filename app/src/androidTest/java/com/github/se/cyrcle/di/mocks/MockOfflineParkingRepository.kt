@@ -1,20 +1,31 @@
 package com.github.se.cyrcle.di.mocks
 
+import com.github.se.cyrcle.model.parking.OfflineParkingRepository
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingReport
 import com.github.se.cyrcle.model.parking.ParkingReportReason
-import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.model.parking.Tile
 import javax.inject.Inject
 
-class MockParkingRepository @Inject constructor() : ParkingRepository {
-  var uid = 0
-  private val parkings = mutableListOf(TestInstancesParking.parking1)
+class MockOfflineParkingRepository @Inject constructor() : OfflineParkingRepository {
+  var uid: Int = 0
+  var parkings = mutableListOf<Parking>()
+
   private val reports =
       mutableListOf(
           ParkingReport(
               "1", ParkingReportReason.INEXISTANT, "1", TestInstancesParking.parking1.uid, ""))
+
+  override fun downloadParkings(parkings: Set<Parking>, onComplete: () -> Unit) {
+    this.parkings += parkings
+    onComplete()
+  }
+
+  override fun deleteTiles(tileIDs: Set<String>, onComplete: () -> Unit) {
+    parkings = parkings.filterNot { it.tileUID in tileIDs }.toMutableList()
+    onComplete()
+  }
 
   override fun getNewUid(): String {
     return (uid++).toString()

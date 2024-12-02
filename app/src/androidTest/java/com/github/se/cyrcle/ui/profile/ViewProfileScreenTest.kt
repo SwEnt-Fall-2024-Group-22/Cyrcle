@@ -18,6 +18,7 @@ import androidx.compose.ui.test.performTextReplacement
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
+import com.github.se.cyrcle.di.mocks.MockOfflineParkingRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
@@ -52,6 +53,7 @@ class ViewProfileScreenTest {
   private lateinit var mockNavigationActions: NavigationActions
   private lateinit var mockUserRepository: MockUserRepository
   private lateinit var mockParkingRepository: MockParkingRepository
+  private lateinit var mockOfflineParkingRepository: MockOfflineParkingRepository
   private lateinit var mockImageRepository: MockImageRepository
   private lateinit var mockAuthenticator: MockAuthenticationRepository
   private lateinit var mockReportedObjectRepository: ReportedObjectRepository
@@ -64,6 +66,7 @@ class ViewProfileScreenTest {
     mockNavigationActions = mock(NavigationActions::class.java)
     mockUserRepository = MockUserRepository()
     mockParkingRepository = MockParkingRepository()
+    mockOfflineParkingRepository = MockOfflineParkingRepository()
     mockImageRepository = MockImageRepository()
     mockAuthenticator = MockAuthenticationRepository()
     mockReportedObjectRepository = MockReportedObjectRepository()
@@ -77,7 +80,11 @@ class ViewProfileScreenTest {
         UserViewModel(
             mockUserRepository, mockParkingRepository, mockImageRepository, mockAuthenticator)
     parkingViewModel =
-        ParkingViewModel(mockImageRepository, mockParkingRepository, mockReportedObjectRepository)
+        ParkingViewModel(
+            mockImageRepository,
+            mockParkingRepository,
+            mockOfflineParkingRepository,
+            mockReportedObjectRepository)
 
     userViewModel.addUser(user, {}, {})
     mockAuthenticator.testUser = user

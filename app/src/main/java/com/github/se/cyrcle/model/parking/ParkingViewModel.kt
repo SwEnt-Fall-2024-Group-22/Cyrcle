@@ -189,25 +189,27 @@ class ParkingViewModel(
             maxOf(startPos.latitude(), endPos.latitude()))
     // Get all tiles that are in the rectangle
     val tilesToDisplay = Tile.getAllTilesInRectangle(bottomLeft, topRight)
-    // Used to keep track of when the last request has finished.
-    var nbRequestLeft = tilesToDisplay.size
+
     tilesToDisplay.forEach { tile ->
+
+      //  Cache hit
       if (tilesToParking.containsKey(tile)) {
         _rectParkings.value += tilesToParking[tile]!!
-        updateClosestParkings(--nbRequestLeft)
-        return@forEach // Skip to the next tile if already fetched
+
+        // Cache miss
+      } else {
+        tilesToParking[tile] = emptyList()
+        parkingRepository.getParkingsForTile(
+            tile,
+            { parkings ->
+              tilesToParking[tile] = parkings
+              _rectParkings.value += parkings
+            },
+            { Log.e("ParkingViewModel", "-- Error getting parkings: $it") })
       }
-      tilesToParking[tile] = emptyList() // Avoid querying the same tile multiple times
-      parkingRepository.getParkingsBetween(
-          tile.bottomLeft,
-          tile.topRight,
-          { parkings ->
-            tilesToParking[tile] = parkings
-            _rectParkings.value += parkings
-            updateClosestParkings(--nbRequestLeft)
-          },
-          { Log.e("ParkingViewModel", "-- Error getting parkings: $it") })
     }
+
+    updateClosestParkings()
   }
 
   /**
@@ -258,19 +260,19 @@ class ParkingViewModel(
    */
   fun toggleProtection(protection: ParkingProtection) {
     _selectedProtection.update { toggleSelection(it, protection) }
-    updateClosestParkings(0)
+    updateClosestParkings()
   }
 
   /** Clear the protection filter and update the list of closest parkings. */
   fun clearProtection() {
     _selectedProtection.value = emptySet()
-    updateClosestParkings(0)
+    updateClosestParkings()
   }
 
   /** Select all the protection options and update the list of closest parkings. */
   fun selectAllProtection() {
     _selectedProtection.value = ParkingProtection.entries.toSet()
-    updateClosestParkings(0)
+    updateClosestParkings()
   }
 
   private val _selectedRackTypes = MutableStateFlow(ParkingRackType.entries.toSet())
@@ -283,19 +285,19 @@ class ParkingViewModel(
    */
   fun toggleRackType(rackType: ParkingRackType) {
     _selectedRackTypes.update { toggleSelection(it, rackType) }
-    updateClosestParkings(0)
+    updateClosestParkings()
   }
 
   /** Clear the rack type filter and update the list of closest parkings. */
   fun clearRackType() {
     _selectedRackTypes.value = emptySet()
-    updateClosestParkings(0)
+    updateClosestParkings()
   }
 
   /** Select all the rack type options and update the list of closest parkings. */
   fun selectAllRackTypes() {
     _selectedRackTypes.value = ParkingRackType.entries.toSet()
-    updateClosestParkings(0)
+    updateClosestParkings()
   }
 
   private val _selectedCapacities = MutableStateFlow(ParkingCapacity.entries.toSet())
@@ -308,19 +310,19 @@ class ParkingViewModel(
    */
   fun toggleCapacity(capacity: ParkingCapacity) {
     _selectedCapacities.update { toggleSelection(it, capacity) }
-    updateClosestParkings(0)
+    updateClosestParkings()
   }
 
   /** Clear the capacity filter and update the list of closest parkings. */
   fun clearCapacity() {
     _selectedCapacities.value = emptySet()
-    updateClosestParkings(0)
+    updateClosestParkings()
   }
 
   /** Select all the capacity options and update the list of closest parkings. */
   fun selectAllCapacities() {
     _selectedCapacities.value = ParkingCapacity.entries.toSet()
-    updateClosestParkings(0)
+    updateClosestParkings()
   }
 
   private val _onlyWithCCTV = MutableStateFlow(false)
@@ -333,7 +335,7 @@ class ParkingViewModel(
    */
   fun setOnlyWithCCTV(onlyWithCCTV: Boolean) {
     _onlyWithCCTV.value = onlyWithCCTV
-    updateClosestParkings(0)
+    updateClosestParkings()
   }
 
   /**
@@ -345,7 +347,7 @@ class ParkingViewModel(
     _selectedProtection.value = ParkingProtection.entries.toSet()
     _selectedRackTypes.value = ParkingRackType.entries.toSet()
     _selectedCapacities.value = ParkingCapacity.entries.toSet()
-    updateClosestParkings(0)
+    updateClosestParkings()
   }
 
   /**
@@ -356,7 +358,7 @@ class ParkingViewModel(
     _selectedProtection.value = emptySet()
     _selectedRackTypes.value = emptySet()
     _selectedCapacities.value = emptySet()
-    updateClosestParkings(0)
+    updateClosestParkings()
   }
 
   // ================== Filtering ==================
@@ -641,19 +643,4 @@ class ParkingViewModel(
   }
 
   // ================== Images ==================
-
-  companion object {
-    val Factory: ViewModelProvider.Factory =
-        object : ViewModelProvider.Factory {
-          @Suppress("UNCHECKED_CAST")
-          override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ParkingViewModel(
-                ImageRepositoryCloudStorage(
-                    FirebaseAuth.getInstance(), FirebaseStorage.getInstance()),
-                ParkingRepositoryFirestore(FirebaseFirestore.getInstance()),
-                ReportedObjectRepositoryFirestore(FirebaseFirestore.getInstance()))
-                as T
-          }
-        }
-  }
 }

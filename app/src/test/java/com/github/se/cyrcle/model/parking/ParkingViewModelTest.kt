@@ -60,8 +60,8 @@ class ParkingViewModelTest {
 
   @Test
   fun getParkingsBetweenTest() {
-    `when`(parkingRepository.getParkingsBetween(any(), any(), any(), any())).then {
-      it.getArgument<(List<Parking>) -> Unit>(2)(
+    `when`(parkingRepository.getParkingsForTile(any(), any(), any())).then {
+      it.getArgument<(List<Parking>) -> Unit>(1)(
           listOf(TestInstancesParking.parking1, TestInstancesParking.parking2))
     }
 

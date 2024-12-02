@@ -2,7 +2,6 @@ package com.github.se.cyrcle.model.parking
 
 import com.github.se.cyrcle.model.parking.offline.ParkingDao
 import com.github.se.cyrcle.model.parking.offline.ParkingDatabase
-import com.mapbox.geojson.Point
 import jakarta.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -49,13 +48,12 @@ class OfflineParkingRepositoryRoom @Inject constructor(parkingDatabase: ParkingD
     }
   }
 
-  override fun getParkingsBetween(
-      start: Point,
-      end: Point,
+  override fun getParkingsForTile(
+      tile: Tile,
       onSuccess: (List<Parking>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    TODO("Not yet implemented")
+    coroutine.launch { onSuccess(parkingManager.getParkingsByTileUIDs(listOf(tile.uid))) }
   }
 
   override fun addParking(parking: Parking, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {

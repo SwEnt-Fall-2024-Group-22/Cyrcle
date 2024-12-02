@@ -6,7 +6,6 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
-import com.mapbox.geojson.Point
 import javax.inject.Inject
 
 class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFirestore) :
@@ -68,21 +67,13 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
         .addOnFailureListener { onFailure(it) }
   }
 
-  override fun getParkingsBetween(
-      start: Point,
-      end: Point,
+  override fun getParkingsForTile(
+      tile: Tile,
       onSuccess: (List<Parking>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    if (start.latitude() > end.latitude() || start.longitude() > end.longitude()) {
-      onFailure(Exception("Invalid range"))
-      return
-    }
     db.collection(collectionPath)
-        .whereGreaterThan("location.center.latitude", start.latitude())
-        .whereLessThanOrEqualTo("location.center.latitude", end.latitude())
-        .whereGreaterThan("location.center.longitude", start.longitude())
-        .whereLessThanOrEqualTo("location.center.longitude", end.longitude())
+        .whereEqualTo("tileUID", tile.uid)
         .get()
         .addOnSuccessListener { querySnapshot ->
           val parkings =
@@ -91,7 +82,7 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
               }
           onSuccess(parkings)
         }
-        .addOnFailureListener { e -> onFailure(e) }
+        .addOnFailureListener(onFailure)
   }
 
   override fun addParking(parking: Parking, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {

@@ -4,6 +4,7 @@ import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockImageRepository
+import com.github.se.cyrcle.di.mocks.MockOfflineParkingRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockReviewRepository
@@ -40,7 +41,10 @@ class ViewReportsScreenTest {
     // Initialize ViewModels with Mock Repositories
     parkingViewModel =
         ParkingViewModel(
-            MockImageRepository(), MockParkingRepository(), MockReportedObjectRepository())
+            MockImageRepository(),
+            MockParkingRepository(),
+            MockOfflineParkingRepository(),
+            MockReportedObjectRepository())
     reviewViewModel = ReviewViewModel(MockReviewRepository(), MockReportedObjectRepository())
     reportedObjectViewModel = ReportedObjectViewModel(MockReportedObjectRepository())
 

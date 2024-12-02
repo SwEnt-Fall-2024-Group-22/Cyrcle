@@ -1,7 +1,5 @@
 package com.github.se.cyrcle.model.parking
 
-import com.mapbox.geojson.Point
-
 interface ParkingRepository {
   /**
    * Get a new unique identifier for a parking
@@ -29,17 +27,16 @@ interface ParkingRepository {
   /**
    * Get parkings between two points
    *
-   * @param start the start point (bottom left) of the area
-   * @param end the end point (top right corner) of the area
+   * @param tile
    * @param onSuccess a callback that is called when the parkings are retrieved
    * @param onFailure a callback that is called when an error occurs
    */
-  fun getParkingsBetween(
-      start: Point,
-      end: Point,
+  fun getParkingsForTile(
+      tile: Tile,
       onSuccess: (List<Parking>) -> Unit,
       onFailure: (Exception) -> Unit
   )
+
   /**
    * Add a parking
    *
@@ -58,6 +55,13 @@ interface ParkingRepository {
    */
   fun updateParking(parking: Parking, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
 
+  /**
+   * Get the reports for a parking
+   *
+   * @param parkingId the identifier of the parking
+   * @param onSuccess a callback that is called when the reports are retrieved
+   * @param onFailure a callback that is called when an error occurs
+   */
   fun getReportsForParking(
       parkingId: String,
       onSuccess: (List<ParkingReport>) -> Unit,
@@ -87,6 +91,13 @@ interface ParkingRepository {
       onFailure: (Exception) -> Unit
   )
 
+  /**
+   * Add a report to a parking
+   *
+   * @param report the report to add
+   * @param onSuccess a callback that is called when the report is added
+   * @param onFailure a callback that is called when an error occurs
+   */
   fun addReport(
       report: ParkingReport,
       onSuccess: (ParkingReport) -> Unit,

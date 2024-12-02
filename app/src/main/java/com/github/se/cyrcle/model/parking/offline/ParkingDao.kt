@@ -76,5 +76,5 @@ interface ParkingDao {
    * @return The parkings belonging to the tiles
    */
   @Query("SELECT * FROM ${Parking.TABLE_NAME} WHERE tileUID IN (:tileIDs)")
-  fun getParkingsByTileUIDs(tileIDs: List<String>): List<Parking>
+  suspend fun getParkingsByTileUIDs(tileIDs: List<String>): List<Parking>
 }
