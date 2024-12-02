@@ -433,6 +433,16 @@ fun ParkingDetailsScreen(
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface)
                           }
+                          Column(modifier = Modifier.weight(1f).testTag("UserColumn")) {
+                            Text(
+                                text = stringResource(R.string.card_screen_user),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onBackground)
+                            Text(
+                                text = selectedParking.owner.public.username,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface)
+                          }
                         }
                   }
 
