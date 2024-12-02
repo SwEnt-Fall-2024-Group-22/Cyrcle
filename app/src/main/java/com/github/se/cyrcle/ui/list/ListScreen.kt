@@ -63,7 +63,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
@@ -72,6 +74,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.address.Address
@@ -115,6 +118,7 @@ fun SpotListScreen(
     addressViewModel: AddressViewModel,
     permissionHandler: PermissionHandler
 ) {
+
   val userPosition by mapViewModel.userPosition.collectAsState()
 
   val filteredParkingSpots by parkingViewModel.closestParkings.collectAsState()
@@ -134,7 +138,7 @@ fun SpotListScreen(
   // location permission from location manager
   val locPermission = permissionHandler.getLocalisationPerm().value
 
-  LaunchedEffect(userPosition, myLocation) {
+  LaunchedEffect(userPosition, myLocation, chosenLocation) {
     if (locPermission && myLocation.value) parkingViewModel.setCircleCenter(userPosition)
     else
         parkingViewModel.setCircleCenter(
