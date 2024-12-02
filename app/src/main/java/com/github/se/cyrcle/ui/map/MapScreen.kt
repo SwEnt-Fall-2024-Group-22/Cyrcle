@@ -128,7 +128,7 @@ fun MapScreen(
 ) {
 
   // Collect the list of parkings from the ParkingViewModel as a state
-  val listOfParkings by parkingViewModel.rectParkings.collectAsState()
+  val listOfParkings by parkingViewModel.filteredRectParkings.collectAsState(emptyList())
 
   // Create a remember state to store the search query of the search bar as a mutable state
   val searchQuery = remember { mutableStateOf("") }

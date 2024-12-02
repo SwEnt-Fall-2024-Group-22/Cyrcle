@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.image.ImageRepositoryCloudStorage
 import com.github.se.cyrcle.model.report.ReportedObject
@@ -17,9 +18,12 @@ import com.google.firebase.storage.FirebaseStorage
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 const val DEFAULT_RADIUS = 100.0
 const val MAX_RADIUS = 1000.0
@@ -46,7 +50,17 @@ class ParkingViewModel(
   // ================== Parkings ==================
   /** List of parkings within the designated area */
   private val _rectParkings = MutableStateFlow<List<Parking>>(emptyList())
-  val rectParkings: StateFlow<List<Parking>> = _rectParkings
+  // Maps the list of all "rect" parkings to a filtered list of "rect" parkings
+  val filteredRectParkings: Flow<List<Parking>>
+    get() =
+        _rectParkings.map { parkings ->
+          parkings.filter { parking ->
+            selectedProtection.value.contains(parking.protection) &&
+                selectedRackTypes.value.contains(parking.rackType) &&
+                selectedCapacities.value.contains(parking.capacity) &&
+                (!onlyWithCCTV.value || parking.hasSecurity)
+          }
+        }
 
   /** List of parkings in the circle of radius _radius around _circleCenter */
   private val _closestParkings = MutableStateFlow<List<Parking>>(emptyList())
@@ -386,21 +400,25 @@ class ParkingViewModel(
    */
   private fun updateClosestParkings(nbRequestLeft: Int) {
     if (_circleCenter.value == null || nbRequestLeft != 0) return // avoid updating if not ready
-    _closestParkings.value =
-        _rectParkings.value
-            .filter { parking ->
-              val distance =
+
+    // This coroutine will update the closest parkings when all the tiles have been fetched. Note
+    // that we don't need to apply the filter again since we use the filteredRectParkings flow.
+    viewModelScope.launch {
+      filteredRectParkings
+          .map { parkings ->
+            parkings
+                .filter { parking ->
+                  TurfMeasurement.distance(
+                      _circleCenter.value!!, parking.location.center, TurfConstants.UNIT_METERS) <=
+                      _radius.value
+                }
+                .sortedBy { parking ->
                   TurfMeasurement.distance(
                       _circleCenter.value!!, parking.location.center, TurfConstants.UNIT_METERS)
-              distance <= _radius.value &&
-                  _selectedProtection.value.contains(parking.protection) &&
-                  _selectedRackTypes.value.contains(parking.rackType) &&
-                  _selectedCapacities.value.contains(parking.capacity) &&
-                  (!_onlyWithCCTV.value || parking.hasSecurity)
-            }
-            .sortedBy { parking ->
-              TurfMeasurement.distance(_circleCenter.value!!, parking.location.center)
-            }
+                }
+          }
+          .collect { filteredParkings -> _closestParkings.value = filteredParkings }
+    }
     if (_closestParkings.value.size < MIN_NB_PARKINGS || _radius.value == MAX_RADIUS) {
       incrementRadius()
     }
