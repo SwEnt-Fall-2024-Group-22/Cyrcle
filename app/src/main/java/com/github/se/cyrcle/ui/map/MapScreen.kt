@@ -120,6 +120,7 @@ const val LAYER_ID = "0128"
 const val LAYER_ID_RECT = "0129"
 const val ADVANCED_MODE_ZOOM_THRESHOLD = 15.5
 const val CLUSTER_COLORS = "#1A4988"
+const val maxSuggestionDisplayNameLengthMap = 70
 
 @Composable
 fun MapScreen(
@@ -595,11 +596,26 @@ fun SuggestionMenu(
     mapViewportState: MapViewportState,
     mapViewModel: MapViewModel
 ) {
+
+  val uniqueSuggestions = remember { mutableStateOf(listOf<Address>()) }
+
   ModalBottomSheet(
       onDismissRequest = { showSuggestions.value = false },
       modifier = Modifier.testTag("SuggestionsMenu")) {
         LazyColumn {
-          items(listOfSuggestions.value) { suggestion ->
+          val seenNames = mutableSetOf<String>()
+          uniqueSuggestions.value =
+              listOfSuggestions.value.filter { suggestion ->
+                val displayName =
+                    suggestion.suggestionFormatDisplayName(maxSuggestionDisplayNameLengthMap)
+                if (displayName in seenNames) {
+                  false
+                } else {
+                  seenNames.add(displayName)
+                  true
+                }
+              }
+          items(uniqueSuggestions.value) { suggestion ->
             Card(
                 onClick = {
                   showSuggestions.value = false
@@ -631,7 +647,8 @@ fun SuggestionMenu(
                         disabledContentColor = defaultOnColor()),
                 modifier = Modifier.fillMaxSize().testTag("suggestionCard${suggestion.city}")) {
                   Text(
-                      text = "${suggestion.road},${suggestion.city},${suggestion.country}",
+                      text =
+                          suggestion.suggestionFormatDisplayName(maxSuggestionDisplayNameLengthMap),
                       Modifier.padding(5.dp))
                 }
 

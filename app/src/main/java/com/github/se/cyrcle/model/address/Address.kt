@@ -103,9 +103,8 @@ data class Address(
   }
 
   /** Function that format the Address to display its suggestion name. */
-  fun suggestionFormatDisplayName(): String {
+  fun suggestionFormatDisplayName(maxLength: Int): String {
     val fieldPriorities = listOf(publicName, road, city, country)
-    return shortenString(
-        fieldPriorities.filter { it.isNotEmpty() }.joinToString(", "), maxDisplayNameLength)
+    return shortenString(fieldPriorities.filter { it.isNotEmpty() }.joinToString(", "), maxLength)
   }
 }
