@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -480,48 +481,49 @@ fun MapScreen(
                 testTag = "addButton")
           }
 
-          // Search bar
-          OutlinedTextField(
-              value = searchQuery.value,
-              onValueChange = { searchQuery.value = it },
-              placeholder = { Text(text = stringResource(R.string.search_bar_placeholder)) },
-              modifier =
-                  Modifier.fillMaxWidth(0.9f)
-                      .padding(end = 30.dp, start = 5.dp, top = 5.dp)
-                      .align(Alignment.TopStart)
-                      .testTag("SearchBar"),
-              shape = RoundedCornerShape(16.dp),
-              colors = getOutlinedTextFieldColorsSearchBar(ColorLevel.PRIMARY),
-              trailingIcon = {
-                if (searchQuery.value.isNotEmpty()) {
-                  Icon(
-                      imageVector = Icons.Filled.Clear,
-                      contentDescription = "Clear search",
-                      tint = defaultOnColor(),
-                      modifier = Modifier.clickable { searchQuery.value = "" })
+          // Search bar and Settings button row
+          Row(
+              modifier = Modifier.fillMaxWidth().padding(5.dp).align(Alignment.TopStart),
+              verticalAlignment = Alignment.CenterVertically) {
+                // Search bar
+                OutlinedTextField(
+                    value = searchQuery.value,
+                    onValueChange = { searchQuery.value = it },
+                    placeholder = { Text(text = stringResource(R.string.search_bar_placeholder)) },
+                    modifier = Modifier.weight(1f).height(56.dp).testTag("SearchBar"),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = getOutlinedTextFieldColorsSearchBar(ColorLevel.PRIMARY),
+                    trailingIcon = {
+                      if (searchQuery.value.isNotEmpty()) {
+                        Icon(
+                            imageVector = Icons.Filled.Clear,
+                            contentDescription = "Clear search",
+                            tint = defaultOnColor(),
+                            modifier = Modifier.clickable { searchQuery.value = "" })
+                      }
+                    },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
+                    keyboardActions =
+                        KeyboardActions(
+                            onSearch = {
+                              virtualKeyboardManager?.hide()
+                              runBlocking { addressViewModel.search(searchQuery.value) }
+                              showSuggestions.value = true
+                            }))
+
+                // Settings button
+                Box(modifier = Modifier.size(56.dp).padding(start = 5.dp)) {
+                  SmallFloatingActionButton(
+                      modifier =
+                          Modifier.matchParentSize() // Fill the parent Box
+                              .testTag("SettingsMenuButton"),
+                      onClick = { showSettings.value = true },
+                      icon = Icons.Filled.Settings,
+                      contentDescription = "Settings",
+                  )
                 }
-              },
-              singleLine = true,
-              keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
-              keyboardActions =
-                  KeyboardActions(
-                      onSearch = {
-                        virtualKeyboardManager?.hide()
-
-                        runBlocking { addressViewModel.search(searchQuery.value) }
-
-                        showSuggestions.value = true
-                      }))
-
-          SmallFloatingActionButton(
-              modifier =
-                  Modifier.align(Alignment.TopEnd)
-                      .padding(top = 5.dp, end = 5.dp)
-                      .testTag("SettingsMenuButton"),
-              onClick = { showSettings.value = true },
-              icon = Icons.Filled.Settings,
-              contentDescription = "Settings",
-          )
+              }
         }
 
         if (showSettings.value) {
