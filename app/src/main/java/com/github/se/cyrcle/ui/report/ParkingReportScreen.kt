@@ -73,7 +73,11 @@ fun ParkingReportScreen(
             parking = parkingId!!,
             description = reportDescription.value)
     parkingViewModel.addReport(report, userViewModel.currentUser.value!!)
-    Toast.makeText(context, strRes, Toast.LENGTH_SHORT).show()
+    if (parkingViewModel.hasAlreadyReported.value) {
+      Toast.makeText(context, "YOU HAVE ALREADY REPORTED", Toast.LENGTH_SHORT).show()
+    } else {
+      Toast.makeText(context, strRes, Toast.LENGTH_SHORT).show()
+    }
     navigationActions.goBack()
   }
 

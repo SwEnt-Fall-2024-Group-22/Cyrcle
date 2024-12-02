@@ -80,6 +80,10 @@ class ParkingViewModel(
   private val _selectedParking = MutableStateFlow<Parking?>(null)
   val selectedParking: StateFlow<Parking?> = _selectedParking
 
+  /** Selected parking has already been reported by current user */
+  private val _hasAlreadyReported = MutableStateFlow<Boolean>(false)
+  val hasAlreadyReported: StateFlow<Boolean> = _hasAlreadyReported
+
   /** Selected parking to review/edit */
   private val _selectedParkingReports = MutableStateFlow<List<ParkingReport>>(emptyList())
   val selectedParkingReports: StateFlow<List<ParkingReport>> = _selectedParkingReports
@@ -108,15 +112,6 @@ class ParkingViewModel(
    */
   fun getNewUid(): String {
     return parkingRepository.getNewUid()
-  }
-
-  fun addReportingUser(user: User) {
-    val selectedParking = _selectedParking.value
-    if (selectedParking != null) {
-      val updatedParking =
-          selectedParking.copy(reportingUsers = selectedParking.reportingUsers + user)
-      _selectedParking.value = updatedParking
-    }
   }
 
   fun deleteParkingByUid(uid: String) {
@@ -455,12 +450,17 @@ class ParkingViewModel(
       return
     }
 
+    if (_selectedParking.value?.reportingUsers?.contains(user.public.userId) == true) {
+      _hasAlreadyReported.value = true
+      return
+    }
+
     Log.d(
         "ParkingViewModel", "${selectedParking.nbReports}, ${selectedParking.nbMaxSeverityReports}")
-
     parkingRepository.addReport(
         report,
         onSuccess = {
+          addReportingUser(user)
           val newReportedObject =
               ReportedObject(
                   objectUID = selectedParking.uid,
@@ -473,7 +473,6 @@ class ParkingViewModel(
                   userUID = user.public.userId,
                   objectType = ReportedObjectType.PARKING,
               )
-
           reportedObjectRepository.checkIfObjectExists(
               objectUID = selectedParking.uid,
               onSuccess = { documentId ->
@@ -520,6 +519,16 @@ class ParkingViewModel(
     selectedParking.nbReports += 1
     parkingRepository.updateParking(selectedParking, {}, {})
     Log.d("ParkingViewModel", "Parking and metrics updated successfully")
+  }
+
+  private fun addReportingUser(user: User) {
+    val selectedParking = _selectedParking.value
+    if (selectedParking != null) {
+      val updatedParking =
+          selectedParking.copy(reportingUsers = selectedParking.reportingUsers + user.public.userId)
+      _selectedParking.value = updatedParking
+      parkingRepository.updateParking(parking = updatedParking, {}, {})
+    }
   }
 
   // ================== Reviews ==================
