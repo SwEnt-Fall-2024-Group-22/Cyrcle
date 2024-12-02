@@ -15,9 +15,12 @@ private const val SERIALIZE_TRUE = 1
  * A class to easily serialize and deserialize class with basic variables inside. An example is
  * available in the test folder, under Settings.
  */
-abstract class ProtoGenericSerializer<T>(
-    override val defaultValue: T,
-) : Serializer<T> {
+abstract class ProtoGenericSerializer<T> : Serializer<T> {
+
+  override val defaultValue: T
+    get() = defaultValue()
+
+  abstract fun defaultValue(): T
 
   companion object {
     private fun writeNBytes(output: OutputStream, byteArray: ByteArray) {
