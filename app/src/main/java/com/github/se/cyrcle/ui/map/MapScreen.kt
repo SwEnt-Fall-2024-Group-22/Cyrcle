@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.CloudDownload
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
@@ -171,6 +171,9 @@ fun MapScreen(
 
   // Mutable state to store the visibility of the settings menu
   val showSettings = remember { mutableStateOf(false) }
+
+  // Mutable state to store the visibility of the filter dialog
+  val showFilter = remember { mutableStateOf(false) }
 
   // Initialize FocusManager
   val focusManager = LocalFocusManager.current
@@ -516,6 +519,15 @@ fun MapScreen(
                               showSuggestions.value = true
                             }))
 
+                // Filter button
+                Box(modifier = Modifier.size(56.dp).padding(start = 5.dp)) {
+                  SmallFloatingActionButton(
+                      modifier = Modifier.matchParentSize().testTag("FilterButton"),
+                      onClick = { showFilter.value = true },
+                      icon = Icons.Default.FilterList,
+                      contentDescription = "Filter")
+                }
+
                 // Settings button
                 Box(modifier = Modifier.size(56.dp).padding(start = 5.dp)) {
                   SmallFloatingActionButton(
@@ -532,11 +544,11 @@ fun MapScreen(
 
         if (showSettings.value) {
           SettingsDialog(
-              mapMode,
-              mapViewModel,
-              navigationActions,
-              parkingViewModel,
-              onDismiss = { showSettings.value = false })
+              mapMode, mapViewModel, navigationActions, onDismiss = { showSettings.value = false })
+        }
+
+        if (showFilter.value) {
+          FilterDialog(parkingViewModel, onDismiss = { showFilter.value = false })
         }
 
         if (showSuggestions.value &&
@@ -638,7 +650,6 @@ fun SettingsDialog(
     mapMode: State<MapViewModel.MapMode>,
     mapViewModel: MapViewModel,
     navigationActions: NavigationActions,
-    parkingViewModel: ParkingViewModel,
     onDismiss: () -> Unit
 ) {
   AlertDialog(
@@ -651,13 +662,9 @@ fun SettingsDialog(
       },
       text = {
         Column(
-            modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp),
+            modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-          // Filter molecule without title, icon and padding
-          FilterHeader(parkingViewModel, displayHeader = false)
-          Spacer(modifier = Modifier.height(32.dp))
-
           // Advanced Mode
           Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             Box(modifier = Modifier.width(64.dp), contentAlignment = Alignment.CenterStart) {
@@ -705,6 +712,33 @@ fun SettingsDialog(
                     text = stringResource(R.string.map_screen_settings_to_zone),
                     style = MaterialTheme.typography.bodyLarge)
               }
+        }
+      },
+      confirmButton = { TextButton(onClick = onDismiss) { Text("Close") } },
+      containerColor = MaterialTheme.colorScheme.surface,
+      tonalElevation = 8.dp,
+      shape = RoundedCornerShape(24.dp))
+}
+
+/**
+ * Composable function to display the filter dialog.
+ *
+ * @param parkingViewModel The ViewModel for managing parking-related data and actions.
+ * @param onDismiss The function to dismiss the dialog.
+ */
+@Composable
+fun FilterDialog(parkingViewModel: ParkingViewModel, onDismiss: () -> Unit) {
+  AlertDialog(
+      onDismissRequest = onDismiss,
+      title = {
+        Text(
+            text = stringResource(R.string.filter),
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.padding(bottom = 16.dp))
+      },
+      text = {
+        Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
+          FilterHeader(parkingViewModel, displayHeader = false)
         }
       },
       confirmButton = { TextButton(onClick = onDismiss) { Text("Close") } },

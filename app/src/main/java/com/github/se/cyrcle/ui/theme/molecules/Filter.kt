@@ -45,9 +45,9 @@ import com.github.se.cyrcle.ui.theme.getCheckBoxColors
 
 @Composable
 fun FilterHeader(parkingViewModel: ParkingViewModel, displayHeader: Boolean = true) {
-  val showProtectionOptions = remember { mutableStateOf(false) }
-  val showRackTypeOptions = remember { mutableStateOf(false) }
-  val showCapacityOptions = remember { mutableStateOf(false) }
+  val showProtectionOptions = remember { mutableStateOf(!displayHeader) }
+  val showRackTypeOptions = remember { mutableStateOf(!displayHeader) }
+  val showCapacityOptions = remember { mutableStateOf(!displayHeader) }
   var showFilters by remember { mutableStateOf(!displayHeader) }
 
   val selectedProtection by parkingViewModel.selectedProtection.collectAsState()
@@ -101,6 +101,7 @@ fun FilterHeader(parkingViewModel: ParkingViewModel, displayHeader: Boolean = tr
       FilterSection(
           title = stringResource(R.string.list_screen_protection),
           expandedState = showProtectionOptions,
+          expandable = displayHeader,
           onReset = { parkingViewModel.clearProtection() },
           onApply = { parkingViewModel.selectAllProtection() }) {
             LazyRow(
@@ -120,6 +121,7 @@ fun FilterHeader(parkingViewModel: ParkingViewModel, displayHeader: Boolean = tr
       FilterSection(
           title = stringResource(R.string.list_screen_rack_type),
           expandedState = showRackTypeOptions,
+          expandable = displayHeader,
           onReset = { parkingViewModel.clearRackType() },
           onApply = { parkingViewModel.selectAllRackTypes() }) {
             LazyRow(
@@ -139,6 +141,7 @@ fun FilterHeader(parkingViewModel: ParkingViewModel, displayHeader: Boolean = tr
       FilterSection(
           title = stringResource(R.string.list_screen_capacity),
           expandedState = showCapacityOptions,
+          expandable = displayHeader,
           onReset = { parkingViewModel.clearCapacity() },
           onApply = { parkingViewModel.selectAllCapacities() }) {
             LazyRow(
@@ -178,6 +181,7 @@ fun FilterHeader(parkingViewModel: ParkingViewModel, displayHeader: Boolean = tr
 fun FilterSection(
     title: String,
     expandedState: MutableState<Boolean>,
+    expandable: Boolean,
     onReset: () -> Unit,
     onApply: () -> Unit,
     content: @Composable () -> Unit
@@ -205,7 +209,10 @@ fun FilterSection(
                   text = title,
                   style = MaterialTheme.typography.titleMedium,
                   modifier =
-                      Modifier.clickable(onClick = { expandedState.value = !expandedState.value })
+                      Modifier.clickable(
+                              onClick = {
+                                if (expandable) expandedState.value = !expandedState.value
+                              })
                           .padding(6.dp),
                   testTag = title)
               ClickableText(
