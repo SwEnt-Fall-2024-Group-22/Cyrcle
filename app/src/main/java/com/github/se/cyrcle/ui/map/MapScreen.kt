@@ -717,6 +717,7 @@ fun SettingsDialog(
       confirmButton = { TextButton(onClick = onDismiss) { Text("Close") } },
       containerColor = MaterialTheme.colorScheme.surface,
       tonalElevation = 8.dp,
+      modifier = Modifier.testTag("SettingsMenu"),
       shape = RoundedCornerShape(24.dp))
 }
 
@@ -741,8 +742,13 @@ fun FilterDialog(parkingViewModel: ParkingViewModel, onDismiss: () -> Unit) {
           FilterHeader(parkingViewModel, displayHeader = false)
         }
       },
-      confirmButton = { TextButton(onClick = onDismiss) { Text("Close") } },
+      confirmButton = {
+        TextButton(onClick = onDismiss, modifier = Modifier.testTag("FilterMenuClose")) {
+          Text("Close")
+        }
+      },
       containerColor = MaterialTheme.colorScheme.surface,
       tonalElevation = 8.dp,
+      modifier = Modifier.testTag("FilterMenu"),
       shape = RoundedCornerShape(24.dp))
 }
