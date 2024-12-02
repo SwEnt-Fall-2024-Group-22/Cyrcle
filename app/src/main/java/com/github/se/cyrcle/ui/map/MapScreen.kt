@@ -534,7 +534,7 @@ fun MapScreen(
         }
 
         if (showSettings.value) {
-          SettingsMenu(mapMode, mapViewModel, navigationActions)
+          SettingsMenu(mapMode, mapViewModel, userViewModel, navigationActions)
         }
 
         if (showSuggestions.value &&
@@ -634,8 +634,10 @@ fun SuggestionMenu(
 fun SettingsMenu(
     mapMode: State<MapViewModel.MapMode>,
     mapViewModel: MapViewModel,
+    userViewModel: UserViewModel,
     navigationActions: NavigationActions
 ) {
+  val isOnlineMode by userViewModel.isOnlineMode.collectAsState()
   Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.TopEnd) {
     Card(
         modifier =
@@ -667,6 +669,26 @@ fun SettingsMenu(
               Spacer(modifier = Modifier.weight(1f))
               Text(text = stringResource(R.string.map_screen_mode_switch_label))
             }
+            HorizontalDivider(
+                thickness = 1.dp,
+                modifier = Modifier.fillMaxWidth(0.9f).padding(16.dp),
+                color = MaterialTheme.colorScheme.onBackground)
+            // Switch to Online/Offline Mode
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()) {
+                  Switch(
+                      modifier = Modifier.padding(start = 8.dp).testTag("OfflineModeSwitch"),
+                      checked = !isOnlineMode,
+                      onCheckedChange = { userViewModel.setIsOnlineMode(!it) },
+                      colors =
+                          SwitchDefaults.colors()
+                              .copy(
+                                  uncheckedTrackColor = disabledColor(),
+                              ))
+                  Spacer(modifier = Modifier.weight(1f))
+                  Text(text = "Offline Mode")
+                }
             HorizontalDivider(
                 thickness = 1.dp,
                 modifier = Modifier.fillMaxWidth(0.9f).padding(16.dp),

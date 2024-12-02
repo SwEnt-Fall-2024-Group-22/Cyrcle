@@ -25,9 +25,16 @@ class UserViewModel(
   val isSignedIn: Flow<Boolean>
     get() = currentUser.map { it != null }
 
+  // === States for Offline mode  ===
+
   // Keep track of the user's online status, can only be changed with the consent of the user.
   private val _isOnlineMode = MutableStateFlow(true)
   val isOnlineMode: StateFlow<Boolean> = _isOnlineMode
+
+  // Keep track of whether the user has connection to the internet or not.
+  private val _hasConnection = MutableStateFlow(true)
+  val hasConnection: StateFlow<Boolean> = _hasConnection
+  // === === === === === === ===
 
   /**
    * Sets the current user.
@@ -450,5 +457,13 @@ class UserViewModel(
    */
   fun setIsOnlineMode(isOnline: Boolean) {
     _isOnlineMode.value = isOnline
+  }
+  /**
+   * Set the has connection status of the user.
+   *
+   * @param hasConnection the new connection status of the user
+   */
+  fun setHasConnection(hasConnection: Boolean) {
+    _hasConnection.value = hasConnection
   }
 }

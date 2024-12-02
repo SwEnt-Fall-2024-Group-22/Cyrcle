@@ -6,16 +6,10 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.util.Log
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 
 class NetworkReceiver(context: Context) {
-    // MutableStateFlow to keep track of the network connection status
+  // MutableStateFlow to keep track of the network connection status
   private val _isConnected = MutableStateFlow(false)
   val isConnected: MutableStateFlow<Boolean> = _isConnected
 
