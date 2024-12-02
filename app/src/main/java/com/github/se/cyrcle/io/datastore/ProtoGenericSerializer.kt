@@ -1,4 +1,4 @@
-package com.github.se.cyrcle.io
+package com.github.se.cyrcle.io.datastore
 
 import androidx.datastore.core.Serializer
 import java.io.IOException

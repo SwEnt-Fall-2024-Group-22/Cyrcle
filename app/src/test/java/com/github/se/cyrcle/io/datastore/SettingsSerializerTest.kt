@@ -1,5 +1,6 @@
-package com.github.se.cyrcle.io
+package com.github.se.cyrcle.io.datastore
 
+import com.github.se.cyrcle.io.Settings
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import kotlinx.coroutines.runBlocking

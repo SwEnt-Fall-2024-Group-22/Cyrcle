@@ -1,48 +1,56 @@
 package com.github.se.cyrcle.model.parking
 
+import android.annotation.SuppressLint
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMeasurement
 import java.math.BigDecimal
 import java.math.RoundingMode
-import kotlin.math.pow
 
-const val TILE_SIZE = 0.1
-const val DECIMALS = 2
 /**
  * Represents a tile in the map.
  *
  * @param bottomLeft the bottom left corner of the tile
  * @param topRight the top right corner of the tile
+ * @param parkings the parkings in the tile
+ * @param uid the unique identifier of the tile
  */
-data class Tile(val bottomLeft: Point, val topRight: Point) {
+@Entity(tableName = "tiles")
+data class Tile(
+    val bottomLeft: Point,
+    val topRight: Point,
+    val parkings: MutableSet<Parking> = mutableSetOf(),
+    @PrimaryKey val uid: String = getUidForPoint(bottomLeft)
+) {
   override fun toString(): String {
-    return "Tile(bottomLeft=${bottomLeft.longitude()},${bottomLeft.latitude()}, topRight=${topRight.longitude()},${topRight.latitude()})"
+    return "Tile(bottomLeft=${bottomLeft.longitude()},${bottomLeft.latitude()}, topRight=${topRight.longitude()},${topRight.latitude()})" +
+        "    with ${parkings.size} parkings"
   }
 
   companion object {
-    /**
-     * Rounds the tile to the nearest decimals
-     *
-     * @param value the value to round
-     * @param decimals the number of decimals to round to
-     * @return the rounded value
-     */
-    private fun roundDouble(value: Double, decimals: Int): Double {
-      val roundingFactor = 10.0.pow(decimals)
-      return (value * roundingFactor).toInt() / roundingFactor
-    }
-    /** Rounds the tile to the nearest 0.01 */
-    private fun roundTiles(tile: Tile): Tile {
 
-      val roundedBottomLeft =
-          Point.fromLngLat(
-              roundDouble(tile.bottomLeft.longitude(), DECIMALS),
-              roundDouble(tile.bottomLeft.latitude(), DECIMALS))
-      val roundedTopRight =
-          Point.fromLngLat(
-              roundDouble(tile.topRight.longitude(), DECIMALS),
-              roundDouble(tile.topRight.latitude(), DECIMALS))
-      return Tile(roundedBottomLeft, roundedTopRight)
+    // Use inverse powers of 2 to avoid floating point errors
+    private const val TILE_SIZE = 0.125
+    private const val INV_TILE_SIZE = 8
+
+    // Need 3 decimals to represent the ".125" in the TILE_SIZE
+    private const val DECIMALS = 3
+
+    /**
+     * For a given point, returns the UID of the tile it is in
+     *
+     * @param point Point used to create the unique ID
+     * @return a string in the format "<longitude>.xx_<latitude>.xx"
+     */
+    @SuppressLint("DefaultLocale")
+    fun getUidForPoint(point: Point): String {
+      val x = (point.longitude() * INV_TILE_SIZE).toInt() * TILE_SIZE
+      val y = (point.latitude() * INV_TILE_SIZE).toInt() * TILE_SIZE
+
+      val xFormated = String.format("%.${DECIMALS}f", x)
+      val yFormated = String.format("%.${DECIMALS}f", y)
+      return "${xFormated}_${yFormated}"
     }
 
     /**
@@ -61,22 +69,25 @@ data class Tile(val bottomLeft: Point, val topRight: Point) {
       Making the repo look for the tile containing 7.0099999999999998 when not needed
        */
       val bottomLeftX =
-          BigDecimal(bottomLeft.longitude() / TILE_SIZE).setScale(7, RoundingMode.HALF_EVEN).toInt()
+          BigDecimal(bottomLeft.longitude() * INV_TILE_SIZE)
+              .setScale(7, RoundingMode.HALF_EVEN)
+              .toInt()
       val bottomLeftY =
-          BigDecimal(bottomLeft.latitude() / TILE_SIZE).setScale(7, RoundingMode.HALF_EVEN).toInt()
+          BigDecimal(bottomLeft.latitude() * INV_TILE_SIZE)
+              .setScale(7, RoundingMode.HALF_EVEN)
+              .toInt()
       // round up topRight to the nearest TILE_SIZE
       val topRightX =
-          BigDecimal(topRight.longitude() / TILE_SIZE).setScale(0, RoundingMode.UP).toInt()
+          BigDecimal(topRight.longitude() * INV_TILE_SIZE).setScale(0, RoundingMode.UP).toInt()
       val topRightY =
-          BigDecimal(topRight.latitude() / TILE_SIZE).setScale(0, RoundingMode.UP).toInt()
+          BigDecimal(topRight.latitude() * INV_TILE_SIZE).setScale(0, RoundingMode.UP).toInt()
 
       for (x in bottomLeftX until topRightX) {
         for (y in bottomLeftY until topRightY) {
           tiles.add(
-              roundTiles(
-                  Tile(
-                      Point.fromLngLat(x * TILE_SIZE, y * TILE_SIZE),
-                      Point.fromLngLat((x + 1) * TILE_SIZE, (y + 1) * TILE_SIZE))))
+              Tile(
+                  Point.fromLngLat(x * TILE_SIZE, y * TILE_SIZE),
+                  Point.fromLngLat((x + 1) * TILE_SIZE, (y + 1) * TILE_SIZE)))
         }
       }
       return tiles
@@ -89,12 +100,11 @@ data class Tile(val bottomLeft: Point, val topRight: Point) {
      * @return the tile that contains the point
      */
     fun getTileFromPoint(point: Point): Tile {
-      val x = (point.longitude() / TILE_SIZE).toInt()
-      val y = (point.latitude() / TILE_SIZE).toInt()
-      return roundTiles(
-          Tile(
-              Point.fromLngLat(x * TILE_SIZE, y * TILE_SIZE),
-              Point.fromLngLat((x + 1) * TILE_SIZE, (y + 1) * TILE_SIZE)))
+      val x = (point.longitude() * INV_TILE_SIZE).toInt()
+      val y = (point.latitude() * INV_TILE_SIZE).toInt()
+      return Tile(
+          Point.fromLngLat(x * TILE_SIZE, y * TILE_SIZE),
+          Point.fromLngLat((x + 1) * TILE_SIZE, (y + 1) * TILE_SIZE))
     }
 
     /**

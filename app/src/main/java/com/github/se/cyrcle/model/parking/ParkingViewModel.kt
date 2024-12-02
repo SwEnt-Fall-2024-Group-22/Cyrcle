@@ -76,8 +76,7 @@ class ParkingViewModel(
   // List of tiles to display
   private var tilesToDisplay: Set<Tile> = emptySet()
   // Map a tile to the parkings that are in it.
-  private val tilesToParking =
-      MutableStateFlow<LinkedHashMap<Tile, List<Parking>>>(LinkedHashMap(10, 1f, true))
+  private val tileCache = LinkedHashMap<String, Tile>(10, 1f, true)
 
   /**
    * Generates a new unique identifier for a parking.
@@ -107,8 +106,10 @@ class ParkingViewModel(
     parkingRepository.addParking(
         parking,
         {
-          val tile = Tile.getTileFromPoint(parking.location.center)
-          tilesToParking.value[tile] = tilesToParking.value[tile]?.plus(parking) ?: listOf(parking)
+          val tileID = Tile.getUidForPoint(parking.location.center)
+          val tile = tileCache[tileID] ?: Tile.getTileFromPoint(parking.location.center)
+          tile.parkings.add(parking)
+          tileCache[tileID] = tile
         },
         { Log.e("ParkingViewModel", "Error adding parking", it) })
   }
@@ -168,26 +169,36 @@ class ParkingViewModel(
         Point.fromLngLat(
             maxOf(startPos.longitude(), endPos.longitude()),
             maxOf(startPos.latitude(), endPos.latitude()))
+
     // Get all tiles that are in the rectangle
     tilesToDisplay = Tile.getAllTilesInRectangle(bottomLeft, topRight)
     // Used to keep track of when the last request has finished.
     var nbRequestLeft = tilesToDisplay.size
+
     tilesToDisplay.forEach { tile ->
-      if (tilesToParking.value.containsKey(tile)) {
-        _rectParkings.value += tilesToParking.value[tile]!!
+
+      // Get parkings from memory cache
+      if (tileCache.containsKey(tile.uid)) {
+        _rectParkings.value += tileCache[tile.uid]!!.parkings
         updateClosestParkings(--nbRequestLeft)
-        return@forEach // Skip to the next tile if already fetched
+
+        // Get parkings from repository
+      } else {
+        // Cache tile
+        tileCache[tile.uid] = tile
+        Log.d("ParkingViewModel", "Requesting parkings for tile ${tile.uid}")
+        parkingRepository.getParkingsBetween(
+            tile.bottomLeft,
+            tile.topRight,
+            { parkings ->
+              Log.d("ParkingViewModel", "For tile ${tile.uid}, got ${parkings.size} parkings")
+
+              tileCache[tile.uid]!!.parkings.addAll(parkings)
+              _rectParkings.value += parkings
+              updateClosestParkings(--nbRequestLeft)
+            },
+            { Log.e("ParkingViewModel", "-- Error getting parkings: $it") })
       }
-      tilesToParking.value[tile] = emptyList() // Avoid querying the same tile multiple times
-      parkingRepository.getParkingsBetween(
-          tile.bottomLeft,
-          tile.topRight,
-          { parkings ->
-            tilesToParking.value[tile] = parkings
-            _rectParkings.value += parkings
-            updateClosestParkings(--nbRequestLeft)
-          },
-          { Log.e("ParkingViewModel", "-- Error getting parkings: $it") })
     }
   }
 
@@ -472,9 +483,7 @@ class ParkingViewModel(
   /** Updates the local parking and metrics after a report is added or updated. */
   private fun updateLocalParkingAndMetrics(report: ParkingReport, selectedParking: Parking) {
     // Update the local reports and parking metrics
-    _selectedParkingReports.update { currentReports ->
-      currentReports?.plus(report) ?: listOf(report)
-    }
+    _selectedParkingReports.update { currentReports -> currentReports.plus(report) }
     if (report.reason.severity == MAX_SEVERITY) {
       selectedParking.nbMaxSeverityReports += 1
     }

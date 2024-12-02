@@ -2,6 +2,7 @@ package com.github.se.cyrcle.model.parking
 
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
+import com.github.se.cyrcle.io.serializer.ParkingAdapter
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.FirebaseApp
@@ -37,9 +38,11 @@ class ParkingRepositoryFirestoreTest {
   @Mock private lateinit var mockParkingQuerySnapshot: QuerySnapshot
   @Mock private lateinit var mockQueryDocumentSnapshot: QueryDocumentSnapshot
 
-  private lateinit var parkingRepositoryFirestore: ParkingRepositoryFirestore
   private val parking = TestInstancesParking.parking1
+  private val parkingAdapter = ParkingAdapter()
+
   private lateinit var mockParkingData: Map<String, Any>
+  private lateinit var parkingRepositoryFirestore: ParkingRepositoryFirestore
 
   @Before
   fun setUp() {
@@ -50,7 +53,7 @@ class ParkingRepositoryFirestoreTest {
       FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
     }
     parkingRepositoryFirestore = ParkingRepositoryFirestore(mockFirestore)
-    mockParkingData = parkingRepositoryFirestore.serializeParking(parking)
+    mockParkingData = parkingAdapter.serializeParking(parking)
 
     `when`(mockFirestore.collection(any())).thenReturn(mockCollectionReference)
     `when`(mockCollectionReference.document(any())).thenReturn(mockDocumentReference)
@@ -125,7 +128,6 @@ class ParkingRepositoryFirestoreTest {
 
     verify(mockParkingQuerySnapshot, times(1)).documents
     verify(mockQueryDocumentSnapshot, times(1)).data
-    verify(spyParkingRepositoryFirestore, times(1)).deserializeParking(mockParkingData)
     assertTrue(onSuccessCallbackCalled)
   }
 
@@ -190,7 +192,6 @@ class ParkingRepositoryFirestoreTest {
 
     verify(mockParkingQuerySnapshot, times(1)).documents
     verify(mockQueryDocumentSnapshot, times(1)).data
-    verify(spyParkingRepositoryFirestore, times(1)).deserializeParking(mockParkingData)
     assertTrue(onSuccessCallbackCalled)
   }
 
@@ -312,23 +313,5 @@ class ParkingRepositoryFirestoreTest {
     verify(mockCollectionReference).get()
     verify(mockDocumentReference, times(0)).delete() // Parking document deletion should not occur
     assertTrue(onFailureCallbackCalled)
-  }
-
-  @Test
-  fun serializeParking_and_deserializeParking() {
-    val serializedParking1 =
-        parkingRepositoryFirestore.serializeParking(TestInstancesParking.parking1)
-    val deserializedParking1 = parkingRepositoryFirestore.deserializeParking(serializedParking1)
-    assert(TestInstancesParking.parking1 == deserializedParking1)
-
-    val serializedParking2 =
-        parkingRepositoryFirestore.serializeParking(TestInstancesParking.parking2)
-    val deserializedParking2 = parkingRepositoryFirestore.deserializeParking(serializedParking2)
-    assert(TestInstancesParking.parking2 == deserializedParking2)
-
-    val serializedParking3 =
-        parkingRepositoryFirestore.serializeParking(TestInstancesParking.parking3)
-    val deserializedParking3 = parkingRepositoryFirestore.deserializeParking(serializedParking3)
-    assert(TestInstancesParking.parking3 == deserializedParking3)
   }
 }

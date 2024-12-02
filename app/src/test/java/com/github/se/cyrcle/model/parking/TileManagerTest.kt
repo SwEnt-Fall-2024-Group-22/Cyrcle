@@ -1,6 +1,7 @@
 package com.github.se.cyrcle.model.parking
 
 import com.mapbox.geojson.Point
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 /** Unit test to check that the Tile extension function works as intended. */
@@ -23,12 +24,21 @@ class TileManagerTest {
   }
 
   @Test
+  fun getUidForPointTest() {
+    var uid = Tile.getUidForPoint(Point.fromLngLat(6.05, 46.05))
+    assertEquals("6.000_46.000", uid)
+
+    uid = Tile.getUidForPoint(Point.fromLngLat(6.6, 46.5))
+    assertEquals("6.500_46.500", uid)
+  }
+
+  @Test
   fun getTileFromPointTest() {
     val tile =
         Tile.getTileFromPoint(
             Point.fromLngLat(6.05, 46.05),
         )
-    assert(tile == Tile(Point.fromLngLat(6.0, 46.0), Point.fromLngLat(6.1, 46.1)))
+    assertEquals(Tile(Point.fromLngLat(6.0, 46.0), Point.fromLngLat(6.125, 46.125)), tile)
   }
 
   /*
