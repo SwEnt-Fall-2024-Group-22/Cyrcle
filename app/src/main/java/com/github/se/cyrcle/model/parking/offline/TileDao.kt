@@ -1,9 +1,9 @@
-package com.github.se.cyrcle.model.parking
+package com.github.se.cyrcle.model.parking.offline
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
+import com.github.se.cyrcle.model.parking.Tile
 
 /**
  * Data access object for tiles It serves as an intermediary between the database and the repository
@@ -24,16 +24,16 @@ interface TileDao {
   /**
    * Delete a tile
    *
-   * @param tile the tile to delete
+   * @param uid the tile id to delete
    */
-  @Delete suspend fun delete(tile: Tile)
+  @Query("DELETE FROM ${Tile.TABLE_NAME} WHERE uid = :uid ") suspend fun delete(uid: String)
 
   /**
    * Get all tiles
    *
    * @return a list of all tiles
    */
-  @Query("SELECT * FROM tiles") suspend fun getAllTiles(): List<Tile>
+  @Query("SELECT * FROM ${Tile.TABLE_NAME}") suspend fun getAllTiles(): List<Tile>
 
   /**
    * Get a tile by its identifier
@@ -41,5 +41,5 @@ interface TileDao {
    * @param uid the identifier of the tile
    * @return the tile with the given identifier
    */
-  @Query("SELECT * FROM tiles WHERE uid = :uid") suspend fun getTile(uid: String): Tile
+  @Query("SELECT * FROM ${Tile.TABLE_NAME} WHERE uid = :uid") suspend fun getTile(uid: String): Tile
 }

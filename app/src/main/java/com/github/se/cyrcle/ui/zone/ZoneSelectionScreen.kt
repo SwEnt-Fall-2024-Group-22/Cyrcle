@@ -21,6 +21,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -45,6 +47,7 @@ import com.mapbox.maps.MapView
 import com.mapbox.maps.extension.compose.DisposableMapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.plugin.gestures.gestures
+import kotlinx.coroutines.launch
 
 const val MAX_ZONE_NAME_LENGTH = 32
 const val MIN_ZONE_NAME_LENGTH = 1
@@ -55,7 +58,7 @@ fun ZoneSelectionScreen(
     mapViewModel: MapViewModel,
     addressViewModel: AddressViewModel // Possibility to use this to suggest a name for the zone.
 ) {
-  val showAlertDialogPickName = remember { mutableStateOf(false) }
+  var showAlertDialogPickName by remember { mutableStateOf(false) }
   val boundingBox = remember { mutableStateOf<BoundingBox?>(null) }
   val zoneName = remember { mutableStateOf("") }
   val mapView = remember { mutableStateOf<MapView?>(null) }
@@ -96,19 +99,24 @@ fun ZoneSelectionScreen(
       // Store the bounding box in a state.
       boundingBox.value = BoundingBox.fromPoints(bottomLeft, topRight)
       // Show the alert dialog to pick the name of the zone.
-      showAlertDialogPickName.value = true
+      showAlertDialogPickName = true
     }
   }
 
-  if (showAlertDialogPickName.value) {
+  if (showAlertDialogPickName) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     AlertDialogPickZoneName(
         onConfirm = {
           zoneName.value = it
-          createZone(boundingBox.value!!, it, context, navigationActions)
+          coroutineScope.launch {
+            val zone = createZone(boundingBox.value!!, it, context)
+
+            navigationActions.goBack()
+          }
         },
         onDismiss = {
-          showAlertDialogPickName.value = false
+          showAlertDialogPickName = false
           mapViewModel.updateLocationPickerState(LocationPickerState.NONE_SET)
         })
   }
@@ -226,12 +234,10 @@ private fun createZone(
     boundingBox: BoundingBox,
     zoneName: String,
     context: Context,
-    navigationActions: NavigationActions
-) {
+): Zone {
   val zone = Zone(boundingBox, zoneName)
-  Log.d("ZoneSelectionScreen", "Zone created: $zone")
   Zone.storeZone(zone, context)
-  // Add calls to function to download the tiles corresponding and the data corresponding to the
-  // zone.
-  navigationActions.goBack()
+  Log.d("ZoneSelectionScreen", "Zone created and stored: $zone")
+
+  return zone
 }

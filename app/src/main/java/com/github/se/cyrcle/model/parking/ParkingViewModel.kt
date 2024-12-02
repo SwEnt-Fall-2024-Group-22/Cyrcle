@@ -6,15 +6,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.github.se.cyrcle.model.image.ImageRepository
-import com.github.se.cyrcle.model.image.ImageRepositoryCloudStorage
 import com.github.se.cyrcle.model.report.ReportedObject
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
-import com.github.se.cyrcle.model.report.ReportedObjectRepositoryFirestore
 import com.github.se.cyrcle.model.report.ReportedObjectType
 import com.github.se.cyrcle.model.user.User
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
@@ -45,6 +40,7 @@ const val PARKING_MAX_SIDE_LENGTH = 50.0
 class ParkingViewModel(
     private val imageRepository: ImageRepository,
     private val parkingRepository: ParkingRepository,
+    private val offlineParkingRepository: OfflineParkingRepository,
     private val reportedObjectRepository: ReportedObjectRepository,
 ) : ViewModel() {
 

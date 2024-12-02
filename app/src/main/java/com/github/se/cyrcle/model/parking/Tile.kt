@@ -16,7 +16,7 @@ import java.math.RoundingMode
  * @param parkings the parkings in the tile
  * @param uid the unique identifier of the tile
  */
-@Entity(tableName = "tiles")
+@Entity(tableName = Tile.TABLE_NAME)
 data class Tile(
     val bottomLeft: Point,
     val topRight: Point,
@@ -29,6 +29,8 @@ data class Tile(
   }
 
   companion object {
+
+    const val TABLE_NAME = "tiles"
 
     // Use inverse powers of 2 to avoid floating point errors
     private const val TILE_SIZE = 0.125

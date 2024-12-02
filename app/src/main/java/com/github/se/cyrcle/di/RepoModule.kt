@@ -4,6 +4,8 @@ import com.github.se.cyrcle.model.address.AddressRepository
 import com.github.se.cyrcle.model.address.AddressRepositoryNominatim
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.image.ImageRepositoryCloudStorage
+import com.github.se.cyrcle.model.parking.OfflineParkingRepository
+import com.github.se.cyrcle.model.parking.OfflineParkingRepositoryRoom
 import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingRepositoryFirestore
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
@@ -64,4 +66,14 @@ abstract class RepoModule {
   abstract fun bindAddressRepository(
       addressRepositoryNominatim: AddressRepositoryNominatim
   ): AddressRepository
+
+  @Binds
+  @Singleton
+  /**
+   * Binds the [OfflineParkingRepositoryRoom] implementation to the [OfflineParkingRepository]
+   * interface.
+   */
+  abstract fun bindOfflineParkingRepo(
+      offlineParkingRepository: OfflineParkingRepositoryRoom
+  ): OfflineParkingRepository
 }
