@@ -126,7 +126,7 @@ class ParkingViewModel(
     parkingRepository.addParking(
         parking,
         {
-          val tile = Tile.getTileFromPoint(parking.location.center)
+          val tile = TileUtils.getTileFromPoint(parking.location.center)
           tilesToParking[tile] = tilesToParking[tile]?.plus(parking) ?: listOf(parking)
         },
         { Log.e("ParkingViewModel", "Error adding parking", it) })
@@ -188,7 +188,7 @@ class ParkingViewModel(
             maxOf(startPos.longitude(), endPos.longitude()),
             maxOf(startPos.latitude(), endPos.latitude()))
     // Get all tiles that are in the rectangle
-    val tilesToDisplay = Tile.getAllTilesInRectangle(bottomLeft, topRight)
+    val tilesToDisplay = TileUtils.getAllTilesInRectangle(bottomLeft, topRight)
 
     tilesToDisplay.forEach { tile ->
 
@@ -227,7 +227,7 @@ class ParkingViewModel(
   ) {
     _radius.value = radius
     _circleCenter.value = center
-    val (bottomLeft, topRight) = Tile.getSmallestRectangleEnclosingCircle(center, radius)
+    val (bottomLeft, topRight) = TileUtils.getSmallestRectangleEnclosingCircle(center, radius)
     getParkingsInRect(bottomLeft, topRight)
   }
 

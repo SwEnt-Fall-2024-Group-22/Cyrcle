@@ -73,7 +73,7 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
       onFailure: (Exception) -> Unit
   ) {
     db.collection(collectionPath)
-        .whereEqualTo("tileUID", tile.uid)
+        .whereEqualTo("tileUID", tile)
         .get()
         .addOnSuccessListener { querySnapshot ->
           val parkings =

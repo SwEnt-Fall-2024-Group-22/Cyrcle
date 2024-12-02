@@ -53,7 +53,7 @@ class OfflineParkingRepositoryRoom @Inject constructor(parkingDatabase: ParkingD
       onSuccess: (List<Parking>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    coroutine.launch { onSuccess(parkingManager.getParkingsByTileUIDs(listOf(tile.uid))) }
+    coroutine.launch { onSuccess(parkingManager.getParkingsByTileUIDs(listOf(tile))) }
   }
 
   override fun addParking(parking: Parking, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {

@@ -41,8 +41,8 @@ class ParkingRepositoryFirestoreTest {
   private val parking = TestInstancesParking.parking1
   private val parkingAdapter = ParkingAdapter()
 
-  private val testTile = Tile.getTileFromPoint(Point.fromLngLat(6.5, 46.5))
-  private val failTile = Tile(Point.fromLngLat(6.5, 46.5), Point.fromLngLat(6.5, 46.5), "")
+  private val testTile = TileUtils.getTileFromPoint(Point.fromLngLat(6.5, 46.5))
+  private val failTile = ""
 
   private lateinit var mockParkingData: Map<String, Any>
   private lateinit var parkingRepositoryFirestore: ParkingRepositoryFirestore
