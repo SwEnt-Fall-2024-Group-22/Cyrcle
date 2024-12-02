@@ -3,6 +3,7 @@ package com.github.se.cyrcle.model.parking
 import android.util.Log
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.ui.theme.molecules.DropDownableEnum
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.Polygon
@@ -36,6 +37,8 @@ data class Parking(
     val protection: ParkingProtection,
     val price: Double,
     val hasSecurity: Boolean,
+    val owner: User,
+    var reportingUsers: List<User>,
     var nbReviews: Int = 0,
     var avgScore: Double = 0.0,
     var nbReports: Int = 0,

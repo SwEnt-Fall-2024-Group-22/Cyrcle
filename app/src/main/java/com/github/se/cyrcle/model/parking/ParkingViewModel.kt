@@ -110,6 +110,15 @@ class ParkingViewModel(
     return parkingRepository.getNewUid()
   }
 
+  fun addReportingUser(user: User) {
+    val selectedParking = _selectedParking.value
+    if (selectedParking != null) {
+      val updatedParking =
+          selectedParking.copy(reportingUsers = selectedParking.reportingUsers + user)
+      _selectedParking.value = updatedParking
+    }
+  }
+
   fun deleteParkingByUid(uid: String) {
     parkingRepository.deleteParkingById(
         uid, {}, { Log.d("ParkingViewModel", "Error deleting Parking") })
