@@ -1,6 +1,7 @@
 package com.github.se.cyrcle.ui.list
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -108,7 +109,7 @@ import kotlinx.coroutines.runBlocking
 
 const val CARD_HEIGHT = 120
 const val MAX_SWIPE_DISTANCE = 150
-const val maxSuggestionDisplayNameLengthList = 50
+const val maxSuggestionDisplayNameLengthList = 70
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
@@ -140,9 +141,10 @@ fun SpotListScreen(
   // location permission from location manager
   val locPermission = permissionHandler.getLocalisationPerm().value
 
-  LaunchedEffect(userPosition, myLocation, chosenLocation) {
+  LaunchedEffect(userPosition, myLocation, chosenLocation.value) {
     if (locPermission && myLocation.value) parkingViewModel.setCircleCenter(userPosition)
     else
+        Log.e("SpotListScreen",parkingViewModel.closestParkings.value.toString())
         parkingViewModel.setCircleCenter(
             Point.fromLngLat(
                 chosenLocation.value.longitude.toDouble(),
