@@ -1,11 +1,17 @@
 package com.github.se.cyrcle.model.zone
 
 import android.content.Context
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.TypeAdapter
+import com.google.gson.stream.JsonReader
+import com.google.gson.stream.JsonWriter
 import com.mapbox.geojson.BoundingBox
+import com.mapbox.geojson.gson.BoundingBoxTypeAdapter
 import java.io.File
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.UUID
-import org.json.JSONObject
 
 const val ZONE_DIR = "zones"
 
@@ -29,23 +35,20 @@ data class Zone(
 
   /** Returns a JSON representation of the zone. */
   fun toJson(): String {
-    return """
-            {
-                "boundingBox": {
-                    "south": ${boundingBox.south()},
-                    "west": ${boundingBox.west()},
-                    "north": ${boundingBox.north()},
-                    "east": ${boundingBox.east()}
-                },
-                "name": "$name",
-                "lastRefreshed": "$lastRefreshed",
-                "uid": "$uid"
-            }
-        """
-        .trimIndent()
+    return createGson().toJson(this)
   }
 
   companion object {
+    /**
+     * Creates a new Gson instance with the necessary type adapters to serialize and deserialize a
+     * Zone
+     */
+    private fun createGson(): Gson {
+      return GsonBuilder()
+          .registerTypeAdapter(BoundingBox::class.java, BoundingBoxTypeAdapter())
+          .registerTypeAdapter(LocalDate::class.java, LocalDateTypeAdapter())
+          .create()
+    }
     /**
      * Creates a new zone from a JSON representation.
      *
@@ -53,18 +56,9 @@ data class Zone(
      */
     private fun fromJson(json: String): Zone? {
       return try {
-        val jsonObject = JSONObject(json)
-        val boundingBox =
-            BoundingBox.fromLngLats(
-                jsonObject.getJSONObject("boundingBox").getDouble("west"),
-                jsonObject.getJSONObject("boundingBox").getDouble("south"),
-                jsonObject.getJSONObject("boundingBox").getDouble("east"),
-                jsonObject.getJSONObject("boundingBox").getDouble("north"))
-        val name = jsonObject.getString("name")
-        val lastRefreshed = LocalDate.parse(jsonObject.getString("lastRefreshed"))
-        val uid = jsonObject.getString("uid")
-        Zone(boundingBox, name, lastRefreshed, uid)
+        createGson().fromJson(json, Zone::class.java)
       } catch (e: Exception) {
+        // If the JSON can't be parsed, we return null, the UI will filter out the invalid zones.
         null
       }
     }
@@ -125,4 +119,16 @@ data class Zone(
 /** Generates a new UID for a zone. */
 private fun generateZoneUid(): String {
   return UUID.randomUUID().toString()
+}
+
+class LocalDateTypeAdapter : TypeAdapter<LocalDate>() {
+  private val formatter = DateTimeFormatter.ISO_LOCAL_DATE
+
+  override fun write(out: JsonWriter, value: LocalDate) {
+    out.value(value.format(formatter))
+  }
+
+  override fun read(`in`: JsonReader?): LocalDate {
+    return LocalDate.parse(`in`?.nextString(), formatter)
+  }
 }
