@@ -54,7 +54,14 @@ class ConnectivityObserver(
    */
   private fun onOnlineMode() {
     Log.d("ConnectivityObserver", "Switching to online mode")
-    userViewModel.signInAnonymously {}
+    userViewModel.signInAnonymously(
+        { Log.d("ConnectivityObserver", "User signed in anonymously") },
+        {
+          Log.e(
+              "ConnectivityObserver",
+              "Failed to sign in user anonymously, going back to offline mode")
+          userViewModel.setIsOnlineMode(false)
+        })
     // mapviewmodel.switchToOnlineMode()
     // parkingViewModel.switchToOnlineMode()
   }

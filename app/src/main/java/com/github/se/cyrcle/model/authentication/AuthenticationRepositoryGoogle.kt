@@ -19,7 +19,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 
 /**
@@ -89,9 +88,11 @@ constructor(
    *
    * @param onComplete a function to be called once the user is loged in anonymously
    */
-  override fun authenticateAnonymously(onComplete: () -> Unit) {
-    runBlocking { auth.signInAnonymously().await() }
-    onComplete()
+  override fun authenticateAnonymously(onComplete: () -> Unit, onFailure: (Exception) -> Unit) {
+    auth
+        .signInAnonymously()
+        .addOnSuccessListener { onComplete() }
+        .addOnFailureListener { e -> onFailure(e) }
   }
 
   /**

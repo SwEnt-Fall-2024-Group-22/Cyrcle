@@ -260,11 +260,13 @@ class UserViewModel(
    *
    * @param onComplete the callback to call on completion
    */
-  fun signInAnonymously(onComplete: () -> Unit) {
-    authenticator.authenticateAnonymously {
-      Log.d("UserViewModel", "User signed in anonymously")
-      onComplete()
-    }
+  fun signInAnonymously(onComplete: () -> Unit, onFailure: (Exception) -> Unit) {
+    authenticator.authenticateAnonymously(
+        onComplete = {
+          Log.d("UserViewModel", "User signed in anonymously")
+          onComplete()
+        },
+        onFailure = { onFailure(it) })
   }
 
   /**
