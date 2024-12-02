@@ -1,5 +1,6 @@
 package com.github.se.cyrcle
 
+import ConnectivityObserver
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -84,6 +85,8 @@ class MainActivity : ComponentActivity() {
         Surface(modifier = Modifier.fillMaxSize()) {
           val navController = rememberNavController()
           val navigationActions = NavigationActions(navController)
+
+          ConnectivityObserver(userViewModel, navigationActions)
 
           CyrcleNavHost(
               navigationActions,

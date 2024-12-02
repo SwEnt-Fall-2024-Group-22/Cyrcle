@@ -25,6 +25,10 @@ class UserViewModel(
   val isSignedIn: Flow<Boolean>
     get() = currentUser.map { it != null }
 
+  // Keep track of the user's online status, can only be changed with the consent of the user.
+  private val _isOnlineMode = MutableStateFlow(true)
+  val isOnlineMode: StateFlow<Boolean> = _isOnlineMode
+
   /**
    * Sets the current user.
    *
@@ -437,5 +441,14 @@ class UserViewModel(
         Log.e("UserViewModel", "Failed to debit coins: ${e.message}")
       }
     } ?: Log.e("UserViewModel", "Attempted to debit coins but no current user")
+  }
+  // ============================== ONLINE STATUS ==============================
+  /**
+   * Sets the online status of the user.
+   *
+   * @param isOnline the new online status of the user
+   */
+  fun setIsOnlineMode(isOnline: Boolean) {
+    _isOnlineMode.value = isOnline
   }
 }
