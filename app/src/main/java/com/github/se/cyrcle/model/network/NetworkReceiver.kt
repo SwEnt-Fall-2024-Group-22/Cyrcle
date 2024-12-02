@@ -15,15 +15,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 class NetworkReceiver(context: Context) {
-
+    // MutableStateFlow to keep track of the network connection status
   private val _isConnected = MutableStateFlow(false)
   val isConnected: MutableStateFlow<Boolean> = _isConnected
 
   private val connectivityManager =
       context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-  private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-  private var debounceJob: Job? = null
   private val networkCallback =
       object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
@@ -52,14 +50,5 @@ class NetworkReceiver(context: Context) {
     val networkRequest =
         NetworkRequest.Builder().addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build()
     connectivityManager.registerNetworkCallback(networkRequest, networkCallback)
-  }
-
-  private fun debounceUpdate(newState: Boolean) {
-    debounceJob?.cancel()
-    debounceJob =
-        scope.launch {
-          delay(1000)
-          _isConnected.value = newState
-        }
   }
 }
