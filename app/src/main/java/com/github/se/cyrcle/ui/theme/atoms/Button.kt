@@ -386,8 +386,7 @@ fun GoogleSignInButton(onClick: () -> Unit) {
       shape = RoundedCornerShape(50),
       border = BorderStroke(1.dp, Color.LightGray),
       modifier =
-          Modifier.padding(start = 16.dp, end = 16.dp)
-              .height(48.dp) // Adjust height as needed
+          Modifier.height(48.dp) // Adjust height as needed
               .testTag("AuthenticateButton")) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

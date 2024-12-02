@@ -78,6 +78,7 @@
     <string name="sign_in_guest_button">Continue as Guest</string>
     <string name="sign_in_account_not_found">Your account was not found, please create one</string>
     <string name="sign_in_google_button">Sign in with Google</string>
+    <string name="sign_in_offline_button"> Continue Offline</string>
 
     <!-- Card Screen -->
     <string name="card_screen_description">Description of %s</string>
@@ -268,8 +269,12 @@
     <string name ="zone_selection_button_accept">Confirm</string>
     <string name ="zone_selection_button_cancel">Cancel</string>
 
-
-
+    <!-- Connectivity Alert Dialog -->
+    <string name="connectivity_alert_offline_title">No Internet Connection</string>
+    <string name="connectivity_alert_offline_message">Do you want to use your Offline Maps</string>
+    <string name="connectivity_alert_online_title">Internet Connection Available</string>
+    <string name="connectivity_alert_online_message">Do you want to use the Online Maps</string>
+    <string name="connectivity_alert_button_confirm">Yes</string>
 
 
 </resources>
