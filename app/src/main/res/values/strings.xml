@@ -102,9 +102,9 @@
     <string name="list_screen_rack_type">Rack Type</string>
     <string name="list_screen_capacity">Capacity</string>
     <string name="list_screen_clear_all">Clear All</string>
-    <string name="list_screen_apply_all">Apply All</string>
+    <string name="list_screen_apply_all">Select All</string>
     <string name="list_screen_clear">Clear</string>
-    <string name="list_screen_apply">Apply</string>
+    <string name="list_screen_apply">Select All</string>
     <string name="list_screen_price">%.2f $</string>
     <string name="list_screen_rating">Rating: %.1f</string>
     <string name="list_screen_display_only_cctv">Only display parkings with CCTV camera</string>

@@ -82,7 +82,7 @@ import com.github.se.cyrcle.ui.theme.defaultOnColor
 import com.github.se.cyrcle.ui.theme.getOutlinedTextFieldColorsSearchBar
 import com.github.se.cyrcle.ui.theme.invertColor
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
-import com.github.se.cyrcle.ui.theme.molecules.FilterHeader
+import com.github.se.cyrcle.ui.theme.molecules.FilterPanel
 import com.google.gson.Gson
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.geojson.Point
@@ -739,7 +739,7 @@ fun FilterDialog(parkingViewModel: ParkingViewModel, onDismiss: () -> Unit) {
       },
       text = {
         Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
-          FilterHeader(parkingViewModel, displayHeader = false)
+          FilterPanel(parkingViewModel, displayHeader = false)
         }
       },
       confirmButton = {

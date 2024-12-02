@@ -43,8 +43,21 @@ import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.atoms.ToggleButton
 import com.github.se.cyrcle.ui.theme.getCheckBoxColors
 
+/**
+ * FilterPanel is a composable that displays the filter options for the parking list screen. It
+ * contains the following filter options:
+ * - Protection
+ * - Rack type
+ * - Capacity
+ * - CCTV
+ *
+ * @param parkingViewModel The view model that contains the filter options
+ * @param displayHeader A boolean that determines if the filter header should be displayed. If true,
+ *   a floating action button will be displayed to show/hide the filter options. If false, the
+ *   filter the filter options and sections will be expanded and not collapsible.
+ */
 @Composable
-fun FilterHeader(parkingViewModel: ParkingViewModel, displayHeader: Boolean = true) {
+fun FilterPanel(parkingViewModel: ParkingViewModel, displayHeader: Boolean) {
   val showProtectionOptions = remember { mutableStateOf(!displayHeader) }
   val showRackTypeOptions = remember { mutableStateOf(!displayHeader) }
   val showCapacityOptions = remember { mutableStateOf(!displayHeader) }
@@ -58,11 +71,13 @@ fun FilterHeader(parkingViewModel: ParkingViewModel, displayHeader: Boolean = tr
   val radius = parkingViewModel.radius.collectAsState()
 
   Column(modifier = Modifier.padding(if (displayHeader) 16.dp else 0.dp)) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.End,
-        verticalAlignment = Alignment.CenterVertically) {
-          if (displayHeader) {
+    if (displayHeader) {
+
+      // Header. Contains the title and the show/hide filters floating action button
+      Row(
+          modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+          horizontalArrangement = Arrangement.End,
+          verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = stringResource(R.string.all_parkings_radius, radius.value.toInt()),
                 modifier = Modifier.weight(1f).padding(end = 8.dp),
@@ -75,8 +90,12 @@ fun FilterHeader(parkingViewModel: ParkingViewModel, displayHeader: Boolean = tr
                 contentDescription = "Filter",
                 testTag = "ShowFiltersButton")
           }
-        }
+    }
 
+    // Filter options. Contains the protection, rack type, capacity, and CCTV filters.
+    // We display the filters if the showFilters is true or if the displayHeader is false. This is
+    // because if displayHeader is false, we want to display the filters expanded and not
+    // collapsible.
     if (showFilters || !displayHeader) {
       Row(
           modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
@@ -101,7 +120,7 @@ fun FilterHeader(parkingViewModel: ParkingViewModel, displayHeader: Boolean = tr
       FilterSection(
           title = stringResource(R.string.list_screen_protection),
           expandedState = showProtectionOptions,
-          expandable = displayHeader,
+          collapsible = displayHeader,
           onReset = { parkingViewModel.clearProtection() },
           onApply = { parkingViewModel.selectAllProtection() }) {
             LazyRow(
@@ -121,7 +140,7 @@ fun FilterHeader(parkingViewModel: ParkingViewModel, displayHeader: Boolean = tr
       FilterSection(
           title = stringResource(R.string.list_screen_rack_type),
           expandedState = showRackTypeOptions,
-          expandable = displayHeader,
+          collapsible = displayHeader,
           onReset = { parkingViewModel.clearRackType() },
           onApply = { parkingViewModel.selectAllRackTypes() }) {
             LazyRow(
@@ -141,7 +160,7 @@ fun FilterHeader(parkingViewModel: ParkingViewModel, displayHeader: Boolean = tr
       FilterSection(
           title = stringResource(R.string.list_screen_capacity),
           expandedState = showCapacityOptions,
-          expandable = displayHeader,
+          collapsible = displayHeader,
           onReset = { parkingViewModel.clearCapacity() },
           onApply = { parkingViewModel.selectAllCapacities() }) {
             LazyRow(
@@ -177,11 +196,24 @@ fun FilterHeader(parkingViewModel: ParkingViewModel, displayHeader: Boolean = tr
   }
 }
 
+/**
+ * FilterSection is a composable that displays a filter section with a title, clear and apply
+ * buttons, and the filter options. The filter options are displayed in a column and can be expanded
+ * or collapsed by clicking on the title if the collapsible parameter is true.
+ *
+ * @param title The title of the filter section
+ * @param expandedState A mutable state that determines if the filter options are expanded or
+ *   collapsed
+ * @param collapsible A boolean that determines if the filter options can be expanded or collapsed
+ * @param onReset A lambda that is called when the clear button is clicked
+ * @param onApply A lambda that is called when the apply button is clicked
+ * @param content A lambda that contains the filter options
+ */
 @Composable
 fun FilterSection(
     title: String,
     expandedState: MutableState<Boolean>,
-    expandable: Boolean,
+    collapsible: Boolean,
     onReset: () -> Unit,
     onApply: () -> Unit,
     content: @Composable () -> Unit
@@ -203,15 +235,14 @@ fun FilterSection(
                   style =
                       MaterialTheme.typography.labelSmall.copy(
                           color = MaterialTheme.colorScheme.primary),
-                  modifier =
-                      Modifier.padding(horizontal = 4.dp).testTag("Clear" + title + "Button"))
+                  modifier = Modifier.padding(horizontal = 4.dp).testTag("Clear${title}Button"))
               Text(
                   text = title,
                   style = MaterialTheme.typography.titleMedium,
                   modifier =
                       Modifier.clickable(
                               onClick = {
-                                if (expandable) expandedState.value = !expandedState.value
+                                if (collapsible) expandedState.value = !expandedState.value
                               })
                           .padding(6.dp),
                   testTag = title)
@@ -224,7 +255,7 @@ fun FilterSection(
                   modifier = Modifier.padding(horizontal = 4.dp).testTag("Apply${title}Button"))
             }
 
-        if (expandedState.value) {
+        if (expandedState.value || !collapsible) {
           Box(modifier = Modifier.padding(top = 8.dp)) { content() }
         }
       }

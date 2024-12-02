@@ -60,7 +60,7 @@ import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
-import com.github.se.cyrcle.ui.theme.molecules.FilterHeader
+import com.github.se.cyrcle.ui.theme.molecules.FilterPanel
 import com.mapbox.turf.TurfMeasurement
 import kotlin.math.roundToInt
 
@@ -86,7 +86,7 @@ fun SpotListScreen(
       bottomBar = { BottomNavigationBar(navigationActions, selectedItem = Route.LIST) }) {
           innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(bottom = 16.dp)) {
-          FilterHeader(parkingViewModel = parkingViewModel)
+          FilterPanel(parkingViewModel = parkingViewModel, displayHeader = true)
           val listState = rememberLazyListState()
           LazyColumn(state = listState, modifier = Modifier.testTag("SpotListColumn")) {
             // Pinned parking spots if any (includes titles and dividers)

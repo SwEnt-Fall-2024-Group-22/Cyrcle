@@ -56,7 +56,7 @@ class FilterTest {
 
   @Test
   fun testCCTVCheckboxInteraction() {
-    composeTestRule.setContent { FilterHeader(parkingViewModel) }
+    composeTestRule.setContent { FilterPanel(parkingViewModel, true) }
 
     // Show filters first
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
@@ -68,7 +68,7 @@ class FilterTest {
 
   @Test
   fun testShowFiltersButtonInitiallyDisplaysShowFilters() {
-    composeTestRule.setContent { FilterHeader(parkingViewModel) }
+    composeTestRule.setContent { FilterPanel(parkingViewModel, true) }
 
     // Act & Assert
     composeTestRule.onNodeWithTag("ShowFiltersButton").assertIsDisplayed().assertHasClickAction()
@@ -77,7 +77,7 @@ class FilterTest {
   @Test
   @OptIn(ExperimentalTestApi::class)
   fun testShowFiltersButtonTogglesFilterSection() {
-    composeTestRule.setContent { FilterHeader(parkingViewModel) }
+    composeTestRule.setContent { FilterPanel(parkingViewModel, true) }
 
     // Act: Click to show filters
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
@@ -102,7 +102,7 @@ class FilterTest {
   @OptIn(ExperimentalTestApi::class)
   fun testProtectionFilters() {
 
-    composeTestRule.setContent { FilterHeader(parkingViewModel) }
+    composeTestRule.setContent { FilterPanel(parkingViewModel, true) }
 
     // Act: Click to show filters
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
@@ -135,7 +135,7 @@ class FilterTest {
   @Test
   @OptIn(ExperimentalTestApi::class)
   fun testRackTypeFilters() {
-    composeTestRule.setContent { FilterHeader(parkingViewModel) }
+    composeTestRule.setContent { FilterPanel(parkingViewModel, true) }
 
     // Act: Click to show filters
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
@@ -167,7 +167,7 @@ class FilterTest {
   @Test
   @OptIn(ExperimentalTestApi::class)
   fun testCapacityFilters() {
-    composeTestRule.setContent { FilterHeader(parkingViewModel) }
+    composeTestRule.setContent { FilterPanel(parkingViewModel, true) }
 
     // Act: Click to show filters
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
