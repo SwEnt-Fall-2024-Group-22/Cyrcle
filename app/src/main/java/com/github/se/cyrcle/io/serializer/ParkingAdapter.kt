@@ -1,7 +1,11 @@
 package com.github.se.cyrcle.io.serializer
 
 import androidx.room.TypeConverter
+import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.model.parking.Parking
+import com.github.se.cyrcle.model.parking.ParkingCapacity
+import com.github.se.cyrcle.model.parking.ParkingProtection
+import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
@@ -12,37 +16,50 @@ import com.google.gson.reflect.TypeToken
 import com.mapbox.geojson.Point
 import java.lang.reflect.Type
 
-/** Adapter for serializing and deserializing Parking objects. */
+/**
+ * Adapter for serializing and deserializing Parking objects. Functions annotated
+ * with @TypeConverter are used by Room to convert the data type of a field in the database.
+ */
 class ParkingAdapter : JsonSerializer<Parking>, JsonDeserializer<Parking> {
 
   /** GSON instance with a custom adapter for Point objects. */
-  private val gson = GsonBuilder().registerTypeAdapter(Point::class.java, PointAdapter()).create()
+  private val gson =
+      GsonBuilder()
+          .registerTypeAdapter(Point::class.java, PointAdapter())
+          .registerTypeAdapter(Location::class.java, LocationAdapter())
+          .create()
 
   /** Type token for a map of Strings to Objects. */
   private val serializedParkingType = object : TypeToken<Map<String, Any>>() {}.type
 
-  /**
-   * Serializes a Parking object to a JSON string. Used internally by Room when this class is
-   * declared as a TypeConverter.
-   *
-   * @param parking The Parking object to serialize.
-   * @return The serialized JSON string.
-   */
   @TypeConverter
-  fun serialize(parking: Parking): String {
-    return gson.toJson(parking)
+  fun serializeParkingCapacity(parkingCapacity: ParkingCapacity): Int {
+    return parkingCapacity.ordinal
   }
 
-  /**
-   * Deserializes a JSON string to a Parking object. Used internally by Room when this class is
-   * declared as a TypeConverter.
-   *
-   * @param data The JSON string to deserialize.
-   * @return The deserialized Parking object.
-   */
   @TypeConverter
-  fun deserialize(data: String): Parking {
-    return gson.fromJson(data, Parking::class.java)
+  fun deserializeParkingCapacity(ordinal: Int): ParkingCapacity {
+    return ParkingCapacity.entries[ordinal]
+  }
+
+  @TypeConverter
+  fun serializeParkingRackType(parkingRackType: ParkingRackType): Int {
+    return parkingRackType.ordinal
+  }
+
+  @TypeConverter
+  fun deserializeParkingRackType(ordinal: Int): ParkingRackType {
+    return ParkingRackType.entries[ordinal]
+  }
+
+  @TypeConverter
+  fun serializeParkingProtection(parkingProtection: ParkingProtection): Int {
+    return parkingProtection.ordinal
+  }
+
+  @TypeConverter
+  fun deserializeParkingProtection(ordinal: Int): ParkingProtection {
+    return ParkingProtection.entries[ordinal]
   }
 
   /**

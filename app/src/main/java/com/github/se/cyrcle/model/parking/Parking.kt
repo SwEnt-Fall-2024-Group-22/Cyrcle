@@ -1,6 +1,8 @@
 package com.github.se.cyrcle.model.parking
 
 import android.util.Log
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.github.se.cyrcle.ui.theme.molecules.DropDownableEnum
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.Polygon
@@ -22,8 +24,9 @@ import com.mapbox.turf.TurfMeasurement
  * @property nbReviews Number of Reviews for this Parking spot as of now.
  * @property avgScore Average Review Score for this Parking spot as of now.
  */
+@Entity(tableName = Parking.TABLE_NAME)
 data class Parking(
-    val uid: String,
+    @PrimaryKey val uid: String,
     val optName: String?,
     val optDescription: String?,
     val location: Location,
@@ -36,8 +39,13 @@ data class Parking(
     var nbReviews: Int = 0,
     var avgScore: Double = 0.0,
     var nbReports: Int = 0,
-    var nbMaxSeverityReports: Int = 0
-)
+    var nbMaxSeverityReports: Int = 0,
+    val tileUID: String = Tile.getUidForPoint(location.center)
+) {
+  companion object {
+    const val TABLE_NAME = "parkings"
+  }
+}
 
 data class ParkingReport(
     val uid: String = "",

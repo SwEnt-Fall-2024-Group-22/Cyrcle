@@ -6,17 +6,16 @@ class UnSupportedOperationException(message: String) : Exception(message)
 interface OfflineParkingRepository : ParkingRepository {
 
   /**
-   * Download the tiles
+   * Download the parkings
    *
-   * @param tiles the tiles to download
+   * @param parkings the parkings to download
    */
-  fun downloadTiles(tiles: Set<Tile>, onComplete: () -> Unit)
+  fun downloadParkings(parkings: Set<Parking>, onComplete: () -> Unit)
 
   /**
-   * Deletes the tiles from the local storage
+   * Deletes the parkings contained within the set of tiles from local storage
    *
    * @param tileIDs the IDs of the tiles to delete
-   * @return the tiles
    */
   fun deleteTiles(tileIDs: Set<String>, onComplete: () -> Unit)
 }

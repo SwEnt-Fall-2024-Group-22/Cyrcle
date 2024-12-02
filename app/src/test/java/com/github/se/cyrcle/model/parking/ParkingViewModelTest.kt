@@ -28,6 +28,7 @@ class ParkingViewModelTest {
 
   @Mock private lateinit var parkingViewModel: ParkingViewModel
   @Mock private lateinit var parkingRepository: ParkingRepository
+  @Mock private lateinit var offlineParkingRepository: OfflineParkingRepository
   @Mock private lateinit var imageRepository: ImageRepository
   @Mock private lateinit var reportedObjectRepository: ReportedObjectRepository
   @Mock private lateinit var context: Context
@@ -37,7 +38,8 @@ class ParkingViewModelTest {
     MockitoAnnotations.openMocks(this)
 
     parkingViewModel =
-        ParkingViewModel(imageRepository, parkingRepository, reportedObjectRepository)
+        ParkingViewModel(
+            imageRepository, parkingRepository, offlineParkingRepository, reportedObjectRepository)
   }
 
   @Test

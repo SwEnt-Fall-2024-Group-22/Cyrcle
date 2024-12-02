@@ -2,7 +2,7 @@ package com.github.se.cyrcle.di
 
 import android.content.Context
 import androidx.room.Room
-import com.github.se.cyrcle.model.parking.offline.TileDatabase
+import com.github.se.cyrcle.model.parking.offline.ParkingDatabase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestoreSettings
@@ -78,8 +78,8 @@ object AppModule {
    * Instantiates an instance of the TileDao with the correct settings for the whole lifetime of the
    * run.
    */
-  fun provideTileDatabase(@ApplicationContext context: Context): TileDatabase {
-    return Room.databaseBuilder(context, TileDatabase::class.java, TileDatabase.DB_NAME)
+  fun provideTileDatabase(@ApplicationContext context: Context): ParkingDatabase {
+    return Room.databaseBuilder(context, ParkingDatabase::class.java, ParkingDatabase.DB_NAME)
         .fallbackToDestructiveMigration()
         .build()
   }

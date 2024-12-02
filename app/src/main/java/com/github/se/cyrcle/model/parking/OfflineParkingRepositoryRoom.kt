@@ -1,30 +1,30 @@
 package com.github.se.cyrcle.model.parking
 
-import com.github.se.cyrcle.model.parking.offline.TileDao
-import com.github.se.cyrcle.model.parking.offline.TileDatabase
+import com.github.se.cyrcle.model.parking.offline.ParkingDao
+import com.github.se.cyrcle.model.parking.offline.ParkingDatabase
 import com.mapbox.geojson.Point
 import jakarta.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class OfflineParkingRepositoryRoom @Inject constructor(tileDatabase: TileDatabase) :
+class OfflineParkingRepositoryRoom @Inject constructor(parkingDatabase: ParkingDatabase) :
     OfflineParkingRepository {
 
-  private val tileManager: TileDao = tileDatabase.tileDao
+  private val parkingManager: ParkingDao = parkingDatabase.parkingDao
 
   private val coroutine = CoroutineScope(Dispatchers.IO)
 
-  override fun downloadTiles(tiles: Set<Tile>, onComplete: () -> Unit) {
+  override fun downloadParkings(parkings: Set<Parking>, onComplete: () -> Unit) {
     coroutine.launch {
-      tiles.forEach { tileManager.upsert(it) }
+      parkingManager.upsertAll(parkings)
       onComplete()
     }
   }
 
   override fun deleteTiles(tileIDs: Set<String>, onComplete: () -> Unit) {
     coroutine.launch {
-      tileIDs.forEach { tileManager.delete(it) }
+      parkingManager.deleteAllInTiles(tileIDs)
       onComplete()
     }
   }
@@ -43,7 +43,10 @@ class OfflineParkingRepositoryRoom @Inject constructor(tileDatabase: TileDatabas
       onSuccess: (Parking) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    TODO("Not yet implemented")
+    coroutine.launch {
+      parkingManager.getParking(id)?.let { onSuccess(it) }
+          ?: onFailure(Exception("Parking not found"))
+    }
   }
 
   override fun getParkingsBetween(
@@ -80,7 +83,10 @@ class OfflineParkingRepositoryRoom @Inject constructor(tileDatabase: TileDatabas
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    onFailure(UnSupportedOperationException("Delete parking by ID called on offline repository"))
+    coroutine.launch {
+      parkingManager.delete(id)
+      onSuccess()
+    }
   }
 
   override fun getParkingsByListOfIds(
@@ -88,7 +94,7 @@ class OfflineParkingRepositoryRoom @Inject constructor(tileDatabase: TileDatabas
       onSuccess: (List<Parking>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    TODO("Not yet implemented")
+    coroutine.launch { onSuccess(parkingManager.getParkingsByTileUIDs(ids)) }
   }
 
   override fun addReport(

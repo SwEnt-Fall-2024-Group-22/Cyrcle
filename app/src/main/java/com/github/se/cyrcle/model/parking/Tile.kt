@@ -1,8 +1,6 @@
 package com.github.se.cyrcle.model.parking
 
 import android.annotation.SuppressLint
-import androidx.room.Entity
-import androidx.room.PrimaryKey
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMeasurement
 import java.math.BigDecimal
@@ -13,25 +11,18 @@ import java.math.RoundingMode
  *
  * @param bottomLeft the bottom left corner of the tile
  * @param topRight the top right corner of the tile
- * @param parkings the parkings in the tile
  * @param uid the unique identifier of the tile
  */
-@Entity(tableName = Tile.TABLE_NAME)
 data class Tile(
     val bottomLeft: Point,
     val topRight: Point,
-    val parkings: MutableSet<Parking> = mutableSetOf(),
-    @PrimaryKey val uid: String = getUidForPoint(bottomLeft)
+    val uid: String = getUidForPoint(bottomLeft)
 ) {
   override fun toString(): String {
-    return "Tile(bottomLeft=${bottomLeft.longitude()},${bottomLeft.latitude()}, topRight=${topRight.longitude()},${topRight.latitude()})" +
-        "    with ${parkings.size} parkings"
+    return "Tile(bottomLeft=${bottomLeft.longitude()},${bottomLeft.latitude()}, topRight=${topRight.longitude()},${topRight.latitude()})"
   }
 
   companion object {
-
-    const val TABLE_NAME = "tiles"
-
     // Use inverse powers of 2 to avoid floating point errors
     private const val TILE_SIZE = 0.125
     private const val INV_TILE_SIZE = 8

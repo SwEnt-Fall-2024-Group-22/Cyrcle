@@ -94,10 +94,9 @@ class ParkingViewModel(
    * null when in the map screen.
    */
   private val _circleCenter = MutableStateFlow<Point?>(null)
-  // List of tiles to display
-  private var tilesToDisplay: Set<Tile> = emptySet()
+
   // Map a tile to the parkings that are in it.
-  private val tileCache = LinkedHashMap<String, Tile>(10, 1f, true)
+  private val tilesToParking = LinkedHashMap<Tile, List<Parking>>(10, 1f, true)
 
   /**
    * Generates a new unique identifier for a parking.
@@ -127,10 +126,8 @@ class ParkingViewModel(
     parkingRepository.addParking(
         parking,
         {
-          val tileID = Tile.getUidForPoint(parking.location.center)
-          val tile = tileCache[tileID] ?: Tile.getTileFromPoint(parking.location.center)
-          tile.parkings.add(parking)
-          tileCache[tileID] = tile
+          val tile = Tile.getTileFromPoint(parking.location.center)
+          tilesToParking[tile] = tilesToParking[tile]?.plus(parking) ?: listOf(parking)
         },
         { Log.e("ParkingViewModel", "Error adding parking", it) })
   }
@@ -190,36 +187,26 @@ class ParkingViewModel(
         Point.fromLngLat(
             maxOf(startPos.longitude(), endPos.longitude()),
             maxOf(startPos.latitude(), endPos.latitude()))
-
     // Get all tiles that are in the rectangle
-    tilesToDisplay = Tile.getAllTilesInRectangle(bottomLeft, topRight)
+    val tilesToDisplay = Tile.getAllTilesInRectangle(bottomLeft, topRight)
     // Used to keep track of when the last request has finished.
     var nbRequestLeft = tilesToDisplay.size
-
     tilesToDisplay.forEach { tile ->
-
-      // Get parkings from memory cache
-      if (tileCache.containsKey(tile.uid)) {
-        _rectParkings.value += tileCache[tile.uid]!!.parkings
+      if (tilesToParking.containsKey(tile)) {
+        _rectParkings.value += tilesToParking[tile]!!
         updateClosestParkings(--nbRequestLeft)
-
-        // Get parkings from repository
-      } else {
-        // Cache tile
-        tileCache[tile.uid] = tile
-        Log.d("ParkingViewModel", "Requesting parkings for tile ${tile.uid}")
-        parkingRepository.getParkingsBetween(
-            tile.bottomLeft,
-            tile.topRight,
-            { parkings ->
-              Log.d("ParkingViewModel", "For tile ${tile.uid}, got ${parkings.size} parkings")
-
-              tileCache[tile.uid]!!.parkings.addAll(parkings)
-              _rectParkings.value += parkings
-              updateClosestParkings(--nbRequestLeft)
-            },
-            { Log.e("ParkingViewModel", "-- Error getting parkings: $it") })
+        return@forEach // Skip to the next tile if already fetched
       }
+      tilesToParking[tile] = emptyList() // Avoid querying the same tile multiple times
+      parkingRepository.getParkingsBetween(
+          tile.bottomLeft,
+          tile.topRight,
+          { parkings ->
+            tilesToParking[tile] = parkings
+            _rectParkings.value += parkings
+            updateClosestParkings(--nbRequestLeft)
+          },
+          { Log.e("ParkingViewModel", "-- Error getting parkings: $it") })
     }
   }
 
