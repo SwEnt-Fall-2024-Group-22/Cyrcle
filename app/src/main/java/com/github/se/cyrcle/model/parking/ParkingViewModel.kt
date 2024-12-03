@@ -3,6 +3,7 @@ package com.github.se.cyrcle.model.parking
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.parking.offline.OfflineParkingRepository
 import com.github.se.cyrcle.model.parking.online.ParkingRepository
@@ -10,12 +11,17 @@ import com.github.se.cyrcle.model.report.ReportedObject
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.report.ReportedObjectType
 import com.github.se.cyrcle.model.user.User
+import com.github.se.cyrcle.model.zone.Zone
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 const val DEFAULT_RADIUS = 100.0
 const val MAX_RADIUS = 1000.0
@@ -185,12 +191,14 @@ class ParkingViewModel(
             maxOf(startPos.latitude(), endPos.latitude()))
     // Get all tiles that are in the rectangle
     val tilesToDisplay = TileUtils.getAllTilesInRectangle(bottomLeft, topRight)
+    var nbRequestLeft = tilesToDisplay.size
 
     tilesToDisplay.forEach { tile ->
 
       //  Cache hit
       if (tilesToParking.containsKey(tile)) {
         _rectParkings.value += tilesToParking[tile]!!
+        updateClosestParkings(--nbRequestLeft)
 
         // Cache miss
       } else {
@@ -198,14 +206,14 @@ class ParkingViewModel(
         parkingRepository.getParkingsForTile(
             tile,
             { parkings ->
+              Log.d("ParkingViewModel", "For tile ${tile}, got ${parkings.size} parkings")
               tilesToParking[tile] = parkings
               _rectParkings.value += parkings
+              updateClosestParkings(--nbRequestLeft)
             },
             { Log.e("ParkingViewModel", "-- Error getting parkings: $it") })
       }
     }
-
-    updateClosestParkings()
   }
 
   /**
@@ -390,7 +398,7 @@ class ParkingViewModel(
    *   the function will update the closest parkings and if the result is empty, it will increment
    *   the radius.
    */
-  private fun updateClosestParkings(nbRequestLeft: Int) {
+  private fun updateClosestParkings(nbRequestLeft: Int = 0) {
     if (_circleCenter.value == null || nbRequestLeft != 0) return // avoid updating if not ready
 
     // This coroutine will update the closest parkings when all the tiles have been fetched. Note
