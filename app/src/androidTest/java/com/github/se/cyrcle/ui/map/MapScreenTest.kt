@@ -3,6 +3,7 @@ package com.github.se.cyrcle.ui.map
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -198,6 +199,32 @@ class MapScreenTest {
     composeTestRule.onNodeWithTag("advancedModeSwitch").assertIsDisplayed()
     composeTestRule.onNodeWithTag("SettingsToZoneRow").assertIsDisplayed().performClick()
     verify(mockNavigation).navigateTo(Route.ZONE)
+  }
+
+  @Test
+  fun testFilterMenu() {
+    composeTestRule.setContent {
+      MapScreen(
+          mockNavigation,
+          parkingViewModel,
+          userViewModel,
+          mapViewModel,
+          permissionHandler,
+          addressViewModel)
+    }
+
+    composeTestRule
+        .onNodeWithTag("FilterButton")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+    composeTestRule.onNodeWithTag("FilterMenu").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag("FilterMenuClose")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+    composeTestRule.onNodeWithTag("FilterMenu").assertIsNotDisplayed()
   }
 
   /** Test that verify that the Search Bar works */

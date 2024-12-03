@@ -6,6 +6,8 @@ import com.github.se.cyrcle.model.report.ReportedObject
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.report.ReportedObjectType
 import com.mapbox.geojson.Point
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
@@ -65,7 +67,7 @@ class ParkingViewModelTest {
     parkingViewModel.getParkingsInRect(Point.fromLngLat(6.0, 46.0), Point.fromLngLat(6.05, 46.05))
 
     // Check if the parkings returned are the correct ones
-    val parkingsReturned = parkingViewModel.rectParkings.value
+    val parkingsReturned = runBlocking { parkingViewModel.filteredRectParkings.first() }
     assertEquals(2, parkingsReturned.size)
     assert(parkingsReturned.contains(TestInstancesParking.parking1))
     assert(parkingsReturned.contains(TestInstancesParking.parking2))
@@ -192,7 +194,7 @@ class ParkingViewModelTest {
   @Test
   fun uploadImageTest() {
     parkingViewModel.selectParking(TestInstancesParking.parking1)
-    parkingViewModel.uploadImage("localPath/image.jpg", context, {})
+    parkingViewModel.uploadImage("localPath/image.jpg", context) {}
     verify(imageRepository).uploadImage(any(), any(), any(), any(), any())
   }
 
@@ -201,7 +203,7 @@ class ParkingViewModelTest {
     // assert nothing is called when no parking is selected
     val emptyParkingViewModel =
         ParkingViewModel(imageRepository, parkingRepository, reportedObjectRepository)
-    emptyParkingViewModel.uploadImage("localPath/image.jpg", context, {})
+    emptyParkingViewModel.uploadImage("localPath/image.jpg", context) {}
     verify(imageRepository, never()).uploadImage(any(), any(), any(), any(), any())
   }
 

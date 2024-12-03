@@ -3,12 +3,11 @@ package com.github.se.cyrcle.ui.map
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,16 +16,19 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.CloudDownload
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.MyLocation
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,6 +40,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -51,7 +54,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -77,10 +79,10 @@ import com.github.se.cyrcle.ui.theme.atoms.IconButton
 import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.defaultOnColor
-import com.github.se.cyrcle.ui.theme.disabledColor
 import com.github.se.cyrcle.ui.theme.getOutlinedTextFieldColorsSearchBar
 import com.github.se.cyrcle.ui.theme.invertColor
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
+import com.github.se.cyrcle.ui.theme.molecules.FilterPanel
 import com.google.gson.Gson
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.geojson.Point
@@ -119,7 +121,6 @@ const val LAYER_ID_RECT = "0129"
 const val ADVANCED_MODE_ZOOM_THRESHOLD = 15.5
 const val CLUSTER_COLORS = "#1A4988"
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(
     navigationActions: NavigationActions,
@@ -132,7 +133,7 @@ fun MapScreen(
 ) {
 
   // Collect the list of parkings from the ParkingViewModel as a state
-  val listOfParkings by parkingViewModel.rectParkings.collectAsState()
+  val listOfParkings by parkingViewModel.filteredRectParkings.collectAsState(emptyList())
 
   // Create a remember state to store the search query of the search bar as a mutable state
   val searchQuery = remember { mutableStateOf("") }
@@ -171,6 +172,9 @@ fun MapScreen(
   // Mutable state to store the visibility of the settings menu
   val showSettings = remember { mutableStateOf(false) }
 
+  // Mutable state to store the visibility of the filter dialog
+  val showFilter = remember { mutableStateOf(false) }
+
   // Initialize FocusManager
   val focusManager = LocalFocusManager.current
 
@@ -192,10 +196,6 @@ fun MapScreen(
   val screenCapacityString = stringResource(R.string.map_screen_capacity)
   val bitmap = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.dot)
   val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 80, 80, false)
-  val alpha by
-      animateFloatAsState(
-          targetValue = if (zoomState.value > ADVANCED_MODE_ZOOM_THRESHOLD) 1f else 0f,
-          label = "zoomAlpha")
 
   // Draw markers on the map when the list of parkings changes
   LaunchedEffect(
@@ -445,8 +445,7 @@ fun MapScreen(
 
         // ======================= OVERLAY =======================
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
-          // A switch to change the display mode
-
+          // Center button if location is enabled
           if (locationEnabled) {
             IconButton(
                 icon = Icons.Default.MyLocation,
@@ -472,6 +471,7 @@ fun MapScreen(
                     else ColorLevel.PRIMARY)
           }
 
+          // Add button to add parking spots if the user is signed in
           if (enableParkingAddition) {
             IconButton(
                 icon = Icons.Default.Add,
@@ -488,53 +488,71 @@ fun MapScreen(
                 testTag = "addButton")
           }
 
-          OutlinedTextField(
-              value = searchQuery.value,
-              onValueChange = { searchQuery.value = it },
-              placeholder = { Text(text = stringResource(R.string.search_bar_placeholder)) },
-              modifier =
-                  Modifier.fillMaxWidth(0.9f)
-                      .padding(end = 30.dp, start = 5.dp, top = 5.dp)
-                      .align(Alignment.TopStart)
-                      .testTag("SearchBar"),
-              shape = RoundedCornerShape(16.dp),
-              colors = getOutlinedTextFieldColorsSearchBar(ColorLevel.PRIMARY),
-              trailingIcon = {
-                if (searchQuery.value.isNotEmpty()) {
-                  Icon(
-                      imageVector = Icons.Filled.Clear,
-                      contentDescription = "Clear search",
-                      tint = defaultOnColor(),
-                      modifier = Modifier.clickable { searchQuery.value = "" })
+          // Search bar and Settings button row
+          Row(
+              modifier = Modifier.fillMaxWidth().padding(5.dp).align(Alignment.TopStart),
+              verticalAlignment = Alignment.CenterVertically) {
+                // Search bar
+                OutlinedTextField(
+                    value = searchQuery.value,
+                    onValueChange = { searchQuery.value = it },
+                    placeholder = { Text(text = stringResource(R.string.search_bar_placeholder)) },
+                    modifier = Modifier.weight(1f).height(56.dp).testTag("SearchBar"),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = getOutlinedTextFieldColorsSearchBar(ColorLevel.PRIMARY),
+                    trailingIcon = {
+                      if (searchQuery.value.isNotEmpty()) {
+                        Icon(
+                            imageVector = Icons.Filled.Clear,
+                            contentDescription = "Clear search",
+                            tint = defaultOnColor(),
+                            modifier = Modifier.clickable { searchQuery.value = "" })
+                      }
+                    },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
+                    keyboardActions =
+                        KeyboardActions(
+                            onSearch = {
+                              virtualKeyboardManager?.hide()
+                              runBlocking { addressViewModel.search(searchQuery.value) }
+                              showSuggestions.value = true
+                            }))
+
+                // Filter button
+                Box(modifier = Modifier.size(56.dp).padding(start = 5.dp)) {
+                  SmallFloatingActionButton(
+                      modifier = Modifier.matchParentSize().testTag("FilterButton"),
+                      onClick = { showFilter.value = true },
+                      icon = Icons.Default.FilterList,
+                      contentDescription = "Filter")
                 }
-              },
-              singleLine = true,
-              keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
-              keyboardActions =
-                  KeyboardActions(
-                      onSearch = {
-                        virtualKeyboardManager?.hide()
 
-                        runBlocking { addressViewModel.search(searchQuery.value) }
-
-                        showSuggestions.value = true
-                      }))
-
-          SmallFloatingActionButton(
-              modifier =
-                  Modifier.align(Alignment.TopEnd)
-                      .padding(top = 5.dp, end = 5.dp)
-                      .testTag("SettingsMenuButton"),
-              onClick = {
-                if (showSettings.value) showSettings.value = false else showSettings.value = true
-              },
-              icon = Icons.Filled.Settings,
-              contentDescription = "Settings",
-          )
+                // Settings button
+                Box(modifier = Modifier.size(56.dp).padding(start = 5.dp)) {
+                  SmallFloatingActionButton(
+                      modifier =
+                          Modifier.matchParentSize() // Fill the parent Box
+                              .testTag("SettingsMenuButton"),
+                      onClick = { showSettings.value = true },
+                      icon = Icons.Filled.Settings,
+                      contentDescription = "Settings",
+                  )
+                }
+              }
         }
 
+        // Settings alert dialog is shown when the showSettings state is true, until the user
+        // dismisses it by clicking the close button or outside the dialog.
         if (showSettings.value) {
-          SettingsMenu(mapMode, mapViewModel, navigationActions)
+          SettingsDialog(
+              mapMode, mapViewModel, navigationActions, onDismiss = { showSettings.value = false })
+        }
+
+        // Filter dialog is shown when the showFilter state is true, until the user dismisses it by
+        // clicking the close button or outside the dialog.
+        if (showFilter.value) {
+          FilterDialog(parkingViewModel, onDismiss = { showFilter.value = false })
         }
 
         if (showSuggestions.value &&
@@ -626,69 +644,115 @@ fun SuggestionMenu(
 /**
  * Composable function to display the settings menu.
  *
- * @param mapMode The current map mode state.
+ * @param mapMode The state of the map mode.
  * @param mapViewModel The ViewModel for managing map-related data and actions.
  * @param navigationActions The actions to navigate to different screens.
+ * @param onDismiss The function to dismiss the dialog.
  */
 @Composable
-fun SettingsMenu(
+fun SettingsDialog(
     mapMode: State<MapViewModel.MapMode>,
     mapViewModel: MapViewModel,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    onDismiss: () -> Unit
 ) {
-  Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.TopEnd) {
-    Card(
-        modifier =
-            Modifier.width(300.dp).height(400.dp).align(Alignment.Center).testTag("SettingsMenu")) {
-          Column(
-              modifier = Modifier.padding(16.dp),
-              horizontalAlignment = Alignment.CenterHorizontally,
-          ) {
-            Text(
-                text = stringResource(R.string.settings),
-                style = MaterialTheme.typography.headlineMedium)
-            Spacer(modifier = Modifier.height(16.dp))
-            // Advanced Mode
-            Row(verticalAlignment = Alignment.CenterVertically) {
+  AlertDialog(
+      onDismissRequest = onDismiss,
+      title = {
+        Text(
+            text = stringResource(R.string.settings),
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.padding(bottom = 16.dp))
+      },
+      text = {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+          // Advanced Mode
+          Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            Box(modifier = Modifier.width(64.dp), contentAlignment = Alignment.CenterStart) {
               Switch(
-                  modifier = Modifier.padding(start = 8.dp).testTag("advancedModeSwitch"),
+                  modifier = Modifier.testTag("advancedModeSwitch"),
                   checked = mapMode.value.isAdvancedMode,
                   onCheckedChange = {
-                    val futurMapMode =
+                    val futureMapMode =
                         if (it) MapViewModel.MapMode.RECTANGLES else MapViewModel.MapMode.MARKERS
-                    mapViewModel.updateUserMapMode(futurMapMode)
-                    mapViewModel.updateMapMode(futurMapMode)
+                    mapViewModel.updateUserMapMode(futureMapMode)
+                    mapViewModel.updateMapMode(futureMapMode)
                   },
                   colors =
-                      SwitchDefaults.colors()
-                          .copy(
-                              uncheckedTrackColor = disabledColor(),
-                          ))
-              Spacer(modifier = Modifier.weight(1f))
-              Text(text = stringResource(R.string.map_screen_mode_switch_label))
+                      SwitchDefaults.colors(
+                          uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant))
             }
-            HorizontalDivider(
-                thickness = 1.dp,
-                modifier = Modifier.fillMaxWidth(0.9f).padding(16.dp),
-                color = MaterialTheme.colorScheme.onBackground)
-            // Offline Map Management
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier =
-                    Modifier.testTag("SettingsToZoneRow").clickable {
-                      navigationActions.navigateTo(Route.ZONE)
-                    }) {
-                  // Icon with offline world
+            Text(
+                text = stringResource(R.string.map_screen_mode_switch_label),
+                style = MaterialTheme.typography.bodyLarge)
+          }
+
+          HorizontalDivider(
+              thickness = 1.dp,
+              modifier = Modifier.fillMaxWidth(),
+              color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
+
+          // Offline Map Management
+          Row(
+              verticalAlignment = Alignment.CenterVertically,
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .clickable {
+                        navigationActions.navigateTo(Route.ZONE)
+                        onDismiss()
+                      }
+                      .testTag("SettingsToZoneRow")) {
+                Box(modifier = Modifier.width(64.dp), contentAlignment = Alignment.CenterStart) {
                   Icon(
                       imageVector = Icons.Filled.CloudDownload,
-                      contentDescription = "Search",
-                      tint = defaultOnColor(),
-                      modifier = Modifier.padding(start = 8.dp).size(40.dp))
-
-                  Spacer(Modifier.weight(1f))
-                  Text(text = stringResource(R.string.map_screen_settings_to_zone))
+                      contentDescription = "Offline Maps",
+                      tint = MaterialTheme.colorScheme.primary,
+                      modifier = Modifier.size(46.dp))
                 }
-          }
+                Text(
+                    text = stringResource(R.string.map_screen_settings_to_zone),
+                    style = MaterialTheme.typography.bodyLarge)
+              }
         }
-  }
+      },
+      confirmButton = { TextButton(onClick = onDismiss) { Text("Close") } },
+      containerColor = MaterialTheme.colorScheme.surface,
+      tonalElevation = 8.dp,
+      modifier = Modifier.testTag("SettingsMenu"),
+      shape = RoundedCornerShape(24.dp))
+}
+
+/**
+ * Composable function to display the filter dialog.
+ *
+ * @param parkingViewModel The ViewModel for managing parking-related data and actions.
+ * @param onDismiss The function to dismiss the dialog.
+ */
+@Composable
+fun FilterDialog(parkingViewModel: ParkingViewModel, onDismiss: () -> Unit) {
+  AlertDialog(
+      onDismissRequest = onDismiss,
+      title = {
+        Text(
+            text = stringResource(R.string.filter),
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.padding(bottom = 16.dp))
+      },
+      text = {
+        Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
+          FilterPanel(parkingViewModel, displayHeader = false)
+        }
+      },
+      confirmButton = {
+        TextButton(onClick = onDismiss, modifier = Modifier.testTag("FilterMenuClose")) {
+          Text(stringResource(R.string.close))
+        }
+      },
+      containerColor = MaterialTheme.colorScheme.surface,
+      tonalElevation = 8.dp,
+      modifier = Modifier.testTag("FilterMenu"),
+      shape = RoundedCornerShape(24.dp))
 }
