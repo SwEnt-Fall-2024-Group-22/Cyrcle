@@ -427,7 +427,8 @@ fun SearchBarListScreen(
             uniqueSuggestions.value =
                 listOfSuggestions.value.filter { suggestion ->
                   val displayName =
-                      suggestion.suggestionFormatDisplayName(maxSuggestionDisplayNameLengthList)
+                      suggestion.suggestionFormatDisplayName(
+                          maxSuggestionDisplayNameLengthList, "ListScreen")
                   if (displayName in seenNames) {
                     false
                   } else {
@@ -439,7 +440,9 @@ fun SearchBarListScreen(
             for (address in uniqueSuggestions.value.take(NumberOfSuggestionsForMenu)) {
               DropdownMenuItem(
                   text = {
-                    Text(address.suggestionFormatDisplayName(maxSuggestionDisplayNameLengthList))
+                    Text(
+                        address.suggestionFormatDisplayName(
+                            maxSuggestionDisplayNameLengthList, "ListScreen"))
                   },
                   onClick = {
                     chosenLocation.value = address
@@ -447,7 +450,8 @@ fun SearchBarListScreen(
                     myLocation.value = false
                     isTextFieldVisible.value = false
                     textFieldValue.value =
-                        address.suggestionFormatDisplayName(maxSuggestionDisplayNameLengthList)
+                        address.suggestionFormatDisplayName(
+                            maxSuggestionDisplayNameLengthList, "ListScreen")
                     focusManager.clearFocus()
                   })
             }

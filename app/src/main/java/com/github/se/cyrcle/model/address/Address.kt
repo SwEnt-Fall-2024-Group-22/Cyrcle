@@ -102,9 +102,20 @@ data class Address(
     return shortenString(string.substring(0, lastComma), length)
   }
 
-  /** Function that format the Address to display its suggestion name. */
-  fun suggestionFormatDisplayName(maxLength: Int): String {
-    val fieldPriorities = listOf(publicName, road, city, country)
+  /**
+   * Function that format the Address to display its suggestion name.
+   *
+   * @param maxLength the maximum length of the string
+   * @param mode the mode of the suggestion (MapScreen for the map, ListScreen for the list)
+   * @return the suggestion formatted display name
+   */
+  fun suggestionFormatDisplayName(maxLength: Int, mode: String): String {
+    val fieldPriorities: List<String>
+    if (mode == "ListScreen") {
+      fieldPriorities = listOf(publicName, road, city, country)
+    } else {
+      fieldPriorities = listOf(publicName, road, city, region, country)
+    }
     return shortenString(fieldPriorities.filter { it.isNotEmpty() }.joinToString(", "), maxLength)
   }
 }

@@ -120,7 +120,7 @@ const val LAYER_ID = "0128"
 const val LAYER_ID_RECT = "0129"
 const val ADVANCED_MODE_ZOOM_THRESHOLD = 15.5
 const val CLUSTER_COLORS = "#1A4988"
-const val maxSuggestionDisplayNameLengthMap = 70
+const val maxSuggestionDisplayNameLengthMap = 100
 
 @Composable
 fun MapScreen(
@@ -611,7 +611,8 @@ fun SuggestionMenu(
           uniqueSuggestions.value =
               listOfSuggestions.value.filter { suggestion ->
                 val displayName =
-                    suggestion.suggestionFormatDisplayName(maxSuggestionDisplayNameLengthMap)
+                    suggestion.suggestionFormatDisplayName(
+                        maxSuggestionDisplayNameLengthMap, "MapScreen")
                 if (displayName in seenNames) {
                   false
                 } else {
@@ -652,7 +653,8 @@ fun SuggestionMenu(
                 modifier = Modifier.fillMaxSize().testTag("suggestionCard${suggestion.city}")) {
                   Text(
                       text =
-                          suggestion.suggestionFormatDisplayName(maxSuggestionDisplayNameLengthMap),
+                          suggestion.suggestionFormatDisplayName(
+                              maxSuggestionDisplayNameLengthMap, "MapScreen"),
                       Modifier.padding(5.dp))
                 }
 
