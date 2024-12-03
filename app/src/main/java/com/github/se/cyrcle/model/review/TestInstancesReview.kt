@@ -10,8 +10,7 @@ object TestInstancesReview {
           text = "Great parking!",
           rating = 5.0,
           parking = "Test_spot_2",
-          reportingUsers = emptyList()
-      )
+          reportingUsers = emptyList())
   val review2 =
       Review(
           uid = "2",
@@ -28,7 +27,8 @@ object TestInstancesReview {
           text = "Bad Parking.",
           rating = 1.0,
           parking = "Test_spot_2",
-          time = Timestamp.now(), reportingUsers = emptyList())
+          time = Timestamp.now(),
+          reportingUsers = emptyList())
   val review4 =
       Review(
           uid = "4",
@@ -36,5 +36,6 @@ object TestInstancesReview {
           text = "New Review.",
           rating = 4.5,
           parking = "Test_spot_2",
-          time = Timestamp.now(), reportingUsers = emptyList())
+          time = Timestamp.now(),
+          reportingUsers = emptyList())
 }

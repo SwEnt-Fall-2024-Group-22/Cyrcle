@@ -37,7 +37,7 @@ data class Parking(
     val protection: ParkingProtection,
     val price: Double,
     val hasSecurity: Boolean,
-    val owner: User,
+    val owner: String,
     var reportingUsers: List<String>,
     var nbReviews: Int = 0,
     var avgScore: Double = 0.0,

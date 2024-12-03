@@ -296,7 +296,7 @@ fun AllReviewsScreen(
                                       {
                                         if (userSignedIn) {
                                           reviewViewModel.selectReview(curReview)
-                                            navigationActions.navigateTo(Screen.REVIEW_REPORT)
+                                          navigationActions.navigateTo(Screen.REVIEW_REPORT)
                                         } else {
                                           Toast.makeText(
                                                   context, signInToReport, Toast.LENGTH_SHORT)
