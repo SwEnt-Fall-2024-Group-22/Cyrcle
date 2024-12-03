@@ -5,6 +5,8 @@ import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
 import com.github.se.cyrcle.model.parking.Parking
+import com.github.se.cyrcle.model.parking.Tile
+import org.jetbrains.annotations.TestOnly
 
 /**
  * Data access object for parkings. It serves as an intermediary between the database and the
@@ -70,11 +72,29 @@ interface ParkingDao {
   suspend fun getParking(uid: String): Parking?
 
   /**
-   * Get a list of parkings belonging to the tiles
+   * Get a list of parkings
    *
-   * @param tileIDs the IDs of the queried tiles
-   * @return The parkings belonging to the tiles
+   * @param uids the queried parkings
+   * @return The queried parkings
    */
-  @Query("SELECT * FROM ${Parking.TABLE_NAME} WHERE tileUID IN (:tileIDs)")
-  suspend fun getParkingsByTileUIDs(tileIDs: List<String>): List<Parking>
+  @Query("SELECT * FROM ${Parking.TABLE_NAME} WHERE uid IN (:uids)")
+  suspend fun getParkings(uids: List<String>): List<Parking>
+
+  /**
+   * Get a list of parkings belonging to the tile
+   *
+   * @param tile the queried tile
+   * @return The parkings belonging to the tile
+   */
+  @Query("SELECT * FROM ${Parking.TABLE_NAME} WHERE tileUID = :tile")
+  suspend fun getParkingsInTile(tile: Tile): List<Parking>
+
+  /**
+   * Get all parkings Only to be used for testing!
+   *
+   * @return All parkings in the database
+   */
+  @TestOnly
+  @Query("SELECT * FROM ${Parking.TABLE_NAME}")
+  suspend fun getAllParkings(): List<Parking>
 }

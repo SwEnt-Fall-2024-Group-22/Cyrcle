@@ -1,4 +1,7 @@
-package com.github.se.cyrcle.model.parking
+package com.github.se.cyrcle.model.parking.offline
+
+import com.github.se.cyrcle.model.parking.Parking
+import com.github.se.cyrcle.model.parking.online.ParkingRepository
 
 class UnSupportedOperationException(message: String) : Exception(message)
 

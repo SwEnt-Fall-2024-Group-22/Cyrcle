@@ -1,4 +1,8 @@
-package com.github.se.cyrcle.model.parking
+package com.github.se.cyrcle.model.parking.online
+
+import com.github.se.cyrcle.model.parking.Parking
+import com.github.se.cyrcle.model.parking.ParkingReport
+import com.github.se.cyrcle.model.parking.Tile
 
 interface ParkingRepository {
   /**

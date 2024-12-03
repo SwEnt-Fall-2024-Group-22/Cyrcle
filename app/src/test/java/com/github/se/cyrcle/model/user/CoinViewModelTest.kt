@@ -2,7 +2,7 @@ package com.github.se.cyrcle.model.user
 
 import com.github.se.cyrcle.model.authentication.AuthenticationRepository
 import com.github.se.cyrcle.model.image.ImageRepository
-import com.github.se.cyrcle.model.parking.ParkingRepository
+import com.github.se.cyrcle.model.parking.online.ParkingRepository
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test

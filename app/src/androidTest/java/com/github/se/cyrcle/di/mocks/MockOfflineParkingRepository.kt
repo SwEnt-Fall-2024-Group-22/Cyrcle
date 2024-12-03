@@ -1,11 +1,11 @@
 package com.github.se.cyrcle.di.mocks
 
-import com.github.se.cyrcle.model.parking.OfflineParkingRepository
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingReport
 import com.github.se.cyrcle.model.parking.ParkingReportReason
 import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.model.parking.Tile
+import com.github.se.cyrcle.model.parking.offline.OfflineParkingRepository
 import javax.inject.Inject
 
 class MockOfflineParkingRepository @Inject constructor() : OfflineParkingRepository {

@@ -1,7 +1,8 @@
-package com.github.se.cyrcle.model.parking
+package com.github.se.cyrcle.model.parking.offline
 
-import com.github.se.cyrcle.model.parking.offline.ParkingDao
-import com.github.se.cyrcle.model.parking.offline.ParkingDatabase
+import com.github.se.cyrcle.model.parking.Parking
+import com.github.se.cyrcle.model.parking.ParkingReport
+import com.github.se.cyrcle.model.parking.Tile
 import jakarta.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -53,7 +54,7 @@ class OfflineParkingRepositoryRoom @Inject constructor(parkingDatabase: ParkingD
       onSuccess: (List<Parking>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    coroutine.launch { onSuccess(parkingManager.getParkingsByTileUIDs(listOf(tile))) }
+    coroutine.launch { onSuccess(parkingManager.getParkingsInTile(tile)) }
   }
 
   override fun addParking(parking: Parking, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
@@ -92,7 +93,7 @@ class OfflineParkingRepositoryRoom @Inject constructor(parkingDatabase: ParkingD
       onSuccess: (List<Parking>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    coroutine.launch { onSuccess(parkingManager.getParkingsByTileUIDs(ids)) }
+    coroutine.launch { onSuccess(parkingManager.getParkings(ids)) }
   }
 
   override fun addReport(

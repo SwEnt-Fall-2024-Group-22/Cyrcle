@@ -2,6 +2,8 @@ package com.github.se.cyrcle.model.parking
 
 import android.content.Context
 import com.github.se.cyrcle.model.image.ImageRepository
+import com.github.se.cyrcle.model.parking.offline.OfflineParkingRepository
+import com.github.se.cyrcle.model.parking.online.ParkingRepository
 import com.github.se.cyrcle.model.report.ReportedObject
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.report.ReportedObjectType
