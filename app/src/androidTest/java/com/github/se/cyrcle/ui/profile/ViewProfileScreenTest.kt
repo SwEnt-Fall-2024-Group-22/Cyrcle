@@ -366,7 +366,7 @@ class ViewProfileScreenTest {
             ParkingProtection.COVERED,
             0.0,
             true,
-            owner = TestInstancesUser.user1,
+            owner = TestInstancesUser.user1.public.userId,
             reportingUsers = emptyList())
 
     parkingViewModel.addParking(parking4)
