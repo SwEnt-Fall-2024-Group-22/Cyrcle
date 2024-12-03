@@ -14,13 +14,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.ThumbDown
 import androidx.compose.material.icons.outlined.ThumbUp
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
@@ -28,6 +32,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -38,13 +43,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.review.Review
@@ -312,6 +320,96 @@ fun AllReviewsScreen(
 }
 
 @Composable
+fun ReviewerProfilePopup(
+    reviewerId: String,
+    userViewModel: UserViewModel,
+    onDismissRequest: () -> Unit
+) {
+
+    val username = remember { mutableStateOf("") }
+    val firstName = remember { mutableStateOf("") }
+    val lastName = remember { mutableStateOf("") }
+    val profilePicturePath = remember { mutableStateOf<String?>(null) }
+    val walletBalance = remember { mutableStateOf(0) }
+
+    LaunchedEffect(reviewerId) {
+        userViewModel.getUserById(
+            reviewerId,
+            onSuccess = { user ->
+                username.value = user.public.username
+                firstName.value = user.details!!.firstName
+                lastName.value = user.details.lastName
+                profilePicturePath.value = user.public.profilePictureCloudPath
+                walletBalance.value = user.details.wallet.getCoins()
+            },
+            onFailure = {
+                username.value = ""
+            }
+        )
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = {
+            Text(
+                text = username.value,
+                style = MaterialTheme.typography.titleMedium
+            )
+        },
+        text = {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                // Profile picture
+                if (profilePicturePath.value != null && profilePicturePath.value!!.isNotBlank()) {
+                    AsyncImage(
+                        model = profilePicturePath.value,
+                        contentDescription = "",
+                        modifier = Modifier
+                            .size(64.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primaryContainer),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "",
+                        modifier = Modifier
+                            .size(64.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primaryContainer)
+                            .padding(8.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Full name
+                Text(
+                    text = "${firstName.value} ${lastName.value}".trim(),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Wallet balance
+                Text(
+                    text = "",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text(text = stringResource(R.string.close))
+            }
+        },
+        modifier = Modifier.testTag("ReviewerProfilePopup")
+    )
+}
+
+
+@Composable
 fun ReviewCard(
     review: Review,
     index: Int,
@@ -321,110 +419,142 @@ fun ReviewCard(
     userViewModel: UserViewModel,
     reviewViewModel: ReviewViewModel
 ) {
-  val currentUser by userViewModel.currentUser.collectAsState()
-  val userSignedIn by userViewModel.isSignedIn.collectAsState(false)
+    val currentUser by userViewModel.currentUser.collectAsState()
+    val userSignedIn by userViewModel.isSignedIn.collectAsState(false)
+    var showProfilePopup by remember { mutableStateOf(false) }
 
-  Card(
-      modifier =
-          Modifier.fillMaxWidth()
-              .padding(8.dp)
-              .clickable(onClick = onCardClick)
-              .testTag("ReviewCard$index"),
-      colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-      shape = MaterialTheme.shapes.medium,
-      elevation = CardDefaults.cardElevation(4.dp)) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .clickable(onClick = onCardClick)
+            .testTag("ReviewCard$index"),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = MaterialTheme.shapes.medium,
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
         Box(modifier = Modifier.fillMaxSize()) {
-          Column(
-              modifier =
-                  Modifier.fillMaxWidth()
-                      .padding(horizontal = 16.dp, vertical = 8.dp)
-                      .testTag("ReviewCardContent$index")) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .testTag("ReviewCardContent$index")
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically) {
-                      val defaultUsername = stringResource(R.string.undefined_username)
-                      val ownerUsername = remember { mutableStateOf(defaultUsername) }
-                      userViewModel.getUserById(
-                          review.owner, onSuccess = { ownerUsername.value = it.public.username })
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val defaultUsername = stringResource(R.string.undefined_username)
+                    val ownerUsername = remember { mutableStateOf(defaultUsername) }
+                    userViewModel.getUserById(
+                        review.owner,
+                        onSuccess = { ownerUsername.value = it.public.username }
+                    )
 
-                      androidx.compose.material3.Text(
-                          text = stringResource(R.string.by_text).format(ownerUsername.value),
-                          style = MaterialTheme.typography.bodySmall,
-                          modifier = Modifier.weight(1f).testTag("ReviewOwner$index"),
-                          maxLines = 1,
-                          overflow = TextOverflow.Ellipsis)
+                    androidx.compose.material3.Text(
+                        text = stringResource(R.string.by_text).format(ownerUsername.value),
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable(
+                                onClickLabel = "",
+                                onClick = { showProfilePopup = true }
+                            )
+                            .testTag("ReviewOwner$index"),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.primary
+                    )
 
-                      // Icon buttons for like, dislike, and more options
-                      Row(
-                          horizontalArrangement = Arrangement.spacedBy(4.dp),
-                          modifier = Modifier.testTag("ReviewActions$index")) {
-                            val currentUserHasLiked =
-                                currentUser?.public?.userId?.let { review.likedBy.contains(it) }
-                                    ?: false
-                            val currentUserHasDisliked =
-                                currentUser?.public?.userId?.let { review.dislikedBy.contains(it) }
-                                    ?: false
-
-                            // Like button and count
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                              IconButton(
-                                  onClick = {
-                                    if (userSignedIn) {
-                                      currentUser?.public?.let {
-                                        reviewViewModel.handleInteraction(review, it.userId, true)
-                                      }
-                                    }
-                                  },
-                                  modifier = Modifier.testTag("LikeButton$index"),
-                                  enabled = userSignedIn) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.ThumbUp,
-                                        contentDescription = "Like",
-                                        tint =
-                                            if (currentUserHasLiked)
-                                                MaterialTheme.colorScheme.primary
-                                            else Black)
-                                  }
-                              Text(
-                                  text = review.likedBy.size.toString(),
-                                  style = MaterialTheme.typography.bodySmall,
-                                  color =
-                                      if (currentUserHasLiked) MaterialTheme.colorScheme.primary
-                                      else Black,
-                                  testTag = "LikeCount$index")
-                            }
-                            // Dislike button and count
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                              IconButton(
-                                  onClick = {
-                                    if (userSignedIn) {
-                                      reviewViewModel.handleInteraction(
-                                          review, currentUser?.public?.userId ?: "", false)
-                                    }
-                                  },
-                                  modifier = Modifier.testTag("DislikeButton$index"),
-                                  enabled = userSignedIn) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.ThumbDown,
-                                        contentDescription = "Dislike",
-                                        tint =
-                                            if (currentUserHasDisliked)
-                                                MaterialTheme.colorScheme.primary
-                                            else Black)
-                                  }
-                              Text(
-                                  text = review.dislikedBy.size.toString(),
-                                  style = MaterialTheme.typography.bodySmall,
-                                  color =
-                                      if (currentUserHasDisliked) MaterialTheme.colorScheme.primary
-                                      else Black,
-                                  testTag = "DislikeCount$index")
-                            }
-
-                            OptionsMenu(options = options, testTag = "MoreOptions$index")
-                          }
+                    if (showProfilePopup) {
+                        ReviewerProfilePopup(
+                            reviewerId = review.owner,
+                            userViewModel,
+                            onDismissRequest = { showProfilePopup = false }
+                        )
                     }
+
+                    // Icon buttons for like, dislike, and more options
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.testTag("ReviewActions$index")
+                    ) {
+                        val currentUserHasLiked =
+                            currentUser?.public?.userId?.let { review.likedBy.contains(it) }
+                                ?: false
+                        val currentUserHasDisliked =
+                            currentUser?.public?.userId?.let { review.dislikedBy.contains(it) }
+                                ?: false
+
+                        // Like button and count
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            IconButton(
+                                onClick = {
+                                    if (userSignedIn) {
+                                        currentUser?.public?.let {
+                                            reviewViewModel.handleInteraction(
+                                                review, it.userId, true
+                                            )
+                                        }
+                                    }
+                                },
+                                modifier = Modifier.testTag("LikeButton$index"),
+                                enabled = userSignedIn
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.ThumbUp,
+                                    contentDescription = "Like",
+                                    tint =
+                                    if (currentUserHasLiked)
+                                        MaterialTheme.colorScheme.primary
+                                    else Black
+                                )
+                            }
+                            Text(
+                                text = review.likedBy.size.toString(),
+                                style = MaterialTheme.typography.bodySmall,
+                                color =
+                                if (currentUserHasLiked) MaterialTheme.colorScheme.primary
+                                else Black,
+                                testTag = "LikeCount$index"
+                            )
+                        }
+                        // Dislike button and count
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            IconButton(
+                                onClick = {
+                                    if (userSignedIn) {
+                                        reviewViewModel.handleInteraction(
+                                            review, currentUser?.public?.userId ?: "", false
+                                        )
+                                    }
+                                },
+                                modifier = Modifier.testTag("DislikeButton$index"),
+                                enabled = userSignedIn
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.ThumbDown,
+                                    contentDescription = "Dislike",
+                                    tint =
+                                    if (currentUserHasDisliked)
+                                        MaterialTheme.colorScheme.primary
+                                    else Black
+                                )
+                            }
+                            Text(
+                                text = review.dislikedBy.size.toString(),
+                                style = MaterialTheme.typography.bodySmall,
+                                color =
+                                if (currentUserHasDisliked) MaterialTheme.colorScheme.primary
+                                else Black,
+                                testTag = "DislikeCount$index"
+                            )
+                        }
+
+                        OptionsMenu(options = options, testTag = "MoreOptions$index")
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(2.dp))
                 ScoreStars(
@@ -440,11 +570,13 @@ fun ReviewCard(
                     textAlign = TextAlign.Justify,
                     maxLines = if (isExpanded) Int.MAX_VALUE else 2,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.testTag("ReviewText$index"))
-              }
+                    modifier = Modifier.testTag("ReviewText$index")
+                )
+            }
         }
-      }
+    }
 }
+
 
 fun Timestamp?.toFormattedDate(): String {
   return if (this != null) {
