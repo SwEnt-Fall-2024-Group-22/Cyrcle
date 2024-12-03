@@ -211,12 +211,15 @@ class ReviewViewModel(
       if (_selectedReview.value?.reportingUsers?.contains(user.public.userId) == true) {
           _hasAlreadyReported.value = true
           return
+      } else {
+          _hasAlreadyReported.value = false
       }
 
 
     reviewRepository.addReport(
         report,
         onSuccess = {
+          addReportingUser(user)
           val newReportedObject =
               ReportedObject(
                   objectUID = selectedReview.uid,
@@ -281,6 +284,16 @@ class ReviewViewModel(
     reviewRepository.updateReview(selectedReview, {}, {})
     Log.d("ReviewViewModel", "Review and metrics updated successfully: ${selectedReview.nbReports}")
   }
+
+    private fun addReportingUser(user: User) {
+        val selectedReview = _selectedReview.value
+        if (selectedReview != null) {
+            val updatedReview =
+                selectedReview.copy(reportingUsers = selectedReview.reportingUsers + user.public.userId)
+            _selectedReview.value = updatedReview
+            reviewRepository.updateReview(review = updatedReview, {}, {})
+        }
+    }
 
   /**
    * Reset the selectedReview This is to prevent old review from being shown while the new spots

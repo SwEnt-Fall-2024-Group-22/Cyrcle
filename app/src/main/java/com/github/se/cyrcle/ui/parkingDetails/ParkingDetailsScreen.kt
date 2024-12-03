@@ -466,12 +466,8 @@ fun ParkingDetailsScreen(
                       Button(
                           text = stringResource(R.string.card_screen_report),
                           onClick = {
-                              if (parkingViewModel.hasAlreadyReported.value) {
-                                  Toast.makeText(context, "YOU HAVE ALREADY REPORTED", Toast.LENGTH_SHORT).show()
-                              } else {
                                   navigationActions.navigateTo(Screen.PARKING_REPORT)
-                              }
-                                    },
+                          },
                           modifier = Modifier.fillMaxWidth(),
                           colorLevel = ColorLevel.ERROR,
                           testTag = "ReportButton")

@@ -296,11 +296,7 @@ fun AllReviewsScreen(
                                       {
                                         if (userSignedIn) {
                                           reviewViewModel.selectReview(curReview)
-                                            if (reviewViewModel.hasAlreadyReported.value) {
-                                                Toast.makeText(context, "YOU HAVE ALREADY REPORTED", Toast.LENGTH_SHORT).show()
-                                            } else {
-                                                navigationActions.navigateTo(Screen.REVIEW_REPORT)
-                                            }
+                                            navigationActions.navigateTo(Screen.REVIEW_REPORT)
                                         } else {
                                           Toast.makeText(
                                                   context, signInToReport, Toast.LENGTH_SHORT)
