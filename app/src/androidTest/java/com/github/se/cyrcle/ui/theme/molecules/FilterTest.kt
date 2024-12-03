@@ -15,15 +15,16 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockImageRepository
+import com.github.se.cyrcle.di.mocks.MockOfflineParkingRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.parking.ParkingCapacity
 import com.github.se.cyrcle.model.parking.ParkingProtection
 import com.github.se.cyrcle.model.parking.ParkingRackType
-import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
+import com.github.se.cyrcle.model.parking.online.ParkingRepository
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import org.junit.Before
 import org.junit.Rule
@@ -36,6 +37,7 @@ class FilterTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var mockParkingRepository: ParkingRepository
+  private lateinit var mockOfflineParkingRepository: MockOfflineParkingRepository
   private lateinit var mockImageRepository: ImageRepository
   private lateinit var mockReportedObjectRepository: ReportedObjectRepository
   private lateinit var parkingViewModel: ParkingViewModel
@@ -44,11 +46,16 @@ class FilterTest {
   fun setUp() {
     MockitoAnnotations.openMocks(this)
     mockParkingRepository = MockParkingRepository()
+    mockOfflineParkingRepository = MockOfflineParkingRepository()
     mockImageRepository = MockImageRepository()
     mockReportedObjectRepository = MockReportedObjectRepository()
 
     parkingViewModel =
-        ParkingViewModel(mockImageRepository, mockParkingRepository, mockReportedObjectRepository)
+        ParkingViewModel(
+            mockImageRepository,
+            mockParkingRepository,
+            mockOfflineParkingRepository,
+            mockReportedObjectRepository)
 
     parkingViewModel.addParking(TestInstancesParking.parking2)
     parkingViewModel.addParking(TestInstancesParking.parking3)

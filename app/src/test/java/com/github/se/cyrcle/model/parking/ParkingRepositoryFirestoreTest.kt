@@ -173,14 +173,17 @@ class ParkingRepositoryFirestoreTest {
   fun getParkingsForTile_callsOnSuccess() {
     `when`(mockQueryDocumentSnapshot.data).thenReturn(mockParkingData)
     `when`(mockQueryDocumentSnapshot.id).thenReturn(parking.uid)
-    `when`(mockCollectionReference.whereEqualTo(any<String>(), any()))
+    `when`(mockCollectionReference.whereGreaterThan(any<String>(), any()))
+        .thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.whereLessThanOrEqualTo(any<String>(), any()))
         .thenReturn(mockCollectionReference)
     `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockParkingQuerySnapshot))
     `when`(mockParkingQuerySnapshot.documents).thenReturn(listOf(mockQueryDocumentSnapshot))
 
     var onSuccessCallbackCalled = false
     // Spy on the parkingRepositoryFirestore to verify deserializeParking call
-    parkingRepositoryFirestore.getParkingsForTile(
+    val spyParkingRepositoryFirestore = spy(parkingRepositoryFirestore)
+    spyParkingRepositoryFirestore.getParkingsForTile(
         testTile,
         onSuccess = { parkings ->
           assertEquals(1, parkings.size)

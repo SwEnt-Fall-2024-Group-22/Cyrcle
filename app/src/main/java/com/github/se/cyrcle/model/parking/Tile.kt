@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.model.parking
 
+import android.util.Log
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMeasurement
 import java.math.BigDecimal
@@ -86,5 +87,53 @@ object TileUtils {
     return Pair(
         Point.fromLngLat(westPoint.longitude(), southPoint.latitude()),
         Point.fromLngLat(eastPoint.longitude(), northPoint.latitude()))
+  }
+
+  /**
+   * Returns the bottom left point of the tile
+   *
+   * @param tile the tile to get the bottom left point from
+   * @return the bottom left point of the tile
+   */
+  fun getBottomLeftPoint(tile: Tile): Point? {
+    val split = tile.split("_")
+    val point =
+        if (split.size == 2)
+            try {
+              val x = split[0].toDouble()
+              val y = split[1].toDouble()
+              Point.fromLngLat(x, y)
+            } catch (_: NumberFormatException) {
+              null
+            }
+        else null
+
+    if (point == null) Log.e("TileUtils", "Invalid tile: $tile")
+
+    return point
+  }
+
+  /**
+   * Returns the top right point of the tile
+   *
+   * @param tile the tile to get the top right point from
+   * @return the top right point of the tile
+   */
+  fun getTopRightPoint(tile: Tile): Point? {
+    val split = tile.split("_")
+    val point =
+        if (split.size == 2)
+            try {
+              val x = split[0].toDouble() + TILE_SIZE
+              val y = split[1].toDouble() + TILE_SIZE
+              Point.fromLngLat(x, y)
+            } catch (_: NumberFormatException) {
+              null
+            }
+        else null
+
+    if (point == null) Log.e("TileUtils", "Invalid tile: $tile")
+
+    return point
   }
 }

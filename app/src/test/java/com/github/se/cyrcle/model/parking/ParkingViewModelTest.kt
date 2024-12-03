@@ -259,7 +259,8 @@ class ParkingViewModelTest {
   fun uploadImageWithoutParkingSelectedTest() {
     // assert nothing is called when no parking is selected
     val emptyParkingViewModel =
-        ParkingViewModel(imageRepository, parkingRepository, offlineParkingRepository, reportedObjectRepository)
+        ParkingViewModel(
+            imageRepository, parkingRepository, offlineParkingRepository, reportedObjectRepository)
     emptyParkingViewModel.uploadImage("localPath/image.jpg", context) {}
     verify(imageRepository, never()).uploadImage(any(), any(), any(), any(), any())
   }

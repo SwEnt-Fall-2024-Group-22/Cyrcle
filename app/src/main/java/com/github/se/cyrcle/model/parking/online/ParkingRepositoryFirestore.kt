@@ -5,6 +5,7 @@ import com.github.se.cyrcle.io.serializer.ParkingAdapter
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingReport
 import com.github.se.cyrcle.model.parking.Tile
+import com.github.se.cyrcle.model.parking.TileUtils
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.CollectionReference
@@ -75,8 +76,23 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
       onSuccess: (List<Parking>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
+    // Get the bottom left and top right points of the tile
+    // This is a temporary solution for the time that `Parking.tile` gets added on Firestore
+    val start = TileUtils.getBottomLeftPoint(tile)
+    val end = TileUtils.getTopRightPoint(tile)
+    if (start == null || end == null) {
+      onFailure(Exception("Invalid tile"))
+      return
+    }
+    if (start.latitude() > end.latitude() || start.longitude() > end.longitude()) {
+      onFailure(Exception("Invalid range"))
+      return
+    }
     db.collection(collectionPath)
-        .whereEqualTo("tile", tile)
+        .whereGreaterThan("location.center.latitude", start.latitude())
+        .whereLessThanOrEqualTo("location.center.latitude", end.latitude())
+        .whereGreaterThan("location.center.longitude", start.longitude())
+        .whereLessThanOrEqualTo("location.center.longitude", end.longitude())
         .get()
         .addOnSuccessListener { querySnapshot ->
           val parkings =
@@ -85,7 +101,7 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
               }
           onSuccess(parkings)
         }
-        .addOnFailureListener(onFailure)
+        .addOnFailureListener { e -> onFailure(e) }
   }
 
   override fun addParking(parking: Parking, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
