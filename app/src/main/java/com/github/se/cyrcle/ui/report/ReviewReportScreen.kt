@@ -79,9 +79,14 @@ fun ReviewReportScreen(
             review = reviewId!!,
             description = reportDescription.value)
     reviewViewModel.addReport(report, userViewModel.currentUser.value!!)
+    if(reviewViewModel.hasAlreadyReported.value){
+        Toast.makeText(context, "You Have Already Reported This Review", Toast.LENGTH_SHORT).show()
+        navigationActions.goBack()
+    }
     Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
     navigationActions.goBack()
   }
+
 
   Scaffold(
       modifier = Modifier.testTag("ReviewReportScreen"),

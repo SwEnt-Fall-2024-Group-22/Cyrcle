@@ -450,9 +450,13 @@ class ParkingViewModel(
       return
     }
 
+      Log.d("AAAAAAAAAAAAAAAAAA", "${_selectedParking.value?.reportingUsers}")
+
     if (_selectedParking.value?.reportingUsers?.contains(user.public.userId) == true) {
-      _hasAlreadyReported.value = true
-      return
+        _hasAlreadyReported.value = true
+        return
+    } else {
+        _hasAlreadyReported.value = false
     }
 
     Log.d(
@@ -522,7 +526,7 @@ class ParkingViewModel(
   }
 
   private fun addReportingUser(user: User) {
-    val selectedParking = _selectedParking.value
+    val selectedParking = selectedParking.value
     if (selectedParking != null) {
       val updatedParking =
           selectedParking.copy(reportingUsers = selectedParking.reportingUsers + user.public.userId)
