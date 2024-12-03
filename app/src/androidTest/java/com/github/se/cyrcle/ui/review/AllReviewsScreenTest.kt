@@ -11,6 +11,7 @@ import com.github.se.cyrcle.di.mocks.MockReviewRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
+import com.github.se.cyrcle.model.review.Review
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.review.TestInstancesReview
 import com.github.se.cyrcle.model.user.TestInstancesUser
@@ -64,6 +65,31 @@ class AllReviewsScreenTest {
     reviewViewModel.addReview(TestInstancesReview.review2)
     reviewViewModel.addReview(TestInstancesReview.review1)
     parkingViewModel.selectParking(TestInstancesParking.parking2)
+  }
+
+  // needs changes.
+  // rn it's assertExists because im not handling edge cases where
+  // somehow the user of a review has no information or doesnt exist
+  @Test
+  fun reviewerProfile_clickOwnerName_showsProfilePopup() {
+    // Set up
+    composeTestRule.setContent {
+      AllReviewsScreen(navigationActions, parkingViewModel, reviewViewModel, userViewModel)
+    }
+    userViewModel.setCurrentUser(TestInstancesUser.user1)
+
+    composeTestRule.onNodeWithTag("ReviewOwner0").performClick()
+
+    composeTestRule.onNodeWithTag("ReviewerProfilePopup").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("ReviewerUsername").assertExists()
+    composeTestRule.onNodeWithTag("ReviewerFullName").assertExists()
+    composeTestRule.onNodeWithTag("ReviewerWallet").assertExists()
+    composeTestRule.onNodeWithTag("ReviewerDefaultProfilePicture").assertExists()
+    composeTestRule.onNodeWithTag("ReviewerProfilePicture").assertDoesNotExist()
+    composeTestRule.onNodeWithTag("CloseReviewerProfilePopupText",
+      useUnmergedTree = true).assertTextEquals("Close")
+    composeTestRule.onNodeWithTag("CloseReviewerProfilePopupButton").performClick()
+    composeTestRule.onNodeWithTag("ReviewerProfilePopup").assertDoesNotExist()
   }
 
   @Test

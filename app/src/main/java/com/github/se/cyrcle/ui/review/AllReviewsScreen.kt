@@ -337,10 +337,10 @@ fun ReviewerProfilePopup(
             reviewerId,
             onSuccess = { user ->
                 username.value = user.public.username
-                firstName.value = user.details!!.firstName
-                lastName.value = user.details.lastName
+                firstName.value = user.details?.firstName ?: ""
+                lastName.value = user.details?.lastName ?: ""
                 profilePicturePath.value = user.public.profilePictureCloudPath
-                walletBalance.value = user.details.wallet.getCoins()
+                walletBalance.value = user.details?.wallet?.getCoins() ?: 0
             },
             onFailure = {
                 username.value = ""
@@ -353,7 +353,8 @@ fun ReviewerProfilePopup(
         title = {
             Text(
                 text = username.value,
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.testTag("ReviewerUsername")
             )
         },
         text = {
@@ -366,7 +367,7 @@ fun ReviewerProfilePopup(
                         modifier = Modifier
                             .size(64.dp)
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primaryContainer),
+                            .background(MaterialTheme.colorScheme.primaryContainer).testTag("ReviewerProfilePicture"),
                         contentScale = ContentScale.Crop
                     )
                 } else {
@@ -377,7 +378,7 @@ fun ReviewerProfilePopup(
                             .size(64.dp)
                             .clip(CircleShape)
                             .background(MaterialTheme.colorScheme.primaryContainer)
-                            .padding(8.dp)
+                            .padding(8.dp).testTag("ReviewerDefaultProfilePicture")
                     )
                 }
 
@@ -386,22 +387,25 @@ fun ReviewerProfilePopup(
                 // Full name
                 Text(
                     text = "${firstName.value} ${lastName.value}".trim(),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.testTag("ReviewerFullName")
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
                 // Wallet balance
                 Text(
-                    text = "",
+                    text = "${walletBalance.value} coins",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.secondary
+                    color = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.testTag("ReviewerWallet")
                 )
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismissRequest) {
-                Text(text = stringResource(R.string.close))
+            TextButton(onClick = onDismissRequest, modifier = Modifier.testTag("CloseReviewerProfilePopupButton")) {
+                Text(text = stringResource(R.string.close),
+                    modifier = Modifier.testTag("CloseReviewerProfilePopupText"))
             }
         },
         modifier = Modifier.testTag("ReviewerProfilePopup")
@@ -458,8 +462,10 @@ fun ReviewCard(
                         modifier = Modifier
                             .weight(1f)
                             .clickable(
+                                enabled = (currentUser?.public?.userId ?: "") != review.owner,
                                 onClickLabel = "",
-                                onClick = { showProfilePopup = true }
+                                onClick = {
+                                    showProfilePopup = true }
                             )
                             .testTag("ReviewOwner$index"),
                         maxLines = 1,
