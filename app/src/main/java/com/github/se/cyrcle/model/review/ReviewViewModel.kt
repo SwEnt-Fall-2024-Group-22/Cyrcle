@@ -207,6 +207,11 @@ class ReviewViewModel(
       return
     }
 
+      Log.d(
+          "ReviewViewModel",
+          "Reports: ${selectedReview.nbReports}, MaxSeverityReports: ${selectedReview.nbMaxSeverityReports}")
+
+
     if (selectedReview.reportingUsers.contains(user.public.userId)) {
       _hasAlreadyReported.value = true
       return
@@ -214,11 +219,12 @@ class ReviewViewModel(
       _hasAlreadyReported.value = false
     }
 
-    Log.d(
-        "ReviewViewModel",
-        "Reports: ${selectedReview.nbReports}, MaxSeverityReports: ${selectedReview.nbMaxSeverityReports}")
+      Log.d(
+          "ReviewViewModel",
+          "SCHMOOOOOOOOOVIN ON")
 
-    reviewRepository.addReport(
+
+      reviewRepository.addReport(
         report,
         onSuccess = {
           addReportingUser(user)
