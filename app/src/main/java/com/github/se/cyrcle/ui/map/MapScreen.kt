@@ -553,7 +553,11 @@ fun MapScreen(
         // Filter dialog is shown when the showFilter state is true, until the user dismisses it by
         // clicking the close button or outside the dialog.
         if (showFilter.value) {
-          FilterDialog(parkingViewModel, onDismiss = { showFilter.value = false })
+          FilterDialog(
+              parkingViewModel,
+              addressViewModel,
+              permissionHandler,
+              onDismiss = { showFilter.value = false })
         }
 
         if (showSuggestions.value &&
@@ -749,7 +753,12 @@ fun SettingsDialog(
  * @param onDismiss The function to dismiss the dialog.
  */
 @Composable
-fun FilterDialog(parkingViewModel: ParkingViewModel, onDismiss: () -> Unit) {
+fun FilterDialog(
+    parkingViewModel: ParkingViewModel,
+    addressViewModel: AddressViewModel,
+    permissionHandler: PermissionHandler,
+    onDismiss: () -> Unit
+) {
   AlertDialog(
       onDismissRequest = onDismiss,
       title = {
@@ -760,7 +769,11 @@ fun FilterDialog(parkingViewModel: ParkingViewModel, onDismiss: () -> Unit) {
       },
       text = {
         Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
-          FilterPanel(parkingViewModel, displayHeader = false)
+          FilterPanel(
+              parkingViewModel,
+              displayHeader = false,
+              addressViewModel,
+              permissionHandler = permissionHandler)
         }
       },
       confirmButton = {
