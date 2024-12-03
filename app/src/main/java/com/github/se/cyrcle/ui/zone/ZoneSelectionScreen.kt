@@ -1,7 +1,6 @@
 package com.github.se.cyrcle.ui.zone
 
-import android.content.Context
-import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,6 +32,7 @@ import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.map.MapViewModel.LocationPickerState
+import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.zone.Zone
 import com.github.se.cyrcle.ui.addParking.location.overlay.Crosshair
 import com.github.se.cyrcle.ui.addParking.location.overlay.RectangleSelection
@@ -56,6 +56,7 @@ const val MIN_ZONE_NAME_LENGTH = 1
 fun ZoneSelectionScreen(
     navigationActions: NavigationActions,
     mapViewModel: MapViewModel,
+    parkingViewModel: ParkingViewModel,
     addressViewModel: AddressViewModel // Possibility to use this to suggest a name for the zone.
 ) {
   var showAlertDialogPickName by remember { mutableStateOf(false) }
@@ -110,9 +111,15 @@ fun ZoneSelectionScreen(
         onConfirm = {
           zoneName.value = it
           coroutineScope.launch {
-            val zone = createZone(boundingBox.value!!, it, context)
-
-            navigationActions.goBack()
+            val zone = Zone.createZone(boundingBox.value!!, it, context)
+            parkingViewModel.downloadZone(
+                zone,
+                { navigationActions.goBack() },
+                {
+                  // On failure, avoid keeping stale zone
+                  Zone.deleteZone(zone, context)
+                  Toast.makeText(context, "Error downloading zone", Toast.LENGTH_SHORT).show()
+                })
           }
         },
         onDismiss = {
@@ -228,16 +235,4 @@ fun AlertDialogPickZoneName(
                   }
             }
       })
-}
-
-private fun createZone(
-    boundingBox: BoundingBox,
-    zoneName: String,
-    context: Context,
-): Zone {
-  val zone = Zone(boundingBox, zoneName)
-  Zone.storeZone(zone, context)
-  Log.d("ZoneSelectionScreen", "Zone created and stored: $zone")
-
-  return zone
 }

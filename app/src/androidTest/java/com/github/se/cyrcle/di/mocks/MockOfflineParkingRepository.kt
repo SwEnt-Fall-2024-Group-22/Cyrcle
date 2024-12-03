@@ -17,7 +17,7 @@ class MockOfflineParkingRepository @Inject constructor() : OfflineParkingReposit
           ParkingReport(
               "1", ParkingReportReason.INEXISTANT, "1", TestInstancesParking.parking1.uid, ""))
 
-  override fun downloadParkings(parkings: Set<Parking>, onComplete: () -> Unit) {
+  override fun downloadParkings(parkings: List<Parking>, onComplete: () -> Unit) {
     this.parkings += parkings
     onComplete()
   }

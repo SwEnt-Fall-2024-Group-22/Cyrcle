@@ -650,28 +650,24 @@ class ParkingViewModel(
   fun downloadZone(zone: Zone, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     val tilesToDownload =
         TileUtils.getAllTilesInRectangle(zone.boundingBox.southwest(), zone.boundingBox.northeast())
-    val latch = CountDownLatch(tilesToDownload.size)
 
     tilesToDownload.forEach { tile ->
       if (tilesToParking.containsKey(tile)) {
-        offlineParkingRepository.downloadParkings(tilesToParking[tile]!!) { latch.countDown() }
+        offlineParkingRepository.downloadParkings(tilesToParking[tile]!!) {}
       } else {
         parkingRepository.getParkingsForTile(
             tile,
             {
               offlineParkingRepository.downloadParkings(it) {
-                latch.countDown()
                 Log.d("ParkingViewModel", "Tile downloaded successfully")
               }
             },
             {
-              latch.countDown()
               Log.e("ParkingViewModel", "Error getting parkings for tile: $it")
               onFailure(it)
             })
       }
     }
-    latch.await()
     onSuccess()
   }
 

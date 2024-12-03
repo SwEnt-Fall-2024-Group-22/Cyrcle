@@ -394,7 +394,7 @@ class ListScreenTest {
     // Test kilometers display
     composeTestRule
         .onNodeWithTag("ParkingDistance", useUnmergedTree = true)
-        .assertTextEquals("2.50 km")
+        .assertTextEquals("%.2f km".format(2.5))
   }
 
   @Test

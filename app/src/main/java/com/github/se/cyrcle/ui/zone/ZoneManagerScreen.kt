@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.map.MapViewModel
+import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.zone.Zone
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
@@ -47,7 +48,11 @@ import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
 /** Screen where users can manage their downloaded zones. and access the zone selection screen. */
 @Composable
-fun ZoneManagerScreen(mapViewModel: MapViewModel, navigationActions: NavigationActions) {
+fun ZoneManagerScreen(
+    mapViewModel: MapViewModel,
+    parkingViewModel: ParkingViewModel,
+    navigationActions: NavigationActions
+) {
   val context = LocalContext.current
   val zones = remember { mutableStateOf<List<Zone>>(emptyList()) }
   LaunchedEffect(Unit) {
@@ -72,7 +77,7 @@ fun ZoneManagerScreen(mapViewModel: MapViewModel, navigationActions: NavigationA
             }
             LazyColumn(modifier = Modifier.fillMaxSize().padding(bottom = 8.dp)) {
               items(zones.value) { zone ->
-                ZoneCard(zone, zones)
+                ZoneCard(parkingViewModel, zone, zones)
                 if (zone != zones.value.last()) {
                   HorizontalDivider(
                       color = MaterialTheme.colorScheme.onBackground.copy(0.5f),
@@ -112,7 +117,7 @@ fun AddZoneButton(mapViewModel: MapViewModel, navigationActions: NavigationActio
 }
 // Display relevant information about a zone. Allows the user to refresh the zone or delete it.
 @Composable
-fun ZoneCard(zone: Zone, zones: MutableState<List<Zone>>) {
+fun ZoneCard(parkingViewModel: ParkingViewModel, zone: Zone, zones: MutableState<List<Zone>>) {
   val context = LocalContext.current
   Row(
       modifier = Modifier.padding(16.dp).fillMaxWidth().testTag("ZoneCard"),
@@ -126,6 +131,7 @@ fun ZoneCard(zone: Zone, zones: MutableState<List<Zone>>) {
                 Modifier.weight(0.2f).clickable {
                   Zone.refreshZone(zone, context)
                   zones.value = Zone.loadZones(context)
+                  parkingViewModel.downloadZone(zone, {}, {})
                   // Call functions to update map tiles and parking data here.
                 })
         Icon(
@@ -135,6 +141,7 @@ fun ZoneCard(zone: Zone, zones: MutableState<List<Zone>>) {
                 Modifier.weight(0.2f).clickable {
                   Zone.deleteZone(zone, context)
                   zones.value = Zone.loadZones(context)
+                  parkingViewModel.deleteZone(zone, zones.value)
                   // Call functions here to delete the map tiles and the paraking datas.
                 })
       }

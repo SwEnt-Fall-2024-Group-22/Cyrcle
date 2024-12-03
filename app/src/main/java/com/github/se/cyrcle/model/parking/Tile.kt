@@ -1,10 +1,10 @@
 package com.github.se.cyrcle.model.parking
 
-import android.annotation.SuppressLint
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMeasurement
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.util.Locale
 
 typealias Tile = String
 
@@ -22,13 +22,13 @@ object TileUtils {
    * @param point Point used to create the unique ID
    * @return a string in the format "<longitude>.xx_<latitude>.xx"
    */
-  @SuppressLint("DefaultLocale")
   fun getTileFromPoint(point: Point): String {
     val x = (point.longitude() * INV_TILE_SIZE).toInt() * TILE_SIZE
     val y = (point.latitude() * INV_TILE_SIZE).toInt() * TILE_SIZE
 
-    val xFormated = String.format("%.${DECIMALS}f", x)
-    val yFormated = String.format("%.${DECIMALS}f", y)
+    // Locale does not matter, it just has to be consistent between devices
+    val xFormated = String.format(Locale.US, "%.${DECIMALS}f", x)
+    val yFormated = String.format(Locale.US, "%.${DECIMALS}f", y)
     return "${xFormated}_${yFormated}"
   }
 
