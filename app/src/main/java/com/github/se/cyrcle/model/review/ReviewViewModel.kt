@@ -29,7 +29,12 @@ class ReviewViewModel(
   private val _userReviews = MutableStateFlow<List<Review?>>(emptyList())
   val userReviews: StateFlow<List<Review?>> = _userReviews
 
-  /** Selected parking to review/edit */
+    /** Selected parking has already been reported by current user */
+    private val _hasAlreadyReported = MutableStateFlow<Boolean>(false)
+    val hasAlreadyReported: StateFlow<Boolean> = _hasAlreadyReported
+
+
+    /** Selected parking to review/edit */
   private val _selectedReviewReports = MutableStateFlow<List<ReviewReport>>(emptyList())
   val selectedReviewReports: StateFlow<List<ReviewReport>> = _selectedReviewReports
 
@@ -203,12 +208,15 @@ class ReviewViewModel(
       return
     }
 
-    Log.d("ReviewViewModel", "${selectedReview.nbReports}, ${selectedReview.nbMaxSeverityReports}")
+      if (_selectedReview.value?.reportingUsers?.contains(user.public.userId) == true) {
+          _hasAlreadyReported.value = true
+          return
+      }
+
 
     reviewRepository.addReport(
         report,
         onSuccess = {
-          Log.d("AAAAAAAA", "HOORAY")
           val newReportedObject =
               ReportedObject(
                   objectUID = selectedReview.uid,
