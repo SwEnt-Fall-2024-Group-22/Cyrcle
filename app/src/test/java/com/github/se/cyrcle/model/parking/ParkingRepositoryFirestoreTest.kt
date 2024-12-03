@@ -74,10 +74,8 @@ class ParkingRepositoryFirestoreTest {
 
   @Test
   fun getParkingById_callsOnSuccess() {
-    `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockParkingQuerySnapshot))
-    `when`(mockParkingQuerySnapshot.documents).thenReturn(listOf(mockQueryDocumentSnapshot))
-    `when`(mockDocumentSnapshot.toObject(Parking::class.java)).thenReturn(parking)
     `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
+    `when`(mockDocumentSnapshot.data).thenReturn(mockParkingData)
 
     var onSuccessCallbackCalled = false
     parkingRepositoryFirestore.getParkingById(
