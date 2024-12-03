@@ -19,6 +19,7 @@ import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.addParking.attributes.AttributesPicker
 import com.github.se.cyrcle.ui.addParking.location.LocationPicker
@@ -76,6 +77,7 @@ class AddScreensNavigationTest {
             reportedObjectRepository)
     mapViewModel = MapViewModel()
     addressViewModel = AddressViewModel(addressRepository)
+    userViewModel.setCurrentUser(TestInstancesUser.user1)
   }
 
   @OptIn(ExperimentalTestApi::class)
