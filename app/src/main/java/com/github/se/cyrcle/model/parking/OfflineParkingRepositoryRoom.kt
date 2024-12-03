@@ -14,7 +14,7 @@ class OfflineParkingRepositoryRoom @Inject constructor(parkingDatabase: ParkingD
 
   private val coroutine = CoroutineScope(Dispatchers.IO)
 
-  override fun downloadParkings(parkings: Set<Parking>, onComplete: () -> Unit) {
+  override fun downloadParkings(parkings: List<Parking>, onComplete: () -> Unit) {
     coroutine.launch {
       parkingManager.upsertAll(parkings)
       onComplete()

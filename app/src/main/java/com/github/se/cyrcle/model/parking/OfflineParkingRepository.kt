@@ -10,7 +10,7 @@ interface OfflineParkingRepository : ParkingRepository {
    *
    * @param parkings the parkings to download
    */
-  fun downloadParkings(parkings: Set<Parking>, onComplete: () -> Unit)
+  fun downloadParkings(parkings: List<Parking>, onComplete: () -> Unit)
 
   /**
    * Deletes the parkings contained within the set of tiles from local storage

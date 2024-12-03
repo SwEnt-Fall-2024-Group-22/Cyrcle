@@ -28,7 +28,7 @@ interface ParkingDao {
    *
    * @param parkings the list of parkings to insert or update
    */
-  @Upsert suspend fun upsertAll(parkings: Set<Parking>)
+  @Upsert suspend fun upsertAll(parkings: List<Parking>)
 
   /**
    * Delete a parking y it's uid

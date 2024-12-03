@@ -3,8 +3,6 @@ package com.github.se.cyrcle.model.parking
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.report.ReportedObject
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
@@ -13,13 +11,9 @@ import com.github.se.cyrcle.model.user.User
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 const val DEFAULT_RADIUS = 100.0
 const val MAX_RADIUS = 1000.0
@@ -643,4 +637,66 @@ class ParkingViewModel(
   }
 
   // ================== Images ==================
+
+  // ================== Offline ==================
+
+  /**
+   * Downloads the parkings in the zone to download from the local storage.
+   *
+   * @param zone the zone to download
+   * @param onSuccess the callback function to execute when the download is successful
+   * @param onFailure the callback function to execute when the download fails
+   */
+  fun downloadZone(zone: Zone, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    val tilesToDownload =
+        TileUtils.getAllTilesInRectangle(zone.boundingBox.southwest(), zone.boundingBox.northeast())
+    val latch = CountDownLatch(tilesToDownload.size)
+
+    tilesToDownload.forEach { tile ->
+      if (tilesToParking.containsKey(tile)) {
+        offlineParkingRepository.downloadParkings(tilesToParking[tile]!!) { latch.countDown() }
+      } else {
+        parkingRepository.getParkingsForTile(
+            tile,
+            {
+              offlineParkingRepository.downloadParkings(it) {
+                latch.countDown()
+                Log.d("ParkingViewModel", "Tile downloaded successfully")
+              }
+            },
+            {
+              latch.countDown()
+              Log.e("ParkingViewModel", "Error getting parkings for tile: $it")
+              onFailure(it)
+            })
+      }
+    }
+    latch.await()
+    onSuccess()
+  }
+
+  /**
+   * Deletes the parkings in the zone to delete from the local storage.
+   *
+   * @param zoneToDelete the zone to delete
+   * @param allZones the list of all zones
+   */
+  fun deleteZone(zoneToDelete: Zone, allZones: List<Zone>) {
+    val tilesToKeep =
+        allZones
+            .flatMap { zone ->
+              if (zone != zoneToDelete)
+                  TileUtils.getAllTilesInRectangle(
+                      zone.boundingBox.southwest(), zone.boundingBox.northeast())
+              else emptySet()
+            }
+            .toSet()
+
+    val tilesToDelete =
+        TileUtils.getAllTilesInRectangle(
+            zoneToDelete.boundingBox.southwest(), zoneToDelete.boundingBox.northeast())
+    offlineParkingRepository.deleteTiles(tilesToDelete - tilesToKeep) {
+      Log.d("ParkingViewModel", "Tiles deleted successfully")
+    }
+  }
 }
