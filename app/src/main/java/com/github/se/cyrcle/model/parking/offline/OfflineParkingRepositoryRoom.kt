@@ -22,9 +22,9 @@ class OfflineParkingRepositoryRoom @Inject constructor(parkingDatabase: ParkingD
     }
   }
 
-  override fun deleteTiles(tileIDs: Set<String>, onComplete: () -> Unit) {
+  override fun deleteTiles(tiles: Set<Tile>, onComplete: () -> Unit) {
     coroutine.launch {
-      parkingManager.deleteAllInTiles(tileIDs)
+      parkingManager.deleteAllInTiles(tiles)
       onComplete()
     }
   }

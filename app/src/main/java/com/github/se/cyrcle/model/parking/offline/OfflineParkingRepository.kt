@@ -1,6 +1,7 @@
 package com.github.se.cyrcle.model.parking.offline
 
 import com.github.se.cyrcle.model.parking.Parking
+import com.github.se.cyrcle.model.parking.Tile
 import com.github.se.cyrcle.model.parking.online.ParkingRepository
 
 class UnSupportedOperationException(message: String) : Exception(message)
@@ -18,7 +19,7 @@ interface OfflineParkingRepository : ParkingRepository {
   /**
    * Deletes the parkings contained within the set of tiles from local storage
    *
-   * @param tileIDs the IDs of the tiles to delete
+   * @param tiles the IDs of the tiles to delete
    */
-  fun deleteTiles(tileIDs: Set<String>, onComplete: () -> Unit)
+  fun deleteTiles(tiles: Set<Tile>, onComplete: () -> Unit)
 }
