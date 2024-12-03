@@ -240,7 +240,7 @@ class ReviewRepositoryFirestore @Inject constructor(private val db: FirebaseFire
     val review = gson.fromJson(json, Review::class.java)
 
     // Set default values for missing fields directly in the Review object
-    return review.copy(nbReports = nbReports, nbMaxSeverityReports = nbMaxSeverityReports, reportingUsers = reportingUsers)
+    return review.copy(nbReports = nbReports, nbMaxSeverityReports = nbMaxSeverityReports, reportingUsers = reportingUsers, likedBy = likedBy, dislikedBy = dislikedBy)
   }
 
   fun createTimestamp(timeAttributes: Map<String, Any>): Timestamp? {

@@ -126,7 +126,10 @@ class ParkingAdapter : JsonSerializer<Parking>, JsonDeserializer<Parking> {
     val tempParking = gson.fromJson(json, Parking::class.java)
     // Older versions of parking don't have the tile field
     return if (tempParking.tile == null)
-        tempParking.copy(tile = TileUtils.getTileFromPoint(tempParking.location.center))
+        tempParking.copy(tile = TileUtils.getTileFromPoint(tempParking.location.center),
+            uid = parking.uid ?: "",  // Default to empty string if null
+            owner = parking.owner ?: "Unknown Owner",  // Replace with your default owner value
+            reportingUsers = parking.reportingUsers ?: emptyList())  // Default to empty list)
     else tempParking
   }
 
