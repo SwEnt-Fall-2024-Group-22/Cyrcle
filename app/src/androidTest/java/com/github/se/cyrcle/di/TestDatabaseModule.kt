@@ -15,8 +15,8 @@ import javax.inject.Singleton
  * influence the phone's storage.
  */
 @Module
-@TestInstallIn(components = [SingletonComponent::class], replaces = [RepoModule::class])
-object DatabaseModule {
+@TestInstallIn(components = [SingletonComponent::class], replaces = [DatabaseModule::class])
+object TestDatabaseModule {
 
   /**
    * Provides the parking database
