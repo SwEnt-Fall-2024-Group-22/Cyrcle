@@ -445,93 +445,118 @@ class ParkingViewModel(
    */
   fun addReport(report: ParkingReport, user: User) {
     val selectedParking = _selectedParking.value
-    if (selectedParking == null) {
+    if (_selectedParking.value == null) {
       Log.e("ParkingViewModel", "No parking selected")
       return
     }
 
-      Log.d("AAAAAAAAAAAAAAAAAA", "${_selectedParking.value?.reportingUsers}")
+    Log.d("AAAAAAAAAAAAAAAAAA", "${_selectedParking.value?.reportingUsers}")
 
     if (_selectedParking.value?.reportingUsers?.contains(user.public.userId) == true) {
-        _hasAlreadyReported.value = true
-        return
+      _hasAlreadyReported.value = true
+      return
     } else {
-        _hasAlreadyReported.value = false
+      _hasAlreadyReported.value = false
     }
 
     Log.d(
-        "ParkingViewModel", "${selectedParking.nbReports}, ${selectedParking.nbMaxSeverityReports}")
+        "ParkingViewModel",
+        "${_selectedParking.value?.nbReports}, ${_selectedParking.value?.nbMaxSeverityReports}")
     parkingRepository.addReport(
         report,
         onSuccess = {
           addReportingUser(user)
           val newReportedObject =
               ReportedObject(
-                  objectUID = selectedParking.uid,
+                  objectUID = _selectedParking.value?.uid!!,
                   reportUID = report.uid,
-                  nbOfTimesReported = selectedParking.nbReports + 1,
+                  nbOfTimesReported = _selectedParking.value?.nbReports!! + 1,
                   nbOfTimesMaxSeverityReported =
                       if (report.reason.severity == MAX_SEVERITY)
-                          selectedParking.nbMaxSeverityReports + 1
-                      else selectedParking.nbMaxSeverityReports,
+                          _selectedParking.value?.nbMaxSeverityReports!! + 1
+                      else _selectedParking.value?.nbMaxSeverityReports!!,
                   userUID = user.public.userId,
                   objectType = ReportedObjectType.PARKING,
               )
           reportedObjectRepository.checkIfObjectExists(
-              objectUID = selectedParking.uid,
+              objectUID = _selectedParking.value?.uid!!,
               onSuccess = { documentId ->
                 if (documentId != null) {
                   reportedObjectRepository.updateReportedObject(
                       documentId = documentId,
                       updatedObject = newReportedObject,
-                      onSuccess = { updateLocalParkingAndMetrics(report, selectedParking) },
+                      onSuccess = { updateLocalParkingAndMetrics(report) },
                       onFailure = { Log.d("ParkingViewModel", "Error updating ReportedObject") })
                 } else {
                   val shouldAdd =
                       (report.reason.severity == MAX_SEVERITY &&
-                          selectedParking.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERITY_THRESH) ||
-                          (selectedParking.nbReports >= NB_REPORTS_THRESH)
+                          _selectedParking.value?.nbMaxSeverityReports!! >=
+                              NB_REPORTS_MAXSEVERITY_THRESH) ||
+                          (_selectedParking.value?.nbReports!! >= NB_REPORTS_THRESH)
 
                   if (shouldAdd) {
                     reportedObjectRepository.addReportedObject(
                         reportedObject = newReportedObject,
-                        onSuccess = { updateLocalParkingAndMetrics(report, selectedParking) },
+                        onSuccess = { updateLocalParkingAndMetrics(report) },
                         onFailure = { Log.d("ParkingViewModel", "Error adding ReportedObject") })
                   } else {
                     Log.d("ParkingViewModel", "Document does not exist, addition not allowed")
-                    updateLocalParkingAndMetrics(report, selectedParking)
+                    updateLocalParkingAndMetrics(report)
                   }
                 }
               },
               onFailure = {
                 Log.d("ParkingViewModel", "Error checking for ReportedObject")
-                updateLocalParkingAndMetrics(report, selectedParking)
+                updateLocalParkingAndMetrics(report)
               })
         },
         onFailure = {
           Log.d("ParkingViewModel", "Report not added")
-          updateLocalParkingAndMetrics(report, selectedParking)
+          updateLocalParkingAndMetrics(report)
         })
   }
-  /** Updates the local parking and metrics after a report is added or updated. */
-  private fun updateLocalParkingAndMetrics(report: ParkingReport, selectedParking: Parking) {
-    // Update the local reports and parking metrics
+
+  private fun updateLocalParkingAndMetrics(report: ParkingReport) {
+    val selectedParking = _selectedParking.value ?: return
     _selectedParkingReports.update { currentReports -> currentReports.plus(report) }
     if (report.reason.severity == MAX_SEVERITY) {
       selectedParking.nbMaxSeverityReports += 1
     }
     selectedParking.nbReports += 1
     parkingRepository.updateParking(selectedParking, {}, {})
-    Log.d("ParkingViewModel", "Parking and metrics updated successfully")
+    Log.d("ParkingViewModel", "Parking and metrics updated: $selectedParking")
   }
 
   private fun addReportingUser(user: User) {
-    val selectedParking = selectedParking.value
-    if (selectedParking != null) {
-      val updatedParking =
-          selectedParking.copy(reportingUsers = selectedParking.reportingUsers + user.public.userId)
-      _selectedParking.value = updatedParking
-      parkingRepository.updateParking(parking = updatedParking, {}, {})
+    _selectedParking.update { currentParking ->
+      currentParking?.let {
+        // Create an updated parking object with the new reporting user
+        val updatedParking = it.copy(reportingUsers = it.reportingUsers + user.public.userId)
+
+        // Update Firestore to reflect the change
+        parkingRepository.updateParking(
+            parking = updatedParking,
+            onSuccess = {
+              Log.d("ParkingViewModel", "User added to reportingUsers in Firestore")
+              // Update the local state to reflect the change
+              _selectedParking.update { state ->
+                // Ensure consistency by returning the updated parking if it matches
+                if (state?.uid == updatedParking.uid) {
+                  updatedParking
+                } else {
+                  state
+                }
+              }
+            },
+            onFailure = { exception ->
+              // Log failure
+              Log.e(
+                  "ParkingViewModel", "Failed to update parking in Firestore: ${exception.message}")
+            })
+
+        // Return the updated parking to update the state
+        updatedParking
+      }
     }
   }
 

@@ -20,7 +20,7 @@ object TestInstancesParking {
           ParkingProtection.COVERED,
           0.0,
           true,
-          owner = TestInstancesUser.user1,
+          owner = TestInstancesUser.user1.public.userId,
           reportingUsers = emptyList(),
           2,
           3.0)
@@ -36,7 +36,7 @@ object TestInstancesParking {
           ParkingProtection.COVERED,
           0.0,
           true,
-          owner = TestInstancesUser.user1,
+          owner = TestInstancesUser.user1.public.userId,
           reportingUsers = emptyList())
   val parking3 =
       Parking(
@@ -51,7 +51,7 @@ object TestInstancesParking {
           ParkingProtection.COVERED,
           0.0,
           true,
-          owner = TestInstancesUser.user1,
+          owner = TestInstancesUser.user1.public.userId,
           reportingUsers = emptyList())
   val parking4 =
       Parking(
@@ -66,7 +66,7 @@ object TestInstancesParking {
           ParkingProtection.COVERED,
           0.0,
           true,
-          owner = TestInstancesUser.user1,
+          owner = TestInstancesUser.user1.public.userId,
           reportingUsers = emptyList())
   val parking5 =
       Parking(
@@ -81,6 +81,6 @@ object TestInstancesParking {
           ParkingProtection.COVERED,
           0.0,
           true,
-          owner = TestInstancesUser.user1,
+          owner = TestInstancesUser.user1.public.userId,
           reportingUsers = emptyList())
 }

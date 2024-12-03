@@ -29,12 +29,11 @@ class ReviewViewModel(
   private val _userReviews = MutableStateFlow<List<Review?>>(emptyList())
   val userReviews: StateFlow<List<Review?>> = _userReviews
 
-    /** Selected parking has already been reported by current user */
-    private val _hasAlreadyReported = MutableStateFlow<Boolean>(false)
-    val hasAlreadyReported: StateFlow<Boolean> = _hasAlreadyReported
+  /** Selected parking has already been reported by current user */
+  private val _hasAlreadyReported = MutableStateFlow<Boolean>(false)
+  val hasAlreadyReported: StateFlow<Boolean> = _hasAlreadyReported
 
-
-    /** Selected parking to review/edit */
+  /** Selected parking to review/edit */
   private val _selectedReviewReports = MutableStateFlow<List<ReviewReport>>(emptyList())
   val selectedReviewReports: StateFlow<List<ReviewReport>> = _selectedReviewReports
 
@@ -208,13 +207,16 @@ class ReviewViewModel(
       return
     }
 
-      if (_selectedReview.value?.reportingUsers?.contains(user.public.userId) == true) {
-          _hasAlreadyReported.value = true
-          return
-      } else {
-          _hasAlreadyReported.value = false
-      }
+    if (selectedReview.reportingUsers.contains(user.public.userId)) {
+      _hasAlreadyReported.value = true
+      return
+    } else {
+      _hasAlreadyReported.value = false
+    }
 
+    Log.d(
+        "ReviewViewModel",
+        "Reports: ${selectedReview.nbReports}, MaxSeverityReports: ${selectedReview.nbMaxSeverityReports}")
 
     reviewRepository.addReport(
         report,
@@ -240,7 +242,7 @@ class ReviewViewModel(
                   reportedObjectRepository.updateReportedObject(
                       documentId = documentId,
                       updatedObject = newReportedObject,
-                      onSuccess = { updateLocalReviewAndMetrics(report, selectedReview) },
+                      onSuccess = { updateLocalReviewAndMetrics(report) },
                       onFailure = { Log.d("ReviewViewModel", "Error updating ReportedObject") })
                 } else {
                   val shouldAdd =
@@ -251,32 +253,28 @@ class ReviewViewModel(
                   if (shouldAdd) {
                     reportedObjectRepository.addReportedObject(
                         reportedObject = newReportedObject,
-                        onSuccess = { updateLocalReviewAndMetrics(report, selectedReview) },
+                        onSuccess = { updateLocalReviewAndMetrics(report) },
                         onFailure = { Log.d("ReviewViewModel", "Error adding ReportedObject") })
                   } else {
-                    updateLocalReviewAndMetrics(report, selectedReview)
-                    Log.d("ReviewViewModel", "Document does not exist, addition not allowed")
-                    updateLocalReviewAndMetrics(report, selectedReview)
+                    updateLocalReviewAndMetrics(report)
                   }
                 }
               },
               onFailure = {
                 Log.d("ReviewViewModel", "Error checking for ReportedObject")
-                updateLocalReviewAndMetrics(report, selectedReview)
+                updateLocalReviewAndMetrics(report)
               })
         },
         onFailure = {
           Log.d("ReviewViewModel", "Report not added")
-          updateLocalReviewAndMetrics(report, selectedReview)
+          updateLocalReviewAndMetrics(report)
         })
   }
 
   /** Updates the local review and metrics after a report is added or updated. */
-  private fun updateLocalReviewAndMetrics(report: ReviewReport, selectedReview: Review) {
-    // Update the local reports and review metrics
-    _selectedReviewReports.update { currentReports ->
-      currentReports.plus(report) ?: listOf(report)
-    }
+  private fun updateLocalReviewAndMetrics(report: ReviewReport) {
+    val selectedReview = _selectedReview.value ?: return
+    _selectedReviewReports.update { currentReports -> currentReports.plus(report) }
     if (report.reason.severity == MAX_SEVERITY) {
       selectedReview.nbMaxSeverityReports += 1
     }
@@ -285,15 +283,31 @@ class ReviewViewModel(
     Log.d("ReviewViewModel", "Review and metrics updated successfully: ${selectedReview.nbReports}")
   }
 
-    private fun addReportingUser(user: User) {
-        val selectedReview = _selectedReview.value
-        if (selectedReview != null) {
-            val updatedReview =
-                selectedReview.copy(reportingUsers = selectedReview.reportingUsers + user.public.userId)
-            _selectedReview.value = updatedReview
-            reviewRepository.updateReview(review = updatedReview, {}, {})
-        }
+  private fun addReportingUser(user: User) {
+    _selectedReview.update { currentReview ->
+      currentReview?.let {
+        val updatedReview = it.copy(reportingUsers = it.reportingUsers + user.public.userId)
+
+        reviewRepository.updateReview(
+            review = updatedReview,
+            onSuccess = {
+              Log.d("ReviewViewModel", "User added to reportingUsers in Firestore")
+              _selectedReview.update { state ->
+                if (state?.uid == updatedReview.uid) {
+                  updatedReview
+                } else {
+                  state
+                }
+              }
+            },
+            onFailure = { exception ->
+              Log.e("ReviewViewModel", "Failed to update review in Firestore: ${exception.message}")
+            })
+
+        updatedReview
+      }
     }
+  }
 
   /**
    * Reset the selectedReview This is to prevent old review from being shown while the new spots

@@ -439,7 +439,7 @@ fun ParkingDetailsScreen(
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onBackground)
                             Text(
-                                text = selectedParking.owner.public.username,
+                                text = selectedParking.owner,
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface)
                           }
@@ -465,9 +465,7 @@ fun ParkingDetailsScreen(
                     if (userViewModel.currentUser.value != null) {
                       Button(
                           text = stringResource(R.string.card_screen_report),
-                          onClick = {
-                                  navigationActions.navigateTo(Screen.PARKING_REPORT)
-                          },
+                          onClick = { navigationActions.navigateTo(Screen.PARKING_REPORT) },
                           modifier = Modifier.fillMaxWidth(),
                           colorLevel = ColorLevel.ERROR,
                           testTag = "ReportButton")
