@@ -23,7 +23,7 @@ class MockOfflineParkingRepository @Inject constructor() : OfflineParkingReposit
   }
 
   override fun deleteTiles(tileIDs: Set<String>, onComplete: () -> Unit) {
-    parkings = parkings.filterNot { it.tileUID in tileIDs }.toMutableList()
+    parkings = parkings.filterNot { it.tile in tileIDs }.toMutableList()
     onComplete()
   }
 
@@ -67,7 +67,7 @@ class MockOfflineParkingRepository @Inject constructor() : OfflineParkingReposit
       onFailure: (Exception) -> Unit
   ) {
     if (tile == "") onFailure(Exception("Error getting parkings"))
-    else onSuccess(parkings.filter { it.tileUID == tile })
+    else onSuccess(parkings.filter { it.tile == tile })
   }
 
   override fun addParking(parking: Parking, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {

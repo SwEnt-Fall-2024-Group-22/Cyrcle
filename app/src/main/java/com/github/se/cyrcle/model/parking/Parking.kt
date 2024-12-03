@@ -40,7 +40,7 @@ data class Parking(
     var avgScore: Double = 0.0,
     var nbReports: Int = 0,
     var nbMaxSeverityReports: Int = 0,
-    val tileUID: String = TileUtils.getTileFromPoint(location.center)
+    val tile: Tile = TileUtils.getTileFromPoint(location.center)
 ) {
   companion object {
     const val TABLE_NAME = "parkings"

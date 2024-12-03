@@ -56,7 +56,7 @@ class MockParkingRepository @Inject constructor() : ParkingRepository {
       onFailure: (Exception) -> Unit
   ) {
     if (tile == "") onFailure(Exception("Error getting parkings"))
-    else onSuccess(parkings.filter { it.tileUID == tile })
+    else onSuccess(parkings.filter { it.tile == tile })
   }
 
   override fun addParking(parking: Parking, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {

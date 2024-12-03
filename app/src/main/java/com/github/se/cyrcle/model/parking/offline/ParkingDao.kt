@@ -50,10 +50,10 @@ interface ParkingDao {
   /**
    * Deletes parkings present in the given tiles
    *
-   * @param uids the list of Tiles to delete
+   * @param tiles the list of Tiles to delete
    */
-  @Query("DELETE FROM ${Parking.TABLE_NAME} WHERE tileUID IN (:uids) ")
-  suspend fun deleteAllInTiles(uids: Set<String>)
+  @Query("DELETE FROM ${Parking.TABLE_NAME} WHERE tile IN (:tiles) ")
+  suspend fun deleteAllInTiles(tiles: Set<Tile>)
 
   /**
    * Delete a parking
@@ -86,7 +86,7 @@ interface ParkingDao {
    * @param tile the queried tile
    * @return The parkings belonging to the tile
    */
-  @Query("SELECT * FROM ${Parking.TABLE_NAME} WHERE tileUID = :tile")
+  @Query("SELECT * FROM ${Parking.TABLE_NAME} WHERE tile = :tile")
   suspend fun getParkingsInTile(tile: Tile): List<Parking>
 
   /**

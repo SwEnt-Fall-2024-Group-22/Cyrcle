@@ -63,16 +63,16 @@ class OfflineParkingRepositoryRoomTest {
 
   @Test
   fun deleteTiles() = runTest {
-    val tileToDelete = TestInstancesParking.parking1.tileUID
+    val tileToDelete = TestInstancesParking.parking1.tile
 
     parkingDao.upsertAll(testList)
 
     val latch = CountDownLatch(1)
-    repository.deleteTiles(setOf(TestInstancesParking.parking1.tileUID)) { latch.countDown() }
+    repository.deleteTiles(setOf(TestInstancesParking.parking1.tile)) { latch.countDown() }
     latch.await()
 
     val result = parkingDao.getAllParkings()
-    assertEquals(testList.filterNot { it.tileUID == tileToDelete }, result)
+    assertEquals(testList.filterNot { it.tile == tileToDelete }, result)
   }
 
   @Test
@@ -122,12 +122,12 @@ class OfflineParkingRepositoryRoomTest {
 
   @Test
   fun getParkingsForTile() {
-    val queriedTile = TestInstancesParking.parking1.tileUID
+    val queriedTile = TestInstancesParking.parking1.tile
     val latch = CountDownLatch(1)
     repository.getParkingsForTile(
         queriedTile,
         { parkings ->
-          assertEquals(testList.filter { it.tileUID == queriedTile }, parkings)
+          assertEquals(testList.filter { it.tile == queriedTile }, parkings)
           latch.countDown()
         },
         {
