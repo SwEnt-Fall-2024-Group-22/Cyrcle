@@ -6,6 +6,7 @@ import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingCapacity
 import com.github.se.cyrcle.model.parking.ParkingProtection
 import com.github.se.cyrcle.model.parking.ParkingRackType
+import com.github.se.cyrcle.model.parking.TileUtils
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
@@ -83,7 +84,11 @@ class ParkingAdapter : JsonSerializer<Parking>, JsonDeserializer<Parking> {
    */
   fun deserializeParking(map: Map<String, Any>): Parking {
     val json = gson.toJson(map)
-    return gson.fromJson(json, Parking::class.java)
+    val tempParking = gson.fromJson(json, Parking::class.java)
+    // Older versions of parking don't have the tile field
+    return if (tempParking.tile == null)
+        tempParking.copy(tile = TileUtils.getTileFromPoint(tempParking.location.center))
+    else tempParking
   }
 
   /**
