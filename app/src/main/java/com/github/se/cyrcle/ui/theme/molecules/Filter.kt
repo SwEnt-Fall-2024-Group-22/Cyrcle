@@ -59,6 +59,7 @@ import com.github.se.cyrcle.model.parking.ParkingProtection
 import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.permission.PermissionHandler
+import com.github.se.cyrcle.ui.list.NumberOfSuggestionsForMenu
 import com.github.se.cyrcle.ui.list.maxSuggestionDisplayNameLengthList
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
@@ -435,7 +436,7 @@ fun SearchBarListScreen(
                   }
                 }
 
-            for (address in uniqueSuggestions.value.take(6)) {
+            for (address in uniqueSuggestions.value.take(NumberOfSuggestionsForMenu)) {
               DropdownMenuItem(
                   text = {
                     Text(address.suggestionFormatDisplayName(maxSuggestionDisplayNameLengthList))

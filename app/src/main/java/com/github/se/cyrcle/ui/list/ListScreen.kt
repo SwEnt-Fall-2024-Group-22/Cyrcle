@@ -111,6 +111,7 @@ import kotlinx.coroutines.runBlocking
 const val CARD_HEIGHT = 120
 const val MAX_SWIPE_DISTANCE = 150
 const val maxSuggestionDisplayNameLengthList = 70
+const val NumberOfSuggestionsForMenu = 6
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
@@ -143,7 +144,13 @@ fun SpotListScreen(
   val locPermission = permissionHandler.getLocalisationPerm().value
 
   LaunchedEffect(userPosition, myLocation, chosenLocation.value) {
+
+    // if suggestion MyLocatio is chosen and user has location permission then set the circle center
+    // to user position
     if (locPermission && myLocation.value) parkingViewModel.setCircleCenter(userPosition)
+
+    // else if the user has chosen a location or hasn't given his location permission then set the
+    // circle center to the chosen location (default position is EPFL)
     else Log.e("SpotListScreen", parkingViewModel.closestParkings.value.toString())
     parkingViewModel.setCircleCenter(
         Point.fromLngLat(
