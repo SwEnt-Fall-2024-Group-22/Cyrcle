@@ -58,7 +58,9 @@ fun ParkingReportScreen(
   val topBoxHeight = screenHeight * 0.10f // 10% of screen height for top box
   val verticalPaddingScaleFactor = screenHeight * 0.02f
 
-  // State for report inputs
+    val strResToast = stringResource(R.string.report_already)
+
+    // State for report inputs
   val selectedReason = rememberSaveable { mutableStateOf(ParkingReportReason.INEXISTANT) }
   val parkingId = parkingViewModel.selectedParking.value?.uid
   val reportDescription = rememberSaveable { mutableStateOf("") }
@@ -74,7 +76,7 @@ fun ParkingReportScreen(
             description = reportDescription.value)
     parkingViewModel.addReport(report, userViewModel.currentUser.value!!)
     if (parkingViewModel.hasAlreadyReported.value) {
-      Toast.makeText(context, "YOU HAVE ALREADY REPORTED", Toast.LENGTH_SHORT).show()
+      Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
     } else {
       Toast.makeText(context, strRes, Toast.LENGTH_SHORT).show()
     }
