@@ -35,7 +35,8 @@ data class UserDetails(
     val favoriteParkings: List<String> = emptyList(),
     // val lastLoginTime: Timestamp? = null,
     val wallet: Wallet = Wallet.empty(),
-    val personalNotes: Map<String, String> = emptyMap()
+    val personalNotes: Map<String, String> = emptyMap(),
+    val isAdmin: Boolean = false
 )
 
 /**

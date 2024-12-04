@@ -76,12 +76,16 @@ fun ViewProfileScreen(
             selectedItem = Route.VIEW_PROFILE)
       },
       floatingActionButton = {
-        FloatingActionButton(
-            onClick = { navigationActions.navigateTo(Screen.ADMIN) },
-            modifier = Modifier.testTag("AdminFAB"),
-            containerColor = MaterialTheme.colorScheme.primary) {
-              Text(text = "Admin", color = MaterialTheme.colorScheme.onPrimary)
-            }
+        if (userState?.public?.userId != null) {
+          if (userState!!.details?.isAdmin == true) {
+            FloatingActionButton(
+                onClick = { navigationActions.navigateTo(Screen.ADMIN) },
+                modifier = Modifier.testTag("AdminFAB"),
+                containerColor = MaterialTheme.colorScheme.primary) {
+                  Text(text = "Admin", color = MaterialTheme.colorScheme.onPrimary)
+                }
+          }
+        }
       }) { innerPadding ->
         Box(Modifier.fillMaxSize().padding(innerPadding)) {
           com.github.se.cyrcle.ui.theme.atoms.IconButton(

@@ -158,6 +158,8 @@ constructor(private val db: FirebaseFirestore, private val auth: FirebaseAuth) :
     val gson = Gson()
     val json = gson.toJson(data)
     val userDetails = gson.fromJson(json, UserDetails::class.java)
-    return userDetails.copy(wallet = userDetails.wallet)
+    // Add a default value for isAdmin if not present or null
+    val isAdmin = data["isAdmin"] as? Boolean ?: false
+    return userDetails.copy(wallet = userDetails.wallet, isAdmin = isAdmin)
   }
 }
