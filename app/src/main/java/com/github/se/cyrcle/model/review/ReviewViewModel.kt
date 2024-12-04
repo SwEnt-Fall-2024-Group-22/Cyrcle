@@ -283,7 +283,7 @@ class ReviewViewModel(
     Log.d("ReviewViewModel", "Review and metrics updated successfully: ${selectedReview.nbReports}")
   }
 
-  private fun addReportingUser(user: User) {
+  fun addReportingUser(user: User) {
     _selectedReview.update { currentReview ->
       currentReview?.let {
         val updatedReview = it.copy(reportingUsers = it.reportingUsers + user.public.userId)
