@@ -81,7 +81,7 @@ class AddScreensNavigationTest {
   @OptIn(ExperimentalTestApi::class)
   @Test
   fun testNavigationToAttribute() {
-    composeTestRule.setContent { LocationPicker(navigationActions, mapViewModel,parkingViewModel) }
+    composeTestRule.setContent { LocationPicker(navigationActions, mapViewModel, parkingViewModel) }
     composeTestRule.waitForIdle()
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("nextButton"))
     // Perform click on the add button
@@ -137,7 +137,7 @@ class AddScreensNavigationTest {
 
   @Test
   fun testCancel2() {
-    composeTestRule.setContent { LocationPicker(navigationActions, mapViewModel,parkingViewModel) }
+    composeTestRule.setContent { LocationPicker(navigationActions, mapViewModel, parkingViewModel) }
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("cancelButton").performClick()
 
