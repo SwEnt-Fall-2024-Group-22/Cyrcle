@@ -450,8 +450,6 @@ class ParkingViewModel(
       return
     }
 
-    Log.d("AAAAAAAAAAAAAAAAAA", "${_selectedParking.value?.reportingUsers}")
-
     if (_selectedParking.value?.reportingUsers?.contains(user.public.userId) == true) {
       _hasAlreadyReported.value = true
       return
@@ -459,9 +457,6 @@ class ParkingViewModel(
       _hasAlreadyReported.value = false
     }
 
-    Log.d(
-        "ParkingViewModel",
-        "${_selectedParking.value?.nbReports}, ${_selectedParking.value?.nbMaxSeverityReports}")
     parkingRepository.addReport(
         report,
         onSuccess = {
