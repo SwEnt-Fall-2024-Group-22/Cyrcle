@@ -194,14 +194,12 @@ class ParkingViewModel(
     var nbRequestLeft = tilesToDisplay.size
 
     tilesToDisplay.forEach { tile ->
-
-      //  Cache hit
       if (tilesToParking.containsKey(tile)) {
+        // Cache hit
         _rectParkings.value += tilesToParking[tile]!!
         updateClosestParkings(--nbRequestLeft)
-
-        // Cache miss
       } else {
+        // Cache miss
         tilesToParking[tile] = emptyList()
         parkingRepository.getParkingsForTile(
             tile,

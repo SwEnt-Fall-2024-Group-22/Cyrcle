@@ -33,34 +33,73 @@ class ParkingAdapter : JsonSerializer<Parking>, JsonDeserializer<Parking> {
   /** Type token for a map of Strings to Objects. */
   private val serializedParkingType = object : TypeToken<Map<String, Any>>() {}.type
 
+  /**
+   * Serializes a ParkingCapacity into an Int
+   *
+   * @param parkingCapacity The ParkingCapacity to serialize
+   * @return The serialized ParkingCapacity
+   */
   @TypeConverter
   fun serializeParkingCapacity(parkingCapacity: ParkingCapacity): Int {
     return parkingCapacity.ordinal
   }
 
+  /**
+   * Deserializes an Int into a ParkingCapacity
+   *
+   * @param ordinal The ordinal of the ParkingCapacity
+   * @return The deserialized ParkingCapacity, "MEDIUM" if the ordinal is out of bounds
+   */
   @TypeConverter
   fun deserializeParkingCapacity(ordinal: Int): ParkingCapacity {
-    return ParkingCapacity.entries[ordinal]
+    return if (ordinal < 0 || ordinal >= ParkingCapacity.entries.size) ParkingCapacity.MEDIUM
+    else ParkingCapacity.entries[ordinal]
   }
 
+  /**
+   * Serializes a ParkingRackType into an Int
+   *
+   * @param parkingRackType The ParkingRackType to serialize
+   * @return The serialized ParkingRackType
+   */
   @TypeConverter
   fun serializeParkingRackType(parkingRackType: ParkingRackType): Int {
     return parkingRackType.ordinal
   }
 
+  /**
+   * Deserializes an Int into a ParkingRackType
+   *
+   * @param ordinal The ordinal of the ParkingRackType
+   * @return The deserialized ParkingRackType, "OTHER" if the ordinal is out of bounds
+   */
   @TypeConverter
   fun deserializeParkingRackType(ordinal: Int): ParkingRackType {
-    return ParkingRackType.entries[ordinal]
+    return if (ordinal < 0 || ordinal >= ParkingRackType.entries.size) ParkingRackType.OTHER
+    else ParkingRackType.entries[ordinal]
   }
 
+  /**
+   * Serializes a ParkingProtection into an Int
+   *
+   * @param parkingProtection The ParkingProtection to serialize
+   * @return The serialized ParkingProtection
+   */
   @TypeConverter
   fun serializeParkingProtection(parkingProtection: ParkingProtection): Int {
     return parkingProtection.ordinal
   }
 
+  /**
+   * Deserializes an Int into a ParkingProtection
+   *
+   * @param ordinal The ordinal of the ParkingProtection
+   * @return The deserialized ParkingProtection, "NONE" if the ordinal is out of bounds
+   */
   @TypeConverter
   fun deserializeParkingProtection(ordinal: Int): ParkingProtection {
-    return ParkingProtection.entries[ordinal]
+    return if (ordinal < 0 || ordinal >= ParkingRackType.entries.size) ParkingProtection.NONE
+    else ParkingProtection.entries[ordinal]
   }
 
   /**

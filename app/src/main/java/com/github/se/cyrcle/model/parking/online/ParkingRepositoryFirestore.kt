@@ -77,7 +77,7 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
       onFailure: (Exception) -> Unit
   ) {
     // Get the bottom left and top right points of the tile
-    // This is a temporary solution for the time that `Parking.tile` gets added on Firestore
+    // TODO This is a temporary solution for the time that `Parking.tile` gets added on Firestore
     val start = TileUtils.getBottomLeftPoint(tile)
     val end = TileUtils.getTopRightPoint(tile)
     if (start == null || end == null) {

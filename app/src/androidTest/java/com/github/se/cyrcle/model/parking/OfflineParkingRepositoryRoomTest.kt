@@ -47,6 +47,7 @@ class OfflineParkingRepositoryRoomTest {
 
   @After
   fun tearDown() {
+    database.clearAllTables()
     database.close()
   }
 

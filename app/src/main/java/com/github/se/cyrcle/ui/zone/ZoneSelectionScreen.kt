@@ -59,6 +59,7 @@ fun ZoneSelectionScreen(
     parkingViewModel: ParkingViewModel,
     addressViewModel: AddressViewModel // Possibility to use this to suggest a name for the zone.
 ) {
+  val downloadErrorText = stringResource(R.string.zone_selection_download_error)
   var showAlertDialogPickName by remember { mutableStateOf(false) }
   val boundingBox = remember { mutableStateOf<BoundingBox?>(null) }
   val zoneName = remember { mutableStateOf("") }
@@ -118,7 +119,7 @@ fun ZoneSelectionScreen(
                 {
                   // On failure, avoid keeping stale zone
                   Zone.deleteZone(zone, context)
-                  Toast.makeText(context, "Error downloading zone", Toast.LENGTH_SHORT).show()
+                  Toast.makeText(context, downloadErrorText, Toast.LENGTH_SHORT).show()
                 })
           }
         },

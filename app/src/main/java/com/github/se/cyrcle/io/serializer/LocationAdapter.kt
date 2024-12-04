@@ -16,11 +16,23 @@ class LocationAdapter : JsonSerializer<Location>, JsonDeserializer<Location> {
 
   private val gson = GsonBuilder().registerTypeAdapter(Point::class.java, PointAdapter()).create()
 
+  /**
+   * Serializes a Location object to a Json string.
+   *
+   * @param location The Location object to serialize.
+   * @return The serialized Json string.
+   */
   @TypeConverter
   fun serializeLocation(location: Location): String {
     return gson.toJson(location)
   }
 
+  /**
+   * Deserializes a Json object to a Location object.
+   *
+   * @param data The Json string to deserialize.
+   * @return The deserialized Location object.
+   */
   @TypeConverter
   fun deserializeLocation(data: String): Location {
     return gson.fromJson(data, Location::class.java)

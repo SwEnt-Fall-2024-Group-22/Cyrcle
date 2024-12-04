@@ -92,8 +92,8 @@ object TileUtils {
   /**
    * Returns the bottom left point of the tile
    *
-   * @param tile the tile to get the bottom left point from
-   * @return the bottom left point of the tile
+   * @param tile a valid tile to get the bottom left point from.
+   * @return the bottom left point of the tile, null if tile is not valid.
    */
   fun getBottomLeftPoint(tile: Tile): Point? {
     val split = tile.split("_")
@@ -116,8 +116,8 @@ object TileUtils {
   /**
    * Returns the top right point of the tile
    *
-   * @param tile the tile to get the top right point from
-   * @return the top right point of the tile
+   * @param tile a valid tile to get the top right point from.
+   * @return the top right point of the tile, null if tile is not valid.
    */
   fun getTopRightPoint(tile: Tile): Point? {
     val split = tile.split("_")
