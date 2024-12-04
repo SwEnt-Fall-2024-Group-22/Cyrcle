@@ -18,6 +18,8 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
   private val collectionPath = "parkings"
   private val parkingSerializer = ParkingAdapter()
 
+  private var nbrOfRequest = 0
+
   override fun onSignIn(onSuccess: () -> Unit) {
     Firebase.auth.addAuthStateListener {
       if (it.currentUser != null) {
@@ -35,6 +37,8 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
       onSuccess: (Parking) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
+    nbrOfRequest += 1
+    Log.d("parkingRepositoryFirestore", "nbrOfRequest: $nbrOfRequest")
     db.collection(collectionPath)
         .document(id)
         .get()
@@ -58,6 +62,8 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
       onSuccess(emptyList())
       return
     }
+    nbrOfRequest += 1
+    Log.d("parkingRepositoryFirestore", "nbrOfRequest: $nbrOfRequest")
     db.collection(collectionPath)
         .whereIn("uid", ids)
         .get()
@@ -88,6 +94,8 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
       onFailure(Exception("Invalid range"))
       return
     }
+    nbrOfRequest += 1
+    Log.d("parkingRepositoryFirestore", "nbrOfRequest: $nbrOfRequest")
     db.collection(collectionPath)
         .whereGreaterThan("location.center.latitude", start.latitude())
         .whereLessThanOrEqualTo("location.center.latitude", end.latitude())

@@ -244,8 +244,6 @@ fun MapScreen(
               DisposableMapEffect { mapView ->
 
                 // ======================= GLOBAL SETTINGS =======================
-                // Disable the rotation gesture
-                mapView.gestures.getGesturesManager().rotateGestureDetector.isEnabled = false
                 // Set camera bounds options
                 val cameraBoundsOptions =
                     CameraBoundsOptions.Builder().minZoom(minZoom).maxZoom(maxZoom).build()
