@@ -58,9 +58,9 @@ fun ParkingReportScreen(
   val topBoxHeight = screenHeight * 0.10f // 10% of screen height for top box
   val verticalPaddingScaleFactor = screenHeight * 0.02f
 
-    val strResToast = stringResource(R.string.report_already)
+  val strResToast = stringResource(R.string.report_already)
 
-    // State for report inputs
+  // State for report inputs
   val selectedReason = rememberSaveable { mutableStateOf(ParkingReportReason.INEXISTANT) }
   val parkingId = parkingViewModel.selectedParking.value?.uid
   val reportDescription = rememberSaveable { mutableStateOf("") }

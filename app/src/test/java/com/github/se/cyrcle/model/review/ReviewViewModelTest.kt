@@ -1,11 +1,6 @@
 package com.github.se.cyrcle.model.review
 
-import com.github.se.cyrcle.model.parking.ParkingReport
-import com.github.se.cyrcle.model.parking.ParkingReportReason
-import com.github.se.cyrcle.model.parking.TestInstancesParking
-import com.github.se.cyrcle.model.report.ReportedObject
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
-import com.github.se.cyrcle.model.report.ReportedObjectType
 import com.github.se.cyrcle.model.user.TestInstancesUser
 import org.junit.Before
 import org.junit.Test
@@ -38,16 +33,15 @@ class ReviewViewModelTest {
     val review = TestInstancesReview.review1.copy(reportingUsers = emptyList(), nbReports = 0)
     val user = TestInstancesUser.user1
     val report =
-      ReviewReport(
-        uid = "ReportUID",
-        review = review.uid,
-        reason = ReviewReportReason.HARMFUL,
-        userId = user.public.userId)
+        ReviewReport(
+            uid = "ReportUID",
+            review = review.uid,
+            reason = ReviewReportReason.HARMFUL,
+            userId = user.public.userId)
 
     `when`(reviewRepository.addReport(any(), any(), any())).then {
       it.getArgument<(ReviewReport) -> Unit>(1).invoke(report) // Trigger onSuccess
     }
-
 
     reviewViewModel.selectReview(review)
     reviewViewModel.addReport(report, user)
@@ -65,16 +59,12 @@ class ReviewViewModelTest {
     val review = TestInstancesReview.review1.copy(reportingUsers = emptyList())
     val user = TestInstancesUser.user1
 
-
     reviewViewModel.selectReview(review)
     reviewViewModel.addReportingUser(user)
 
     // Verify that reportingUsers was updated in the repository
-    verify(reviewRepository).updateReview(
-      eq(review.copy(reportingUsers = listOf(user.public.userId))),
-      any(),
-      any()
-    )
+    verify(reviewRepository)
+        .updateReview(eq(review.copy(reportingUsers = listOf(user.public.userId))), any(), any())
   }
 
   @Test
