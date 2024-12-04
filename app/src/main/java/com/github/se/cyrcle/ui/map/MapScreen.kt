@@ -612,7 +612,7 @@ fun SuggestionMenu(
               listOfSuggestions.value.filter { suggestion ->
                 val displayName =
                     suggestion.suggestionFormatDisplayName(
-                        maxSuggestionDisplayNameLengthMap, "MapScreen")
+                        maxSuggestionDisplayNameLengthMap, Address.Mode.MAP)
                 if (displayName in seenNames) {
                   false
                 } else {
@@ -654,7 +654,7 @@ fun SuggestionMenu(
                   Text(
                       text =
                           suggestion.suggestionFormatDisplayName(
-                              maxSuggestionDisplayNameLengthMap, "MapScreen"),
+                              maxSuggestionDisplayNameLengthMap, Address.Mode.MAP),
                       Modifier.padding(5.dp))
                 }
 

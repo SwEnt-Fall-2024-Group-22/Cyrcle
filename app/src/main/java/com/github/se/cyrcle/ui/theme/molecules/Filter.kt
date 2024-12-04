@@ -430,7 +430,7 @@ fun SearchBarListScreen(
                 listOfSuggestions.value.filter { suggestion ->
                   val displayName =
                       suggestion.suggestionFormatDisplayName(
-                          maxSuggestionDisplayNameLengthList, "ListScreen")
+                          maxSuggestionDisplayNameLengthList, Address.Mode.LIST)
                   if (displayName in seenNames) {
                     false
                   } else {
@@ -444,7 +444,7 @@ fun SearchBarListScreen(
                   text = {
                     Text(
                         address.suggestionFormatDisplayName(
-                            maxSuggestionDisplayNameLengthList, "ListScreen"))
+                            maxSuggestionDisplayNameLengthList, Address.Mode.LIST))
                   },
                   modifier = Modifier.testTag("SuggestionMenuItem${address.city}"),
                   onClick = {
@@ -454,7 +454,7 @@ fun SearchBarListScreen(
                     isTextFieldVisible.value = false
                     textFieldValue.value =
                         address.suggestionFormatDisplayName(
-                            maxSuggestionDisplayNameLengthList, "ListScreen")
+                            maxSuggestionDisplayNameLengthList, Address.Mode.LIST)
                     focusManager.clearFocus()
                   })
             }

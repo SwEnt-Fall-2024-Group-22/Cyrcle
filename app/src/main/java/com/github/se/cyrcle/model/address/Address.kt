@@ -106,16 +106,22 @@ data class Address(
    * Function that format the Address to display its suggestion name.
    *
    * @param maxLength the maximum length of the string
-   * @param mode the mode of the suggestion (MapScreen for the map, ListScreen for the list)
+   * @param mode the mode of the suggestion formatting
    * @return the suggestion formatted display name
    */
-  fun suggestionFormatDisplayName(maxLength: Int, mode: String): String {
+  fun suggestionFormatDisplayName(maxLength: Int, mode: Mode): String {
     val fieldPriorities: List<String>
-    if (mode == "ListScreen") {
+    if (mode == Mode.LIST) {
       fieldPriorities = listOf(publicName, road, city, country)
     } else {
       fieldPriorities = listOf(publicName, road, city, region, country)
     }
     return shortenString(fieldPriorities.filter { it.isNotEmpty() }.joinToString(", "), maxLength)
+  }
+
+  // Enum that determine the mode of formatting of the suggestion display name
+  enum class Mode {
+    MAP,
+    LIST
   }
 }
