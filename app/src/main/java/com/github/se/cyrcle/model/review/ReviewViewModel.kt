@@ -283,6 +283,16 @@ class ReviewViewModel(
     Log.d("ReviewViewModel", "Review and metrics updated successfully: ${selectedReview.nbReports}")
   }
 
+
+    /**
+     * Adds a reporting user to the currently selected review and updates Firestore.
+     *
+     * This function first verifies if a review is selected. If a review is selected, it creates an
+     * updated review object with the new reporting user and attempts to update Firestore to reflect
+     * the change. Upon a successful update, the local state is also updated to ensure consistency. If
+     * no review is selected, an error is logged and no operation is performed.
+     * @param user The user to be added to the reporting users list.
+     */
   fun addReportingUser(user: User) {
     _selectedReview.update { currentReview ->
       currentReview?.let {
@@ -292,11 +302,11 @@ class ReviewViewModel(
             review = updatedReview,
             onSuccess = {
               Log.d("ReviewViewModel", "User added to reportingUsers in Firestore")
-              _selectedReview.update { state ->
-                if (state?.uid == updatedReview.uid) {
+              _selectedReview.update { curReview ->
+                if (curReview?.uid == updatedReview.uid) {
                   updatedReview
                 } else {
-                  state
+                  curReview
                 }
               }
             },
