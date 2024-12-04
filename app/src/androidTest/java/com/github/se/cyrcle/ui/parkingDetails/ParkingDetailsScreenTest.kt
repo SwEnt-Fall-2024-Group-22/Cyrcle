@@ -20,6 +20,7 @@ import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockReviewRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.image.ImageRepository
+import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingCapacity
 import com.github.se.cyrcle.model.parking.ParkingProtection
 import com.github.se.cyrcle.model.parking.ParkingRackType
@@ -53,6 +54,7 @@ class ParkingDetailsScreenTest {
   private lateinit var mockReportedObjectRepository: ReportedObjectRepository
   private lateinit var authenticator: MockAuthenticationRepository
 
+  private lateinit var mapViewModel: MapViewModel
   private lateinit var userViewModel: UserViewModel
   private lateinit var parkingViewModel: ParkingViewModel
   private lateinit var reviewViewModel: ReviewViewModel
@@ -73,6 +75,7 @@ class ParkingDetailsScreenTest {
     authenticator = MockAuthenticationRepository()
     mockReportedObjectRepository = MockReportedObjectRepository()
 
+    mapViewModel = MapViewModel()
     parkingViewModel =
         ParkingViewModel(
             imageRepository,
@@ -94,7 +97,7 @@ class ParkingDetailsScreenTest {
     userViewModel.setCurrentUser(null) // Ensure user is signed out
 
     composeTestRule.setContent {
-      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
+      ParkingDetailsScreen(mapViewModel, navigationActions, parkingViewModel, userViewModel)
     }
 
     composeTestRule.onNodeWithTag("TopInteractionRow").assertIsDisplayed()
@@ -108,7 +111,7 @@ class ParkingDetailsScreenTest {
     parkingViewModel.selectParking(TestInstancesParking.parking1)
 
     composeTestRule.setContent {
-      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
+      ParkingDetailsScreen(mapViewModel, navigationActions, parkingViewModel, userViewModel)
     }
 
     composeTestRule.onNodeWithTag("PinIcon").assertIsDisplayed().performClick()
@@ -133,7 +136,7 @@ class ParkingDetailsScreenTest {
     userViewModel.signIn({}, {})
 
     composeTestRule.setContent {
-      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
+      ParkingDetailsScreen(mapViewModel, navigationActions, parkingViewModel, userViewModel)
     }
     // Initially should show outline icon
     composeTestRule.onNodeWithTag("BlackOutlinedFavoriteIcon").assertIsDisplayed()
@@ -153,7 +156,7 @@ class ParkingDetailsScreenTest {
     userViewModel.signIn({}, {})
 
     composeTestRule.setContent {
-      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
+      ParkingDetailsScreen(mapViewModel, navigationActions, parkingViewModel, userViewModel)
     }
 
     // Initially should show filled icon
@@ -170,7 +173,7 @@ class ParkingDetailsScreenTest {
   fun displayAllComponents() {
     parkingViewModel.selectParking(TestInstancesParking.parking1)
     composeTestRule.setContent {
-      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
+      ParkingDetailsScreen(mapViewModel, navigationActions, parkingViewModel, userViewModel)
     }
 
     // Verify the top app bar
@@ -200,7 +203,7 @@ class ParkingDetailsScreenTest {
   fun componentsDisplayCorrectValues() {
     parkingViewModel.selectParking(TestInstancesParking.parking1)
     composeTestRule.setContent {
-      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
+      ParkingDetailsScreen(mapViewModel, navigationActions, parkingViewModel, userViewModel)
     }
 
     composeTestRule
@@ -227,7 +230,7 @@ class ParkingDetailsScreenTest {
   fun displayTitleAndMultipleImages() {
     parkingViewModel.selectParking(TestInstancesParking.parking2)
     composeTestRule.setContent {
-      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
+      ParkingDetailsScreen(mapViewModel, navigationActions, parkingViewModel, userViewModel)
     }
 
     composeTestRule.onNodeWithTag("TopAppBarTitle").assertTextContains("Description of Rude épais")
@@ -238,7 +241,7 @@ class ParkingDetailsScreenTest {
   fun seeAllReviewsBehavesCorrectly() {
     parkingViewModel.selectParking(TestInstancesParking.parking1)
     composeTestRule.setContent {
-      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
+      ParkingDetailsScreen(mapViewModel, navigationActions, parkingViewModel, userViewModel)
     }
 
     composeTestRule.onNodeWithTag("SeeAllReviewsText").performClick()
@@ -251,7 +254,7 @@ class ParkingDetailsScreenTest {
     userViewModel.setCurrentUser(TestInstancesUser.user1)
     parkingViewModel.selectParking(TestInstancesParking.parking1)
     composeTestRule.setContent {
-      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
+      ParkingDetailsScreen(mapViewModel, navigationActions, parkingViewModel, userViewModel)
     }
 
     composeTestRule.onNodeWithTag("NoteText").assertIsDisplayed()
@@ -284,7 +287,7 @@ class ParkingDetailsScreenTest {
     userViewModel.setCurrentUser(userWithNote)
     parkingViewModel.selectParking(TestInstancesParking.parking1)
     composeTestRule.setContent {
-      ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
+      ParkingDetailsScreen(mapViewModel, navigationActions, parkingViewModel, userViewModel)
     }
 
     composeTestRule
