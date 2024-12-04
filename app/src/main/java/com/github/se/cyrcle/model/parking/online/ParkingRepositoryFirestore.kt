@@ -11,7 +11,6 @@ import com.google.firebase.auth.auth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.*
-import com.mapbox.geojson.Point
 import javax.inject.Inject
 
 class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFirestore) :
