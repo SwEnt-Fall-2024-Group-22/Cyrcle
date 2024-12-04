@@ -38,7 +38,7 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
       onFailure: (Exception) -> Unit
   ) {
     nbrOfRequest += 1
-    Log.e("parkingRepositoryFirestore", "nbrOfRequest: $nbrOfRequest")
+    Log.d("parkingRepositoryFirestore", "nbrOfRequest: $nbrOfRequest")
     db.collection(collectionPath)
         .document(id)
         .get()
@@ -63,7 +63,7 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
       return
     }
     nbrOfRequest += 1
-    Log.e("parkingRepositoryFirestore", "nbrOfRequest: $nbrOfRequest")
+    Log.d("parkingRepositoryFirestore", "nbrOfRequest: $nbrOfRequest")
     db.collection(collectionPath)
         .whereIn("uid", ids)
         .get()
@@ -95,7 +95,7 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
       return
     }
     nbrOfRequest += 1
-    Log.e("parkingRepositoryFirestore", "nbrOfRequest: $nbrOfRequest")
+    Log.d("parkingRepositoryFirestore", "nbrOfRequest: $nbrOfRequest")
     db.collection(collectionPath)
         .whereGreaterThan("location.center.latitude", start.latitude())
         .whereLessThanOrEqualTo("location.center.latitude", end.latitude())
