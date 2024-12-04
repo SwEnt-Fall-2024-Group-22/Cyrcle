@@ -139,11 +139,11 @@ class AddressRepositoryNominatimTest {
     val mockResponse = MockResponse(200, "[]")
     setupMockResponse(mockResponse)
 
-    var resultAddress: Address? = null
-    addressRepositoryNominatim.search("0.0,0.0", { address -> resultAddress = address.first() }, {})
+    var resultAddress: List<Address> = emptyList()
+    addressRepositoryNominatim.search("0.0,0.0", { address -> resultAddress = address }, {})
 
     assertNotNull(resultAddress)
-    assertEquals(Address(), resultAddress)
+    assertEquals(emptyList<Address>(), resultAddress)
   }
 
   @Test
@@ -157,7 +157,7 @@ class AddressRepositoryNominatimTest {
 
     val capturedRequest = urlCaptor.firstValue
     assertEquals(
-        "https://nominatim.openstreetmap.org/search?q=38.89787%2C-77.036571&format=json&addressdetails=1",
+        "https://nominatim.openstreetmap.org/search?q=38.89787%2C-77.036571&format=json&addressdetails=1&accept-language=en",
         capturedRequest.url.toString())
     assertEquals("Cyrcle", capturedRequest.header("User-Agent"))
   }
