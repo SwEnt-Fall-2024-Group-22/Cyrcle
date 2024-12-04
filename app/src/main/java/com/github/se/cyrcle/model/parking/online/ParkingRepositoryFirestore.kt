@@ -1,9 +1,6 @@
 package com.github.se.cyrcle.model.parking.online
 
 import android.util.Log
-import com.github.se.cyrcle.model.user.User
-import com.github.se.cyrcle.model.user.UserDetails
-import com.github.se.cyrcle.model.user.UserPublic
 import com.github.se.cyrcle.io.serializer.ParkingAdapter
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingReport
@@ -14,9 +11,7 @@ import com.google.firebase.auth.auth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.*
-import com.google.gson.reflect.TypeToken
 import com.mapbox.geojson.Point
-import java.lang.reflect.Type
 import javax.inject.Inject
 
 class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFirestore) :
