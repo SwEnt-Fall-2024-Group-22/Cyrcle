@@ -378,7 +378,7 @@ fun SearchBarListScreen(
         onValueChange = { textFieldValue.value = it },
         placeholder = { Text(text = stringResource(R.string.search_bar_placeholder)) },
         modifier =
-            Modifier.padding(start = 8.dp)
+            Modifier.padding(start = 4.dp, end = 8.dp)
                 .offset(x = slideOffset)
                 .alpha(alpha)
                 .onGloballyPositioned { coordinates -> textFieldSize.value = coordinates.size }
