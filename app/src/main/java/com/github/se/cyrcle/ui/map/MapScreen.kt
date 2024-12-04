@@ -103,8 +103,10 @@ import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.createPolygonAnnotationManager
+import com.mapbox.maps.plugin.compass.compass
 import com.mapbox.maps.plugin.gestures.OnMoveListener
 import com.mapbox.maps.plugin.gestures.gestures
+import com.mapbox.maps.plugin.scalebar.generated.ScaleBarSettings
 import com.mapbox.maps.plugin.viewport.data.FollowPuckViewportStateOptions
 import com.mapbox.maps.plugin.viewport.data.OverviewViewportStateOptions
 import com.mapbox.maps.viewannotation.annotatedLayerFeature
@@ -238,7 +240,14 @@ fun MapScreen(
             })
       }) { padding ->
         MapboxMap(
-            Modifier.fillMaxSize().padding(padding).testTag("MapScreen"),
+            compass = {
+              // height of setting icon is hardcoded to 56dp so we put the compass down by more than
+              // 56dp.
+              Compass(alignment = Alignment.TopEnd, modifier = Modifier.padding(top = 60.dp))
+            },
+            // disable the scale bar that is anyways under the search bar.
+            scaleBar = { ScaleBarSettings.Builder().setEnabled(false).build() },
+            modifier = Modifier.fillMaxSize().padding(padding).testTag("MapScreen"),
             mapViewportState = mapViewportState,
             style = { MapConfig.DefaultStyle() }) {
               DisposableMapEffect { mapView ->

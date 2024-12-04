@@ -49,6 +49,7 @@ class ParkingViewModel(
   // ================== Parkings ==================
   /** List of parkings within the designated area */
   private val _rectParkings = MutableStateFlow<List<Parking>>(emptyList())
+  val rectParkings: StateFlow<List<Parking>> = _rectParkings
 
   /**
    * List of parkings within the designated area, filtered by the selected options. The flow is
