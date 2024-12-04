@@ -770,7 +770,8 @@ fun PreviewCard(navigationActions: NavigationActions, parkingViewModel: ParkingV
                     val yOffset = -placeable.height / 2 - 50.dp.roundToPx()
                     placeable.placeRelative(0, yOffset)
                   }
-                },
+                }
+                .testTag("PreviewCard"),
         colors =
             cardColors(
                 containerColor = MaterialTheme.colorScheme.surface,
@@ -785,7 +786,8 @@ fun PreviewCard(navigationActions: NavigationActions, parkingViewModel: ParkingV
                     text = parking.optName ?: stringResource(R.string.default_parking_name),
                     style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onSurface,
-                    textAlign = TextAlign.Left)
+                    textAlign = TextAlign.Left,
+                    testTag = "PreviewCardTitle")
                 ScoreStars(
                     score = parking.avgScore,
                     text =
@@ -802,7 +804,8 @@ fun PreviewCard(navigationActions: NavigationActions, parkingViewModel: ParkingV
                     text =
                         stringResource(R.string.map_screen_rack_type, parking.rackType.description),
                     style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Left)
+                    textAlign = TextAlign.Left,
+                    testTag = "PreviewCardRackType")
 
                 // Text for protection
                 Text(
@@ -810,20 +813,23 @@ fun PreviewCard(navigationActions: NavigationActions, parkingViewModel: ParkingV
                         stringResource(
                             R.string.map_screen_protection, parking.protection.description),
                     style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Left)
+                    textAlign = TextAlign.Left,
+                    testTag = "PreviewCardProtection")
 
                 // Text for description
                 Text(
                     text =
                         stringResource(R.string.map_screen_capacity, parking.capacity.description),
                     style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Left)
+                    textAlign = TextAlign.Left,
+                    testTag = "PreviewCardCapacity")
 
                 // Go to parking details button
                 Button(
                     onClick = { navigationActions.navigateTo(Screen.PARKING_DETAILS) },
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                    text = stringResource(R.string.map_screen_details_button))
+                    text = stringResource(R.string.map_screen_details_button),
+                    testTag = "PreviewCardDetailsButton")
               }
         }
   }

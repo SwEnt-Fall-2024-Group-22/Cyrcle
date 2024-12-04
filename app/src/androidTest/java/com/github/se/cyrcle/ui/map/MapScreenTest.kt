@@ -23,6 +23,7 @@ import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.model.user.UserViewModel
@@ -284,5 +285,26 @@ class MapScreenTest {
         .onNodeWithTag("suggestionCardMock City 2")
         .assertIsDisplayed()
         .assertHasClickAction()
+  }
+
+  @Test
+  fun testPreviewCard() {
+    composeTestRule.setContent {
+      PreviewCard(navigationActions = mockNavigation, parkingViewModel = parkingViewModel)
+      parkingViewModel.selectParking(TestInstancesParking.parking1)
+    }
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithTag("PreviewCard").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("PreviewCardTitle").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("PreviewCardRackType").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("PreviewCardProtection").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("PreviewCardCapacity").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag("PreviewCardDetailsButton")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+    verify(mockNavigation).navigateTo(Screen.PARKING_DETAILS)
   }
 }
