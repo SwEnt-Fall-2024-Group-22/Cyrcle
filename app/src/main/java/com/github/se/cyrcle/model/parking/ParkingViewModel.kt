@@ -80,10 +80,6 @@ class ParkingViewModel(
   private val _selectedParking = MutableStateFlow<Parking?>(null)
   val selectedParking: StateFlow<Parking?> = _selectedParking
 
-  /** Selected parking has already been reported by current user */
-  private val _hasAlreadyReported = MutableStateFlow<Boolean>(false)
-  val hasAlreadyReported: StateFlow<Boolean> = _hasAlreadyReported
-
   /** Selected parking to review/edit */
   private val _selectedParkingReports = MutableStateFlow<List<ParkingReport>>(emptyList())
   val selectedParkingReports: StateFlow<List<ParkingReport>> = _selectedParkingReports
@@ -444,23 +440,13 @@ class ParkingViewModel(
    * @param user The user submitting the report, required for identifying the reporter.
    */
   fun addReport(report: ParkingReport, user: User) {
-    val selectedParking = _selectedParking.value
     if (_selectedParking.value == null) {
       Log.e("ParkingViewModel", "No parking selected")
       return
     }
-
-    if (_selectedParking.value?.reportingUsers?.contains(user.public.userId) == true) {
-      _hasAlreadyReported.value = true
-      return
-    } else {
-      _hasAlreadyReported.value = false
-    }
-
     parkingRepository.addReport(
         report,
         onSuccess = {
-          addReportingUser(user)
           val newReportedObject =
               ReportedObject(
                   objectUID = _selectedParking.value?.uid!!,
@@ -520,49 +506,6 @@ class ParkingViewModel(
     selectedParking.nbReports += 1
     parkingRepository.updateParking(selectedParking, {}, {})
     Log.d("ParkingViewModel", "Parking and metrics updated: $selectedParking")
-  }
-
-  /**
-   * Adds a reporting user to the currently selected parking and updates Firestore.
-   *
-   * This function first verifies if a parking is selected. If a parking is selected, it creates an
-   * updated parking object with the new reporting user and attempts to update Firestore to reflect
-   * the change. Upon a successful update, the local state is also updated to ensure consistency. If
-   * no parking is selected, an error is logged and no operation is performed.
-   *
-   * @param user The user to be added to the reporting users list.
-   */
-  fun addReportingUser(user: User) {
-    _selectedParking.update { currentParking ->
-      currentParking?.let {
-        // Create an updated parking object with the new reporting user
-        val updatedParking = it.copy(reportingUsers = it.reportingUsers + user.public.userId)
-
-        // Update Firestore to reflect the change
-        parkingRepository.updateParking(
-            parking = updatedParking,
-            onSuccess = {
-              Log.d("ParkingViewModel", "User added to reportingUsers in Firestore")
-              // Update the local state to reflect the change
-              _selectedParking.update { curParking ->
-                // Ensure consistency by returning the updated parking if it matches
-                if (curParking?.uid == updatedParking.uid) {
-                  updatedParking
-                } else {
-                  curParking
-                }
-              }
-            },
-            onFailure = { exception ->
-              // Log failure
-              Log.e(
-                  "ParkingViewModel", "Failed to update parking in Firestore: ${exception.message}")
-            })
-
-        // Return the updated parking to update the state
-        updatedParking
-      }
-    }
   }
 
   // ================== Reviews ==================
