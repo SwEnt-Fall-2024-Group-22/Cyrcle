@@ -2,9 +2,13 @@ package com.github.se.cyrcle.model.parking
 
 import android.content.Context
 import com.github.se.cyrcle.model.image.ImageRepository
+import com.github.se.cyrcle.model.parking.offline.OfflineParkingRepository
+import com.github.se.cyrcle.model.parking.online.ParkingRepository
 import com.github.se.cyrcle.model.report.ReportedObject
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.report.ReportedObjectType
+import com.github.se.cyrcle.model.zone.Zone
+import com.mapbox.geojson.BoundingBox
 import com.mapbox.geojson.Point
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -28,6 +32,7 @@ class ParkingViewModelTest {
 
   @Mock private lateinit var parkingViewModel: ParkingViewModel
   @Mock private lateinit var parkingRepository: ParkingRepository
+  @Mock private lateinit var offlineParkingRepository: OfflineParkingRepository
   @Mock private lateinit var imageRepository: ImageRepository
   @Mock private lateinit var reportedObjectRepository: ReportedObjectRepository
   @Mock private lateinit var context: Context
@@ -37,7 +42,59 @@ class ParkingViewModelTest {
     MockitoAnnotations.openMocks(this)
 
     parkingViewModel =
-        ParkingViewModel(imageRepository, parkingRepository, reportedObjectRepository)
+        ParkingViewModel(
+            imageRepository, parkingRepository, offlineParkingRepository, reportedObjectRepository)
+  }
+
+  @Test
+  fun deleteZoneTest() {
+    val zoneToDelete = Zone(BoundingBox.fromLngLats(0.0, 0.0, 1.0, 1.0), "zone1")
+    val allZones = listOf(zoneToDelete, Zone(BoundingBox.fromLngLats(2.0, 2.0, 3.0, 3.0), "zone2"))
+
+    val tilesFromZoneToDelete =
+        TileUtils.getAllTilesInRectangle(
+            zoneToDelete.boundingBox.southwest(), zoneToDelete.boundingBox.northeast())
+    val tilesFromAllZones =
+        allZones
+            .flatMap { zone ->
+              if (zone != zoneToDelete)
+                  TileUtils.getAllTilesInRectangle(
+                      zone.boundingBox.southwest(), zone.boundingBox.northeast())
+              else emptySet()
+            }
+            .toSet()
+
+    parkingViewModel.deleteZone(zoneToDelete, allZones)
+    verify(offlineParkingRepository)
+        .deleteTiles(eq(tilesFromZoneToDelete - tilesFromAllZones), any())
+  }
+
+  @Test
+  fun downloadZoneTest() {
+    val zone = Zone(BoundingBox.fromLngLats(0.0, 0.0, 1.0, 1.0), "zone1")
+    val tiles =
+        TileUtils.getAllTilesInRectangle(zone.boundingBox.southwest(), zone.boundingBox.northeast())
+    val mutableTiles = tiles.toMutableSet()
+    val checkerForTiles = mutableSetOf<Tile>()
+
+    `when`(parkingRepository.getParkingsForTile(any(), any(), any())).then {
+      val tile = it.getArgument<Tile>(0)
+      val callback = it.getArgument<(List<Parking>) -> Unit>(1)
+      mutableTiles -= tile
+      callback(listOf(TestInstancesParking.parking1.copy(uid = tile)))
+    }
+
+    `when`(offlineParkingRepository.downloadParkings(any(), any())).then {
+      val parkings = it.getArgument<List<Parking>>(0)
+      assert(parkings.size == 1)
+      checkerForTiles += parkings[0].uid
+      Unit
+    }
+
+    parkingViewModel.downloadZone(zone, {}, {})
+
+    assert(mutableTiles.isEmpty())
+    assertEquals(tiles, checkerForTiles)
   }
 
   @Test
@@ -58,8 +115,8 @@ class ParkingViewModelTest {
 
   @Test
   fun getParkingsBetweenTest() {
-    `when`(parkingRepository.getParkingsBetween(any(), any(), any(), any())).then {
-      it.getArgument<(List<Parking>) -> Unit>(2)(
+    `when`(parkingRepository.getParkingsForTile(any(), any(), any())).then {
+      it.getArgument<(List<Parking>) -> Unit>(1)(
           listOf(TestInstancesParking.parking1, TestInstancesParking.parking2))
     }
 
@@ -202,7 +259,8 @@ class ParkingViewModelTest {
   fun uploadImageWithoutParkingSelectedTest() {
     // assert nothing is called when no parking is selected
     val emptyParkingViewModel =
-        ParkingViewModel(imageRepository, parkingRepository, reportedObjectRepository)
+        ParkingViewModel(
+            imageRepository, parkingRepository, offlineParkingRepository, reportedObjectRepository)
     emptyParkingViewModel.uploadImage("localPath/image.jpg", context) {}
     verify(imageRepository, never()).uploadImage(any(), any(), any(), any(), any())
   }

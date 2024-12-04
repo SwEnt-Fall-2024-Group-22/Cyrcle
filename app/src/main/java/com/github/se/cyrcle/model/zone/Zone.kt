@@ -35,7 +35,7 @@ data class Zone(
 
   /** Returns a JSON representation of the zone. */
   fun toJson(): String {
-    return createGson().toJson(this)
+    return gson.toJson(this)
   }
 
   companion object {
@@ -43,12 +43,12 @@ data class Zone(
      * Creates a new Gson instance with the necessary type adapters to serialize and deserialize a
      * Zone
      */
-    private fun createGson(): Gson {
-      return GsonBuilder()
-          .registerTypeAdapter(BoundingBox::class.java, BoundingBoxTypeAdapter())
-          .registerTypeAdapter(LocalDate::class.java, LocalDateTypeAdapter())
-          .create()
-    }
+    private val gson: Gson =
+        GsonBuilder()
+            .registerTypeAdapter(BoundingBox::class.java, BoundingBoxTypeAdapter())
+            .registerTypeAdapter(LocalDate::class.java, LocalDateTypeAdapter())
+            .create()
+
     /**
      * Creates a new zone from a JSON representation.
      *
@@ -56,11 +56,17 @@ data class Zone(
      */
     private fun fromJson(json: String): Zone? {
       return try {
-        createGson().fromJson(json, Zone::class.java)
+        gson.fromJson(json, Zone::class.java)
       } catch (e: Exception) {
         // If the JSON can't be parsed, we return null, the UI will filter out the invalid zones.
         null
       }
+    }
+
+    fun createZone(boundingBox: BoundingBox, name: String, context: Context): Zone {
+      val zone = Zone(boundingBox, name)
+      storeZone(zone, context)
+      return zone
     }
 
     /**

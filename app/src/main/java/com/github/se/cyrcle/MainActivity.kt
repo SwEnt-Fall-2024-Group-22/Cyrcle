@@ -15,8 +15,9 @@ import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.authentication.AuthenticationRepository
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.map.MapViewModel
-import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.parking.offline.OfflineParkingRepository
+import com.github.se.cyrcle.model.parking.online.ParkingRepository
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.report.ReportedObjectViewModel
 import com.github.se.cyrcle.model.review.ReviewRepository
@@ -48,6 +49,8 @@ class MainActivity : ComponentActivity() {
 
   @Inject lateinit var authenticationRepository: AuthenticationRepository
 
+  @Inject lateinit var offlineParkingRepository: OfflineParkingRepository
+
   private val reviewViewModel: ReviewViewModel by viewModels {
     CustomViewModelFactory { ReviewViewModel(reviewRepository, reportedObjectRepository) }
   }
@@ -58,7 +61,8 @@ class MainActivity : ComponentActivity() {
   }
   private val parkingViewModel: ParkingViewModel by viewModels {
     CustomViewModelFactory {
-      ParkingViewModel(imageRepository, parkingRepository, reportedObjectRepository)
+      ParkingViewModel(
+          imageRepository, parkingRepository, offlineParkingRepository, reportedObjectRepository)
     }
   }
   private val reportedObjectViewModel: ReportedObjectViewModel by viewModels {

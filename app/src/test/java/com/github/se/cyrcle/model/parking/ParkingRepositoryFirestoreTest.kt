@@ -3,6 +3,7 @@ package com.github.se.cyrcle.model.parking
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
 import com.github.se.cyrcle.io.serializer.ParkingAdapter
+import com.github.se.cyrcle.model.parking.online.ParkingRepositoryFirestore
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.FirebaseApp
@@ -41,6 +42,9 @@ class ParkingRepositoryFirestoreTest {
   private val parking = TestInstancesParking.parking1
   private val parkingAdapter = ParkingAdapter()
 
+  private val testTile = TileUtils.getTileFromPoint(Point.fromLngLat(6.5, 46.5))
+  private val failTile = ""
+
   private lateinit var mockParkingData: Map<String, Any>
   private lateinit var parkingRepositoryFirestore: ParkingRepositoryFirestore
 
@@ -70,10 +74,8 @@ class ParkingRepositoryFirestoreTest {
 
   @Test
   fun getParkingById_callsOnSuccess() {
-    `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockParkingQuerySnapshot))
-    `when`(mockParkingQuerySnapshot.documents).thenReturn(listOf(mockQueryDocumentSnapshot))
-    `when`(mockDocumentSnapshot.toObject(Parking::class.java)).thenReturn(parking)
     `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
+    `when`(mockDocumentSnapshot.data).thenReturn(mockParkingData)
 
     var onSuccessCallbackCalled = false
     parkingRepositoryFirestore.getParkingById(
@@ -166,7 +168,7 @@ class ParkingRepositoryFirestoreTest {
   }
 
   @Test
-  fun getParkingsBetween_callsOnSuccess() {
+  fun getParkingsForTile_callsOnSuccess() {
     `when`(mockQueryDocumentSnapshot.data).thenReturn(mockParkingData)
     `when`(mockQueryDocumentSnapshot.id).thenReturn(parking.uid)
     `when`(mockCollectionReference.whereGreaterThan(any<String>(), any()))
@@ -179,9 +181,8 @@ class ParkingRepositoryFirestoreTest {
     var onSuccessCallbackCalled = false
     // Spy on the parkingRepositoryFirestore to verify deserializeParking call
     val spyParkingRepositoryFirestore = spy(parkingRepositoryFirestore)
-    spyParkingRepositoryFirestore.getParkingsBetween(
-        start = Point.fromLngLat(6.5, 46.5),
-        end = Point.fromLngLat(6.6, 46.6),
+    spyParkingRepositoryFirestore.getParkingsForTile(
+        testTile,
         onSuccess = { parkings ->
           assertEquals(1, parkings.size)
           assertEquals(parking.uid, parkings[0].uid)
@@ -196,29 +197,15 @@ class ParkingRepositoryFirestoreTest {
   }
 
   @Test
-  fun getParkingsBetween_withInvalidRange_callsOnFailure() {
-    var onFailureCallbackCalled = false
-    parkingRepositoryFirestore.getParkingsBetween(
-        start = Point.fromLngLat(6.6, 46.6),
-        end = Point.fromLngLat(6.5, 46.5),
-        onSuccess = { fail("Expected failure but got success") },
-        onFailure = { onFailureCallbackCalled = true })
-    assertTrue(onFailureCallbackCalled)
-  }
-
-  @Test
-  fun getParkingsBetween_callsOnFailure() {
+  fun getParkingsForTile_callsOnFailure() {
     val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
-    `when`(mockCollectionReference.whereGreaterThan(any<String>(), any()))
-        .thenReturn(mockCollectionReference)
-    `when`(mockCollectionReference.whereLessThanOrEqualTo(any<String>(), any()))
+    `when`(mockCollectionReference.whereEqualTo(any<String>(), any()))
         .thenReturn(mockCollectionReference)
     `when`(mockCollectionReference.get()).thenReturn(taskCompletionSource.task)
 
     var onFailureCallbackCalled = false
-    parkingRepositoryFirestore.getParkingsBetween(
-        start = Point.fromLngLat(6.5, 46.5),
-        end = Point.fromLngLat(6.6, 46.6),
+    parkingRepositoryFirestore.getParkingsForTile(
+        failTile,
         onSuccess = { fail("Expected failure but got success") },
         onFailure = { onFailureCallbackCalled = true })
     // Complete the task to trigger the addOnCompleteListener with an exception

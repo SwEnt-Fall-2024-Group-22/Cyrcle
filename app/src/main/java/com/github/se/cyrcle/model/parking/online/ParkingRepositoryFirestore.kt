@@ -1,12 +1,15 @@
-package com.github.se.cyrcle.model.parking
+package com.github.se.cyrcle.model.parking.online
 
 import android.util.Log
 import com.github.se.cyrcle.io.serializer.ParkingAdapter
+import com.github.se.cyrcle.model.parking.Parking
+import com.github.se.cyrcle.model.parking.ParkingReport
+import com.github.se.cyrcle.model.parking.Tile
+import com.github.se.cyrcle.model.parking.TileUtils
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
-import com.mapbox.geojson.Point
 import javax.inject.Inject
 
 class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFirestore) :
@@ -68,12 +71,19 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
         .addOnFailureListener { onFailure(it) }
   }
 
-  override fun getParkingsBetween(
-      start: Point,
-      end: Point,
+  override fun getParkingsForTile(
+      tile: Tile,
       onSuccess: (List<Parking>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
+    // Get the bottom left and top right points of the tile
+    // TODO This is a temporary solution for the time that `Parking.tile` gets added on Firestore
+    val start = TileUtils.getBottomLeftPoint(tile)
+    val end = TileUtils.getTopRightPoint(tile)
+    if (start == null || end == null) {
+      onFailure(Exception("Invalid tile"))
+      return
+    }
     if (start.latitude() > end.latitude() || start.longitude() > end.longitude()) {
       onFailure(Exception("Invalid range"))
       return

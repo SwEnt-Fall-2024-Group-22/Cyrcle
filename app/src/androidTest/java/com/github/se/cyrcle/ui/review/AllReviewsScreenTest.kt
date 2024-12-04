@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
+import com.github.se.cyrcle.di.mocks.MockOfflineParkingRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockReviewRepository
@@ -33,6 +34,7 @@ class AllReviewsScreenTest {
 
   private lateinit var navigationActions: NavigationActions
   private lateinit var parkingRepository: MockParkingRepository
+  private lateinit var offlineParkingRepository: MockOfflineParkingRepository
   private lateinit var reviewRepository: MockReviewRepository
   private lateinit var userRepository: MockUserRepository
   private lateinit var imageRepository: MockImageRepository
@@ -48,6 +50,7 @@ class AllReviewsScreenTest {
 
     navigationActions = mock(NavigationActions::class.java)
     parkingRepository = MockParkingRepository()
+    offlineParkingRepository = MockOfflineParkingRepository()
     reviewRepository = MockReviewRepository()
     userRepository = MockUserRepository()
     imageRepository = MockImageRepository()
@@ -55,7 +58,8 @@ class AllReviewsScreenTest {
     reportedObjectRepository = MockReportedObjectRepository()
 
     parkingViewModel =
-        ParkingViewModel(imageRepository, parkingRepository, reportedObjectRepository)
+        ParkingViewModel(
+            imageRepository, parkingRepository, offlineParkingRepository, reportedObjectRepository)
     reviewViewModel = ReviewViewModel(reviewRepository, reportedObjectRepository)
     userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository, authenticator)
 

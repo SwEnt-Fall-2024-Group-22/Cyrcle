@@ -9,7 +9,13 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.se.cyrcle.di.mocks.MockImageRepository
+import com.github.se.cyrcle.di.mocks.MockOfflineParkingRepository
+import com.github.se.cyrcle.di.mocks.MockParkingRepository
+import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.model.map.MapViewModel
+import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.zone.Zone
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
@@ -17,23 +23,38 @@ import com.mapbox.geojson.BoundingBox
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.verify
 
+@RunWith(AndroidJUnit4::class)
 class ZoneManagerScreenTest {
+
   @get:Rule val composeTestRule = createComposeRule()
+
   private lateinit var navigationActions: NavigationActions
-  val mapViewModel = MapViewModel()
+
+  private lateinit var mapViewModel: MapViewModel
+  private lateinit var parkingViewModel: ParkingViewModel
 
   @Before
   fun setUp() {
     navigationActions = mock(NavigationActions::class.java)
+    mapViewModel = MapViewModel()
+    parkingViewModel =
+        ParkingViewModel(
+            MockImageRepository(),
+            MockParkingRepository(),
+            MockOfflineParkingRepository(),
+            MockReportedObjectRepository())
   }
 
   @OptIn(ExperimentalTestApi::class)
   @Test
   fun checkAllUIElementsAreDisplayedWithNoZones() {
-    composeTestRule.setContent { ZoneManagerScreen(mapViewModel, navigationActions) }
+    composeTestRule.setContent {
+      ZoneManagerScreen(mapViewModel, parkingViewModel, navigationActions)
+    }
 
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("TopAppBar"))
     composeTestRule.onNodeWithTag("TopAppBar").assertIsDisplayed()
@@ -52,7 +73,7 @@ class ZoneManagerScreenTest {
             "Test Zone",
         )
     val zonesState = mutableStateOf(listOf(zone))
-    composeTestRule.setContent { ZoneCard(zone, zonesState) }
+    composeTestRule.setContent { ZoneCard(parkingViewModel, zone, zonesState) }
     composeTestRule
         .onNodeWithContentDescription("Refresh")
         .assertIsDisplayed()

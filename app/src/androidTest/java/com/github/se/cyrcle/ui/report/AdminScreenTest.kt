@@ -33,7 +33,10 @@ class AdminScreenTest {
     // Initialize ViewModels with Mock Repositories
     parkingViewModel =
         ParkingViewModel(
-            MockImageRepository(), MockParkingRepository(), MockReportedObjectRepository())
+            MockImageRepository(),
+            MockParkingRepository(),
+            MockOfflineParkingRepository(),
+            MockReportedObjectRepository())
     reviewViewModel = ReviewViewModel(MockReviewRepository(), MockReportedObjectRepository())
     reportedObjectViewModel = ReportedObjectViewModel(MockReportedObjectRepository())
 

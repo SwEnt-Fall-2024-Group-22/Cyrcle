@@ -3,18 +3,15 @@ package com.github.se.cyrcle.model.parking
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.github.se.cyrcle.model.image.ImageRepository
-import com.github.se.cyrcle.model.image.ImageRepositoryCloudStorage
+import com.github.se.cyrcle.model.parking.offline.OfflineParkingRepository
+import com.github.se.cyrcle.model.parking.online.ParkingRepository
 import com.github.se.cyrcle.model.report.ReportedObject
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
-import com.github.se.cyrcle.model.report.ReportedObjectRepositoryFirestore
 import com.github.se.cyrcle.model.report.ReportedObjectType
 import com.github.se.cyrcle.model.user.User
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
+import com.github.se.cyrcle.model.zone.Zone
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
@@ -45,6 +42,7 @@ const val PARKING_MAX_SIDE_LENGTH = 50.0
 class ParkingViewModel(
     private val imageRepository: ImageRepository,
     private val parkingRepository: ParkingRepository,
+    private val offlineParkingRepository: OfflineParkingRepository,
     private val reportedObjectRepository: ReportedObjectRepository,
 ) : ViewModel() {
 
@@ -98,10 +96,9 @@ class ParkingViewModel(
    * null when in the map screen.
    */
   private val _circleCenter = MutableStateFlow<Point?>(null)
-  // List of tiles to display
-  private var tilesToDisplay: Set<Tile> = emptySet()
+
   // Map a tile to the parkings that are in it.
-  private val tileCache = LinkedHashMap<String, Tile>(10, 1f, true)
+  private val tilesToParking = LinkedHashMap<Tile, List<Parking>>(10, 1f, true)
 
   /**
    * Generates a new unique identifier for a parking.
@@ -131,10 +128,8 @@ class ParkingViewModel(
     parkingRepository.addParking(
         parking,
         {
-          val tileID = Tile.getUidForPoint(parking.location.center)
-          val tile = tileCache[tileID] ?: Tile.getTileFromPoint(parking.location.center)
-          tile.parkings.add(parking)
-          tileCache[tileID] = tile
+          val tile = TileUtils.getTileFromPoint(parking.location.center)
+          tilesToParking[tile] = tilesToParking[tile]?.plus(parking) ?: listOf(parking)
         },
         { Log.e("ParkingViewModel", "Error adding parking", it) })
   }
@@ -194,31 +189,23 @@ class ParkingViewModel(
         Point.fromLngLat(
             maxOf(startPos.longitude(), endPos.longitude()),
             maxOf(startPos.latitude(), endPos.latitude()))
-
     // Get all tiles that are in the rectangle
-    tilesToDisplay = Tile.getAllTilesInRectangle(bottomLeft, topRight)
-    // Used to keep track of when the last request has finished.
+    val tilesToDisplay = TileUtils.getAllTilesInRectangle(bottomLeft, topRight)
     var nbRequestLeft = tilesToDisplay.size
 
     tilesToDisplay.forEach { tile ->
-
-      // Get parkings from memory cache
-      if (tileCache.containsKey(tile.uid)) {
-        _rectParkings.value += tileCache[tile.uid]!!.parkings
+      if (tilesToParking.containsKey(tile)) {
+        // Cache hit
+        _rectParkings.value += tilesToParking[tile]!!
         updateClosestParkings(--nbRequestLeft)
-
-        // Get parkings from repository
       } else {
-        // Cache tile
-        tileCache[tile.uid] = tile
-        Log.d("ParkingViewModel", "Requesting parkings for tile ${tile.uid}")
-        parkingRepository.getParkingsBetween(
-            tile.bottomLeft,
-            tile.topRight,
+        // Cache miss
+        tilesToParking[tile] = emptyList()
+        parkingRepository.getParkingsForTile(
+            tile,
             { parkings ->
-              Log.d("ParkingViewModel", "For tile ${tile.uid}, got ${parkings.size} parkings")
-
-              tileCache[tile.uid]!!.parkings.addAll(parkings)
+              Log.d("ParkingViewModel", "For tile ${tile}, got ${parkings.size} parkings")
+              tilesToParking[tile] = parkings
               _rectParkings.value += parkings
               updateClosestParkings(--nbRequestLeft)
             },
@@ -242,7 +229,7 @@ class ParkingViewModel(
   ) {
     _radius.value = radius
     _circleCenter.value = center
-    val (bottomLeft, topRight) = Tile.getSmallestRectangleEnclosingCircle(center, radius)
+    val (bottomLeft, topRight) = TileUtils.getSmallestRectangleEnclosingCircle(center, radius)
     getParkingsInRect(bottomLeft, topRight)
   }
 
@@ -275,19 +262,19 @@ class ParkingViewModel(
    */
   fun toggleProtection(protection: ParkingProtection) {
     _selectedProtection.update { toggleSelection(it, protection) }
-    updateClosestParkings(0)
+    updateClosestParkings()
   }
 
   /** Clear the protection filter and update the list of closest parkings. */
   fun clearProtection() {
     _selectedProtection.value = emptySet()
-    updateClosestParkings(0)
+    updateClosestParkings()
   }
 
   /** Select all the protection options and update the list of closest parkings. */
   fun selectAllProtection() {
     _selectedProtection.value = ParkingProtection.entries.toSet()
-    updateClosestParkings(0)
+    updateClosestParkings()
   }
 
   private val _selectedRackTypes = MutableStateFlow(ParkingRackType.entries.toSet())
@@ -300,19 +287,19 @@ class ParkingViewModel(
    */
   fun toggleRackType(rackType: ParkingRackType) {
     _selectedRackTypes.update { toggleSelection(it, rackType) }
-    updateClosestParkings(0)
+    updateClosestParkings()
   }
 
   /** Clear the rack type filter and update the list of closest parkings. */
   fun clearRackType() {
     _selectedRackTypes.value = emptySet()
-    updateClosestParkings(0)
+    updateClosestParkings()
   }
 
   /** Select all the rack type options and update the list of closest parkings. */
   fun selectAllRackTypes() {
     _selectedRackTypes.value = ParkingRackType.entries.toSet()
-    updateClosestParkings(0)
+    updateClosestParkings()
   }
 
   private val _selectedCapacities = MutableStateFlow(ParkingCapacity.entries.toSet())
@@ -325,19 +312,19 @@ class ParkingViewModel(
    */
   fun toggleCapacity(capacity: ParkingCapacity) {
     _selectedCapacities.update { toggleSelection(it, capacity) }
-    updateClosestParkings(0)
+    updateClosestParkings()
   }
 
   /** Clear the capacity filter and update the list of closest parkings. */
   fun clearCapacity() {
     _selectedCapacities.value = emptySet()
-    updateClosestParkings(0)
+    updateClosestParkings()
   }
 
   /** Select all the capacity options and update the list of closest parkings. */
   fun selectAllCapacities() {
     _selectedCapacities.value = ParkingCapacity.entries.toSet()
-    updateClosestParkings(0)
+    updateClosestParkings()
   }
 
   private val _onlyWithCCTV = MutableStateFlow(false)
@@ -350,7 +337,7 @@ class ParkingViewModel(
    */
   fun setOnlyWithCCTV(onlyWithCCTV: Boolean) {
     _onlyWithCCTV.value = onlyWithCCTV
-    updateClosestParkings(0)
+    updateClosestParkings()
   }
 
   /**
@@ -362,7 +349,7 @@ class ParkingViewModel(
     _selectedProtection.value = ParkingProtection.entries.toSet()
     _selectedRackTypes.value = ParkingRackType.entries.toSet()
     _selectedCapacities.value = ParkingCapacity.entries.toSet()
-    updateClosestParkings(0)
+    updateClosestParkings()
   }
 
   /**
@@ -373,7 +360,7 @@ class ParkingViewModel(
     _selectedProtection.value = emptySet()
     _selectedRackTypes.value = emptySet()
     _selectedCapacities.value = emptySet()
-    updateClosestParkings(0)
+    updateClosestParkings()
   }
 
   // ================== Filtering ==================
@@ -409,7 +396,7 @@ class ParkingViewModel(
    *   the function will update the closest parkings and if the result is empty, it will increment
    *   the radius.
    */
-  private fun updateClosestParkings(nbRequestLeft: Int) {
+  private fun updateClosestParkings(nbRequestLeft: Int = 0) {
     if (_circleCenter.value == null || nbRequestLeft != 0) return // avoid updating if not ready
 
     // This coroutine will update the closest parkings when all the tiles have been fetched. Note
@@ -659,18 +646,61 @@ class ParkingViewModel(
 
   // ================== Images ==================
 
-  companion object {
-    val Factory: ViewModelProvider.Factory =
-        object : ViewModelProvider.Factory {
-          @Suppress("UNCHECKED_CAST")
-          override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ParkingViewModel(
-                ImageRepositoryCloudStorage(
-                    FirebaseAuth.getInstance(), FirebaseStorage.getInstance()),
-                ParkingRepositoryFirestore(FirebaseFirestore.getInstance()),
-                ReportedObjectRepositoryFirestore(FirebaseFirestore.getInstance()))
-                as T
-          }
-        }
+  // ================== Offline ==================
+
+  /**
+   * Downloads the parkings in the zone to download from the local storage.
+   *
+   * @param zone the zone to download
+   * @param onSuccess the callback function to execute when the download is successful
+   * @param onFailure the callback function to execute when the download fails
+   */
+  fun downloadZone(zone: Zone, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    val tilesToDownload =
+        TileUtils.getAllTilesInRectangle(zone.boundingBox.southwest(), zone.boundingBox.northeast())
+
+    tilesToDownload.forEach { tile ->
+      if (tilesToParking.containsKey(tile)) {
+        offlineParkingRepository.downloadParkings(tilesToParking[tile]!!) {}
+      } else {
+        parkingRepository.getParkingsForTile(
+            tile,
+            {
+              offlineParkingRepository.downloadParkings(it) {
+                Log.d("ParkingViewModel", "Tile downloaded successfully")
+              }
+            },
+            {
+              Log.e("ParkingViewModel", "Error getting parkings for tile: $it")
+              onFailure(it)
+            })
+      }
+    }
+    onSuccess()
+  }
+
+  /**
+   * Deletes the parkings in the zone to delete from the local storage.
+   *
+   * @param zoneToDelete the zone to delete
+   * @param allZones the list of all zones
+   */
+  fun deleteZone(zoneToDelete: Zone, allZones: List<Zone>) {
+    val tilesToKeep =
+        allZones
+            .flatMap { zone ->
+              if (zone != zoneToDelete)
+                  TileUtils.getAllTilesInRectangle(
+                      zone.boundingBox.southwest(), zone.boundingBox.northeast())
+              else emptySet()
+            }
+            .toSet()
+
+    val tilesToDelete =
+        TileUtils.getAllTilesInRectangle(
+            zoneToDelete.boundingBox.southwest(), zoneToDelete.boundingBox.northeast())
+    offlineParkingRepository.deleteTiles(tilesToDelete - tilesToKeep) {
+      Log.d("ParkingViewModel", "Tiles deleted successfully")
+    }
   }
 }

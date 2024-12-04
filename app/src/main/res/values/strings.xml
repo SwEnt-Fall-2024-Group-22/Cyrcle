@@ -270,6 +270,7 @@
     <string name ="zone_selection_button_when_both_set">Please wait...</string>
     <string name ="zone_selection_button_accept">Confirm</string>
     <string name ="zone_selection_button_cancel">Cancel</string>
+    <string name ="zone_selection_download_error">Error downloading zone</string>
 
 
 

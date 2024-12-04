@@ -3,8 +3,8 @@ package com.github.se.cyrcle.model.user
 import com.github.se.cyrcle.model.authentication.AuthenticationRepository
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.parking.Parking
-import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.TestInstancesParking
+import com.github.se.cyrcle.model.parking.online.ParkingRepository
 import com.google.firebase.firestore.util.Assert.fail
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking

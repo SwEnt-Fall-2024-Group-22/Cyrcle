@@ -7,11 +7,13 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
+import com.github.se.cyrcle.di.mocks.MockOfflineParkingRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
-import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.parking.offline.OfflineParkingRepository
+import com.github.se.cyrcle.model.parking.online.ParkingRepository
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.model.user.UserRepository
@@ -31,6 +33,7 @@ class ProfileScreenTest {
   private lateinit var imageRepository: MockImageRepository
   private lateinit var userRepository: UserRepository
   private lateinit var parkingRepository: ParkingRepository
+  private lateinit var offlineParkingRepository: OfflineParkingRepository
   private lateinit var reportedObjectRepository: ReportedObjectRepository
   private lateinit var userViewModel: UserViewModel
   private lateinit var parkingViewModel: ParkingViewModel
@@ -45,11 +48,13 @@ class ProfileScreenTest {
     imageRepository = MockImageRepository()
     userRepository = MockUserRepository()
     parkingRepository = MockParkingRepository()
+    offlineParkingRepository = MockOfflineParkingRepository()
     reportedObjectRepository = MockReportedObjectRepository()
     authenticator = MockAuthenticationRepository()
     userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository, authenticator)
     parkingViewModel =
-        ParkingViewModel(imageRepository, parkingRepository, reportedObjectRepository)
+        ParkingViewModel(
+            imageRepository, parkingRepository, offlineParkingRepository, reportedObjectRepository)
 
     composeTestRule.setContent {
       ProfileScreen(mockNavigationActions, userViewModel, parkingViewModel)

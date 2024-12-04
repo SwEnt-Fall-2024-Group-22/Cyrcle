@@ -14,6 +14,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
+import com.github.se.cyrcle.di.mocks.MockOfflineParkingRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockReviewRepository
@@ -22,9 +23,10 @@ import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.parking.ParkingCapacity
 import com.github.se.cyrcle.model.parking.ParkingProtection
 import com.github.se.cyrcle.model.parking.ParkingRackType
-import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
+import com.github.se.cyrcle.model.parking.offline.OfflineParkingRepository
+import com.github.se.cyrcle.model.parking.online.ParkingRepository
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.review.ReviewRepository
 import com.github.se.cyrcle.model.review.ReviewViewModel
@@ -44,6 +46,7 @@ import org.mockito.kotlin.verify
 @RunWith(AndroidJUnit4::class)
 class ParkingDetailsScreenTest {
   private lateinit var parkingRepository: ParkingRepository
+  private lateinit var offlineParkingRepository: OfflineParkingRepository
   private lateinit var imageRepository: ImageRepository
   private lateinit var userRepository: UserRepository
   private lateinit var reviewRepository: ReviewRepository
@@ -63,6 +66,7 @@ class ParkingDetailsScreenTest {
     navigationActions = mock(NavigationActions::class.java)
 
     parkingRepository = MockParkingRepository()
+    offlineParkingRepository = MockOfflineParkingRepository()
     imageRepository = MockImageRepository()
     userRepository = MockUserRepository()
     reviewRepository = MockReviewRepository()
@@ -70,7 +74,11 @@ class ParkingDetailsScreenTest {
     mockReportedObjectRepository = MockReportedObjectRepository()
 
     parkingViewModel =
-        ParkingViewModel(imageRepository, parkingRepository, mockReportedObjectRepository)
+        ParkingViewModel(
+            imageRepository,
+            parkingRepository,
+            offlineParkingRepository,
+            mockReportedObjectRepository)
     userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository, authenticator)
     reviewViewModel = ReviewViewModel(reviewRepository, mockReportedObjectRepository)
 

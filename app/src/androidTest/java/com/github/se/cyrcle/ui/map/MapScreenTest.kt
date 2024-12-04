@@ -15,6 +15,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockAddressRepository
 import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
+import com.github.se.cyrcle.di.mocks.MockOfflineParkingRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockPermissionHandler
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
@@ -57,12 +58,17 @@ class MapScreenTest {
 
     val imageRepository = MockImageRepository()
     val parkingRepository = MockParkingRepository()
+    val offlineParkingRepository = MockOfflineParkingRepository()
     val userRepository = MockUserRepository()
     val authenticationRepository = MockAuthenticationRepository()
     val addressRepository = MockAddressRepository()
 
     parkingViewModel =
-        ParkingViewModel(imageRepository, parkingRepository, mockReportedObjectRepository)
+        ParkingViewModel(
+            imageRepository,
+            parkingRepository,
+            offlineParkingRepository,
+            mockReportedObjectRepository)
     userViewModel =
         UserViewModel(userRepository, parkingRepository, imageRepository, authenticationRepository)
     mapViewModel = MapViewModel()

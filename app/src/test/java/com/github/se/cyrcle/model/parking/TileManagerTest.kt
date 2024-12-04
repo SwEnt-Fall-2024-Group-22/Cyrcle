@@ -3,42 +3,36 @@ package com.github.se.cyrcle.model.parking
 import com.mapbox.geojson.Point
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
 /** Unit test to check that the Tile extension function works as intended. */
+@RunWith(RobolectricTestRunner::class)
 class TileManagerTest {
   @Test
   fun getAllTilesInRectangleTest() {
     val tiles =
-        Tile.getAllTilesInRectangle(
+        TileUtils.getAllTilesInRectangle(
             Point.fromLngLat(6.0101, 46.0101),
             Point.fromLngLat(6.09, 46.09),
         )
-    assert(tiles.size == 1)
+    assertEquals(1, tiles.size)
 
     val tiles2 =
-        Tile.getAllTilesInRectangle(
+        TileUtils.getAllTilesInRectangle(
             Point.fromLngLat(6.010, 46.01),
             Point.fromLngLat(6.13, 46.13),
         )
-    assert(tiles2.size == 4)
-  }
-
-  @Test
-  fun getUidForPointTest() {
-    var uid = Tile.getUidForPoint(Point.fromLngLat(6.05, 46.05))
-    assertEquals("6.000_46.000", uid)
-
-    uid = Tile.getUidForPoint(Point.fromLngLat(6.6, 46.5))
-    assertEquals("6.500_46.500", uid)
+    assertEquals(4, tiles2.size)
   }
 
   @Test
   fun getTileFromPointTest() {
-    val tile =
-        Tile.getTileFromPoint(
-            Point.fromLngLat(6.05, 46.05),
-        )
-    assertEquals(Tile(Point.fromLngLat(6.0, 46.0), Point.fromLngLat(6.125, 46.125)), tile)
+    var uid = TileUtils.getTileFromPoint(Point.fromLngLat(6.05, 46.05))
+    assertEquals("6.000_46.000", uid)
+
+    uid = TileUtils.getTileFromPoint(Point.fromLngLat(6.6, 46.5))
+    assertEquals("6.500_46.500", uid)
   }
 
   /*
@@ -51,7 +45,7 @@ class TileManagerTest {
   @Test
   fun getSmallestRectangleEnclosingCircleTest() {
     val (bottomLeft, topRight) =
-        Tile.getSmallestRectangleEnclosingCircle(Point.fromLngLat(6.05, 46.05), 10.0)
+        TileUtils.getSmallestRectangleEnclosingCircle(Point.fromLngLat(6.05, 46.05), 10.0)
     assert(bottomLeft.longitude() < 6.05)
     assert(bottomLeft.latitude() < 46.05)
     assert(topRight.longitude() > 6.05)
