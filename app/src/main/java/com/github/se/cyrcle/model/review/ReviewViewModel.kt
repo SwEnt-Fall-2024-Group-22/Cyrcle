@@ -218,8 +218,6 @@ class ReviewViewModel(
       _hasAlreadyReported.value = false
     }
 
-    Log.d("ReviewViewModel", "SCHMOOOOOOOOOVIN ON")
-
     reviewRepository.addReport(
         report,
         onSuccess = {
