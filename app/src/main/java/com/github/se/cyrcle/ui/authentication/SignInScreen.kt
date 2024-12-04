@@ -109,11 +109,13 @@ fun SignInScreen(navigationActions: NavigationActions, userViewModel: UserViewMo
                 text = stringResource(R.string.sign_in_guest_button),
                 onClick = {
                   userViewModel.signInAnonymously(
-                      {
+                      onComplete = {
                         userViewModel.setIsOnlineMode(true)
                         navigationActions.navigateTo(TopLevelDestinations.MAP)
                       },
-                      { Toast.makeText(context, failSignInMsg, Toast.LENGTH_LONG).show() })
+                      onFailure = {
+                        Toast.makeText(context, failSignInMsg, Toast.LENGTH_LONG).show()
+                      })
                 },
                 colorLevel = ColorLevel.TERTIARY,
                 modifier =

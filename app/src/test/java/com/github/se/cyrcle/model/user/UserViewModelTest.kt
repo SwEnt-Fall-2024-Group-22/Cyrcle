@@ -221,16 +221,18 @@ class UserViewModelTest {
   @Test
   @Suppress("UNCHECKED_CAST")
   fun testSignInAnonymously() {
-    `when`(authenticator.authenticateAnonymously(any())).thenAnswer { invocation ->
+    `when`(authenticator.authenticateAnonymously(any(), any())).thenAnswer { invocation ->
       val onComplete = invocation.arguments[0] as () -> Unit
       onComplete()
     }
 
     var calledOnComplete = false
-    userViewModel.signInAnonymously { calledOnComplete = true }
+    userViewModel.signInAnonymously(
+        onComplete = { calledOnComplete = true },
+    )
 
     // Check if the repository was called
-    verify(authenticator).authenticateAnonymously(any())
+    verify(authenticator).authenticateAnonymously(any(), any())
     assert(calledOnComplete)
   }
 

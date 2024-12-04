@@ -15,7 +15,7 @@ class MockAuthenticationRepository @Inject constructor() : AuthenticationReposit
     testUser?.let { onSuccess(it.public.userId) } ?: onFailure(Exception("User not found"))
   }
 
-  override fun authenticateAnonymously(onComplete: () -> Unit) {
+  override fun authenticateAnonymously(onComplete: () -> Unit, onFailure: (Exception) -> Unit) {
     onComplete()
   }
 

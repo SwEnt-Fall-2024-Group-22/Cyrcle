@@ -55,8 +55,8 @@ class ConnectivityObserver(
   private fun onOnlineMode() {
     Log.d("ConnectivityObserver", "Switching to online mode")
     userViewModel.signInAnonymously(
-        { Log.d("ConnectivityObserver", "User signed in anonymously") },
-        {
+        onComplete = { Log.d("ConnectivityObserver", "User signed in anonymously") },
+        onFailure = {
           Log.e(
               "ConnectivityObserver",
               "Failed to sign in user anonymously, going back to offline mode")
