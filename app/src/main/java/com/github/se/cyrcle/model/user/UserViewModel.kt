@@ -38,10 +38,10 @@ class UserViewModel(
   private val _favoriteParkings = MutableStateFlow<List<Parking>>(emptyList())
   val favoriteParkings: StateFlow<List<Parking>> = _favoriteParkings
 
-    private val _reportedParkings = MutableStateFlow<List<String>>(emptyList())
-    val reportedParkings: StateFlow<List<String>> = _reportedParkings
+  private val _reportedParkings = MutableStateFlow<List<String>>(emptyList())
+  val reportedParkings: StateFlow<List<String>> = _reportedParkings
 
-    /**
+  /**
    * Set the current user by fetching the user from the Firestore database with the given ID.
    *
    * @param userId the ID of the user to get
@@ -163,14 +163,14 @@ class UserViewModel(
     }
   }
 
-    fun addReportedParkingToSelectedUser(parking: String) {
-        currentUser.value?.let { user ->
-            val updatedDetails =
-                user.details?.copy(reportedParkings = user.details.reportedParkings + parking)
-            val updatedUser = user.copy(details = updatedDetails)
-            updateUser(updatedUser) { _reportedParkings.value += parking }
-        }
+  fun addReportedParkingToSelectedUser(parking: String) {
+    currentUser.value?.let { user ->
+      val updatedDetails =
+          user.details?.copy(reportedParkings = user.details.reportedParkings + parking)
+      val updatedUser = user.copy(details = updatedDetails)
+      updateUser(updatedUser) { _reportedParkings.value += parking }
     }
+  }
 
   /**
    * Removes parking from the list of favorite parkings for the selected user and updates the
