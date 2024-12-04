@@ -113,8 +113,6 @@ fun FilterPanel(
   // Text field value
   val textFieldValue = remember { mutableStateOf("") }
 
-  val alpha by animateFloatAsState(targetValue = if (isTextFieldVisible.value) 1f else 0f)
-
   val radius = parkingViewModel.radius.collectAsState()
 
   Column(modifier = Modifier.padding(if (displayHeader) 16.dp else 0.dp)) {
@@ -129,7 +127,7 @@ fun FilterPanel(
             SmallFloatingActionButton(
                 icon = if (isTextFieldVisible.value) Icons.Default.Close else Icons.Default.Search,
                 onClick = { isTextFieldVisible.value = !isTextFieldVisible.value },
-                modifier = Modifier,
+                modifier = Modifier.testTag("ShowSearchButton"),
                 contentDescription = "Search List Screen",
             )
 
@@ -378,7 +376,8 @@ fun SearchBarListScreen(
             Modifier.padding(start = 8.dp)
                 .offset(x = slideOffset)
                 .alpha(alpha)
-                .onGloballyPositioned { coordinates -> textFieldSize.value = coordinates.size },
+                .onGloballyPositioned { coordinates -> textFieldSize.value = coordinates.size }
+                .testTag("SearchBarListScreen"),
         colors = getOutlinedTextFieldColorsSearchBar(ColorLevel.PRIMARY),
         trailingIcon = {
           if (textFieldValue.value.isNotEmpty()) {
@@ -388,9 +387,10 @@ fun SearchBarListScreen(
                 tint = defaultOnColor(),
                 modifier =
                     Modifier.clickable {
-                      textFieldValue.value = ""
-                      showSuggestions.value = false
-                    })
+                          textFieldValue.value = ""
+                          showSuggestions.value = false
+                        }
+                        .testTag("ClearSearchButtonListScreen"))
           }
         },
         singleLine = true,
@@ -410,10 +410,12 @@ fun SearchBarListScreen(
           expanded = showSuggestions.value,
           onDismissRequest = { showSuggestions.value = false },
           modifier =
-              Modifier.width(with(LocalDensity.current) { textFieldSize.value.width.toDp() })) {
+              Modifier.width(with(LocalDensity.current) { textFieldSize.value.width.toDp() })
+                  .testTag("SuggestionsMenuListScreen")) {
             if (permissionHandler.getLocalisationPerm().collectAsState().value) {
               DropdownMenuItem(
                   text = { Text("My Location") },
+                  modifier = Modifier.testTag("MyLocationSuggestionMenuItem"),
                   onClick = {
                     myLocation.value = true
                     showSuggestions.value = false
@@ -444,6 +446,7 @@ fun SearchBarListScreen(
                         address.suggestionFormatDisplayName(
                             maxSuggestionDisplayNameLengthList, "ListScreen"))
                   },
+                  modifier = Modifier.testTag("SuggestionMenuItem${address.city}"),
                   onClick = {
                     chosenLocation.value = address
                     showSuggestions.value = false

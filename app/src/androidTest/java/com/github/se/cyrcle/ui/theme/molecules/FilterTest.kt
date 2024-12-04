@@ -14,9 +14,12 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.se.cyrcle.di.mocks.MockAddressRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
+import com.github.se.cyrcle.di.mocks.MockPermissionHandler
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
+import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.parking.ParkingCapacity
 import com.github.se.cyrcle.model.parking.ParkingProtection
@@ -37,8 +40,11 @@ class FilterTest {
 
   private lateinit var mockParkingRepository: ParkingRepository
   private lateinit var mockImageRepository: ImageRepository
+  private lateinit var mockAddressRepository: MockAddressRepository
   private lateinit var mockReportedObjectRepository: ReportedObjectRepository
   private lateinit var parkingViewModel: ParkingViewModel
+  private lateinit var addressViewModel: AddressViewModel
+  private lateinit var permissionHandler: MockPermissionHandler
 
   @Before
   fun setUp() {
@@ -46,7 +52,10 @@ class FilterTest {
     mockParkingRepository = MockParkingRepository()
     mockImageRepository = MockImageRepository()
     mockReportedObjectRepository = MockReportedObjectRepository()
+    mockAddressRepository = MockAddressRepository()
 
+    addressViewModel = AddressViewModel(mockAddressRepository)
+    permissionHandler = MockPermissionHandler()
     parkingViewModel =
         ParkingViewModel(mockImageRepository, mockParkingRepository, mockReportedObjectRepository)
 
@@ -56,7 +65,9 @@ class FilterTest {
 
   @Test
   fun testCCTVCheckboxInteraction() {
-    composeTestRule.setContent { FilterPanel(parkingViewModel, true) }
+    composeTestRule.setContent {
+      FilterPanel(parkingViewModel, true, addressViewModel, permissionHandler = permissionHandler)
+    }
 
     // Show filters first
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
@@ -68,7 +79,9 @@ class FilterTest {
 
   @Test
   fun testShowFiltersButtonInitiallyDisplaysShowFilters() {
-    composeTestRule.setContent { FilterPanel(parkingViewModel, true) }
+    composeTestRule.setContent {
+      FilterPanel(parkingViewModel, true, addressViewModel, permissionHandler = permissionHandler)
+    }
 
     // Act & Assert
     composeTestRule.onNodeWithTag("ShowFiltersButton").assertIsDisplayed().assertHasClickAction()
@@ -77,7 +90,9 @@ class FilterTest {
   @Test
   @OptIn(ExperimentalTestApi::class)
   fun testShowFiltersButtonTogglesFilterSection() {
-    composeTestRule.setContent { FilterPanel(parkingViewModel, true) }
+    composeTestRule.setContent {
+      FilterPanel(parkingViewModel, true, addressViewModel, permissionHandler = permissionHandler)
+    }
 
     // Act: Click to show filters
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
@@ -102,7 +117,9 @@ class FilterTest {
   @OptIn(ExperimentalTestApi::class)
   fun testProtectionFilters() {
 
-    composeTestRule.setContent { FilterPanel(parkingViewModel, true) }
+    composeTestRule.setContent {
+      FilterPanel(parkingViewModel, true, addressViewModel, permissionHandler = permissionHandler)
+    }
 
     // Act: Click to show filters
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
@@ -135,7 +152,9 @@ class FilterTest {
   @Test
   @OptIn(ExperimentalTestApi::class)
   fun testRackTypeFilters() {
-    composeTestRule.setContent { FilterPanel(parkingViewModel, true) }
+    composeTestRule.setContent {
+      FilterPanel(parkingViewModel, true, addressViewModel, permissionHandler = permissionHandler)
+    }
 
     // Act: Click to show filters
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
@@ -167,7 +186,9 @@ class FilterTest {
   @Test
   @OptIn(ExperimentalTestApi::class)
   fun testCapacityFilters() {
-    composeTestRule.setContent { FilterPanel(parkingViewModel, true) }
+    composeTestRule.setContent {
+      FilterPanel(parkingViewModel, true, addressViewModel, permissionHandler = permissionHandler)
+    }
 
     // Act: Click to show filters
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()

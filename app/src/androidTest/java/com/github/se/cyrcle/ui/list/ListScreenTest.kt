@@ -7,14 +7,20 @@ import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performImeAction
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipe
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.se.cyrcle.di.mocks.MockAddressRepository
 import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
+import com.github.se.cyrcle.di.mocks.MockPermissionHandler
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
+import com.github.se.cyrcle.model.address.AddressRepository
+import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.authentication.AuthenticationRepository
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.map.MapViewModel
@@ -47,11 +53,16 @@ class ListScreenTest {
   private lateinit var mockParkingRepository: ParkingRepository
   private lateinit var mockImageRepository: ImageRepository
   private lateinit var authenticator: AuthenticationRepository
+  private lateinit var addressRepository: AddressRepository
   private lateinit var mockReportedObjectRepository: ReportedObjectRepository
-  private lateinit var mockNavigationActions: NavigationActions
+
   private lateinit var parkingViewModel: ParkingViewModel
   private lateinit var mapViewModel: MapViewModel
   private lateinit var userViewModel: UserViewModel
+  private lateinit var addressViewModel: AddressViewModel
+
+  private lateinit var mockNavigationActions: NavigationActions
+  private lateinit var permissionHandler: MockPermissionHandler
 
   @Before
   fun setUp() {
@@ -62,12 +73,15 @@ class ListScreenTest {
     mockImageRepository = MockImageRepository()
     authenticator = MockAuthenticationRepository()
     mockReportedObjectRepository = MockReportedObjectRepository()
+    addressRepository = MockAddressRepository()
 
+    permissionHandler = MockPermissionHandler()
     parkingViewModel =
         ParkingViewModel(mockImageRepository, mockParkingRepository, mockReportedObjectRepository)
     mapViewModel = MapViewModel()
     userViewModel =
         UserViewModel(mockUserRepository, mockParkingRepository, mockImageRepository, authenticator)
+    addressViewModel = AddressViewModel(addressRepository)
 
     `when`(mockNavigationActions.currentRoute()).thenReturn(Screen.LIST)
 
@@ -248,7 +262,9 @@ class ListScreenTest {
           navigationActions = mockNavigationActions,
           parkingViewModel = parkingViewModel,
           mapViewModel = mapViewModel,
-          userViewModel = userViewModel)
+          userViewModel = userViewModel,
+          addressViewModel = addressViewModel,
+          permissionHandler = permissionHandler)
     }
 
     // Show filters
@@ -274,7 +290,9 @@ class ListScreenTest {
           navigationActions = mockNavigationActions,
           parkingViewModel = parkingViewModel,
           mapViewModel = mapViewModel,
-          userViewModel = userViewModel)
+          userViewModel = userViewModel,
+          addressViewModel,
+          permissionHandler = permissionHandler)
     }
 
     // Verify main screen components
@@ -290,7 +308,9 @@ class ListScreenTest {
           navigationActions = mockNavigationActions,
           parkingViewModel = parkingViewModel,
           mapViewModel = mapViewModel,
-          userViewModel = userViewModel)
+          userViewModel = userViewModel,
+          addressViewModel,
+          permissionHandler = permissionHandler)
     }
 
     // Initially, no parking is pinned
@@ -405,5 +425,88 @@ class ListScreenTest {
     composeTestRule
         .onNodeWithTag("ParkingName", useUnmergedTree = true)
         .assertTextEquals("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...")
+  }
+
+  @Test
+  fun assertSearchBarIsDisplayed() {
+    composeTestRule.setContent {
+      SpotListScreen(
+          navigationActions = mockNavigationActions,
+          parkingViewModel = parkingViewModel,
+          mapViewModel = mapViewModel,
+          userViewModel = userViewModel,
+          addressViewModel = addressViewModel,
+          permissionHandler = permissionHandler)
+    }
+
+    composeTestRule
+        .onNodeWithTag("ShowSearchButton")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+
+    composeTestRule
+        .onNodeWithTag("SearchBarListScreen")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performTextInput("Mock Park")
+
+    composeTestRule.onNodeWithTag("SearchBarListScreen").assertTextEquals("Mock Park")
+    composeTestRule.onNodeWithTag("SearchBarListScreen").performImeAction()
+
+    composeTestRule.onNodeWithTag("SuggestionsMenuListScreen").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag("SuggestionMenuItemMock City")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+    composeTestRule
+        .onNodeWithTag("SuggestionMenuItemMock City 2")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+
+    composeTestRule.onNodeWithTag("SuggestionMenuItemMock City").performClick()
+
+    composeTestRule.onNodeWithTag("SuggestionsMenuListScreen").assertIsNotDisplayed()
+    composeTestRule.onNodeWithTag("SearchBarListScreen").assertIsNotDisplayed()
+  }
+
+  @Test
+  fun assertCloseButtonWorks() {
+    composeTestRule.setContent {
+      SpotListScreen(
+          navigationActions = mockNavigationActions,
+          parkingViewModel = parkingViewModel,
+          mapViewModel = mapViewModel,
+          userViewModel = userViewModel,
+          addressViewModel = addressViewModel,
+          permissionHandler = permissionHandler)
+    }
+
+    composeTestRule
+        .onNodeWithTag("ShowSearchButton")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+
+    composeTestRule
+        .onNodeWithTag("SearchBarListScreen")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performTextInput("Mock Park")
+
+    composeTestRule.onNodeWithTag("SearchBarListScreen").assertTextEquals("Mock Park")
+    composeTestRule
+        .onNodeWithTag("ClearSearchButtonListScreen")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+
+    composeTestRule
+        .onNodeWithTag("ShowSearchButton")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+
+    composeTestRule.onNodeWithTag("SearchBarListScreen").assertIsNotDisplayed()
   }
 }
