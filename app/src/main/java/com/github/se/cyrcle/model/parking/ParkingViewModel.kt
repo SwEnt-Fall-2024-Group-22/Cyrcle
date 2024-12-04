@@ -522,6 +522,17 @@ class ParkingViewModel(
     Log.d("ParkingViewModel", "Parking and metrics updated: $selectedParking")
   }
 
+
+    /**
+     * Adds a reporting user to the currently selected parking and updates Firestore.
+     *
+     * This function first verifies if a parking is selected. If a parking is selected, it creates an
+     * updated parking object with the new reporting user and attempts to update Firestore to reflect
+     * the change. Upon a successful update, the local state is also updated to ensure consistency. If
+     * no parking is selected, an error is logged and no operation is performed.
+     *
+     * @param user The user to be added to the reporting users list.
+     */
   fun addReportingUser(user: User) {
     _selectedParking.update { currentParking ->
       currentParking?.let {
@@ -534,12 +545,12 @@ class ParkingViewModel(
             onSuccess = {
               Log.d("ParkingViewModel", "User added to reportingUsers in Firestore")
               // Update the local state to reflect the change
-              _selectedParking.update { state ->
+              _selectedParking.update { curParking ->
                 // Ensure consistency by returning the updated parking if it matches
-                if (state?.uid == updatedParking.uid) {
+                if (curParking?.uid == updatedParking.uid) {
                   updatedParking
                 } else {
-                  state
+                  curParking
                 }
               }
             },
