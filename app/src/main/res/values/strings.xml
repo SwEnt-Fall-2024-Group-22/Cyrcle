@@ -127,6 +127,7 @@
     <string name="map_screen_settings_to_zone">Offline Map</string>
     <string name="settings">Settings</string>
     <string name="search_bar_placeholder">Search for a location</string>
+    <string name="map_screen_details_button">See Details</string>
 
     <!-- Profile Commons -->
     <string name="profile_account_already_exists">Your account is already linked, please try with another email</string>

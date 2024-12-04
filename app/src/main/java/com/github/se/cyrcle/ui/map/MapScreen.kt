@@ -112,7 +112,6 @@ import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotation
 import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.createPolygonAnnotationManager
-import com.mapbox.maps.plugin.compass.compass
 import com.mapbox.maps.plugin.gestures.OnMoveListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.scalebar.generated.ScaleBarSettings
@@ -124,8 +123,6 @@ const val defaultZoom = 16.0
 const val maxZoom = 18.0
 const val minZoom = 8.0
 const val thresholdDisplayZoom = 13.0
-const val LAYER_ID = "0128"
-const val LAYER_ID_RECT = "0129"
 const val ADVANCED_MODE_ZOOM_THRESHOLD = 15.5
 const val CLUSTER_COLORS = "#1A4988"
 const val MAX_SUGGESTION_DISPLAY_NAME_LENGTH_MAP = 100
@@ -286,12 +283,11 @@ fun MapScreen(
                                                     Pair(
                                                         1,
                                                         android.graphics.Color.parseColor(
-                                                            CLUSTER_COLORS))))),
-                            layerId = LAYER_ID))
+                                                            CLUSTER_COLORS)))))))
                 // Create polygon annotation manager to draw rectangles
                 rectangleAnnotationManager =
                     mapView.annotations.createPolygonAnnotationManager(
-                        annotationConfig = AnnotationConfig().copy(layerId = LAYER_ID_RECT))
+                        annotationConfig = AnnotationConfig())
                 // Create point annotation manager to draw parking labels
                 pLabelAnnotationManager =
                     mapView.annotations.createPointAnnotationManager(AnnotationConfig())
@@ -827,7 +823,7 @@ fun PreviewCard(navigationActions: NavigationActions, parkingViewModel: ParkingV
                 Button(
                     onClick = { navigationActions.navigateTo(Screen.PARKING_DETAILS) },
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                    text = "See details")
+                    text = stringResource(R.string.map_screen_details_button))
               }
         }
   }

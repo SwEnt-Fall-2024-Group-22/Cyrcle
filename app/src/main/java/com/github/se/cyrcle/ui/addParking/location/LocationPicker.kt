@@ -17,7 +17,6 @@ import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.ui.addParking.location.overlay.Crosshair
 import com.github.se.cyrcle.ui.addParking.location.overlay.RectangleSelection
-import com.github.se.cyrcle.ui.map.LAYER_ID_RECT
 import com.github.se.cyrcle.ui.map.MapConfig
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
@@ -75,8 +74,7 @@ fun LocationPicker(
             rectangleAnnotationManager =
                 mapView.value!!
                     .annotations
-                    .createPolygonAnnotationManager(
-                        annotationConfig = AnnotationConfig().copy(layerId = LAYER_ID_RECT))
+                    .createPolygonAnnotationManager(annotationConfig = AnnotationConfig())
 
             // Create point annotation manager to draw parking labels
             pLabelAnnotationManager =
