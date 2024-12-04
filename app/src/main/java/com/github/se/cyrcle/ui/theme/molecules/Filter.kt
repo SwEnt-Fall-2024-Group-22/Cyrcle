@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.theme.molecules
 
+import android.content.Context
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -8,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -41,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -344,6 +347,8 @@ fun SearchBarListScreen(
     textFieldValue: MutableState<String>
 ) {
 
+  val context: Context = LocalContext.current
+
   // Initialize FocusManager
   val focusManager = LocalFocusManager.current
 
@@ -414,12 +419,15 @@ fun SearchBarListScreen(
                   .testTag("SuggestionsMenuListScreen")) {
             if (permissionHandler.getLocalisationPerm().collectAsState().value) {
               DropdownMenuItem(
-                  text = { Text("My Location") },
+                  text = {
+                    Text(stringResource(R.string.my_location), textAlign = TextAlign.Start)
+                  },
                   modifier = Modifier.testTag("MyLocationSuggestionMenuItem"),
+                  contentPadding = PaddingValues(8.dp),
                   onClick = {
                     myLocation.value = true
                     showSuggestions.value = false
-                    textFieldValue.value = "My Location"
+                    textFieldValue.value = context.resources.getString(R.string.my_location)
                     isTextFieldVisible.value = false
                     focusManager.clearFocus()
                   })
@@ -444,9 +452,11 @@ fun SearchBarListScreen(
                   text = {
                     Text(
                         address.suggestionFormatDisplayName(
-                            maxSuggestionDisplayNameLengthList, Address.Mode.LIST))
+                            maxSuggestionDisplayNameLengthList, Address.Mode.LIST),
+                        textAlign = TextAlign.Start)
                   },
                   modifier = Modifier.testTag("SuggestionMenuItem${address.city}"),
+                  contentPadding = PaddingValues(8.dp),
                   onClick = {
                     chosenLocation.value = address
                     showSuggestions.value = false

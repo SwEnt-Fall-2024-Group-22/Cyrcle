@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.list
 
-import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
@@ -113,7 +112,6 @@ const val MAX_SWIPE_DISTANCE = 150
 const val maxSuggestionDisplayNameLengthList = 70
 const val NumberOfSuggestionsForMenu = 6
 
-@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun SpotListScreen(
     navigationActions: NavigationActions,
@@ -141,7 +139,7 @@ fun SpotListScreen(
   val myLocation = remember { mutableStateOf(true) }
 
   // location permission from location manager
-  val locPermission = permissionHandler.getLocalisationPerm().value
+  val locPermission = permissionHandler.getLocalisationPerm().collectAsState().value
 
   LaunchedEffect(userPosition, myLocation, chosenLocation.value) {
 
@@ -151,7 +149,7 @@ fun SpotListScreen(
 
     // else if the user has chosen a location or hasn't given his location permission then set the
     // circle center to the chosen location (default position is EPFL)
-    else Log.e("SpotListScreen", parkingViewModel.closestParkings.value.toString())
+    else Log.d("SpotListScreen", parkingViewModel.closestParkings.value.toString())
     parkingViewModel.setCircleCenter(
         Point.fromLngLat(
             chosenLocation.value.longitude.toDouble(), chosenLocation.value.latitude.toDouble()))

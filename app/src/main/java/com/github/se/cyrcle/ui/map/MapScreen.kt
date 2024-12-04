@@ -60,6 +60,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.databinding.ItemCalloutViewBinding
@@ -120,7 +121,7 @@ const val LAYER_ID = "0128"
 const val LAYER_ID_RECT = "0129"
 const val ADVANCED_MODE_ZOOM_THRESHOLD = 15.5
 const val CLUSTER_COLORS = "#1A4988"
-const val maxSuggestionDisplayNameLengthMap = 100
+const val MAX_SUGGESTION_DISPLAY_NAME_LENGTH_MAP = 100
 
 @Composable
 fun MapScreen(
@@ -612,7 +613,7 @@ fun SuggestionMenu(
               listOfSuggestions.value.filter { suggestion ->
                 val displayName =
                     suggestion.suggestionFormatDisplayName(
-                        maxSuggestionDisplayNameLengthMap, Address.Mode.MAP)
+                        MAX_SUGGESTION_DISPLAY_NAME_LENGTH_MAP, Address.Mode.MAP)
                 if (displayName in seenNames) {
                   false
                 } else {
@@ -654,8 +655,9 @@ fun SuggestionMenu(
                   Text(
                       text =
                           suggestion.suggestionFormatDisplayName(
-                              maxSuggestionDisplayNameLengthMap, Address.Mode.MAP),
-                      Modifier.padding(5.dp))
+                              MAX_SUGGESTION_DISPLAY_NAME_LENGTH_MAP, Address.Mode.MAP),
+                      Modifier.padding(5.dp),
+                      textAlign = TextAlign.Start)
                 }
 
             androidx.compose.material.Divider(Modifier.fillMaxWidth(), color = Black)
