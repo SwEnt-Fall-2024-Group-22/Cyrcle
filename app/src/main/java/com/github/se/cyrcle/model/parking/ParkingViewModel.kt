@@ -522,7 +522,7 @@ class ParkingViewModel(
     Log.d("ParkingViewModel", "Parking and metrics updated: $selectedParking")
   }
 
-  private fun addReportingUser(user: User) {
+  fun addReportingUser(user: User) {
     _selectedParking.update { currentParking ->
       currentParking?.let {
         // Create an updated parking object with the new reporting user
