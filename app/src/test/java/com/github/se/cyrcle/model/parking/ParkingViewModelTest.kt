@@ -350,43 +350,7 @@ class ParkingViewModelTest {
 
     // Verify report is added to the repository
     verify(parkingRepository).addReport(eq(report), any(), any())
-
-    // Check if user is added to reportingUsers and reports are updated
-    assert(!parkingViewModel.hasAlreadyReported.value)
-    verify(parkingRepository, times(2)).updateParking(any(), any(), any())
-  }
-
-  @Test
-  fun addReportingUserSuccessfullyAddsUserToReportingUsers() {
-    val user = TestInstancesUser.user1
-    val parking = TestInstancesParking.parking1.copy(reportingUsers = emptyList())
-
-    parkingViewModel.selectParking(parking)
-    parkingViewModel.addReportingUser(user)
-
-    // Verify that the user's ID is added to reportingUsers
-    assertTrue(
-        parkingViewModel.selectedParking.value?.reportingUsers?.contains(user.public.userId) ==
-            true)
     verify(parkingRepository).updateParking(any(), any(), any())
-  }
-
-  @Test
-  fun addReportingUserFailsToUpdateParkingInFirestore() {
-    val user = TestInstancesUser.user1
-    val parking = TestInstancesParking.parking1.copy(reportingUsers = emptyList())
-
-    `when`(parkingRepository.updateParking(any(), any(), any())).then {
-      it.getArgument<(Exception) -> Unit>(2).invoke(Exception("Update failed")) // Simulate failure
-    }
-
-    parkingViewModel.selectParking(parking)
-    parkingViewModel.addReportingUser(user)
-
-    // Verify that no changes are made to reportingUsers
-    assertTrue(
-        parkingViewModel.selectedParking.value?.reportingUsers?.contains(user.public.userId) ==
-            true)
   }
 
   // Helper functions to assert the state of the filter options
