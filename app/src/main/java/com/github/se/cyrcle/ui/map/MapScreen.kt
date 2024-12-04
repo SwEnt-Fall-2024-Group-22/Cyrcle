@@ -60,6 +60,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.databinding.ItemCalloutViewBinding
@@ -120,6 +121,7 @@ const val LAYER_ID = "0128"
 const val LAYER_ID_RECT = "0129"
 const val ADVANCED_MODE_ZOOM_THRESHOLD = 15.5
 const val CLUSTER_COLORS = "#1A4988"
+const val MAX_SUGGESTION_DISPLAY_NAME_LENGTH_MAP = 100
 
 @Composable
 fun MapScreen(
@@ -552,7 +554,11 @@ fun MapScreen(
         // Filter dialog is shown when the showFilter state is true, until the user dismisses it by
         // clicking the close button or outside the dialog.
         if (showFilter.value) {
-          FilterDialog(parkingViewModel, onDismiss = { showFilter.value = false })
+          FilterDialog(
+              parkingViewModel,
+              addressViewModel,
+              permissionHandler,
+              onDismiss = { showFilter.value = false })
         }
 
         if (showSuggestions.value &&
@@ -595,11 +601,27 @@ fun SuggestionMenu(
     mapViewportState: MapViewportState,
     mapViewModel: MapViewModel
 ) {
+
+  val uniqueSuggestions = remember { mutableStateOf(listOf<Address>()) }
+
   ModalBottomSheet(
       onDismissRequest = { showSuggestions.value = false },
       modifier = Modifier.testTag("SuggestionsMenu")) {
         LazyColumn {
-          items(listOfSuggestions.value) { suggestion ->
+          val seenNames = mutableSetOf<String>()
+          uniqueSuggestions.value =
+              listOfSuggestions.value.filter { suggestion ->
+                val displayName =
+                    suggestion.suggestionFormatDisplayName(
+                        MAX_SUGGESTION_DISPLAY_NAME_LENGTH_MAP, Address.Mode.MAP)
+                if (displayName in seenNames) {
+                  false
+                } else {
+                  seenNames.add(displayName)
+                  true
+                }
+              }
+          items(uniqueSuggestions.value) { suggestion ->
             Card(
                 onClick = {
                   showSuggestions.value = false
@@ -631,8 +653,11 @@ fun SuggestionMenu(
                         disabledContentColor = defaultOnColor()),
                 modifier = Modifier.fillMaxSize().testTag("suggestionCard${suggestion.city}")) {
                   Text(
-                      text = "${suggestion.road},${suggestion.city},${suggestion.country}",
-                      Modifier.padding(5.dp))
+                      text =
+                          suggestion.suggestionFormatDisplayName(
+                              MAX_SUGGESTION_DISPLAY_NAME_LENGTH_MAP, Address.Mode.MAP),
+                      Modifier.padding(5.dp),
+                      textAlign = TextAlign.Start)
                 }
 
             androidx.compose.material.Divider(Modifier.fillMaxWidth(), color = Black)
@@ -732,7 +757,12 @@ fun SettingsDialog(
  * @param onDismiss The function to dismiss the dialog.
  */
 @Composable
-fun FilterDialog(parkingViewModel: ParkingViewModel, onDismiss: () -> Unit) {
+fun FilterDialog(
+    parkingViewModel: ParkingViewModel,
+    addressViewModel: AddressViewModel,
+    permissionHandler: PermissionHandler,
+    onDismiss: () -> Unit
+) {
   AlertDialog(
       onDismissRequest = onDismiss,
       title = {
@@ -743,7 +773,11 @@ fun FilterDialog(parkingViewModel: ParkingViewModel, onDismiss: () -> Unit) {
       },
       text = {
         Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
-          FilterPanel(parkingViewModel, displayHeader = false)
+          FilterPanel(
+              parkingViewModel,
+              displayHeader = false,
+              addressViewModel,
+              permissionHandler = permissionHandler)
         }
       },
       confirmButton = {

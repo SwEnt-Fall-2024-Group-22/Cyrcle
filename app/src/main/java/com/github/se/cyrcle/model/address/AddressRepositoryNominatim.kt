@@ -21,6 +21,7 @@ class AddressRepositoryNominatim @Inject constructor(private val client: OkHttpC
             .addQueryParameter("q", query)
             .addQueryParameter("format", "json")
             .addQueryParameter("addressdetails", "1")
+            .addQueryParameter("accept-language", "en")
             .build()
     val request = Request.Builder().url(url).header("User-Agent", "Cyrcle").build()
 
@@ -59,7 +60,7 @@ class AddressRepositoryNominatim @Inject constructor(private val client: OkHttpC
 
     val jsonArray = JSONArray(body)
     if (jsonArray.length() == 0) {
-      return listOf(Address())
+      return emptyList()
     }
     val addressList = mutableListOf<Address>()
     for (i in 0 until jsonArray.length()) {

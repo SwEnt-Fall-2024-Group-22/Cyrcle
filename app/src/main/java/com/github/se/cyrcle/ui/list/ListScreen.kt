@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.list
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,13 +32,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -50,10 +54,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.model.address.Address
+import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
+import com.github.se.cyrcle.permission.PermissionHandler
+import com.github.se.cyrcle.ui.map.MapConfig
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
@@ -61,32 +69,70 @@ import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.github.se.cyrcle.ui.theme.molecules.FilterPanel
+import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMeasurement
 import kotlin.math.roundToInt
 
 const val CARD_HEIGHT = 120
 const val MAX_SWIPE_DISTANCE = 150
+const val maxSuggestionDisplayNameLengthList = 70
+const val NumberOfSuggestionsForMenu = 6
 
 @Composable
 fun SpotListScreen(
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel,
     mapViewModel: MapViewModel,
-    userViewModel: UserViewModel
+    userViewModel: UserViewModel,
+    addressViewModel: AddressViewModel,
+    permissionHandler: PermissionHandler
 ) {
+
   val userPosition by mapViewModel.userPosition.collectAsState()
 
   val filteredParkingSpots by parkingViewModel.closestParkings.collectAsState()
   val pinnedParkings by parkingViewModel.pinnedParkings.collectAsState()
 
-  LaunchedEffect(userPosition) { parkingViewModel.setCircleCenter(userPosition) }
+  // chosen location by the user for the list Screen
+  val chosenLocation: MutableState<Address> = remember {
+    mutableStateOf(
+        Address(
+            latitude = MapConfig.defaultCameraState().center.latitude().toString(),
+            longitude = MapConfig.defaultCameraState().center.longitude().toString()))
+  }
+
+  // value that says wether the user clicked on my Location Suggestion or not
+  val myLocation = remember { mutableStateOf(true) }
+
+  // location permission from location manager
+  val locPermission = permissionHandler.getLocalisationPerm().collectAsState().value
+
+  LaunchedEffect(userPosition, myLocation, chosenLocation.value) {
+
+    // if suggestion MyLocatio is chosen and user has location permission then set the circle center
+    // to user position
+    if (locPermission && myLocation.value) parkingViewModel.setCircleCenter(userPosition)
+
+    // else if the user has chosen a location or hasn't given his location permission then set the
+    // circle center to the chosen location (default position is EPFL)
+    else Log.d("SpotListScreen", parkingViewModel.closestParkings.value.toString())
+    parkingViewModel.setCircleCenter(
+        Point.fromLngLat(
+            chosenLocation.value.longitude.toDouble(), chosenLocation.value.latitude.toDouble()))
+  }
 
   Scaffold(
       modifier = Modifier.testTag("SpotListScreen"),
       bottomBar = { BottomNavigationBar(navigationActions, selectedItem = Route.LIST) }) {
           innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(bottom = 16.dp)) {
-          FilterPanel(parkingViewModel = parkingViewModel, displayHeader = true)
+          FilterPanel(
+              parkingViewModel = parkingViewModel,
+              displayHeader = true,
+              addressViewModel,
+              myLocation,
+              chosenLocation,
+              permissionHandler)
           val listState = rememberLazyListState()
           LazyColumn(state = listState, modifier = Modifier.testTag("SpotListColumn")) {
             // Pinned parking spots if any (includes titles and dividers)
