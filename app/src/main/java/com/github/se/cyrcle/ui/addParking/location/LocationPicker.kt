@@ -53,7 +53,7 @@ fun LocationPicker(
   var pLabelAnnotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
 
   // Collect the list of parkings from the ParkingViewModel as a state
-  val listOfParkings by parkingViewModel.filteredRectParkings.collectAsState(emptyList())
+  val listOfParkings by parkingViewModel.rectParkings.collectAsState(emptyList())
 
   // Draw the markers on the map when the list of parkings changes
   LaunchedEffect(listOfParkings) {
