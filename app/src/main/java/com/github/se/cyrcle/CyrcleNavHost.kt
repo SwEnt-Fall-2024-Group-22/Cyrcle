@@ -105,7 +105,9 @@ fun CyrcleNavHost(
     }
 
     navigation(startDestination = Screen.LOCATION_PICKER, route = Route.ADD_SPOTS) {
-      composable(Screen.LOCATION_PICKER) { LocationPicker(navigationActions, mapViewModel,parkingViewModel) }
+      composable(Screen.LOCATION_PICKER) {
+        LocationPicker(navigationActions, mapViewModel, parkingViewModel)
+      }
       composable(Screen.ATTRIBUTES_PICKER) {
         AttributesPicker(
             navigationActions, parkingViewModel, mapViewModel, addressViewModel, userViewModel)

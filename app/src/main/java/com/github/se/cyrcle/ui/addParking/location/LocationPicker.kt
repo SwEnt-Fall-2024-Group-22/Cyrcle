@@ -60,8 +60,7 @@ fun LocationPicker(
   // Collect the list of parkings from the ParkingViewModel as a state
   val listOfParkings by parkingViewModel.filteredRectParkings.collectAsState(emptyList())
 
-
-// Draw the markers on the map when the list of parkings changes
+  // Draw the markers on the map when the list of parkings changes
   LaunchedEffect(listOfParkings) {
     mapViewModel.drawMarkers(markerAnnotationManager, listOfParkings, resizedBitmap)
   }
