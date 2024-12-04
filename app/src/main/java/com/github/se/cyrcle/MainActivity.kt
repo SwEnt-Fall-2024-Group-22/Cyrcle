@@ -16,7 +16,6 @@ import com.github.se.cyrcle.model.authentication.AuthenticationRepository
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.network.ConnectivityObserver
-import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.offline.OfflineParkingRepository
 import com.github.se.cyrcle.model.parking.online.ParkingRepository

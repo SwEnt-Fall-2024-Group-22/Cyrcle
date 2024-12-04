@@ -3,6 +3,7 @@ package com.github.se.cyrcle.ui.map
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -529,7 +530,11 @@ fun MapScreen(
         // dismisses it by clicking the close button or outside the dialog.
         if (showSettings.value) {
           SettingsDialog(
-              mapMode, mapViewModel, navigationActions, onDismiss = { showSettings.value = false })
+              mapMode,
+              userViewModel,
+              mapViewModel,
+              navigationActions,
+              onDismiss = { showSettings.value = false })
         }
 
         // Filter dialog is shown when the showFilter state is true, until the user dismisses it by
@@ -658,10 +663,14 @@ fun SuggestionMenu(
 @Composable
 fun SettingsDialog(
     mapMode: State<MapViewModel.MapMode>,
+    userViewModel: UserViewModel,
     mapViewModel: MapViewModel,
     navigationActions: NavigationActions,
     onDismiss: () -> Unit
 ) {
+  val isOnlineMode by userViewModel.isOnlineMode.collectAsState()
+  val hasConnection by userViewModel.hasConnection.collectAsState()
+  val context = LocalContext.current
   AlertDialog(
       onDismissRequest = onDismiss,
       title = {
@@ -695,7 +704,29 @@ fun SettingsDialog(
                 text = stringResource(R.string.map_screen_mode_switch_label),
                 style = MaterialTheme.typography.bodyLarge)
           }
-
+          HorizontalDivider(
+              thickness = 1.dp,
+              modifier = Modifier.fillMaxWidth(),
+              color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
+          // Switch to Online/Offline Mode
+          Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            Box(modifier = Modifier.width(64.dp), contentAlignment = Alignment.CenterStart) {
+              Switch(
+                  modifier = Modifier.testTag("OfflineModeSwitch"),
+                  checked = !isOnlineMode,
+                  onCheckedChange = { isOfflineMode ->
+                    if (!isOfflineMode && !hasConnection) {
+                      Toast.makeText(context, "No connection", Toast.LENGTH_SHORT).show()
+                    } else {
+                      userViewModel.setIsOnlineMode(!isOfflineMode)
+                    }
+                  },
+                  colors =
+                      SwitchDefaults.colors(
+                          uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant))
+            }
+            Text(text = "Offline Mode")
+          }
           HorizontalDivider(
               thickness = 1.dp,
               modifier = Modifier.fillMaxWidth(),
