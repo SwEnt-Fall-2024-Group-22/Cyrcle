@@ -120,7 +120,9 @@
     <string name="zoom_out">Zoom Out</string>
 
     <!-- Map Screen -->
-    <string name="map_screen_capacity">Capacity is %s</string>
+    <string name="map_screen_capacity">Capacity: %s</string>
+    <string name="map_screen_rack_type">Rack Type: %s</string>
+    <string name="map_screen_protection">Protection: %s</string>
     <string name="map_screen_mode_switch_label">Advanced Mode</string>
     <string name="map_screen_settings_to_zone">Offline Map</string>
     <string name="settings">Settings</string>

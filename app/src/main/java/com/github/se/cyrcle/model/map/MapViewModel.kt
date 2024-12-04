@@ -24,7 +24,6 @@ import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationOptions
 import com.mapbox.maps.plugin.locationcomponent.createDefault2DPuck
 import com.mapbox.maps.plugin.locationcomponent.location
-import com.mapbox.maps.viewannotation.ViewAnnotationManager
 import com.mapbox.turf.TurfMeasurement
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -323,26 +322,6 @@ class MapViewModel : ViewModel() {
     // draw the polygons via the polygonAnnotationManager
     polygonAnnotationManager?.create(annotations)
   }
-
-  // ================== ViewAnnotationManager ==================
-  // State to manage the preview cards on the map screen
-
-  private val _viewAnnotationManager = MutableStateFlow<ViewAnnotationManager?>(null)
-  val viewAnnotationManager: StateFlow<ViewAnnotationManager?> = _viewAnnotationManager
-  /**
-   * To call once on the creation on the map screen to initialize the ViewAnnotationManager
-   *
-   * @param viewAnnotationManager the ViewAnnotationManager to update
-   */
-  fun updateViewAnnotationManager(viewAnnotationManager: ViewAnnotationManager?) {
-    _viewAnnotationManager.value = viewAnnotationManager
-  }
-
-  /** Remove the preview card from the map screen */
-  fun removePreviewCard() {
-    _viewAnnotationManager.value?.removeAllViewAnnotations()
-  }
-  // ===============  End Of  ViewAnnotationManager ==================
 
   /**
    * Enum class to represent the state of the location picker, This state is used to determine which
