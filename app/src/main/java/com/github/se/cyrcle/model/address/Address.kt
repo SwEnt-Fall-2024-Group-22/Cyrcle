@@ -58,10 +58,10 @@ data class Address(
     val cityBlock: String = "",
     @SerializedName("neighbourhood", alternate = ["quarter", "allotments"])
     val neighbourhood: String = "",
-    @SerializedName("hamlet", alternate = ["isolated_dwelling, croft"]) val hamlet: String = "",
+    @SerializedName("hamlet", alternate = ["isolated_dwelling", "croft"]) val hamlet: String = "",
     @SerializedName("suburb", alternate = ["city_district", "district", "borough", "subdivision"])
     val suburb: String = "",
-    @SerializedName("city", alternate = ["municipality", "village, town"]) val city: String = "",
+    @SerializedName("city", alternate = ["municipality", "village", "town"]) val city: String = "",
     @SerializedName("postcode") val postcode: String = "",
     @SerializedName("region", alternate = ["state", "state_district", "county", "ISO3166-2-lvl"])
     val region: String = "",
