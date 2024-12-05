@@ -197,6 +197,9 @@ class ParkingDetailsScreenTest {
     // Scroll to the buttons section
     composeTestRule.onNodeWithTag("ButtonsColumn").performScrollTo().assertIsDisplayed()
     composeTestRule.onNodeWithTag("ShowInMapButton").assertIsDisplayed()
+
+    // Verify the Show in Map button
+    composeTestRule.onNodeWithTag("ShowInMapButton").assertIsDisplayed()
   }
 
   @Test
@@ -311,5 +314,20 @@ class ParkingDetailsScreenTest {
     // After saving, the note input and save button should be hidden
     composeTestRule.onNodeWithTag("NoteInputText").assertIsNotDisplayed()
     composeTestRule.onNodeWithTag("SaveNoteIcon").assertIsNotDisplayed()
+  }
+
+  @Test
+  fun showInMapButtonGoesToMapScreen() {
+    parkingViewModel.selectParking(TestInstancesParking.parking1)
+    composeTestRule.setContent {
+      ParkingDetailsScreen(mapViewModel, navigationActions, parkingViewModel, userViewModel)
+    }
+
+    composeTestRule
+        .onNodeWithTag("ShowInMapButton")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+    verify(navigationActions).navigateTo(Screen.MAP)
   }
 }
