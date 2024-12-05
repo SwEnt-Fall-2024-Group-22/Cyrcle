@@ -49,6 +49,11 @@ class UserViewModel(
     _currentUser.value = user
   }
 
+  fun setParkingUser(user: User?) {
+    Log.d("UserViewModel", "Setting the current user in viewmodel : $user")
+    _selectedParkingOwner.value = user
+  }
+
   private val _favoriteParkings = MutableStateFlow<List<Parking>>(emptyList())
   val favoriteParkings: StateFlow<List<Parking>> = _favoriteParkings
 
@@ -186,11 +191,16 @@ class UserViewModel(
     }
   }
 
-  fun selectSelectedParkingUser(uid: String) {
+  fun selectSelectedParkingUser(userId: String) {
     userRepository.getUserById(
-        uid,
-        { user -> _selectedParkingOwner.value = user },
-        { Log.d("UserViewModel", "Error fetching selected parking's User") })
+        userId,
+        onSuccess = { setParkingUser(it) },
+        onFailure = { exception ->
+          Log.e(
+              "com.github.se.cyrcle.model.user.UserViewModel",
+              "Failed to fetch user by ID: $userId",
+              exception)
+        })
   }
 
   /**

@@ -1,6 +1,7 @@
 package com.github.se.cyrcle.ui.parkingDetails
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -88,8 +89,9 @@ fun ParkingDetailsScreen(
   val showDialog = remember { mutableStateOf(false) }
   val imagesUrls by parkingViewModel.selectedParkingImagesUrls.collectAsState()
   val showDialogImage = remember { mutableStateOf<String?>(null) }
+  Log.d("AAAAAAAAAAAAA", "${selectedParking.owner}")
   if (selectedParking.owner != null) {
-    userViewModel.selectSelectedParkingUser(parkingViewModel.selectedParking.value?.uid!!)
+    userViewModel.selectSelectedParkingUser(parkingViewModel.selectedParking.value?.owner!!)
   }
   // === === === === === === ===
 
