@@ -32,9 +32,5 @@ interface ImageRepository {
       onFailure: () -> Unit
   )
 
-  fun deleteImage(
-        path: String,
-        onSuccess: () -> Unit,
-        onFailure: (Exception) -> Unit
-    )
+  fun deleteImage(path: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
 }

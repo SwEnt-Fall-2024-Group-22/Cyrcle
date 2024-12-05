@@ -80,25 +80,25 @@ constructor(private val auth: FirebaseAuth, private val storage: FirebaseStorage
     return outputStream.toByteArray()
   }
 
-    override fun deleteImage(
-        destinationPath: String,
-        onSuccess: () -> Unit,
-        onFailure: (Exception) -> Unit
-    ) {
-        if (auth.currentUser == null) {
-            Log.e("ImageRepositoryCloudStorage", "User not logged in, signInAnonymously")
-            onFailure(Exception("User not logged in"))
-            return
-        }
-        val ref = storageRef.child(destinationPath)
-        ref.delete()
-            .addOnSuccessListener {
-                Log.d("ImageRepositoryCloudStorage", "Image deleted successfully from path: $path")
-                onSuccess()
-            }
-            .addOnFailureListener { exception ->
-                Log.e("ImageRepositoryCloudStorage", "Error deleting image from path: $path", exception)
-                onFailure(exception)
-            }
+  override fun deleteImage(
+      destinationPath: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    if (auth.currentUser == null) {
+      Log.e("ImageRepositoryCloudStorage", "User not logged in, signInAnonymously")
+      onFailure(Exception("User not logged in"))
+      return
     }
+    val ref = storageRef.child(destinationPath)
+    ref.delete()
+        .addOnSuccessListener {
+          Log.d("ImageRepositoryCloudStorage", "Image deleted successfully from path: $path")
+          onSuccess()
+        }
+        .addOnFailureListener { exception ->
+          Log.e("ImageRepositoryCloudStorage", "Error deleting image from path: $path", exception)
+          onFailure(exception)
+        }
+  }
 }
