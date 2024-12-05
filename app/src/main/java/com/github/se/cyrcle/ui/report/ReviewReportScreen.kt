@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.model.report.ReportedObjectType
 import com.github.se.cyrcle.model.review.ReviewReport
 import com.github.se.cyrcle.model.review.ReviewReportReason
 import com.github.se.cyrcle.model.review.ReviewViewModel
@@ -115,11 +116,14 @@ fun ReviewReportScreen(
                 modifier = Modifier.testTag("ReportBulletPoints"))
 
             // Select Reason
+            // Select Reason
             ReportInputs(
-                selectedReason = selectedReason,
+                selectedReasonIfParking = null,
+                selectedReasonIfReview = selectedReason,
+                selectedReasonIfImage = null,
+                reportedObjectType = ReportedObjectType.REVIEW,
                 reportDescription = reportDescription,
-                horizontalPadding = horizontalPadding,
-                modifier = Modifier.testTag("DetailsInput"))
+                horizontalPadding = horizontalPadding)
 
             val validInputs = areInputsValid(reportDescription.value)
 
