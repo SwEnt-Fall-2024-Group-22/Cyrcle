@@ -115,6 +115,10 @@ class ParkingViewModel(
         uid, {}, { Log.d("ParkingViewModel", "Error deleting Parking") })
   }
 
+  fun deleteImageFromParking(imgUID: String){
+
+  }
+
   fun clearSelectedParking() {
     _selectedParking.value = null
     _selectedParkingReports.value = emptyList()
