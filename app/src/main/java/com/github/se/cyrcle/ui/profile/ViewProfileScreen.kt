@@ -42,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.Parking
@@ -364,76 +365,83 @@ private fun ReviewCard(review: Review, parkingViewModel: ParkingViewModel) {
         onFailure = {})
   }
 
-  Card(modifier = Modifier.padding(8.dp).width(260.dp), shape = MaterialTheme.shapes.medium) {
-    Column(modifier = Modifier.padding(16.dp)) {
-      // Display parking name with unique test tag
-      Text(
-          text = parkingName,
-          style = MaterialTheme.typography.titleMedium,
-          modifier = Modifier.fillMaxWidth().testTag("ParkingName_${review.uid}"))
+  Card(
+      modifier = Modifier.padding(8.dp).width(260.dp).height(200.dp),
+      shape = MaterialTheme.shapes.medium) {
+        Column(
+            modifier = Modifier.padding(16.dp).fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween) {
+              // Display parking name with unique test tag
+              Text(
+                  text = parkingName,
+                  style = MaterialTheme.typography.titleMedium,
+                  modifier = Modifier.fillMaxWidth().testTag("ParkingName_${review.uid}"))
 
-      Spacer(modifier = Modifier.height(8.dp))
+              Spacer(modifier = Modifier.height(8.dp))
 
-      // Display rating with unique test tag
-      Text(
-          text =
-              stringResource(
-                  R.string.view_profile_screen_you_rated_parking, review.rating.toString()),
-          style = MaterialTheme.typography.bodyMedium,
-          color = MaterialTheme.colorScheme.primary,
-          modifier = Modifier.testTag("RatingText_${review.uid}"))
+              // Display rating with unique test tag
+              Text(
+                  text =
+                      stringResource(
+                          R.string.view_profile_screen_you_rated_parking, review.rating.toString()),
+                  style = MaterialTheme.typography.bodyMedium,
+                  color = MaterialTheme.colorScheme.primary,
+                  modifier = Modifier.testTag("RatingText_${review.uid}"))
 
-      Spacer(modifier = Modifier.height(8.dp))
+              Spacer(modifier = Modifier.height(8.dp))
 
-      // Display review text section
-      Text(
-          text = stringResource(R.string.view_profile_screen_you_said),
-          style = MaterialTheme.typography.bodyMedium,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-          modifier = Modifier.testTag("YouSaidText_${review.uid}"))
+              // Display review text section
+              Text(
+                  text = stringResource(R.string.view_profile_screen_you_said),
+                  style = MaterialTheme.typography.bodyMedium,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  modifier = Modifier.testTag("YouSaidText_${review.uid}"))
 
-      Text(
-          text = "\"${truncateText(review.text)}\"",
-          style = MaterialTheme.typography.bodyMedium,
-          modifier = Modifier.fillMaxWidth().testTag("ReviewText_${review.uid}"))
+              androidx.compose.material3.Text(
+                  text = "\"${truncateText(review.text)}\"",
+                  style = MaterialTheme.typography.bodyMedium,
+                  maxLines = 2,
+                  overflow = TextOverflow.Ellipsis,
+                  modifier = Modifier.fillMaxWidth().testTag("ReviewText_${review.uid}"))
 
-      Spacer(modifier = Modifier.height(8.dp))
+              Spacer(modifier = Modifier.height(8.dp))
 
-      // Display likes and dislikes counts
-      Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.End,
-          verticalAlignment = Alignment.CenterVertically) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically) {
-                  // Likes count
-                  Row(
-                      horizontalArrangement = Arrangement.spacedBy(4.dp),
-                      verticalAlignment = Alignment.CenterVertically,
-                      modifier = Modifier.testTag("LikesCount_${review.uid}")) {
-                        Text(
-                            text =
-                                stringResource(
-                                    R.string.view_profile_screen_likes_count, review.likedBy.size),
-                            style = MaterialTheme.typography.bodyMedium)
-                      }
-                  // Dislikes count
-                  Row(
-                      horizontalArrangement = Arrangement.spacedBy(4.dp),
-                      verticalAlignment = Alignment.CenterVertically,
-                      modifier = Modifier.testTag("DislikesCount_${review.uid}")) {
-                        Text(
-                            text =
-                                stringResource(
-                                    R.string.view_profile_screen_dislikes_count,
-                                    review.dislikedBy.size),
-                            style = MaterialTheme.typography.bodyMedium)
-                      }
-                }
-          }
-    }
-  }
+              // Display likes and dislikes counts
+              Row(
+                  modifier = Modifier.fillMaxWidth(),
+                  horizontalArrangement = Arrangement.End,
+                  verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically) {
+                          // Likes count
+                          Row(
+                              horizontalArrangement = Arrangement.spacedBy(4.dp),
+                              verticalAlignment = Alignment.CenterVertically,
+                              modifier = Modifier.testTag("LikesCount_${review.uid}")) {
+                                Text(
+                                    text =
+                                        stringResource(
+                                            R.string.view_profile_screen_likes_count,
+                                            review.likedBy.size),
+                                    style = MaterialTheme.typography.bodyMedium)
+                              }
+                          // Dislikes count
+                          Row(
+                              horizontalArrangement = Arrangement.spacedBy(4.dp),
+                              verticalAlignment = Alignment.CenterVertically,
+                              modifier = Modifier.testTag("DislikesCount_${review.uid}")) {
+                                Text(
+                                    text =
+                                        stringResource(
+                                            R.string.view_profile_screen_dislikes_count,
+                                            review.dislikedBy.size),
+                                    style = MaterialTheme.typography.bodyMedium)
+                              }
+                        }
+                  }
+            }
+      }
 }
 
 /**
