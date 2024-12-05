@@ -401,7 +401,7 @@ private fun ReviewCard(review: Review, parkingViewModel: ParkingViewModel) {
                   text = "\"${truncateText(review.text)}\"",
                   style = MaterialTheme.typography.bodyMedium,
                   maxLines = 2,
-                  softWrap = true,
+                  softWrap = false,
                   overflow = TextOverflow.Ellipsis,
                   modifier = Modifier.fillMaxWidth().testTag("ReviewText_${review.uid}"))
 
@@ -453,8 +453,10 @@ private fun ReviewCard(review: Review, parkingViewModel: ParkingViewModel) {
  *   otherwise returns the original text
  */
 private fun truncateText(text: String): String {
-  return if (text.length > MAX_TRUNCATED_TEXT_LENGTH) {
-    text.take(MAX_TRUNCATED_TEXT_LENGTH) + "..."
+  // Reserve 4 characters: 1 for opening quote, 3 for "..." and 1 for closing quote
+  val maxLength = MAX_TRUNCATED_TEXT_LENGTH - 5
+  return if (text.length > maxLength) {
+    text.take(maxLength) + "..."
   } else {
     text
   }
