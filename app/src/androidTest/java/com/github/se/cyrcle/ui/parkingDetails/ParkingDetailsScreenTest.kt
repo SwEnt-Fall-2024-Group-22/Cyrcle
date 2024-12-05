@@ -325,6 +325,7 @@ class ParkingDetailsScreenTest {
 
     composeTestRule
         .onNodeWithTag("ShowInMapButton")
+        .performScrollTo()
         .assertIsDisplayed()
         .assertHasClickAction()
         .performClick()
