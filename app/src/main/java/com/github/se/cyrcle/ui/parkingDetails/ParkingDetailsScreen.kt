@@ -53,6 +53,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.user.MAX_NOTE_LENGTH
 import com.github.se.cyrcle.model.user.UserViewModel
@@ -71,6 +72,7 @@ import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ParkingDetailsScreen(
+    mapViewModel: MapViewModel,
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel,
     userViewModel: UserViewModel
@@ -470,11 +472,13 @@ fun ParkingDetailsScreen(
                     Button(
                         text = stringResource(R.string.card_screen_show_map),
                         onClick = {
-                          Toast.makeText(
-                                  context,
-                                  "A feature to show the parking on the map will be added later",
-                                  Toast.LENGTH_LONG)
-                              .show()
+                          parkingViewModel.selectParking(selectedParking)
+
+                          mapViewModel.updateTrackingMode(false)
+                          mapViewModel.updateMapRecentering(true)
+                          mapViewModel.zoomOnLocation(selectedParking.location)
+
+                          navigationActions.navigateTo(Screen.MAP)
                         },
                         modifier = Modifier.fillMaxWidth(),
                         colorLevel = ColorLevel.PRIMARY,
