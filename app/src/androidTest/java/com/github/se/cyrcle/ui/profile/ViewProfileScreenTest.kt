@@ -13,8 +13,13 @@ import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeLeft
+import androidx.compose.ui.test.swipeUp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
@@ -31,6 +36,7 @@ import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
+import com.github.se.cyrcle.model.review.Review
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserDetails
@@ -308,7 +314,6 @@ class ViewProfileScreenTest {
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithText("Remove").performClick()
     composeTestRule.waitForIdle()
-
     // Remove the second parking
     composeTestRule.onNodeWithTag("FavoriteToggle_0").performClick()
     composeTestRule.waitForIdle()
@@ -322,6 +327,7 @@ class ViewProfileScreenTest {
     composeTestRule.waitForIdle()
 
     composeTestRule.onNodeWithTag("NoFavoritesMessage").assertIsDisplayed()
+    Thread.sleep(5000)
   }
 
   @Test
@@ -422,5 +428,117 @@ class ViewProfileScreenTest {
     composeTestRule.waitForIdle()
 
     verify(mockNavigationActions).navigateTo(Screen.PARKING_DETAILS)
+  }
+
+  @Test
+  fun whenNoReviews_showsEmptyMessage() {
+    composeTestRule.waitForIdle()
+
+    // Scroll to the reviews section using swipe
+    composeTestRule
+      .onNodeWithTag("ProfileContentSections")
+      .performTouchInput {
+        swipeUp()
+      }
+
+    Thread.sleep(5000)
+    composeTestRule
+      .onNodeWithTag("UserReviewsTitle")
+      .assertIsDisplayed()
+
+    composeTestRule
+      .onNodeWithTag("NoReviewsMessage")
+      .assertIsDisplayed()
+      .assertTextEquals("You haven't written any reviews yet")
+  }
+
+  @Test
+  fun whenUserHasReviews_showsReviewsList() {
+    // Add some test reviews
+    val testReview1 = Review(
+      uid = "review1",
+      owner = "1",
+      text = "Great parking spot!",
+      rating = 4.5,
+      parking = "Test Parking 1",
+      likedBy = listOf("user2", "user3"),
+      dislikedBy = listOf("user4")
+    )
+
+    val testReview2 = Review(
+      uid = "review2",
+      owner = "1",
+      text = "Decent parking",
+      rating = 3.5,
+      parking = "Test Parking 2",
+      likedBy = listOf("user2"),
+      dislikedBy = emptyList()
+    )
+
+    // Add reviews to mock repository
+    mockReviewRepository.addReview(testReview1, {}, {})
+    mockReviewRepository.addReview(testReview2, {}, {})
+
+    // Trigger review fetch
+    reviewViewModel.getReviewsByOwnerId("1")
+
+    composeTestRule.waitForIdle()
+
+    repeat(3) {  // Add multiple swipes to ensure we reach the bottom
+      composeTestRule
+        .onNodeWithTag("ProfileContentSections")
+        .performTouchInput {
+          swipeUp()
+        }
+    }
+
+    Thread.sleep(10000)
+    // Verify first review content
+    composeTestRule
+      .onNodeWithText("Test Parking 1")
+      .assertIsDisplayed()
+    composeTestRule
+      .onNodeWithText("You rated this parking: 4.5 ⭐")
+      .assertIsDisplayed()
+    composeTestRule
+      .onNodeWithTag("YouSaidText_review1")
+      .assertIsDisplayed()
+    composeTestRule
+      .onNodeWithText("\"Great parking spot!\"")
+      .assertIsDisplayed()
+    composeTestRule
+      .onNodeWithTag("LikesCount_review1")
+      .assertIsDisplayed()
+    composeTestRule
+      .onNodeWithTag("DislikesCount_review1")
+      .assertIsDisplayed()
+
+    // Scroll horizontally to see the second review
+    composeTestRule
+      .onNodeWithTag("UserReviewsList")
+      .performTouchInput {
+        swipeLeft()
+      }
+    Thread.sleep(10000)
+
+    // Verify second review content
+    composeTestRule
+      .onNodeWithText("Test Parking 2")
+      .assertIsDisplayed()
+    composeTestRule
+      .onNodeWithText("You rated this parking: 3.5 ⭐")
+      .assertIsDisplayed()
+    composeTestRule
+      .onNodeWithTag("YouSaidText_review2")
+      .assertIsDisplayed()
+    composeTestRule
+      .onNodeWithText("\"Decent parking\"")
+      .assertIsDisplayed()
+    composeTestRule
+      .onNodeWithTag("LikesCount_review2")
+      .assertIsDisplayed()
+    composeTestRule
+      .onNodeWithTag("DislikesCount_review2")
+      .assertIsDisplayed()
   }
 }
