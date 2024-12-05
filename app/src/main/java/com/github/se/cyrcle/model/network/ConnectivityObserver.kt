@@ -9,6 +9,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+/**
+ * This class has two roles in our app :
+ * - Listen for network changes and update the user viewmodel accordingly
+ * - Listen for changes in the mode the user chooses (online/offline) and update the other
+ *   viewmodels accordingly
+ *
+ * In that sense in the MVVM architecture, this class is behind the viewmodel layer.
+ */
 class ConnectivityObserver(
     private val userViewModel: UserViewModel,
     private val mapViewModel: MapViewModel,
