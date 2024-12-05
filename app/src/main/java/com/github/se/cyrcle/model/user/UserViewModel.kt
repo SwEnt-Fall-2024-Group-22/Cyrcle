@@ -185,6 +185,13 @@ class UserViewModel(
     }
   }
 
+    /**
+     * Adds a parking to the list of reported parkings for the selected user and updates the reported
+     * parkings state.
+     *
+     * @param parking The parking ID to add to the list of reported parkings.
+     */
+
   fun addReportedParkingToSelectedUser(parking: String) {
     currentUser.value?.let { user ->
       val updatedDetails =
@@ -194,6 +201,12 @@ class UserViewModel(
     }
   }
 
+    /**
+     * Adds a review to the list of reported reviews for the selected user and updates the reported
+     * reviews state.
+     *
+     * @param review The review ID to add to the list of reported reviews.
+     */
   fun addReportedReviewToSelectedUser(review: String) {
     currentUser.value?.let { user ->
       val updatedDetails =
@@ -203,17 +216,7 @@ class UserViewModel(
     }
   }
 
-  fun selectSelectedParkingUser(userId: String) {
-    userRepository.getUserById(
-        userId,
-        onSuccess = { setParkingUser(it) },
-        onFailure = { exception ->
-          Log.e(
-              "com.github.se.cyrcle.model.user.UserViewModel",
-              "Failed to fetch user by ID: $userId",
-              exception)
-        })
-  }
+
 
   /**
    * Removes parking from the list of favorite parkings for the selected user and updates the
@@ -298,6 +301,30 @@ class UserViewModel(
           onFailure(SignInFailureReason.ERROR)
         })
   }
+
+    /**
+     * Selects a parking owner based on the given user ID.
+     *
+     * @param userId The ID of the user to set as the selected parking owner.
+     */
+    fun selectSelectedParkingUser(userId: String?) {
+        if (userId.isNullOrEmpty()) {
+            Log.e("UserViewModel", "Invalid userId: $userId")
+            return
+        }
+
+        userRepository.getUserById(
+            userId,
+            onSuccess = { setParkingUser(it) },
+            onFailure = { exception ->
+                Log.e(
+                    "com.github.se.cyrcle.model.user.UserViewModel",
+                    "Failed to fetch user by ID: $userId",
+                    exception
+                )
+            }
+        )
+    }
 
   /**
    * Sign in a user anonymously.
