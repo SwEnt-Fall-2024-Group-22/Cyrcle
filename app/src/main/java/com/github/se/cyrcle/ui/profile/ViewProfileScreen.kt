@@ -453,10 +453,8 @@ private fun ReviewCard(review: Review, parkingViewModel: ParkingViewModel) {
  *   otherwise returns the original text
  */
 private fun truncateText(text: String): String {
-  // Reserve 4 characters: 1 for opening quote, 3 for "..." and 1 for closing quote
-  val maxLength = MAX_TRUNCATED_TEXT_LENGTH - 5
-  return if (text.length > maxLength) {
-    text.take(maxLength) + "..."
+  return if (text.length > MAX_TRUNCATED_TEXT_LENGTH) {
+    text.take(MAX_TRUNCATED_TEXT_LENGTH) + "..."
   } else {
     text
   }
