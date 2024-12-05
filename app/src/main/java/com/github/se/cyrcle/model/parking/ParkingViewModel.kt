@@ -81,7 +81,12 @@ class ParkingViewModel(
   private val _selectedParking = MutableStateFlow<Parking?>(null)
   val selectedParking: StateFlow<Parking?> = _selectedParking
 
-  /** Selected parking to review/edit */
+    /** Selected parking to review/edit */
+    private val _selectedParkingImage = MutableStateFlow<ParkingImage?>(null)
+    val selectedParkingImage: StateFlow<ParkingImage?> = _selectedParkingImage
+
+
+    /** Selected parking to review/edit */
   private val _selectedParkingReports = MutableStateFlow<List<ParkingReport>>(emptyList())
   val selectedParkingReports: StateFlow<List<ParkingReport>> = _selectedParkingReports
 
