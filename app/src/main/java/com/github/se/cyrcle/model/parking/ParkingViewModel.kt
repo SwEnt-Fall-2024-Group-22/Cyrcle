@@ -36,7 +36,6 @@ const val PARKING_MAX_SIDE_LENGTH = 50.0
 
 /**
  * ViewModel for the Parking feature.
- *
  * @param imageRepository the repository for the Parking feature
  */
 class ParkingViewModel(
@@ -395,6 +394,28 @@ class ParkingViewModel(
       set + item
     }
   }
+
+
+    /**
+     * Removes an image from the list of images of the given parking.
+     *
+     * @param parking The parking object to update.
+     * @param imgId The ID of the image to remove.
+     * @param onSuccess A callback function executed when the operation is successful.
+     * @param onFailure A callback function executed if the operation fails.
+     */
+    /**
+     * Removes an image from the list of images of the given parking.
+     *
+     * @param parking The parking object to update.
+     * @param imgId The ID of the image to remove.
+     * @return A new Parking object with the image removed from the images list.
+     */
+    fun deleteImageFromParking(parking: Parking, imgId: String): Parking {
+        // Filter out the image with the specified ID
+        val updatedImages = parking.images.filterNot { it.endsWith("/$imgId") }
+        return parking.copy(images = updatedImages)
+    }
 
   /**
    * Updates the list of closest parkings.
