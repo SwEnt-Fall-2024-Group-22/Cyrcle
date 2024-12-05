@@ -34,8 +34,8 @@ import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
-import com.github.se.cyrcle.model.review.Review
 import com.github.se.cyrcle.model.review.ReviewViewModel
+import com.github.se.cyrcle.model.review.TestInstancesReview
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserDetails
 import com.github.se.cyrcle.model.user.UserPublic
@@ -324,7 +324,6 @@ class ViewProfileScreenTest {
     composeTestRule.waitForIdle()
 
     composeTestRule.onNodeWithTag("NoFavoritesMessage").assertIsDisplayed()
-    Thread.sleep(5000)
   }
 
   @Test
@@ -444,34 +443,16 @@ class ViewProfileScreenTest {
 
   @Test
   fun whenUserHasReviews_showsReviewsList() {
-    // Add some test reviews
-    val testReview1 =
-        Review(
-            uid = "review1",
-            owner = "1",
-            text = "Great parking spot!",
-            rating = 4.5,
-            parking = "Test Parking 1",
-            likedBy = listOf("user2", "user3"),
-            dislikedBy = listOf("user4"))
+    // Add test parkings to mock repository
+    mockParkingRepository.addParking(TestInstancesParking.parking1, {}, {}) // For review5
+    mockParkingRepository.addParking(TestInstancesParking.parking2, {}, {}) // For review1
 
-    val testReview2 =
-        Review(
-            uid = "review2",
-            owner = "1",
-            text =
-                "You know what's crazy is that that low taper fade like meme it is dude it is still massive like massive i see new ones that i've never seen before that have like millions of likes and views still that are popping up all over the place.",
-            rating = 5.0,
-            parking = "Test Parking 2",
-            likedBy = listOf("user2", "user3", "user4", "user5"),
-            dislikedBy = listOf())
+    // Add user1's reviews from TestInstancesReview
+    mockReviewRepository.addReview(TestInstancesReview.review1, {}, {})
+    mockReviewRepository.addReview(TestInstancesReview.review5, {}, {})
 
-    // Add reviews to mock repository
-    mockReviewRepository.addReview(testReview1, {}, {})
-    mockReviewRepository.addReview(testReview2, {}, {})
-
-    // Trigger review fetch
-    reviewViewModel.getReviewsByOwnerId("1")
+    // Trigger review fetch for user1
+    reviewViewModel.getReviewsByOwnerId("user1")
 
     composeTestRule.waitForIdle()
 
@@ -479,25 +460,24 @@ class ViewProfileScreenTest {
       composeTestRule.onNodeWithTag("ProfileContentSections").performTouchInput { swipeUp() }
     }
 
-    // Verify first review content
-    composeTestRule.onNodeWithText("Test Parking 1").assertIsDisplayed()
-    composeTestRule.onNodeWithText("You rated this parking: 4.5 ⭐").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("YouSaidText_review1").assertIsDisplayed()
-    composeTestRule.onNodeWithText("\"Great parking spot!\"").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("LikesCount_review1").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("DislikesCount_review1").assertIsDisplayed()
-
+    // Verify first review content (review1)
+    composeTestRule.onNodeWithTag("ParkingName_1").assertTextEquals("Rude épais")
+    composeTestRule.onNodeWithTag("RatingText_1").assertTextEquals("You rated this parking: 5.0 ⭐")
+    composeTestRule.onNodeWithTag("YouSaidText_1").assertIsDisplayed()
+    composeTestRule.onNodeWithText("\"Great parking!\"").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("LikesCount_1").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("DislikesCount_1").assertIsDisplayed()
     // Scroll horizontally to see the second review
     repeat(3) { composeTestRule.onNodeWithTag("UserReviewsList").performTouchInput { swipeLeft() } }
 
-    // Verify second review content
-    composeTestRule.onNodeWithText("Test Parking 2").assertIsDisplayed()
-    composeTestRule.onNodeWithText("You rated this parking: 5.0 ⭐").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("YouSaidText_review2").assertIsDisplayed()
+    // Verify second review content (review5)
+    composeTestRule.onNodeWithTag("ParkingName_5").assertTextEquals("Rue de la paix")
+    composeTestRule.onNodeWithTag("RatingText_5").assertTextEquals("You rated this parking: 5.0 ⭐")
+    composeTestRule.onNodeWithTag("YouSaidText_5").assertIsDisplayed()
     composeTestRule
         .onNodeWithText("\"You know what's crazy is that that low taper fade like meme it is...\"")
         .assertIsDisplayed()
-    composeTestRule.onNodeWithTag("LikesCount_review2").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("DislikesCount_review2").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("LikesCount_5").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("DislikesCount_5").assertIsDisplayed()
   }
 }
