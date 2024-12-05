@@ -168,6 +168,10 @@ class ParkingViewModel(
     parkingRepository.getParkingById(id, onSuccess, onFailure)
   }
 
+  fun removeImageFromParking(
+      imgId: String,
+  ) {}
+
   /**
    * Retrieves parkings within a rectangle defined by two opposite corners, regardless of their
    * order.
@@ -444,6 +448,7 @@ class ParkingViewModel(
       Log.e("ParkingViewModel", "No parking selected")
       return
     }
+
     parkingRepository.addReport(
         report,
         onSuccess = {

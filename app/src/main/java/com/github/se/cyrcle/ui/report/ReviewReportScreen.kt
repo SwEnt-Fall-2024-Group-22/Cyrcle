@@ -78,6 +78,7 @@ fun ReviewReportScreen(
             userId = userId,
             review = reviewId!!,
             description = reportDescription.value)
+
     reviewViewModel.addReport(report, userViewModel.currentUser.value!!)
     if (reviewViewModel.hasAlreadyReported.value) {
       Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
