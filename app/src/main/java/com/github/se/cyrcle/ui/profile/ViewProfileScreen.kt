@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -172,6 +175,7 @@ fun ViewProfileScreen(
                 })
           } else {
               DisplayProfileComponent(userState) {
+                  // Edit Button directly in the Box
                   Button(
                       text = stringResource(R.string.view_profile_screen_modify_profile_button),
                       onClick = { isEditing = true },
@@ -179,12 +183,13 @@ fun ViewProfileScreen(
                       testTag = "EditButton"
                   )
 
-                  Spacer(modifier = Modifier.height(8.dp))
-
+                  // Scrollable Column instead of LazyColumn
                   Column(
                       modifier = Modifier
                           .fillMaxWidth()
-                          .verticalScroll(rememberScrollState())  // Make the whole content scrollable
+                          .verticalScroll(rememberScrollState())
+                          .padding(top = 56.dp) // Adjust based on button height
+                          .testTag("ProfileContentSections")
                   ) {
                       FavoriteParkingsSection(userViewModel, parkingViewModel, navigationActions)
 
@@ -333,9 +338,11 @@ private fun UserReviewsSection(
             modifier = Modifier.testTag("NoReviewsMessage")
         )
     } else {
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth().testTag("UserReviewsList"),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("UserReviewsList"),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             itemsIndexed(userReviews) { _, review ->
                 review?.let { ReviewCard(review = it) }
@@ -348,48 +355,82 @@ private fun UserReviewsSection(
 private fun ReviewCard(review: Review) {
     Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
+            .padding(8.dp)
+            .width(260.dp),
         shape = MaterialTheme.shapes.medium
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Parking: ${review.parking}",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Text(
-                    text = "Rating: ${review.rating}",
-                    style = MaterialTheme.typography.titleMedium
-                )
-            }
+            Text(
+                text = review.parking,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.fillMaxWidth()
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = review.text,
-                style = MaterialTheme.typography.bodyMedium
+                text = "You rated this parking: ${review.rating} ⭐",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "You said:",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.testTag("YouSaidText_${review.uid}")  // Add unique test tag
+            )
+
+            Text(
+                text = "\"${review.text}\"",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "👍 ${review.likedBy.size}",
-                    style = MaterialTheme.typography.bodySmall
-                )
-                Text(
-                    text = "👎 ${review.dislikedBy.size}",
-                    style = MaterialTheme.typography.bodySmall
-                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.testTag("LikesCount_${review.uid}")  // Add test tag
+                    ) {
+                        Text(
+                            text = "👍",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Text(
+                            text = "${review.likedBy.size}",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.testTag("DislikesCount_${review.uid}")  // Add test tag
+                    ) {
+                        Text(
+                            text = "👎",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Text(
+                            text = "${review.dislikedBy.size}",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
             }
         }
     }
