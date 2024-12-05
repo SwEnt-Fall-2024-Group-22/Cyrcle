@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Diamond
 import androidx.compose.material.icons.filled.Favorite
@@ -169,21 +171,28 @@ fun ViewProfileScreen(
                       testTag = "CancelButton")
                 })
           } else {
-            DisplayProfileComponent(userState) {
-              Button(
-                  text = stringResource(R.string.view_profile_screen_modify_profile_button),
-                  onClick = { isEditing = true },
-                  colorLevel = ColorLevel.TERTIARY,
-                  testTag = "EditButton")
+              DisplayProfileComponent(userState) {
+                  Button(
+                      text = stringResource(R.string.view_profile_screen_modify_profile_button),
+                      onClick = { isEditing = true },
+                      colorLevel = ColorLevel.TERTIARY,
+                      testTag = "EditButton"
+                  )
 
-              Spacer(modifier = Modifier.height(24.dp))
+                  Spacer(modifier = Modifier.height(8.dp))
 
-              FavoriteParkingsSection(userViewModel, parkingViewModel, navigationActions)
+                  Column(
+                      modifier = Modifier
+                          .fillMaxWidth()
+                          .verticalScroll(rememberScrollState())  // Make the whole content scrollable
+                  ) {
+                      FavoriteParkingsSection(userViewModel, parkingViewModel, navigationActions)
 
-              Spacer(modifier = Modifier.height(24.dp))
+                      Spacer(modifier = Modifier.height(16.dp))
 
-              UserReviewsSection(reviewViewModel, userViewModel)
-            }
+                      UserReviewsSection(reviewViewModel, userViewModel)
+                  }
+              }
           }
         }
       }
@@ -202,7 +211,7 @@ private fun FavoriteParkingsSection(
       style = MaterialTheme.typography.titleLarge,
       modifier = Modifier.testTag("FavoriteParkingsTitle"))
 
-  Spacer(modifier = Modifier.height(16.dp))
+  Spacer(modifier = Modifier.height(12.dp))
 
   if (favoriteParkings.isEmpty()) {
     Text(
@@ -315,7 +324,7 @@ private fun UserReviewsSection(
         modifier = Modifier.testTag("UserReviewsTitle")
     )
 
-    Spacer(modifier = Modifier.height(16.dp))
+    Spacer(modifier = Modifier.height(12.dp))
 
     if (userReviews.isEmpty()) {
         Text(
