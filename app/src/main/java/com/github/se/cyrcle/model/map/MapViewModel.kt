@@ -10,7 +10,6 @@ import com.github.se.cyrcle.model.parking.PARKING_MAX_SIDE_LENGTH
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.ui.map.MapConfig
-import com.github.se.cyrcle.ui.map.maxZoom
 import com.github.se.cyrcle.ui.theme.molecules.DropDownableEnum
 import com.google.gson.Gson
 import com.mapbox.geojson.Point
@@ -119,22 +118,6 @@ class MapViewModel : ViewModel() {
    */
   fun updateCameraPosition(cameraState: CameraState) {
     _cameraPosition.value = cameraState
-  }
-
-  /**
-   * Set the camera to go to a specific location, with default padding, bearing and pitch. The zoom
-   * is set to the max zoom defined in the UI.
-   *
-   * @param location the location to zoom on.
-   */
-  fun zoomOnLocation(location: Location) {
-    _cameraPosition.value =
-        CameraState(
-            location.center,
-            MapConfig.defaultCameraState().padding,
-            maxZoom,
-            MapConfig.defaultCameraState().bearing,
-            MapConfig.defaultCameraState().pitch)
   }
 
   /**
