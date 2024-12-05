@@ -83,10 +83,12 @@ fun ViewReportsScreen(
         Box(modifier = Modifier.padding(paddingValues)) {
           val selParkRep by parkingViewModel.selectedParkingReports.collectAsState()
           val selRevRep by reviewViewModel.selectedReviewReports.collectAsState()
+          val selImgRep by reviewViewModel.selectedReviewReports.collectAsState()
           val reports =
               when (selType) {
                 ReportedObjectType.PARKING -> selParkRep
                 ReportedObjectType.REVIEW -> selRevRep
+                ReportedObjectType.IMAGE -> selImgRep
               }
 
           Column(modifier = Modifier.fillMaxSize().padding(16.dp).testTag("ReportsContent")) {
@@ -104,6 +106,7 @@ fun ViewReportsScreen(
                           when (selType) {
                             ReportedObjectType.PARKING -> Report.Parking(report as ParkingReport)
                             ReportedObjectType.REVIEW -> Report.Review(report as ReviewReport)
+                            ReportedObjectType.IMAGE -> Report.Review(report as ReviewReport)
                           }
                       ReportCard(reportType)
                     }
@@ -128,6 +131,11 @@ fun ReportCard(report: Report) {
                 report.reviewReport.reason.description,
                 report.reviewReport.userId,
                 report.reviewReport.description)
+          is Report.Image ->
+              Triple(
+                  report.imageReport.reason.description,
+                  report.imageReport.userId,
+                  report.imageReport.description)
       }
 
   Card(
