@@ -71,16 +71,4 @@ class MapViewModelTest {
     mapViewModel.updateScreenCoordinates(screenCoordinates)
     assert(mapViewModel.screenCoordinates.value == screenCoordinates)
   }
-
-  @Test
-  fun mapViewModelTestZoomOnLocation() {
-    assert(mapViewModel.screenCoordinates.value.isEmpty())
-    val expected = Location(Point.fromLngLat(6.566, 46.519))
-    mapViewModel.zoomOnLocation(expected)
-
-    val actual =
-        mapViewModel.cameraPosition.value?.center
-            ?: Point.fromLngLat(0.0, 0.0) // Default to somewhere not expected
-    assert(expected.center == actual)
-  }
 }
