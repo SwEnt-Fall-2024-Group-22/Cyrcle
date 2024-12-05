@@ -34,7 +34,9 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.LocalParking
 import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.PedalBike
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -79,7 +81,10 @@ import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.address.Address
 import com.github.se.cyrcle.model.address.AddressViewModel
+import com.github.se.cyrcle.model.map.BikeLocationViewModel
+import com.github.se.cyrcle.model.map.BikeLocationViewModel.BikeLocationState.*
 import com.github.se.cyrcle.model.map.MapViewModel
+import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
@@ -142,6 +147,7 @@ fun MapScreen(
     mapViewModel: MapViewModel,
     permissionHandler: PermissionHandler,
     addressViewModel: AddressViewModel,
+    bikeLocationViewModel: BikeLocationViewModel,
     zoomState: MutableState<Double> = remember { mutableDoubleStateOf(defaultZoom) }
 ) {
 
@@ -459,30 +465,33 @@ fun MapScreen(
             PreviewCard(navigationActions, parkingViewModel)
           }
           // Center button if location is enabled
-          if (locationEnabled) {
-            IconButton(
-                icon = Icons.Default.MyLocation,
-                contentDescription = "Recenter on Location",
-                modifier =
-                    Modifier.align(Alignment.BottomEnd)
-                        .padding(bottom = 25.dp, end = 16.dp)
-                        .scale(1.2f)
-                        .testTag("recenterButton"),
-                onClick = {
-                  showPreviewCard = false
-                  mapViewModel.updateTrackingMode(true)
-                  mapViewportState.transitionToFollowPuckState(
-                      FollowPuckViewportStateOptions.Builder()
-                          .pitch(0.0)
-                          .zoom(maxZoom)
-                          .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
-                          .build())
-                },
-                colorLevel =
-                    if (mapViewModel.isTrackingModeEnable.collectAsState().value)
-                        ColorLevel.SECONDARY
-                    else ColorLevel.PRIMARY)
-          }
+          Column(
+              Modifier.align(Alignment.BottomEnd)
+                  .padding(bottom = 25.dp, end = 16.dp)
+                  .scale(1.2f)) {
+
+                if (locationEnabled) {
+                  IconButton(
+                      icon = Icons.Default.MyLocation,
+                      contentDescription = "Recenter on Location",
+                      modifier =
+                        Modifier.testTag("recenterButton"),
+                      onClick = {
+                        showPreviewCard = false
+                        mapViewModel.updateTrackingMode(true)
+                        mapViewportState.transitionToFollowPuckState(
+                            FollowPuckViewportStateOptions.Builder()
+                                .pitch(0.0)
+                                .zoom(maxZoom)
+                                .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
+                                .build())
+                      },
+                      colorLevel =
+                          if (mapViewModel.isTrackingModeEnable.collectAsState().value)
+                              ColorLevel.SECONDARY
+                          else ColorLevel.PRIMARY)
+                }
+              }
 
           // Add button to add parking spots if the user is signed in
           if (enableParkingAddition) {
@@ -937,4 +946,64 @@ fun PreviewCard(navigationActions: NavigationActions, parkingViewModel: ParkingV
               }
         }
   }
+}
+
+/**
+ *  Composable function to display the Bike Location Floating action button.
+ *  QUESTION : Should this be visible if the user doesn't have GPS enable, and if so, should we have
+ *   a screen to add the location manually ?
+ *
+ *   @param bikeLocationViewModel The ViewModel for managing bike location-related data and actions.
+ *   @param mapViewModel The ViewModel for managing map-related data and actions.
+ *   @param navigationActions The actions to navigate to different screens.
+ */
+@Composable
+fun BikeLocationButton(
+    bikeLocationViewModel: BikeLocationViewModel,
+    mapViewModel: MapViewModel,
+    navigationActions: NavigationActions
+) {
+  val bikeLocationState by bikeLocationViewModel.bikeLocationState.collectAsState()
+  val userPosition: Point by mapViewModel.userPosition.collectAsState()
+
+  IconButton(
+      icon =
+          when (bikeLocationState) {
+            NO_LOCATION -> Icons.Default.LocalParking
+            LOCATION_STORED_UNUSED -> Icons.Default.PedalBike
+            LOCATION_STORED_USED -> Icons.Default.PedalBike
+          },
+      contentDescription =
+          when (bikeLocationState) {
+            NO_LOCATION -> "Store my bike position"
+            LOCATION_STORED_UNUSED -> "Go to Bike Location"
+            LOCATION_STORED_USED -> "Go to Bike Location"
+          },
+      modifier = Modifier.testTag("goToBikeLocationButton"),
+      onClick = {
+        when (bikeLocationState) {
+          NO_LOCATION -> {
+            Log.d("BikeLocationButton", "on NO_LOCATION (${userPosition})")
+            bikeLocationViewModel.parkBike(userPosition)
+            // TODO Add a marker on the map
+          }
+          LOCATION_STORED_UNUSED -> {
+            val bikeLocation = Location(bikeLocationViewModel.goToMyBike()!!.location!!)
+            Log.d("BikeLocationButton", "on LOCATION_STORED_UNUSED (${bikeLocation})")
+            mapViewModel.zoomOnLocation(bikeLocation)
+            navigationActions.navigateTo(Route.MAP)
+          }
+          LOCATION_STORED_USED -> {
+            Log.d("BikeLocationButton", "on LOCATION_STORED_USED")
+            // TODO Make pop-up to remove the location of the bike (?)
+            bikeLocationViewModel.removeBikeLocation()
+          }
+        }
+      },
+      colorLevel =
+          when (bikeLocationState) {
+            NO_LOCATION -> ColorLevel.PRIMARY
+            LOCATION_STORED_UNUSED -> ColorLevel.SECONDARY
+            LOCATION_STORED_USED -> ColorLevel.SECONDARY
+          })
 }

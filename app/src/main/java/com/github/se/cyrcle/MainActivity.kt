@@ -12,11 +12,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import com.github.se.cyrcle.io.datastore.PreferenceStorage
 import com.github.se.cyrcle.model.CustomViewModelFactory
 import com.github.se.cyrcle.model.address.AddressRepository
 import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.authentication.AuthenticationRepository
 import com.github.se.cyrcle.model.image.ImageRepository
+import com.github.se.cyrcle.model.map.BikeLocationViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.network.ConnectivityObserver
 import com.github.se.cyrcle.model.parking.ParkingViewModel
@@ -83,6 +85,9 @@ class MainActivity : ComponentActivity() {
   private val addressViewModel: AddressViewModel by viewModels {
     CustomViewModelFactory { AddressViewModel(addressRepository) }
   }
+  private val bikeLocationViewModel: BikeLocationViewModel by viewModels {
+    CustomViewModelFactory { BikeLocationViewModel(PreferenceStorage(this)) }
+  }
 
   private var showSnow by mutableStateOf(false)
   private lateinit var shakeDetector: ShakeDetector
@@ -116,6 +121,7 @@ class MainActivity : ComponentActivity() {
               mapViewModel,
               addressViewModel,
               reportedObjectViewModel,
+              bikeLocationViewModel,
               permissionsHandler)
 
           if (showSnow) SnowfallAnimation()
