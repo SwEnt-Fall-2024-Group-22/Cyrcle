@@ -3,11 +3,13 @@ package com.github.se.cyrcle.ui.map
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -31,6 +33,8 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardDefaults.cardColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -54,16 +58,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
-import com.github.se.cyrcle.databinding.ItemCalloutViewBinding
 import com.github.se.cyrcle.model.address.Address
 import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
@@ -76,7 +82,9 @@ import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.Black
 import com.github.se.cyrcle.ui.theme.ColorLevel
+import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.IconButton
+import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.defaultOnColor
@@ -89,7 +97,6 @@ import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraBoundsOptions
 import com.mapbox.maps.EdgeInsets
-import com.mapbox.maps.ViewAnnotationAnchor
 import com.mapbox.maps.extension.compose.DisposableMapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.MapViewportState
@@ -99,28 +106,23 @@ import com.mapbox.maps.plugin.annotation.ClusterOptions
 import com.mapbox.maps.plugin.annotation.annotations
 import com.mapbox.maps.plugin.annotation.generated.OnPointAnnotationClickListener
 import com.mapbox.maps.plugin.annotation.generated.OnPolygonAnnotationClickListener
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotation
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager
+import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotation
 import com.mapbox.maps.plugin.annotation.generated.PolygonAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.createPolygonAnnotationManager
-import com.mapbox.maps.plugin.compass.compass
 import com.mapbox.maps.plugin.gestures.OnMoveListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.scalebar.generated.ScaleBarSettings
 import com.mapbox.maps.plugin.viewport.data.FollowPuckViewportStateOptions
 import com.mapbox.maps.plugin.viewport.data.OverviewViewportStateOptions
-import com.mapbox.maps.viewannotation.annotatedLayerFeature
-import com.mapbox.maps.viewannotation.annotationAnchor
-import com.mapbox.maps.viewannotation.geometry
-import com.mapbox.maps.viewannotation.viewAnnotationOptions
 import kotlinx.coroutines.runBlocking
 
 const val defaultZoom = 16.0
 const val maxZoom = 18.0
 const val minZoom = 8.0
 const val thresholdDisplayZoom = 13.0
-const val LAYER_ID = "0128"
-const val LAYER_ID_RECT = "0129"
 const val ADVANCED_MODE_ZOOM_THRESHOLD = 15.5
 const val CLUSTER_COLORS = "#1A4988"
 const val MAX_SUGGESTION_DISPLAY_NAME_LENGTH_MAP = 100
@@ -135,7 +137,6 @@ fun MapScreen(
     addressViewModel: AddressViewModel,
     zoomState: MutableState<Double> = remember { mutableDoubleStateOf(defaultZoom) }
 ) {
-
   // Collect the list of parkings from the ParkingViewModel as a state
   val listOfParkings by parkingViewModel.filteredRectParkings.collectAsState(emptyList())
 
@@ -162,6 +163,11 @@ fun MapScreen(
 
   // Mutable state to store the PointAnnotationManager for parking labels
   var pLabelAnnotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
+
+  // Mutable state to store the visibility of the preview card
+  var showPreviewCard by remember { mutableStateOf(false) }
+
+  Log.d("MapScreen", "showPreviewCard: $showPreviewCard")
 
   // Collect the selected parking from the ParkingViewModel as a state
   val selectedParking by parkingViewModel.selectedParking.collectAsState()
@@ -194,10 +200,6 @@ fun MapScreen(
   // Chosen location by the user
   val chosenLocation = addressViewModel.address.collectAsState()
 
-  // initialize the Gson object that will deserialize and serialize the parking to bind it to the
-  // marker
-  val gson = Gson()
-  val screenCapacityString = stringResource(R.string.map_screen_capacity)
   val bitmap = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.dot)
   val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 80, 80, false)
 
@@ -211,6 +213,10 @@ fun MapScreen(
             mapViewModel.drawRectangles(
                 rectangleAnnotationManager, pLabelAnnotationManager, listOfParkings)
         else mapViewModel.drawMarkers(markerAnnotationManager, listOfParkings, resizedBitmap)
+
+        // This is so that when we filter the parkings and the list is updated, the preview card
+        // stays open only if the selected parking is still in the list of parkings
+        showPreviewCard = showPreviewCard && listOfParkings.contains(selectedParking)
       }
 
   // Center the camera on th puck and transition to the follow puck state. Update the user
@@ -282,29 +288,24 @@ fun MapScreen(
                                                     Pair(
                                                         1,
                                                         android.graphics.Color.parseColor(
-                                                            CLUSTER_COLORS))))),
-                            layerId = LAYER_ID))
+                                                            CLUSTER_COLORS)))))))
                 // Create polygon annotation manager to draw rectangles
                 rectangleAnnotationManager =
                     mapView.annotations.createPolygonAnnotationManager(
-                        annotationConfig = AnnotationConfig().copy(layerId = LAYER_ID_RECT))
+                        annotationConfig = AnnotationConfig())
                 // Create point annotation manager to draw parking labels
                 pLabelAnnotationManager =
                     mapView.annotations.createPointAnnotationManager(AnnotationConfig())
                 // ======================= ANNOTATIONS =======================
 
-                val viewAnnotationManager = mapView.viewAnnotationManager
-                // upload the view annotation manager to the view model
-                mapViewModel.updateViewAnnotationManager(viewAnnotationManager)
                 // ======================= MOVE LISTENER =======================
                 // Add a move listener to the map to deactivate tracking mode when the user moves
-                // the
-                // map
+                // the map
                 val moveListener =
                     object : OnMoveListener {
                       override fun onMoveBegin(detector: MoveGestureDetector) {
                         // Remove any preview card displayed
-                        mapViewModel.removePreviewCard()
+                        showPreviewCard = false
 
                         // remove focus on the Search Bar
                         focusManager.clearFocus()
@@ -329,89 +330,54 @@ fun MapScreen(
                 mapView.gestures.addOnMoveListener(moveListener)
                 // ======================= MOVE LISTENER =======================
 
-                // ======================= MARKERS CLICK =======================
+                // ======================= ANNOTATION CLICK LISTENER =======================
+                /**
+                 * Function to handle the click on an annotation. It will center the camera on the
+                 * annotation and enable the preview card with the parking information.
+                 *
+                 * @param annotation The annotation clicked.
+                 * @param mapViewportState The viewport state of the map to center the camera on the
+                 * @param parkingViewModel The ViewModel for managing parking-related data and
+                 *   actions.
+                 */
+                fun handleAnnotationClick(
+                    annotation: Any,
+                    mapViewportState: MapViewportState,
+                    parkingViewModel: ParkingViewModel
+                ) {
+                  val parkingData =
+                      when (annotation) {
+                        is PointAnnotation -> annotation.getData()?.asJsonObject
+                        is PolygonAnnotation -> annotation.getData()?.asJsonObject
+                        else -> null
+                      }
+
+                  // If the data is not null, deserialize it to a Parking object, select it in the
+                  // ViewModel to show the preview card and center the camera on it
+                  parkingData?.let {
+                    val parking = Gson().fromJson(it, Parking::class.java)
+
+                    parkingViewModel.selectParking(parking)
+                    showPreviewCard = true
+
+                    mapViewportState.setCameraOptions { center(parking.location.center) }
+                  }
+                }
+
+                // Use the common handler for markers
                 markerAnnotationManager?.addClickListener(
                     OnPointAnnotationClickListener { pointAnnotation ->
-                      mapViewModel.removePreviewCard()
-                      // get the data from the PointAnnotation and deserialize it
-                      val parkingData = pointAnnotation.getData()?.asJsonObject
-                      val parkingDeserialized = gson.fromJson(parkingData, Parking::class.java)
-                      // move the camera to the selected parking
-                      mapViewportState.setCameraOptions {
-                        center(parkingDeserialized.location.center)
-                      }
-
-                      // Add the new view annotation
-                      val viewAnnotation =
-                          viewAnnotationManager.addViewAnnotation(
-                              resId = R.layout.item_callout_view,
-                              options =
-                                  viewAnnotationOptions {
-                                    annotatedLayerFeature(LAYER_ID) {
-                                      featureId(pointAnnotation.id)
-                                      geometry(pointAnnotation.geometry)
-                                      annotationAnchor {
-                                        anchor(ViewAnnotationAnchor.BOTTOM)
-                                        offsetY(
-                                            (pointAnnotation.iconImageBitmap?.height!!.toDouble()))
-                                      }
-                                    }
-                                  })
-
-                      // Set the text and the button of the view annotation
-                      ItemCalloutViewBinding.bind(viewAnnotation).apply {
-                        textNativeView.text =
-                            screenCapacityString.format(parkingDeserialized.capacity.description)
-                        selectButton.setOnClickListener {
-                          parkingViewModel.selectParking(parkingDeserialized)
-                          navigationActions.navigateTo(Screen.PARKING_DETAILS)
-                        }
-                      }
+                      handleAnnotationClick(pointAnnotation, mapViewportState, parkingViewModel)
                       true
                     })
-                // ======================= MARKERS CLICK =======================
 
-                // ======================= RECTANGLES CLICK =======================
+                // Use the common handler for rectangles
                 rectangleAnnotationManager?.addClickListener(
-                    OnPolygonAnnotationClickListener {
-                      // Remove any preview card displayed
-                      mapViewModel.removePreviewCard()
-                      // get the data from the PointAnnotation and deserialize it
-                      val parkingData = it.getData()?.asJsonObject
-                      val parkingDeserialized = gson.fromJson(parkingData, Parking::class.java)
-                      // move the camera to the selected parking
-                      mapViewportState.setCameraOptions {
-                        center(parkingDeserialized.location.center)
-                      }
-
-                      // Add the new view annotation
-                      val viewAnnotation =
-                          viewAnnotationManager.addViewAnnotation(
-                              resId = R.layout.item_callout_view,
-                              options =
-                                  viewAnnotationOptions {
-                                    annotatedLayerFeature(LAYER_ID_RECT) {
-                                      featureId(it.id)
-                                      geometry(it.geometry)
-                                      annotationAnchor {
-                                        anchor(ViewAnnotationAnchor.BOTTOM)
-                                        offsetY(0.0)
-                                      }
-                                    }
-                                  })
-
-                      // Set the text and the button of the view annotation
-                      ItemCalloutViewBinding.bind(viewAnnotation).apply {
-                        textNativeView.text =
-                            screenCapacityString.format(parkingDeserialized.capacity.description)
-                        selectButton.setOnClickListener {
-                          parkingViewModel.selectParking(parkingDeserialized)
-                          navigationActions.navigateTo(Screen.PARKING_DETAILS)
-                        }
-                      }
+                    OnPolygonAnnotationClickListener { polygonAnnotation ->
+                      handleAnnotationClick(polygonAnnotation, mapViewportState, parkingViewModel)
                       true
                     })
-                // ======================= RECTANGLES CLICK =======================
+                // ======================= ANNOTATION CLICK LISTENER =======================
 
                 // =======================  CAMERA  LISTENER  =======================
                 mapView.mapboxMap.subscribeCameraChanged {
@@ -429,13 +395,19 @@ fun MapScreen(
                       zoomState.value >= ADVANCED_MODE_ZOOM_THRESHOLD) {
                     mapViewModel.updateMapMode(MapViewModel.MapMode.MARKERS)
                   }
-                  // On zoomin in past the threshold, switch to the user's selected mode
+                  // On zoom-in in past the threshold, switch to the user's selected mode
                   if (mapView.mapboxMap.cameraState.zoom >= ADVANCED_MODE_ZOOM_THRESHOLD &&
                       zoomState.value < ADVANCED_MODE_ZOOM_THRESHOLD) {
                     mapViewModel.updateMapMode(userMapMode.value)
                   }
 
-                  // store the zoom level
+                  // If the zoom level changes, hide the preview card. This is to avoid the card
+                  // being displayed when the user taps to zoom in/out.
+                  if (zoomState.value != mapView.mapboxMap.cameraState.zoom) {
+                    showPreviewCard = false
+                  }
+
+                  // Store the zoom level
                   // This must stay at the end of the listener.
                   zoomState.value = mapView.mapboxMap.cameraState.zoom
                 }
@@ -445,8 +417,7 @@ fun MapScreen(
                   pLabelAnnotationManager?.deleteAll()
                   rectangleAnnotationManager?.deleteAll()
                   markerAnnotationManager?.deleteAll()
-                  mapViewModel.removePreviewCard()
-                  mapViewModel.updateViewAnnotationManager(null)
+                  showPreviewCard = false
                   mapViewModel.updateCameraPosition(mapViewportState.cameraState!!)
                 }
               }
@@ -454,6 +425,9 @@ fun MapScreen(
 
         // ======================= OVERLAY =======================
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
+          if (showPreviewCard) {
+            PreviewCard(navigationActions, parkingViewModel)
+          }
           // Center button if location is enabled
           if (locationEnabled) {
             IconButton(
@@ -465,7 +439,7 @@ fun MapScreen(
                         .scale(1.2f)
                         .testTag("recenterButton"),
                 onClick = {
-                  mapViewModel.removePreviewCard()
+                  showPreviewCard = false
                   mapViewModel.updateTrackingMode(true)
                   mapViewportState.transitionToFollowPuckState(
                       FollowPuckViewportStateOptions.Builder()
@@ -796,4 +770,86 @@ fun FilterDialog(
       tonalElevation = 8.dp,
       modifier = Modifier.testTag("FilterMenu"),
       shape = RoundedCornerShape(24.dp))
+}
+
+@Composable
+fun PreviewCard(navigationActions: NavigationActions, parkingViewModel: ParkingViewModel) {
+  Box(modifier = Modifier.fillMaxSize()) {
+    // Get the selected parking from the ViewModel
+    val parking = parkingViewModel.selectedParking.collectAsState().value ?: return
+    // Card displaying the parking overview information
+    Card(
+        modifier =
+            Modifier.width(250.dp)
+                .align(Alignment.Center)
+                // Note: The .layout modifier was generated by a LLM
+                .layout { measurable, constraints ->
+                  val placeable = measurable.measure(constraints)
+                  layout(placeable.width, placeable.height) {
+                    val yOffset = -placeable.height / 2 - 50.dp.roundToPx()
+                    placeable.placeRelative(0, yOffset)
+                  }
+                }
+                .testTag("PreviewCard"),
+        colors =
+            cardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(4.dp),
+        border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary)) {
+          Column(
+              modifier = Modifier.fillMaxWidth().padding(16.dp),
+              verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = parking.optName ?: stringResource(R.string.default_parking_name),
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Left,
+                    testTag = "PreviewCardTitle")
+                ScoreStars(
+                    score = parking.avgScore,
+                    text =
+                        pluralStringResource(R.plurals.reviews_count, count = parking.nbReviews)
+                            .format(parking.nbReviews),
+                    scale = 0.6f)
+                HorizontalDivider(
+                    thickness = 1.dp,
+                    modifier = Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
+                Spacer(modifier = Modifier.height(8.dp))
+                // Text for rack type
+                Text(
+                    text =
+                        stringResource(R.string.map_screen_rack_type, parking.rackType.description),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Left,
+                    testTag = "PreviewCardRackType")
+
+                // Text for protection
+                Text(
+                    text =
+                        stringResource(
+                            R.string.map_screen_protection, parking.protection.description),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Left,
+                    testTag = "PreviewCardProtection")
+
+                // Text for description
+                Text(
+                    text =
+                        stringResource(R.string.map_screen_capacity, parking.capacity.description),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Left,
+                    testTag = "PreviewCardCapacity")
+
+                // Go to parking details button
+                Button(
+                    onClick = { navigationActions.navigateTo(Screen.PARKING_DETAILS) },
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    text = stringResource(R.string.map_screen_details_button),
+                    testTag = "PreviewCardDetailsButton")
+              }
+        }
+  }
 }
