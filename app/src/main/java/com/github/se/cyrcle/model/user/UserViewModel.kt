@@ -60,6 +60,9 @@ class UserViewModel(
   private val _reportedParkings = MutableStateFlow<List<String>>(emptyList())
   val reportedParkings: StateFlow<List<String>> = _reportedParkings
 
+  private val _reportedReviews = MutableStateFlow<List<String>>(emptyList())
+  val reportedReviews: StateFlow<List<String>> = _reportedReviews
+
   /**
    * Set the current user by fetching the user from the Firestore database with the given ID.
    *
@@ -188,6 +191,15 @@ class UserViewModel(
           user.details?.copy(reportedParkings = user.details.reportedParkings + parking)
       val updatedUser = user.copy(details = updatedDetails)
       updateUser(updatedUser) { _reportedParkings.value += parking }
+    }
+  }
+
+  fun addReportedReviewToSelectedUser(review: String) {
+    currentUser.value?.let { user ->
+      val updatedDetails =
+          user.details?.copy(reportedReviews = user.details.reportedReviews + review)
+      val updatedUser = user.copy(details = updatedDetails)
+      updateUser(updatedUser) { _reportedParkings.value += review }
     }
   }
 
