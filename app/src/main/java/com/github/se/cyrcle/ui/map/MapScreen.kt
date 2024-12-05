@@ -213,6 +213,10 @@ fun MapScreen(
             mapViewModel.drawRectangles(
                 rectangleAnnotationManager, pLabelAnnotationManager, listOfParkings)
         else mapViewModel.drawMarkers(markerAnnotationManager, listOfParkings, resizedBitmap)
+
+        // This is so that when we filter the parkings and the list is updated, the preview card
+        // stays open only if the selected parking is still in the list of parkings
+        showPreviewCard = showPreviewCard && listOfParkings.contains(selectedParking)
       }
 
   // Center the camera on th puck and transition to the follow puck state. Update the user
