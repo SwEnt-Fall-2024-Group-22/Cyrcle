@@ -6,7 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,8 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
@@ -174,30 +171,28 @@ fun ViewProfileScreen(
                       testTag = "CancelButton")
                 })
           } else {
-              DisplayProfileComponent(userState) {
-                  // Edit Button directly in the Box
-                  Button(
-                      text = stringResource(R.string.view_profile_screen_modify_profile_button),
-                      onClick = { isEditing = true },
-                      colorLevel = ColorLevel.TERTIARY,
-                      testTag = "EditButton"
-                  )
+            DisplayProfileComponent(userState) {
+              // Edit Button directly in the Box
+              Button(
+                  text = stringResource(R.string.view_profile_screen_modify_profile_button),
+                  onClick = { isEditing = true },
+                  colorLevel = ColorLevel.TERTIARY,
+                  testTag = "EditButton")
 
-                  // Scrollable Column instead of LazyColumn
-                  Column(
-                      modifier = Modifier
-                          .fillMaxWidth()
+              // Scrollable Column instead of LazyColumn
+              Column(
+                  modifier =
+                      Modifier.fillMaxWidth()
                           .verticalScroll(rememberScrollState())
                           .padding(top = 56.dp) // Adjust based on button height
-                          .testTag("ProfileContentSections")
-                  ) {
-                      FavoriteParkingsSection(userViewModel, parkingViewModel, navigationActions)
+                          .testTag("ProfileContentSections")) {
+                    FavoriteParkingsSection(userViewModel, parkingViewModel, navigationActions)
 
-                      Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                      UserReviewsSection(reviewViewModel, userViewModel)
+                    UserReviewsSection(reviewViewModel, userViewModel)
                   }
-              }
+            }
           }
         }
       }
@@ -310,136 +305,108 @@ private fun FavoriteParkingCard(
 }
 
 @Composable
-private fun UserReviewsSection(
-    reviewViewModel: ReviewViewModel,
-    userViewModel: UserViewModel
-) {
-    val userState = userViewModel.currentUser.collectAsState().value
+private fun UserReviewsSection(reviewViewModel: ReviewViewModel, userViewModel: UserViewModel) {
+  val userState = userViewModel.currentUser.collectAsState().value
 
-    if (userState != null) {
-        LaunchedEffect(userState.public.userId) {
-            reviewViewModel.getReviewsByOwnerId(userState.public.userId)
-        }
+  if (userState != null) {
+    LaunchedEffect(userState.public.userId) {
+      reviewViewModel.getReviewsByOwnerId(userState.public.userId)
     }
-    val userReviews = reviewViewModel.userReviews.collectAsState().value
+  }
+  val userReviews = reviewViewModel.userReviews.collectAsState().value
 
+  Text(
+      text = stringResource(R.string.view_profile_screen_my_reviews_title),
+      style = MaterialTheme.typography.titleLarge,
+      modifier = Modifier.testTag("UserReviewsTitle"))
+
+  Spacer(modifier = Modifier.height(12.dp))
+
+  if (userReviews.isEmpty()) {
     Text(
-        text = "My Reviews",
-        style = MaterialTheme.typography.titleLarge,
-        modifier = Modifier.testTag("UserReviewsTitle")
-    )
-
-    Spacer(modifier = Modifier.height(12.dp))
-
-    if (userReviews.isEmpty()) {
-        Text(
-            text = "You haven't written any reviews yet",
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.testTag("NoReviewsMessage")
-        )
-    } else {
-        LazyRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("UserReviewsList"),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            itemsIndexed(userReviews) { _, review ->
-                review?.let { ReviewCard(review = it) }
-            }
+        text = stringResource(R.string.view_profile_screen_no_reviews_message),
+        style = MaterialTheme.typography.bodyMedium,
+        modifier = Modifier.testTag("NoReviewsMessage"))
+  } else {
+    LazyRow(
+        modifier = Modifier.fillMaxWidth().testTag("UserReviewsList"),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+          itemsIndexed(userReviews) { _, review -> review?.let { ReviewCard(review = it) } }
         }
-    }
-}
-
-private fun truncateText(text: String, maxLength: Int = 65): String {
-    return if (text.length > maxLength) {
-        text.take(maxLength) + "..."
-    } else {
-        text
-    }
+  }
 }
 
 @Composable
 private fun ReviewCard(review: Review) {
-    Card(
-        modifier = Modifier
-            .padding(8.dp)
-            .width(260.dp),
-        shape = MaterialTheme.shapes.medium
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = review.parking,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.fillMaxWidth()
-            )
+  Card(modifier = Modifier.padding(8.dp).width(260.dp), shape = MaterialTheme.shapes.medium) {
+    Column(modifier = Modifier.padding(16.dp)) {
+      Text(
+          text = review.parking,
+          style = MaterialTheme.typography.titleMedium,
+          modifier = Modifier.fillMaxWidth())
 
-            Spacer(modifier = Modifier.height(8.dp))
+      Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
-                text = "You rated this parking: ${review.rating} ⭐",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
+      Text(
+          text =
+              stringResource(
+                  R.string.view_profile_screen_you_rated_parking, review.rating.toString()),
+          style = MaterialTheme.typography.bodyMedium,
+          color = MaterialTheme.colorScheme.primary)
 
-            Spacer(modifier = Modifier.height(8.dp))
+      Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
-                text = "You said:",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.testTag("YouSaidText_${review.uid}")
-            )
+      Text(
+          text = stringResource(R.string.view_profile_screen_you_said),
+          style = MaterialTheme.typography.bodyMedium,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          modifier = Modifier.testTag("YouSaidText_${review.uid}"))
 
-            Text(
-                text = "\"${truncateText(review.text)}\"",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.fillMaxWidth()
-            )
+      Text(
+          text = "\"${truncateText(review.text)}\"",
+          style = MaterialTheme.typography.bodyMedium,
+          modifier = Modifier.fillMaxWidth())
 
-            Spacer(modifier = Modifier.height(8.dp))
+      Spacer(modifier = Modifier.height(8.dp))
 
+      Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.End,
+          verticalAlignment = Alignment.CenterVertically) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.testTag("LikesCount_${review.uid}")
-                    ) {
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically) {
+                  Row(
+                      horizontalArrangement = Arrangement.spacedBy(4.dp),
+                      verticalAlignment = Alignment.CenterVertically,
+                      modifier = Modifier.testTag("LikesCount_${review.uid}")) {
                         Text(
-                            text = "👍",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
+                            text =
+                                stringResource(
+                                    R.string.view_profile_screen_likes_count, review.likedBy.size),
+                            style = MaterialTheme.typography.bodyMedium)
+                      }
+                  Row(
+                      horizontalArrangement = Arrangement.spacedBy(4.dp),
+                      verticalAlignment = Alignment.CenterVertically,
+                      modifier = Modifier.testTag("DislikesCount_${review.uid}")) {
                         Text(
-                            text = "${review.likedBy.size}",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.testTag("DislikesCount_${review.uid}")
-                    ) {
-                        Text(
-                            text = "👎",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        Text(
-                            text = "${review.dislikedBy.size}",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
+                            text =
+                                stringResource(
+                                    R.string.view_profile_screen_dislikes_count,
+                                    review.dislikedBy.size),
+                            style = MaterialTheme.typography.bodyMedium)
+                      }
                 }
-            }
-        }
+          }
     }
+  }
+}
+
+private fun truncateText(text: String, maxLength: Int = 65): String {
+  return if (text.length > maxLength) {
+    text.take(maxLength) + "..."
+  } else {
+    text
+  }
 }

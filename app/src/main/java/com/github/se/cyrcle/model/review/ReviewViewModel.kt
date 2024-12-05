@@ -92,13 +92,12 @@ class ReviewViewModel(
         { Log.e("ReviewViewModel", "Error getting reviews", it) })
   }
 
-    fun getReviewsByOwnerId(ownerId: String) {
-        reviewRepository.getReviewsByOwnerId(
-            ownerId,
-            { reviews -> _userReviews.value = reviews },
-            { Log.e("ReviewViewModel", "Error getting reviews for owner", it) }
-        )
-    }
+  fun getReviewsByOwnerId(ownerId: String) {
+    reviewRepository.getReviewsByOwnerId(
+        ownerId,
+        { reviews -> _userReviews.value = reviews },
+        { Log.e("ReviewViewModel", "Error getting reviews for owner", it) })
+  }
 
   fun deleteReviewById(uid: String) {
     reviewRepository.deleteReviewById(

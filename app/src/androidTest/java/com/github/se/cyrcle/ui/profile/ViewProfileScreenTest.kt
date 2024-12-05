@@ -13,8 +13,6 @@ import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
@@ -96,7 +94,7 @@ class ViewProfileScreenTest {
             mockParkingRepository,
             mockOfflineParkingRepository,
             mockReportedObjectRepository)
-    reviewViewModel = ReviewViewModel(mockReviewRepository,mockReportedObjectRepository)
+    reviewViewModel = ReviewViewModel(mockReviewRepository, mockReportedObjectRepository)
 
     userViewModel.addUser(user, {}, {})
     mockAuthenticator.testUser = user
@@ -435,45 +433,40 @@ class ViewProfileScreenTest {
     composeTestRule.waitForIdle()
 
     // Scroll to the reviews section using swipe
-    composeTestRule
-      .onNodeWithTag("ProfileContentSections")
-      .performTouchInput {
-        swipeUp()
-      }
+    composeTestRule.onNodeWithTag("ProfileContentSections").performTouchInput { swipeUp() }
 
     Thread.sleep(5000)
-    composeTestRule
-      .onNodeWithTag("UserReviewsTitle")
-      .assertIsDisplayed()
+    composeTestRule.onNodeWithTag("UserReviewsTitle").assertIsDisplayed()
 
     composeTestRule
-      .onNodeWithTag("NoReviewsMessage")
-      .assertIsDisplayed()
-      .assertTextEquals("You haven't written any reviews yet")
+        .onNodeWithTag("NoReviewsMessage")
+        .assertIsDisplayed()
+        .assertTextEquals("You haven't written any reviews yet")
   }
 
   @Test
   fun whenUserHasReviews_showsReviewsList() {
     // Add some test reviews
-    val testReview1 = Review(
-      uid = "review1",
-      owner = "1",
-      text = "Great parking spot!",
-      rating = 4.5,
-      parking = "Test Parking 1",
-      likedBy = listOf("user2", "user3"),
-      dislikedBy = listOf("user4")
-    )
+    val testReview1 =
+        Review(
+            uid = "review1",
+            owner = "1",
+            text = "Great parking spot!",
+            rating = 4.5,
+            parking = "Test Parking 1",
+            likedBy = listOf("user2", "user3"),
+            dislikedBy = listOf("user4"))
 
-    val testReview2 = Review(
-      uid = "review2",
-      owner = "1",
-      text = "You know what's crazy is that that low taper fade like meme it is dude it is still massive like massive i see new ones that i've never seen before that have like millions of likes and views still that are popping up all over the place.",
-      rating = 5.0,
-      parking = "Test Parking 2",
-      likedBy = listOf("user2", "user3", "user4", "user5"),
-      dislikedBy = listOf()
-    )
+    val testReview2 =
+        Review(
+            uid = "review2",
+            owner = "1",
+            text =
+                "You know what's crazy is that that low taper fade like meme it is dude it is still massive like massive i see new ones that i've never seen before that have like millions of likes and views still that are popping up all over the place.",
+            rating = 5.0,
+            parking = "Test Parking 2",
+            likedBy = listOf("user2", "user3", "user4", "user5"),
+            dislikedBy = listOf())
 
     // Add reviews to mock repository
     mockReviewRepository.addReview(testReview1, {}, {})
@@ -485,65 +478,31 @@ class ViewProfileScreenTest {
     composeTestRule.waitForIdle()
 
     repeat(3) {
-      composeTestRule
-        .onNodeWithTag("ProfileContentSections")
-        .performTouchInput {
-          swipeUp()
-        }
+      composeTestRule.onNodeWithTag("ProfileContentSections").performTouchInput { swipeUp() }
     }
 
     Thread.sleep(10000)
     // Verify first review content
-    composeTestRule
-      .onNodeWithText("Test Parking 1")
-      .assertIsDisplayed()
-    composeTestRule
-      .onNodeWithText("You rated this parking: 4.5 ⭐")
-      .assertIsDisplayed()
-    composeTestRule
-      .onNodeWithTag("YouSaidText_review1")
-      .assertIsDisplayed()
-    composeTestRule
-      .onNodeWithText("\"Great parking spot!\"")
-      .assertIsDisplayed()
-    composeTestRule
-      .onNodeWithTag("LikesCount_review1")
-      .assertIsDisplayed()
-    composeTestRule
-      .onNodeWithTag("DislikesCount_review1")
-      .assertIsDisplayed()
+    composeTestRule.onNodeWithText("Test Parking 1").assertIsDisplayed()
+    composeTestRule.onNodeWithText("You rated this parking: 4.5 ⭐").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("YouSaidText_review1").assertIsDisplayed()
+    composeTestRule.onNodeWithText("\"Great parking spot!\"").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("LikesCount_review1").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("DislikesCount_review1").assertIsDisplayed()
 
     // Scroll horizontally to see the second review
-    repeat(3){
-      composeTestRule
-        .onNodeWithTag("UserReviewsList")
-        .performTouchInput {
-          swipeLeft()
-        }
-    }
+    repeat(3) { composeTestRule.onNodeWithTag("UserReviewsList").performTouchInput { swipeLeft() } }
 
     Thread.sleep(10000)
 
     // Verify second review content
+    composeTestRule.onNodeWithText("Test Parking 2").assertIsDisplayed()
+    composeTestRule.onNodeWithText("You rated this parking: 5.0 ⭐").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("YouSaidText_review2").assertIsDisplayed()
     composeTestRule
-      .onNodeWithText("Test Parking 2")
-      .assertIsDisplayed()
-    composeTestRule
-      .onNodeWithText("You rated this parking: 5.0 ⭐")
-      .assertIsDisplayed()
-    composeTestRule
-      .onNodeWithTag("YouSaidText_review2")
-      .assertIsDisplayed()
-    composeTestRule
-      .onNodeWithText("\"You know what's crazy is that that low taper fade like meme it is...\"")
-      .assertIsDisplayed()
-    composeTestRule
-      .onNodeWithTag("LikesCount_review2")
-      .assertIsDisplayed()
-    composeTestRule
-      .onNodeWithTag("DislikesCount_review2")
-      .assertIsDisplayed()
-
+        .onNodeWithText("\"You know what's crazy is that that low taper fade like meme it is...\"")
+        .assertIsDisplayed()
+    composeTestRule.onNodeWithTag("LikesCount_review2").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("DislikesCount_review2").assertIsDisplayed()
   }
-
 }
