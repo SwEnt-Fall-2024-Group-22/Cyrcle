@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.parkingDetails
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -34,6 +35,7 @@ import com.github.se.cyrcle.ui.theme.atoms.Text
 fun ParkingDetailsAlertDialogShowImage(onDismiss: () -> Unit, imageUrl: String) {
   val alertDialogMaxHeight = LocalConfiguration.current.screenHeightDp.dp * 0.8f
 
+    Log.d("AAAAAAAAAAAAAA",imageUrl)
   BasicAlertDialog(
       modifier = Modifier.testTag("ParkingDetailsAlertDialogShowImage").wrapContentSize(),
       onDismissRequest = onDismiss,

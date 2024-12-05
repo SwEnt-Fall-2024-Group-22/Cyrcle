@@ -86,6 +86,7 @@ fun ParkingDetailsScreen(
   var newParkingImageLocalPath by remember { mutableStateOf("") }
   val showDialog = remember { mutableStateOf(false) }
   val imagesUrls by parkingViewModel.selectedParkingImagesUrls.collectAsState()
+  val imagesPaths by parkingViewModel.selectedParkingAssociatedPaths.collectAsState()
   val showDialogImage = remember { mutableStateOf<String?>(null) }
   if (selectedParking.owner != "Unknown Owner" && selectedParking.owner != null) {
     userViewModel.selectSelectedParkingUser(parkingViewModel.selectedParking.value?.owner!!)
