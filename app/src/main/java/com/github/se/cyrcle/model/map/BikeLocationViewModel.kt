@@ -81,7 +81,6 @@ class BikeLocationViewModel(private val preferenceStorage: PreferenceStorage) : 
   }
 
   private val _bikeLocation = MutableStateFlow(INVALID_LOCATION)
-  val bikeLocation = _bikeLocation
 
   init {
     Log.d("BikeLocationViewModel", "Init | Fetching bike location from Preferences")

@@ -9,11 +9,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import com.github.se.cyrcle.io.datastore.PreferenceStorage
 import com.github.se.cyrcle.model.CustomViewModelFactory
 import com.github.se.cyrcle.model.address.AddressRepository
 import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.authentication.AuthenticationRepository
 import com.github.se.cyrcle.model.image.ImageRepository
+import com.github.se.cyrcle.model.map.BikeLocationViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.network.ConnectivityObserver
 import com.github.se.cyrcle.model.parking.ParkingViewModel
@@ -73,6 +75,9 @@ class MainActivity : ComponentActivity() {
   private val addressViewModel: AddressViewModel by viewModels {
     CustomViewModelFactory { AddressViewModel(addressRepository) }
   }
+  private val bikeLocationViewModel: BikeLocationViewModel by viewModels {
+    CustomViewModelFactory { BikeLocationViewModel(PreferenceStorage(this)) }
+  }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -97,7 +102,8 @@ class MainActivity : ComponentActivity() {
               mapViewModel,
               addressViewModel,
               reportedObjectViewModel,
-              permissionsHandler)
+              permissionsHandler,
+              bikeLocationViewModel)
         }
       }
     }
