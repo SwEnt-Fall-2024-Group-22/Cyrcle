@@ -22,6 +22,9 @@ class UserViewModel(
   private val _currentUser = MutableStateFlow<User?>(null)
   val currentUser: StateFlow<User?> = _currentUser
 
+  private val _selectedParkingOwner = MutableStateFlow<User?>(null)
+  val selectedParkingOwner: StateFlow<User?> = _selectedParkingOwner
+
   val isSignedIn: Flow<Boolean>
     get() = currentUser.map { it != null }
 
@@ -181,6 +184,13 @@ class UserViewModel(
       val updatedUser = user.copy(details = updatedDetails)
       updateUser(updatedUser) { _reportedParkings.value += parking }
     }
+  }
+
+  fun selectSelectedParkingUser(uid: String) {
+    userRepository.getUserById(
+        uid,
+        { user -> _selectedParkingOwner.value = user },
+        { Log.d("UserViewModel", "Error fetching selected parking's User") })
   }
 
   /**
