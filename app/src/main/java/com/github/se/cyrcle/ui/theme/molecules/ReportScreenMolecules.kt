@@ -82,7 +82,7 @@ fun ReportInputs(
         }
         ReportedObjectType.IMAGE -> {
             EnumDropDown(
-                options = ReviewReportReason.entries,
+                options = ImageReportReason.entries,
                 selectedValue = selectedReasonIfImage!!,
                 label = stringResource(R.string.report_reason),
                 modifier = Modifier.testTag("ReasonDropdown"))
