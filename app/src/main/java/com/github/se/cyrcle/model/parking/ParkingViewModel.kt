@@ -660,6 +660,9 @@ class ParkingViewModel(
     private val _selectedParkingImagesUrls = MutableStateFlow<List<String>>(mutableListOf())
     val selectedParkingImagesUrls: StateFlow<List<String>> = _selectedParkingImagesUrls
 
+    private val _selectedParkingAssociatedPaths = MutableStateFlow<List<String>>(mutableListOf())
+    val selectedParkingAssociatedPaths: StateFlow<List<String>> = _selectedParkingAssociatedPaths
+
     /**
      * Load the iamges of the selected parkings in the state selectedParkingImagesUrls This function
      * transforms the paths of the images (stored into firestore) of the selected parking into URLs.
@@ -675,6 +678,7 @@ class ParkingViewModel(
 
         _selectedParking.value!!.images.forEach { imagePath ->
             // get the URL of each image and add it to the list of URLs state that is observed by the UI.
+            _selectedParkingAssociatedPaths.value = _selectedParkingImagesUrls.value.plus(imagePath)
             imageRepository.getUrl(
                 path = imagePath,
                 onSuccess = { url ->
