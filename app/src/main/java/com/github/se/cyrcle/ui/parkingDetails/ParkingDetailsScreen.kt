@@ -439,7 +439,9 @@ fun ParkingDetailsScreen(
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onBackground)
                             Text(
-                                text = selectedParking.owner,
+                                text =
+                                    selectedParking.owner
+                                        ?: stringResource(R.string.undefined_username),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface)
                           }
