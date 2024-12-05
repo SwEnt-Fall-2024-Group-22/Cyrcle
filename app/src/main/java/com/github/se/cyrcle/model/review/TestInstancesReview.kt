@@ -9,9 +9,7 @@ object TestInstancesReview {
           owner = "user1",
           text = "Great parking!",
           rating = 5.0,
-          parking = "Test_spot_2",
-          likedBy = listOf("user3"),
-          dislikedBy = listOf("user2"))
+          parking = "Test_spot_2")
   val review2 =
       Review(
           uid = "2",
