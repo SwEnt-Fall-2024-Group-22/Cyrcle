@@ -61,6 +61,7 @@ import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 
+/** Maximum length for the truncated text in review cards. */
 const val MAX_TRUNCATED_TEXT_LENGTH = 65
 
 @Composable
@@ -344,6 +345,12 @@ private fun UserReviewsSection(
   }
 }
 
+/**
+ * A composable that displays a card containing the user's review information.
+ *
+ * @param review The review to display
+ * @param parkingViewModel The view model used to fetch the parking's name
+ */
 @Composable
 private fun ReviewCard(review: Review, parkingViewModel: ParkingViewModel) {
   val defaultParkingName = stringResource(R.string.default_parking_name)
@@ -359,6 +366,7 @@ private fun ReviewCard(review: Review, parkingViewModel: ParkingViewModel) {
 
   Card(modifier = Modifier.padding(8.dp).width(260.dp), shape = MaterialTheme.shapes.medium) {
     Column(modifier = Modifier.padding(16.dp)) {
+      // Display parking name with unique test tag
       Text(
           text = parkingName,
           style = MaterialTheme.typography.titleMedium,
@@ -366,6 +374,7 @@ private fun ReviewCard(review: Review, parkingViewModel: ParkingViewModel) {
 
       Spacer(modifier = Modifier.height(8.dp))
 
+      // Display rating with unique test tag
       Text(
           text =
               stringResource(
@@ -376,6 +385,7 @@ private fun ReviewCard(review: Review, parkingViewModel: ParkingViewModel) {
 
       Spacer(modifier = Modifier.height(8.dp))
 
+      // Display review text section
       Text(
           text = stringResource(R.string.view_profile_screen_you_said),
           style = MaterialTheme.typography.bodyMedium,
@@ -385,10 +395,11 @@ private fun ReviewCard(review: Review, parkingViewModel: ParkingViewModel) {
       Text(
           text = "\"${truncateText(review.text)}\"",
           style = MaterialTheme.typography.bodyMedium,
-          modifier = Modifier.fillMaxWidth())
+          modifier = Modifier.fillMaxWidth().testTag("ReviewText_${review.uid}"))
 
       Spacer(modifier = Modifier.height(8.dp))
 
+      // Display likes and dislikes counts
       Row(
           modifier = Modifier.fillMaxWidth(),
           horizontalArrangement = Arrangement.End,
@@ -396,6 +407,7 @@ private fun ReviewCard(review: Review, parkingViewModel: ParkingViewModel) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically) {
+                  // Likes count
                   Row(
                       horizontalArrangement = Arrangement.spacedBy(4.dp),
                       verticalAlignment = Alignment.CenterVertically,
@@ -406,6 +418,7 @@ private fun ReviewCard(review: Review, parkingViewModel: ParkingViewModel) {
                                     R.string.view_profile_screen_likes_count, review.likedBy.size),
                             style = MaterialTheme.typography.bodyMedium)
                       }
+                  // Dislikes count
                   Row(
                       horizontalArrangement = Arrangement.spacedBy(4.dp),
                       verticalAlignment = Alignment.CenterVertically,
@@ -423,6 +436,13 @@ private fun ReviewCard(review: Review, parkingViewModel: ParkingViewModel) {
   }
 }
 
+/**
+ * Truncates the given text if it exceeds the maximum length.
+ *
+ * @param text The text to truncate
+ * @return The truncated text with "..." appended if it exceeds [MAX_TRUNCATED_TEXT_LENGTH],
+ *   otherwise returns the original text
+ */
 private fun truncateText(text: String): String {
   return if (text.length > MAX_TRUNCATED_TEXT_LENGTH) {
     text.take(MAX_TRUNCATED_TEXT_LENGTH) + "..."

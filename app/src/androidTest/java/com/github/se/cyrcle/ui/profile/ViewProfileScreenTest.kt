@@ -36,6 +36,7 @@ import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.review.TestInstancesReview
+import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserDetails
 import com.github.se.cyrcle.model.user.UserPublic
@@ -374,7 +375,9 @@ class ViewProfileScreenTest {
             ParkingRackType.TWO_TIER,
             ParkingProtection.COVERED,
             0.0,
-            true)
+            true,
+            owner = TestInstancesUser.user1.public.userId,
+            emptyList())
 
     parkingViewModel.addParking(parking4)
     userViewModel.addFavoriteParkingToSelectedUser(parking4)
@@ -464,9 +467,10 @@ class ViewProfileScreenTest {
     composeTestRule.onNodeWithTag("ParkingName_1").assertTextEquals("Rude épais")
     composeTestRule.onNodeWithTag("RatingText_1").assertTextEquals("You rated this parking: 5.0 ⭐")
     composeTestRule.onNodeWithTag("YouSaidText_1").assertIsDisplayed()
-    composeTestRule.onNodeWithText("\"Great parking!\"").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("ReviewText_1").assertTextEquals("\"Great parking!\"")
     composeTestRule.onNodeWithTag("LikesCount_1").assertIsDisplayed()
     composeTestRule.onNodeWithTag("DislikesCount_1").assertIsDisplayed()
+
     // Scroll horizontally to see the second review
     repeat(3) { composeTestRule.onNodeWithTag("UserReviewsList").performTouchInput { swipeLeft() } }
 
@@ -475,8 +479,9 @@ class ViewProfileScreenTest {
     composeTestRule.onNodeWithTag("RatingText_5").assertTextEquals("You rated this parking: 5.0 ⭐")
     composeTestRule.onNodeWithTag("YouSaidText_5").assertIsDisplayed()
     composeTestRule
-        .onNodeWithText("\"You know what's crazy is that that low taper fade like meme it is...\"")
-        .assertIsDisplayed()
+        .onNodeWithTag("ReviewText_5")
+        .assertTextEquals(
+            "\"You know what's crazy is that that low taper fade like meme it is...\"")
     composeTestRule.onNodeWithTag("LikesCount_5").assertIsDisplayed()
     composeTestRule.onNodeWithTag("DislikesCount_5").assertIsDisplayed()
   }
