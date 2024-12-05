@@ -61,6 +61,8 @@ import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 
+const val MAX_TRUNCATED_TEXT_LENGTH = 65
+
 @Composable
 fun ViewProfileScreen(
     navigationActions: NavigationActions,
@@ -190,7 +192,7 @@ fun ViewProfileScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    UserReviewsSection(reviewViewModel, userViewModel)
+                    UserReviewsSection(reviewViewModel, userViewModel, parkingViewModel)
                   }
             }
           }
@@ -305,7 +307,11 @@ private fun FavoriteParkingCard(
 }
 
 @Composable
-private fun UserReviewsSection(reviewViewModel: ReviewViewModel, userViewModel: UserViewModel) {
+private fun UserReviewsSection(
+    reviewViewModel: ReviewViewModel,
+    userViewModel: UserViewModel,
+    parkingViewModel: ParkingViewModel
+) {
   val userState = userViewModel.currentUser.collectAsState().value
 
   if (userState != null) {
@@ -331,19 +337,32 @@ private fun UserReviewsSection(reviewViewModel: ReviewViewModel, userViewModel: 
     LazyRow(
         modifier = Modifier.fillMaxWidth().testTag("UserReviewsList"),
         horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-          itemsIndexed(userReviews) { _, review -> review?.let { ReviewCard(review = it) } }
+          itemsIndexed(userReviews) { _, review ->
+            review?.let { ReviewCard(review = it, parkingViewModel = parkingViewModel) }
+          }
         }
   }
 }
 
 @Composable
-private fun ReviewCard(review: Review) {
+private fun ReviewCard(review: Review, parkingViewModel: ParkingViewModel) {
+  val defaultParkingName = stringResource(R.string.default_parking_name)
+  var parkingName by remember { mutableStateOf(defaultParkingName) }
+
+  // Fetch parking name when the card is created
+  LaunchedEffect(review.parking) {
+    parkingViewModel.getParkingById(
+        review.parking,
+        onSuccess = { parking -> parkingName = parking.optName ?: defaultParkingName },
+        onFailure = {})
+  }
+
   Card(modifier = Modifier.padding(8.dp).width(260.dp), shape = MaterialTheme.shapes.medium) {
     Column(modifier = Modifier.padding(16.dp)) {
       Text(
-          text = review.parking,
+          text = parkingName,
           style = MaterialTheme.typography.titleMedium,
-          modifier = Modifier.fillMaxWidth())
+          modifier = Modifier.fillMaxWidth().testTag("ParkingName_${review.uid}"))
 
       Spacer(modifier = Modifier.height(8.dp))
 
@@ -352,7 +371,8 @@ private fun ReviewCard(review: Review) {
               stringResource(
                   R.string.view_profile_screen_you_rated_parking, review.rating.toString()),
           style = MaterialTheme.typography.bodyMedium,
-          color = MaterialTheme.colorScheme.primary)
+          color = MaterialTheme.colorScheme.primary,
+          modifier = Modifier.testTag("RatingText_${review.uid}"))
 
       Spacer(modifier = Modifier.height(8.dp))
 
@@ -403,9 +423,9 @@ private fun ReviewCard(review: Review) {
   }
 }
 
-private fun truncateText(text: String, maxLength: Int = 65): String {
-  return if (text.length > maxLength) {
-    text.take(maxLength) + "..."
+private fun truncateText(text: String): String {
+  return if (text.length > MAX_TRUNCATED_TEXT_LENGTH) {
+    text.take(MAX_TRUNCATED_TEXT_LENGTH) + "..."
   } else {
     text
   }
