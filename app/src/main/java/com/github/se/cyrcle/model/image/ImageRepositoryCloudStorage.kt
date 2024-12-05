@@ -93,11 +93,11 @@ constructor(private val auth: FirebaseAuth, private val storage: FirebaseStorage
     val ref = storageRef.child(destinationPath)
     ref.delete()
         .addOnSuccessListener {
-          Log.d("ImageRepositoryCloudStorage", "Image deleted successfully from path: $path")
+          Log.d("ImageRepositoryCloudStorage", "Image deleted successfully from path: $destinationPath")
           onSuccess()
         }
         .addOnFailureListener { exception ->
-          Log.e("ImageRepositoryCloudStorage", "Error deleting image from path: $path", exception)
+          Log.e("ImageRepositoryCloudStorage", "Error deleting image from path: $destinationPath", exception)
           onFailure(exception)
         }
   }
