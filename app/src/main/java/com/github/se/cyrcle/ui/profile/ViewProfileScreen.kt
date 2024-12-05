@@ -351,6 +351,14 @@ private fun UserReviewsSection(
     }
 }
 
+private fun truncateText(text: String, maxLength: Int = 65): String {
+    return if (text.length > maxLength) {
+        text.take(maxLength) + "..."
+    } else {
+        text
+    }
+}
+
 @Composable
 private fun ReviewCard(review: Review) {
     Card(
@@ -382,11 +390,11 @@ private fun ReviewCard(review: Review) {
                 text = "You said:",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.testTag("YouSaidText_${review.uid}")  // Add unique test tag
+                modifier = Modifier.testTag("YouSaidText_${review.uid}")
             )
 
             Text(
-                text = "\"${review.text}\"",
+                text = "\"${truncateText(review.text)}\"",
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -405,7 +413,7 @@ private fun ReviewCard(review: Review) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.testTag("LikesCount_${review.uid}")  // Add test tag
+                        modifier = Modifier.testTag("LikesCount_${review.uid}")
                     ) {
                         Text(
                             text = "👍",
@@ -419,7 +427,7 @@ private fun ReviewCard(review: Review) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.testTag("DislikesCount_${review.uid}")  // Add test tag
+                        modifier = Modifier.testTag("DislikesCount_${review.uid}")
                     ) {
                         Text(
                             text = "👎",
