@@ -5,12 +5,15 @@ import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
@@ -26,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,6 +44,8 @@ import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.review.Review
+import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.LIST_TOP_LEVEL_DESTINATION
@@ -58,6 +64,7 @@ fun ViewProfileScreen(
     navigationActions: NavigationActions,
     userViewModel: UserViewModel,
     parkingViewModel: ParkingViewModel,
+    reviewViewModel: ReviewViewModel
 ) {
 
   val context = LocalContext.current
@@ -172,6 +179,10 @@ fun ViewProfileScreen(
               Spacer(modifier = Modifier.height(24.dp))
 
               FavoriteParkingsSection(userViewModel, parkingViewModel, navigationActions)
+
+              Spacer(modifier = Modifier.height(24.dp))
+
+              UserReviewsSection(reviewViewModel, userViewModel)
             }
           }
         }
@@ -282,4 +293,95 @@ private fun FavoriteParkingCard(
           }
         })
   }
+}
+
+@Composable
+private fun UserReviewsSection(
+    reviewViewModel: ReviewViewModel,
+    userViewModel: UserViewModel
+) {
+    val userState = userViewModel.currentUser.collectAsState().value
+
+    if (userState != null) {
+        LaunchedEffect(userState.public.userId) {
+            reviewViewModel.getReviewsByOwnerId(userState.public.userId)
+        }
+    }
+    val userReviews = reviewViewModel.userReviews.collectAsState().value
+
+    Text(
+        text = "My Reviews",
+        style = MaterialTheme.typography.titleLarge,
+        modifier = Modifier.testTag("UserReviewsTitle")
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    if (userReviews.isEmpty()) {
+        Text(
+            text = "You haven't written any reviews yet",
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.testTag("NoReviewsMessage")
+        )
+    } else {
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth().testTag("UserReviewsList"),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            itemsIndexed(userReviews) { _, review ->
+                review?.let { ReviewCard(review = it) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReviewCard(review: Review) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        shape = MaterialTheme.shapes.medium
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Parking: ${review.parking}",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = "Rating: ${review.rating}",
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = review.text,
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "👍 ${review.likedBy.size}",
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Text(
+                    text = "👎 ${review.dislikedBy.size}",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
+    }
 }
