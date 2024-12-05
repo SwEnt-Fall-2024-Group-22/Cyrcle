@@ -58,7 +58,7 @@ class ConnectivityObserver(
   /**
    * Switches the app to online mode by
    * - signing in the user anonymously
-   * - switching the map and parking viewmodels to online mode (Soon)
+   * - switching the map and parking viewmodels to online mode (TODO)
    */
   private fun onOnlineMode() {
     Log.d("ConnectivityObserver", "Switching to online mode")
