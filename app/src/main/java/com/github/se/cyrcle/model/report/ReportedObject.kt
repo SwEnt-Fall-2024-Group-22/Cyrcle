@@ -7,8 +7,9 @@ package com.github.se.cyrcle.model.report
 
 /** Enum representing the type of object being reported. Can be either a parking or a review. */
 enum class ReportedObjectType {
-  PARKING,
-  REVIEW
+    PARKING,
+    REVIEW,
+    IMAGE
 }
 
 /**

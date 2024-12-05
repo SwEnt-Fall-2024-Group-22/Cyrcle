@@ -20,6 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.model.parking.ImageReportReason
 import com.github.se.cyrcle.model.parking.ParkingReportReason
 import com.github.se.cyrcle.model.report.ReportedObjectType
 import com.github.se.cyrcle.model.review.ReviewReportReason
