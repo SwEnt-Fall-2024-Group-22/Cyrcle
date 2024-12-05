@@ -398,9 +398,10 @@ private fun ReviewCard(review: Review, parkingViewModel: ParkingViewModel) {
                   modifier = Modifier.testTag("YouSaidText_${review.uid}"))
 
               androidx.compose.material3.Text(
-                  text = truncateText("\"" + review.text + "\""),
+                  text = "\"${truncateText(review.text)}\"",
                   style = MaterialTheme.typography.bodyMedium,
                   maxLines = 2,
+                  softWrap = true,
                   overflow = TextOverflow.Ellipsis,
                   modifier = Modifier.fillMaxWidth().testTag("ReviewText_${review.uid}"))
 
