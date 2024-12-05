@@ -397,6 +397,12 @@ fun MapScreen(
                     mapViewModel.updateMapMode(userMapMode.value)
                   }
 
+                  // If the zoom level changes, hide the preview card. This is to avoid the card
+                  // being displayed when the user taps to zoom in/out.
+                  if (zoomState.value != mapView.mapboxMap.cameraState.zoom) {
+                    showPreviewCard = false
+                  }
+
                   // Store the zoom level
                   // This must stay at the end of the listener.
                   zoomState.value = mapView.mapboxMap.cameraState.zoom
