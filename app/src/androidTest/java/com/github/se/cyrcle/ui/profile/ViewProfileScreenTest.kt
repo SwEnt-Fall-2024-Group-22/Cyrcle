@@ -163,7 +163,6 @@ class ViewProfileScreenTest {
     composeTestRule.onNodeWithTag("DisplayFirstName").assertTextEquals("Jane")
     composeTestRule.onNodeWithTag("DisplayLastName").assertTextEquals("Smith")
     composeTestRule.onNodeWithTag("DisplayUsername").assertTextEquals("@janesmith")
-    Thread.sleep(5000)
   }
 
   @Test
@@ -435,7 +434,6 @@ class ViewProfileScreenTest {
     // Scroll to the reviews section using swipe
     composeTestRule.onNodeWithTag("ProfileContentSections").performTouchInput { swipeUp() }
 
-    Thread.sleep(5000)
     composeTestRule.onNodeWithTag("UserReviewsTitle").assertIsDisplayed()
 
     composeTestRule
@@ -481,7 +479,6 @@ class ViewProfileScreenTest {
       composeTestRule.onNodeWithTag("ProfileContentSections").performTouchInput { swipeUp() }
     }
 
-    Thread.sleep(10000)
     // Verify first review content
     composeTestRule.onNodeWithText("Test Parking 1").assertIsDisplayed()
     composeTestRule.onNodeWithText("You rated this parking: 4.5 ⭐").assertIsDisplayed()
@@ -492,8 +489,6 @@ class ViewProfileScreenTest {
 
     // Scroll horizontally to see the second review
     repeat(3) { composeTestRule.onNodeWithTag("UserReviewsList").performTouchInput { swipeLeft() } }
-
-    Thread.sleep(10000)
 
     // Verify second review content
     composeTestRule.onNodeWithText("Test Parking 2").assertIsDisplayed()
