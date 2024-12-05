@@ -21,6 +21,7 @@ import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockOfflineParkingRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
+import com.github.se.cyrcle.di.mocks.MockReviewRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.model.parking.Parking
@@ -30,7 +31,7 @@ import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
-import com.github.se.cyrcle.model.user.TestInstancesUser
+import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserDetails
 import com.github.se.cyrcle.model.user.UserPublic
@@ -58,9 +59,11 @@ class ViewProfileScreenTest {
   private lateinit var mockImageRepository: MockImageRepository
   private lateinit var mockAuthenticator: MockAuthenticationRepository
   private lateinit var mockReportedObjectRepository: ReportedObjectRepository
+  private lateinit var mockReviewRepository: MockReviewRepository
 
   private lateinit var userViewModel: UserViewModel
   private lateinit var parkingViewModel: ParkingViewModel
+  private lateinit var reviewViewModel: ReviewViewModel
 
   @Before
   fun setUp() {
@@ -71,6 +74,7 @@ class ViewProfileScreenTest {
     mockImageRepository = MockImageRepository()
     mockAuthenticator = MockAuthenticationRepository()
     mockReportedObjectRepository = MockReportedObjectRepository()
+    mockReviewRepository = MockReviewRepository()
 
     val user =
         User(
@@ -86,6 +90,7 @@ class ViewProfileScreenTest {
             mockParkingRepository,
             mockOfflineParkingRepository,
             mockReportedObjectRepository)
+    reviewViewModel = ReviewViewModel(mockReviewRepository,mockReportedObjectRepository)
 
     userViewModel.addUser(user, {}, {})
     mockAuthenticator.testUser = user
@@ -107,7 +112,8 @@ class ViewProfileScreenTest {
       ViewProfileScreen(
           navigationActions = mockNavigationActions,
           userViewModel = userViewModel,
-          parkingViewModel = parkingViewModel)
+          parkingViewModel = parkingViewModel,
+          reviewViewModel = reviewViewModel)
     }
   }
 
@@ -153,6 +159,7 @@ class ViewProfileScreenTest {
     composeTestRule.onNodeWithTag("DisplayFirstName").assertTextEquals("Jane")
     composeTestRule.onNodeWithTag("DisplayLastName").assertTextEquals("Smith")
     composeTestRule.onNodeWithTag("DisplayUsername").assertTextEquals("@janesmith")
+    Thread.sleep(5000)
   }
 
   @Test
@@ -365,9 +372,7 @@ class ViewProfileScreenTest {
             ParkingRackType.TWO_TIER,
             ParkingProtection.COVERED,
             0.0,
-            true,
-            owner = TestInstancesUser.user1.public.userId,
-            reportingUsers = emptyList())
+            true)
 
     parkingViewModel.addParking(parking4)
     userViewModel.addFavoriteParkingToSelectedUser(parking4)

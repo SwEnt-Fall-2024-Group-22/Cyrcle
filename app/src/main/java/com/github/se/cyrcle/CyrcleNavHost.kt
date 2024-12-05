@@ -120,7 +120,7 @@ fun CyrcleNavHost(
         route = Route.VIEW_PROFILE,
     ) {
       composable(Screen.VIEW_PROFILE) {
-        ProfileScreen(navigationActions, userViewModel, parkingViewModel)
+        ProfileScreen(navigationActions, userViewModel, parkingViewModel, reviewViewModel)
       }
       composable(Screen.ADMIN) {
         AdminScreen(navigationActions, reportedObjectViewModel, parkingViewModel, reviewViewModel)
