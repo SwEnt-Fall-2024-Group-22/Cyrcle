@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.github.se.cyrcle.model.address.AddressViewModel
+import com.github.se.cyrcle.model.map.BikeLocationViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.report.ReportedObjectViewModel
@@ -44,7 +45,8 @@ fun CyrcleNavHost(
     mapViewModel: MapViewModel,
     addressViewModel: AddressViewModel,
     reportedObjectViewModel: ReportedObjectViewModel,
-    permissionHandler: PermissionHandler
+    permissionHandler: PermissionHandler,
+    bikeLocationViewModel: BikeLocationViewModel,
 ) {
   NavHost(navController = navController, startDestination = Route.AUTH) {
     navigation(
@@ -94,7 +96,8 @@ fun CyrcleNavHost(
             userViewModel,
             mapViewModel,
             permissionHandler,
-            addressViewModel)
+            addressViewModel,
+            bikeLocationViewModel)
       }
     }
 
