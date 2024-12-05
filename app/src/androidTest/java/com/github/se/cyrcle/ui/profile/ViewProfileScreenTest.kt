@@ -468,11 +468,11 @@ class ViewProfileScreenTest {
     val testReview2 = Review(
       uid = "review2",
       owner = "1",
-      text = "Decent parking",
-      rating = 3.5,
+      text = "You know what's crazy is that that low taper fade like meme it is dude it is still massive like massive i see new ones that i've never seen before that have like millions of likes and views still that are popping up all over the place.",
+      rating = 5.0,
       parking = "Test Parking 2",
-      likedBy = listOf("user2"),
-      dislikedBy = emptyList()
+      likedBy = listOf("user2", "user3", "user4", "user5"),
+      dislikedBy = listOf()
     )
 
     // Add reviews to mock repository
@@ -484,7 +484,7 @@ class ViewProfileScreenTest {
 
     composeTestRule.waitForIdle()
 
-    repeat(3) {  // Add multiple swipes to ensure we reach the bottom
+    repeat(3) {
       composeTestRule
         .onNodeWithTag("ProfileContentSections")
         .performTouchInput {
@@ -514,11 +514,14 @@ class ViewProfileScreenTest {
       .assertIsDisplayed()
 
     // Scroll horizontally to see the second review
-    composeTestRule
-      .onNodeWithTag("UserReviewsList")
-      .performTouchInput {
-        swipeLeft()
-      }
+    repeat(3){
+      composeTestRule
+        .onNodeWithTag("UserReviewsList")
+        .performTouchInput {
+          swipeLeft()
+        }
+    }
+
     Thread.sleep(10000)
 
     // Verify second review content
@@ -526,13 +529,13 @@ class ViewProfileScreenTest {
       .onNodeWithText("Test Parking 2")
       .assertIsDisplayed()
     composeTestRule
-      .onNodeWithText("You rated this parking: 3.5 ⭐")
+      .onNodeWithText("You rated this parking: 5.0 ⭐")
       .assertIsDisplayed()
     composeTestRule
       .onNodeWithTag("YouSaidText_review2")
       .assertIsDisplayed()
     composeTestRule
-      .onNodeWithText("\"Decent parking\"")
+      .onNodeWithText("\"You know what's crazy is that that low taper fade like meme it is...\"")
       .assertIsDisplayed()
     composeTestRule
       .onNodeWithTag("LikesCount_review2")
@@ -540,5 +543,7 @@ class ViewProfileScreenTest {
     composeTestRule
       .onNodeWithTag("DislikesCount_review2")
       .assertIsDisplayed()
+
   }
+
 }
