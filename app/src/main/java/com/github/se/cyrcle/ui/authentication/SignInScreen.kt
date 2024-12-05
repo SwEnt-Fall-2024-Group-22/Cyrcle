@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -67,51 +68,75 @@ fun SignInScreen(navigationActions: NavigationActions, userViewModel: UserViewMo
           contentDescription = "App Logo",
           modifier = Modifier.size(250.dp).testTag("AppLogo"))
 
-      // Authenticate With Google Button
-      GoogleSignInButton {
-        userViewModel.signIn(
-            {
-              Toast.makeText(context, successSignInMsg, Toast.LENGTH_LONG).show()
-              navigationActions.navigateTo(TopLevelDestinations.MAP)
-            },
-            {
-              when (it) {
-                UserViewModel.SignInFailureReason.ACCOUNT_NOT_FOUND -> {
-                  Toast.makeText(context, accountNotFoundToast, Toast.LENGTH_LONG).show()
-                }
-                UserViewModel.SignInFailureReason.ERROR -> {
-                  Toast.makeText(context, failSignInMsg, Toast.LENGTH_LONG).show()
-                }
-              }
-            })
-      }
-
-      // Create Account Button
-      Button(
-          text = "Create an account",
-          colorLevel = ColorLevel.SECONDARY,
-          modifier =
-              Modifier.padding(16.dp)
-                  .border(BorderStroke(1.dp, Color.LightGray), RoundedCornerShape(50))
-                  .height(48.dp)
-                  .width(250.dp),
-          onClick = { navigationActions.navigateTo(Screen.CREATE_PROFILE) },
-          testTag = "CreateAccountButton")
-
-      // Anonymous Login Button
-      Button(
-          text = stringResource(R.string.sign_in_guest_button),
-          onClick = {
-            userViewModel.signInAnonymously {
-              navigationActions.navigateTo(TopLevelDestinations.MAP)
+      // buttons for signing in column container
+      Column(
+          modifier = Modifier.fillMaxWidth().padding(16.dp),
+          horizontalAlignment = Alignment.CenterHorizontally,
+          verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            // Authenticate With Google Button
+            GoogleSignInButton {
+              userViewModel.signIn(
+                  {
+                    Toast.makeText(context, successSignInMsg, Toast.LENGTH_LONG).show()
+                    userViewModel.setIsOnlineMode(true)
+                    navigationActions.navigateTo(TopLevelDestinations.MAP)
+                  },
+                  {
+                    when (it) {
+                      UserViewModel.SignInFailureReason.ACCOUNT_NOT_FOUND -> {
+                        Toast.makeText(context, accountNotFoundToast, Toast.LENGTH_LONG).show()
+                      }
+                      UserViewModel.SignInFailureReason.ERROR -> {
+                        Toast.makeText(context, failSignInMsg, Toast.LENGTH_LONG).show()
+                      }
+                    }
+                  })
             }
-          },
-          colorLevel = ColorLevel.TERTIARY,
-          modifier =
-              Modifier.padding(start = 16.dp, end = 16.dp)
-                  .border(BorderStroke(1.dp, Color.LightGray), RoundedCornerShape(50))
-                  .height(48.dp),
-          testTag = "AnonymousLoginButton")
+            // Create Account Button
+            Button(
+                text = "Create an account",
+                colorLevel = ColorLevel.SECONDARY,
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .border(BorderStroke(1.dp, Color.LightGray), RoundedCornerShape(50))
+                        .height(48.dp)
+                        .width(250.dp),
+                onClick = { navigationActions.navigateTo(Screen.CREATE_PROFILE) },
+                testTag = "CreateAccountButton")
+
+            // Anonymous Login Button
+            Button(
+                text = stringResource(R.string.sign_in_guest_button),
+                onClick = {
+                  userViewModel.signInAnonymously(
+                      onComplete = {
+                        userViewModel.setIsOnlineMode(true)
+                        navigationActions.navigateTo(TopLevelDestinations.MAP)
+                      },
+                      onFailure = {
+                        Toast.makeText(context, failSignInMsg, Toast.LENGTH_LONG).show()
+                      })
+                },
+                colorLevel = ColorLevel.TERTIARY,
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .border(BorderStroke(1.dp, Color.LightGray), RoundedCornerShape(50))
+                        .height(48.dp),
+                testTag = "AnonymousLoginButton")
+            // Offline Mode Button
+            Button(
+                text = stringResource(R.string.sign_in_offline_button),
+                onClick = {
+                  userViewModel.setIsOnlineMode(false)
+                  userViewModel.signOut { navigationActions.navigateTo(TopLevelDestinations.MAP) }
+                },
+                colorLevel = ColorLevel.TERTIARY,
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .border(BorderStroke(1.dp, Color.LightGray), RoundedCornerShape(50))
+                        .height(48.dp),
+                testTag = "OfflineModeButton")
+          }
     }
   }
 }

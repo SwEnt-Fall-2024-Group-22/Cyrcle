@@ -15,6 +15,7 @@ import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.authentication.AuthenticationRepository
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.map.MapViewModel
+import com.github.se.cyrcle.model.network.ConnectivityObserver
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.offline.OfflineParkingRepository
 import com.github.se.cyrcle.model.parking.online.ParkingRepository
@@ -78,6 +79,8 @@ class MainActivity : ComponentActivity() {
     requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
     permissionsHandler.initHandler(this@MainActivity)
+
+    ConnectivityObserver(userViewModel, mapViewModel, parkingViewModel).init(this)
 
     setContent {
       CyrcleTheme {

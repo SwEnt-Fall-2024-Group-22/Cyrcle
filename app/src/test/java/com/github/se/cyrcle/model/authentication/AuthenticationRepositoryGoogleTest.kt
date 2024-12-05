@@ -85,7 +85,7 @@ class AuthenticationRepositoryGoogleTest {
     `when`(firebaseAuth.signInAnonymously()).thenReturn(Tasks.forResult(authResult))
 
     var invoked = false
-    authenticationRepositoryGoogle.authenticateAnonymously { invoked = true }
+    authenticationRepositoryGoogle.authenticateAnonymously(onComplete = { invoked = true })
     shadowOf(Looper.getMainLooper()).idle()
 
     verify(firebaseAuth).signInAnonymously()

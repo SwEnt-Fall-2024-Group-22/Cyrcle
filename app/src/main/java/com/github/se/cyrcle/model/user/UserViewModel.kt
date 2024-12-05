@@ -25,6 +25,17 @@ class UserViewModel(
   val isSignedIn: Flow<Boolean>
     get() = currentUser.map { it != null }
 
+  // === States for Offline mode  ===
+
+  // Keep track of the user's online status, can only be changed with the consent of the user.
+  private val _isOnlineMode = MutableStateFlow(true)
+  val isOnlineMode: StateFlow<Boolean> = _isOnlineMode
+
+  // Keep track of whether the user has connection to the internet or not.
+  private val _hasConnection = MutableStateFlow(true)
+  val hasConnection: StateFlow<Boolean> = _hasConnection
+  // === === === === === === ===
+
   /**
    * Sets the current user.
    *
@@ -249,11 +260,13 @@ class UserViewModel(
    *
    * @param onComplete the callback to call on completion
    */
-  fun signInAnonymously(onComplete: () -> Unit) {
-    authenticator.authenticateAnonymously {
-      Log.d("UserViewModel", "User signed in anonymously")
-      onComplete()
-    }
+  fun signInAnonymously(onComplete: () -> Unit = {}, onFailure: (Exception) -> Unit = {}) {
+    authenticator.authenticateAnonymously(
+        onComplete = {
+          Log.d("UserViewModel", "User signed in anonymously")
+          onComplete()
+        },
+        onFailure = { onFailure(it) })
   }
 
   /**
@@ -437,5 +450,22 @@ class UserViewModel(
         Log.e("UserViewModel", "Failed to debit coins: ${e.message}")
       }
     } ?: Log.e("UserViewModel", "Attempted to debit coins but no current user")
+  }
+  // ============================== ONLINE STATUS ==============================
+  /**
+   * Sets the online status of the user.
+   *
+   * @param isOnline the new online status of the user
+   */
+  fun setIsOnlineMode(isOnline: Boolean) {
+    _isOnlineMode.value = isOnline
+  }
+  /**
+   * Set the has connection status of the user.
+   *
+   * @param hasConnection the new connection status of the user
+   */
+  fun setHasConnection(hasConnection: Boolean) {
+    _hasConnection.value = hasConnection
   }
 }

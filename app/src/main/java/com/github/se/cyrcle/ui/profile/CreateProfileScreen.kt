@@ -65,6 +65,7 @@ fun CreateProfileScreen(navigationActions: NavigationActions, userViewModel: Use
                     // not set before
                     userViewModel.setCurrentUser(userWithCoins)
                     userViewModel.updateUser(userWithCoins, context)
+                    userViewModel.setIsOnlineMode(true)
                     Toast.makeText(context, combinedToastText, Toast.LENGTH_LONG).show()
                     navigationActions.navigateTo(TopLevelDestinations.MAP)
                   },

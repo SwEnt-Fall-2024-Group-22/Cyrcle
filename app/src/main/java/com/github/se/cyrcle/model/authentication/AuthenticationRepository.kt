@@ -16,7 +16,7 @@ interface AuthenticationRepository {
    *
    * @param onComplete a function to be called once the user is loged in anonymously
    */
-  fun authenticateAnonymously(onComplete: () -> Unit)
+  fun authenticateAnonymously(onComplete: () -> Unit = {}, onFailure: (Exception) -> Unit = {})
 
   /**
    * Sign out the user
