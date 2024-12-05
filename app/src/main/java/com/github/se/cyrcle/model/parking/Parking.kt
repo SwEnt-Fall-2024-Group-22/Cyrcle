@@ -30,7 +30,7 @@ data class Parking(
     val optName: String?,
     val optDescription: String?,
     val location: Location,
-    val images: List<String>,
+    val images: List<ParkingImage>,
     val capacity: ParkingCapacity,
     val rackType: ParkingRackType,
     val protection: ParkingProtection,
@@ -53,7 +53,9 @@ data class ParkingImage(
     val uid: String = "",
     val userId: String = "",
     val parking: String = "",
-    val url: String = ""
+    val url: String = "",
+    var nbReports: Int = 0,
+    var nbMaxSeverityReports: Int = 0
 )
 
 data class ParkingReport(

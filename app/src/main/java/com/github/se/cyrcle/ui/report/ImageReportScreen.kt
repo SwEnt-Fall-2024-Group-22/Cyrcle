@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.ImageReport
 import com.github.se.cyrcle.model.parking.ImageReportReason
+import com.github.se.cyrcle.model.parking.ParkingReport
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.report.ReportedObjectType
 import com.github.se.cyrcle.model.review.ReviewReport
@@ -79,6 +80,7 @@ fun ImageReportScreen(
         if (userViewModel.currentUser.value!!.details?.reportedImages?.contains(imageId) == true) {
             Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
         } else {
+            parkingViewModel.addImageReport(report, userViewModel.currentUser.value!!)
             userViewModel.addReportedImageToSelectedUser(imageId!!)
             Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
         }

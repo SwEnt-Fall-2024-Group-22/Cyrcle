@@ -2,7 +2,9 @@ package com.github.se.cyrcle.model.parking.online
 
 import android.util.Log
 import com.github.se.cyrcle.io.serializer.ParkingAdapter
+import com.github.se.cyrcle.model.parking.ImageReport
 import com.github.se.cyrcle.model.parking.Parking
+import com.github.se.cyrcle.model.parking.ParkingImage
 import com.github.se.cyrcle.model.parking.ParkingReport
 import com.github.se.cyrcle.model.parking.Tile
 import com.github.se.cyrcle.model.parking.TileUtils
@@ -221,4 +223,42 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
         .addOnSuccessListener { onSuccess(report) }
         .addOnFailureListener { onFailure(it) }
   }
+
+    override fun addImageReport(
+        report: ImageReport,
+        onSuccess: (ImageReport) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val reportId = getNewUid() // Generate a new unique ID for the report
+        db.collection(collectionPath)
+            .document(report.parking)
+            .collection("reports")
+            .document(reportId)
+            .set(report)
+            .addOnSuccessListener { onSuccess(report) }
+            .addOnFailureListener { onFailure(it) }
+    }
+
+    override fun getParkingImageById(
+        id: String,
+        onSuccess: (ParkingImage) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        nbrOfRequest += 1
+        Log.d("parkingRepositoryFirestore", "nbrOfRequest: $nbrOfRequest")
+        db.collection(collectionPath)
+            .document(id)
+            .get()
+            .addOnSuccessListener { document ->
+                val parking = document.data?.let(parkingSerializer::deserializeParking)
+                if (parking != null) {
+                    onSuccess(parking)
+                } else {
+                    onFailure(Exception("Parking not found"))
+                }
+            }
+            .addOnFailureListener { onFailure(it) }
+    }
+
+
 }
