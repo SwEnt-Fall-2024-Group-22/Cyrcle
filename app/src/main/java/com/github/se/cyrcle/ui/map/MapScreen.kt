@@ -164,6 +164,7 @@ fun MapScreen(
   // Mutable state to store the PointAnnotationManager for parking labels
   var pLabelAnnotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
 
+  // Mutable state to store the visibility of the preview card
   var showPreviewCard by remember { mutableStateOf(false) }
 
   Log.d("MapScreen", "showPreviewCard: $showPreviewCard")
@@ -326,7 +327,15 @@ fun MapScreen(
                 // ======================= MOVE LISTENER =======================
 
                 // ======================= ANNOTATION CLICK LISTENER =======================
-                // Define a common click handler function
+                /**
+                 * Function to handle the click on an annotation. It will center the camera on the
+                 * annotation and enable the preview card with the parking information.
+                 *
+                 * @param annotation The annotation clicked.
+                 * @param mapViewportState The viewport state of the map to center the camera on the
+                 * @param parkingViewModel The ViewModel for managing parking-related data and
+                 *   actions.
+                 */
                 fun handleAnnotationClick(
                     annotation: Any,
                     mapViewportState: MapViewportState,
