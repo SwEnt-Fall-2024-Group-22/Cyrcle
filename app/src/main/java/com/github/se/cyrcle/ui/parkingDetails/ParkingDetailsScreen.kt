@@ -447,7 +447,8 @@ fun ParkingDetailsScreen(
                           parkingViewModel.selectParking(selectedParking)
 
                           mapViewModel.updateTrackingMode(false)
-                          mapViewModel.updateMapRecentering(false) // Avoid
+
+                          mapViewModel.updateMapRecentering(true)
                           mapViewModel.zoomOnLocation(selectedParking.location)
 
                           navigationActions.navigateTo(Screen.MAP)
