@@ -6,6 +6,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.times
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
@@ -29,28 +30,41 @@ class ReviewViewModelTest {
 
   @Test
   fun addReportTest() {
-
-    val review = TestInstancesReview.review1.copy(nbReports = 0, nbMaxSeverityReports = 0)
+    val review = TestInstancesReview.review1.copy(reportingUsers = emptyList(), nbReports = 0)
     val user = TestInstancesUser.user1
     val report =
         ReviewReport(
-            uid = "report1",
-            reason = ReviewReportReason.HARMFUL,
-            userId = user.public.userId,
+            uid = "ReportUID",
             review = review.uid,
-            "")
+            reason = ReviewReportReason.HARMFUL,
+            userId = user.public.userId)
 
-    // Mock repository behavior for report addition
-    `when`(reviewRepository.addReport(eq(report), any(), any())).then {
-      it.getArgument<(ReviewReport) -> Unit>(1)(report)
+    `when`(reviewRepository.addReport(any(), any(), any())).then {
+      it.getArgument<(ReviewReport) -> Unit>(1).invoke(report) // Trigger onSuccess
     }
 
     reviewViewModel.selectReview(review)
     reviewViewModel.addReport(report, user)
 
-    // Verify that the report was added to the parking repository
+    // Verify report is added to the repository
     verify(reviewRepository).addReport(eq(report), any(), any())
-    // Verify the parking repository update method is called to persist changes
+
+    // Check if user is added to reportingUsers and reports are updated
+    assert(!reviewViewModel.hasAlreadyReported.value)
+    verify(reviewRepository).updateReview(any(), any(), any())
+  }
+
+  @Test
+  fun addReportingUserShouldUpdateReportingUsersList() {
+    val review = TestInstancesReview.review1.copy(reportingUsers = emptyList())
+    val user = TestInstancesUser.user1
+
+    reviewViewModel.selectReview(review)
+    reviewViewModel.addReportingUser(user)
+
+    // Verify that reportingUsers was updated in the repository
+    verify(reviewRepository)
+        .updateReview(eq(review.copy(reportingUsers = listOf(user.public.userId))), any(), any())
   }
 
   @Test

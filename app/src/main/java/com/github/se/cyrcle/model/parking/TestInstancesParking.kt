@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.model.parking
 
+import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.mapbox.geojson.Point
 
 object TestInstancesParking {
@@ -19,6 +20,8 @@ object TestInstancesParking {
           ParkingProtection.COVERED,
           0.0,
           true,
+          owner = TestInstancesUser.user1.public.userId,
+          reportingUsers = emptyList(),
           2,
           3.0)
   val parking2 =
@@ -32,7 +35,9 @@ object TestInstancesParking {
           ParkingRackType.TWO_TIER,
           ParkingProtection.COVERED,
           0.0,
-          true)
+          true,
+          owner = TestInstancesUser.user1.public.userId,
+          reportingUsers = emptyList())
   val parking3 =
       Parking(
           "Test_spot_3",
@@ -45,7 +50,9 @@ object TestInstancesParking {
           ParkingRackType.TWO_TIER,
           ParkingProtection.COVERED,
           0.0,
-          true)
+          true,
+          owner = TestInstancesUser.user1.public.userId,
+          reportingUsers = emptyList())
   val parking4 =
       Parking(
           "Test_spot_4",
@@ -58,7 +65,9 @@ object TestInstancesParking {
           ParkingRackType.TWO_TIER,
           ParkingProtection.COVERED,
           0.0,
-          true)
+          true,
+          owner = TestInstancesUser.user1.public.userId,
+          reportingUsers = emptyList())
   val parking5 =
       Parking(
           "Test_spot_5",
@@ -71,5 +80,7 @@ object TestInstancesParking {
           ParkingRackType.TWO_TIER,
           ParkingProtection.COVERED,
           0.0,
-          true)
+          true,
+          owner = TestInstancesUser.user1.public.userId,
+          reportingUsers = emptyList())
 }

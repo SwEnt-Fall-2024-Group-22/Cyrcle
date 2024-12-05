@@ -149,7 +149,8 @@ fun ReviewScreen(
                               text = textValue,
                               parking = selectedParking.uid,
                               rating = sliderToValue,
-                              uid = reviewViewModel.getNewUid()))
+                              uid = reviewViewModel.getNewUid(),
+                              reportingUsers = emptyList()))
 
                       userViewModel.creditCoinsToCurrentUser(PARKING_REVIEW_REWARD)
                       // Show combined toast
@@ -163,7 +164,8 @@ fun ReviewScreen(
                               text = textValue,
                               parking = selectedParking.uid,
                               rating = sliderToValue,
-                              uid = reviewViewModel.selectedReview.value?.uid!!))
+                              uid = reviewViewModel.selectedReview.value?.uid!!,
+                              reportingUsers = emptyList()))
                       Toast.makeText(context, reviewUpdateText, Toast.LENGTH_SHORT).show()
                     }
                     navigationActions.goBack()

@@ -32,10 +32,13 @@ data class UserDetails(
     val firstName: String = "",
     val lastName: String = "",
     val email: String = "",
+    val reportedParkings: List<String> = emptyList(),
+    val reportedReviews: List<String> = emptyList(),
     val favoriteParkings: List<String> = emptyList(),
     // val lastLoginTime: Timestamp? = null,
     val wallet: Wallet = Wallet.empty(),
-    val personalNotes: Map<String, String> = emptyMap()
+    val personalNotes: Map<String, String> = emptyMap(),
+    val isAdmin: Boolean = false
 )
 
 /**

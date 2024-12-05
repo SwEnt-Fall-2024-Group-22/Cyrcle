@@ -22,6 +22,9 @@ class UserViewModel(
   private val _currentUser = MutableStateFlow<User?>(null)
   val currentUser: StateFlow<User?> = _currentUser
 
+  private val _selectedParkingOwner = MutableStateFlow<User?>(null)
+  val selectedParkingOwner: StateFlow<User?> = _selectedParkingOwner
+
   val isSignedIn: Flow<Boolean>
     get() = currentUser.map { it != null }
 
@@ -46,8 +49,19 @@ class UserViewModel(
     _currentUser.value = user
   }
 
+  fun setParkingUser(user: User?) {
+    Log.d("UserViewModel", "Setting the current user in viewmodel : $user")
+    _selectedParkingOwner.value = user
+  }
+
   private val _favoriteParkings = MutableStateFlow<List<Parking>>(emptyList())
   val favoriteParkings: StateFlow<List<Parking>> = _favoriteParkings
+
+  private val _reportedParkings = MutableStateFlow<List<String>>(emptyList())
+  val reportedParkings: StateFlow<List<String>> = _reportedParkings
+
+  private val _reportedReviews = MutableStateFlow<List<String>>(emptyList())
+  val reportedReviews: StateFlow<List<String>> = _reportedReviews
 
   /**
    * Set the current user by fetching the user from the Firestore database with the given ID.
@@ -172,6 +186,36 @@ class UserViewModel(
   }
 
   /**
+   * Adds a parking to the list of reported parkings for the selected user and updates the reported
+   * parkings state.
+   *
+   * @param parking The parking ID to add to the list of reported parkings.
+   */
+  fun addReportedParkingToSelectedUser(parking: String) {
+    currentUser.value?.let { user ->
+      val updatedDetails =
+          user.details?.copy(reportedParkings = user.details.reportedParkings + parking)
+      val updatedUser = user.copy(details = updatedDetails)
+      updateUser(updatedUser) { _reportedParkings.value += parking }
+    }
+  }
+
+  /**
+   * Adds a review to the list of reported reviews for the selected user and updates the reported
+   * reviews state.
+   *
+   * @param review The review ID to add to the list of reported reviews.
+   */
+  fun addReportedReviewToSelectedUser(review: String) {
+    currentUser.value?.let { user ->
+      val updatedDetails =
+          user.details?.copy(reportedReviews = user.details.reportedReviews + review)
+      val updatedUser = user.copy(details = updatedDetails)
+      updateUser(updatedUser) { _reportedParkings.value += review }
+    }
+  }
+
+  /**
    * Removes parking from the list of favorite parkings for the selected user and updates the
    * favorite parkings state.
    *
@@ -252,6 +296,28 @@ class UserViewModel(
         {
           Log.e("UserViewModel", "Failed to sign in user", it)
           onFailure(SignInFailureReason.ERROR)
+        })
+  }
+
+  /**
+   * Selects a parking owner based on the given user ID.
+   *
+   * @param userId The ID of the user to set as the selected parking owner.
+   */
+  fun selectSelectedParkingUser(userId: String?) {
+    if (userId.isNullOrEmpty()) {
+      Log.e("UserViewModel", "Invalid userId: $userId")
+      return
+    }
+
+    userRepository.getUserById(
+        userId,
+        onSuccess = { setParkingUser(it) },
+        onFailure = { exception ->
+          Log.e(
+              "com.github.se.cyrcle.model.user.UserViewModel",
+              "Failed to fetch user by ID: $userId",
+              exception)
         })
   }
 

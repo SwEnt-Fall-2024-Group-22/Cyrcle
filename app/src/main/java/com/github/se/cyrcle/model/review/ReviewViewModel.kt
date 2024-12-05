@@ -29,6 +29,10 @@ class ReviewViewModel(
   private val _userReviews = MutableStateFlow<List<Review?>>(emptyList())
   val userReviews: StateFlow<List<Review?>> = _userReviews
 
+  /** Selected parking has already been reported by current user */
+  private val _hasAlreadyReported = MutableStateFlow<Boolean>(false)
+  val hasAlreadyReported: StateFlow<Boolean> = _hasAlreadyReported
+
   /** Selected parking to review/edit */
   private val _selectedReviewReports = MutableStateFlow<List<ReviewReport>>(emptyList())
   val selectedReviewReports: StateFlow<List<ReviewReport>> = _selectedReviewReports
@@ -203,11 +207,21 @@ class ReviewViewModel(
       return
     }
 
-    Log.d("ReviewViewModel", "${selectedReview.nbReports}, ${selectedReview.nbMaxSeverityReports}")
+    Log.d(
+        "ReviewViewModel",
+        "Reports: ${selectedReview.nbReports}, MaxSeverityReports: ${selectedReview.nbMaxSeverityReports}")
+
+    if (selectedReview.reportingUsers.contains(user.public.userId)) {
+      _hasAlreadyReported.value = true
+      return
+    } else {
+      _hasAlreadyReported.value = false
+    }
 
     reviewRepository.addReport(
         report,
         onSuccess = {
+          addReportingUser(user)
           val newReportedObject =
               ReportedObject(
                   objectUID = selectedReview.uid,
@@ -228,7 +242,7 @@ class ReviewViewModel(
                   reportedObjectRepository.updateReportedObject(
                       documentId = documentId,
                       updatedObject = newReportedObject,
-                      onSuccess = { updateLocalReviewAndMetrics(report, selectedReview) },
+                      onSuccess = { updateLocalReviewAndMetrics(report) },
                       onFailure = { Log.d("ReviewViewModel", "Error updating ReportedObject") })
                 } else {
                   val shouldAdd =
@@ -239,33 +253,70 @@ class ReviewViewModel(
                   if (shouldAdd) {
                     reportedObjectRepository.addReportedObject(
                         reportedObject = newReportedObject,
-                        onSuccess = { updateLocalReviewAndMetrics(report, selectedReview) },
+                        onSuccess = { updateLocalReviewAndMetrics(report) },
                         onFailure = { Log.d("ReviewViewModel", "Error adding ReportedObject") })
                   } else {
-                    Log.d("ReviewViewModel", "Document does not exist, addition not allowed")
+                    updateLocalReviewAndMetrics(report)
                   }
                 }
               },
-              onFailure = { Log.d("ReviewViewModel", "Error checking for ReportedObject") })
+              onFailure = {
+                Log.d("ReviewViewModel", "Error checking for ReportedObject")
+                updateLocalReviewAndMetrics(report)
+              })
         },
         onFailure = {
           Log.d("ReviewViewModel", "Report not added")
-          updateLocalReviewAndMetrics(report, selectedReview)
+          updateLocalReviewAndMetrics(report)
         })
   }
 
   /** Updates the local review and metrics after a report is added or updated. */
-  private fun updateLocalReviewAndMetrics(report: ReviewReport, selectedReview: Review) {
-    // Update the local reports and review metrics
-    _selectedReviewReports.update { currentReports ->
-      currentReports.plus(report) ?: listOf(report)
-    }
+  private fun updateLocalReviewAndMetrics(report: ReviewReport) {
+    val selectedReview = _selectedReview.value ?: return
+    _selectedReviewReports.update { currentReports -> currentReports.plus(report) }
     if (report.reason.severity == MAX_SEVERITY) {
       selectedReview.nbMaxSeverityReports += 1
     }
     selectedReview.nbReports += 1
     reviewRepository.updateReview(selectedReview, {}, {})
     Log.d("ReviewViewModel", "Review and metrics updated successfully: ${selectedReview.nbReports}")
+  }
+
+  /**
+   * Adds a reporting user to the currently selected review and updates Firestore.
+   *
+   * This function first verifies if a review is selected. If a review is selected, it creates an
+   * updated review object with the new reporting user and attempts to update Firestore to reflect
+   * the change. Upon a successful update, the local state is also updated to ensure consistency. If
+   * no review is selected, an error is logged and no operation is performed.
+   *
+   * @param user The user to be added to the reporting users list.
+   */
+  fun addReportingUser(user: User) {
+    _selectedReview.update { currentReview ->
+      currentReview?.let {
+        val updatedReview = it.copy(reportingUsers = it.reportingUsers + user.public.userId)
+
+        reviewRepository.updateReview(
+            review = updatedReview,
+            onSuccess = {
+              Log.d("ReviewViewModel", "User added to reportingUsers in Firestore")
+              _selectedReview.update { curReview ->
+                if (curReview?.uid == updatedReview.uid) {
+                  updatedReview
+                } else {
+                  curReview
+                }
+              }
+            },
+            onFailure = { exception ->
+              Log.e("ReviewViewModel", "Failed to update review in Firestore: ${exception.message}")
+            })
+
+        updatedReview
+      }
+    }
   }
 
   /**

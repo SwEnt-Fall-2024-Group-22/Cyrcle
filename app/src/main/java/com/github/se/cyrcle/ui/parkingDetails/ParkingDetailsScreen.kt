@@ -88,6 +88,11 @@ fun ParkingDetailsScreen(
   val showDialog = remember { mutableStateOf(false) }
   val imagesUrls by parkingViewModel.selectedParkingImagesUrls.collectAsState()
   val showDialogImage = remember { mutableStateOf<String?>(null) }
+  if (selectedParking.owner != "Unknown Owner" && selectedParking.owner != null) {
+    userViewModel.selectSelectedParkingUser(parkingViewModel.selectedParking.value?.owner!!)
+  } else {
+    userViewModel.setParkingUser(null)
+  }
   // === === === === === === ===
 
   LaunchedEffect(Unit, selectedParking) {
@@ -430,6 +435,19 @@ fun ParkingDetailsScreen(
                                 text =
                                     if (selectedParking.hasSecurity) stringResource(R.string.yes)
                                     else stringResource(R.string.no),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface)
+                          }
+                          Column(modifier = Modifier.weight(1f).testTag("UserColumn")) {
+                            Text(
+                                text = stringResource(R.string.card_screen_user),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onBackground)
+                            Text(
+                                text =
+                                    if (userViewModel.selectedParkingOwner.value != null)
+                                        userViewModel.selectedParkingOwner.value?.public?.username!!
+                                    else stringResource(R.string.undefined_username),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface)
                           }

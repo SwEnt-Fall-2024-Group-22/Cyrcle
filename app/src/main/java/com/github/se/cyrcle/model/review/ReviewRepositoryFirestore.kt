@@ -233,6 +233,7 @@ class ReviewRepositoryFirestore @Inject constructor(private val db: FirebaseFire
     val nbMaxSeverityReports = (data["nbMaxSeverityReports"] as? Number)?.toInt() ?: 0
     val dislikedBy: List<String> = data["dislikedBy"] as? List<String> ?: emptyList()
     val likedBy: List<String> = data["likedBy"] as? List<String> ?: emptyList()
+    val reportingUsers = (data["reportingUsers"] as? List<String>) ?: emptyList()
 
     // Convert the map to JSON, then deserialize into a Review object
     val json = gson.toJson(processedData)
@@ -242,8 +243,9 @@ class ReviewRepositoryFirestore @Inject constructor(private val db: FirebaseFire
     return review.copy(
         nbReports = nbReports,
         nbMaxSeverityReports = nbMaxSeverityReports,
-        dislikedBy = dislikedBy,
-        likedBy = likedBy)
+        reportingUsers = reportingUsers,
+        likedBy = likedBy,
+        dislikedBy = dislikedBy)
   }
 
   fun createTimestamp(timeAttributes: Map<String, Any>): Timestamp? {

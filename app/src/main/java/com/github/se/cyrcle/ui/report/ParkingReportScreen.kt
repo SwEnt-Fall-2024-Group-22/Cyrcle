@@ -58,6 +58,8 @@ fun ParkingReportScreen(
   val topBoxHeight = screenHeight * 0.10f // 10% of screen height for top box
   val verticalPaddingScaleFactor = screenHeight * 0.02f
 
+  val strResToast = stringResource(R.string.report_already)
+
   // State for report inputs
   val selectedReason = rememberSaveable { mutableStateOf(ParkingReportReason.INEXISTANT) }
   val parkingId = parkingViewModel.selectedParking.value?.uid
@@ -72,8 +74,14 @@ fun ParkingReportScreen(
             userId = userId,
             parking = parkingId!!,
             description = reportDescription.value)
-    parkingViewModel.addReport(report, userViewModel.currentUser.value!!)
-    Toast.makeText(context, strRes, Toast.LENGTH_SHORT).show()
+
+    if (userViewModel.currentUser.value!!.details?.reportedParkings?.contains(parkingId) == true) {
+      Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
+    } else {
+      parkingViewModel.addReport(report, userViewModel.currentUser.value!!)
+      userViewModel.addReportedParkingToSelectedUser(parkingId)
+      Toast.makeText(context, strRes, Toast.LENGTH_SHORT).show()
+    }
     navigationActions.goBack()
   }
 

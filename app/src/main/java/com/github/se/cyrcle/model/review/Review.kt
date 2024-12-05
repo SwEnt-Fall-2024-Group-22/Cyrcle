@@ -10,6 +10,7 @@ data class Review(
     val rating: Double,
     val parking: String,
     val time: Timestamp = Timestamp.now(),
+    var reportingUsers: List<String>,
     var nbReports: Int = 0,
     var nbMaxSeverityReports: Int = 0,
     val likedBy: List<String> = emptyList(), // List of user ids

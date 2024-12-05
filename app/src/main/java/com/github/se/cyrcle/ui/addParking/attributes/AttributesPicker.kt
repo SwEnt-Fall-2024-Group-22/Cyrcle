@@ -136,7 +136,9 @@ fun AttributesPicker(
             location = location,
             images = listOf(),
             price = 0.0,
-            uid = parkingViewModel.getNewUid())
+            uid = parkingViewModel.getNewUid(),
+            owner = userViewModel.currentUser.value?.public?.userId!!,
+            reportingUsers = emptyList())
     parkingViewModel.addParking(parking)
 
     userViewModel.creditCoinsToCurrentUser(PARKING_CREATION_REWARD)

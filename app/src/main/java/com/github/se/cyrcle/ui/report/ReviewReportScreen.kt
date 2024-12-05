@@ -68,8 +68,8 @@ fun ReviewReportScreen(
   val reportDescription = rememberSaveable { mutableStateOf("") }
   val userId = userViewModel.currentUser.value?.public?.userId!!
   val context = LocalContext.current
-
-  val strResToast = stringResource(R.string.report_added)
+  val strResToast = stringResource(R.string.report_already)
+  val strResToast2 = stringResource(R.string.report_added)
   fun onSubmit() {
     val report =
         ReviewReport(
@@ -78,8 +78,14 @@ fun ReviewReportScreen(
             userId = userId,
             review = reviewId!!,
             description = reportDescription.value)
-    reviewViewModel.addReport(report, userViewModel.currentUser.value!!)
-    Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
+
+    if (userViewModel.currentUser.value!!.details?.reportedReviews?.contains(reviewId) == true) {
+      Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
+    } else {
+      reviewViewModel.addReport(report, userViewModel.currentUser.value!!)
+      userViewModel.addReportedReviewToSelectedUser(reviewId)
+      Toast.makeText(context, strResToast2, Toast.LENGTH_SHORT).show()
+    }
     navigationActions.goBack()
   }
 

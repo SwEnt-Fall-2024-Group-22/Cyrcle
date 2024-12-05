@@ -7,6 +7,7 @@ import com.github.se.cyrcle.model.parking.online.ParkingRepository
 import com.github.se.cyrcle.model.report.ReportedObject
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.report.ReportedObjectType
+import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.model.zone.Zone
 import com.mapbox.geojson.BoundingBox
 import com.mapbox.geojson.Point
@@ -20,6 +21,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.never
+import org.mockito.Mockito.times
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
@@ -322,6 +324,33 @@ class ParkingViewModelTest {
 
     parkingViewModel.selectAllFilterOptions()
     assertFull(protection = true, rackTypes = true, capacities = true)
+  }
+
+  @Test
+  fun addReportTest() {
+    val parking = TestInstancesParking.parking1.copy(reportingUsers = emptyList(), nbReports = 0)
+    val user = TestInstancesUser.user1
+    val report =
+        ParkingReport(
+            uid = "ReportUID",
+            parking = parking.uid,
+            reason = ParkingReportReason.INEXISTANT,
+            userId = user.public.userId)
+
+    `when`(parkingRepository.addReport(any(), any(), any())).then {
+      it.getArgument<(ParkingReport) -> Unit>(1).invoke(report) // Trigger onSuccess
+    }
+
+    `when`(reportedObjectRepository.checkIfObjectExists(eq(parking.uid), any(), any())).then {
+      it.getArgument<(String?) -> Unit>(1).invoke(null) // Trigger onSuccess with no existing object
+    }
+
+    parkingViewModel.selectParking(parking)
+    parkingViewModel.addReport(report, user)
+
+    // Verify report is added to the repository
+    verify(parkingRepository).addReport(eq(report), any(), any())
+    verify(parkingRepository).updateParking(any(), any(), any())
   }
 
   // Helper functions to assert the state of the filter options

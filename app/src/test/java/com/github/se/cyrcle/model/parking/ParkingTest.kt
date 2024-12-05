@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.model.parking
 
+import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.mapbox.geojson.Point
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -23,7 +24,9 @@ class ParkingsTest {
             rackType = ParkingRackType.U_RACK,
             protection = ParkingProtection.COVERED,
             price = 0.0,
-            hasSecurity = true)
+            hasSecurity = true,
+            owner = TestInstancesUser.user1.public.userId,
+            reportingUsers = emptyList())
 
     assertEquals("1", parking.uid)
     assertEquals("Parking", parking.optName)
@@ -50,7 +53,9 @@ class ParkingsTest {
             rackType = ParkingRackType.U_RACK,
             protection = ParkingProtection.COVERED,
             price = 0.0,
-            hasSecurity = true)
+            hasSecurity = true,
+            owner = TestInstancesUser.user1.public.userId,
+            reportingUsers = emptyList())
 
     val parking2 =
         Parking(
@@ -63,7 +68,9 @@ class ParkingsTest {
             rackType = ParkingRackType.U_RACK,
             protection = ParkingProtection.COVERED,
             price = 0.0,
-            hasSecurity = true)
+            hasSecurity = true,
+            owner = TestInstancesUser.user1.public.userId,
+            reportingUsers = emptyList())
 
     assertEquals(parking1, parking2)
     assertEquals(parking1.hashCode(), parking2.hashCode())
