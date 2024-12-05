@@ -92,6 +92,22 @@ class ReviewViewModel(
         { Log.e("ReviewViewModel", "Error getting reviews", it) })
   }
 
+  /**
+   * Fetches all reviews written by a specific user.
+   *
+   * This function retrieves reviews from the repository based on the owner's ID and updates the
+   * [_userReviews] state with the fetched reviews. If the operation fails, the error is logged but
+   * the state remains unchanged.
+   *
+   * @param ownerId The unique identifier of the user whose reviews are to be fetched
+   */
+  fun getReviewsByOwnerId(ownerId: String) {
+    reviewRepository.getReviewsByOwnerId(
+        ownerId,
+        { reviews -> _userReviews.value = reviews },
+        { Log.e("ReviewViewModel", "Error getting reviews for owner", it) })
+  }
+
   fun deleteReviewById(uid: String) {
     reviewRepository.deleteReviewById(
         uid, {}, { Log.e("ReviewViewModel", "Error deleting reviews", it) })

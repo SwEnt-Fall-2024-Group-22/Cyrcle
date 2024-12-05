@@ -38,4 +38,16 @@ object TestInstancesReview {
           parking = "Test_spot_2",
           time = Timestamp.now(),
           reportingUsers = emptyList())
+  val review5 =
+      Review(
+          uid = "5",
+          owner = "user1",
+          text =
+              "You know what's crazy is that that low taper fade like meme it is dude it is still massive like massive i see new ones that i've never seen before that have like millions of likes and views still that are popping up all over the place.",
+          rating = 5.0,
+          parking = "Test_spot_1",
+          likedBy = listOf("user1", "user2", "user3"),
+          dislikedBy = listOf(),
+          time = Timestamp.now(),
+          reportingUsers = emptyList())
 }

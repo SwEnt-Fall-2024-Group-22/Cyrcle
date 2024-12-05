@@ -15,12 +15,16 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeLeft
+import androidx.compose.ui.test.swipeUp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockOfflineParkingRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
+import com.github.se.cyrcle.di.mocks.MockReviewRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.model.parking.Parking
@@ -30,6 +34,8 @@ import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
+import com.github.se.cyrcle.model.review.ReviewViewModel
+import com.github.se.cyrcle.model.review.TestInstancesReview
 import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserDetails
@@ -58,9 +64,11 @@ class ViewProfileScreenTest {
   private lateinit var mockImageRepository: MockImageRepository
   private lateinit var mockAuthenticator: MockAuthenticationRepository
   private lateinit var mockReportedObjectRepository: ReportedObjectRepository
+  private lateinit var mockReviewRepository: MockReviewRepository
 
   private lateinit var userViewModel: UserViewModel
   private lateinit var parkingViewModel: ParkingViewModel
+  private lateinit var reviewViewModel: ReviewViewModel
 
   @Before
   fun setUp() {
@@ -71,6 +79,7 @@ class ViewProfileScreenTest {
     mockImageRepository = MockImageRepository()
     mockAuthenticator = MockAuthenticationRepository()
     mockReportedObjectRepository = MockReportedObjectRepository()
+    mockReviewRepository = MockReviewRepository()
 
     val user =
         User(
@@ -86,6 +95,7 @@ class ViewProfileScreenTest {
             mockParkingRepository,
             mockOfflineParkingRepository,
             mockReportedObjectRepository)
+    reviewViewModel = ReviewViewModel(mockReviewRepository, mockReportedObjectRepository)
 
     userViewModel.addUser(user, {}, {})
     mockAuthenticator.testUser = user
@@ -107,7 +117,8 @@ class ViewProfileScreenTest {
       ViewProfileScreen(
           navigationActions = mockNavigationActions,
           userViewModel = userViewModel,
-          parkingViewModel = parkingViewModel)
+          parkingViewModel = parkingViewModel,
+          reviewViewModel = reviewViewModel)
     }
   }
 
@@ -301,7 +312,6 @@ class ViewProfileScreenTest {
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithText("Remove").performClick()
     composeTestRule.waitForIdle()
-
     // Remove the second parking
     composeTestRule.onNodeWithTag("FavoriteToggle_0").performClick()
     composeTestRule.waitForIdle()
@@ -367,7 +377,7 @@ class ViewProfileScreenTest {
             0.0,
             true,
             owner = TestInstancesUser.user1.public.userId,
-            reportingUsers = emptyList())
+            emptyList())
 
     parkingViewModel.addParking(parking4)
     userViewModel.addFavoriteParkingToSelectedUser(parking4)
@@ -417,5 +427,62 @@ class ViewProfileScreenTest {
     composeTestRule.waitForIdle()
 
     verify(mockNavigationActions).navigateTo(Screen.PARKING_DETAILS)
+  }
+
+  @Test
+  fun whenNoReviews_showsEmptyMessage() {
+    composeTestRule.waitForIdle()
+
+    // Scroll to the reviews section using swipe
+    composeTestRule.onNodeWithTag("ProfileContentSections").performTouchInput { swipeUp() }
+
+    composeTestRule.onNodeWithTag("UserReviewsTitle").assertIsDisplayed()
+
+    composeTestRule
+        .onNodeWithTag("NoReviewsMessage")
+        .assertIsDisplayed()
+        .assertTextEquals("You haven't written any reviews yet")
+  }
+
+  @Test
+  fun whenUserHasReviews_showsReviewsList() {
+    // Add test parkings to mock repository
+    mockParkingRepository.addParking(TestInstancesParking.parking1, {}, {}) // For review5
+    mockParkingRepository.addParking(TestInstancesParking.parking2, {}, {}) // For review1
+
+    // Add user1's reviews from TestInstancesReview
+    mockReviewRepository.addReview(TestInstancesReview.review1, {}, {})
+    mockReviewRepository.addReview(TestInstancesReview.review5, {}, {})
+
+    // Trigger review fetch for user1
+    reviewViewModel.getReviewsByOwnerId("user1")
+
+    composeTestRule.waitForIdle()
+
+    repeat(3) {
+      composeTestRule.onNodeWithTag("ProfileContentSections").performTouchInput { swipeUp() }
+    }
+
+    // Verify first review content (review1)
+    composeTestRule.onNodeWithTag("ParkingName_1").assertTextEquals("Rude épais")
+    composeTestRule.onNodeWithTag("RatingText_1").assertTextEquals("You rated this parking: 5.0 ⭐")
+    composeTestRule.onNodeWithTag("YouSaidText_1").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("ReviewText_1").assertTextEquals("\"Great parking!\"")
+    composeTestRule.onNodeWithTag("LikesCount_1").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("DislikesCount_1").assertIsDisplayed()
+
+    // Scroll horizontally to see the second review
+    repeat(3) { composeTestRule.onNodeWithTag("UserReviewsList").performTouchInput { swipeLeft() } }
+
+    // Verify second review content (review5)
+    composeTestRule.onNodeWithTag("ParkingName_5").assertTextEquals("Rue de la paix")
+    composeTestRule.onNodeWithTag("RatingText_5").assertTextEquals("You rated this parking: 5.0 ⭐")
+    composeTestRule.onNodeWithTag("YouSaidText_5").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag("ReviewText_5")
+        .assertTextEquals(
+            "\"You know what's crazy is that that low taper fade like meme it is...\"")
+    composeTestRule.onNodeWithTag("LikesCount_5").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("DislikesCount_5").assertIsDisplayed()
   }
 }

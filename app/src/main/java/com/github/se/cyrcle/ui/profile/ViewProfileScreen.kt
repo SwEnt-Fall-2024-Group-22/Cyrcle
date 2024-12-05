@@ -5,14 +5,19 @@ import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Diamond
 import androidx.compose.material.icons.filled.Favorite
@@ -26,6 +31,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,10 +42,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.review.Review
+import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.LIST_TOP_LEVEL_DESTINATION
@@ -53,11 +62,15 @@ import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 
+/** Maximum length for the truncated text in review cards. */
+const val MAX_TRUNCATED_TEXT_LENGTH = 65
+
 @Composable
 fun ViewProfileScreen(
     navigationActions: NavigationActions,
     userViewModel: UserViewModel,
     parkingViewModel: ParkingViewModel,
+    reviewViewModel: ReviewViewModel
 ) {
 
   val context = LocalContext.current
@@ -163,15 +176,26 @@ fun ViewProfileScreen(
                 })
           } else {
             DisplayProfileComponent(userState) {
+              // Edit Button directly in the Box
               Button(
                   text = stringResource(R.string.view_profile_screen_modify_profile_button),
                   onClick = { isEditing = true },
                   colorLevel = ColorLevel.TERTIARY,
                   testTag = "EditButton")
 
-              Spacer(modifier = Modifier.height(24.dp))
+              // Scrollable Column instead of LazyColumn
+              Column(
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .verticalScroll(rememberScrollState())
+                          .padding(top = 56.dp) // Adjust based on button height
+                          .testTag("ProfileContentSections")) {
+                    FavoriteParkingsSection(userViewModel, parkingViewModel, navigationActions)
 
-              FavoriteParkingsSection(userViewModel, parkingViewModel, navigationActions)
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    UserReviewsSection(reviewViewModel, userViewModel, parkingViewModel)
+                  }
             }
           }
         }
@@ -191,7 +215,7 @@ private fun FavoriteParkingsSection(
       style = MaterialTheme.typography.titleLarge,
       modifier = Modifier.testTag("FavoriteParkingsTitle"))
 
-  Spacer(modifier = Modifier.height(16.dp))
+  Spacer(modifier = Modifier.height(12.dp))
 
   if (favoriteParkings.isEmpty()) {
     Text(
@@ -281,5 +305,157 @@ private fun FavoriteParkingCard(
             Text(stringResource(R.string.view_profile_screen_remove_favorite_dialog_cancel_button))
           }
         })
+  }
+}
+
+@Composable
+private fun UserReviewsSection(
+    reviewViewModel: ReviewViewModel,
+    userViewModel: UserViewModel,
+    parkingViewModel: ParkingViewModel
+) {
+  val userState = userViewModel.currentUser.collectAsState().value
+
+  if (userState != null) {
+    LaunchedEffect(userState.public.userId) {
+      reviewViewModel.getReviewsByOwnerId(userState.public.userId)
+    }
+  }
+  val userReviews = reviewViewModel.userReviews.collectAsState().value
+
+  Text(
+      text = stringResource(R.string.view_profile_screen_my_reviews_title),
+      style = MaterialTheme.typography.titleLarge,
+      modifier = Modifier.testTag("UserReviewsTitle"))
+
+  Spacer(modifier = Modifier.height(12.dp))
+
+  if (userReviews.isEmpty()) {
+    Text(
+        text = stringResource(R.string.view_profile_screen_no_reviews_message),
+        style = MaterialTheme.typography.bodyMedium,
+        modifier = Modifier.testTag("NoReviewsMessage"))
+  } else {
+    LazyRow(
+        modifier = Modifier.fillMaxWidth().testTag("UserReviewsList"),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+          itemsIndexed(userReviews) { _, review ->
+            review?.let { ReviewCard(review = it, parkingViewModel = parkingViewModel) }
+          }
+        }
+  }
+}
+
+/**
+ * A composable that displays a card containing the user's review information.
+ *
+ * @param review The review to display
+ * @param parkingViewModel The view model used to fetch the parking's name
+ */
+@Composable
+private fun ReviewCard(review: Review, parkingViewModel: ParkingViewModel) {
+  val defaultParkingName = stringResource(R.string.default_parking_name)
+  var parkingName by remember { mutableStateOf(defaultParkingName) }
+
+  // Fetch parking name when the card is created
+  LaunchedEffect(review.parking) {
+    parkingViewModel.getParkingById(
+        review.parking,
+        onSuccess = { parking -> parkingName = parking.optName ?: defaultParkingName },
+        onFailure = {})
+  }
+
+  Card(
+      modifier = Modifier.padding(8.dp).width(260.dp).height(200.dp),
+      shape = MaterialTheme.shapes.medium) {
+        Column(
+            modifier = Modifier.padding(16.dp).fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween) {
+              // Display parking name with unique test tag
+              Text(
+                  text = parkingName,
+                  style = MaterialTheme.typography.titleMedium,
+                  modifier = Modifier.fillMaxWidth().testTag("ParkingName_${review.uid}"))
+
+              Spacer(modifier = Modifier.height(8.dp))
+
+              // Display rating with unique test tag
+              Text(
+                  text =
+                      stringResource(
+                          R.string.view_profile_screen_you_rated_parking, review.rating.toString()),
+                  style = MaterialTheme.typography.bodyMedium,
+                  color = MaterialTheme.colorScheme.primary,
+                  modifier = Modifier.testTag("RatingText_${review.uid}"))
+
+              Spacer(modifier = Modifier.height(8.dp))
+
+              // Display review text section
+              Text(
+                  text = stringResource(R.string.view_profile_screen_you_said),
+                  style = MaterialTheme.typography.bodyMedium,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  modifier = Modifier.testTag("YouSaidText_${review.uid}"))
+
+              androidx.compose.material3.Text(
+                  text = "\"${truncateText(review.text)}\"",
+                  style = MaterialTheme.typography.bodyMedium,
+                  maxLines = 2,
+                  softWrap = false,
+                  overflow = TextOverflow.Ellipsis,
+                  modifier = Modifier.fillMaxWidth().testTag("ReviewText_${review.uid}"))
+
+              Spacer(modifier = Modifier.height(8.dp))
+
+              // Display likes and dislikes counts
+              Row(
+                  modifier = Modifier.fillMaxWidth(),
+                  horizontalArrangement = Arrangement.End,
+                  verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically) {
+                          // Likes count
+                          Row(
+                              horizontalArrangement = Arrangement.spacedBy(4.dp),
+                              verticalAlignment = Alignment.CenterVertically,
+                              modifier = Modifier.testTag("LikesCount_${review.uid}")) {
+                                Text(
+                                    text =
+                                        stringResource(
+                                            R.string.view_profile_screen_likes_count,
+                                            review.likedBy.size),
+                                    style = MaterialTheme.typography.bodyMedium)
+                              }
+                          // Dislikes count
+                          Row(
+                              horizontalArrangement = Arrangement.spacedBy(4.dp),
+                              verticalAlignment = Alignment.CenterVertically,
+                              modifier = Modifier.testTag("DislikesCount_${review.uid}")) {
+                                Text(
+                                    text =
+                                        stringResource(
+                                            R.string.view_profile_screen_dislikes_count,
+                                            review.dislikedBy.size),
+                                    style = MaterialTheme.typography.bodyMedium)
+                              }
+                        }
+                  }
+            }
+      }
+}
+
+/**
+ * Truncates the given text if it exceeds the maximum length.
+ *
+ * @param text The text to truncate
+ * @return The truncated text with "..." appended if it exceeds [MAX_TRUNCATED_TEXT_LENGTH],
+ *   otherwise returns the original text
+ */
+private fun truncateText(text: String): String {
+  return if (text.length > MAX_TRUNCATED_TEXT_LENGTH) {
+    text.take(MAX_TRUNCATED_TEXT_LENGTH) + "..."
+  } else {
+    text
   }
 }
