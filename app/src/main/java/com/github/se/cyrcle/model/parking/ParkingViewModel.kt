@@ -82,8 +82,8 @@ class ParkingViewModel(
   val selectedParking: StateFlow<Parking?> = _selectedParking
 
     /** Selected parking to review/edit */
-    private val _selectedParkingImage = MutableStateFlow<ParkingImage?>(null)
-    val selectedParkingImage: StateFlow<ParkingImage?> = _selectedParkingImage
+    private val _selectedParkingImageIndex = MutableStateFlow<Int?>(null)
+    val selectedParkingImageIndex: StateFlow<Int?> = _selectedParkingImageIndex
 
 
     /** Selected parking to review/edit */
@@ -416,10 +416,17 @@ class ParkingViewModel(
      * @param imgId The ID of the image to remove.
      * @return A new Parking object with the image removed from the images list.
      */
+
+    fun getIndexOfImage(imageID: String){
+        if (selectedParking.value != null) {
+            _selectedParkingImageIndex.value = _selectedParking.value?.images?.indexOfFirst { it.uid == imageID }
+        }
+    }
+
     fun deleteImageFromParking(parking: Parking, imgId: String): Parking {
-        // Filter out the image with the specified ID
-        val updatedImages = parking.images.filterNot { it.endsWith("/$imgId") }
+        val updatedImages = parking.images.filterNot { it.uid == imgId }
         return parking.copy(images = updatedImages)
+        parking.images
     }
 
   /**
@@ -541,6 +548,132 @@ class ParkingViewModel(
     Log.d("ParkingViewModel", "Parking and metrics updated: $selectedParking")
   }
 
+
+/**
+ * Adds a report for the currently selected parking image.
+ *
+ * This function first verifies that a parking image is selected. If no image is selected, it logs
+ * an error and returns. It then creates an `ImageReport` and stores it in the appropriate repository.
+ * Additionally, this function ensures that the user cannot report the same image multiple times.
+ *
+ * @param report The report to be added, which includes details such as the reason and user ID.
+ * @param user The user submitting the report, required for identifying the reporter.
+ */
+    /**
+     * Adds a report for the currently selected parking image and updates the repository.
+     *
+     * This function first verifies that a parking image is selected. If no image is selected, it logs an
+     * error and returns. It then attempts to add the report to the parking repository. Upon successful
+     * addition, the report is evaluated against severity and threshold limits to determine if a
+     * `ReportedObject` should be created and added to the reported objects repository.
+     *
+     * Updates the parking image's report count and severity metrics and ensures these changes are
+     * reflected in the repository.
+     *
+     * @param report The report to be added, which includes details such as the reason and user ID.
+     * @param user The user submitting the report, required for identifying the reporter.
+     */
+    fun addImageReport(report: ImageReport, user: User) {
+        if (selectedParking.value != null && selectedParkingImageIndex.value != null) {
+            val selectedImage = _selectedParking.value?.images!![_selectedParkingImageIndex.value!!]
+            if (selectedImage == null) {
+                Log.e("ParkingViewModel", "No parking image selected")
+                return
+            }
+            parkingRepository.addImageReport(
+                report,
+                onSuccess = {
+                    val newReportedObject = ReportedObject(
+                        objectUID = selectedImage.uid,
+                        reportUID = report.uid,
+                        nbOfTimesReported = selectedImage.nbReports + 1,
+                        nbOfTimesMaxSeverityReported = if (report.reason.severity == MAX_SEVERITY) {
+                            selectedImage.nbMaxSeverityReports + 1
+                        } else {
+                            selectedImage.nbMaxSeverityReports
+                        },
+                        userUID = user.public.userId,
+                        objectType = ReportedObjectType.IMAGE
+                    )
+
+                    reportedObjectRepository.checkIfObjectExists(
+                        objectUID = selectedImage.uid,
+                        onSuccess = { documentId ->
+                            if (documentId != null) {
+                                // Object already exists, update it
+                                reportedObjectRepository.updateReportedObject(
+                                    documentId = documentId,
+                                    updatedObject = newReportedObject,
+                                    onSuccess = { updateLocalImageAndMetrics(report) },
+                                    onFailure = {
+                                        Log.e(
+                                            "ParkingViewModel",
+                                            "Error updating ReportedObject"
+                                        )
+                                    }
+                                )
+                            } else {
+                                // Object doesn't exist, check thresholds to decide whether to add it
+                                val shouldAdd = (report.reason.severity == MAX_SEVERITY &&
+                                        selectedImage.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERITY_THRESH) ||
+                                        (selectedImage.nbReports >= NB_REPORTS_THRESH)
+
+                                if (shouldAdd) {
+                                    reportedObjectRepository.addReportedObject(
+                                        reportedObject = newReportedObject,
+                                        onSuccess = { updateLocalImageAndMetrics(report) },
+                                        onFailure = {
+                                            Log.e(
+                                                "ParkingViewModel",
+                                                "Error adding ReportedObject"
+                                            )
+                                        }
+                                    )
+                                } else {
+                                    Log.d(
+                                        "ParkingViewModel",
+                                        "Thresholds not met, no addition needed"
+                                    )
+                                    updateLocalImageAndMetrics(report)
+                                }
+                            }
+                        },
+                        onFailure = {
+                            Log.e("ParkingViewModel", "Error checking if ReportedObject exists")
+                            updateLocalImageAndMetrics(report)
+                        }
+                    )
+                },
+                onFailure = {
+                    Log.e("ParkingViewModel", "Error adding image report")
+                    updateLocalImageAndMetrics(report)
+                }
+            )
+        }
+    }
+
+    /**
+     * Updates the selected parking image and its metrics after adding a report.
+     *
+     * @param report The report that was added.
+     */
+    private fun updateLocalImageAndMetrics(report: ImageReport) {
+        if(_selectedParking.value != null && _selectedParking.value?.images?.size!! > 0 && _selectedParkingImageIndex.value != null) {
+            if (_selectedParkingImageIndex.value!! < _selectedParking.value?.images?.size!!) {
+                val selectedImage = _selectedParking.value?.images!![_selectedParkingImageIndex.value!!]
+                if (report.reason.severity == MAX_SEVERITY) {
+                    selectedImage.nbMaxSeverityReports += 1
+                }
+                selectedImage.nbReports += 1
+
+                parkingRepository.updateParking(selectedImage, {}, {})
+                Log.d("ParkingViewModel", "Parking image and metrics updated: $selectedImage")
+            }
+        }
+    }
+
+
+
   // ================== Reviews ==================
   /**
    * Handles the deletion of a review for a given parking. Adjusts the average score and the number
@@ -637,7 +770,7 @@ class ParkingViewModel(
     _selectedParking.value!!.images.forEach { imagePath ->
       // get the URL of each image and add it to the list of URLs state that is observed by the UI.
       imageRepository.getUrl(
-          path = imagePath,
+          path = imagePath.url,
           onSuccess = { url ->
             _selectedParkingImagesUrls.value = _selectedParkingImagesUrls.value.plus(url)
           },
@@ -654,27 +787,41 @@ class ParkingViewModel(
    * @param onSuccess a callback function to execute when the image is uploaded successfully
    */
   fun uploadImage(imageUri: String, context: Context, onSuccess: () -> Unit = {}) {
-    if (_selectedParking.value == null) {
-      Log.e("ParkingViewModel", "No parking selected while trying to upload image")
-      return
-    }
-    val selectedParking = _selectedParking.value!!
-    val destinationPath = "parking/${selectedParking.uid}/${selectedParking.images.size}"
-    imageRepository.uploadImage(
-        context = context,
-        fileUri = imageUri,
-        destinationPath = destinationPath,
-        onSuccess = {
-          val updatedParking =
-              selectedParking.copy(images = selectedParking.images.plus(destinationPath))
-          selectParking(updatedParking)
-          parkingRepository.updateParking(
-              updatedParking,
-              { onSuccess() },
-              { Log.e("ParkingViewModel", "Error adding image path to parking firestore $it") })
-        },
-        onFailure = { Log.e("ParkingViewModel", "Error uploading image") },
-    )
+      if (_selectedParking.value == null) {
+          Log.e("ParkingViewModel", "No parking selected while trying to upload image")
+          return
+      }
+
+      val selectedParking = _selectedParking.value!!
+      val newImageId = "${selectedParking.uid}_${selectedParking.images.size}"
+      val destinationPath = "parking/${selectedParking.uid}/$newImageId"
+
+      imageRepository.uploadImage(
+          context = context,
+          fileUri = imageUri,
+          destinationPath = destinationPath,
+          onSuccess = { url ->
+              // Create a new ParkingImage object
+              val newImage = ParkingImage(
+                  uid = newImageId,
+                  userId = selectedParking.owner,
+                  parking = selectedParking.uid,
+                  url = url
+              )
+
+              // Add the new image to the parking's images list
+              val updatedParking = selectedParking.copy(images = selectedParking.images.plus(newImage))
+              selectParking(updatedParking)
+              parkingRepository.updateParking(
+                  updatedParking,
+                  { onSuccess() },
+                  { Log.e("ParkingViewModel", "Error adding image path to parking firestore $it") }
+              )
+          },
+          onFailure = {
+              Log.e("ParkingViewModel", "Error uploading image")
+          },
+      )
   }
 
   // ================== Images ==================
