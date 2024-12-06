@@ -14,10 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Diamond
 import androidx.compose.material.icons.filled.Favorite
@@ -29,11 +27,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -183,21 +184,45 @@ fun ViewProfileScreen(
                   colorLevel = ColorLevel.TERTIARY,
                   testTag = "EditButton")
 
-              // Scrollable Column instead of LazyColumn
-              Column(
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .verticalScroll(rememberScrollState())
-                          .padding(top = 56.dp) // Adjust based on button height
-                          .testTag("ProfileContentSections")) {
-                    FavoriteParkingsSection(userViewModel, parkingViewModel, navigationActions)
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    UserReviewsSection(reviewViewModel, userViewModel, parkingViewModel)
-                  }
+              // Display the TabLayout
+              TabLayout(
+                  userViewModel = userViewModel,
+                  parkingViewModel = parkingViewModel,
+                  reviewViewModel = reviewViewModel,
+                  navigationActions = navigationActions)
             }
           }
+        }
+      }
+}
+
+/** Tab layout that displays different sections based on the selected tab. */
+@Composable
+private fun TabLayout(
+    userViewModel: UserViewModel,
+    parkingViewModel: ParkingViewModel,
+    reviewViewModel: ReviewViewModel,
+    navigationActions: NavigationActions
+) {
+  var selectedTabIndex by remember { mutableIntStateOf(0) }
+  val tabs = listOf("Favorite Parkings", "My Reviews")
+
+  Column(
+      modifier = Modifier.fillMaxWidth().padding(top = 56.dp) // Adjust based on button height
+      ) {
+        TabRow(selectedTabIndex = selectedTabIndex, modifier = Modifier.testTag("TabRow")) {
+          tabs.forEachIndexed { index, title ->
+            Tab(
+                text = { Text(title) },
+                selected = selectedTabIndex == index,
+                onClick = { selectedTabIndex = index },
+                modifier = Modifier.testTag("Tab${title.replace(" ", "")}"))
+          }
+        }
+
+        when (selectedTabIndex) {
+          0 -> FavoriteParkingsSection(userViewModel, parkingViewModel, navigationActions)
+          1 -> UserReviewsSection(reviewViewModel, userViewModel, parkingViewModel)
         }
       }
 }
@@ -210,22 +235,15 @@ private fun FavoriteParkingsSection(
 ) {
   val favoriteParkings = userViewModel.favoriteParkings.collectAsState().value
 
-  Text(
-      text = stringResource(R.string.view_profile_screen_favorite_parking_title),
-      style = MaterialTheme.typography.titleLarge,
-      modifier = Modifier.testTag("FavoriteParkingsTitle"))
-
-  Spacer(modifier = Modifier.height(12.dp))
-
   if (favoriteParkings.isEmpty()) {
     Text(
         text = stringResource(R.string.view_profile_screen_no_favorite_parking),
         style = MaterialTheme.typography.bodyMedium,
         modifier = Modifier.testTag("NoFavoritesMessage"))
   } else {
-    LazyRow(
+    LazyColumn(
         modifier = Modifier.fillMaxWidth().testTag("FavoriteParkingList"),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        verticalArrangement = Arrangement.spacedBy(8.dp)) {
           itemsIndexed(favoriteParkings) { index, parking ->
             FavoriteParkingCard(
                 parking = parking,
@@ -323,22 +341,15 @@ private fun UserReviewsSection(
   }
   val userReviews = reviewViewModel.userReviews.collectAsState().value
 
-  Text(
-      text = stringResource(R.string.view_profile_screen_my_reviews_title),
-      style = MaterialTheme.typography.titleLarge,
-      modifier = Modifier.testTag("UserReviewsTitle"))
-
-  Spacer(modifier = Modifier.height(12.dp))
-
   if (userReviews.isEmpty()) {
     Text(
         text = stringResource(R.string.view_profile_screen_no_reviews_message),
         style = MaterialTheme.typography.bodyMedium,
         modifier = Modifier.testTag("NoReviewsMessage"))
   } else {
-    LazyRow(
+    LazyColumn(
         modifier = Modifier.fillMaxWidth().testTag("UserReviewsList"),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        verticalArrangement = Arrangement.spacedBy(8.dp)) {
           itemsIndexed(userReviews) { _, review ->
             review?.let { ReviewCard(review = it, parkingViewModel = parkingViewModel) }
           }
@@ -366,7 +377,8 @@ private fun ReviewCard(review: Review, parkingViewModel: ParkingViewModel) {
   }
 
   Card(
-      modifier = Modifier.padding(8.dp).width(260.dp).height(200.dp),
+      modifier =
+          Modifier.padding(8.dp).width(260.dp).height(200.dp).testTag("ReviewCard_${review.uid}"),
       shape = MaterialTheme.shapes.medium) {
         Column(
             modifier = Modifier.padding(16.dp).fillMaxSize(),
