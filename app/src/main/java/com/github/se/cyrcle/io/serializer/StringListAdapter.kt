@@ -19,8 +19,8 @@ class StringListAdapter {
    * @return The serialized Json object.
    */
   @TypeConverter
-  fun serializeStringList(strList: List<String>): String {
-    return gson.toJson(strList)
+  fun serializeStringList(strList: List<String>?): String {
+    return if (strList == null) "" else gson.toJson(strList)
   }
 
   /**
@@ -31,6 +31,6 @@ class StringListAdapter {
    */
   @TypeConverter
   fun deserializeStringList(data: String): List<String> {
-    return gson.fromJson(data, stringListType)
+    return if (data.isBlank()) emptyList() else gson.fromJson(data, stringListType)
   }
 }

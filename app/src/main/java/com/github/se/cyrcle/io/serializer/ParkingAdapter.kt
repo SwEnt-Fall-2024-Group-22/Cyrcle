@@ -123,15 +123,13 @@ class ParkingAdapter : JsonSerializer<Parking>, JsonDeserializer<Parking> {
    */
   fun deserializeParking(map: Map<String, Any>): Parking {
     val json = gson.toJson(map)
-    val tempParking = gson.fromJson(json, Parking::class.java)
-    // Older versions of parking don't have the tile field
-    return if (tempParking.tile == null)
-        tempParking.copy(
-            tile = TileUtils.getTileFromPoint(tempParking.location.center),
-            uid = tempParking.uid ?: "", // Default to empty string if null
-            owner = tempParking.owner ?: "Unknown Owner", // Replace with your default owner value
-            reportingUsers = tempParking.reportingUsers ?: emptyList()) // Default to empty list)
-    else tempParking
+    val parking = gson.fromJson(json, Parking::class.java)
+
+    // FIXME: update the default values if the Firestore parking object is missing some fields
+    return parking.copy(
+        tile = parking.tile ?: TileUtils.getTileFromPoint(parking.location.center),
+        owner = parking.owner ?: "Unknown Owner", // Replace with your default owner value
+        reportingUsers = parking.reportingUsers ?: emptyList()) // Default to empty list
   }
 
   /**
