@@ -46,6 +46,7 @@ fun InviteToAuthScreen(navigationActions: NavigationActions) {
 
         Button(
             text = stringResource(R.string.invite_auth_screen_to_sign_in),
+            testTag = "GoBackToSignInButton",
             onClick = {
               // navigate to the route to not clear backstack
               navigationActions.navigateTo(Route.AUTH)
