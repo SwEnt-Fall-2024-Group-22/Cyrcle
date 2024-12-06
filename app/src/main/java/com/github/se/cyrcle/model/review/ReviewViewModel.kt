@@ -81,6 +81,7 @@ class ReviewViewModel(
         {
           _parkingReviews.value =
               _parkingReviews.value.map { if (it.uid == review.uid) review else it }
+          _userReviews.value = _userReviews.value.map { if (it.uid == review.uid) review else it }
         },
         { Log.e("ReviewViewModel", "Error adding review", it) })
   }

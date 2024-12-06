@@ -349,14 +349,16 @@ private fun UserReviewsSection(
           items(items = userReviews, key = { it.uid }) { curReview ->
             val index = userReviews.indexOf(curReview)
             val isExpanded = true
+
+            // We need to get the parking associated with the review to allow clicking on the card
             var parking by remember { mutableStateOf<Parking?>(null) }
             parkingViewModel.getParkingById(curReview.parking, { parking = it }, {})
 
+            // We only display the review if the parking exists in the database
             parking?.let {
-              val defaultUsername = stringResource(R.string.undefined_username)
               ReviewCard(
                   review = curReview,
-                  ownerUsername = userState?.public?.username ?: defaultUsername,
+                  title = it.optName ?: "",
                   index = index,
                   isExpanded = isExpanded,
                   onCardClick = {

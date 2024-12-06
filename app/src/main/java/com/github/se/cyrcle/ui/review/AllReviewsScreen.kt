@@ -226,7 +226,7 @@ fun AllReviewsScreen(
                         userReview?.let {
                           ReviewCard(
                               review = it,
-                              ownerUsername = currentUser?.public?.username ?: defaultUsername,
+                              title = currentUser?.public?.username ?: defaultUsername,
                               index = -1,
                               isExpanded = true,
                               onCardClick = {},
@@ -294,7 +294,7 @@ fun AllReviewsScreen(
 
                       ReviewCard(
                           review = curReview,
-                          ownerUsername = "",
+                          title = ownerUsername,
                           index = index,
                           isExpanded = isExpanded,
                           onCardClick = { selectedCardIndex = if (isExpanded) -1 else index },
@@ -322,7 +322,7 @@ fun AllReviewsScreen(
 @Composable
 fun ReviewCard(
     review: Review,
-    ownerUsername: String,
+    title: String,
     index: Int,
     isExpanded: Boolean,
     onCardClick: () -> Unit,
@@ -353,9 +353,9 @@ fun ReviewCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically) {
                       androidx.compose.material3.Text(
-                          text = stringResource(R.string.by_text).format(ownerUsername),
+                          text = title,
                           style = MaterialTheme.typography.bodySmall,
-                          modifier = Modifier.weight(1f).testTag("ReviewOwner$index"),
+                          modifier = Modifier.weight(1f).testTag("ReviewTitle$index"),
                           maxLines = 1,
                           overflow = TextOverflow.Ellipsis)
 
