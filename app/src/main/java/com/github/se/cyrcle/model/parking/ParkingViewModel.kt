@@ -41,10 +41,12 @@ const val PARKING_MAX_SIDE_LENGTH = 50.0
  */
 class ParkingViewModel(
     private val imageRepository: ImageRepository,
-    private val parkingRepository: ParkingRepository,
+    private val onlineParkingRepository: ParkingRepository,
     private val offlineParkingRepository: OfflineParkingRepository,
     private val reportedObjectRepository: ReportedObjectRepository,
 ) : ViewModel() {
+
+  private var parkingRepository = onlineParkingRepository
 
   // ================== Parkings ==================
   /** List of parkings within the designated area */
@@ -707,5 +709,16 @@ class ParkingViewModel(
     offlineParkingRepository.deleteTiles(tilesToDelete - tilesToKeep) {
       Log.d("ParkingViewModel", "Tiles deleted successfully")
     }
+  }
+
+
+  fun switchToOfflineMode() {
+      tilesToParking.clear()
+      parkingRepository = offlineParkingRepository
+  }
+
+  fun switchToOnlineMode() {
+      tilesToParking.clear()
+      parkingRepository = onlineParkingRepository
   }
 }
