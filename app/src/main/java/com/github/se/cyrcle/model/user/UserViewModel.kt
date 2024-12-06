@@ -217,7 +217,7 @@ class UserViewModel(
 
   fun addReportedImageToSelectedUser(image: String) {
     currentUser.value?.let { user ->
-      val updatedDetails = user.details?.copy(reportedReviews = user.details.reportedImages + image)
+      val updatedDetails = user.details?.copy(reportedImages = user.details.reportedImages + image)
       val updatedUser = user.copy(details = updatedDetails)
       updateUser(updatedUser) { _reportedParkings.value += image }
     }

@@ -63,7 +63,7 @@ fun ParkingDetailsAlertDialogShowImage(
                   onClick = onDismiss,
                   inverted = true)
               FloatingActionButton(
-                  onClick = { navigationActions.navigateTo(Screen.PARKING_REPORT) },
+                  onClick = { navigationActions.navigateTo(Screen.IMAGE_REPORT) },
                   modifier = Modifier.padding(8.dp),
                   content = { Text("REPORT IMAGE") })
             }
