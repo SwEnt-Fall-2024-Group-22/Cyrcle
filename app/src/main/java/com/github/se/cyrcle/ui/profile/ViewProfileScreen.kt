@@ -34,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -198,7 +199,7 @@ private fun TabLayout(
     reviewViewModel: ReviewViewModel,
     navigationActions: NavigationActions
 ) {
-  var selectedTabIndex by remember { mutableIntStateOf(0) }
+  var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
   val tabs = listOf("Favorite Parkings", "My Reviews")
 
   Column(
@@ -348,14 +349,22 @@ private fun UserReviewsSection(
           items(items = userReviews, key = { it.uid }) { curReview ->
             val index = userReviews.indexOf(curReview)
             val isExpanded = true
-            ReviewCard(
-                review = curReview,
-                index = index,
-                isExpanded = isExpanded,
-                onCardClick = {},
-                options = mapOf(),
-                userViewModel = userViewModel,
-                reviewViewModel = reviewViewModel)
+            var parking by remember { mutableStateOf<Parking?>(null) }
+            parkingViewModel.getParkingById(curReview.parking, { parking = it }, {})
+
+            parking?.let {
+              ReviewCard(
+                  review = curReview,
+                  index = index,
+                  isExpanded = isExpanded,
+                  onCardClick = {
+                    parkingViewModel.selectParking(it)
+                    navigationActions.navigateTo(Screen.PARKING_DETAILS)
+                  },
+                  options = mapOf(),
+                  userViewModel = userViewModel,
+                  reviewViewModel = reviewViewModel)
+            }
           }
         }
   }

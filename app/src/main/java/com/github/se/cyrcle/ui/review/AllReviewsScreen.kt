@@ -422,7 +422,9 @@ fun ReviewCard(
                                   testTag = "DislikeCount$index")
                             }
 
-                            OptionsMenu(options = options, testTag = "MoreOptions$index")
+                            // More options button
+                            if (options.isNotEmpty())
+                                OptionsMenu(options = options, testTag = "MoreOptions$index")
                           }
                     }
 
