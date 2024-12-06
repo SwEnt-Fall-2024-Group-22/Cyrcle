@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.model.parking.offline
 
+import com.github.se.cyrcle.model.parking.ImageReport
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingReport
 import com.github.se.cyrcle.model.parking.Tile
@@ -99,6 +100,14 @@ class OfflineParkingRepositoryRoom @Inject constructor(parkingDatabase: ParkingD
   override fun addReport(
       report: ParkingReport,
       onSuccess: (ParkingReport) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    onFailure(UnSupportedOperationException("Add report called on offline repository"))
+  }
+
+  override fun addImageReport(
+      report: ImageReport,
+      onSuccess: (ImageReport) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
     onFailure(UnSupportedOperationException("Add report called on offline repository"))

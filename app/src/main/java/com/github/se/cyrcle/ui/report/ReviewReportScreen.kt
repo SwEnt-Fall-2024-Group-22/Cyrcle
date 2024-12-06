@@ -44,92 +44,92 @@ fun ReviewReportScreen(
     userViewModel: UserViewModel,
     reviewViewModel: ReviewViewModel,
 ) {
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp
-    val screenHeight = configuration.screenHeightDp.dp
-    val horizontalPadding = screenWidth * 0.03f
-    val topBoxHeight = screenHeight * 0.10f
-    val verticalPadding = screenHeight * 0.02f
+  val configuration = LocalConfiguration.current
+  val screenWidth = configuration.screenWidthDp.dp
+  val screenHeight = configuration.screenHeightDp.dp
+  val horizontalPadding = screenWidth * 0.03f
+  val topBoxHeight = screenHeight * 0.10f
+  val verticalPadding = screenHeight * 0.02f
 
-    // State for dialog and inputs
-    val showDialog = remember { mutableStateOf(false) }
-    val selectedReason = rememberSaveable { mutableStateOf(ReviewReportReason.IRRELEVANT) }
-    val reviewId = reviewViewModel.selectedReview.value?.uid
-    val reportDescription = rememberSaveable { mutableStateOf("") }
-    val userId = userViewModel.currentUser.value?.public?.userId!!
-    val context = LocalContext.current
+  // State for dialog and inputs
+  val showDialog = remember { mutableStateOf(false) }
+  val selectedReason = rememberSaveable { mutableStateOf(ReviewReportReason.IRRELEVANT) }
+  val reviewId = reviewViewModel.selectedReview.value?.uid
+  val reportDescription = rememberSaveable { mutableStateOf("") }
+  val userId = userViewModel.currentUser.value?.public?.userId!!
+  val context = LocalContext.current
 
-    // Toast messages
-    val strResToast = stringResource(R.string.report_already)
-    val strResToast2 = stringResource(R.string.report_added)
+  // Toast messages
+  val strResToast = stringResource(R.string.report_already)
+  val strResToast2 = stringResource(R.string.report_added)
 
-    fun onSubmit() {
-        val report =
-            ReviewReport(
-                uid = reviewViewModel.getNewUid(),
-                reason = selectedReason.value,
-                userId = userId,
-                review = reviewId!!,
-                description = reportDescription.value)
-        reviewViewModel.addReport(report, userViewModel.currentUser.value!!)
-        if (reviewViewModel.hasAlreadyReported.value) {
-            Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(context, strResToast2, Toast.LENGTH_SHORT).show()
-        }
-        navigationActions.goBack()
+  fun onSubmit() {
+    val report =
+        ReviewReport(
+            uid = reviewViewModel.getNewUid(),
+            reason = selectedReason.value,
+            userId = userId,
+            review = reviewId!!,
+            description = reportDescription.value)
+    reviewViewModel.addReport(report, userViewModel.currentUser.value!!)
+    if (reviewViewModel.hasAlreadyReported.value) {
+      Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
+    } else {
+      Toast.makeText(context, strResToast2, Toast.LENGTH_SHORT).show()
     }
+    navigationActions.goBack()
+  }
 
-    Scaffold(
-        modifier = Modifier.testTag("ReviewReportScreen"),
-        topBar = {
-            ReportTopAppBar(
-                navigationActions,
-                title =
+  Scaffold(
+      modifier = Modifier.testTag("ReviewReportScreen"),
+      topBar = {
+        ReportTopAppBar(
+            navigationActions,
+            title =
                 stringResource(R.string.report_a_review)
                     .format(reviewViewModel.selectedReview.value?.text?.take(30) ?: reviewId))
-        }) { padding ->
+      }) { padding ->
         val scaledPaddingValues =
             PaddingValues(horizontal = horizontalPadding, vertical = verticalPadding)
 
         Column(
             modifier =
-            Modifier.fillMaxSize()
-                .padding(scaledPaddingValues)
-                .verticalScroll(rememberScrollState())
-                .testTag("ReviewReportColumn"),
+                Modifier.fillMaxSize()
+                    .padding(scaledPaddingValues)
+                    .verticalScroll(rememberScrollState())
+                    .testTag("ReviewReportColumn"),
             horizontalAlignment = Alignment.Start) {
-            Box(
-                modifier =
-                Modifier.fillMaxWidth()
-                    .height(topBoxHeight)
-                    .background(MaterialTheme.colorScheme.background))
+              Box(
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .height(topBoxHeight)
+                          .background(MaterialTheme.colorScheme.background))
 
-            // Text Block Section
-            ReportTextBlock(
-                title = stringResource(R.string.report_title),
-                bulletPoints =
-                listOf(
-                    stringResource(R.string.report_bullet_point_1),
-                    stringResource(R.string.report_bullet_point_2_review),
-                    stringResource(R.string.report_bullet_point_3)),
-                modifier = Modifier.testTag("ReportBulletPoints"))
+              // Text Block Section
+              ReportTextBlock(
+                  title = stringResource(R.string.report_title),
+                  bulletPoints =
+                      listOf(
+                          stringResource(R.string.report_bullet_point_1),
+                          stringResource(R.string.report_bullet_point_2_review),
+                          stringResource(R.string.report_bullet_point_3)),
+                  modifier = Modifier.testTag("ReportBulletPoints"))
 
-            // Select Reason
-            // Select Reason
-            ReportInputs(
-                selectedReasonIfParking = null,
-                selectedReasonIfReview = selectedReason,
-                selectedReasonIfImage = null,
-                reportedObjectType = ReportedObjectType.REVIEW,
-                reportDescription = reportDescription,
-                horizontalPadding = horizontalPadding)
+              // Select Reason
+              // Select Reason
+              ReportInputs(
+                  selectedReasonIfParking = null,
+                  selectedReasonIfReview = selectedReason,
+                  selectedReasonIfImage = null,
+                  reportedObjectType = ReportedObjectType.REVIEW,
+                  reportDescription = reportDescription,
+                  horizontalPadding = horizontalPadding)
 
-            val validInputs = areInputsValid(reportDescription.value)
+              val validInputs = areInputsValid(reportDescription.value)
 
-            // Submit Button with Dialog
-            SubmitButtonWithDialog(
-                showDialog = showDialog, validInputs = validInputs, onSubmit = { onSubmit() })
-        }
-    }
+              // Submit Button with Dialog
+              SubmitButtonWithDialog(
+                  showDialog = showDialog, validInputs = validInputs, onSubmit = { onSubmit() })
+            }
+      }
 }

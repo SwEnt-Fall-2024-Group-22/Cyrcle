@@ -131,11 +131,11 @@ fun ReportCard(report: Report) {
                 report.reviewReport.reason.description,
                 report.reviewReport.userId,
                 report.reviewReport.description)
-          is Report.Image ->
-              Triple(
-                  report.imageReport.reason.description,
-                  report.imageReport.userId,
-                  report.imageReport.description)
+        is Report.Image ->
+            Triple(
+                report.imageReport.reason.description,
+                report.imageReport.userId,
+                report.imageReport.description)
       }
 
   Card(
