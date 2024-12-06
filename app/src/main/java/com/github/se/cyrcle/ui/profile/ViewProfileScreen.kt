@@ -353,8 +353,10 @@ private fun UserReviewsSection(
             parkingViewModel.getParkingById(curReview.parking, { parking = it }, {})
 
             parking?.let {
+              val defaultUsername = stringResource(R.string.undefined_username)
               ReviewCard(
                   review = curReview,
+                  ownerUsername = userState?.public?.username ?: defaultUsername,
                   index = index,
                   isExpanded = isExpanded,
                   onCardClick = {
