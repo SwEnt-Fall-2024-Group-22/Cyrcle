@@ -36,35 +36,38 @@ fun DisplayProfileComponent(user: User?, extras: @Composable () -> Unit) {
   val profilePictureUrl = user.localSession?.profilePictureUrl ?: ""
 
   Column(
-      modifier = Modifier.fillMaxSize().padding(16.dp).testTag("ProfileContent"),
+      modifier = Modifier.fillMaxSize().testTag("ProfileContent"),
       horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = firstName,
-            style = MaterialTheme.typography.headlineMedium,
-            testTag = "DisplayFirstName")
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally) {
+              Text(
+                  text = firstName,
+                  style = MaterialTheme.typography.headlineMedium,
+                  testTag = "DisplayFirstName")
 
-        Text(
-            text = lastName,
-            style = MaterialTheme.typography.headlineMedium,
-            testTag = "DisplayLastName")
+              Text(
+                  text = lastName,
+                  style = MaterialTheme.typography.headlineMedium,
+                  testTag = "DisplayLastName")
 
-        Spacer(modifier = Modifier.height(16.dp))
+              Spacer(modifier = Modifier.height(16.dp))
 
-        ProfileImageComponent(
-            url = profilePictureUrl,
-            onClick = {},
-            isEditable = false,
-            modifier = Modifier.testTag("ProfileImage"))
+              ProfileImageComponent(
+                  url = profilePictureUrl,
+                  onClick = {},
+                  isEditable = false,
+                  modifier = Modifier.testTag("ProfileImage"))
 
-        Spacer(modifier = Modifier.height(8.dp))
+              Spacer(modifier = Modifier.height(8.dp))
 
-        Text(
-            text = stringResource(R.string.view_profile_screen_display_username, username),
-            style = MaterialTheme.typography.bodyMedium,
-            testTag = "DisplayUsername")
+              Text(
+                  text = stringResource(R.string.view_profile_screen_display_username, username),
+                  style = MaterialTheme.typography.bodyMedium,
+                  testTag = "DisplayUsername")
 
-        Spacer(modifier = Modifier.height(16.dp))
-
+              Spacer(modifier = Modifier.height(16.dp))
+            }
         extras()
       }
 }

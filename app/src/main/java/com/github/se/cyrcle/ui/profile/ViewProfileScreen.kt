@@ -24,7 +24,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
@@ -60,6 +59,7 @@ import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.Red
 import com.github.se.cyrcle.ui.theme.atoms.Button
+import com.github.se.cyrcle.ui.theme.atoms.IconButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 
@@ -102,14 +102,14 @@ fun ViewProfileScreen(
         }
       }) { innerPadding ->
         Box(Modifier.fillMaxSize().padding(innerPadding)) {
-          com.github.se.cyrcle.ui.theme.atoms.IconButton(
+          IconButton(
               modifier = Modifier.padding(10.dp).align(Alignment.TopEnd),
               icon = Icons.Filled.Outbox,
               contentDescription = "Sign Out",
               testTag = "SignOutButton",
               onClick = { signOut = true })
 
-          com.github.se.cyrcle.ui.theme.atoms.IconButton(
+          IconButton(
               modifier = Modifier.padding(10.dp).align(Alignment.TopStart),
               icon =
                   Icons.Filled.Diamond, // or Icons.Filled.Paid or Icons.Filled.AttachMoney etc...
@@ -239,10 +239,10 @@ private fun FavoriteParkingsSection(
     Text(
         text = stringResource(R.string.view_profile_screen_no_favorite_parking),
         style = MaterialTheme.typography.bodyMedium,
-        modifier = Modifier.testTag("NoFavoritesMessage"))
+        modifier = Modifier.testTag("NoFavoritesMessage").padding(16.dp))
   } else {
     LazyColumn(
-        modifier = Modifier.fillMaxWidth().testTag("FavoriteParkingList"),
+        modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("FavoriteParkingList"),
         verticalArrangement = Arrangement.spacedBy(8.dp)) {
           itemsIndexed(favoriteParkings) { index, parking ->
             FavoriteParkingCard(
@@ -283,7 +283,7 @@ private fun FavoriteParkingCard(
               modifier =
                   Modifier.align(Alignment.Center).padding(8.dp).testTag("ParkingItem_$index"))
 
-          IconButton(
+          androidx.compose.material3.IconButton(
               onClick = { showConfirmDialog = true },
               modifier =
                   Modifier.align(Alignment.TopEnd).size(32.dp).testTag("FavoriteToggle_$index")) {
@@ -345,10 +345,10 @@ private fun UserReviewsSection(
     Text(
         text = stringResource(R.string.view_profile_screen_no_reviews_message),
         style = MaterialTheme.typography.bodyMedium,
-        modifier = Modifier.testTag("NoReviewsMessage"))
+        modifier = Modifier.padding(16.dp).testTag("NoReviewsMessage"))
   } else {
     LazyColumn(
-        modifier = Modifier.fillMaxWidth().testTag("UserReviewsList"),
+        modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("UserReviewsList"),
         verticalArrangement = Arrangement.spacedBy(8.dp)) {
           itemsIndexed(userReviews) { _, review ->
             review?.let { ReviewCard(review = it, parkingViewModel = parkingViewModel) }
