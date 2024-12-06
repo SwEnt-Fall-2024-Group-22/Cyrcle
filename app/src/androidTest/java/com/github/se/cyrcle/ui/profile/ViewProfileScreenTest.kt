@@ -13,7 +13,6 @@ import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -489,6 +488,23 @@ class ViewProfileScreenTest {
 
   @Test
   fun whenUserHasReviews_showsReviewsList() {
+    myReviewsTestHelper()
+    composeTestRule.waitForIdle()
+    composeTestRule
+        .onNodeWithTag("UserReviewsList")
+        .assertIsDisplayed()
+        .onChildren()
+        .assertCountEquals(2)
+  }
+
+  /**
+   * Helper function to set up the test environment for the "My Reviews" tab.
+   * - Select the "My Reviews" tab
+   * - Add test parkings to the mock repository
+   * - Add user1's reviews from TestInstancesReview
+   * - Trigger review fetch for user1
+   */
+  private fun myReviewsTestHelper() {
     // We display the parking tabs
     composeTestRule
         .onNodeWithTag("TabMyReviews")
@@ -506,29 +522,5 @@ class ViewProfileScreenTest {
 
     // Trigger review fetch for user1
     reviewViewModel.getReviewsByOwnerId("user1")
-
-    composeTestRule.waitForIdle()
-
-    // Verify first review content (review1)
-    composeTestRule.onNodeWithTag("ParkingName_1").assertTextEquals("Rude épais")
-    composeTestRule.onNodeWithTag("RatingText_1").assertTextEquals("You rated this parking: 5.0 ⭐")
-    composeTestRule.onNodeWithTag("YouSaidText_1").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("ReviewText_1").assertTextEquals("\"Great parking!\"")
-    composeTestRule.onNodeWithTag("LikesCount_1").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("DislikesCount_1").assertIsDisplayed()
-
-    // Scroll horizontally to see the second review
-    composeTestRule.onNodeWithTag("ReviewCard_5").performScrollTo()
-
-    // Verify second review content (review5)
-    composeTestRule.onNodeWithTag("ParkingName_5").assertTextEquals("Rue de la paix")
-    composeTestRule.onNodeWithTag("RatingText_5").assertTextEquals("You rated this parking: 5.0 ⭐")
-    composeTestRule.onNodeWithTag("YouSaidText_5").assertIsDisplayed()
-    composeTestRule
-        .onNodeWithTag("ReviewText_5")
-        .assertTextEquals(
-            "\"You know what's crazy is that that low taper fade like meme it is...\"")
-    composeTestRule.onNodeWithTag("LikesCount_5").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("DislikesCount_5").assertIsDisplayed()
   }
 }

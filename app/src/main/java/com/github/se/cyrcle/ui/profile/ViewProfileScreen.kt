@@ -6,15 +6,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Diamond
@@ -42,12 +40,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
-import com.github.se.cyrcle.model.review.Review
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserViewModel
@@ -56,15 +52,13 @@ import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
+import com.github.se.cyrcle.ui.review.ReviewCard
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.Red
 import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.IconButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
-
-/** Maximum length for the truncated text in review cards. */
-const val MAX_TRUNCATED_TEXT_LENGTH = 65
 
 @Composable
 fun ViewProfileScreen(
@@ -222,7 +216,9 @@ private fun TabLayout(
 
         when (selectedTabIndex) {
           0 -> FavoriteParkingsSection(userViewModel, parkingViewModel, navigationActions)
-          1 -> UserReviewsSection(reviewViewModel, userViewModel, parkingViewModel)
+          1 ->
+              UserReviewsSection(
+                  reviewViewModel, userViewModel, parkingViewModel, navigationActions)
         }
       }
 }
@@ -330,16 +326,15 @@ private fun FavoriteParkingCard(
 private fun UserReviewsSection(
     reviewViewModel: ReviewViewModel,
     userViewModel: UserViewModel,
-    parkingViewModel: ParkingViewModel
+    parkingViewModel: ParkingViewModel,
+    navigationActions: NavigationActions
 ) {
-  val userState = userViewModel.currentUser.collectAsState().value
+  val userState by userViewModel.currentUser.collectAsState()
+  val userReviews by reviewViewModel.userReviews.collectAsState()
 
-  if (userState != null) {
-    LaunchedEffect(userState.public.userId) {
-      reviewViewModel.getReviewsByOwnerId(userState.public.userId)
-    }
+  LaunchedEffect(userState?.public?.userId) {
+    userState?.public?.userId?.let { userId -> reviewViewModel.getReviewsByOwnerId(userId) }
   }
-  val userReviews = reviewViewModel.userReviews.collectAsState().value
 
   if (userReviews.isEmpty()) {
     Text(
@@ -348,126 +343,20 @@ private fun UserReviewsSection(
         modifier = Modifier.padding(16.dp).testTag("NoReviewsMessage"))
   } else {
     LazyColumn(
-        modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("UserReviewsList"),
-        verticalArrangement = Arrangement.spacedBy(8.dp)) {
-          itemsIndexed(userReviews) { _, review ->
-            review?.let { ReviewCard(review = it, parkingViewModel = parkingViewModel) }
+        modifier = Modifier.fillMaxSize().testTag("UserReviewsList"),
+        contentPadding = PaddingValues(16.dp)) {
+          items(items = userReviews, key = { it.uid }) { curReview ->
+            val index = userReviews.indexOf(curReview)
+            val isExpanded = true
+            ReviewCard(
+                review = curReview,
+                index = index,
+                isExpanded = isExpanded,
+                onCardClick = {},
+                options = mapOf(),
+                userViewModel = userViewModel,
+                reviewViewModel = reviewViewModel)
           }
         }
-  }
-}
-
-/**
- * A composable that displays a card containing the user's review information.
- *
- * @param review The review to display
- * @param parkingViewModel The view model used to fetch the parking's name
- */
-@Composable
-private fun ReviewCard(review: Review, parkingViewModel: ParkingViewModel) {
-  val defaultParkingName = stringResource(R.string.default_parking_name)
-  var parkingName by remember { mutableStateOf(defaultParkingName) }
-
-  // Fetch parking name when the card is created
-  LaunchedEffect(review.parking) {
-    parkingViewModel.getParkingById(
-        review.parking,
-        onSuccess = { parking -> parkingName = parking.optName ?: defaultParkingName },
-        onFailure = {})
-  }
-
-  Card(
-      modifier =
-          Modifier.padding(8.dp).width(260.dp).height(200.dp).testTag("ReviewCard_${review.uid}"),
-      shape = MaterialTheme.shapes.medium) {
-        Column(
-            modifier = Modifier.padding(16.dp).fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween) {
-              // Display parking name with unique test tag
-              Text(
-                  text = parkingName,
-                  style = MaterialTheme.typography.titleMedium,
-                  modifier = Modifier.fillMaxWidth().testTag("ParkingName_${review.uid}"))
-
-              Spacer(modifier = Modifier.height(8.dp))
-
-              // Display rating with unique test tag
-              Text(
-                  text =
-                      stringResource(
-                          R.string.view_profile_screen_you_rated_parking, review.rating.toString()),
-                  style = MaterialTheme.typography.bodyMedium,
-                  color = MaterialTheme.colorScheme.primary,
-                  modifier = Modifier.testTag("RatingText_${review.uid}"))
-
-              Spacer(modifier = Modifier.height(8.dp))
-
-              // Display review text section
-              Text(
-                  text = stringResource(R.string.view_profile_screen_you_said),
-                  style = MaterialTheme.typography.bodyMedium,
-                  color = MaterialTheme.colorScheme.onSurfaceVariant,
-                  modifier = Modifier.testTag("YouSaidText_${review.uid}"))
-
-              androidx.compose.material3.Text(
-                  text = "\"${truncateText(review.text)}\"",
-                  style = MaterialTheme.typography.bodyMedium,
-                  maxLines = 2,
-                  softWrap = false,
-                  overflow = TextOverflow.Ellipsis,
-                  modifier = Modifier.fillMaxWidth().testTag("ReviewText_${review.uid}"))
-
-              Spacer(modifier = Modifier.height(8.dp))
-
-              // Display likes and dislikes counts
-              Row(
-                  modifier = Modifier.fillMaxWidth(),
-                  horizontalArrangement = Arrangement.End,
-                  verticalAlignment = Alignment.CenterVertically) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.CenterVertically) {
-                          // Likes count
-                          Row(
-                              horizontalArrangement = Arrangement.spacedBy(4.dp),
-                              verticalAlignment = Alignment.CenterVertically,
-                              modifier = Modifier.testTag("LikesCount_${review.uid}")) {
-                                Text(
-                                    text =
-                                        stringResource(
-                                            R.string.view_profile_screen_likes_count,
-                                            review.likedBy.size),
-                                    style = MaterialTheme.typography.bodyMedium)
-                              }
-                          // Dislikes count
-                          Row(
-                              horizontalArrangement = Arrangement.spacedBy(4.dp),
-                              verticalAlignment = Alignment.CenterVertically,
-                              modifier = Modifier.testTag("DislikesCount_${review.uid}")) {
-                                Text(
-                                    text =
-                                        stringResource(
-                                            R.string.view_profile_screen_dislikes_count,
-                                            review.dislikedBy.size),
-                                    style = MaterialTheme.typography.bodyMedium)
-                              }
-                        }
-                  }
-            }
-      }
-}
-
-/**
- * Truncates the given text if it exceeds the maximum length.
- *
- * @param text The text to truncate
- * @return The truncated text with "..." appended if it exceeds [MAX_TRUNCATED_TEXT_LENGTH],
- *   otherwise returns the original text
- */
-private fun truncateText(text: String): String {
-  return if (text.length > MAX_TRUNCATED_TEXT_LENGTH) {
-    text.take(MAX_TRUNCATED_TEXT_LENGTH) + "..."
-  } else {
-    text
   }
 }

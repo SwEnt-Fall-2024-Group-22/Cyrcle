@@ -175,12 +175,7 @@
     <string name="view_profile_screen_sign_out_dialog_action_button">Sign Out</string>
     <string name="view_profile_screen_sign_out_dialog_cancel_button">Cancel</string>
 
-    <string name="view_profile_screen_my_reviews_title">My Reviews</string>
     <string name="view_profile_screen_no_reviews_message">You haven\'t written any reviews yet</string>
-    <string name="view_profile_screen_you_rated_parking">You rated this parking: %1$s ⭐</string>
-    <string name="view_profile_screen_you_said">You said:</string>
-    <string name="view_profile_screen_likes_count">👍 %1$d</string>
-    <string name="view_profile_screen_dislikes_count">👎 %1$d</string>
 
     <!-- All Reviews Screen -->
     <string name="all_review_title">All Reviews For %s</string>
