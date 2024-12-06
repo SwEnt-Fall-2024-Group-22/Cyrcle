@@ -2,6 +2,7 @@ package com.github.se.cyrcle.model.parking.online
 
 import android.util.Log
 import com.github.se.cyrcle.io.serializer.ParkingAdapter
+import com.github.se.cyrcle.model.parking.ImageReport
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingReport
 import com.github.se.cyrcle.model.parking.Tile
@@ -210,6 +211,21 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
   override fun addReport(
       report: ParkingReport,
       onSuccess: (ParkingReport) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    val reportId = getNewUid() // Generate a new unique ID for the report
+    db.collection(collectionPath)
+        .document(report.parking)
+        .collection("reports")
+        .document(reportId)
+        .set(report)
+        .addOnSuccessListener { onSuccess(report) }
+        .addOnFailureListener { onFailure(it) }
+  }
+
+  override fun addImageReport(
+      report: ImageReport,
+      onSuccess: (ImageReport) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
     val reportId = getNewUid() // Generate a new unique ID for the report

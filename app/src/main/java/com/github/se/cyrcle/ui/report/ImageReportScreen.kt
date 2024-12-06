@@ -26,23 +26,23 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.model.parking.ImageReport
+import com.github.se.cyrcle.model.parking.ImageReportReason
+import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.model.report.ReportedObjectType
-import com.github.se.cyrcle.model.review.ReviewReport
-import com.github.se.cyrcle.model.review.ReviewReportReason
-import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.molecules.ReportInputs
 import com.github.se.cyrcle.ui.theme.molecules.ReportTextBlock
-import com.github.se.cyrcle.ui.theme.molecules.ReportTopAppBar
 import com.github.se.cyrcle.ui.theme.molecules.SubmitButtonWithDialog
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun ReviewReportScreen(
+fun ImageReportScreen(
     navigationActions: NavigationActions,
     userViewModel: UserViewModel,
-    reviewViewModel: ReviewViewModel,
+    parkingViewModel: ParkingViewModel
 ) {
   val configuration = LocalConfiguration.current
   val screenWidth = configuration.screenWidthDp.dp
@@ -53,8 +53,8 @@ fun ReviewReportScreen(
 
   // State for dialog and inputs
   val showDialog = remember { mutableStateOf(false) }
-  val selectedReason = rememberSaveable { mutableStateOf(ReviewReportReason.IRRELEVANT) }
-  val reviewId = reviewViewModel.selectedReview.value?.uid
+  val selectedReason = rememberSaveable { mutableStateOf(ImageReportReason.USELESS) }
+  val imageId = parkingViewModel.selectedParkingImage.value?.uid
   val reportDescription = rememberSaveable { mutableStateOf("") }
   val userId = userViewModel.currentUser.value?.public?.userId!!
   val context = LocalContext.current
@@ -65,29 +65,31 @@ fun ReviewReportScreen(
 
   fun onSubmit() {
     val report =
-        ReviewReport(
-            uid = reviewViewModel.getNewUid(),
+        ImageReport(
+            uid = parkingViewModel.getNewUid(),
             reason = selectedReason.value,
             userId = userId,
-            review = reviewId!!,
+            parking = TestInstancesParking.parking1.uid,
             description = reportDescription.value)
-    reviewViewModel.addReport(report, userViewModel.currentUser.value!!)
-    if (reviewViewModel.hasAlreadyReported.value) {
+
+    if (userViewModel.currentUser.value!!.details?.reportedImages?.contains(imageId) == true) {
       Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
     } else {
-      Toast.makeText(context, strResToast2, Toast.LENGTH_SHORT).show()
+      parkingViewModel.addImageReport(report, userViewModel.currentUser.value!!)
+      userViewModel.addReportedImageToSelectedUser(imageId!!)
+      Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
     }
     navigationActions.goBack()
   }
 
   Scaffold(
-      modifier = Modifier.testTag("ReviewReportScreen"),
+      modifier = Modifier.testTag("ImageReportScreen"),
       topBar = {
-        ReportTopAppBar(
-            navigationActions,
-            title =
-                stringResource(R.string.report_a_review)
-                    .format(reviewViewModel.selectedReview.value?.text?.take(30) ?: reviewId))
+        // ReportTopAppBar(
+        //    navigationActions,
+        //    title =
+        //    stringResource(R.string.report_an_image)
+        //        .format(imageViewModel.selectedImage.value?.url?.take(30) ?: imageId))
       }) { padding ->
         val scaledPaddingValues =
             PaddingValues(horizontal = horizontalPadding, vertical = verticalPadding)
@@ -97,7 +99,7 @@ fun ReviewReportScreen(
                 Modifier.fillMaxSize()
                     .padding(scaledPaddingValues)
                     .verticalScroll(rememberScrollState())
-                    .testTag("ReviewReportColumn"),
+                    .testTag("ImageReportColumn"),
             horizontalAlignment = Alignment.Start) {
               Box(
                   modifier =
@@ -111,17 +113,16 @@ fun ReviewReportScreen(
                   bulletPoints =
                       listOf(
                           stringResource(R.string.report_bullet_point_1),
-                          stringResource(R.string.report_bullet_point_2_review),
+                          stringResource(R.string.report_already),
                           stringResource(R.string.report_bullet_point_3)),
                   modifier = Modifier.testTag("ReportBulletPoints"))
 
               // Select Reason
-              // Select Reason
               ReportInputs(
                   selectedReasonIfParking = null,
-                  selectedReasonIfReview = selectedReason,
-                  selectedReasonIfImage = null,
-                  reportedObjectType = ReportedObjectType.REVIEW,
+                  selectedReasonIfReview = null,
+                  selectedReasonIfImage = selectedReason,
+                  reportedObjectType = ReportedObjectType.IMAGE,
                   reportDescription = reportDescription,
                   horizontalPadding = horizontalPadding)
 

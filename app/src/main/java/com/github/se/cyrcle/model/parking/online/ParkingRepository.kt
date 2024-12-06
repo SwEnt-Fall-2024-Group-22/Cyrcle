@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.model.parking.online
 
+import com.github.se.cyrcle.model.parking.ImageReport
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingReport
 import com.github.se.cyrcle.model.parking.Tile
@@ -105,6 +106,12 @@ interface ParkingRepository {
   fun addReport(
       report: ParkingReport,
       onSuccess: (ParkingReport) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  fun addImageReport(
+      report: ImageReport,
+      onSuccess: (ImageReport) -> Unit,
       onFailure: (Exception) -> Unit
   )
 }

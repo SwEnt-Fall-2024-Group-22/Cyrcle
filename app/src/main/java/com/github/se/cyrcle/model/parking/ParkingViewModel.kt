@@ -80,6 +80,13 @@ class ParkingViewModel(
   private val _selectedParking = MutableStateFlow<Parking?>(null)
   val selectedParking: StateFlow<Parking?> = _selectedParking
 
+  private val _selectedImage = MutableStateFlow<String?>(null)
+  val selectedImage: StateFlow<String?> = _selectedImage
+
+  /** Selected parking to review/edit */
+  private val _selectedParkingImage = MutableStateFlow<ParkingImage?>(null)
+  val selectedParkingImage: StateFlow<ParkingImage?> = _selectedParkingImage
+
   /** Selected parking to review/edit */
   private val _selectedParkingReports = MutableStateFlow<List<ParkingReport>>(emptyList())
   val selectedParkingReports: StateFlow<List<ParkingReport>> = _selectedParkingReports
@@ -115,9 +122,8 @@ class ParkingViewModel(
         uid, {}, { Log.d("ParkingViewModel", "Error deleting Parking") })
   }
 
-  fun clearSelectedParking() {
-    _selectedParking.value = null
-    _selectedParkingReports.value = emptyList()
+  fun selectImage(imagePath: String) {
+    _selectedImage.value = imagePath
   }
 
   /**
@@ -167,10 +173,6 @@ class ParkingViewModel(
   fun getParkingById(id: String, onSuccess: (Parking) -> Unit, onFailure: (Exception) -> Unit) {
     parkingRepository.getParkingById(id, onSuccess, onFailure)
   }
-
-  fun removeImageFromParking(
-      imgId: String,
-  ) {}
 
   /**
    * Retrieves parkings within a rectangle defined by two opposite corners, regardless of their
@@ -395,6 +397,27 @@ class ParkingViewModel(
   }
 
   /**
+   * Removes an image from the list of images of the given parking.
+   *
+   * @param parking The parking object to update.
+   * @param imgId The ID of the image to remove.
+   * @param onSuccess A callback function executed when the operation is successful.
+   * @param onFailure A callback function executed if the operation fails.
+   */
+  /**
+   * Removes an image from the list of images of the given parking.
+   *
+   * @param parking The parking object to update.
+   * @param imgId The ID of the image to remove.
+   * @return A new Parking object with the image removed from the images list.
+   */
+  fun deleteImageFromParking(parking: Parking, imgId: String): Parking {
+    // Filter out the image with the specified ID
+    val updatedImages = parking.images.filterNot { it.endsWith("/$imgId") }
+    return parking.copy(images = updatedImages)
+  }
+
+  /**
    * Updates the list of closest parkings.
    *
    * @param nbRequestLeft: number of tiles left to fetch the parkings from. If nbRequestLeft is 0,
@@ -513,6 +536,41 @@ class ParkingViewModel(
     Log.d("ParkingViewModel", "Parking and metrics updated: $selectedParking")
   }
 
+  /**
+   * Adds a report for the currently selected parking image.
+   *
+   * This function first verifies that a parking image is selected. If no image is selected, it logs
+   * an error and returns. It then creates an `ImageReport` and stores it in the appropriate
+   * repository. Additionally, this function ensures that the user cannot report the same image
+   * multiple times.
+   *
+   * @param report The report to be added, which includes details such as the reason and user ID.
+   * @param user The user submitting the report, required for identifying the reporter.
+   */
+  fun addImageReport(report: ImageReport, user: User) {
+    if (_selectedParkingImage.value == null) {
+      Log.e("ParkingViewModel", "No parking image selected")
+      return
+    }
+
+    val selectedImage = _selectedParkingImage.value!!
+
+    // Add the report to the repository
+    parkingRepository.addImageReport(
+        report,
+        onSuccess = {
+          Log.d("ParkingViewModel", "Image report added successfully")
+          // Update the parking image state or any local cache if needed
+          _selectedParkingImage.value =
+              selectedImage.copy(
+                  // Optionally update state, such as incrementing report count
+                  )
+        },
+        onFailure = { exception ->
+          Log.e("ParkingViewModel", "Failed to add image report: ${exception.message}")
+        })
+  }
+
   // ================== Reviews ==================
   /**
    * Handles the deletion of a review for a given parking. Adjusts the average score and the number
@@ -593,6 +651,9 @@ class ParkingViewModel(
   private val _selectedParkingImagesUrls = MutableStateFlow<List<String>>(mutableListOf())
   val selectedParkingImagesUrls: StateFlow<List<String>> = _selectedParkingImagesUrls
 
+  private val _selectedParkingAssociatedPaths = MutableStateFlow<List<String>>(mutableListOf())
+  val selectedParkingAssociatedPaths: StateFlow<List<String>> = _selectedParkingAssociatedPaths
+
   /**
    * Load the iamges of the selected parkings in the state selectedParkingImagesUrls This function
    * transforms the paths of the images (stored into firestore) of the selected parking into URLs.
@@ -605,9 +666,12 @@ class ParkingViewModel(
     // clear the list of URLs each time we request the images (prevent duplicates and old images
     // from being displayed)
     _selectedParkingImagesUrls.value = emptyList()
+    _selectedParkingAssociatedPaths.value = emptyList()
 
+    Log.d("SELECTED PARKING", _selectedParking.value?.uid!!)
     _selectedParking.value!!.images.forEach { imagePath ->
-      // get the URL of each image and add it to the list of URLs state that is observed by the UI.
+      Log.d("ANWZOSXJKWESNWOJSJWO", imagePath)
+      _selectedParkingAssociatedPaths.value = _selectedParkingAssociatedPaths.value.plus(imagePath)
       imageRepository.getUrl(
           path = imagePath,
           onSuccess = { url ->
@@ -638,7 +702,10 @@ class ParkingViewModel(
         destinationPath = destinationPath,
         onSuccess = {
           val updatedParking =
-              selectedParking.copy(images = selectedParking.images.plus(destinationPath))
+              selectedParking.copy(
+                  images = selectedParking.images.plus(destinationPath),
+                  associatedImageUrls = emptyList(),
+                  reportedImages = emptyList())
           selectParking(updatedParking)
           parkingRepository.updateParking(
               updatedParking,

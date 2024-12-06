@@ -34,6 +34,7 @@ data class UserDetails(
     val email: String = "",
     val reportedParkings: List<String> = emptyList(),
     val reportedReviews: List<String> = emptyList(),
+    val reportedImages: List<String> = emptyList(),
     val favoriteParkings: List<String> = emptyList(),
     // val lastLoginTime: Timestamp? = null,
     val wallet: Wallet = Wallet.empty(),
