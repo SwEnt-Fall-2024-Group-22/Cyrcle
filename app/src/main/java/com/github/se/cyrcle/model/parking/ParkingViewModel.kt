@@ -552,23 +552,54 @@ class ParkingViewModel(
       Log.e("ParkingViewModel", "No parking image selected")
       return
     }
+    val selectedImage = _selectedImage.value!!
 
-    val selectedImage = _selectedParkingImage.value!!
+    val (foundReportedImage, index) =
+        selectedParking.value
+            ?.reportedImages
+            ?.withIndex()
+            ?.find { it.value.imagePath == selectedImage }
+            ?.let { it.value to it.index } ?: (null to -1)
 
-    // Add the report to the repository
-    parkingRepository.addImageReport(
-        report,
-        onSuccess = {
-          Log.d("ParkingViewModel", "Image report added successfully")
-          // Update the parking image state or any local cache if needed
-          _selectedParkingImage.value =
-              selectedImage.copy(
-                  // Optionally update state, such as incrementing report count
-                  )
-        },
-        onFailure = { exception ->
-          Log.e("ParkingViewModel", "Failed to add image report: ${exception.message}")
-        })
+    val parkingImageToAdd = ParkingImage(parkingRepository.getNewUid(), selectedImage, 0, 0)
+
+    if (foundReportedImage == null) {
+      _selectedParking.value =
+          _selectedParking.value?.copy(
+              reportedImages = _selectedParking.value?.reportedImages?.plus(parkingImageToAdd)!!)
+      parkingRepository.addImageReport(
+          report,
+          onSuccess = {},
+          onFailure = { exception ->
+            Log.e("ParkingViewModel", "Failed to add image report: ${exception.message}")
+          })
+    } else {
+      val numMaxSeverityReports =
+          if (report.reason.severity == MAX_SEVERITY) foundReportedImage.nbMaxSeverityReports + 1
+          else foundReportedImage.nbMaxSeverityReports
+      val updatedImage =
+          ParkingImage(
+              uid = foundReportedImage.uid,
+              imagePath = foundReportedImage.imagePath,
+              nbReports = foundReportedImage.nbReports + 1,
+              nbMaxSeverityReports = numMaxSeverityReports)
+
+      parkingRepository.addImageReport(
+          report,
+          onSuccess = {
+            Log.d("ParkingViewModel", "Image report added successfully")
+            // Update the specific image in the reportedImages list
+            _selectedParking.value =
+                _selectedParking.value?.copy(
+                    reportedImages =
+                        _selectedParking.value?.reportedImages?.mapIndexed { i, image ->
+                          if (i == index) updatedImage else image
+                        } ?: emptyList())
+          },
+          onFailure = { exception ->
+            Log.e("ParkingViewModel", "Failed to add image report: ${exception.message}")
+          })
+    }
   }
 
   // ================== Reviews ==================

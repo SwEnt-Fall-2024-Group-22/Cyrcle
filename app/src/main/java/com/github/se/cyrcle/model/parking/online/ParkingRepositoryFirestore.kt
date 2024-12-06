@@ -231,7 +231,7 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
     val reportId = getNewUid() // Generate a new unique ID for the report
     db.collection(collectionPath)
         .document(report.parking)
-        .collection("reports")
+        .collection("image_reports")
         .document(reportId)
         .set(report)
         .addOnSuccessListener { onSuccess(report) }
