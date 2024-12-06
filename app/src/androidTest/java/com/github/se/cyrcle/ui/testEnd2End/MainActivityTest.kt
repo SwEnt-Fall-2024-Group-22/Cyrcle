@@ -97,6 +97,16 @@ class MainActivityTest {
     cardRobot.assertParkingDetailsScreen()
   }
 
+  @Test
+  fun e2e_3() {
+    composeTestRule.activity.userRepository.addUser(TestInstancesUser.user1, {}, {})
+
+    authRobot.assertAuthScreen()
+    authRobot.performSignIn()
+
+    mapRobot.assertMapScreen()
+  }
+
   // ============================================================================
   // ============================ ADDPARKINGS ROBOT =============================
   // ============================================================================
