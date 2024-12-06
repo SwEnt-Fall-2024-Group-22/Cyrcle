@@ -1,6 +1,7 @@
 package com.github.se.cyrcle.ui.report
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -29,7 +30,6 @@ import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.ImageReport
 import com.github.se.cyrcle.model.parking.ImageReportReason
 import com.github.se.cyrcle.model.parking.ParkingViewModel
-import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.model.report.ReportedObjectType
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
@@ -54,7 +54,8 @@ fun ImageReportScreen(
   // State for dialog and inputs
   val showDialog = remember { mutableStateOf(false) }
   val selectedReason = rememberSaveable { mutableStateOf(ImageReportReason.USELESS) }
-  val imageId = parkingViewModel.selectedParkingImage.value?.uid
+  val imageId = parkingViewModel.selectedImage.value!!
+  Log.d("SELECTEDIMAGE", imageId)
   val reportDescription = rememberSaveable { mutableStateOf("") }
   val userId = userViewModel.currentUser.value?.public?.userId!!
   val context = LocalContext.current
@@ -66,10 +67,10 @@ fun ImageReportScreen(
   fun onSubmit() {
     val report =
         ImageReport(
-            uid = parkingViewModel.getNewUid(),
+            uid = imageId,
             reason = selectedReason.value,
             userId = userId,
-            parking = TestInstancesParking.parking1.uid,
+            parking = parkingViewModel.selectedParking.value?.uid!!,
             description = reportDescription.value)
 
     if (userViewModel.currentUser.value!!.details?.reportedImages?.contains(imageId) == true) {
@@ -77,7 +78,7 @@ fun ImageReportScreen(
     } else {
       parkingViewModel.addImageReport(report, userViewModel.currentUser.value!!)
       userViewModel.addReportedImageToSelectedUser(imageId!!)
-      Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
+      Toast.makeText(context, strResToast2, Toast.LENGTH_SHORT).show()
     }
     navigationActions.goBack()
   }
@@ -113,7 +114,7 @@ fun ImageReportScreen(
                   bulletPoints =
                       listOf(
                           stringResource(R.string.report_bullet_point_1),
-                          stringResource(R.string.report_already),
+                          stringResource(R.string.report_bullet_point_2_review),
                           stringResource(R.string.report_bullet_point_3)),
                   modifier = Modifier.testTag("ReportBulletPoints"))
 
@@ -127,8 +128,6 @@ fun ImageReportScreen(
                   horizontalPadding = horizontalPadding)
 
               val validInputs = areInputsValid(reportDescription.value)
-
-              // Submit Button with Dialog
               SubmitButtonWithDialog(
                   showDialog = showDialog, validInputs = validInputs, onSubmit = { onSubmit() })
             }

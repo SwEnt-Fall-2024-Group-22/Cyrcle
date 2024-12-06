@@ -32,6 +32,7 @@ object Screen {
   const val CREATE_PROFILE = "Create Profile"
   const val PARKING_REPORT = "Parking Report Screen"
   const val REVIEW_REPORT = "Review Report Screen"
+  const val IMAGE_REPORT = "Image Report Screen"
   const val GAMBLING = "Gambling Screen"
   const val ADMIN = "Admin Screen"
   const val VIEW_REPORTS = "View Reports Screen"

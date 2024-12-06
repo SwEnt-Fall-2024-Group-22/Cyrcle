@@ -32,7 +32,7 @@ data class Parking(
     val location: Location,
     val images: List<(String)>,
     val associatedImageUrls: List<String>,
-    val reportedImages: List<ParkingImage>,
+    var reportedImages: List<ParkingImage>,
     val capacity: ParkingCapacity,
     val rackType: ParkingRackType,
     val protection: ParkingProtection,

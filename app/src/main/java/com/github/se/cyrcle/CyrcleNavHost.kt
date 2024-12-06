@@ -26,6 +26,7 @@ import com.github.se.cyrcle.ui.parkingDetails.ParkingDetailsScreen
 import com.github.se.cyrcle.ui.profile.CreateProfileScreen
 import com.github.se.cyrcle.ui.profile.ProfileScreen
 import com.github.se.cyrcle.ui.report.AdminScreen
+import com.github.se.cyrcle.ui.report.ImageReportScreen
 import com.github.se.cyrcle.ui.report.ParkingReportScreen
 import com.github.se.cyrcle.ui.report.ReviewReportScreen
 import com.github.se.cyrcle.ui.report.ViewReportsScreen
@@ -73,6 +74,9 @@ fun CyrcleNavHost(
       }
       composable(Screen.PARKING_REPORT) {
         ParkingReportScreen(navigationActions, userViewModel, parkingViewModel)
+      }
+      composable(Screen.IMAGE_REPORT) {
+        ImageReportScreen(navigationActions, userViewModel, parkingViewModel)
       }
     }
     navigation(
