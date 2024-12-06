@@ -124,12 +124,13 @@ class ParkingAdapter : JsonSerializer<Parking>, JsonDeserializer<Parking> {
   fun deserializeParking(map: Map<String, Any>): Parking {
     val json = gson.toJson(map)
     val tempParking = gson.fromJson(json, Parking::class.java)
-    // Older versions of parking don't have the tile field
     return if (tempParking.tile == null)
         tempParking.copy(
             tile = TileUtils.getTileFromPoint(tempParking.location.center),
             uid = tempParking.uid ?: "", // Default to empty string if null
             owner = tempParking.owner ?: "Unknown Owner", // Replace with your default owner value
+            associatedImageUrls = tempParking.associatedImageUrls ?: emptyList(),
+            reportedImages = tempParking.reportedImages ?: emptyList(),
             reportingUsers = tempParking.reportingUsers ?: emptyList()) // Default to empty list)
     else tempParking
   }
