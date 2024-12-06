@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.parkingDetails
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -20,6 +19,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
+import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.atoms.IconButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
 
@@ -32,10 +33,12 @@ import com.github.se.cyrcle.ui.theme.atoms.Text
  */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun ParkingDetailsAlertDialogShowImage(onDismiss: () -> Unit, imageUrl: String) {
+fun ParkingDetailsAlertDialogShowImage(
+    onDismiss: () -> Unit,
+    imageUrl: String,
+    navigationActions: NavigationActions
+) {
   val alertDialogMaxHeight = LocalConfiguration.current.screenHeightDp.dp * 0.8f
-
-    Log.d("AAAAAAAAAAAAAA",imageUrl)
   BasicAlertDialog(
       modifier = Modifier.testTag("ParkingDetailsAlertDialogShowImage").wrapContentSize(),
       onDismissRequest = onDismiss,
@@ -59,11 +62,10 @@ fun ParkingDetailsAlertDialogShowImage(onDismiss: () -> Unit, imageUrl: String) 
                   contentDescription = "Back",
                   onClick = onDismiss,
                   inverted = true)
-            FloatingActionButton ( onClick = {},
-                modifier = Modifier.padding(8.dp), content = {
-                    Text("REPORT IMAGE")
-                })
-
+              FloatingActionButton(
+                  onClick = { navigationActions.navigateTo(Screen.PARKING_REPORT) },
+                  modifier = Modifier.padding(8.dp),
+                  content = { Text("REPORT IMAGE") })
             }
       })
 }

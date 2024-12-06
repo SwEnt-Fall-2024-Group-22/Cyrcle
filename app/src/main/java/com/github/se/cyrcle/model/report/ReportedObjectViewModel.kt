@@ -9,7 +9,9 @@ import kotlinx.coroutines.flow.StateFlow
 
 sealed class Report {
   data class Parking(val parkingReport: ParkingReport) : Report()
+
   data class Review(val reviewReport: ReviewReport) : Report()
+
   data class Image(val imageReport: ImageReport) : Report()
 }
 

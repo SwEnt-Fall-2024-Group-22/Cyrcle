@@ -33,26 +33,26 @@ import com.github.se.cyrcle.ui.theme.disabledColor
 
 @Composable
 fun ReportTopAppBar(navigationActions: NavigationActions, title: String) {
-    TopAppBar(navigationActions, title = title)
+  TopAppBar(navigationActions, title = title)
 }
 
 @Composable
 fun ReportTextBlock(title: String, bulletPoints: List<String>, modifier: Modifier = Modifier) {
-    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            text = title,
-            style =
+  Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Text(
+        text = title,
+        style =
             MaterialTheme.typography.titleMedium.copy(
                 fontWeight = FontWeight.Bold, textAlign = TextAlign.Start),
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp))
-        Column(
-            modifier = Modifier.padding(start = 16.dp, bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            bulletPoints.forEachIndexed { index, point ->
-                BulletPoint(point, testTag = "BulletPoint$index")
-            }
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp))
+    Column(
+        modifier = Modifier.padding(start = 16.dp, bottom = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)) {
+          bulletPoints.forEachIndexed { index, point ->
+            BulletPoint(point, testTag = "BulletPoint$index")
+          }
         }
-    }
+  }
 }
 
 @Composable
@@ -65,37 +65,37 @@ fun ReportInputs(
     horizontalPadding: Dp,
     modifier: Modifier = Modifier
 ) {
-    when (reportedObjectType) {
-        ReportedObjectType.PARKING -> {
-            EnumDropDown(
-                options = ParkingReportReason.entries,
-                selectedValue = selectedReasonIfParking!!,
-                label = stringResource(R.string.report_reason),
-                modifier = Modifier.testTag("ReasonDropdown"))
-        }
-        ReportedObjectType.REVIEW -> {
-            EnumDropDown(
-                options = ReviewReportReason.entries,
-                selectedValue = selectedReasonIfReview!!,
-                label = stringResource(R.string.report_reason),
-                modifier = Modifier.testTag("ReasonDropdown"))
-        }
-        ReportedObjectType.IMAGE -> {
-            EnumDropDown(
-                options = ImageReportReason.entries,
-                selectedValue = selectedReasonIfImage!!,
-                label = stringResource(R.string.report_reason),
-                modifier = Modifier.testTag("ReasonDropdown"))
-        }
+  when (reportedObjectType) {
+    ReportedObjectType.PARKING -> {
+      EnumDropDown(
+          options = ParkingReportReason.entries,
+          selectedValue = selectedReasonIfParking!!,
+          label = stringResource(R.string.report_reason),
+          modifier = Modifier.testTag("ReasonDropdown"))
     }
-    ConditionCheckingInputText(
-        value = reportDescription.value,
-        onValueChange = { reportDescription.value = it },
-        label = stringResource(R.string.report_details),
-        minCharacters = 0,
-        maxCharacters = 256,
-        modifier =
-        Modifier.fillMaxWidth().padding(horizontal = horizontalPadding).testTag("DetailsInput"))
+    ReportedObjectType.REVIEW -> {
+      EnumDropDown(
+          options = ReviewReportReason.entries,
+          selectedValue = selectedReasonIfReview!!,
+          label = stringResource(R.string.report_reason),
+          modifier = Modifier.testTag("ReasonDropdown"))
+    }
+    ReportedObjectType.IMAGE -> {
+      EnumDropDown(
+          options = ImageReportReason.entries,
+          selectedValue = selectedReasonIfImage!!,
+          label = stringResource(R.string.report_reason),
+          modifier = Modifier.testTag("ReasonDropdown"))
+    }
+  }
+  ConditionCheckingInputText(
+      value = reportDescription.value,
+      onValueChange = { reportDescription.value = it },
+      label = stringResource(R.string.report_details),
+      minCharacters = 0,
+      maxCharacters = 256,
+      modifier =
+          Modifier.fillMaxWidth().padding(horizontal = horizontalPadding).testTag("DetailsInput"))
 }
 
 @Composable
@@ -104,25 +104,25 @@ fun SubmitButtonWithDialog(
     validInputs: Boolean,
     onSubmit: () -> Unit
 ) {
-    if (showDialog.value) {
-        ReportScreenAlertDialog(
-            onDismiss = { showDialog.value = false },
-            onAccept = {
-                showDialog.value = false
-                if (validInputs) onSubmit()
-            })
-    }
-    Box(
-        modifier = Modifier.fillMaxWidth() // Ensures alignment works within this BoxScope
-    ) {
+  if (showDialog.value) {
+    ReportScreenAlertDialog(
+        onDismiss = { showDialog.value = false },
+        onAccept = {
+          showDialog.value = false
+          if (validInputs) onSubmit()
+        })
+  }
+  Box(
+      modifier = Modifier.fillMaxWidth() // Ensures alignment works within this BoxScope
+      ) {
         Button(
             onClick = { showDialog.value = true },
             modifier = Modifier.padding(top = 16.dp).align(Alignment.Center),
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
-            Text(
-                text = stringResource(R.string.attributes_picker_bottom_bar_submit_button),
-                color = if (validInputs) MaterialTheme.colorScheme.primary else disabledColor(),
-                textAlign = TextAlign.Center)
-        }
-    }
+              Text(
+                  text = stringResource(R.string.attributes_picker_bottom_bar_submit_button),
+                  color = if (validInputs) MaterialTheme.colorScheme.primary else disabledColor(),
+                  textAlign = TextAlign.Center)
+            }
+      }
 }
