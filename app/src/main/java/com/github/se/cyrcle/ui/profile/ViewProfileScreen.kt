@@ -297,21 +297,21 @@ fun FavoriteParkingCard(
                     // Display the personal note if it exists. Otherwise, display a message
                     // indicating that there is no note.
                     val personalNote = userState?.details?.personalNotes?.get(parking.uid)
-                    if (personalNote.isNullOrBlank()) {
-                      Text(
-                          text = stringResource(R.string.view_profile_screen_no_note),
-                          style =
-                              MaterialTheme.typography.bodySmall.copy(
-                                  fontStyle = FontStyle.Italic, fontSize = 12.sp),
-                          testTag = "ParkingNote$index")
-                    } else {
-                      androidx.compose.material3.Text(
-                          text = stringResource(R.string.view_profile_screen_note, personalNote),
-                          style = MaterialTheme.typography.bodyMedium,
-                          maxLines = 2,
-                          overflow = TextOverflow.Ellipsis,
-                          modifier = Modifier.testTag("ParkingNote$index"))
-                    }
+                    Text(
+                        text =
+                            if (personalNote.isNullOrBlank()) {
+                              stringResource(R.string.view_profile_screen_no_note)
+                            } else {
+                              stringResource(R.string.view_profile_screen_note, personalNote)
+                            },
+                        style =
+                            if (personalNote.isNullOrBlank())
+                                MaterialTheme.typography.bodyMedium.copy(
+                                    fontStyle = FontStyle.Italic, fontSize = 12.sp)
+                            else MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.testTag("ParkingNote$index"),
+                        textAlign = TextAlign.Justify)
                   }
 
               Spacer(modifier = Modifier.weight(0.1f).width(8.dp))
