@@ -13,11 +13,9 @@ import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextReplacement
-import androidx.compose.ui.test.performTouchInput
-import androidx.compose.ui.test.swipeLeft
-import androidx.compose.ui.test.swipeUp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
@@ -244,7 +242,12 @@ class ViewProfileScreenTest {
   fun testFavoriteParkingsDisplay() {
     composeTestRule.waitForIdle()
 
-    composeTestRule.onNodeWithTag("FavoriteParkingsTitle").assertIsDisplayed()
+    // We display the parking tabs
+    composeTestRule
+        .onNodeWithTag("TabFavoriteParkings")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
 
     composeTestRule.onNodeWithTag("FavoriteParkingList").onChildren().assertCountEquals(3)
     composeTestRule
@@ -260,6 +263,13 @@ class ViewProfileScreenTest {
 
   @Test
   fun testStarIconClickDisplaysConfirmationDialog() {
+    // We display the parking tabs
+    composeTestRule
+        .onNodeWithTag("TabFavoriteParkings")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+
     composeTestRule.waitForIdle()
 
     composeTestRule.onNodeWithTag("FavoriteToggle_0").performClick()
@@ -274,6 +284,12 @@ class ViewProfileScreenTest {
   @Test
   fun testConfirmRemoveFavoriteParking() {
     composeTestRule.waitForIdle()
+    // We display the parking tabs
+    composeTestRule
+        .onNodeWithTag("TabFavoriteParkings")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
 
     // Click the star icon to show the confirmation dialog
     composeTestRule.onNodeWithTag("FavoriteToggle_0").performClick()
@@ -290,6 +306,12 @@ class ViewProfileScreenTest {
   @Test
   fun testCancelRemoveFavoriteParking() {
     composeTestRule.waitForIdle()
+    // We display the parking tabs
+    composeTestRule
+        .onNodeWithTag("TabFavoriteParkings")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
 
     // Click the star icon to show the confirmation dialog
     composeTestRule.onNodeWithTag("FavoriteToggle_0").performClick()
@@ -306,6 +328,12 @@ class ViewProfileScreenTest {
   @Test
   fun testRemoveAllFavoriteParkings() {
     composeTestRule.waitForIdle()
+    // We display the parking tabs
+    composeTestRule
+        .onNodeWithTag("TabFavoriteParkings")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
 
     // Remove the first parking
     composeTestRule.onNodeWithTag("FavoriteToggle_0").performClick()
@@ -330,9 +358,19 @@ class ViewProfileScreenTest {
   @Test
   fun testRemoveFavoriteParkingsAndCheckIndexes() {
     composeTestRule.waitForIdle()
+    // We display the parking tabs
+    composeTestRule
+        .onNodeWithTag("TabFavoriteParkings")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
 
     // Remove the middle parking
-    composeTestRule.onNodeWithTag("FavoriteToggle_1").performClick()
+    composeTestRule
+        .onNodeWithTag("ParkingItem_1", useUnmergedTree = true)
+        .performScrollTo()
+        .assertIsDisplayed()
+    composeTestRule.onNodeWithTag("FavoriteToggle_1").assertIsDisplayed().performClick()
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithText("Remove").performClick()
     composeTestRule.waitForIdle()
@@ -362,6 +400,13 @@ class ViewProfileScreenTest {
   @Test
   fun testAddParkingAndScrollFavorites() {
     composeTestRule.waitForIdle()
+
+    // We display the parking tabs
+    composeTestRule
+        .onNodeWithTag("TabFavoriteParkings")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
 
     val parking4 =
         Parking(
@@ -433,10 +478,12 @@ class ViewProfileScreenTest {
   fun whenNoReviews_showsEmptyMessage() {
     composeTestRule.waitForIdle()
 
-    // Scroll to the reviews section using swipe
-    composeTestRule.onNodeWithTag("ProfileContentSections").performTouchInput { swipeUp() }
-
-    composeTestRule.onNodeWithTag("UserReviewsTitle").assertIsDisplayed()
+    // We display the parking tabs
+    composeTestRule
+        .onNodeWithTag("TabMyReviews")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
 
     composeTestRule
         .onNodeWithTag("NoReviewsMessage")
@@ -446,6 +493,43 @@ class ViewProfileScreenTest {
 
   @Test
   fun whenUserHasReviews_showsReviewsList() {
+    myReviewsTestHelper()
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("UserReviewsList").assertIsDisplayed()
+
+    composeTestRule
+        .onNodeWithTag("ReviewCard0", useUnmergedTree = true)
+        .performScrollTo()
+        .assertIsDisplayed()
+
+    composeTestRule
+        .onNodeWithTag("ReviewTitle0", useUnmergedTree = true)
+        .assertIsDisplayed()
+        .assertTextEquals(TestInstancesParking.parking2.optName!!)
+
+    // Ensure the card is clickable and it takes us the all reviews screen
+    composeTestRule.onNodeWithTag("ReviewCard0").assertHasClickAction().performClick()
+    composeTestRule.waitForIdle()
+
+    verify(mockNavigationActions).navigateTo(Screen.PARKING_DETAILS)
+    assert(parkingViewModel.selectedParking.value == TestInstancesParking.parking2)
+  }
+
+  /**
+   * Helper function to set up the test environment for the "My Reviews" tab.
+   * - Select the "My Reviews" tab
+   * - Add test parkings to the mock repository
+   * - Add user1's reviews from TestInstancesReview
+   * - Trigger review fetch for user1
+   */
+  private fun myReviewsTestHelper() {
+    // We display the parking tabs
+    composeTestRule
+        .onNodeWithTag("TabMyReviews")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+
     // Add test parkings to mock repository
     mockParkingRepository.addParking(TestInstancesParking.parking1, {}, {}) // For review5
     mockParkingRepository.addParking(TestInstancesParking.parking2, {}, {}) // For review1
@@ -456,33 +540,5 @@ class ViewProfileScreenTest {
 
     // Trigger review fetch for user1
     reviewViewModel.getReviewsByOwnerId("user1")
-
-    composeTestRule.waitForIdle()
-
-    repeat(3) {
-      composeTestRule.onNodeWithTag("ProfileContentSections").performTouchInput { swipeUp() }
-    }
-
-    // Verify first review content (review1)
-    composeTestRule.onNodeWithTag("ParkingName_1").assertTextEquals("Rude épais")
-    composeTestRule.onNodeWithTag("RatingText_1").assertTextEquals("You rated this parking: 5.0 ⭐")
-    composeTestRule.onNodeWithTag("YouSaidText_1").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("ReviewText_1").assertTextEquals("\"Great parking!\"")
-    composeTestRule.onNodeWithTag("LikesCount_1").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("DislikesCount_1").assertIsDisplayed()
-
-    // Scroll horizontally to see the second review
-    repeat(3) { composeTestRule.onNodeWithTag("UserReviewsList").performTouchInput { swipeLeft() } }
-
-    // Verify second review content (review5)
-    composeTestRule.onNodeWithTag("ParkingName_5").assertTextEquals("Rue de la paix")
-    composeTestRule.onNodeWithTag("RatingText_5").assertTextEquals("You rated this parking: 5.0 ⭐")
-    composeTestRule.onNodeWithTag("YouSaidText_5").assertIsDisplayed()
-    composeTestRule
-        .onNodeWithTag("ReviewText_5")
-        .assertTextEquals(
-            "\"You know what's crazy is that that low taper fade like meme it is...\"")
-    composeTestRule.onNodeWithTag("LikesCount_5").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("DislikesCount_5").assertIsDisplayed()
   }
 }

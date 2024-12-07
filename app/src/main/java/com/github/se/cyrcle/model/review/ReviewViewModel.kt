@@ -26,8 +26,8 @@ class ReviewViewModel(
   private val _parkingReviews = MutableStateFlow<List<Review>>(emptyList())
   val parkingReviews: StateFlow<List<Review>> = _parkingReviews
 
-  private val _userReviews = MutableStateFlow<List<Review?>>(emptyList())
-  val userReviews: StateFlow<List<Review?>> = _userReviews
+  private val _userReviews = MutableStateFlow<List<Review>>(emptyList())
+  val userReviews: StateFlow<List<Review>> = _userReviews
 
   /** Selected parking has already been reported by current user */
   private val _hasAlreadyReported = MutableStateFlow<Boolean>(false)
@@ -81,6 +81,7 @@ class ReviewViewModel(
         {
           _parkingReviews.value =
               _parkingReviews.value.map { if (it.uid == review.uid) review else it }
+          _userReviews.value = _userReviews.value.map { if (it.uid == review.uid) review else it }
         },
         { Log.e("ReviewViewModel", "Error adding review", it) })
   }

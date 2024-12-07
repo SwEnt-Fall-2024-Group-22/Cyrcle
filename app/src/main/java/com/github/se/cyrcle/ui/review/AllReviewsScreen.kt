@@ -205,6 +205,7 @@ fun AllReviewsScreen(
                 selectedSortingOption = selectedOption
               })
 
+          val defaultUsername = stringResource(R.string.undefined_username)
           // Scrollable Review Cards
           LazyColumn(
               modifier = Modifier.weight(1f).padding(horizontal = 16.dp).testTag("ReviewList"),
@@ -225,6 +226,7 @@ fun AllReviewsScreen(
                         userReview?.let {
                           ReviewCard(
                               review = it,
+                              title = currentUser?.public?.username ?: defaultUsername,
                               index = -1,
                               isExpanded = true,
                               onCardClick = {},
@@ -285,8 +287,14 @@ fun AllReviewsScreen(
                       val index = sortedReviews.indexOf(curReview)
                       val isExpanded = selectedCardIndex == index
                       val signInToReport = stringResource(R.string.sign_in_to_report_review)
+
+                      var ownerUsername by remember { mutableStateOf(defaultUsername) }
+                      userViewModel.getUserById(
+                          curReview.owner, onSuccess = { ownerUsername = it.public.username })
+
                       ReviewCard(
                           review = curReview,
+                          title = ownerUsername,
                           index = index,
                           isExpanded = isExpanded,
                           onCardClick = { selectedCardIndex = if (isExpanded) -1 else index },
@@ -314,6 +322,7 @@ fun AllReviewsScreen(
 @Composable
 fun ReviewCard(
     review: Review,
+    title: String,
     index: Int,
     isExpanded: Boolean,
     onCardClick: () -> Unit,
@@ -343,15 +352,10 @@ fun ReviewCard(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically) {
-                      val defaultUsername = stringResource(R.string.undefined_username)
-                      val ownerUsername = remember { mutableStateOf(defaultUsername) }
-                      userViewModel.getUserById(
-                          review.owner, onSuccess = { ownerUsername.value = it.public.username })
-
                       androidx.compose.material3.Text(
-                          text = stringResource(R.string.by_text).format(ownerUsername.value),
+                          text = title,
                           style = MaterialTheme.typography.bodySmall,
-                          modifier = Modifier.weight(1f).testTag("ReviewOwner$index"),
+                          modifier = Modifier.weight(1f).testTag("ReviewTitle$index"),
                           maxLines = 1,
                           overflow = TextOverflow.Ellipsis)
 
@@ -422,7 +426,9 @@ fun ReviewCard(
                                   testTag = "DislikeCount$index")
                             }
 
-                            OptionsMenu(options = options, testTag = "MoreOptions$index")
+                            // More options button
+                            if (options.isNotEmpty())
+                                OptionsMenu(options = options, testTag = "MoreOptions$index")
                           }
                     }
 
