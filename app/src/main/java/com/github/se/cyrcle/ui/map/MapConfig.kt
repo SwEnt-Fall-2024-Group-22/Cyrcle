@@ -42,6 +42,7 @@ object MapConfig {
     return MapStyle("mapbox://styles/seanprz/cm27wh9ff00jl01r21jz3hcb1")
   }
 
+    // Useful function to debug the downloaded tiles, can be called from mapScreen if needed
   fun getAllTilesDownloaded() {
     val tileStore = TileStore.create()
     // Get a list of tile regions that are currently available.
@@ -58,30 +59,35 @@ object MapConfig {
     }
   }
 
+    /**
+     * Download the tiles to local storage for a specific zone
+     * @param zone the zone to download
+     */
   fun downloadZone(zone: Zone) {
-    val tileStore = TileStore.create()
+      // Defines the area to download
+      val geometry =
+          Polygon.fromLngLats(
+              listOf(
+                  listOf(
+                      zone.boundingBox.southwest(),
+                      zone.boundingBox.northeast(),
+                  )))
 
-    val offlineManager = OfflineManager()
+
+    // Define style and zooms levels to download
     val tilesetDescriptor =
-        offlineManager.createTilesetDescriptor(
+        OfflineManager().createTilesetDescriptor(
             TilesetDescriptorOptions.Builder()
                 .styleURI("mapbox://styles/seanprz/cm27wh9ff00jl01r21jz3hcb1")
                 .minZoom(minZoom.toInt().toByte())
                 .maxZoom(maxZoom.toInt().toByte())
                 .build())
-    // create a geometry for lausanne
-    val GEOMETRY =
-        Polygon.fromLngLats(
-            listOf(
-                listOf(
-                    zone.boundingBox.southwest(),
-                    zone.boundingBox.northeast(),
-                )))
 
-    tileStore.loadTileRegion(
-        zone.uid,
+        // Finally Download the tile region
+      TileStore.create().loadTileRegion(
+        zone.uid, // identify the tileRegsion with the zoneUID
         TileRegionLoadOptions.Builder()
-            .geometry(GEOMETRY)
+            .geometry(geometry)
             .descriptors(listOf(tilesetDescriptor))
             .acceptExpired(false)
             .networkRestriction(NetworkRestriction.NONE)
@@ -92,20 +98,23 @@ object MapConfig {
         }) { expected ->
           if (expected.isValue) {
             // Tile region download finishes successfully
-            expected.value?.let { Log.d("ZoneSelection", "Tile region downloaded: $it") }
+            expected.value?.let { Log.d("ZoneManager", "Tile region downloaded: $it") }
           }
-          expected.error?.let { Log.e("ZoneSelection", "Tile region download error: $it") }
+          expected.error?.let { Log.e("ZoneManager", "Tile region download error: $it") }
         }
   }
 
-  fun deleteZone(zone: Zone) {
-    val tileStore = TileStore.create()
-    tileStore.removeTileRegion(zone.uid) { expected ->
+    /**
+     * Delete the tiles from local storage for a specific zone
+     * @param zone the zone to delete
+     */
+  fun deleteZoneFromStorage(zone: Zone) {
+      TileStore.create().removeTileRegion(zone.uid) { expected ->
       if (expected.isValue) {
         // Tile region removal finishes successfully
-        Log.d("MapScreen", "Tile region removed")
+        Log.d("ZoneManager", "Tile region ${zone.uid}  removed")
       }
-      expected.error?.let { Log.e("MapScreen", "Tile region removal error: $it") }
+      expected.error?.let { Log.e("ZoneManager", "Tile region removal error: $it") }
     }
   }
 }

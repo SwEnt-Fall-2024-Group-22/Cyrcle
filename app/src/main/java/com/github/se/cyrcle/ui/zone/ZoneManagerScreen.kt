@@ -39,6 +39,7 @@ import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.zone.Zone
+import com.github.se.cyrcle.ui.map.MapConfig
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.ColorLevel
@@ -132,6 +133,7 @@ fun ZoneCard(parkingViewModel: ParkingViewModel, zone: Zone, zones: MutableState
                   Zone.refreshZone(zone, context)
                   zones.value = Zone.loadZones(context)
                   parkingViewModel.downloadZone(zone, {}, {})
+                    MapConfig.downloadZone(zone)
                   // Call functions to update map tiles and parking data here.
                 })
         Icon(
@@ -142,7 +144,7 @@ fun ZoneCard(parkingViewModel: ParkingViewModel, zone: Zone, zones: MutableState
                   Zone.deleteZone(zone, context)
                   zones.value = Zone.loadZones(context)
                   parkingViewModel.deleteZone(zone, zones.value)
-                  // Call functions here to delete the map tiles and the paraking datas.
+                  MapConfig.deleteZoneFromStorage(zone)
                 })
       }
 }

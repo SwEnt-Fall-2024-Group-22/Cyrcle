@@ -113,6 +113,7 @@ fun ZoneSelectionScreen(
           zoneName.value = it
           coroutineScope.launch {
             val zone = Zone.createZone(boundingBox.value!!, it, context)
+              MapConfig.downloadZone(zone)
             parkingViewModel.downloadZone(
                 zone,
                 { navigationActions.goBack() },
