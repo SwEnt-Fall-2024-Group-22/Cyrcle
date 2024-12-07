@@ -366,7 +366,11 @@ class ViewProfileScreenTest {
         .performClick()
 
     // Remove the middle parking
-    composeTestRule.onNodeWithTag("FavoriteToggle_1").performClick()
+    composeTestRule
+        .onNodeWithTag("ParkingItem_1", useUnmergedTree = true)
+        .performScrollTo()
+        .assertIsDisplayed()
+    composeTestRule.onNodeWithTag("FavoriteToggle_1").assertIsDisplayed().performClick()
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithText("Remove").performClick()
     composeTestRule.waitForIdle()
@@ -491,26 +495,24 @@ class ViewProfileScreenTest {
   fun whenUserHasReviews_showsReviewsList() {
     myReviewsTestHelper()
     composeTestRule.waitForIdle()
-    composeTestRule
-        .onNodeWithTag("UserReviewsList")
-        .assertIsDisplayed()
-        .onChildren()
-        .assertCountEquals(2)
+    composeTestRule.onNodeWithTag("UserReviewsList").assertIsDisplayed()
 
-    // Make sure he sees the two reviews. We first scroll to them
-    composeTestRule.onNodeWithTag("ReviewCard0").performScrollTo().assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag("ReviewCard0", useUnmergedTree = true)
+        .performScrollTo()
+        .assertIsDisplayed()
 
     composeTestRule
         .onNodeWithTag("ReviewTitle0", useUnmergedTree = true)
         .assertIsDisplayed()
         .assertTextEquals(TestInstancesParking.parking2.optName!!)
 
-    composeTestRule.onNodeWithTag("ReviewCard1").performScrollTo().assertIsDisplayed()
+    // Ensure the card is clickable and it takes us the all reviews screen
+    composeTestRule.onNodeWithTag("ReviewCard0").assertHasClickAction().performClick()
+    composeTestRule.waitForIdle()
 
-    composeTestRule
-        .onNodeWithTag("ReviewTitle1", useUnmergedTree = true)
-        .assertIsDisplayed()
-        .assertTextEquals(TestInstancesParking.parking1.optName!!)
+    verify(mockNavigationActions).navigateTo(Screen.PARKING_DETAILS)
+    assert(parkingViewModel.selectedParking.value == TestInstancesParking.parking2)
   }
 
   /**
