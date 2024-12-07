@@ -161,7 +161,7 @@
     <string name="view_profile_screen_default_profile_picture">Default Profile Picture</string>
     <string name="view_profile_screen_profile_picture">Profile Picture</string>
     <string name="view_profile_screen_edit_profile_picture">Edit Profile Picture</string>
-    <string name="view_profile_screen_no_favorite_parking">No favorite parking</string>
+    <string name="view_profile_screen_no_favorite_parking">You haven\'t added any parking to your favorites yet</string>
     <string name="view_profile_screen_remove_from_favorite">Remove from Favorites</string>
     <string name="view_profile_screen_remove_favorite_dialog_title">Remove favorite</string>
     <string name="view_profile_screen_remove_favorite_dialog_message">Are you sure you want to remove %s from your favorites?</string>
@@ -175,7 +175,8 @@
     <string name="view_profile_screen_sign_out_dialog_cancel_button">Cancel</string>
     <string name="view_profile_screen_favorite_parkings">Favorite Parkings</string>
     <string name="view_profile_screen_my_reviews">My Reviews</string>
-
+    <string name="view_profile_screen_no_note">No personal notes to this parking yet</string>
+    <string name="view_profile_screen_note">Note: %s</string>
     <string name="view_profile_screen_no_reviews_message">You haven\'t written any reviews yet</string>
 
     <!-- All Reviews Screen -->

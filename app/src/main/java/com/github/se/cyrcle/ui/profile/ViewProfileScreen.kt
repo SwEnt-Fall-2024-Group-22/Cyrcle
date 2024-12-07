@@ -7,12 +7,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
@@ -21,6 +23,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Outbox
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -39,10 +42,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
@@ -56,7 +64,6 @@ import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import com.github.se.cyrcle.ui.review.ReviewCard
 import com.github.se.cyrcle.ui.theme.ColorLevel
-import com.github.se.cyrcle.ui.theme.Red
 import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.IconButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
@@ -238,76 +245,108 @@ private fun FavoriteParkingsSection(
         style = MaterialTheme.typography.bodyMedium,
         modifier = Modifier.testTag("NoFavoritesMessage").padding(16.dp))
   } else {
-    LazyRow(
-        modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("FavoriteParkingList"),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    LazyColumn(
+        modifier = Modifier.fillMaxWidth().testTag("FavoriteParkingList"),
+        contentPadding = PaddingValues(16.dp)) {
           itemsIndexed(favoriteParkings) { index, parking ->
-            FavoriteParkingCard(
-                parking = parking,
-                index = index,
-                onRemove = { userViewModel.removeFavoriteParkingFromSelectedUser(parking) },
-                parkingViewModel,
-                navigationActions)
+            FavoriteParkingCard(navigationActions, parkingViewModel, userViewModel, parking, index)
           }
         }
   }
 }
 
 @Composable
-private fun FavoriteParkingCard(
-    parking: Parking,
-    index: Int,
-    onRemove: () -> Unit,
+fun FavoriteParkingCard(
+    navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel,
-    navigationActions: NavigationActions
+    userViewModel: UserViewModel,
+    parking: Parking,
+    index: Int
 ) {
+  val userState by userViewModel.currentUser.collectAsState()
   var showConfirmDialog by remember { mutableStateOf(false) }
 
   Card(
       modifier =
-          Modifier.size(120.dp)
+          Modifier.fillMaxWidth()
               .padding(8.dp)
               .clickable(
                   onClick = {
                     parkingViewModel.selectParking(parking)
                     navigationActions.navigateTo(Screen.PARKING_DETAILS)
-                  }),
-      shape = MaterialTheme.shapes.medium) {
-        Box(modifier = Modifier.fillMaxSize()) {
-          Text(
-              text = parking.optName ?: "",
-              style = MaterialTheme.typography.bodySmall,
-              modifier =
-                  Modifier.align(Alignment.Center).padding(8.dp).testTag("ParkingItem_$index"))
+                  })
+              .testTag("ParkingItem$index"),
+      colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+      elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
+        Row(
+            modifier = Modifier.fillMaxSize().padding(16.dp).testTag("ParkingContent$index"),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween) {
+              Column(
+                  modifier = Modifier.weight(1f),
+                  verticalArrangement = Arrangement.spacedBy(8.dp)) {
 
-          androidx.compose.material3.IconButton(
-              onClick = { showConfirmDialog = true },
-              modifier =
-                  Modifier.align(Alignment.TopEnd).size(32.dp).testTag("FavoriteToggle_$index")) {
-                Icon(
-                    imageVector = Icons.Default.Favorite,
-                    contentDescription =
-                        stringResource(R.string.view_profile_screen_remove_from_favorite),
-                    tint = Red,
-                    modifier = Modifier.size(20.dp))
-              }
-        }
+                    // Parking name
+                    androidx.compose.material3.Text(
+                        text = parking.optName ?: stringResource(R.string.default_parking_name),
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.testTag("ParkingName$index"))
+
+                    // Display the personal note if it exists. Otherwise, display a message
+                    // indicating that there is no note.
+                    val personalNote = userState?.details?.personalNotes?.get(parking.uid)
+                    if (personalNote.isNullOrBlank()) {
+                      Text(
+                          text = stringResource(R.string.view_profile_screen_no_note),
+                          style =
+                              MaterialTheme.typography.bodySmall.copy(
+                                  fontStyle = FontStyle.Italic, fontSize = 12.sp),
+                          testTag = "ParkingNote$index")
+                    } else {
+                      androidx.compose.material3.Text(
+                          text = stringResource(R.string.view_profile_screen_note, personalNote),
+                          style = MaterialTheme.typography.bodyMedium,
+                          maxLines = 2,
+                          overflow = TextOverflow.Ellipsis,
+                          modifier = Modifier.testTag("ParkingNote$index"))
+                    }
+                  }
+
+              Spacer(modifier = Modifier.weight(0.1f).width(8.dp))
+
+              // Favorite icon
+              androidx.compose.material3.IconButton(
+                  onClick = { showConfirmDialog = true },
+                  modifier = Modifier.size(32.dp).testTag("FavoriteToggle$index")) {
+                    Icon(
+                        imageVector = Icons.Default.Favorite,
+                        contentDescription = "Favorite Parking",
+                        tint = Color.Red)
+                  }
+            }
       }
 
   if (showConfirmDialog) {
     AlertDialog(
         onDismissRequest = { showConfirmDialog = false },
-        title = { Text(stringResource(R.string.view_profile_screen_remove_favorite_dialog_title)) },
+        title = {
+          Text(
+              stringResource(R.string.view_profile_screen_remove_favorite_dialog_title),
+              style = MaterialTheme.typography.titleMedium)
+        },
         text = {
           Text(
               stringResource(
                   R.string.view_profile_screen_remove_favorite_dialog_message,
-                  parking.optName ?: stringResource(R.string.default_parking_name)))
+                  parking.optName ?: stringResource(R.string.default_parking_name)),
+              textAlign = TextAlign.Justify)
         },
         confirmButton = {
           TextButton(
               onClick = {
-                onRemove()
+                userViewModel.removeFavoriteParkingFromSelectedUser(parking)
                 showConfirmDialog = false
               }) {
                 Text(
