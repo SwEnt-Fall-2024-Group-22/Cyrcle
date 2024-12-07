@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
@@ -205,26 +206,22 @@ private fun TabLayout(
           stringResource(R.string.view_profile_screen_favorite_parkings),
           stringResource(R.string.view_profile_screen_my_reviews))
 
-  Column(
-      modifier = Modifier.fillMaxWidth().padding(top = 56.dp) // Adjust based on button height
-      ) {
-        TabRow(selectedTabIndex = selectedTabIndex, modifier = Modifier.testTag("TabRow")) {
-          tabs.forEachIndexed { index, title ->
-            Tab(
-                text = { Text(title) },
-                selected = selectedTabIndex == index,
-                onClick = { selectedTabIndex = index },
-                modifier = Modifier.testTag("Tab${title.replace(" ", "")}"))
-          }
-        }
-
-        when (selectedTabIndex) {
-          0 -> FavoriteParkingsSection(userViewModel, parkingViewModel, navigationActions)
-          1 ->
-              UserReviewsSection(
-                  reviewViewModel, userViewModel, parkingViewModel, navigationActions)
-        }
+  Column(modifier = Modifier.fillMaxWidth().padding(top = 24.dp)) {
+    TabRow(selectedTabIndex = selectedTabIndex, modifier = Modifier.testTag("TabRow")) {
+      tabs.forEachIndexed { index, title ->
+        Tab(
+            text = { Text(title) },
+            selected = selectedTabIndex == index,
+            onClick = { selectedTabIndex = index },
+            modifier = Modifier.testTag("Tab${title.replace(" ", "")}"))
       }
+    }
+
+    when (selectedTabIndex) {
+      0 -> FavoriteParkingsSection(userViewModel, parkingViewModel, navigationActions)
+      1 -> UserReviewsSection(reviewViewModel, userViewModel, parkingViewModel, navigationActions)
+    }
+  }
 }
 
 @Composable
@@ -241,9 +238,9 @@ private fun FavoriteParkingsSection(
         style = MaterialTheme.typography.bodyMedium,
         modifier = Modifier.testTag("NoFavoritesMessage").padding(16.dp))
   } else {
-    LazyColumn(
+    LazyRow(
         modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("FavoriteParkingList"),
-        verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
           itemsIndexed(favoriteParkings) { index, parking ->
             FavoriteParkingCard(
                 parking = parking,
