@@ -248,14 +248,14 @@ class ViewProfileScreenTest {
 
     composeTestRule.onNodeWithTag("FavoriteParkingList").assertIsDisplayed()
     composeTestRule.onNodeWithTag("ParkingItem0").assertIsDisplayed()
-
+    composeTestRule.onNodeWithTag("ParkingNote0", useUnmergedTree = true).assertIsDisplayed()
     composeTestRule
         .onNodeWithTag("ParkingName0", useUnmergedTree = true)
         .assertIsDisplayed()
         .assertTextContains("Rue de la paix")
 
     composeTestRule.onNodeWithTag("FavoriteParkingList").performScrollToIndex(1)
-
+    composeTestRule.onNodeWithTag("ParkingNote1", useUnmergedTree = true).assertIsDisplayed()
     composeTestRule.onNodeWithTag("ParkingItem1").assertIsDisplayed()
     composeTestRule
         .onNodeWithTag("ParkingName1", useUnmergedTree = true)
@@ -264,6 +264,7 @@ class ViewProfileScreenTest {
 
     composeTestRule.onNodeWithTag("FavoriteParkingList").performScrollToIndex(2)
     composeTestRule.onNodeWithTag("ParkingItem2").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("ParkingNote2", useUnmergedTree = true).assertIsDisplayed()
     composeTestRule
         .onNodeWithTag("ParkingName2", useUnmergedTree = true)
         .assertIsDisplayed()
