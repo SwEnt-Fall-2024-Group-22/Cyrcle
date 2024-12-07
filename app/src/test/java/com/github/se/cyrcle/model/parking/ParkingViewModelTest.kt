@@ -49,6 +49,58 @@ class ParkingViewModelTest {
   }
 
   @Test
+  fun onlineToOfflineModeTest() {
+    parkingViewModel.switchToOnlineMode()
+    val testParking = TestInstancesParking.parking1
+    `when`(parkingRepository.addParking(any(), any(), any())).then {
+      it.getArgument<() -> Unit>(1).invoke()
+    }
+
+    parkingViewModel.addParking(testParking)
+    verify(parkingRepository, times(1)).addParking(eq(testParking), any(), any())
+
+    parkingViewModel.switchToOfflineMode()
+
+    `when`(offlineParkingRepository.getParkingById(eq(testParking.uid), any(), any())).then {
+      it.getArgument<(Exception) -> Unit>(2)(Exception("Parking not found"))
+    }
+
+    var onFailureCalled = false
+    parkingViewModel.getParkingById(
+        testParking.uid,
+        { fail("Did not expect parking to be present") },
+        { onFailureCalled = true })
+    assert(onFailureCalled)
+    verify(offlineParkingRepository, times(1)).getParkingById(eq(testParking.uid), any(), any())
+  }
+
+  @Test
+  fun offlineToOnlineModeTest() {
+    parkingViewModel.switchToOfflineMode()
+
+    val testParking = TestInstancesParking.parking1
+    `when`(offlineParkingRepository.addParking(any(), any(), any())).then {
+      it.getArgument<() -> Unit>(1).invoke()
+    }
+
+    parkingViewModel.addParking(testParking)
+    verify(offlineParkingRepository, times(1)).addParking(eq(testParking), any(), any())
+
+    parkingViewModel.switchToOnlineMode()
+    `when`(parkingRepository.getParkingById(eq(testParking.uid), any(), any())).then {
+      it.getArgument<(Exception) -> Unit>(2)(Exception("Parking not found"))
+    }
+
+    var onFailureCalled = false
+    parkingViewModel.getParkingById(
+        testParking.uid,
+        { fail("Did not expect parking to be present") },
+        { onFailureCalled = true })
+    assert(onFailureCalled)
+    verify(parkingRepository, times(1)).getParkingById(eq(testParking.uid), any(), any())
+  }
+
+  @Test
   fun deleteZoneTest() {
     val zoneToDelete = Zone(BoundingBox.fromLngLats(0.0, 0.0, 1.0, 1.0), "zone1")
     val allZones = listOf(zoneToDelete, Zone(BoundingBox.fromLngLats(2.0, 2.0, 3.0, 3.0), "zone2"))

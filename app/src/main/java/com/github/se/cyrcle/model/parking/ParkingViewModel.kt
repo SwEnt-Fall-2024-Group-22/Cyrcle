@@ -711,14 +711,15 @@ class ParkingViewModel(
     }
   }
 
-
+  /** Changes the parking view model to offline mode. */
   fun switchToOfflineMode() {
-      tilesToParking.clear()
-      parkingRepository = offlineParkingRepository
+    tilesToParking.clear()
+    parkingRepository = offlineParkingRepository
   }
 
+  /** Changes the parking view model to online mode. */
   fun switchToOnlineMode() {
-      tilesToParking.clear()
-      parkingRepository = onlineParkingRepository
+    tilesToParking.clear()
+    parkingRepository = onlineParkingRepository
   }
 }
