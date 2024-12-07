@@ -200,7 +200,10 @@ private fun TabLayout(
     navigationActions: NavigationActions
 ) {
   var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
-  val tabs = listOf("Favorite Parkings", "My Reviews")
+  val tabs =
+      listOf(
+          stringResource(R.string.view_profile_screen_favorite_parkings),
+          stringResource(R.string.view_profile_screen_my_reviews))
 
   Column(
       modifier = Modifier.fillMaxWidth().padding(top = 56.dp) // Adjust based on button height
@@ -355,10 +358,11 @@ private fun UserReviewsSection(
             parkingViewModel.getParkingById(curReview.parking, { parking = it }, {})
 
             // We only display the review if the parking exists in the database
+            val defaultName = stringResource(R.string.default_parking_name)
             parking?.let {
               ReviewCard(
                   review = curReview,
-                  title = it.optName ?: "",
+                  title = it.optName ?: defaultName,
                   index = index,
                   isExpanded = isExpanded,
                   onCardClick = {
