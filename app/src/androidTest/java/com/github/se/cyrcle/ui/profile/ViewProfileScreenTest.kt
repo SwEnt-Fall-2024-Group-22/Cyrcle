@@ -13,6 +13,7 @@ import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -495,6 +496,21 @@ class ViewProfileScreenTest {
         .assertIsDisplayed()
         .onChildren()
         .assertCountEquals(2)
+
+    // Make sure he sees the two reviews. We first scroll to them
+    composeTestRule.onNodeWithTag("ReviewCard0").performScrollTo().assertIsDisplayed()
+
+    composeTestRule
+        .onNodeWithTag("ReviewTitle0", useUnmergedTree = true)
+        .assertIsDisplayed()
+        .assertTextEquals(TestInstancesParking.parking2.optName!!)
+
+    composeTestRule.onNodeWithTag("ReviewCard1").performScrollTo().assertIsDisplayed()
+
+    composeTestRule
+        .onNodeWithTag("ReviewTitle1", useUnmergedTree = true)
+        .assertIsDisplayed()
+        .assertTextEquals(TestInstancesParking.parking1.optName!!)
   }
 
   /**
