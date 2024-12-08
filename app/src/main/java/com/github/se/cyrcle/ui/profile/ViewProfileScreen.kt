@@ -1,6 +1,7 @@
 package com.github.se.cyrcle.ui.profile
 
 import android.app.Activity
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
@@ -38,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -388,7 +390,20 @@ private fun UserReviewsSection(
   val userReviews by reviewViewModel.userReviews.collectAsState()
 
   LaunchedEffect(userState?.public?.userId) {
-    userState?.public?.userId?.let { userId -> reviewViewModel.getReviewsByOwnerId(userId) }
+    userState?.public?.userId?.let { userId ->
+      Log.d("ViewProfileScreen", "Fetching reviews for user $userId")
+      reviewViewModel.getReviewsByOwnerId(userId)
+    }
+  }
+
+  // Map to store the parking corresponding to each review. This is used to display the parking
+  // name in the review card and allow to navigate to the parking's details screen
+  val reviewToParkingMap = remember { mutableStateMapOf<String, Parking>() }
+  LaunchedEffect(userReviews) {
+    userReviews.forEach { review ->
+      parkingViewModel.getParkingById(
+          review.parking, { parking -> reviewToParkingMap[review.uid] = parking }, {})
+    }
   }
 
   Box(modifier = Modifier.fillMaxSize().testTag("UserReviewsList")) {
@@ -399,31 +414,29 @@ private fun UserReviewsSection(
           modifier = Modifier.padding(16.dp).testTag("NoReviewsMessage"))
     } else {
       LazyColumn(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(16.dp)) {
-        items(items = userReviews, key = { it.uid }) { curReview ->
-          val index = userReviews.indexOf(curReview)
-          val isExpanded = true
+        items(
+            // Filter out reviews that do not have a corresponding parking (desynced data)
+            items = userReviews.filter { reviewToParkingMap.containsKey(it.uid) },
+            key = { it.uid }) { curReview ->
+              val index = userReviews.indexOf(curReview)
+              val isExpanded = true
 
-          // We need to get the parking associated with the review to allow clicking on the card
-          var parking by remember { mutableStateOf<Parking?>(null) }
-          parkingViewModel.getParkingById(curReview.parking, { parking = it }, {})
+              // We can assert parking is not null thanks to the filter above
+              val parking = reviewToParkingMap[curReview.uid]!!
 
-          // We only display the review if the parking exists in the database
-          val defaultName = stringResource(R.string.default_parking_name)
-          parking?.let {
-            ReviewCard(
-                review = curReview,
-                title = it.optName ?: defaultName,
-                index = index,
-                isExpanded = isExpanded,
-                onCardClick = {
-                  parkingViewModel.selectParking(it)
-                  navigationActions.navigateTo(Screen.PARKING_DETAILS)
-                },
-                options = mapOf(),
-                userViewModel = userViewModel,
-                reviewViewModel = reviewViewModel)
-          }
-        }
+              ReviewCard(
+                  review = curReview,
+                  title = parking.optName ?: stringResource(R.string.default_parking_name),
+                  index = index,
+                  isExpanded = isExpanded,
+                  onCardClick = {
+                    parkingViewModel.selectParking(parking)
+                    navigationActions.navigateTo(Screen.PARKING_DETAILS)
+                  },
+                  options = mapOf(),
+                  userViewModel = userViewModel,
+                  reviewViewModel = reviewViewModel)
+            }
       }
     }
   }
