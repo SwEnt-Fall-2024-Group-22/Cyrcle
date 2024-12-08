@@ -256,18 +256,21 @@ private fun FavoriteParkingsSection(
 ) {
   val favoriteParkings = userViewModel.favoriteParkings.collectAsState().value
 
-  Box(modifier = Modifier.fillMaxSize().testTag("FavoriteParkingList")) {
+  Box(modifier = Modifier.fillMaxSize()) {
     if (favoriteParkings.isEmpty()) {
       Text(
           text = stringResource(R.string.view_profile_screen_no_favorite_parking),
           style = MaterialTheme.typography.bodyMedium,
           modifier = Modifier.testTag("NoFavoritesMessage").padding(16.dp))
     } else {
-      LazyColumn(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(16.dp)) {
-        itemsIndexed(favoriteParkings) { index, parking ->
-          FavoriteParkingCard(navigationActions, parkingViewModel, userViewModel, parking, index)
-        }
-      }
+      LazyColumn(
+          modifier = Modifier.fillMaxWidth().testTag("FavoriteParkingList"),
+          contentPadding = PaddingValues(16.dp)) {
+            itemsIndexed(favoriteParkings) { index, parking ->
+              FavoriteParkingCard(
+                  navigationActions, parkingViewModel, userViewModel, parking, index)
+            }
+          }
     }
   }
 }
@@ -406,38 +409,40 @@ private fun UserReviewsSection(
     }
   }
 
-  Box(modifier = Modifier.fillMaxSize().testTag("UserReviewsList")) {
+  Box(modifier = Modifier.fillMaxSize()) {
     if (userReviews.isEmpty()) {
       Text(
           text = stringResource(R.string.view_profile_screen_no_reviews_message),
           style = MaterialTheme.typography.bodyMedium,
           modifier = Modifier.padding(16.dp).testTag("NoReviewsMessage"))
     } else {
-      LazyColumn(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(16.dp)) {
-        items(
-            // Filter out reviews that do not have a corresponding parking (desynced data)
-            items = userReviews.filter { reviewToParkingMap.containsKey(it.uid) },
-            key = { it.uid }) { curReview ->
-              val index = userReviews.indexOf(curReview)
-              val isExpanded = true
+      LazyColumn(
+          modifier = Modifier.fillMaxWidth().testTag("UserReviewsList"),
+          contentPadding = PaddingValues(16.dp)) {
+            items(
+                // Filter out reviews that do not have a corresponding parking (desynced data)
+                items = userReviews.filter { reviewToParkingMap.containsKey(it.uid) },
+                key = { it.uid }) { curReview ->
+                  val index = userReviews.indexOf(curReview)
+                  val isExpanded = true
 
-              // We can assert parking is not null thanks to the filter above
-              val parking = reviewToParkingMap[curReview.uid]!!
+                  // We can assert parking is not null thanks to the filter above
+                  val parking = reviewToParkingMap[curReview.uid]!!
 
-              ReviewCard(
-                  review = curReview,
-                  title = parking.optName ?: stringResource(R.string.default_parking_name),
-                  index = index,
-                  isExpanded = isExpanded,
-                  onCardClick = {
-                    parkingViewModel.selectParking(parking)
-                    navigationActions.navigateTo(Screen.PARKING_DETAILS)
-                  },
-                  options = mapOf(),
-                  userViewModel = userViewModel,
-                  reviewViewModel = reviewViewModel)
-            }
-      }
+                  ReviewCard(
+                      review = curReview,
+                      title = parking.optName ?: stringResource(R.string.default_parking_name),
+                      index = index,
+                      isExpanded = isExpanded,
+                      onCardClick = {
+                        parkingViewModel.selectParking(parking)
+                        navigationActions.navigateTo(Screen.PARKING_DETAILS)
+                      },
+                      options = mapOf(),
+                      userViewModel = userViewModel,
+                      reviewViewModel = reviewViewModel)
+                }
+          }
     }
   }
 }
