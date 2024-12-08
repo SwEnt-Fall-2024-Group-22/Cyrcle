@@ -209,15 +209,29 @@ fun WheelView(
 
           val startAngle = index * segmentAngle
           val middleAngle = Math.toRadians((startAngle + segmentAngle / 2.0))
-          val textRadius = radius * 0.6f
+          val textRadius = radius * 0.65f // Moved closer to edge (was 0.6f)
           val textX = centerX + cos(middleAngle).toFloat() * textRadius
           val textY = centerY + sin(middleAngle).toFloat() * textRadius
+
+          // Measure text size first
+          val textLayoutResult =
+              textMeasurer.measure(
+                  text = segment.name,
+                  style =
+                      TextStyle(
+                          color = Color.White,
+                          fontSize = (radius * 0.06f).sp,
+                          textAlign = TextAlign.Center))
 
           rotate(startAngle + segmentAngle / 2 + 90, Offset(textX, textY)) {
             drawText(
                 textMeasurer = textMeasurer,
                 text = segment.name,
-                topLeft = Offset(textX - 25f, textY - 10f),
+                topLeft =
+                    Offset(
+                        textX - textLayoutResult.size.width / 2f, // Center horizontally
+                        textY - textLayoutResult.size.height / 2f // Center vertically
+                        ),
                 style =
                     TextStyle(
                         color = Color.White,
@@ -297,12 +311,24 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
                   colors =
                       ButtonDefaults.buttonColors(
                           containerColor = Color.Red, disabledContainerColor = Color.Gray)) {
-                    Text(
-                        text = stringResource(R.string.spin_button_text),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.wrapContentSize().testTag("spin_button_text"))
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.wrapContentSize()) {
+                          Text(
+                              text = stringResource(R.string.spin_button_text),
+                              fontSize = 16.sp,
+                              fontWeight = FontWeight.Bold,
+                              textAlign = TextAlign.Center,
+                              modifier = Modifier.testTag("spin_button_text"))
+                          Text(
+                              text =
+                                  stringResource(
+                                      R.string.gambling_screen_spin_button_cost, SPIN_COST),
+                              fontSize = 9.sp,
+                              fontWeight = FontWeight.Medium,
+                              textAlign = TextAlign.Center,
+                              modifier = Modifier.testTag("spin_cost_text"))
+                        }
                   }
             }
       }
