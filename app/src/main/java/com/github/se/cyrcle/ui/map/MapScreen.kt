@@ -95,7 +95,6 @@ import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.github.se.cyrcle.ui.theme.molecules.FilterPanel
 import com.google.gson.Gson
 import com.mapbox.android.gestures.MoveGestureDetector
-import com.mapbox.common.TileStore
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraBoundsOptions
 import com.mapbox.maps.EdgeInsets
@@ -141,6 +140,7 @@ fun MapScreen(
 ) {
   // Collect the list of parkings from the ParkingViewModel as a state
   val listOfParkings by parkingViewModel.filteredRectParkings.collectAsState(emptyList())
+
   // Create a remember state to store the search query of the search bar as a mutable state
   val searchQuery = remember { mutableStateOf("") }
 
@@ -258,6 +258,7 @@ fun MapScreen(
             mapViewportState = mapViewportState,
             style = { MapConfig.DefaultStyle() }) {
               DisposableMapEffect { mapView ->
+
                 // ======================= GLOBAL SETTINGS =======================
                 // Set camera bounds options
                 val cameraBoundsOptions =
@@ -272,14 +273,6 @@ fun MapScreen(
                 // the
                 // location component
                 if (locationEnabled) mapViewModel.initLocationComponent(mapView)
-
-                TileStore.create().clearAmbientCache { expected ->
-                  if (expected.isValue) {
-                    Log.d("MapScreen", "Cache cleared successfully")
-                  } else {
-                    Log.e("MapScreen", "Error clearing cache: ${expected.error}")
-                  }
-                }
                 // ======================= GLOBAL SETTINGS =======================
 
                 // ======================= ANNOTATIONS =======================
