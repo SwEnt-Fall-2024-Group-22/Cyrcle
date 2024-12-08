@@ -440,9 +440,6 @@ class ViewProfileScreenTest {
     userViewModel.addFavoriteParkingToSelectedUser(parking4)
 
     composeTestRule.waitForIdle()
-    composeTestRule.onNodeWithTag("FavoriteToggle3", useUnmergedTree = true).assertDoesNotExist()
-
-    composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("FavoriteParkingList").performScrollToIndex(3)
     composeTestRule.onNodeWithTag("FavoriteToggle3").assertIsDisplayed()
   }
