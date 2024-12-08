@@ -192,12 +192,25 @@ fun ViewProfileScreen(
                   colorLevel = ColorLevel.TERTIARY,
                   testTag = "EditButton")
 
+              val userReviews by reviewViewModel.userReviews.collectAsState()
+              // Map to store the parking corresponding to each review. This is used to display the
+              // parking
+              // name in the review card and allow to navigate to the parking's details screen
+              val reviewToParkingMap = remember { mutableStateMapOf<String, Parking>() }
+              LaunchedEffect(userReviews) {
+                userReviews.forEach { review ->
+                  parkingViewModel.getParkingById(
+                      review.parking, { parking -> reviewToParkingMap[review.uid] = parking }, {})
+                }
+              }
+
               // Display the TabLayout
               TabLayout(
                   userViewModel = userViewModel,
                   parkingViewModel = parkingViewModel,
                   reviewViewModel = reviewViewModel,
-                  navigationActions = navigationActions)
+                  navigationActions = navigationActions,
+                  reviewToParkingMap = reviewToParkingMap)
             }
           }
         }
@@ -218,7 +231,8 @@ private fun TabLayout(
     userViewModel: UserViewModel,
     parkingViewModel: ParkingViewModel,
     reviewViewModel: ReviewViewModel,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    reviewToParkingMap: Map<String, Parking>
 ) {
   val tabs =
       listOf(
@@ -242,7 +256,13 @@ private fun TabLayout(
     HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
       when (page) {
         0 -> FavoriteParkingsSection(userViewModel, parkingViewModel, navigationActions)
-        1 -> UserReviewsSection(reviewViewModel, userViewModel, parkingViewModel, navigationActions)
+        1 ->
+            UserReviewsSection(
+                reviewViewModel,
+                userViewModel,
+                parkingViewModel,
+                navigationActions,
+                reviewToParkingMap)
       }
     }
   }
@@ -387,10 +407,10 @@ private fun UserReviewsSection(
     reviewViewModel: ReviewViewModel,
     userViewModel: UserViewModel,
     parkingViewModel: ParkingViewModel,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    reviewToParkingMap: Map<String, Parking>
 ) {
   val userState by userViewModel.currentUser.collectAsState()
-  val userReviews by reviewViewModel.userReviews.collectAsState()
 
   LaunchedEffect(userState?.public?.userId) {
     userState?.public?.userId?.let { userId ->
@@ -399,15 +419,7 @@ private fun UserReviewsSection(
     }
   }
 
-  // Map to store the parking corresponding to each review. This is used to display the parking
-  // name in the review card and allow to navigate to the parking's details screen
-  val reviewToParkingMap = remember { mutableStateMapOf<String, Parking>() }
-  LaunchedEffect(userReviews) {
-    userReviews.forEach { review ->
-      parkingViewModel.getParkingById(
-          review.parking, { parking -> reviewToParkingMap[review.uid] = parking }, {})
-    }
-  }
+  val userReviews by reviewViewModel.userReviews.collectAsState()
 
   Box(modifier = Modifier.fillMaxSize()) {
     if (userReviews.isEmpty()) {
