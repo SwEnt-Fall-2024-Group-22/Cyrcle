@@ -71,7 +71,7 @@ class ConnectivityObserver(
           userViewModel.setIsOnlineMode(false)
         })
     // mapviewmodel.switchToOnlineMode()
-    // parkingViewModel.switchToOnlineMode()
+    parkingViewModel.switchToOnlineMode()
   }
 
   /**
@@ -83,6 +83,6 @@ class ConnectivityObserver(
     Log.d("ConnectivityObserver", "Switching to offline mode")
     userViewModel.setCurrentUser(null)
     // mapviewmodel.switchToOfflineMode()
-    // parkingViewModel.switchToOfflineMode()
+    parkingViewModel.switchToOfflineMode()
   }
 }

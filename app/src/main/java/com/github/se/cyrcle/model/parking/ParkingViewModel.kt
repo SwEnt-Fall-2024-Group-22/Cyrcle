@@ -41,10 +41,12 @@ const val PARKING_MAX_SIDE_LENGTH = 50.0
  */
 class ParkingViewModel(
     private val imageRepository: ImageRepository,
-    private val parkingRepository: ParkingRepository,
+    private val onlineParkingRepository: ParkingRepository,
     private val offlineParkingRepository: OfflineParkingRepository,
     private val reportedObjectRepository: ReportedObjectRepository,
 ) : ViewModel() {
+
+  private var parkingRepository = onlineParkingRepository
 
   // ================== Parkings ==================
   /** List of parkings within the designated area */
@@ -666,14 +668,20 @@ class ParkingViewModel(
 
     tilesToDownload.forEach { tile ->
       if (tilesToParking.containsKey(tile)) {
-        offlineParkingRepository.downloadParkings(tilesToParking[tile]!!) {}
+        offlineParkingRepository.downloadParkings(
+            filterParkingInRect(
+                tilesToParking[tile]!!,
+                zone.boundingBox.southwest(),
+                zone.boundingBox.northeast())) {}
       } else {
         parkingRepository.getParkingsForTile(
             tile,
             {
-              offlineParkingRepository.downloadParkings(it) {
-                Log.d("ParkingViewModel", "Tile downloaded successfully")
-              }
+              offlineParkingRepository.downloadParkings(
+                  filterParkingInRect(
+                      it, zone.boundingBox.southwest(), zone.boundingBox.northeast())) {
+                    Log.d("ParkingViewModel", "Tile downloaded successfully")
+                  }
             },
             {
               Log.e("ParkingViewModel", "Error getting parkings for tile: $it")
@@ -706,6 +714,45 @@ class ParkingViewModel(
             zoneToDelete.boundingBox.southwest(), zoneToDelete.boundingBox.northeast())
     offlineParkingRepository.deleteTiles(tilesToDelete - tilesToKeep) {
       Log.d("ParkingViewModel", "Tiles deleted successfully")
+    }
+  }
+
+  /** Changes the parking view model to offline mode. */
+  fun switchToOfflineMode() {
+    tilesToParking.clear()
+    _rectParkings.value = emptyList()
+    _closestParkings.value = emptyList()
+    _selectedParkingReports.value = emptyList()
+    parkingRepository = offlineParkingRepository
+  }
+
+  /** Changes the parking view model to online mode. */
+  fun switchToOnlineMode() {
+    tilesToParking.clear()
+    _rectParkings.value = emptyList()
+    _closestParkings.value = emptyList()
+    _selectedParkingReports.value = emptyList()
+    parkingRepository = onlineParkingRepository
+  }
+
+  /**
+   * Filters the parkings in the given list to only keep the ones that are in the given zone.
+   *
+   * @param parkingList the list of parkings to filter
+   * @param bottomLeft the bottom left corner of the zone
+   * @param topRight the top right corner of the zone
+   * @return the list of parking that are in the given zone
+   */
+  private fun filterParkingInRect(
+      parkingList: List<Parking>,
+      bottomLeft: Point,
+      topRight: Point
+  ): List<Parking> {
+    return parkingList.filter { parking ->
+      parking.location.center.latitude() >= bottomLeft.latitude() &&
+          parking.location.center.latitude() <= topRight.latitude() &&
+          parking.location.center.longitude() >= bottomLeft.longitude() &&
+          parking.location.center.longitude() <= topRight.longitude()
     }
   }
 }
