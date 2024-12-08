@@ -133,7 +133,7 @@ fun ZoneCard(parkingViewModel: ParkingViewModel, zone: Zone, zones: MutableState
                   Zone.refreshZone(zone, context)
                   zones.value = Zone.loadZones(context)
                   parkingViewModel.downloadZone(zone, {}, {})
-                    MapConfig.downloadZone(zone)
+                  MapConfig.downloadZone(zone)
                   // Call functions to update map tiles and parking data here.
                 })
         Icon(

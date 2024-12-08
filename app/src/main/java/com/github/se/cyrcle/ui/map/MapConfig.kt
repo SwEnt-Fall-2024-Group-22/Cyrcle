@@ -42,7 +42,7 @@ object MapConfig {
     return MapStyle("mapbox://styles/seanprz/cm27wh9ff00jl01r21jz3hcb1")
   }
 
-    // Useful function to debug the downloaded tiles, can be called from mapScreen if needed
+  // Useful function to debug the downloaded tiles, can be called from mapScreen if needed
   fun getAllTilesDownloaded() {
     val tileStore = TileStore.create()
     // Get a list of tile regions that are currently available.
@@ -59,32 +59,33 @@ object MapConfig {
     }
   }
 
-    /**
-     * Download the tiles to local storage for a specific zone
-     * @param zone the zone to download
-     */
+  /**
+   * Download the tiles to local storage for a specific zone
+   *
+   * @param zone the zone to download
+   */
   fun downloadZone(zone: Zone) {
-      // Defines the area to download
-      val geometry =
-          Polygon.fromLngLats(
-              listOf(
-                  listOf(
-                      zone.boundingBox.southwest(),
-                      zone.boundingBox.northeast(),
-                  )))
-
+    // Defines the area to download
+    val geometry =
+        Polygon.fromLngLats(
+            listOf(
+                listOf(
+                    zone.boundingBox.southwest(),
+                    zone.boundingBox.northeast(),
+                )))
 
     // Define style and zooms levels to download
     val tilesetDescriptor =
-        OfflineManager().createTilesetDescriptor(
-            TilesetDescriptorOptions.Builder()
-                .styleURI("mapbox://styles/seanprz/cm27wh9ff00jl01r21jz3hcb1")
-                .minZoom(minZoom.toInt().toByte())
-                .maxZoom(maxZoom.toInt().toByte())
-                .build())
+        OfflineManager()
+            .createTilesetDescriptor(
+                TilesetDescriptorOptions.Builder()
+                    .styleURI("mapbox://styles/seanprz/cm27wh9ff00jl01r21jz3hcb1")
+                    .minZoom(minZoom.toInt().toByte())
+                    .maxZoom(maxZoom.toInt().toByte())
+                    .build())
 
-        // Finally Download the tile region
-      TileStore.create().loadTileRegion(
+    // Finally Download the tile region
+    TileStore.create().loadTileRegion(
         zone.uid, // identify the tileRegsion with the zoneUID
         TileRegionLoadOptions.Builder()
             .geometry(geometry)
@@ -104,12 +105,13 @@ object MapConfig {
         }
   }
 
-    /**
-     * Delete the tiles from local storage for a specific zone
-     * @param zone the zone to delete
-     */
+  /**
+   * Delete the tiles from local storage for a specific zone
+   *
+   * @param zone the zone to delete
+   */
   fun deleteZoneFromStorage(zone: Zone) {
-      TileStore.create().removeTileRegion(zone.uid) { expected ->
+    TileStore.create().removeTileRegion(zone.uid) { expected ->
       if (expected.isValue) {
         // Tile region removal finishes successfully
         Log.d("ZoneManager", "Tile region ${zone.uid}  removed")
