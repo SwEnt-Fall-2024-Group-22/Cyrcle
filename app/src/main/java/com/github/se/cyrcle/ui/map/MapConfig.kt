@@ -18,6 +18,7 @@ import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportS
 import com.mapbox.maps.extension.compose.style.MapStyle
 
 object MapConfig {
+  private const val STYLE_URI = "mapbox://styles/seanprz/cm27wh9ff00jl01r21jz3hcb1"
 
   @Composable
   fun createMapViewPortStateFromViewModel(mapViewModel: MapViewModel): MapViewportState {
@@ -39,7 +40,7 @@ object MapConfig {
 
   @Composable
   fun DefaultStyle() {
-    return MapStyle("mapbox://styles/seanprz/cm27wh9ff00jl01r21jz3hcb1")
+    return MapStyle(STYLE_URI)
   }
 
   // Useful function to debug the downloaded tiles, can be called from mapScreen if needed
@@ -79,7 +80,7 @@ object MapConfig {
         OfflineManager()
             .createTilesetDescriptor(
                 TilesetDescriptorOptions.Builder()
-                    .styleURI("mapbox://styles/seanprz/cm27wh9ff00jl01r21jz3hcb1")
+                    .styleURI(STYLE_URI)
                     .minZoom(minZoom.toInt().toByte())
                     .maxZoom(maxZoom.toInt().toByte())
                     .build())
