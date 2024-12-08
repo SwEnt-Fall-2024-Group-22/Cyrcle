@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -13,6 +14,9 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeLeft
+import androidx.compose.ui.test.swipeRight
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
@@ -546,5 +550,34 @@ class ViewProfileScreenTest {
 
     // Trigger review fetch for user1
     reviewViewModel.getReviewsByOwnerId("user1")
+  }
+
+  @Test
+  fun testTabLayoutSwipeChangesTab() {
+    // Check initial state
+    composeTestRule.onNodeWithTag("TabFavoriteParkings").assertIsSelected()
+    composeTestRule.onNodeWithTag("FavoriteParkingList").assertIsDisplayed()
+
+    // Swipe left on the content area to change to Reviews tab
+    composeTestRule.onNodeWithTag("FavoriteParkingList").performTouchInput {
+      swipeLeft(startX = this.width * 0.9f, endX = this.width * 0.1f)
+    }
+    composeTestRule.waitForIdle()
+
+    // Check if Reviews tab is selected and content is displayed
+    composeTestRule.onNodeWithTag("TabMyReviews").assertIsSelected()
+  }
+
+  @Test
+  fun testTabLayoutSwipeDoesNotExceedTabCount() {
+    // Try to swipe right when already on the first tab
+    composeTestRule.onNodeWithTag("FavoriteParkingList").performTouchInput {
+      swipeRight(startX = this.width * 0.1f, endX = this.width * 0.9f)
+    }
+    composeTestRule.waitForIdle()
+
+    // Check that we're still on the first tab
+    composeTestRule.onNodeWithTag("TabFavoriteParkings").assertIsSelected()
+    composeTestRule.onNodeWithTag("FavoriteParkingList").assertIsDisplayed()
   }
 }

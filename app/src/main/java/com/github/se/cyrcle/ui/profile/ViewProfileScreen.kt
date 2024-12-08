@@ -2,6 +2,7 @@ package com.github.se.cyrcle.ui.profile
 
 import android.app.Activity
 import android.widget.Toast
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,6 +18,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Diamond
 import androidx.compose.material.icons.filled.Favorite
@@ -35,10 +38,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,6 +70,7 @@ import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.IconButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
+import kotlinx.coroutines.launch
 
 @Composable
 fun ViewProfileScreen(
@@ -199,7 +202,15 @@ fun ViewProfileScreen(
       }
 }
 
-/** Tab layout that displays different sections based on the selected tab. */
+/**
+ * Tab layout for the profile screen. This layout contains the following tabs:
+ * - Favorite Parkings
+ * - My Reviews
+ *
+ * This layout allows a tab to be selected by either clicking on the tab itself or by swiping
+ * horizontally.
+ */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun TabLayout(
     userViewModel: UserViewModel,
@@ -207,26 +218,30 @@ private fun TabLayout(
     reviewViewModel: ReviewViewModel,
     navigationActions: NavigationActions
 ) {
-  var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
   val tabs =
       listOf(
           stringResource(R.string.view_profile_screen_favorite_parkings),
           stringResource(R.string.view_profile_screen_my_reviews))
 
+  val pagerState = rememberPagerState(pageCount = { tabs.size })
+  val coroutineScope = rememberCoroutineScope()
+
   Column(modifier = Modifier.fillMaxWidth().padding(top = 24.dp)) {
-    TabRow(selectedTabIndex = selectedTabIndex, modifier = Modifier.testTag("TabRow")) {
+    TabRow(selectedTabIndex = pagerState.currentPage, modifier = Modifier.testTag("TabRow")) {
       tabs.forEachIndexed { index, title ->
         Tab(
             text = { Text(title) },
-            selected = selectedTabIndex == index,
-            onClick = { selectedTabIndex = index },
+            selected = pagerState.currentPage == index,
+            onClick = { coroutineScope.launch { pagerState.animateScrollToPage(index) } },
             modifier = Modifier.testTag("Tab${title.replace(" ", "")}"))
       }
     }
 
-    when (selectedTabIndex) {
-      0 -> FavoriteParkingsSection(userViewModel, parkingViewModel, navigationActions)
-      1 -> UserReviewsSection(reviewViewModel, userViewModel, parkingViewModel, navigationActions)
+    HorizontalPager(state = pagerState, modifier = Modifier.fillMaxWidth()) { page ->
+      when (page) {
+        0 -> FavoriteParkingsSection(userViewModel, parkingViewModel, navigationActions)
+        1 -> UserReviewsSection(reviewViewModel, userViewModel, parkingViewModel, navigationActions)
+      }
     }
   }
 }
