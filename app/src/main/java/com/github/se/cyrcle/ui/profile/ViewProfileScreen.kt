@@ -237,7 +237,7 @@ private fun TabLayout(
       }
     }
 
-    HorizontalPager(state = pagerState, modifier = Modifier.fillMaxWidth()) { page ->
+    HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
       when (page) {
         0 -> FavoriteParkingsSection(userViewModel, parkingViewModel, navigationActions)
         1 -> UserReviewsSection(reviewViewModel, userViewModel, parkingViewModel, navigationActions)
@@ -254,19 +254,19 @@ private fun FavoriteParkingsSection(
 ) {
   val favoriteParkings = userViewModel.favoriteParkings.collectAsState().value
 
-  if (favoriteParkings.isEmpty()) {
-    Text(
-        text = stringResource(R.string.view_profile_screen_no_favorite_parking),
-        style = MaterialTheme.typography.bodyMedium,
-        modifier = Modifier.testTag("NoFavoritesMessage").padding(16.dp))
-  } else {
-    LazyColumn(
-        modifier = Modifier.fillMaxWidth().testTag("FavoriteParkingList"),
-        contentPadding = PaddingValues(16.dp)) {
-          itemsIndexed(favoriteParkings) { index, parking ->
-            FavoriteParkingCard(navigationActions, parkingViewModel, userViewModel, parking, index)
-          }
+  Box(modifier = Modifier.fillMaxSize().testTag("FavoriteParkingList")) {
+    if (favoriteParkings.isEmpty()) {
+      Text(
+          text = stringResource(R.string.view_profile_screen_no_favorite_parking),
+          style = MaterialTheme.typography.bodyMedium,
+          modifier = Modifier.testTag("NoFavoritesMessage").padding(16.dp))
+    } else {
+      LazyColumn(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(16.dp)) {
+        itemsIndexed(favoriteParkings) { index, parking ->
+          FavoriteParkingCard(navigationActions, parkingViewModel, userViewModel, parking, index)
         }
+      }
+    }
   }
 }
 
@@ -391,40 +391,40 @@ private fun UserReviewsSection(
     userState?.public?.userId?.let { userId -> reviewViewModel.getReviewsByOwnerId(userId) }
   }
 
-  if (userReviews.isEmpty()) {
-    Text(
-        text = stringResource(R.string.view_profile_screen_no_reviews_message),
-        style = MaterialTheme.typography.bodyMedium,
-        modifier = Modifier.padding(16.dp).testTag("NoReviewsMessage"))
-  } else {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize().testTag("UserReviewsList"),
-        contentPadding = PaddingValues(16.dp)) {
-          items(items = userReviews, key = { it.uid }) { curReview ->
-            val index = userReviews.indexOf(curReview)
-            val isExpanded = true
+  Box(modifier = Modifier.fillMaxSize().testTag("UserReviewsList")) {
+    if (userReviews.isEmpty()) {
+      Text(
+          text = stringResource(R.string.view_profile_screen_no_reviews_message),
+          style = MaterialTheme.typography.bodyMedium,
+          modifier = Modifier.padding(16.dp).testTag("NoReviewsMessage"))
+    } else {
+      LazyColumn(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(16.dp)) {
+        items(items = userReviews, key = { it.uid }) { curReview ->
+          val index = userReviews.indexOf(curReview)
+          val isExpanded = true
 
-            // We need to get the parking associated with the review to allow clicking on the card
-            var parking by remember { mutableStateOf<Parking?>(null) }
-            parkingViewModel.getParkingById(curReview.parking, { parking = it }, {})
+          // We need to get the parking associated with the review to allow clicking on the card
+          var parking by remember { mutableStateOf<Parking?>(null) }
+          parkingViewModel.getParkingById(curReview.parking, { parking = it }, {})
 
-            // We only display the review if the parking exists in the database
-            val defaultName = stringResource(R.string.default_parking_name)
-            parking?.let {
-              ReviewCard(
-                  review = curReview,
-                  title = it.optName ?: defaultName,
-                  index = index,
-                  isExpanded = isExpanded,
-                  onCardClick = {
-                    parkingViewModel.selectParking(it)
-                    navigationActions.navigateTo(Screen.PARKING_DETAILS)
-                  },
-                  options = mapOf(),
-                  userViewModel = userViewModel,
-                  reviewViewModel = reviewViewModel)
-            }
+          // We only display the review if the parking exists in the database
+          val defaultName = stringResource(R.string.default_parking_name)
+          parking?.let {
+            ReviewCard(
+                review = curReview,
+                title = it.optName ?: defaultName,
+                index = index,
+                isExpanded = isExpanded,
+                onCardClick = {
+                  parkingViewModel.selectParking(it)
+                  navigationActions.navigateTo(Screen.PARKING_DETAILS)
+                },
+                options = mapOf(),
+                userViewModel = userViewModel,
+                reviewViewModel = reviewViewModel)
           }
         }
+      }
+    }
   }
 }
