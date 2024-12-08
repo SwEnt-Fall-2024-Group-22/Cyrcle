@@ -125,7 +125,8 @@ class ParkingViewModelTest {
 
   @Test
   fun downloadZoneTest() {
-    val zone = Zone(BoundingBox.fromLngLats(0.0, 0.0, 1.0, 1.0), "zone1")
+    // 6.566397, 46.518467 is the EPFL center
+    val zone = Zone(BoundingBox.fromLngLats(6.5, 46.5, 6.6, 46.6), "zone1")
     val tiles =
         TileUtils.getAllTilesInRectangle(zone.boundingBox.southwest(), zone.boundingBox.northeast())
     val mutableTiles = tiles.toMutableSet()
