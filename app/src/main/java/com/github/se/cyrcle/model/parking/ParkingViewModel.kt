@@ -848,6 +848,7 @@ class ParkingViewModel(
           val updatedParking =
               selectedParking.copy(
                   images = selectedParking.images.plus(destinationPath),
+                  maxNumOfImages = selectedParking.maxNumOfImages + 1,
                   reportedImages = emptyList())
           selectParking(updatedParking)
           parkingRepository.updateParking(
