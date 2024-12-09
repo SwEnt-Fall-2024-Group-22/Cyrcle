@@ -25,17 +25,12 @@ import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockReviewRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
-import com.github.se.cyrcle.model.parking.Location
-import com.github.se.cyrcle.model.parking.Parking
-import com.github.se.cyrcle.model.parking.ParkingCapacity
-import com.github.se.cyrcle.model.parking.ParkingProtection
-import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
+import com.github.se.cyrcle.model.parking.TestInstancesParking.parking4
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.review.TestInstancesReview
-import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserDetails
 import com.github.se.cyrcle.model.user.UserPublic
@@ -43,7 +38,6 @@ import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
-import com.mapbox.geojson.Point
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -419,22 +413,6 @@ class ViewProfileScreenTest {
         .assertIsDisplayed()
         .assertHasClickAction()
         .performClick()
-
-    val parking4 =
-        Parking(
-            "Test_spot_4",
-            "Roulade P",
-            "Wazzup beijing",
-            Location(Point.fromLngLat(7.19, 47.19)),
-            listOf(
-                "https://upload.wikimedia.org/wikipedia/commons/7/78/%22G%C3%A4nsemarkt%22_in_Amance_-_panoramio.jpg"),
-            ParkingCapacity.LARGE,
-            ParkingRackType.TWO_TIER,
-            ParkingProtection.COVERED,
-            0.0,
-            true,
-            owner = TestInstancesUser.user1.public.userId,
-            emptyList())
 
     parkingViewModel.addParking(parking4)
     userViewModel.addFavoriteParkingToSelectedUser(parking4)
