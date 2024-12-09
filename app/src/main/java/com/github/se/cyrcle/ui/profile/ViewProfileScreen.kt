@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.profile
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.util.Log
 import android.widget.Toast
@@ -74,6 +75,7 @@ import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import kotlinx.coroutines.launch
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ViewProfileScreen(
     navigationActions: NavigationActions,
@@ -99,13 +101,12 @@ fun ViewProfileScreen(
       },
       floatingActionButton = {
         if (userState?.public?.userId != null) {
-          if (userState!!.details?.isAdmin == true) {
             FloatingActionButton(
                 onClick = { navigationActions.navigateTo(Screen.ADMIN) },
                 modifier = Modifier.testTag("AdminFAB"),
                 containerColor = MaterialTheme.colorScheme.primary) {
                   Text(text = "Admin", color = MaterialTheme.colorScheme.onPrimary)
-                }
+
           }
         }
       }) { innerPadding ->
