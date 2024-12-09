@@ -12,9 +12,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -580,25 +583,34 @@ fun SuggestionMenu(
   ModalBottomSheet(
       onDismissRequest = { showSuggestions.value = false },
       modifier = Modifier.testTag("SuggestionsMenu")) {
-        LazyColumn(contentPadding = PaddingValues(vertical = 4.dp)) {
-          items(uniqueSuggestions) { suggestion ->
-            Surface(
-                onClick = {
-                  handleSuggestionClick(suggestion, showSuggestions, mapViewportState, mapViewModel)
-                },
-                color = MaterialTheme.colorScheme.surface,
-                modifier = Modifier.fillMaxWidth().testTag("suggestionItem${suggestion.city}")) {
-                  Text(
-                      text =
-                          suggestion.suggestionFormatDisplayName(
-                              MAX_SUGGESTION_DISPLAY_NAME_LENGTH_MAP, Address.Mode.MAP),
-                      modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                      style = MaterialTheme.typography.bodyMedium)
-                }
-            HorizontalDivider(
-                thickness = 0.5.dp, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.24f))
-          }
-        }
+        LazyColumn(
+            contentPadding =
+                PaddingValues(
+                    // Add padding for the android navigation bar according to the system insets
+                    bottom =
+                        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
+                            4.dp)) {
+              items(uniqueSuggestions) { suggestion ->
+                Surface(
+                    onClick = {
+                      handleSuggestionClick(
+                          suggestion, showSuggestions, mapViewportState, mapViewModel)
+                    },
+                    color = MaterialTheme.colorScheme.surface,
+                    modifier =
+                        Modifier.fillMaxWidth().testTag("suggestionItem${suggestion.city}")) {
+                      Text(
+                          text =
+                              suggestion.suggestionFormatDisplayName(
+                                  MAX_SUGGESTION_DISPLAY_NAME_LENGTH_MAP, Address.Mode.MAP),
+                          modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                          style = MaterialTheme.typography.bodyMedium)
+                    }
+                HorizontalDivider(
+                    thickness = 0.5.dp,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.24f))
+              }
+            }
       }
 }
 
