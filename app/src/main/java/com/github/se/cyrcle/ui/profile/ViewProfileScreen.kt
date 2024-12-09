@@ -2,6 +2,7 @@ package com.github.se.cyrcle.ui.profile
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
