@@ -62,8 +62,8 @@ import com.github.se.cyrcle.model.parking.ParkingProtection
 import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.permission.PermissionHandler
-import com.github.se.cyrcle.ui.list.NumberOfSuggestionsForMenu
-import com.github.se.cyrcle.ui.list.maxSuggestionDisplayNameLengthList
+import com.github.se.cyrcle.ui.list.MAX_SUGGESTION_DISPLAY_NAME_LENGTH_LIST
+import com.github.se.cyrcle.ui.list.NUMBER_OF_SUGGESTIONS_FOR_MENU
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
@@ -438,7 +438,7 @@ fun SearchBarListScreen(
                 listOfSuggestions.value.filter { suggestion ->
                   val displayName =
                       suggestion.suggestionFormatDisplayName(
-                          maxSuggestionDisplayNameLengthList, Address.Mode.LIST)
+                          MAX_SUGGESTION_DISPLAY_NAME_LENGTH_LIST, Address.Mode.LIST)
                   if (displayName in seenNames) {
                     false
                   } else {
@@ -447,12 +447,12 @@ fun SearchBarListScreen(
                   }
                 }
 
-            for (address in uniqueSuggestions.value.take(NumberOfSuggestionsForMenu)) {
+            for (address in uniqueSuggestions.value.take(NUMBER_OF_SUGGESTIONS_FOR_MENU)) {
               DropdownMenuItem(
                   text = {
                     Text(
                         address.suggestionFormatDisplayName(
-                            maxSuggestionDisplayNameLengthList, Address.Mode.LIST),
+                            MAX_SUGGESTION_DISPLAY_NAME_LENGTH_LIST, Address.Mode.LIST),
                         textAlign = TextAlign.Start)
                   },
                   modifier = Modifier.testTag("SuggestionMenuItem${address.city}"),
@@ -464,7 +464,7 @@ fun SearchBarListScreen(
                     isTextFieldVisible.value = false
                     textFieldValue.value =
                         address.suggestionFormatDisplayName(
-                            maxSuggestionDisplayNameLengthList, Address.Mode.LIST)
+                            MAX_SUGGESTION_DISPLAY_NAME_LENGTH_LIST, Address.Mode.LIST)
                     focusManager.clearFocus()
                   })
             }

@@ -75,8 +75,8 @@ import kotlin.math.roundToInt
 
 const val CARD_HEIGHT = 120
 const val MAX_SWIPE_DISTANCE = 150
-const val maxSuggestionDisplayNameLengthList = 70
-const val NumberOfSuggestionsForMenu = 6
+const val MAX_SUGGESTION_DISPLAY_NAME_LENGTH_LIST = 70
+const val NUMBER_OF_SUGGESTIONS_FOR_MENU = 6
 
 @Composable
 fun SpotListScreen(
@@ -147,16 +147,35 @@ fun SpotListScreen(
                 HorizontalDivider(
                     thickness = 1.dp, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
               }
+              // The parkings are sorted by distance to the user's location (default being the EPFL)
+              // or by distance to the chosen location if any
               items(
-                  items = filteredParkingSpots.filter { it in pinnedParkings },
+                  items =
+                      filteredParkingSpots
+                          .filter { it in pinnedParkings }
+                          .sortedBy {
+                            TurfMeasurement.distance(
+                                if (myLocation.value) userPosition
+                                else
+                                    Point.fromLngLat(
+                                        chosenLocation.value.longitude.toDouble(),
+                                        chosenLocation.value.latitude.toDouble()),
+                                it.location.center)
+                          },
                   key = { parking -> parking.uid + "pin" }) { parking ->
-                    val distance = TurfMeasurement.distance(userPosition, parking.location.center)
                     SpotCard(
                         navigationActions = navigationActions,
                         parkingViewModel = parkingViewModel,
                         userViewModel = userViewModel,
                         parking = parking,
-                        distance = distance)
+                        distance =
+                            TurfMeasurement.distance(
+                                if (myLocation.value) userPosition
+                                else
+                                    Point.fromLngLat(
+                                        chosenLocation.value.longitude.toDouble(),
+                                        chosenLocation.value.latitude.toDouble()),
+                                parking.location.center))
                   }
               item { Spacer(modifier = Modifier.height(32.dp)) }
             }
@@ -173,19 +192,38 @@ fun SpotListScreen(
             }
 
             // All parking spots
-            items(items = filteredParkingSpots, key = { parking -> parking.uid }) { parking ->
-              val distance = TurfMeasurement.distance(userPosition, parking.location.center)
-              SpotCard(
-                  navigationActions = navigationActions,
-                  parkingViewModel = parkingViewModel,
-                  userViewModel = userViewModel,
-                  parking = parking,
-                  distance = distance)
+            // The parkings are sorted by distance to the user's location (default being the EPFL)
+            // or by distance to the chosen location if any
+            items(
+                items =
+                    filteredParkingSpots.sortedBy {
+                      TurfMeasurement.distance(
+                          if (myLocation.value) userPosition
+                          else
+                              Point.fromLngLat(
+                                  chosenLocation.value.longitude.toDouble(),
+                                  chosenLocation.value.latitude.toDouble()),
+                          it.location.center)
+                    },
+                key = { parking -> parking.uid }) { parking ->
+                  SpotCard(
+                      navigationActions = navigationActions,
+                      parkingViewModel = parkingViewModel,
+                      userViewModel = userViewModel,
+                      parking = parking,
+                      distance =
+                          TurfMeasurement.distance(
+                              if (myLocation.value) userPosition
+                              else
+                                  Point.fromLngLat(
+                                      chosenLocation.value.longitude.toDouble(),
+                                      chosenLocation.value.latitude.toDouble()),
+                              parking.location.center))
 
-              if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1) {
-                parkingViewModel.incrementRadius()
-              }
-            }
+                  if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1) {
+                    parkingViewModel.incrementRadius()
+                  }
+                }
           }
         }
       }
