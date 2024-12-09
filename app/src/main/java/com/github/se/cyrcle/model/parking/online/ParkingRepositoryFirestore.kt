@@ -208,6 +208,27 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
         .addOnFailureListener { exception -> onFailure(exception) }
   }
 
+  override fun getReportsForImage(
+      parkingId: String,
+      imageId: String,
+      onSuccess: (List<ImageReport>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    db.collection("parkings")
+        .document(parkingId)
+        .collection("image_reports")
+        .whereEqualTo("image", imageId)
+        .get()
+        .addOnSuccessListener { querySnapshot ->
+          val reports =
+              querySnapshot.documents.mapNotNull { document ->
+                document.toObject(ImageReport::class.java)
+              }
+          onSuccess(reports)
+        }
+        .addOnFailureListener { exception -> onFailure(exception) }
+  }
+
   override fun addReport(
       report: ParkingReport,
       onSuccess: (ParkingReport) -> Unit,
@@ -225,12 +246,13 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
 
   override fun addImageReport(
       report: ImageReport,
+      parking: String,
       onSuccess: (ImageReport) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
     val reportId = getNewUid() // Generate a new unique ID for the report
     db.collection(collectionPath)
-        .document(report.uid) // Check if this is a valid parking ID
+        .document(parking) // Check if this is a valid parking ID
         .collection("image_reports")
         .document(reportId)
         .set(report)

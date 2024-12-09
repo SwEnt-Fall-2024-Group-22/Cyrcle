@@ -280,9 +280,19 @@ fun AdminScreen(
                                                   onFailure = {})
                                             }
                                             ReportedObjectType.IMAGE -> {
-                                              // Handle IMAGE-specific navigation
-                                              Log.d("AdminScreen", "Navigate to Image View")
-                                              navigationActions.navigateTo(Screen.VIEW_REPORTS)
+                                              val parkingUID =
+                                                  parkingViewModel.getParkingFromImagePath(
+                                                      curReport.objectUID)
+                                              parkingViewModel.getParkingById(
+                                                  parkingUID,
+                                                  { parking ->
+                                                    parkingViewModel.selectParking(parking)
+                                                    parkingViewModel.selectImage(
+                                                        curReport.objectUID)
+                                                    navigationActions.navigateTo(
+                                                        Screen.VIEW_REPORTS)
+                                                  },
+                                                  {})
                                             }
                                           }
                                         } else {

@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.model.parking.ImageReport
 import com.github.se.cyrcle.model.parking.ParkingReport
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.report.Report
@@ -88,7 +89,7 @@ fun ViewReportsScreen(
         Box(modifier = Modifier.padding(paddingValues)) {
           val selParkRep by parkingViewModel.selectedParkingReports.collectAsState()
           val selRevRep by reviewViewModel.selectedReviewReports.collectAsState()
-          val selImgRep by reviewViewModel.selectedReviewReports.collectAsState()
+          val selImgRep by parkingViewModel.selectedImageReports.collectAsState()
           val reports =
               when (selType) {
                 ReportedObjectType.PARKING -> selParkRep
@@ -111,7 +112,7 @@ fun ViewReportsScreen(
                           when (selType) {
                             ReportedObjectType.PARKING -> Report.Parking(report as ParkingReport)
                             ReportedObjectType.REVIEW -> Report.Review(report as ReviewReport)
-                            ReportedObjectType.IMAGE -> Report.Review(report as ReviewReport)
+                            ReportedObjectType.IMAGE -> Report.Image(report as ImageReport)
                           }
                       ReportCard(reportType)
                     }
