@@ -153,7 +153,7 @@ constructor(private val db: FirebaseFirestore, private val auth: FirebaseAuth) :
         val gson = Gson()
         val processedData = data.toMutableMap()
         // Ensure default values for missing fields
-        val userReputationScore = (data["userReputationScore"] as? Number)?.toInt() ?: 0
+        val userReputationScore = (data["userReputationScore"] as? Number)?.toDouble() ?: 0.0
         val json = gson.toJson(processedData)
         val userPublic = gson.fromJson(json, UserPublic::class.java)
         return userPublic.copy(userReputationScore = userReputationScore)
