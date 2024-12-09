@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.report
 
+import android.util.Log
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
@@ -64,8 +65,12 @@ fun ViewReportsScreen(
                 reportedObjectViewModel.deleteReportedObject(uidOfObject)
                 if (selType == ReportedObjectType.PARKING) {
                   parkingViewModel.deleteParkingByUid(uidOfObject)
-                } else {
+                } else if (selType == ReportedObjectType.REVIEW){
                   reviewViewModel.deleteReviewById(uidOfObject)
+                } else {
+                    val uidOfParking = parkingViewModel.getParkingFromImagePath(uidOfObject)
+                    Log.d("${uidOfParking}","${uidOfObject}")
+                    parkingViewModel.deleteImageFromParking(uidOfParking,uidOfObject)
                 }
                 Toast.makeText(context, successDeleteText, Toast.LENGTH_LONG).show()
                 navigationActions.navigateTo(Screen.ADMIN)
