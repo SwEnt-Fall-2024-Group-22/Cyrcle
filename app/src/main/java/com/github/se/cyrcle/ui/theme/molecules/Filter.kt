@@ -33,6 +33,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -95,8 +96,8 @@ fun FilterPanel(
     parkingViewModel: ParkingViewModel,
     displayHeader: Boolean,
     addressViewModel: AddressViewModel,
-    myLocation: MutableState<Boolean> = mutableStateOf(false),
-    chosenLocation: MutableState<Address> =
+    myLocation: State<Boolean> = mutableStateOf(false),
+    chosenLocation: State<Address> =
         mutableStateOf(Address(latitude = "46.518467", longitude = "6.566397")),
     permissionHandler: PermissionHandler
 ) {
@@ -138,6 +139,7 @@ fun FilterPanel(
             if (isTextFieldVisible.value) {
               SearchBarListScreen(
                   addressViewModel,
+                  parkingViewModel,
                   isTextFieldVisible,
                   myLocation,
                   chosenLocation,
@@ -340,9 +342,10 @@ fun FilterSection(
 @Composable
 fun SearchBarListScreen(
     addressViewModel: AddressViewModel,
+    parkingViewModel: ParkingViewModel,
     isTextFieldVisible: MutableState<Boolean>,
-    myLocation: MutableState<Boolean>,
-    chosenLocation: MutableState<Address>,
+    myLocation: State<Boolean>,
+    chosenLocation: State<Address>,
     permissionHandler: PermissionHandler,
     textFieldValue: MutableState<String>
 ) {
@@ -425,7 +428,7 @@ fun SearchBarListScreen(
                   modifier = Modifier.testTag("MyLocationSuggestionMenuItem"),
                   contentPadding = PaddingValues(8.dp),
                   onClick = {
-                    myLocation.value = true
+                    parkingViewModel.setMyLocation(true)
                     showSuggestions.value = false
                     textFieldValue.value = context.resources.getString(R.string.my_location)
                     isTextFieldVisible.value = false
@@ -458,9 +461,9 @@ fun SearchBarListScreen(
                   modifier = Modifier.testTag("SuggestionMenuItem${address.city}"),
                   contentPadding = PaddingValues(8.dp),
                   onClick = {
-                    chosenLocation.value = address
+                    parkingViewModel.setChosenLocation(address)
                     showSuggestions.value = false
-                    myLocation.value = false
+                    parkingViewModel.setMyLocation(false)
                     isTextFieldVisible.value = false
                     textFieldValue.value =
                         address.suggestionFormatDisplayName(

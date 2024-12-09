@@ -32,11 +32,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -54,14 +52,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
-import com.github.se.cyrcle.model.address.Address
 import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.permission.PermissionHandler
-import com.github.se.cyrcle.ui.map.MapConfig
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
@@ -94,15 +90,10 @@ fun SpotListScreen(
   val pinnedParkings by parkingViewModel.pinnedParkings.collectAsState()
 
   // chosen location by the user for the list Screen
-  val chosenLocation: MutableState<Address> = remember {
-    mutableStateOf(
-        Address(
-            latitude = MapConfig.defaultCameraState().center.latitude().toString(),
-            longitude = MapConfig.defaultCameraState().center.longitude().toString()))
-  }
+  val chosenLocation = parkingViewModel.chosenLocation.collectAsState()
 
   // value that says wether the user clicked on my Location Suggestion or not
-  val myLocation = remember { mutableStateOf(true) }
+  val myLocation = parkingViewModel.myLocation.collectAsState()
 
   // location permission from location manager
   val locPermission = permissionHandler.getLocalisationPerm().collectAsState().value

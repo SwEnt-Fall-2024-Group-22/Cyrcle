@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.se.cyrcle.model.address.Address
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.parking.offline.OfflineParkingRepository
 import com.github.se.cyrcle.model.parking.online.ParkingRepository
@@ -12,6 +13,7 @@ import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.report.ReportedObjectType
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.zone.Zone
+import com.github.se.cyrcle.ui.map.MapConfig
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
@@ -103,6 +105,35 @@ class ParkingViewModel(
   // Map a tile to the parkings that are in it.
   private val tilesToParking = LinkedHashMap<Tile, List<Parking>>(10, 1f, true)
 
+  private val _chosenLocation: MutableStateFlow<Address> =
+      MutableStateFlow(
+          Address(
+              latitude = MapConfig.defaultCameraState().center.latitude().toString(),
+              longitude = MapConfig.defaultCameraState().center.longitude().toString()))
+  val chosenLocation: StateFlow<Address> = _chosenLocation
+
+  // value that says wether the user clicked on my Location Suggestion or not
+  private val _myLocation = MutableStateFlow(true)
+  val myLocation: StateFlow<Boolean> = _myLocation
+
+  /**
+   * Set the value of the myLocation variable
+   *
+   * @param value the value to set
+   */
+  fun setMyLocation(value: Boolean) {
+    _myLocation.value = value
+  }
+
+  /**
+   * Set the chosen location to the given address
+   *
+   * @param address the address to set as the chosen location
+   */
+  fun setChosenLocation(address: Address) {
+    _chosenLocation.value = address
+  }
+
   /**
    * Generates a new unique identifier for a parking.
    *
@@ -122,6 +153,11 @@ class ParkingViewModel(
     _selectedParkingReports.value = emptyList()
   }
 
+  /**
+   * Adds a parking to the repository.
+   *
+   * @param parking the parking to add
+   */
   /**
    * Adds a parking to the repository.
    *
@@ -161,6 +197,11 @@ class ParkingViewModel(
    *
    * @param parking the parking id to get
    */
+  /**
+   * Select a parking to review/edit.
+   *
+   * @param parking the parking id to get
+   */
   fun selectParking(parking: Parking) {
     _selectedParking.value = parking
     loadSelectedParkingReports()
@@ -174,6 +215,13 @@ class ParkingViewModel(
       imgId: String,
   ) {}
 
+  /**
+   * Retrieves parkings within a rectangle defined by two opposite corners, regardless of their
+   * order.
+   *
+   * @param startPos the first corner of the rectangle
+   * @param endPos the opposite corner of the rectangle
+   */
   /**
    * Retrieves parkings within a rectangle defined by two opposite corners, regardless of their
    * order.
@@ -230,6 +278,15 @@ class ParkingViewModel(
    * @param center: center of the circle
    * @param radius: radius of the circle in meter.
    */
+  /**
+   * Get all parkings in a radius of radius meters around a location. Uses the Haversine formula to
+   * calculate the distance between two points on the Earth's surface. and make use of the
+   * getParkingBetween function to get all parkings in the circle. The result is stored in the
+   * closestParkings state.
+   *
+   * @param center: center of the circle
+   * @param radius: radius of the circle in meter.
+   */
   private fun getParkingsInRadius(
       center: Point,
       radius: Double,
@@ -244,12 +301,17 @@ class ParkingViewModel(
    * Increments the radius of the circle by RADIUS_INCREMENT if the new radius is less than
    * MAX_RADIUS.
    */
+  /**
+   * Increments the radius of the circle by RADIUS_INCREMENT if the new radius is less than
+   * MAX_RADIUS.
+   */
   fun incrementRadius() {
     if (_circleCenter.value == null || _radius.value == MAX_RADIUS) return
     _radius.value += RADIUS_INCREMENT
     getParkingsInRadius(_circleCenter.value!!, _radius.value)
   }
 
+  /** set the center of the circle, and reset the radius to DEFAULT_RADIUS */
   /** set the center of the circle, and reset the radius to DEFAULT_RADIUS */
   fun setCircleCenter(center: Point) {
     _circleCenter.value = center
@@ -267,17 +329,24 @@ class ParkingViewModel(
    *
    * @param protection the protection to toggle the status of
    */
+  /**
+   * Toggles the protection status of a parking and updates the list of closest parkings.
+   *
+   * @param protection the protection to toggle the status of
+   */
   fun toggleProtection(protection: ParkingProtection) {
     _selectedProtection.update { toggleSelection(it, protection) }
     updateClosestParkings()
   }
 
   /** Clear the protection filter and update the list of closest parkings. */
+  /** Clear the protection filter and update the list of closest parkings. */
   fun clearProtection() {
     _selectedProtection.value = emptySet()
     updateClosestParkings()
   }
 
+  /** Select all the protection options and update the list of closest parkings. */
   /** Select all the protection options and update the list of closest parkings. */
   fun selectAllProtection() {
     _selectedProtection.value = ParkingProtection.entries.toSet()
@@ -292,17 +361,24 @@ class ParkingViewModel(
    *
    * @param rackType the rack type to toggle the status of
    */
+  /**
+   * Toggles the rack type of a parking and updates the list of closest parkings.
+   *
+   * @param rackType the rack type to toggle the status of
+   */
   fun toggleRackType(rackType: ParkingRackType) {
     _selectedRackTypes.update { toggleSelection(it, rackType) }
     updateClosestParkings()
   }
 
   /** Clear the rack type filter and update the list of closest parkings. */
+  /** Clear the rack type filter and update the list of closest parkings. */
   fun clearRackType() {
     _selectedRackTypes.value = emptySet()
     updateClosestParkings()
   }
 
+  /** Select all the rack type options and update the list of closest parkings. */
   /** Select all the rack type options and update the list of closest parkings. */
   fun selectAllRackTypes() {
     _selectedRackTypes.value = ParkingRackType.entries.toSet()
@@ -317,17 +393,24 @@ class ParkingViewModel(
    *
    * @param capacity the capacity to toggle the status of
    */
+  /**
+   * Toggles the capacity of a parking and updates the list of closest parkings.
+   *
+   * @param capacity the capacity to toggle the status of
+   */
   fun toggleCapacity(capacity: ParkingCapacity) {
     _selectedCapacities.update { toggleSelection(it, capacity) }
     updateClosestParkings()
   }
 
   /** Clear the capacity filter and update the list of closest parkings. */
+  /** Clear the capacity filter and update the list of closest parkings. */
   fun clearCapacity() {
     _selectedCapacities.value = emptySet()
     updateClosestParkings()
   }
 
+  /** Select all the capacity options and update the list of closest parkings. */
   /** Select all the capacity options and update the list of closest parkings. */
   fun selectAllCapacities() {
     _selectedCapacities.value = ParkingCapacity.entries.toSet()
@@ -337,6 +420,11 @@ class ParkingViewModel(
   private val _onlyWithCCTV = MutableStateFlow(false)
   val onlyWithCCTV: StateFlow<Boolean> = _onlyWithCCTV
 
+  /**
+   * Set the filter to only show parkings with CCTV and updates the list of closest parkings.
+   *
+   * @param onlyWithCCTV the filter to only show parkings with CCTV
+   */
   /**
    * Set the filter to only show parkings with CCTV and updates the list of closest parkings.
    *
@@ -352,6 +440,11 @@ class ParkingViewModel(
    * will display all the parkings without any filter. This function does not affect the
    * onlyWithCCTV filter
    */
+  /**
+   * Select all the filter options and update the list of closest parkings. In other words, this
+   * will display all the parkings without any filter. This function does not affect the
+   * onlyWithCCTV filter
+   */
   fun selectAllFilterOptions() {
     _selectedProtection.value = ParkingProtection.entries.toSet()
     _selectedRackTypes.value = ParkingRackType.entries.toSet()
@@ -359,6 +452,10 @@ class ParkingViewModel(
     updateClosestParkings()
   }
 
+  /**
+   * Deselect all the filter options and update the list of closest parkings. In other words, this
+   * will display no parkings. This function does not affect the onlyWithCCTV filter
+   */
   /**
    * Deselect all the filter options and update the list of closest parkings. In other words, this
    * will display no parkings. This function does not affect the onlyWithCCTV filter
@@ -382,6 +479,11 @@ class ParkingViewModel(
    *
    * @param parking the parking to toggle the pin status of
    */
+  /**
+   * Toggles the pin status of a parking.
+   *
+   * @param parking the parking to toggle the pin status of
+   */
   fun togglePinStatus(parking: Parking) {
     _pinnedParkings.update { toggleSelection(it, parking) }
   }
@@ -396,6 +498,13 @@ class ParkingViewModel(
     }
   }
 
+  /**
+   * Updates the list of closest parkings.
+   *
+   * @param nbRequestLeft: number of tiles left to fetch the parkings from. If nbRequestLeft is 0,
+   *   the function will update the closest parkings and if the result is empty, it will increment
+   *   the radius.
+   */
   /**
    * Updates the list of closest parkings.
    *
@@ -431,6 +540,20 @@ class ParkingViewModel(
   // ================== Helper functions ==================
 
   // ================== Reports ==================
+  /**
+   * Adds a report for the currently selected parking and updates the repository.
+   *
+   * This function first verifies that a parking is selected. If no parking is selected, it logs an
+   * error and returns. It then attempts to add the report to the parking repository. Upon
+   * successful addition, the report is evaluated against severity and threshold limits to determine
+   * if a `ReportedObject` should be created and added to the reported objects repository.
+   *
+   * Updates the selected parking's report count and severity metrics and ensures these changes are
+   * reflected in the repository.
+   *
+   * @param report The report to be added, which includes details such as the reason and user ID.
+   * @param user The user submitting the report, required for identifying the reporter.
+   */
   /**
    * Adds a report for the currently selected parking and updates the repository.
    *
@@ -529,6 +652,19 @@ class ParkingViewModel(
    * 0.0. The function then decrements the `nbReviews` count and updates the parking data in the
    * repository.
    */
+  /**
+   * Handles the deletion of a review for a given parking. Adjusts the average score and the number
+   * of reviews accordingly.
+   *
+   * @param parking The parking object for which the review is being deleted. Defaults to the
+   *   currently selected parking.
+   * @param oldScore The score of the review that is being deleted.
+   *
+   * The function recalculates the `avgScore` by removing the contribution of `oldScore` from the
+   * total score. If the number of reviews becomes zero after deletion, the `avgScore` is set to
+   * 0.0. The function then decrements the `nbReviews` count and updates the parking data in the
+   * repository.
+   */
   fun handleReviewDeletion(parking: Parking = selectedParking.value!!, oldScore: Double) {
     parking.avgScore =
         if (parking.nbReviews >= 2) {
@@ -553,6 +689,19 @@ class ParkingViewModel(
    * The function then increments the `nbReviews` count and updates the parking data in the
    * repository.
    */
+  /**
+   * Handles the addition of a new review for a given parking. Adjusts the average score and the
+   * number of reviews accordingly.
+   *
+   * @param parking The parking object for which the review is being added. Defaults to the
+   *   currently selected parking.
+   * @param newScore The score of the new review being added.
+   *
+   * The function calculates the new `avgScore` by adding the `newScore` to the total score and
+   * dividing by the updated number of reviews. The new average is rounded to two decimal places.
+   * The function then increments the `nbReviews` count and updates the parking data in the
+   * repository.
+   */
   fun handleNewReview(parking: Parking = selectedParking.value!!, newScore: Double) {
     parking.avgScore =
         (100 * ((parking.avgScore * parking.nbReviews) + newScore) / (parking.nbReviews + 1))
@@ -561,6 +710,19 @@ class ParkingViewModel(
     parkingRepository.updateParking(parking, onSuccess = {}, onFailure = {})
   }
 
+  /**
+   * Handles updating an existing review for a given parking. Adjusts the average score based on the
+   * difference between the new and old review scores.
+   *
+   * @param parking The parking object for which the review is being updated. Defaults to the
+   *   currently selected parking.
+   * @param newScore The new score of the review after the update.
+   * @param oldScore The previous score of the review before the update.
+   *
+   * The function calculates the difference (`delta`) between the `newScore` and `oldScore`, divided
+   * by the total number of reviews, to adjust the `avgScore`. The adjusted average score is then
+   * updated in the repository.
+   */
   /**
    * Handles updating an existing review for a given parking. Adjusts the average score based on the
    * difference between the new and old review scores.
@@ -599,6 +761,10 @@ class ParkingViewModel(
    * Load the iamges of the selected parkings in the state selectedParkingImagesUrls This function
    * transforms the paths of the images (stored into firestore) of the selected parking into URLs.
    */
+  /**
+   * Load the iamges of the selected parkings in the state selectedParkingImagesUrls This function
+   * transforms the paths of the images (stored into firestore) of the selected parking into URLs.
+   */
   fun loadSelectedParkingImages() {
     if (selectedParking.value == null) {
       Log.e("ParkingViewModel", "No parking selected while trying to load images")
@@ -619,6 +785,14 @@ class ParkingViewModel(
     }
   }
 
+  /**
+   * Upload an image for the selected parking. This function uploads the image to the cloud storage
+   * and updates the selected parking with the new image path.
+   *
+   * @param imageUri the URI of the image to upload ( local path on user device)
+   * @param context the context of the application (needed to access the file)
+   * @param onSuccess a callback function to execute when the image is uploaded successfully
+   */
   /**
    * Upload an image for the selected parking. This function uploads the image to the cloud storage
    * and updates the selected parking with the new image path.
@@ -662,6 +836,13 @@ class ParkingViewModel(
    * @param onSuccess the callback function to execute when the download is successful
    * @param onFailure the callback function to execute when the download fails
    */
+  /**
+   * Downloads the parkings in the zone to download from the local storage.
+   *
+   * @param zone the zone to download
+   * @param onSuccess the callback function to execute when the download is successful
+   * @param onFailure the callback function to execute when the download fails
+   */
   fun downloadZone(zone: Zone, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     val tilesToDownload =
         TileUtils.getAllTilesInRectangle(zone.boundingBox.southwest(), zone.boundingBox.northeast())
@@ -698,6 +879,12 @@ class ParkingViewModel(
    * @param zoneToDelete the zone to delete
    * @param allZones the list of all zones
    */
+  /**
+   * Deletes the parkings in the zone to delete from the local storage.
+   *
+   * @param zoneToDelete the zone to delete
+   * @param allZones the list of all zones
+   */
   fun deleteZone(zoneToDelete: Zone, allZones: List<Zone>) {
     val tilesToKeep =
         allZones
@@ -718,6 +905,7 @@ class ParkingViewModel(
   }
 
   /** Changes the parking view model to offline mode. */
+  /** Changes the parking view model to offline mode. */
   fun switchToOfflineMode() {
     tilesToParking.clear()
     _rectParkings.value = emptyList()
@@ -727,6 +915,7 @@ class ParkingViewModel(
   }
 
   /** Changes the parking view model to online mode. */
+  /** Changes the parking view model to online mode. */
   fun switchToOnlineMode() {
     tilesToParking.clear()
     _rectParkings.value = emptyList()
@@ -735,6 +924,14 @@ class ParkingViewModel(
     parkingRepository = onlineParkingRepository
   }
 
+  /**
+   * Filters the parkings in the given list to only keep the ones that are in the given zone.
+   *
+   * @param parkingList the list of parkings to filter
+   * @param bottomLeft the bottom left corner of the zone
+   * @param topRight the top right corner of the zone
+   * @return the list of parking that are in the given zone
+   */
   /**
    * Filters the parkings in the given list to only keep the ones that are in the given zone.
    *
