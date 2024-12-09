@@ -31,7 +31,6 @@ data class Parking(
     val optDescription: String?,
     val location: Location,
     val images: List<(String)>,
-    val associatedImageUrls: List<String>,
     var reportedImages: List<ParkingImage>,
     val capacity: ParkingCapacity,
     val rackType: ParkingRackType,

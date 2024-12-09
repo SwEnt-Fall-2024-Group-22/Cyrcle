@@ -1,5 +1,7 @@
 package com.github.se.cyrcle.di.mocks
 
+import com.github.se.cyrcle.model.parking.ImageReport
+import com.github.se.cyrcle.model.parking.ImageReportReason
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingReport
 import com.github.se.cyrcle.model.parking.ParkingReportReason
@@ -16,6 +18,8 @@ class MockOfflineParkingRepository @Inject constructor() : OfflineParkingReposit
       mutableListOf(
           ParkingReport(
               "1", ParkingReportReason.INEXISTANT, "1", TestInstancesParking.parking1.uid, ""))
+  private val reports2 =
+      mutableListOf(ImageReport("1", ImageReportReason.WRONG, "2", "parking/2/b.png", ""))
 
   override fun downloadParkings(parkings: List<Parking>, onComplete: () -> Unit) {
     this.parkings += parkings
@@ -120,5 +124,14 @@ class MockOfflineParkingRepository @Inject constructor() : OfflineParkingReposit
   ) {
     if (report.uid == "") onFailure(Exception("Error adding report"))
     onSuccess(reports[0])
+  }
+
+  override fun addImageReport(
+      report: ImageReport,
+      onSuccess: (ImageReport) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    if (report.uid == "") onFailure(Exception("Error adding report"))
+    onSuccess(reports2[0])
   }
 }
