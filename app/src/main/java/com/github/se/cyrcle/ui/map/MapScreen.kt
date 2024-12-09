@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -582,7 +583,8 @@ fun SuggestionMenu(
 
   ModalBottomSheet(
       onDismissRequest = { showSuggestions.value = false },
-      modifier = Modifier.testTag("SuggestionsMenu")) {
+      modifier = Modifier.testTag("SuggestionsMenu"),
+      dragHandle = { SuggestionsMenuDragHandle() }) {
         LazyColumn(
             contentPadding =
                 PaddingValues(
@@ -612,6 +614,20 @@ fun SuggestionMenu(
               }
             }
       }
+}
+
+/** Composable function to display the drag handle for the suggestion menu. */
+@Composable
+fun SuggestionsMenuDragHandle() {
+  Row(
+      modifier =
+          Modifier.padding(vertical = 12.dp)
+              .width(32.dp)
+              .height(4.dp)
+              .background(
+                  color = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                  shape = RoundedCornerShape(2.dp)),
+      horizontalArrangement = Arrangement.Center) {}
 }
 
 /**
