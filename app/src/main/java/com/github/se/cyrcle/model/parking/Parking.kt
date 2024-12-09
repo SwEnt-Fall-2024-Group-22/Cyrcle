@@ -70,7 +70,7 @@ data class ImageReport(
     val uid: String = "",
     val reason: ImageReportReason = ImageReportReason.OTHER,
     val userId: String = "",
-    val parking: String = "",
+    val image: String = "",
     val description: String = ""
 )
 

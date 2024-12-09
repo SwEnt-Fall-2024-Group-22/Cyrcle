@@ -44,92 +44,113 @@ fun ImageReportScreen(
     userViewModel: UserViewModel,
     parkingViewModel: ParkingViewModel
 ) {
-  val configuration = LocalConfiguration.current
-  val screenWidth = configuration.screenWidthDp.dp
-  val screenHeight = configuration.screenHeightDp.dp
-  val horizontalPadding = screenWidth * 0.03f
-  val topBoxHeight = screenHeight * 0.10f
-  val verticalPadding = screenHeight * 0.02f
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val screenHeight = configuration.screenHeightDp.dp
+    val horizontalPadding = screenWidth * 0.03f
+    val topBoxHeight = screenHeight * 0.10f
+    val verticalPadding = screenHeight * 0.02f
 
-  // State for dialog and inputs
-  val showDialog = remember { mutableStateOf(false) }
-  val selectedReason = rememberSaveable { mutableStateOf(ImageReportReason.USELESS) }
-  val imageId = parkingViewModel.selectedImage.value!!
-  Log.d("SELECTEDIMAGE", imageId)
-  val reportDescription = rememberSaveable { mutableStateOf("") }
-  val userId = userViewModel.currentUser.value?.public?.userId!!
-  val context = LocalContext.current
-
-  // Toast messages
-  val strResToast = stringResource(R.string.report_already)
-  val strResToast2 = stringResource(R.string.report_added)
-
-  fun onSubmit() {
-    val report =
-        ImageReport(
-            uid = imageId,
-            reason = selectedReason.value,
-            userId = userId,
-            parking = parkingViewModel.selectedParking.value?.uid!!,
-            description = reportDescription.value)
-
-    if (userViewModel.currentUser.value!!.details?.reportedImages?.contains(imageId) == true) {
-      Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
-    } else {
-      parkingViewModel.addImageReport(report, userViewModel.currentUser.value!!)
-      userViewModel.addReportedImageToSelectedUser(imageId!!)
-      Toast.makeText(context, strResToast2, Toast.LENGTH_SHORT).show()
+    // State for dialog and inputs
+    val showDialog = remember { mutableStateOf(false) }
+    val selectedReason = rememberSaveable { mutableStateOf(ImageReportReason.USELESS) }
+    val imageId = parkingViewModel.selectedImage.value
+    if (imageId == null) {
+        Log.e("ImageReportScreen", "No selected image found!")
+        return
     }
-    navigationActions.goBack()
-  }
+    Log.d("ImageReportScreen", "Image ID: $imageId")
 
-  Scaffold(
-      modifier = Modifier.testTag("ImageReportScreen"),
-      topBar = {
-        // ReportTopAppBar(
-        //    navigationActions,
-        //    title =
-        //    stringResource(R.string.report_an_image)
-        //        .format(imageViewModel.selectedImage.value?.url?.take(30) ?: imageId))
-      }) { padding ->
-        val scaledPaddingValues =
-            PaddingValues(horizontal = horizontalPadding, vertical = verticalPadding)
+    val reportDescription = rememberSaveable { mutableStateOf("") }
+    val userId = userViewModel.currentUser.value?.public?.userId ?: ""
+    if (userId.isEmpty()) {
+        Log.e("ImageReportScreen", "User ID is empty!")
+        return
+    }
+    Log.d("ImageReportScreen", "User ID: $userId")
+
+    val context = LocalContext.current
+
+    // Toast messages
+    val strResToast = stringResource(R.string.report_already)
+    val strResToast2 = stringResource(R.string.report_added)
+
+    fun onSubmit() {
+        val report = ImageReport(
+            uid = parkingViewModel.getNewUid(),
+             reason = selectedReason.value,
+            userId = userId,
+            image = imageId,
+            description = reportDescription.value
+        )
+        Log.d("ImageReportScreen", "Submitting report: $report")
+
+        if (userViewModel.currentUser.value?.details?.reportedImages?.contains(imageId) == true) {
+            Log.d("ImageReportScreen", "Image already reported by the user.")
+            Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
+        } else {
+            Log.d("ImageReportScreen", "Adding image report...")
+            parkingViewModel.addImageReport(report, userViewModel.currentUser.value!!)
+            userViewModel.addReportedImageToSelectedUser(imageId)
+            Toast.makeText(context, strResToast2, Toast.LENGTH_SHORT).show()
+        }
+        Log.d("ImageReportScreen", "Navigating back after reporting.")
+        navigationActions.goBack()
+    }
+
+    Scaffold(
+        modifier = Modifier.testTag("ImageReportScreen"),
+        topBar = {
+            // ReportTopAppBar(
+            //    navigationActions,
+            //    title =
+            //    stringResource(R.string.report_an_image)
+            //        .format(imageViewModel.selectedImage.value?.url?.take(30) ?: imageId))
+        }) { padding ->
+        val scaledPaddingValues = PaddingValues(horizontal = horizontalPadding, vertical = verticalPadding)
 
         Column(
-            modifier =
-                Modifier.fillMaxSize()
-                    .padding(scaledPaddingValues)
-                    .verticalScroll(rememberScrollState())
-                    .testTag("ImageReportColumn"),
-            horizontalAlignment = Alignment.Start) {
-              Box(
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .height(topBoxHeight)
-                          .background(MaterialTheme.colorScheme.background))
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(scaledPaddingValues)
+                .verticalScroll(rememberScrollState())
+                .testTag("ImageReportColumn"),
+            horizontalAlignment = Alignment.Start
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(topBoxHeight)
+                    .background(MaterialTheme.colorScheme.background)
+            )
 
-              // Text Block Section
-              ReportTextBlock(
-                  title = stringResource(R.string.report_title),
-                  bulletPoints =
-                      listOf(
-                          stringResource(R.string.report_bullet_point_1),
-                          stringResource(R.string.report_bullet_point_2_review),
-                          stringResource(R.string.report_bullet_point_3)),
-                  modifier = Modifier.testTag("ReportBulletPoints"))
+            // Text Block Section
+            ReportTextBlock(
+                title = stringResource(R.string.report_title),
+                bulletPoints = listOf(
+                    stringResource(R.string.report_bullet_point_1),
+                    stringResource(R.string.report_bullet_point_2_review),
+                    stringResource(R.string.report_bullet_point_3)
+                ),
+                modifier = Modifier.testTag("ReportBulletPoints")
+            )
 
-              // Select Reason
-              ReportInputs(
-                  selectedReasonIfParking = null,
-                  selectedReasonIfReview = null,
-                  selectedReasonIfImage = selectedReason,
-                  reportedObjectType = ReportedObjectType.IMAGE,
-                  reportDescription = reportDescription,
-                  horizontalPadding = horizontalPadding)
+            // Select Reason
+            ReportInputs(
+                selectedReasonIfParking = null,
+                selectedReasonIfReview = null,
+                selectedReasonIfImage = selectedReason,
+                reportedObjectType = ReportedObjectType.IMAGE,
+                reportDescription = reportDescription,
+                horizontalPadding = horizontalPadding
+            )
 
-              val validInputs = areInputsValid(reportDescription.value)
-              SubmitButtonWithDialog(
-                  showDialog = showDialog, validInputs = validInputs, onSubmit = { onSubmit() })
-            }
-      }
+            val validInputs = areInputsValid(reportDescription.value)
+            SubmitButtonWithDialog(
+                showDialog = showDialog,
+                validInputs = validInputs,
+                onSubmit = { onSubmit() }
+            )
+        }
+    }
 }
