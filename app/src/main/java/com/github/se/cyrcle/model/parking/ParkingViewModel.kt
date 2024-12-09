@@ -602,6 +602,7 @@ class ParkingViewModel(
     val selectedImage = _selectedImage.value!!
     Log.d("ParkingViewModel", "Selected image: $selectedImage")
 
+    // Check if the Image is among the list of images that were already reported
     val (foundReportedImage, index) =
         _selectedParking.value
             ?.reportedImages
@@ -609,11 +610,14 @@ class ParkingViewModel(
             ?.find { it.value.imagePath == selectedImage }
             ?.let { it.value to it.index } ?: (null to -1)
 
-    val parkingImageToAdd = ParkingImage(parkingRepository.getNewUid(), selectedImage, 1, 0)
 
+    // If not, add it to the list of Reported Images
+    val parkingImageToAdd = ParkingImage(parkingRepository.getNewUid(), selectedImage, 1, 0)
     if (foundReportedImage == null) {
       Log.d("ParkingViewModel", "No existing report for this image. Creating a new one.")
 
+
+    // add the Image Report to the "images_reports" subcollection
       _selectedParking.value =
           _selectedParking.value?.copy(
               reportedImages = _selectedParking.value?.reportedImages?.plus(parkingImageToAdd)!!)
@@ -627,11 +631,16 @@ class ParkingViewModel(
           onFailure = { exception ->
             Log.e("ParkingViewModel", "Failed to add image report: ${exception.message}")
           })
+    // if the image already is in the Reported Images, update it
     } else {
+
+      // if the incoming report is max severity, increment both reports counter and maxSev counter
       val numMaxSeverityReports =
           if (report.reason.severity == MAX_SEVERITY) foundReportedImage.nbMaxSeverityReports + 1
           else foundReportedImage.nbMaxSeverityReports
 
+
+      // new version to add to ReportedImages after the new Report is added
       val updatedImage =
           ParkingImage(
               uid = foundReportedImage.uid,
@@ -662,6 +671,7 @@ class ParkingViewModel(
                     userUID = user.public.userId,
                     objectType = ReportedObjectType.IMAGE)
 
+           // since it's already a Reported Image, check it shouldn't become a Reported Object
             reportedObjectRepository.checkIfObjectExists(
                 objectUID = updatedImage.uid,
                 onSuccess = { documentId ->
@@ -677,13 +687,13 @@ class ParkingViewModel(
                               "ParkingViewModel", "Failed to update ReportedObject: ${it.message}")
                         })
                   } else {
+
+                    // Boolean to determine if it should be added
                     val shouldAdd =
                         (report.reason.severity == MAX_SEVERITY &&
                             updatedImage.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERITY_THRESH) ||
                             (updatedImage.nbReports >= NB_REPORTS_THRESH)
-
-                    Log.d("DA BOOL", shouldAdd.toString())
-
+                    // if it should be added, add it
                     if (shouldAdd) {
                       reportedObjectRepository.addReportedObject(
                           reportedObject = updatedReportedObject,
@@ -695,7 +705,6 @@ class ParkingViewModel(
                           })
                       updateLocalImageAndMetrics(report, updatedImage)
                     } else {
-                      Log.d("WOMP WOMP", "Nice try")
                       updateLocalImageAndMetrics(report, updatedImage)
                     }
                   }
@@ -711,8 +720,8 @@ class ParkingViewModel(
           })
     }
   }
-
-  private fun updateLocalImageAndMetrics(report: ImageReport, updatedImage: ParkingImage) {
+  // function to update the Image's metrics locally before sending to Firestore
+  fun updateLocalImageAndMetrics(report: ImageReport, updatedImage: ParkingImage) {
     val selectedParking = _selectedParking.value ?: return
     val reportedImages =
         _selectedParking.value?.reportedImages?.map { image ->
@@ -729,7 +738,6 @@ class ParkingViewModel(
         reportedImages[index].nbMaxSeverityReports += 1
       }
     }
-
     // Increment the number of reports for the image
     val index = reportedImages.indexOfFirst { it.uid == updatedImage.uid }
     if (index != -1) {
@@ -813,7 +821,6 @@ class ParkingViewModel(
       Log.e("ParkingViewModel", "An unexpect error occured (0 reviews)")
     }
   }
-  // ================== Reviews ==================
 
   // ================== Images ==================
   // Holds the URLs of the images of the selected parking, these aren't stored in the
@@ -838,9 +845,7 @@ class ParkingViewModel(
     _selectedParkingImagesUrls.value = emptyList()
     _selectedParkingAssociatedPaths.value = emptyList()
 
-    Log.d("SELECTED PARKING", _selectedParking.value?.uid!!)
     _selectedParking.value!!.images.forEach { imagePath ->
-      Log.d("ANWZOSXJKWESNWOJSJWO", imagePath)
       _selectedParkingAssociatedPaths.value = _selectedParkingAssociatedPaths.value.plus(imagePath)
       imageRepository.getUrl(
           path = imagePath,
@@ -866,7 +871,7 @@ class ParkingViewModel(
     }
     val selectedParking = _selectedParking.value!!
     // maxNumOfImages ensures that 2 Parkings don't have the same destinationPath (which was
-    // possible when the next line used size of images field
+    // possible when the next line used size of images field)
     val destinationPath = "parking/${selectedParking.uid}/${selectedParking.maxNumOfImages}"
     imageRepository.uploadImage(
         context = context,
@@ -874,10 +879,10 @@ class ParkingViewModel(
         destinationPath = destinationPath,
         onSuccess = {
           val updatedParking =
+              // adapt Parking's reportedImages field
               selectedParking.copy(
                   images = selectedParking.images.plus(destinationPath),
-                  maxNumOfImages = selectedParking.maxNumOfImages + 1,
-                  reportedImages = emptyList())
+                  maxNumOfImages = selectedParking.maxNumOfImages + 1)
           selectParking(updatedParking)
           parkingRepository.updateParking(
               updatedParking,
@@ -888,7 +893,6 @@ class ParkingViewModel(
     )
   }
 
-  // ================== Images ==================
 
   // ================== Offline ==================
 

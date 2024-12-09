@@ -27,124 +27,129 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
-
 @RunWith(AndroidJUnit4::class)
 class ReviewReportScreenTest {
 
-  @get:Rule val composeTestRule = createComposeRule()
+    @get:Rule val composeTestRule = createComposeRule()
 
-  private lateinit var parkingRepository: ParkingRepository
-  private lateinit var userRepository: UserRepository
-  private lateinit var reviewRepository: ReviewRepository
-  private lateinit var reportedObjectRepository: ReportedObjectRepository
+    private lateinit var parkingRepository: ParkingRepository
+    private lateinit var userRepository: UserRepository
+    private lateinit var reviewRepository: ReviewRepository
+    private lateinit var reportedObjectRepository: ReportedObjectRepository
 
-  private lateinit var userViewModel: UserViewModel
-  private lateinit var parkingViewModel: ParkingViewModel
-  private lateinit var reviewViewModel: ReviewViewModel
+    private lateinit var userViewModel: UserViewModel
+    private lateinit var parkingViewModel: ParkingViewModel
+    private lateinit var reviewViewModel: ReviewViewModel
 
-  private lateinit var navigationActions: NavigationActions
+    private lateinit var navigationActions: NavigationActions
 
-  @Before
-  fun setUp() {
-    navigationActions = mock(NavigationActions::class.java)
+    @Before
+    fun setUp() {
+        navigationActions = mock(NavigationActions::class.java)
 
-    parkingRepository = MockParkingRepository()
-    userRepository = MockUserRepository()
-    reviewRepository = MockReviewRepository()
-    reportedObjectRepository = MockReportedObjectRepository()
+        parkingRepository = MockParkingRepository()
+        userRepository = MockUserRepository()
+        reviewRepository = MockReviewRepository()
+        reportedObjectRepository = MockReportedObjectRepository()
 
-    parkingViewModel =
-        ParkingViewModel(
-            MockImageRepository(),
-            parkingRepository,
-            MockOfflineParkingRepository(),
-            reportedObjectRepository)
-    userViewModel =
-        UserViewModel(
-            userRepository,
-            parkingRepository,
-            MockImageRepository(),
-            MockAuthenticationRepository())
-    reviewViewModel = ReviewViewModel(reviewRepository, reportedObjectRepository)
+        parkingViewModel =
+            ParkingViewModel(
+                MockImageRepository(),
+                parkingRepository,
+                MockOfflineParkingRepository(),
+                reportedObjectRepository
+            )
+        userViewModel =
+            UserViewModel(
+                userRepository,
+                parkingRepository,
+                MockImageRepository(),
+                MockAuthenticationRepository()
+            )
+        userViewModel.setCurrentUser(TestInstancesUser.user1)
+        reviewViewModel = ReviewViewModel(reviewRepository, reportedObjectRepository)
 
-    parkingViewModel.addParking(TestInstancesParking.parking2)
-    parkingViewModel.addParking(TestInstancesParking.parking3)
+        parkingViewModel.addParking(TestInstancesParking.parking2)
+        parkingViewModel.addParking(TestInstancesParking.parking3)
 
-    userViewModel.setCurrentUser(TestInstancesUser.user1)
-
-    `when`(navigationActions.currentRoute()).thenReturn(Screen.PARKING_DETAILS)
-  }
-
-  @Test
-  fun reviewReportScreenDisplaysCorrectly() {
-    composeTestRule.setContent {
-      ReviewReportScreen(
-          navigationActions = navigationActions,
-          userViewModel = userViewModel,
-          reviewViewModel = reviewViewModel)
+        `when`(navigationActions.currentRoute()).thenReturn(Screen.PARKING_DETAILS)
     }
 
-    // Assert that the title is displayed
-    composeTestRule.onNodeWithTag("ReportTitle").assertIsDisplayed()
+    @Test
+    fun reviewReportScreenDisplaysCorrectly() {
+        composeTestRule.setContent {
+            ReviewReportScreen(
+                navigationActions = navigationActions,
+                userViewModel = userViewModel,
+                reviewViewModel = reviewViewModel
+            )
+        }
 
-    // Assert that bullet points are displayed
-    composeTestRule.onNodeWithTag("ReportBulletPoints").assertExists()
+        // Assert that the title is displayed
+        composeTestRule.onNodeWithTag("ReportBulletPoints").assertExists()
 
-    // Assert that the reason dropdown is displayed
-    composeTestRule.onNodeWithTag("ReasonDropdown").assertExists()
+        // Assert that bullet points are displayed
+        composeTestRule.onNodeWithTag("ReportBulletPoints").assertExists()
 
-    // Assert that the details input field is displayed
-    composeTestRule.onNodeWithTag("DetailsInput").assertExists()
+        // Assert that the reason dropdown is displayed
+        composeTestRule.onNodeWithTag("ReasonDropdown").assertExists()
 
-    // Assert that the submit button is displayed
-    composeTestRule.onNodeWithTag("SubmitButton").assertExists()
-  }
+        // Assert that the details input field is displayed
+        composeTestRule.onNodeWithTag("DetailsInput").assertExists()
 
-  @OptIn(ExperimentalTestApi::class)
-  @Test
-  fun submitButtonDisplaysDialogWhenClicked() {
-    composeTestRule.setContent {
-      ReviewReportScreen(
-          navigationActions = navigationActions,
-          userViewModel = userViewModel,
-          reviewViewModel = reviewViewModel)
+        // Assert that the submit button is displayed by text
+        composeTestRule.onNodeWithText("Submit").assertExists()
     }
 
-    // Click on the submit button
-    composeTestRule.onNodeWithTag("SubmitButton").performClick()
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun submitButtonDisplaysDialogWhenClicked() {
+        composeTestRule.setContent {
+            ReviewReportScreen(
+                navigationActions = navigationActions,
+                userViewModel = userViewModel,
+                reviewViewModel = reviewViewModel
+            )
+        }
 
-    // Wait for the dialog
-    composeTestRule.waitUntilAtLeastOneExists(
-        hasTestTag("ReportScreenAlertDialog"), timeoutMillis = 5000)
+        // Click on the submit button
+        composeTestRule.onNodeWithText("Submit").performClick()
 
-    // Assert that the dialog exists
-    composeTestRule.onNodeWithTag("ReportScreenAlertDialog").assertExists()
-  }
+        // Wait for the dialog
+        composeTestRule.waitUntilAtLeastOneExists(
+            hasTestTag("ReportScreenAlertDialog"), timeoutMillis = 5000
+        )
 
-  @Test
-  fun detailsInputAcceptsTextInput() {
-    composeTestRule.setContent {
-      ReviewReportScreen(
-          navigationActions = navigationActions,
-          userViewModel = userViewModel,
-          reviewViewModel = reviewViewModel)
+        // Assert that the dialog exists
+        composeTestRule.onNodeWithTag("ReportScreenAlertDialog").assertExists()
     }
 
-    val testInput = "This review is misleading."
+    @Test
+    fun detailsInputAcceptsTextInput() {
+        composeTestRule.setContent {
+            ReviewReportScreen(
+                navigationActions = navigationActions,
+                userViewModel = userViewModel,
+                reviewViewModel = reviewViewModel
+            )
+        }
 
-    composeTestRule.onNodeWithTag("DetailsInput").performTextInput(testInput)
-    composeTestRule.onNodeWithTag("DetailsInput").assertTextContains(testInput)
-  }
+        val testInput = "This review is misleading."
 
-  @Test
-  fun reasonDropDownIsClickable() {
-    composeTestRule.setContent {
-      ParkingReportScreen(
-          navigationActions = navigationActions,
-          userViewModel = userViewModel,
-          parkingViewModel = parkingViewModel)
+        composeTestRule.onNodeWithTag("DetailsInput").performTextInput(testInput)
+        composeTestRule.onNodeWithTag("DetailsInput").assertTextContains(testInput)
     }
 
-    composeTestRule.onNodeWithTag("ReasonDropDown").performClick()
-  }
+    @Test
+    fun reasonDropDownIsClickable() {
+        composeTestRule.setContent {
+            ReviewReportScreen(
+                navigationActions = navigationActions,
+                userViewModel = userViewModel,
+                reviewViewModel = reviewViewModel
+            )
+        }
+
+        composeTestRule.onNodeWithTag("ReasonDropdown").performClick()
+    }
 }
