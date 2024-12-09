@@ -335,6 +335,11 @@ class ParkingViewModel(
     updateClosestParkings()
   }
 
+  fun getParkingFromImagePath(imagePath: String): String {
+      val id = imagePath.split("/")[1] // Extracts "IrVBJ7R96UaPIs5WtuVP"
+      return id
+  }
+
   private val _onlyWithCCTV = MutableStateFlow(false)
   val onlyWithCCTV: StateFlow<Boolean> = _onlyWithCCTV
 
@@ -412,10 +417,25 @@ class ParkingViewModel(
    * @param imgId The ID of the image to remove.
    * @return A new Parking object with the image removed from the images list.
    */
-  fun deleteImageFromParking(parking: Parking, imgId: String): Parking {
-    // Filter out the image with the specified ID
-    val updatedImages = parking.images.filterNot { it.endsWith("/$imgId") }
-    return parking.copy(images = updatedImages)
+  fun deleteImageFromParking(parkingId: String, imgId: String) {
+      parkingRepository.getParkingById(parkingId,
+          onSuccess = { parking ->
+              val updatedImages = parking.images.filterNot { it.equals(imgId) }
+              val updatedParking = parking.copy(images = updatedImages)
+
+              parkingRepository.updateParking(updatedParking,
+                  onSuccess = {
+                      Log.d("deleteImageFromParking", "Image removed successfully from parking.")
+                  },
+                  onFailure = { exception ->
+                      Log.e("deleteImageFromParking", "Failed to update parking: ${exception.message}")
+                  }
+              )
+          },
+          onFailure = { exception ->
+              Log.e("deleteImageFromParking", "Failed to fetch parking: ${exception.message}")
+          }
+      )
   }
 
   /**
