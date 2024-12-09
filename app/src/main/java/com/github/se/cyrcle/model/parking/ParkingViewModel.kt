@@ -336,8 +336,8 @@ class ParkingViewModel(
   }
 
   fun getParkingFromImagePath(imagePath: String): String {
-      val id = imagePath.split("/")[1] // Extracts "IrVBJ7R96UaPIs5WtuVP"
-      return id
+    val id = imagePath.split("/")[1] // Extracts "IrVBJ7R96UaPIs5WtuVP"
+    return id
   }
 
   private val _onlyWithCCTV = MutableStateFlow(false)
@@ -418,24 +418,24 @@ class ParkingViewModel(
    * @return A new Parking object with the image removed from the images list.
    */
   fun deleteImageFromParking(parkingId: String, imgId: String) {
-      parkingRepository.getParkingById(parkingId,
-          onSuccess = { parking ->
-              val updatedImages = parking.images.filterNot { it.equals(imgId) }
-              val updatedParking = parking.copy(images = updatedImages)
+    parkingRepository.getParkingById(
+        parkingId,
+        onSuccess = { parking ->
+          val updatedImages = parking.images.filterNot { it.equals(imgId) }
+          val updatedParking = parking.copy(images = updatedImages)
 
-              parkingRepository.updateParking(updatedParking,
-                  onSuccess = {
-                      Log.d("deleteImageFromParking", "Image removed successfully from parking.")
-                  },
-                  onFailure = { exception ->
-                      Log.e("deleteImageFromParking", "Failed to update parking: ${exception.message}")
-                  }
-              )
-          },
-          onFailure = { exception ->
-              Log.e("deleteImageFromParking", "Failed to fetch parking: ${exception.message}")
-          }
-      )
+          parkingRepository.updateParking(
+              updatedParking,
+              onSuccess = {
+                Log.d("deleteImageFromParking", "Image removed successfully from parking.")
+              },
+              onFailure = { exception ->
+                Log.e("deleteImageFromParking", "Failed to update parking: ${exception.message}")
+              })
+        },
+        onFailure = { exception ->
+          Log.e("deleteImageFromParking", "Failed to fetch parking: ${exception.message}")
+        })
   }
 
   /**
@@ -569,146 +569,150 @@ class ParkingViewModel(
    * @param user The user submitting the report, required for identifying the reporter.
    */
   fun addImageReport(report: ImageReport, user: User) {
-      if (_selectedImage.value == null) {
-          Log.e("ParkingViewModel", "No parking image selected")
-          return
-      }
+    if (_selectedImage.value == null) {
+      Log.e("ParkingViewModel", "No parking image selected")
+      return
+    }
 
-      val selectedImage = _selectedImage.value!!
-      Log.d("ParkingViewModel", "Selected image: $selectedImage")
+    val selectedImage = _selectedImage.value!!
+    Log.d("ParkingViewModel", "Selected image: $selectedImage")
 
-      val (foundReportedImage, index) =
-          _selectedParking.value
-              ?.reportedImages
-              ?.withIndex()
-              ?.find { it.value.imagePath == selectedImage }
-              ?.let { it.value to it.index } ?: (null to -1)
+    val (foundReportedImage, index) =
+        _selectedParking.value
+            ?.reportedImages
+            ?.withIndex()
+            ?.find { it.value.imagePath == selectedImage }
+            ?.let { it.value to it.index } ?: (null to -1)
 
-      val parkingImageToAdd = ParkingImage(parkingRepository.getNewUid(), selectedImage, 1, 0)
+    val parkingImageToAdd = ParkingImage(parkingRepository.getNewUid(), selectedImage, 1, 0)
 
-      if (foundReportedImage == null) {
-          Log.d("ParkingViewModel", "No existing report for this image. Creating a new one.")
+    if (foundReportedImage == null) {
+      Log.d("ParkingViewModel", "No existing report for this image. Creating a new one.")
 
-          _selectedParking.value =
-              _selectedParking.value?.copy(
-                  reportedImages = _selectedParking.value?.reportedImages?.plus(parkingImageToAdd)!!
-              )
-          parkingRepository.addImageReport(
-              report,
-              onSuccess = {
-                  Log.d("ParkingViewModel", "Successfully added image report to repository.")
-                  parkingRepository.updateParking(_selectedParking.value!!, {}, {})
-              },
-              onFailure = { exception ->
-                  Log.e("ParkingViewModel", "Failed to add image report: ${exception.message}")
-              }
-          )
-      } else {
-          val numMaxSeverityReports =
-              if (report.reason.severity == MAX_SEVERITY) foundReportedImage.nbMaxSeverityReports + 1
-              else foundReportedImage.nbMaxSeverityReports
+      _selectedParking.value =
+          _selectedParking.value?.copy(
+              reportedImages = _selectedParking.value?.reportedImages?.plus(parkingImageToAdd)!!)
+      parkingRepository.addImageReport(
+          report,
+          onSuccess = {
+            Log.d("ParkingViewModel", "Successfully added image report to repository.")
+            parkingRepository.updateParking(_selectedParking.value!!, {}, {})
+          },
+          onFailure = { exception ->
+            Log.e("ParkingViewModel", "Failed to add image report: ${exception.message}")
+          })
+    } else {
+      val numMaxSeverityReports =
+          if (report.reason.severity == MAX_SEVERITY) foundReportedImage.nbMaxSeverityReports + 1
+          else foundReportedImage.nbMaxSeverityReports
 
-          val updatedImage = ParkingImage(
+      val updatedImage =
+          ParkingImage(
               uid = foundReportedImage.uid,
               imagePath = foundReportedImage.imagePath,
               nbReports = foundReportedImage.nbReports + 1,
-              nbMaxSeverityReports = numMaxSeverityReports
-          )
+              nbMaxSeverityReports = numMaxSeverityReports)
 
-          parkingRepository.addImageReport(
-              report,
-              onSuccess = {
-                  Log.d("ParkingViewModel", "Successfully updated image report in repository.")
-                  _selectedParking.value =
-                      _selectedParking.value?.copy(
-                          reportedImages =
-                          _selectedParking.value?.reportedImages?.mapIndexed { i, image ->
-                              if (i == index) updatedImage else image
-                          } ?: emptyList()
-                      )
+      parkingRepository.addImageReport(
+          report,
+          onSuccess = {
+            Log.d("ParkingViewModel", "Successfully updated image report in repository.")
+            _selectedParking.value =
+                _selectedParking.value?.copy(
+                    reportedImages =
+                        _selectedParking.value?.reportedImages?.mapIndexed { i, image ->
+                          if (i == index) updatedImage else image
+                        } ?: emptyList())
 
-                  parkingRepository.updateParking(_selectedParking.value!!, {}, {})
+            parkingRepository.updateParking(_selectedParking.value!!, {}, {})
 
-                  val updatedReportedObject = ReportedObject(
-                      objectUID = updatedImage.imagePath,
-                      reportUID = report.uid,
-                      nbOfTimesReported = updatedImage.nbReports,
-                      nbOfTimesMaxSeverityReported = updatedImage.nbMaxSeverityReports,
-                      userUID = user.public.userId,
-                      objectType = ReportedObjectType.IMAGE
-                  )
+            val updatedReportedObject =
+                ReportedObject(
+                    objectUID = updatedImage.imagePath,
+                    reportUID = report.uid,
+                    nbOfTimesReported = updatedImage.nbReports,
+                    nbOfTimesMaxSeverityReported = updatedImage.nbMaxSeverityReports,
+                    userUID = user.public.userId,
+                    objectType = ReportedObjectType.IMAGE)
 
-                  reportedObjectRepository.checkIfObjectExists(
-                      objectUID = updatedImage.uid,
-                      onSuccess = { documentId ->
-                          if (documentId != null) {
-                              reportedObjectRepository.updateReportedObject(
-                                  documentId = documentId,
-                                  updatedObject = updatedReportedObject,
-                                  onSuccess = { Log.d("ParkingViewModel", "ReportedObject updated successfully.") },
-                                  onFailure = { Log.e("ParkingViewModel", "Failed to update ReportedObject: ${it.message}") }
-                              )
-                          } else {
-                              val shouldAdd = (report.reason.severity == MAX_SEVERITY &&
-                                      updatedImage.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERITY_THRESH) ||
-                                      (updatedImage.nbReports >= NB_REPORTS_THRESH)
+            reportedObjectRepository.checkIfObjectExists(
+                objectUID = updatedImage.uid,
+                onSuccess = { documentId ->
+                  if (documentId != null) {
+                    reportedObjectRepository.updateReportedObject(
+                        documentId = documentId,
+                        updatedObject = updatedReportedObject,
+                        onSuccess = {
+                          Log.d("ParkingViewModel", "ReportedObject updated successfully.")
+                        },
+                        onFailure = {
+                          Log.e(
+                              "ParkingViewModel", "Failed to update ReportedObject: ${it.message}")
+                        })
+                  } else {
+                    val shouldAdd =
+                        (report.reason.severity == MAX_SEVERITY &&
+                            updatedImage.nbMaxSeverityReports >= NB_REPORTS_MAXSEVERITY_THRESH) ||
+                            (updatedImage.nbReports >= NB_REPORTS_THRESH)
 
-                              Log.d("DA BOOL", shouldAdd.toString())
+                    Log.d("DA BOOL", shouldAdd.toString())
 
-                              if (shouldAdd) {
-                                  reportedObjectRepository.addReportedObject(
-                                      reportedObject = updatedReportedObject,
-                                      onSuccess = { Log.d("ParkingViewModel", "ReportedObject added successfully.") },
-                                      onFailure = { Log.e("ParkingViewModel", "Failed to add ReportedObject: ${it.message}") }
-                                  )
-                                  updateLocalImageAndMetrics(report, updatedImage)
-                              } else {
-                                  Log.d("WOMP WOMP", "Nice try")
-                                  updateLocalImageAndMetrics(report, updatedImage)
-                              }
-                          }
-                      },
-                      onFailure = { exception ->
-                          Log.e("ParkingViewModel", "Failed to check ReportedObject: ${exception.message}")
-                          updateLocalImageAndMetrics(report, updatedImage)
-                      }
-                  )
-              },
-              onFailure = { exception ->
-                  Log.e("ParkingViewModel", "Failed to update image report: ${exception.message}")
+                    if (shouldAdd) {
+                      reportedObjectRepository.addReportedObject(
+                          reportedObject = updatedReportedObject,
+                          onSuccess = {
+                            Log.d("ParkingViewModel", "ReportedObject added successfully.")
+                          },
+                          onFailure = {
+                            Log.e("ParkingViewModel", "Failed to add ReportedObject: ${it.message}")
+                          })
+                      updateLocalImageAndMetrics(report, updatedImage)
+                    } else {
+                      Log.d("WOMP WOMP", "Nice try")
+                      updateLocalImageAndMetrics(report, updatedImage)
+                    }
+                  }
+                },
+                onFailure = { exception ->
+                  Log.e("ParkingViewModel", "Failed to check ReportedObject: ${exception.message}")
                   updateLocalImageAndMetrics(report, updatedImage)
-              }
-          )
-      }
+                })
+          },
+          onFailure = { exception ->
+            Log.e("ParkingViewModel", "Failed to update image report: ${exception.message}")
+            updateLocalImageAndMetrics(report, updatedImage)
+          })
+    }
   }
 
-    private fun updateLocalImageAndMetrics(report: ImageReport, updatedImage: ParkingImage) {
-        val selectedParking = _selectedParking.value ?: return
-        val reportedImages = _selectedParking.value?.reportedImages?.map { image ->
-            if (image.uid == updatedImage.uid) updatedImage else image
+  private fun updateLocalImageAndMetrics(report: ImageReport, updatedImage: ParkingImage) {
+    val selectedParking = _selectedParking.value ?: return
+    val reportedImages =
+        _selectedParking.value?.reportedImages?.map { image ->
+          if (image.uid == updatedImage.uid) updatedImage else image
         } ?: return
 
-        // Update the selected parking with the updated images list
-        _selectedParking.value = selectedParking.copy(reportedImages = reportedImages)
+    // Update the selected parking with the updated images list
+    _selectedParking.value = selectedParking.copy(reportedImages = reportedImages)
 
-        // Update the local state for the selected parking
-        if (report.reason.severity == MAX_SEVERITY) {
-            val index = reportedImages.indexOfFirst { it.uid == updatedImage.uid }
-            if (index != -1) {
-                reportedImages[index].nbMaxSeverityReports += 1
-            }
-        }
-
-        // Increment the number of reports for the image
-        val index = reportedImages.indexOfFirst { it.uid == updatedImage.uid }
-        if (index != -1) {
-            reportedImages[index].nbReports += 1
-        }
-
-        // Update the parking repository with the updated parking object
-        parkingRepository.updateParking(selectedParking.copy(reportedImages = reportedImages), {}, {})
-        Log.d("ParkingViewModel", "Parking image and metrics updated: $updatedImage")
+    // Update the local state for the selected parking
+    if (report.reason.severity == MAX_SEVERITY) {
+      val index = reportedImages.indexOfFirst { it.uid == updatedImage.uid }
+      if (index != -1) {
+        reportedImages[index].nbMaxSeverityReports += 1
+      }
     }
+
+    // Increment the number of reports for the image
+    val index = reportedImages.indexOfFirst { it.uid == updatedImage.uid }
+    if (index != -1) {
+      reportedImages[index].nbReports += 1
+    }
+
+    // Update the parking repository with the updated parking object
+    parkingRepository.updateParking(selectedParking.copy(reportedImages = reportedImages), {}, {})
+    Log.d("ParkingViewModel", "Parking image and metrics updated: $updatedImage")
+  }
 
   // ================== Reviews ==================
   /**

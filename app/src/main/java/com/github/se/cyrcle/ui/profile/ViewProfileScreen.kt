@@ -2,7 +2,6 @@ package com.github.se.cyrcle.ui.profile
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
@@ -101,13 +100,12 @@ fun ViewProfileScreen(
       },
       floatingActionButton = {
         if (userState?.public?.userId != null) {
-            FloatingActionButton(
-                onClick = { navigationActions.navigateTo(Screen.ADMIN) },
-                modifier = Modifier.testTag("AdminFAB"),
-                containerColor = MaterialTheme.colorScheme.primary) {
-                  Text(text = "Admin", color = MaterialTheme.colorScheme.onPrimary)
-
-          }
+          FloatingActionButton(
+              onClick = { navigationActions.navigateTo(Screen.ADMIN) },
+              modifier = Modifier.testTag("AdminFAB"),
+              containerColor = MaterialTheme.colorScheme.primary) {
+                Text(text = "Admin", color = MaterialTheme.colorScheme.onPrimary)
+              }
         }
       }) { innerPadding ->
         Box(Modifier.fillMaxSize().padding(innerPadding)) {
