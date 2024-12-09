@@ -232,6 +232,7 @@
     <string name="rarity_epic">Epic</string>
     <string name="gambling_screen_title">Gambling</string>
     <string name="gambling_screen_coins_display">Coins: %d</string>
+    <string name="gambling_screen_spin_button_cost">(%d coins)</string>
 
 
     <!-- Report Screens -->
