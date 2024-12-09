@@ -33,6 +33,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -62,8 +63,8 @@ import com.github.se.cyrcle.model.parking.ParkingProtection
 import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.permission.PermissionHandler
-import com.github.se.cyrcle.ui.list.NumberOfSuggestionsForMenu
-import com.github.se.cyrcle.ui.list.maxSuggestionDisplayNameLengthList
+import com.github.se.cyrcle.ui.list.MAX_SUGGESTION_DISPLAY_NAME_LENGTH_LIST
+import com.github.se.cyrcle.ui.list.NUMBER_OF_SUGGESTIONS_FOR_MENU
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
@@ -95,8 +96,8 @@ fun FilterPanel(
     parkingViewModel: ParkingViewModel,
     displayHeader: Boolean,
     addressViewModel: AddressViewModel,
-    myLocation: MutableState<Boolean> = mutableStateOf(false),
-    chosenLocation: MutableState<Address> =
+    myLocation: State<Boolean> = mutableStateOf(false),
+    chosenLocation: State<Address> =
         mutableStateOf(Address(latitude = "46.518467", longitude = "6.566397")),
     permissionHandler: PermissionHandler
 ) {
@@ -138,6 +139,7 @@ fun FilterPanel(
             if (isTextFieldVisible.value) {
               SearchBarListScreen(
                   addressViewModel,
+                  parkingViewModel,
                   isTextFieldVisible,
                   myLocation,
                   chosenLocation,
@@ -340,9 +342,10 @@ fun FilterSection(
 @Composable
 fun SearchBarListScreen(
     addressViewModel: AddressViewModel,
+    parkingViewModel: ParkingViewModel,
     isTextFieldVisible: MutableState<Boolean>,
-    myLocation: MutableState<Boolean>,
-    chosenLocation: MutableState<Address>,
+    myLocation: State<Boolean>,
+    chosenLocation: State<Address>,
     permissionHandler: PermissionHandler,
     textFieldValue: MutableState<String>
 ) {
@@ -425,7 +428,7 @@ fun SearchBarListScreen(
                   modifier = Modifier.testTag("MyLocationSuggestionMenuItem"),
                   contentPadding = PaddingValues(8.dp),
                   onClick = {
-                    myLocation.value = true
+                    parkingViewModel.setMyLocation(true)
                     showSuggestions.value = false
                     textFieldValue.value = context.resources.getString(R.string.my_location)
                     isTextFieldVisible.value = false
@@ -438,7 +441,7 @@ fun SearchBarListScreen(
                 listOfSuggestions.value.filter { suggestion ->
                   val displayName =
                       suggestion.suggestionFormatDisplayName(
-                          maxSuggestionDisplayNameLengthList, Address.Mode.LIST)
+                          MAX_SUGGESTION_DISPLAY_NAME_LENGTH_LIST, Address.Mode.LIST)
                   if (displayName in seenNames) {
                     false
                   } else {
@@ -447,24 +450,24 @@ fun SearchBarListScreen(
                   }
                 }
 
-            for (address in uniqueSuggestions.value.take(NumberOfSuggestionsForMenu)) {
+            for (address in uniqueSuggestions.value.take(NUMBER_OF_SUGGESTIONS_FOR_MENU)) {
               DropdownMenuItem(
                   text = {
                     Text(
                         address.suggestionFormatDisplayName(
-                            maxSuggestionDisplayNameLengthList, Address.Mode.LIST),
+                            MAX_SUGGESTION_DISPLAY_NAME_LENGTH_LIST, Address.Mode.LIST),
                         textAlign = TextAlign.Start)
                   },
                   modifier = Modifier.testTag("SuggestionMenuItem${address.city}"),
                   contentPadding = PaddingValues(8.dp),
                   onClick = {
-                    chosenLocation.value = address
+                    parkingViewModel.setChosenLocation(address)
                     showSuggestions.value = false
-                    myLocation.value = false
+                    parkingViewModel.setMyLocation(false)
                     isTextFieldVisible.value = false
                     textFieldValue.value =
                         address.suggestionFormatDisplayName(
-                            maxSuggestionDisplayNameLengthList, Address.Mode.LIST)
+                            MAX_SUGGESTION_DISPLAY_NAME_LENGTH_LIST, Address.Mode.LIST)
                     focusManager.clearFocus()
                   })
             }
