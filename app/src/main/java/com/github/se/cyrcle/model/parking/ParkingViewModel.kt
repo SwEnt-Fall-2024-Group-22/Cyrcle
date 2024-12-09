@@ -848,7 +848,6 @@ class ParkingViewModel(
           val updatedParking =
               selectedParking.copy(
                   images = selectedParking.images.plus(destinationPath),
-                  associatedImageUrls = emptyList(),
                   reportedImages = emptyList())
           selectParking(updatedParking)
           parkingRepository.updateParking(
