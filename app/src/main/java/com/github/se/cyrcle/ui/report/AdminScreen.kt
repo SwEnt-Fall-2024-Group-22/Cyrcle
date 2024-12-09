@@ -50,11 +50,10 @@ import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
 enum class ReportSortingOption {
-    Parking,
-    Review,
-    Image
+  Parking,
+  Review,
+  Image
 }
-
 
 @Composable
 fun FilterSection(
@@ -87,37 +86,37 @@ fun FilterHeader(
     selectedSortingOption: ReportSortingOption,
     onSortingOptionSelected: (ReportSortingOption) -> Unit
 ) {
-    var showFilters by remember { mutableStateOf(false) }
+  var showFilters by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = stringResource(R.string.choose_parkingorreview),
-                modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onSurface)
+  Column(modifier = Modifier.padding(16.dp)) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically) {
+          Text(
+              text = stringResource(R.string.choose_parkingorreview),
+              modifier = Modifier.weight(1f),
+              style = MaterialTheme.typography.headlineMedium,
+              color = MaterialTheme.colorScheme.onSurface)
 
-            SmallFloatingActionButton(
-                onClick = { showFilters = !showFilters },
-                icon = if (showFilters) Icons.Default.Close else Icons.Default.FilterList,
-                contentDescription = "Filter",
-                testTag = "ShowFiltersButton")
+          SmallFloatingActionButton(
+              onClick = { showFilters = !showFilters },
+              icon = if (showFilters) Icons.Default.Close else Icons.Default.FilterList,
+              contentDescription = "Filter",
+              testTag = "ShowFiltersButton")
         }
 
-        if (showFilters) {
-            FilterSection(
-                title = stringResource(R.string.view_reports),
-                isExpanded = true,
-                onToggle = { /* No toggle needed for always-visible sorting options */ }) {
-                SortingOptionSelector(
-                    selectedSortingOption = selectedSortingOption,
-                    onOptionSelected = onSortingOptionSelected)
-            }
-        }
+    if (showFilters) {
+      FilterSection(
+          title = stringResource(R.string.view_reports),
+          isExpanded = true,
+          onToggle = { /* No toggle needed for always-visible sorting options */}) {
+            SortingOptionSelector(
+                selectedSortingOption = selectedSortingOption,
+                onOptionSelected = onSortingOptionSelected)
+          }
     }
+  }
 }
 
 @Composable
@@ -125,36 +124,37 @@ fun SortingOptionSelector(
     selectedSortingOption: ReportSortingOption,
     onOptionSelected: (ReportSortingOption) -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-        ReportSortingOption.values().forEach { sortingOption ->
-            Row(
-                modifier =
-                Modifier.fillMaxWidth()
-                    .padding(vertical = 4.dp)
-                    .clickable { onOptionSelected(sortingOption) }
-                    .background(
-                        color =
-                        if (selectedSortingOption == sortingOption)
-                            MaterialTheme.colorScheme.secondaryContainer
-                        else Color.Transparent,
-                        shape = MaterialTheme.shapes.small)
-                    .padding(12.dp)) {
-                Text(
-                    text = stringResource(
+  Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+    ReportSortingOption.values().forEach { sortingOption ->
+      Row(
+          modifier =
+              Modifier.fillMaxWidth()
+                  .padding(vertical = 4.dp)
+                  .clickable { onOptionSelected(sortingOption) }
+                  .background(
+                      color =
+                          if (selectedSortingOption == sortingOption)
+                              MaterialTheme.colorScheme.secondaryContainer
+                          else Color.Transparent,
+                      shape = MaterialTheme.shapes.small)
+                  .padding(12.dp)) {
+            Text(
+                text =
+                    stringResource(
                         id =
-                        when (sortingOption) {
-                            ReportSortingOption.Parking -> R.string.sort_reported_parkings
-                            ReportSortingOption.Review -> R.string.sort_reported_reviews
-                            ReportSortingOption.Image -> R.string.sort_reported_reviews
-                        }),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color =
+                            when (sortingOption) {
+                              ReportSortingOption.Parking -> R.string.sort_reported_parkings
+                              ReportSortingOption.Review -> R.string.sort_reported_reviews
+                              ReportSortingOption.Image -> R.string.sort_reported_reviews
+                            }),
+                style = MaterialTheme.typography.bodyMedium,
+                color =
                     if (selectedSortingOption == sortingOption)
                         MaterialTheme.colorScheme.onSecondaryContainer
                     else MaterialTheme.colorScheme.primary)
-            }
-        }
+          }
     }
+  }
 }
 
 @Composable
@@ -164,85 +164,85 @@ fun AdminScreen(
     parkingViewModel: ParkingViewModel,
     reviewViewModel: ReviewViewModel
 ) {
-    LaunchedEffect(Unit) { reportedObjectViewModel.fetchAllReportedObjects() }
-    val selectedObject by reportedObjectViewModel.selectedObject.collectAsState()
-    val reportsList by reportedObjectViewModel.reportsList.collectAsState()
-    var selectedCardIndex by remember { mutableStateOf(-1) }
-    val context = LocalContext.current
-    var selectedSortingOption by remember { mutableStateOf(ReportSortingOption.Parking) }
+  LaunchedEffect(Unit) { reportedObjectViewModel.fetchAllReportedObjects() }
+  val selectedObject by reportedObjectViewModel.selectedObject.collectAsState()
+  val reportsList by reportedObjectViewModel.reportsList.collectAsState()
+  var selectedCardIndex by remember { mutableStateOf(-1) }
+  val context = LocalContext.current
+  var selectedSortingOption by remember { mutableStateOf(ReportSortingOption.Parking) }
 
-    // Filter and sort reports based on the selected sorting option
-    val sortedReports =
-        remember(reportsList, selectedSortingOption) {
-            val filteredReports =
-                when (selectedSortingOption) {
-                    ReportSortingOption.Parking ->
-                        reportsList.filter { it.objectType == ReportedObjectType.PARKING }
-                    ReportSortingOption.Review ->
-                        reportsList.filter { it.objectType == ReportedObjectType.REVIEW }
-                    ReportSortingOption.Image ->
-                        reportsList.filter { it.objectType == ReportedObjectType.IMAGE }
-                }
-            filteredReports.sortedByDescending { it.nbOfTimesReported }
-        }
+  // Filter and sort reports based on the selected sorting option
+  val sortedReports =
+      remember(reportsList, selectedSortingOption) {
+        val filteredReports =
+            when (selectedSortingOption) {
+              ReportSortingOption.Parking ->
+                  reportsList.filter { it.objectType == ReportedObjectType.PARKING }
+              ReportSortingOption.Review ->
+                  reportsList.filter { it.objectType == ReportedObjectType.REVIEW }
+              ReportSortingOption.Image ->
+                  reportsList.filter { it.objectType == ReportedObjectType.IMAGE }
+            }
+        filteredReports.sortedByDescending { it.nbOfTimesReported }
+      }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                navigationActions = navigationActions,
-                title =
+  Scaffold(
+      topBar = {
+        TopAppBar(
+            navigationActions = navigationActions,
+            title =
                 stringResource(R.string.admin_topappbar_title).format(selectedSortingOption.name),
-            )
-        },
-        modifier = Modifier.testTag("AdminScreen")) { innerPadding ->
+        )
+      },
+      modifier = Modifier.testTag("AdminScreen")) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-            // Header Section
-            FilterHeader(
-                selectedSortingOption = selectedSortingOption,
-                onSortingOptionSelected = { selectedOption ->
-                    selectedSortingOption = selectedOption
-                })
+          // Header Section
+          FilterHeader(
+              selectedSortingOption = selectedSortingOption,
+              onSortingOptionSelected = { selectedOption ->
+                selectedSortingOption = selectedOption
+              })
 
-            // Scrollable Review Cards
-            LazyColumn(
-                modifier = Modifier.weight(1f).padding(horizontal = 16.dp).testTag("ReportList"),
-                contentPadding = PaddingValues(bottom = 16.dp)) {
+          // Scrollable Review Cards
+          LazyColumn(
+              modifier = Modifier.weight(1f).padding(horizontal = 16.dp).testTag("ReportList"),
+              contentPadding = PaddingValues(bottom = 16.dp)) {
                 items(items = sortedReports) { curReport ->
-                    val index = sortedReports.indexOf(curReport)
-                    val isExpanded = selectedCardIndex == index
-                    val cardHeight by
-                    animateDpAsState(
-                        if (isExpanded) 150.dp
-                        else 100.dp) // Adjust card height based on selection
-                    val cardColor = MaterialTheme.colorScheme.surfaceContainer
+                  val index = sortedReports.indexOf(curReport)
+                  val isExpanded = selectedCardIndex == index
+                  val cardHeight by
+                      animateDpAsState(
+                          if (isExpanded) 150.dp
+                          else 100.dp) // Adjust card height based on selection
+                  val cardColor = MaterialTheme.colorScheme.surfaceContainer
 
-                    Card(
-                        modifier =
-                        Modifier.fillMaxWidth()
-                            .padding(8.dp)
-                            .height(cardHeight)
-                            .clickable { selectedCardIndex = if (isExpanded) -1 else index }
-                            .testTag("ReportCard$index"),
-                        colors = CardDefaults.cardColors(containerColor = cardColor),
-                        shape = MaterialTheme.shapes.medium,
-                        elevation = CardDefaults.cardElevation(8.dp)) {
+                  Card(
+                      modifier =
+                          Modifier.fillMaxWidth()
+                              .padding(8.dp)
+                              .height(cardHeight)
+                              .clickable { selectedCardIndex = if (isExpanded) -1 else index }
+                              .testTag("ReportCard$index"),
+                      colors = CardDefaults.cardColors(containerColor = cardColor),
+                      shape = MaterialTheme.shapes.medium,
+                      elevation = CardDefaults.cardElevation(8.dp)) {
                         Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-                            Column(
-                                modifier =
-                                Modifier.fillMaxWidth()
-                                    .align(Alignment.TopStart)
-                                    .testTag("ReportCardContent$index")) {
+                          Column(
+                              modifier =
+                                  Modifier.fillMaxWidth()
+                                      .align(Alignment.TopStart)
+                                      .testTag("ReportCardContent$index")) {
                                 Text(
                                     text =
-                                    stringResource(R.string.admin_timesbeenmaxreported)
-                                        .format(curReport.nbOfTimesMaxSeverityReported),
+                                        stringResource(R.string.admin_timesbeenmaxreported)
+                                            .format(curReport.nbOfTimesMaxSeverityReported),
                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                                     style = MaterialTheme.typography.bodySmall,
                                     modifier = Modifier.testTag("TimesMaxSeverityReported$index"))
                                 Text(
                                     text =
-                                    stringResource(R.string.admin_timesbeenreported)
-                                        .format(curReport.nbOfTimesReported),
+                                        stringResource(R.string.admin_timesbeenreported)
+                                            .format(curReport.nbOfTimesReported),
                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                                     style = MaterialTheme.typography.bodySmall,
                                     modifier = Modifier.testTag("TimesReported$index"))
@@ -250,57 +250,59 @@ fun AdminScreen(
                                 // Conditionally show the Report Review button only when the card is
                                 // expanded
                                 if (isExpanded) {
-                                    FloatingActionButton(
-                                        onClick = {
-                                            reportedObjectViewModel.selectObject(curReport)
+                                  FloatingActionButton(
+                                      onClick = {
+                                        reportedObjectViewModel.selectObject(curReport)
 
-                                            // Ensure the selectedObject is not null before proceeding
-                                            val currentObject =
-                                                reportedObjectViewModel.selectedObject.value
-                                            if (currentObject != null) {
-                                                when (curReport.objectType) {
-                                                    ReportedObjectType.PARKING -> {
-                                                        parkingViewModel.getParkingById(
-                                                            curReport.objectUID,
-                                                            onSuccess = { parking ->
-                                                                parkingViewModel.selectParking(parking)
-                                                                navigationActions.navigateTo(Screen.VIEW_REPORTS)
-                                                            },
-                                                            onFailure = {})
-                                                    }
-                                                    ReportedObjectType.REVIEW -> {
-                                                        reviewViewModel.getReviewById(
-                                                            curReport.objectUID,
-                                                            onSuccess = { review ->
-                                                                reviewViewModel.selectReviewAdminScreen(review)
-                                                                navigationActions.navigateTo(Screen.VIEW_REPORTS)
-                                                            },
-                                                            onFailure = {})
-                                                    }
-                                                    ReportedObjectType.IMAGE -> {
-                                                        // Handle IMAGE-specific navigation
-                                                        Log.d("AdminScreen", "Navigate to Image View")
-                                                        navigationActions.navigateTo(Screen.VIEW_REPORTS)
-                                                    }
-                                                }
-                                            } else {
-                                                Log.e("AdminScreen", "Failed to set selectedObject")
+                                        // Ensure the selectedObject is not null before proceeding
+                                        val currentObject =
+                                            reportedObjectViewModel.selectedObject.value
+                                        if (currentObject != null) {
+                                          when (curReport.objectType) {
+                                            ReportedObjectType.PARKING -> {
+                                              parkingViewModel.getParkingById(
+                                                  curReport.objectUID,
+                                                  onSuccess = { parking ->
+                                                    parkingViewModel.selectParking(parking)
+                                                    navigationActions.navigateTo(
+                                                        Screen.VIEW_REPORTS)
+                                                  },
+                                                  onFailure = {})
                                             }
-                                        },
-                                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                                        shape = MaterialTheme.shapes.medium,
-                                        modifier = Modifier.testTag("CheckReportsButton$index")) {
+                                            ReportedObjectType.REVIEW -> {
+                                              reviewViewModel.getReviewById(
+                                                  curReport.objectUID,
+                                                  onSuccess = { review ->
+                                                    reviewViewModel.selectReviewAdminScreen(review)
+                                                    navigationActions.navigateTo(
+                                                        Screen.VIEW_REPORTS)
+                                                  },
+                                                  onFailure = {})
+                                            }
+                                            ReportedObjectType.IMAGE -> {
+                                              // Handle IMAGE-specific navigation
+                                              Log.d("AdminScreen", "Navigate to Image View")
+                                              navigationActions.navigateTo(Screen.VIEW_REPORTS)
+                                            }
+                                          }
+                                        } else {
+                                          Log.e("AdminScreen", "Failed to set selectedObject")
+                                        }
+                                      },
+                                      containerColor = MaterialTheme.colorScheme.errorContainer,
+                                      shape = MaterialTheme.shapes.medium,
+                                      modifier = Modifier.testTag("CheckReportsButton$index")) {
                                         Text(
                                             text = stringResource(R.string.check_reports),
                                             color = MaterialTheme.colorScheme.onErrorContainer,
                                             style = MaterialTheme.typography.bodyMedium)
-                                    }
+                                      }
                                 }
-                            }
+                              }
                         }
-                    }
+                      }
                 }
-            }
+              }
         }
-    }
+      }
 }

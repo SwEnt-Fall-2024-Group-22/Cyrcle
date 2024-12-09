@@ -65,12 +65,12 @@ fun ViewReportsScreen(
                 reportedObjectViewModel.deleteReportedObject(uidOfObject)
                 if (selType == ReportedObjectType.PARKING) {
                   parkingViewModel.deleteParkingByUid(uidOfObject)
-                } else if (selType == ReportedObjectType.REVIEW){
+                } else if (selType == ReportedObjectType.REVIEW) {
                   reviewViewModel.deleteReviewById(uidOfObject)
                 } else {
-                    val uidOfParking = parkingViewModel.getParkingFromImagePath(uidOfObject)
-                    Log.d("${uidOfParking}","${uidOfObject}")
-                    parkingViewModel.deleteImageFromParking(uidOfParking,uidOfObject)
+                  val uidOfParking = parkingViewModel.getParkingFromImagePath(uidOfObject)
+                  Log.d("${uidOfParking}", "${uidOfObject}")
+                  parkingViewModel.deleteImageFromParking(uidOfParking, uidOfObject)
                 }
                 Toast.makeText(context, successDeleteText, Toast.LENGTH_LONG).show()
                 navigationActions.navigateTo(Screen.ADMIN)
