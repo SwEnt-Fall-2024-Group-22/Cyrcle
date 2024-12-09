@@ -2,10 +2,13 @@ package com.github.se.cyrcle.ui.map
 
 import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.zone.Zone
 import com.mapbox.common.NetworkRestriction
 import com.mapbox.common.TileRegionLoadOptions
+import com.mapbox.common.TileRegionLoadProgress
 import com.mapbox.common.TileStore
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.Polygon
@@ -64,8 +67,11 @@ object MapConfig {
    * Download the tiles to local storage for a specific zone
    *
    * @param zone the zone to download
+   * @param progressState the state to update the download progress (optional)
    */
-  fun downloadZone(zone: Zone) {
+  fun downloadZone(
+      zone: Zone,
+      progressState: MutableState<TileRegionLoadProgress?> = mutableStateOf(null)) {
     // Defines the area to download
     val geometry =
         Polygon.fromLngLats(
@@ -95,7 +101,7 @@ object MapConfig {
             .networkRestriction(NetworkRestriction.NONE)
             .build(),
         { progress ->
-          // Handle progress updates
+          progressState.value = progress
           Log.d("MapScreen", "Progress: $progress")
         }) { expected ->
           if (expected.isValue) {

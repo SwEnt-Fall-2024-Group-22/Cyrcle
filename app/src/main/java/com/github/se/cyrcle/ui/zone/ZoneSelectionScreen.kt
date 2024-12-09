@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.zone
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -42,16 +44,19 @@ import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.ConditionCheckingInputText
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
+import com.mapbox.common.TileRegionLoadProgress
 import com.mapbox.geojson.BoundingBox
 import com.mapbox.maps.MapView
 import com.mapbox.maps.extension.compose.DisposableMapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.plugin.gestures.gestures
 import kotlinx.coroutines.launch
+import kotlin.math.round
 
 const val MAX_ZONE_NAME_LENGTH = 32
 const val MIN_ZONE_NAME_LENGTH = 1
 /** Screen where users can select a new zone to download. */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ZoneSelectionScreen(
     navigationActions: NavigationActions,
@@ -64,6 +69,8 @@ fun ZoneSelectionScreen(
   val boundingBox = remember { mutableStateOf<BoundingBox?>(null) }
   val zoneName = remember { mutableStateOf("") }
   val mapView = remember { mutableStateOf<MapView?>(null) }
+    val mapBoxprogressState = remember { mutableStateOf<TileRegionLoadProgress?>(null) }
+    val parkingProgressState = remember { mutableStateOf<Boolean>(false) }
   val locationPickerState by
       mapViewModel.locationPickerState
           .collectAsState() // state representing where the user is in the location selection
@@ -104,7 +111,21 @@ fun ZoneSelectionScreen(
       showAlertDialogPickName = true
     }
   }
-
+    if(mapBoxprogressState.value != null) {
+        val progress = mapBoxprogressState.value!!
+        val progressPercentage: Double = round((progress.completedResourceCount.toDouble() / progress.requiredResourceCount.toDouble())*100)
+        BasicAlertDialog(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.background, shape = MaterialTheme.shapes.small)
+                .padding(16.dp),
+            onDismissRequest = {},
+            content = { Text("Downloading : $progressPercentage %") },
+        )
+        if (progress.completedResourceCount == progress.requiredResourceCount) {
+            navigationActions.goBack()
+            mapBoxprogressState.value = null
+        }
+    }
   if (showAlertDialogPickName) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -113,10 +134,12 @@ fun ZoneSelectionScreen(
           zoneName.value = it
           coroutineScope.launch {
             val zone = Zone.createZone(boundingBox.value!!, it, context)
-            MapConfig.downloadZone(zone)
+            MapConfig.downloadZone(zone, mapBoxprogressState)
             parkingViewModel.downloadZone(
                 zone,
-                { navigationActions.goBack() },
+                {
+                    parkingProgressState.value = true
+                },
                 {
                   // On failure, avoid keeping stale zone
                   Zone.deleteZone(zone, context)
