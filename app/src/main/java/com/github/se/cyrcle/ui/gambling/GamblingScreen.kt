@@ -181,10 +181,11 @@ fun WheelView(
           rotation = targetRotation % 360
           isSpinning = false
           pauseAfterSpin = true
+          onSegmentLanded?.invoke(segments[getSegmentAtPointer(rotation)].name)
           delay(2000)
           pauseAfterSpin = false
 
-          onSegmentLanded?.invoke(segments[getSegmentAtPointer(rotation)].name)
+
         }
       }
     }
@@ -266,6 +267,10 @@ fun WheelView(
 
 @Composable
 fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserViewModel) {
+    val rarityLegendary = stringResource(R.string.rarity_legendary)
+    val rarityCommon = stringResource(R.string.rarity_common)
+    val rarityRare = stringResource(R.string.rarity_rare)
+    val rarityEpic = stringResource(R.string.rarity_epic)
   val userState by userViewModel.currentUser.collectAsState()
   var coins by remember { mutableStateOf(userState?.details?.wallet?.getCoins()) }
 
@@ -289,12 +294,37 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
                           .testTag("coin_display"),
                   style = MaterialTheme.typography.headlineMedium)
 
-              WheelView(
-                      modifier = Modifier.size(300.dp).testTag("wheel_view"),
-                      onSegmentLanded = { /* Handle landing */})
-                  .let { spinFn -> wheelSpinFunction = spinFn }
+            WheelView(
+                modifier = Modifier.size(300.dp).testTag("wheel_view"),
+                onSegmentLanded = { segmentName ->
+                    val currentLevel = userState?.public?.userReputationScore ?: 0.0
+                    // Define the mapping of segment names to reputation increments
+                    // Get the increment for the landed segment
+                    val reputationIncrement = when (segmentName) {
+                        rarityLegendary -> 10.0 // Legendary always adds 10.0 level no matter what
+                        rarityCommon -> 1.0 / sqrt(currentLevel + 1.0)
+                        rarityRare -> 2.0 / sqrt(currentLevel + 1.0)
+                        rarityEpic -> 16.0 / sqrt(currentLevel + 1.0)
+                        else -> 0.0 // Nothing gives no increment no matter what
+                    }
 
-              val canSpin = userState?.details?.wallet?.isSolvable(SPIN_COST, 0) == true
+
+                    // Update the user with the new reputation score
+                    val updatedUser = userState?.copy(
+                        public = userState!!.public.copy(
+                            userReputationScore = userState!!.public.userReputationScore + reputationIncrement
+                        )
+                    )
+
+                    // Call the ViewModel to update the user
+                    if (updatedUser != null) {
+                        userViewModel.updateUser(user = updatedUser)
+                    }
+                }
+            ).let { spinFn -> wheelSpinFunction = spinFn }
+
+
+            val canSpin = userState?.details?.wallet?.isSolvable(SPIN_COST, 0) == true
 
               Button(
                   onClick = {
