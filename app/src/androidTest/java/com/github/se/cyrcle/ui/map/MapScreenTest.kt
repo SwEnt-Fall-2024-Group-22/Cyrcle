@@ -278,11 +278,11 @@ class MapScreenTest {
     composeTestRule.onNodeWithTag("SuggestionsMenu").assertIsDisplayed()
 
     composeTestRule
-        .onNodeWithTag("suggestionCardMock City")
+        .onNodeWithTag("suggestionItemMock City")
         .assertIsDisplayed()
         .assertHasClickAction()
     composeTestRule
-        .onNodeWithTag("suggestionCardMock City 2")
+        .onNodeWithTag("suggestionItemMock City 2")
         .assertIsDisplayed()
         .assertHasClickAction()
   }
