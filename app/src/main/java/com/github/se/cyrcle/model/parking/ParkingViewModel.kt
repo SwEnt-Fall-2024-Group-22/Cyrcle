@@ -610,14 +610,12 @@ class ParkingViewModel(
             ?.find { it.value.imagePath == selectedImage }
             ?.let { it.value to it.index } ?: (null to -1)
 
-
     // If not, add it to the list of Reported Images
     val parkingImageToAdd = ParkingImage(parkingRepository.getNewUid(), selectedImage, 1, 0)
     if (foundReportedImage == null) {
       Log.d("ParkingViewModel", "No existing report for this image. Creating a new one.")
 
-
-    // add the Image Report to the "images_reports" subcollection
+      // add the Image Report to the "images_reports" subcollection
       _selectedParking.value =
           _selectedParking.value?.copy(
               reportedImages = _selectedParking.value?.reportedImages?.plus(parkingImageToAdd)!!)
@@ -631,14 +629,13 @@ class ParkingViewModel(
           onFailure = { exception ->
             Log.e("ParkingViewModel", "Failed to add image report: ${exception.message}")
           })
-    // if the image already is in the Reported Images, update it
+      // if the image already is in the Reported Images, update it
     } else {
 
       // if the incoming report is max severity, increment both reports counter and maxSev counter
       val numMaxSeverityReports =
           if (report.reason.severity == MAX_SEVERITY) foundReportedImage.nbMaxSeverityReports + 1
           else foundReportedImage.nbMaxSeverityReports
-
 
       // new version to add to ReportedImages after the new Report is added
       val updatedImage =
@@ -671,7 +668,7 @@ class ParkingViewModel(
                     userUID = user.public.userId,
                     objectType = ReportedObjectType.IMAGE)
 
-           // since it's already a Reported Image, check it shouldn't become a Reported Object
+            // since it's already a Reported Image, check it shouldn't become a Reported Object
             reportedObjectRepository.checkIfObjectExists(
                 objectUID = updatedImage.uid,
                 onSuccess = { documentId ->
@@ -892,7 +889,6 @@ class ParkingViewModel(
         onFailure = { Log.e("ParkingViewModel", "Error uploading image") },
     )
   }
-
 
   // ================== Offline ==================
 

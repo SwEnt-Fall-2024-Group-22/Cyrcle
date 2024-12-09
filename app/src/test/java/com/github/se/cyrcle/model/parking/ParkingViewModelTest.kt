@@ -411,19 +411,15 @@ class ParkingViewModelTest {
     val parking = TestInstancesParking.parking1.copy(images = listOf("imagePath1"))
     val user = TestInstancesUser.user1
     val imageReport =
-      ImageReport(
-        uid = "ImageReportUID",
-        reason = ImageReportReason.USELESS,
-        userId = user.public.userId,
-        image = "imagePath1"
-      )
+        ImageReport(
+            uid = "ImageReportUID",
+            reason = ImageReportReason.USELESS,
+            userId = user.public.userId,
+            image = "imagePath1")
 
-    val updatedImage = ParkingImage(
-      uid = "ValidUid",
-      imagePath = "imagePath1",
-      nbReports = 1,
-      nbMaxSeverityReports = 0
-    )
+    val updatedImage =
+        ParkingImage(
+            uid = "ValidUid", imagePath = "imagePath1", nbReports = 1, nbMaxSeverityReports = 0)
 
     `when`(parkingRepository.getNewUid()).thenReturn("ValidUid")
 
@@ -435,41 +431,39 @@ class ParkingViewModelTest {
       it.getArgument<(ImageReport) -> Unit>(2).invoke(imageReport)
     }
 
-
     parkingViewModel.addImageReport(imageReport, user)
     // Verify image report was added and parking was updated
     verify(parkingRepository).addImageReport(eq(imageReport), eq(parking.uid), any(), any())
-    verify(parkingRepository).updateParking(
-      eq(parking.copy(reportedImages = listOf(updatedImage))), any(), any()
-    )
+    verify(parkingRepository)
+        .updateParking(eq(parking.copy(reportedImages = listOf(updatedImage))), any(), any())
   }
 
   @Test
   fun updateLocalImageAndMetricsTest() {
     // Arrange
-    val parking = TestInstancesParking.parking1.copy(
-      reportedImages = listOf(
+    val parking =
+        TestInstancesParking.parking1.copy(
+            reportedImages =
+                listOf(
+                    ParkingImage(
+                        uid = "imageUID1",
+                        imagePath = "imagePath1",
+                        nbReports = 1,
+                        nbMaxSeverityReports = 0)))
+    val report =
+        ImageReport(
+            uid = "reportUID1",
+            image = "imagePath1",
+            reason = ImageReportReason.USELESS,
+            userId = TestInstancesUser.user1.public.userId,
+            description = "This image is irrelevant")
+    val updatedImage =
         ParkingImage(
-          uid = "imageUID1",
-          imagePath = "imagePath1",
-          nbReports = 1,
-          nbMaxSeverityReports = 0
-        )
-      )
-    )
-    val report = ImageReport(
-      uid = "reportUID1",
-      image = "imagePath1",
-      reason = ImageReportReason.USELESS,
-      userId = TestInstancesUser.user1.public.userId,
-      description = "This image is irrelevant"
-    )
-    val updatedImage = ParkingImage(
-      uid = "imageUID1",
-      imagePath = "imagePath1",
-      nbReports = 2, // Incremented by the method
-      nbMaxSeverityReports = 1 // Incremented by the method
-    )
+            uid = "imageUID1",
+            imagePath = "imagePath1",
+            nbReports = 2, // Incremented by the method
+            nbMaxSeverityReports = 1 // Incremented by the method
+            )
 
     parkingViewModel.selectParking(parking)
 
@@ -485,7 +479,8 @@ class ParkingViewModelTest {
     assertEquals(1, selectedParking?.reportedImages?.first()?.nbMaxSeverityReports)
 
     // Verify the parking repository was updated with the new metrics
-    verify(parkingRepository).updateParking(eq(parking.copy(reportedImages = listOf(updatedImage))), any(), any())
+    verify(parkingRepository)
+        .updateParking(eq(parking.copy(reportedImages = listOf(updatedImage))), any(), any())
   }
 
   // Helper functions to assert the state of the filter options
