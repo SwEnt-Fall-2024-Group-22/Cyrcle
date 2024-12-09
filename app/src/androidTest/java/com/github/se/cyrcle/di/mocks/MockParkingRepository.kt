@@ -45,6 +45,24 @@ class MockParkingRepository @Inject constructor() : ParkingRepository {
     }
   }
 
+    override fun getReportsForImage(
+        parkingId: String,
+        imageId: String,
+        onSuccess: (List<ImageReport>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        if (parkingId.isEmpty()) {
+            onFailure(Exception("Parking ID cannot be empty"))
+        } else {
+            val associatedReports = reports2.filter { it.uid == parkingId }
+            if (associatedReports.isEmpty()) {
+                onFailure(Exception("No reports found for the given parking ID"))
+            } else {
+                onSuccess(associatedReports)
+            }
+        }
+    }
+
   override fun getParkingById(
       id: String,
       onSuccess: (Parking) -> Unit,
@@ -117,6 +135,7 @@ class MockParkingRepository @Inject constructor() : ParkingRepository {
 
   override fun addImageReport(
       report: ImageReport,
+      parking: String,
       onSuccess: (ImageReport) -> Unit,
       onFailure: (Exception) -> Unit
   ) {

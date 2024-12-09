@@ -145,7 +145,7 @@ fun SortingOptionSelector(
                             when (sortingOption) {
                               ReportSortingOption.Parking -> R.string.sort_reported_parkings
                               ReportSortingOption.Review -> R.string.sort_reported_reviews
-                              ReportSortingOption.Image -> R.string.sort_reported_reviews
+                              ReportSortingOption.Image -> R.string.sort_reported_images
                             }),
                 style = MaterialTheme.typography.bodyMedium,
                 color =
