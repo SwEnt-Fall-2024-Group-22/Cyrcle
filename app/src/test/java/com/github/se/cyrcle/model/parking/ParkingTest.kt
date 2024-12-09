@@ -26,7 +26,9 @@ class ParkingsTest {
             price = 0.0,
             hasSecurity = true,
             owner = TestInstancesUser.user1.public.userId,
-            reportingUsers = emptyList())
+            reportingUsers = emptyList(),
+            reportedImages = emptyList(),
+            maxNumOfImages = 0)
 
     assertEquals("1", parking.uid)
     assertEquals("Parking", parking.optName)
@@ -55,7 +57,9 @@ class ParkingsTest {
             price = 0.0,
             hasSecurity = true,
             owner = TestInstancesUser.user1.public.userId,
-            reportingUsers = emptyList())
+            reportingUsers = emptyList(),
+            reportedImages = emptyList(),
+            maxNumOfImages = 0)
 
     val parking2 =
         Parking(
@@ -70,7 +74,9 @@ class ParkingsTest {
             price = 0.0,
             hasSecurity = true,
             owner = TestInstancesUser.user1.public.userId,
-            reportingUsers = emptyList())
+            reportingUsers = emptyList(),
+            reportedImages = emptyList(),
+            maxNumOfImages = 0)
 
     assertEquals(parking1, parking2)
     assertEquals(parking1.hashCode(), parking2.hashCode())
