@@ -93,6 +93,10 @@ class ParkingViewModel(
   private val _selectedParkingReports = MutableStateFlow<List<ParkingReport>>(emptyList())
   val selectedParkingReports: StateFlow<List<ParkingReport>> = _selectedParkingReports
 
+  /** Selected parking to review/edit */
+  private val _selectedImageReports = MutableStateFlow<List<ImageReport>>(emptyList())
+  val selectedImageReports: StateFlow<List<ImageReport>> = _selectedImageReports
+
   /**
    * Radius of the circle around the center to display parkings With a public getter to display the
    * radius in the TopBar of the ListScreen The default value is DEFAULT_RADIUS stored in meters
@@ -126,6 +130,7 @@ class ParkingViewModel(
 
   fun selectImage(imagePath: String) {
     _selectedImage.value = imagePath
+    loadSelectedImageReports()
   }
 
   /**
@@ -149,12 +154,31 @@ class ParkingViewModel(
       Log.e("ParkingViewModel", "No parking selected while trying to load reports")
       return
     }
-
     parkingRepository.getReportsForParking(
         parkingId = parking.uid,
         onSuccess = { reports ->
           // Update the selectedParkingReports state with the fetched reports
           _selectedParkingReports.value = reports
+          Log.d("ParkingViewModel", "Reports loaded successfully: ${reports.size}")
+        },
+        onFailure = { exception ->
+          Log.e("ParkingViewModel", "Error loading reports: ${exception.message}")
+        })
+  }
+
+  private fun loadSelectedImageReports() {
+    val parking = _selectedParking.value
+    val image = _selectedImage.value
+    if (parking == null || image == null) {
+      Log.e("ParkingViewModel", "No parking selected while trying to load reports")
+      return
+    }
+    parkingRepository.getReportsForImage(
+        parkingId = parking.uid,
+        imageId = image,
+        onSuccess = { reports ->
+          // Update the selectedParkingReports state with the fetched reports
+          _selectedImageReports.value = reports
           Log.d("ParkingViewModel", "Reports loaded successfully: ${reports.size}")
         },
         onFailure = { exception ->
@@ -595,6 +619,7 @@ class ParkingViewModel(
               reportedImages = _selectedParking.value?.reportedImages?.plus(parkingImageToAdd)!!)
       parkingRepository.addImageReport(
           report,
+          selectedParking.value?.uid!!,
           onSuccess = {
             Log.d("ParkingViewModel", "Successfully added image report to repository.")
             parkingRepository.updateParking(_selectedParking.value!!, {}, {})
@@ -616,6 +641,7 @@ class ParkingViewModel(
 
       parkingRepository.addImageReport(
           report,
+          selectedParking.value?.uid!!,
           onSuccess = {
             Log.d("ParkingViewModel", "Successfully updated image report in repository.")
             _selectedParking.value =

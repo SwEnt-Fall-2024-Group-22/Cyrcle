@@ -78,6 +78,15 @@ class OfflineParkingRepositoryRoom @Inject constructor(parkingDatabase: ParkingD
     onFailure(UnSupportedOperationException("Get reports for parking called on offline repository"))
   }
 
+  override fun getReportsForImage(
+      parkingId: String,
+      imageId: String,
+      onSuccess: (List<ImageReport>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    onFailure(UnSupportedOperationException("Get reports for parking called on offline repository"))
+  }
+
   override fun deleteParkingById(
       id: String,
       onSuccess: () -> Unit,
@@ -107,6 +116,7 @@ class OfflineParkingRepositoryRoom @Inject constructor(parkingDatabase: ParkingD
 
   override fun addImageReport(
       report: ImageReport,
+      parking: String,
       onSuccess: (ImageReport) -> Unit,
       onFailure: (Exception) -> Unit
   ) {

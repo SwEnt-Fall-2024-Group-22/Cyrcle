@@ -74,6 +74,20 @@ interface ParkingRepository {
   )
 
   /**
+   * Get the reports for an image
+   *
+   * @param imageId the identifier of the image
+   * @param onSuccess a callback that is called when the reports are retrieved
+   * @param onFailure a callback that is called when an error occurs
+   */
+  fun getReportsForImage(
+      parkingId: String,
+      imageId: String,
+      onSuccess: (List<ImageReport>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  /**
    * Delete a parking by its identifier
    *
    * @param id the identifier of the parking to delete
@@ -111,6 +125,7 @@ interface ParkingRepository {
 
   fun addImageReport(
       report: ImageReport,
+      parking: String,
       onSuccess: (ImageReport) -> Unit,
       onFailure: (Exception) -> Unit
   )
