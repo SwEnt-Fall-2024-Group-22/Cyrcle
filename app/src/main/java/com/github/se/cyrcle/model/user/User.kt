@@ -16,7 +16,7 @@ data class UserPublic(
     val profilePictureCloudPath: String? = "",
     // val accountCreationDate: Timestamp? = null,
     // val numberOfContributedSpots: Int = 0,
-    val userReputationScore: Int = 0
+    val userReputationScore: Double = 0.0
 )
 
 /**
