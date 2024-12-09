@@ -25,119 +25,114 @@ import org.mockito.Mockito.`when`
 @RunWith(AndroidJUnit4::class)
 class ParkingReportScreenTest {
 
-    @get:Rule val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
-    private lateinit var parkingRepository: ParkingRepository
-    private lateinit var userRepository: UserRepository
-    private lateinit var reviewRepository: ReviewRepository
-    private lateinit var reportedObjectRepository: ReportedObjectRepository
+  private lateinit var parkingRepository: ParkingRepository
+  private lateinit var userRepository: UserRepository
+  private lateinit var reviewRepository: ReviewRepository
+  private lateinit var reportedObjectRepository: ReportedObjectRepository
 
-    private lateinit var userViewModel: UserViewModel
-    private lateinit var parkingViewModel: ParkingViewModel
-    private lateinit var reviewViewModel: ReviewViewModel
+  private lateinit var userViewModel: UserViewModel
+  private lateinit var parkingViewModel: ParkingViewModel
+  private lateinit var reviewViewModel: ReviewViewModel
 
-    private lateinit var navigationActions: NavigationActions
+  private lateinit var navigationActions: NavigationActions
 
-    @Before
-    fun setUp() {
-        navigationActions = mock(NavigationActions::class.java)
+  @Before
+  fun setUp() {
+    navigationActions = mock(NavigationActions::class.java)
 
-        parkingRepository = MockParkingRepository()
-        userRepository = MockUserRepository()
-        reviewRepository = MockReviewRepository()
-        reportedObjectRepository = MockReportedObjectRepository()
+    parkingRepository = MockParkingRepository()
+    userRepository = MockUserRepository()
+    reviewRepository = MockReviewRepository()
+    reportedObjectRepository = MockReportedObjectRepository()
 
-        parkingViewModel =
-            ParkingViewModel(
-                MockImageRepository(),
-                parkingRepository,
-                MockOfflineParkingRepository(),
-                reportedObjectRepository
-            )
-        userViewModel =
-            UserViewModel(
-                userRepository,
-                parkingRepository,
-                MockImageRepository(),
-                MockAuthenticationRepository()
-            )
-        userViewModel.setCurrentUser(TestInstancesUser.user1)
-        reviewViewModel = ReviewViewModel(reviewRepository, reportedObjectRepository)
+    parkingViewModel =
+        ParkingViewModel(
+            MockImageRepository(),
+            parkingRepository,
+            MockOfflineParkingRepository(),
+            reportedObjectRepository)
+    userViewModel =
+        UserViewModel(
+            userRepository,
+            parkingRepository,
+            MockImageRepository(),
+            MockAuthenticationRepository())
+    userViewModel.setCurrentUser(TestInstancesUser.user1)
+    reviewViewModel = ReviewViewModel(reviewRepository, reportedObjectRepository)
 
-        parkingViewModel.addParking(TestInstancesParking.parking2)
-        parkingViewModel.addParking(TestInstancesParking.parking3)
+    parkingViewModel.addParking(TestInstancesParking.parking2)
+    parkingViewModel.addParking(TestInstancesParking.parking3)
 
-        `when`(navigationActions.currentRoute()).thenReturn(Screen.PARKING_DETAILS)
-    }
-    @Test
-    fun parkingReportScreenDisplaysCorrectly() {
-        composeTestRule.setContent {
-            ParkingReportScreen(
-                navigationActions = navigationActions,
-                userViewModel = userViewModel,
-                parkingViewModel = parkingViewModel
-            )
-        }
+    `when`(navigationActions.currentRoute()).thenReturn(Screen.PARKING_DETAILS)
+  }
 
-        // Assert that the report bullet points section is displayed
-        composeTestRule.onNodeWithTag("ReportBulletPoints").assertExists()
-
-        // Assert that the dropdown for reason selection is displayed
-        composeTestRule.onNodeWithTag("ReasonDropdown").assertExists()
-
-        // Assert that the input field for additional details is displayed
-        composeTestRule.onNodeWithTag("DetailsInput").assertExists()
-
-        // Assert that the submit button is displayed by its text
-        composeTestRule.onNodeWithText("Submit").assertExists()
+  @Test
+  fun parkingReportScreenDisplaysCorrectly() {
+    composeTestRule.setContent {
+      ParkingReportScreen(
+          navigationActions = navigationActions,
+          userViewModel = userViewModel,
+          parkingViewModel = parkingViewModel)
     }
 
-    @Test
-    fun submitButtonDisplaysDialogWhenClicked() {
-        composeTestRule.setContent {
-            ParkingReportScreen(
-                navigationActions = navigationActions,
-                userViewModel = userViewModel,
-                parkingViewModel = parkingViewModel
-            )
-        }
+    // Assert that the report bullet points section is displayed
+    composeTestRule.onNodeWithTag("ReportBulletPoints").assertExists()
 
-        // Click on the submit button by its text
-        composeTestRule.onNodeWithText("Submit").performClick()
+    // Assert that the dropdown for reason selection is displayed
+    composeTestRule.onNodeWithTag("ReasonDropdown").assertExists()
 
-        // Assert that the dialog exists
-        composeTestRule.onNodeWithTag("ReportScreenAlertDialog").assertExists()
+    // Assert that the input field for additional details is displayed
+    composeTestRule.onNodeWithTag("DetailsInput").assertExists()
+
+    // Assert that the submit button is displayed by its text
+    composeTestRule.onNodeWithText("Submit").assertExists()
+  }
+
+  @Test
+  fun submitButtonDisplaysDialogWhenClicked() {
+    composeTestRule.setContent {
+      ParkingReportScreen(
+          navigationActions = navigationActions,
+          userViewModel = userViewModel,
+          parkingViewModel = parkingViewModel)
     }
 
-    @Test
-    fun detailsInputAcceptsTextInput() {
-        composeTestRule.setContent {
-            ParkingReportScreen(
-                navigationActions = navigationActions,
-                userViewModel = userViewModel,
-                parkingViewModel = parkingViewModel
-            )
-        }
+    // Click on the submit button by its text
+    composeTestRule.onNodeWithText("Submit").performClick()
 
-        // Enter text in the details input field
-        val detailsText = "This parking has accessibility issues."
-        composeTestRule.onNodeWithTag("DetailsInput").performTextInput(detailsText)
+    // Assert that the dialog exists
+    composeTestRule.onNodeWithTag("ReportScreenAlertDialog").assertExists()
+  }
 
-        // Assert that the input field contains the entered text
-        composeTestRule.onNodeWithTag("DetailsInput").assertTextContains(detailsText)
+  @Test
+  fun detailsInputAcceptsTextInput() {
+    composeTestRule.setContent {
+      ParkingReportScreen(
+          navigationActions = navigationActions,
+          userViewModel = userViewModel,
+          parkingViewModel = parkingViewModel)
     }
 
-    @Test
-    fun reasonDropDownIsClickable() {
-        composeTestRule.setContent {
-            ParkingReportScreen(
-                navigationActions = navigationActions,
-                userViewModel = userViewModel,
-                parkingViewModel = parkingViewModel
-            )
-        }
+    // Enter text in the details input field
+    val detailsText = "This parking has accessibility issues."
+    composeTestRule.onNodeWithTag("DetailsInput").performTextInput(detailsText)
 
-        // Click on the dropdown for reason selection
-        composeTestRule.onNodeWithTag("ReasonDropdown").performClick()
+    // Assert that the input field contains the entered text
+    composeTestRule.onNodeWithTag("DetailsInput").assertTextContains(detailsText)
+  }
+
+  @Test
+  fun reasonDropDownIsClickable() {
+    composeTestRule.setContent {
+      ParkingReportScreen(
+          navigationActions = navigationActions,
+          userViewModel = userViewModel,
+          parkingViewModel = parkingViewModel)
     }
+
+    // Click on the dropdown for reason selection
+    composeTestRule.onNodeWithTag("ReasonDropdown").performClick()
+  }
 }

@@ -30,7 +30,8 @@ import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
 /**
- * Displays a screen for viewing reports based on the type of reported object (Parking, Review, or Image).
+ * Displays a screen for viewing reports based on the type of reported object (Parking, Review, or
+ * Image).
  *
  * @param navigationActions Provides navigation actions to move between screens.
  * @param reportedObjectViewModel ViewModel managing the selected reported object.
@@ -44,128 +45,126 @@ fun ViewReportsScreen(
     parkingViewModel: ParkingViewModel,
     reviewViewModel: ReviewViewModel
 ) {
-    // Observing the current selected reported object and its type
-    val currentObject by reportedObjectViewModel.selectedObject.collectAsState()
-    val context = LocalContext.current
-    val selType = currentObject?.objectType ?: ReportedObjectType.PARKING
-    val successDeleteText = stringResource(R.string.object_deleted)
+  // Observing the current selected reported object and its type
+  val currentObject by reportedObjectViewModel.selectedObject.collectAsState()
+  val context = LocalContext.current
+  val selType = currentObject?.objectType ?: ReportedObjectType.PARKING
+  val successDeleteText = stringResource(R.string.object_deleted)
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                navigationActions,
-                title =
+  Scaffold(
+      topBar = {
+        TopAppBar(
+            navigationActions,
+            title =
                 when (selType) {
-                    ReportedObjectType.PARKING -> stringResource(R.string.parking_reports)
-                    ReportedObjectType.REVIEW -> stringResource(R.string.review_reports)
-                    else -> stringResource(R.string.image_reports)
+                  ReportedObjectType.PARKING -> stringResource(R.string.parking_reports)
+                  ReportedObjectType.REVIEW -> stringResource(R.string.review_reports)
+                  else -> stringResource(R.string.image_reports)
                 })
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    val uidOfObject = currentObject?.objectUID
-                    if (uidOfObject != null) {
-                        // Delete the reported object and navigate back to the admin screen
-                        reportedObjectViewModel.deleteReportedObject(uidOfObject)
-                        when (selType) {
-                            ReportedObjectType.PARKING -> parkingViewModel.deleteParkingByUid(uidOfObject)
-                            ReportedObjectType.REVIEW -> reviewViewModel.deleteReviewById(uidOfObject)
-                            ReportedObjectType.IMAGE -> {
-                                val uidOfParking = parkingViewModel.getParkingFromImagePath(uidOfObject)
-                                Log.d("$uidOfParking", "$uidOfObject")
-                                parkingViewModel.deleteImageFromParking(uidOfParking, uidOfObject)
-                            }
-                        }
-                        Toast.makeText(context, successDeleteText, Toast.LENGTH_LONG).show()
-                        navigationActions.navigateTo(Screen.ADMIN)
-                    }
-                },
-                modifier = Modifier.padding(16.dp).testTag("DeleteFloatingActionButton"),
-                containerColor = MaterialTheme.colorScheme.errorContainer
-            ) {
-                Text(
-                    text = stringResource(R.string.delete_object),
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    style = MaterialTheme.typography.bodyLarge
-                )
+      },
+      floatingActionButton = {
+        FloatingActionButton(
+            onClick = {
+              val uidOfObject = currentObject?.objectUID
+              if (uidOfObject != null) {
+                // Delete the reported object and navigate back to the admin screen
+                reportedObjectViewModel.deleteReportedObject(uidOfObject)
+                when (selType) {
+                  ReportedObjectType.PARKING -> parkingViewModel.deleteParkingByUid(uidOfObject)
+                  ReportedObjectType.REVIEW -> reviewViewModel.deleteReviewById(uidOfObject)
+                  ReportedObjectType.IMAGE -> {
+                    val uidOfParking = parkingViewModel.getParkingFromImagePath(uidOfObject)
+                    Log.d("$uidOfParking", "$uidOfObject")
+                    parkingViewModel.deleteImageFromParking(uidOfParking, uidOfObject)
+                  }
+                }
+                Toast.makeText(context, successDeleteText, Toast.LENGTH_LONG).show()
+                navigationActions.navigateTo(Screen.ADMIN)
+              }
+            },
+            modifier = Modifier.padding(16.dp).testTag("DeleteFloatingActionButton"),
+            containerColor = MaterialTheme.colorScheme.errorContainer) {
+              Text(
+                  text = stringResource(R.string.delete_object),
+                  color = MaterialTheme.colorScheme.onPrimary,
+                  style = MaterialTheme.typography.bodyLarge)
             }
-        },
-        floatingActionButtonPosition = FabPosition.End
-    ) { paddingValues ->
+      },
+      floatingActionButtonPosition = FabPosition.End) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
-            // Observing the reports based on the selected object type
-            val selParkRep by parkingViewModel.selectedParkingReports.collectAsState()
-            val selRevRep by reviewViewModel.selectedReviewReports.collectAsState()
-            val selImgRep by parkingViewModel.selectedImageReports.collectAsState()
-            val reports = when (selType) {
+          // Observing the reports based on the selected object type
+          val selParkRep by parkingViewModel.selectedParkingReports.collectAsState()
+          val selRevRep by reviewViewModel.selectedReviewReports.collectAsState()
+          val selImgRep by parkingViewModel.selectedImageReports.collectAsState()
+          val reports =
+              when (selType) {
                 ReportedObjectType.PARKING -> selParkRep
                 ReportedObjectType.REVIEW -> selRevRep
                 ReportedObjectType.IMAGE -> selImgRep
-            }
+              }
 
-            Column(modifier = Modifier.fillMaxSize().padding(16.dp).testTag("ReportsContent")) {
-                if (reports.isEmpty()) {
-                    Text(
-                        text = stringResource(R.string.no_reports_available),
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.align(Alignment.CenterHorizontally).testTag("NoReportsText")
-                    )
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize().testTag("ReportsList"),
-                        contentPadding = PaddingValues(vertical = 8.dp)
-                    ) {
-                        items(reports) { report ->
-                            val reportType = when (selType) {
-                                ReportedObjectType.PARKING -> Report.Parking(report as ParkingReport)
-                                ReportedObjectType.REVIEW -> Report.Review(report as ReviewReport)
-                                ReportedObjectType.IMAGE -> Report.Image(report as ImageReport)
-                            }
-                            ReportCard(reportType)
-                        }
+          Column(modifier = Modifier.fillMaxSize().padding(16.dp).testTag("ReportsContent")) {
+            if (reports.isEmpty()) {
+              Text(
+                  text = stringResource(R.string.no_reports_available),
+                  style = MaterialTheme.typography.bodyMedium,
+                  modifier = Modifier.align(Alignment.CenterHorizontally).testTag("NoReportsText"))
+            } else {
+              LazyColumn(
+                  modifier = Modifier.fillMaxSize().testTag("ReportsList"),
+                  contentPadding = PaddingValues(vertical = 8.dp)) {
+                    items(reports) { report ->
+                      val reportType =
+                          when (selType) {
+                            ReportedObjectType.PARKING -> Report.Parking(report as ParkingReport)
+                            ReportedObjectType.REVIEW -> Report.Review(report as ReviewReport)
+                            ReportedObjectType.IMAGE -> Report.Image(report as ImageReport)
+                          }
+                      ReportCard(reportType)
                     }
-                }
+                  }
             }
+          }
         }
-    }
+      }
 }
 
 /**
  * Displays a card for a single report with its details.
  *
- * @param report The report to be displayed, which could be a ParkingReport, ReviewReport, or ImageReport.
+ * @param report The report to be displayed, which could be a ParkingReport, ReviewReport, or
+ *   ImageReport.
  */
 @Composable
 fun ReportCard(report: Report) {
-    val (reason, userId, description) = when (report) {
-        is Report.Parking -> Triple(
-            report.parkingReport.reason.description,
-            report.parkingReport.userId,
-            report.parkingReport.description
-        )
-        is Report.Review -> Triple(
-            report.reviewReport.reason.description,
-            report.reviewReport.userId,
-            report.reviewReport.description
-        )
-        is Report.Image -> Triple(
-            report.imageReport.reason.description,
-            report.imageReport.userId,
-            report.imageReport.description
-        )
-    }
+  val (reason, userId, description) =
+      when (report) {
+        is Report.Parking ->
+            Triple(
+                report.parkingReport.reason.description,
+                report.parkingReport.userId,
+                report.parkingReport.description)
+        is Report.Review ->
+            Triple(
+                report.reviewReport.reason.description,
+                report.reviewReport.userId,
+                report.reviewReport.description)
+        is Report.Image ->
+            Triple(
+                report.imageReport.reason.description,
+                report.imageReport.userId,
+                report.imageReport.description)
+      }
 
-    Card(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).testTag("ReportCard"),
-        elevation = CardDefaults.cardElevation(4.dp)
-    ) {
+  Card(
+      modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).testTag("ReportCard"),
+      elevation = CardDefaults.cardElevation(4.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
-            ReportText(label = R.string.admin_reason, value = reason)
-            ReportText(label = R.string.admin_reportedBy, value = userId)
-            ReportText(label = R.string.admin_description, value = description)
+          ReportText(label = R.string.admin_reason, value = reason)
+          ReportText(label = R.string.admin_reportedBy, value = userId)
+          ReportText(label = R.string.admin_description, value = description)
         }
-    }
+      }
 }
 
 /**
@@ -176,9 +175,8 @@ fun ReportCard(report: Report) {
  */
 @Composable
 fun ReportText(@StringRes label: Int, value: String) {
-    Text(
-        text = stringResource(label).format(value),
-        style = MaterialTheme.typography.bodyMedium,
-        modifier = Modifier.padding(top = 4.dp).testTag("ReportText_$label")
-    )
+  Text(
+      text = stringResource(label).format(value),
+      style = MaterialTheme.typography.bodyMedium,
+      modifier = Modifier.padding(top = 4.dp).testTag("ReportText_$label"))
 }
