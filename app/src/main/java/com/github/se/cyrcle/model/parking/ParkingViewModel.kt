@@ -839,7 +839,9 @@ class ParkingViewModel(
       return
     }
     val selectedParking = _selectedParking.value!!
-    val destinationPath = "parking/${selectedParking.uid}/${selectedParking.images.size}"
+    // maxNumOfImages ensures that 2 Parkings don't have the same destinationPath (which was
+    // possible when the next line used size of images field
+    val destinationPath = "parking/${selectedParking.uid}/${selectedParking.maxNumOfImages}"
     imageRepository.uploadImage(
         context = context,
         fileUri = imageUri,
