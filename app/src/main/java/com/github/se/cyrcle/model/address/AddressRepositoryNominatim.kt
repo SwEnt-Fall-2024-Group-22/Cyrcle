@@ -44,7 +44,7 @@ class AddressRepositoryNominatim @Inject constructor(private val client: OkHttpC
                   if (body != null) {
                     onSuccess(addressFromBody(body))
                   } else {
-                    onSuccess(listOf(Address()))
+                    onSuccess(emptyList())
                   }
                 }
               }
@@ -67,10 +67,10 @@ class AddressRepositoryNominatim @Inject constructor(private val client: OkHttpC
       if (jsonArray.getJSONObject(i) != null) {
         val jsonObject = jsonArray.getJSONObject(i)
         val address = jsonObject.getJSONObject("address")
-        val deserializedAdress = Gson().fromJson(address.toString(), Address::class.java)
-        deserializedAdress.latitude = jsonObject.getString("lat")
-        deserializedAdress.longitude = jsonObject.getString("lon")
-        addressList.add(deserializedAdress)
+        val deserializedAddress = Gson().fromJson(address.toString(), Address::class.java)
+        deserializedAddress.latitude = jsonObject.getString("lat")
+        deserializedAddress.longitude = jsonObject.getString("lon")
+        addressList.add(deserializedAddress)
       } else {
         break
       }
