@@ -208,8 +208,8 @@ fun AllReviewsScreen(
           val defaultUsername = stringResource(R.string.undefined_username)
           // Scrollable Review Cards
           LazyColumn(
-              modifier = Modifier.weight(1f).padding(horizontal = 16.dp).testTag("ReviewList"),
-              contentPadding = PaddingValues(bottom = 16.dp)) {
+              modifier = Modifier.weight(1f).testTag("ReviewList"),
+              contentPadding = PaddingValues(16.dp)) {
                 // Only display "Your Review" section if user is signed in
                 if (userSignedIn) {
                   item {

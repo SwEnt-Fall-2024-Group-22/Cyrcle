@@ -1,21 +1,22 @@
 package com.github.se.cyrcle.ui.profile
 
-import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
-import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeLeft
+import androidx.compose.ui.test.swipeRight
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
@@ -249,15 +250,28 @@ class ViewProfileScreenTest {
         .assertHasClickAction()
         .performClick()
 
-    composeTestRule.onNodeWithTag("FavoriteParkingList").onChildren().assertCountEquals(3)
+    composeTestRule.onNodeWithTag("FavoriteParkingList").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("ParkingItem0").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("ParkingNote0", useUnmergedTree = true).assertIsDisplayed()
     composeTestRule
-        .onNodeWithTag("ParkingItem_0", useUnmergedTree = true)
+        .onNodeWithTag("ParkingName0", useUnmergedTree = true)
+        .assertIsDisplayed()
         .assertTextContains("Rue de la paix")
+
+    composeTestRule.onNodeWithTag("FavoriteParkingList").performScrollToIndex(1)
+    composeTestRule.onNodeWithTag("ParkingNote1", useUnmergedTree = true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("ParkingItem1").assertIsDisplayed()
     composeTestRule
-        .onNodeWithTag("ParkingItem_1", useUnmergedTree = true)
+        .onNodeWithTag("ParkingName1", useUnmergedTree = true)
+        .assertIsDisplayed()
         .assertTextContains("Rude épais")
+
+    composeTestRule.onNodeWithTag("FavoriteParkingList").performScrollToIndex(2)
+    composeTestRule.onNodeWithTag("ParkingItem2").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("ParkingNote2", useUnmergedTree = true).assertIsDisplayed()
     composeTestRule
-        .onNodeWithTag("ParkingItem_2", useUnmergedTree = true)
+        .onNodeWithTag("ParkingName2", useUnmergedTree = true)
+        .assertIsDisplayed()
         .assertTextContains("Rue du pet")
   }
 
@@ -272,7 +286,7 @@ class ViewProfileScreenTest {
 
     composeTestRule.waitForIdle()
 
-    composeTestRule.onNodeWithTag("FavoriteToggle_0").performClick()
+    composeTestRule.onNodeWithTag("FavoriteToggle0", useUnmergedTree = true).performClick()
     composeTestRule.waitForIdle()
 
     composeTestRule.onNodeWithText("Remove favorite").assertIsDisplayed()
@@ -292,7 +306,7 @@ class ViewProfileScreenTest {
         .performClick()
 
     // Click the star icon to show the confirmation dialog
-    composeTestRule.onNodeWithTag("FavoriteToggle_0").performClick()
+    composeTestRule.onNodeWithTag("FavoriteToggle0", useUnmergedTree = true).performClick()
     composeTestRule.waitForIdle()
 
     // Confirm removal
@@ -314,7 +328,7 @@ class ViewProfileScreenTest {
         .performClick()
 
     // Click the star icon to show the confirmation dialog
-    composeTestRule.onNodeWithTag("FavoriteToggle_0").performClick()
+    composeTestRule.onNodeWithTag("FavoriteToggle0", useUnmergedTree = true).performClick()
     composeTestRule.waitForIdle()
 
     // Cancel removal
@@ -336,18 +350,18 @@ class ViewProfileScreenTest {
         .performClick()
 
     // Remove the first parking
-    composeTestRule.onNodeWithTag("FavoriteToggle_0").performClick()
+    composeTestRule.onNodeWithTag("FavoriteToggle0", useUnmergedTree = true).performClick()
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithText("Remove").performClick()
     composeTestRule.waitForIdle()
     // Remove the second parking
-    composeTestRule.onNodeWithTag("FavoriteToggle_0").performClick()
+    composeTestRule.onNodeWithTag("FavoriteToggle0", useUnmergedTree = true).performClick()
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithText("Remove").performClick()
     composeTestRule.waitForIdle()
 
     // Remove the third parking
-    composeTestRule.onNodeWithTag("FavoriteToggle_0").performClick()
+    composeTestRule.onNodeWithTag("FavoriteToggle0", useUnmergedTree = true).performClick()
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithText("Remove").performClick()
     composeTestRule.waitForIdle()
@@ -366,11 +380,9 @@ class ViewProfileScreenTest {
         .performClick()
 
     // Remove the middle parking
-    composeTestRule
-        .onNodeWithTag("ParkingItem_1", useUnmergedTree = true)
-        .performScrollTo()
-        .assertIsDisplayed()
-    composeTestRule.onNodeWithTag("FavoriteToggle_1").assertIsDisplayed().performClick()
+    composeTestRule.onNodeWithTag("FavoriteParkingList").performScrollToIndex(1)
+    composeTestRule.onNodeWithTag("ParkingItem1", useUnmergedTree = true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("FavoriteToggle1").assertIsDisplayed().performClick()
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithText("Remove").performClick()
     composeTestRule.waitForIdle()
@@ -379,7 +391,7 @@ class ViewProfileScreenTest {
     composeTestRule.onNodeWithText("Rue du pet").assertIsDisplayed()
 
     // Remove the third parking (which is now second)
-    composeTestRule.onNodeWithTag("FavoriteToggle_1").performClick()
+    composeTestRule.onNodeWithTag("FavoriteToggle1").performClick()
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithText("Remove").performClick()
     composeTestRule.waitForIdle()
@@ -394,7 +406,7 @@ class ViewProfileScreenTest {
     composeTestRule.onNodeWithTag("EditButton").performClick()
     composeTestRule.waitForIdle()
 
-    composeTestRule.onNodeWithTag("FavoriteToggle_0").assertIsNotDisplayed()
+    composeTestRule.onNodeWithTag("FavoriteToggle0").assertIsNotDisplayed()
   }
 
   @Test
@@ -428,13 +440,8 @@ class ViewProfileScreenTest {
     userViewModel.addFavoriteParkingToSelectedUser(parking4)
 
     composeTestRule.waitForIdle()
-    composeTestRule.onNodeWithTag("FavoriteToggle_3").assertDoesNotExist()
-
-    composeTestRule.waitForIdle()
-    composeTestRule
-        .onNodeWithTag("FavoriteParkingList")
-        .performScrollToNode(hasTestTag("FavoriteToggle_3"))
-    composeTestRule.onNodeWithTag("FavoriteToggle_3").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("FavoriteParkingList").performScrollToIndex(3)
+    composeTestRule.onNodeWithTag("FavoriteToggle3").assertIsDisplayed()
   }
 
   @Test
@@ -468,7 +475,7 @@ class ViewProfileScreenTest {
   fun testNavigateToParkingDetailsOnClick() {
     composeTestRule.waitForIdle()
 
-    composeTestRule.onNodeWithTag("ParkingItem_0", useUnmergedTree = true).performClick()
+    composeTestRule.onNodeWithTag("ParkingItem0", useUnmergedTree = true).performClick()
     composeTestRule.waitForIdle()
 
     verify(mockNavigationActions).navigateTo(Screen.PARKING_DETAILS)
@@ -540,5 +547,34 @@ class ViewProfileScreenTest {
 
     // Trigger review fetch for user1
     reviewViewModel.getReviewsByOwnerId("user1")
+  }
+
+  @Test
+  fun testTabLayoutSwipeChangesTab() {
+    // Check initial state
+    composeTestRule.onNodeWithTag("TabFavoriteParkings").assertIsSelected()
+    composeTestRule.onNodeWithTag("FavoriteParkingList").assertIsDisplayed()
+
+    // Swipe left on the content area to change to Reviews tab
+    composeTestRule.onNodeWithTag("FavoriteParkingList").performTouchInput {
+      swipeLeft(startX = this.width * 0.9f, endX = this.width * 0.1f)
+    }
+    composeTestRule.waitForIdle()
+
+    // Check if Reviews tab is selected and content is displayed
+    composeTestRule.onNodeWithTag("TabMyReviews").assertIsSelected()
+  }
+
+  @Test
+  fun testTabLayoutSwipeDoesNotExceedTabCount() {
+    // Try to swipe right when already on the first tab
+    composeTestRule.onNodeWithTag("FavoriteParkingList").performTouchInput {
+      swipeRight(startX = this.width * 0.1f, endX = this.width * 0.9f)
+    }
+    composeTestRule.waitForIdle()
+
+    // Check that we're still on the first tab
+    composeTestRule.onNodeWithTag("TabFavoriteParkings").assertIsSelected()
+    composeTestRule.onNodeWithTag("FavoriteParkingList").assertIsDisplayed()
   }
 }

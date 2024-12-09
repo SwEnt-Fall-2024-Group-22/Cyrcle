@@ -1,26 +1,33 @@
 package com.github.se.cyrcle.ui.profile
 
 import android.app.Activity
+import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Diamond
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Outbox
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -32,17 +39,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
@@ -56,11 +68,11 @@ import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import com.github.se.cyrcle.ui.review.ReviewCard
 import com.github.se.cyrcle.ui.theme.ColorLevel
-import com.github.se.cyrcle.ui.theme.Red
 import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.IconButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
+import kotlinx.coroutines.launch
 
 @Composable
 fun ViewProfileScreen(
@@ -180,46 +192,78 @@ fun ViewProfileScreen(
                   colorLevel = ColorLevel.TERTIARY,
                   testTag = "EditButton")
 
+              val userReviews by reviewViewModel.userReviews.collectAsState()
+              // Map to store the parking corresponding to each review. This is used to display the
+              // parking
+              // name in the review card and allow to navigate to the parking's details screen
+              val reviewToParkingMap = remember { mutableStateMapOf<String, Parking>() }
+              LaunchedEffect(userReviews) {
+                userReviews.forEach { review ->
+                  parkingViewModel.getParkingById(
+                      review.parking, { parking -> reviewToParkingMap[review.uid] = parking }, {})
+                }
+              }
+
               // Display the TabLayout
               TabLayout(
                   userViewModel = userViewModel,
                   parkingViewModel = parkingViewModel,
                   reviewViewModel = reviewViewModel,
-                  navigationActions = navigationActions)
+                  navigationActions = navigationActions,
+                  reviewToParkingMap = reviewToParkingMap)
             }
           }
         }
       }
 }
 
-/** Tab layout that displays different sections based on the selected tab. */
+/**
+ * Tab layout for the profile screen. This layout contains the following tabs:
+ * - Favorite Parkings
+ * - My Reviews
+ *
+ * This layout allows a tab to be selected by either clicking on the tab itself or by swiping
+ * horizontally.
+ */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun TabLayout(
     userViewModel: UserViewModel,
     parkingViewModel: ParkingViewModel,
     reviewViewModel: ReviewViewModel,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    reviewToParkingMap: Map<String, Parking>
 ) {
-  var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
   val tabs =
       listOf(
           stringResource(R.string.view_profile_screen_favorite_parkings),
           stringResource(R.string.view_profile_screen_my_reviews))
 
+  val pagerState = rememberPagerState(pageCount = { tabs.size })
+  val coroutineScope = rememberCoroutineScope()
+
   Column(modifier = Modifier.fillMaxWidth().padding(top = 24.dp)) {
-    TabRow(selectedTabIndex = selectedTabIndex, modifier = Modifier.testTag("TabRow")) {
+    TabRow(selectedTabIndex = pagerState.currentPage, modifier = Modifier.testTag("TabRow")) {
       tabs.forEachIndexed { index, title ->
         Tab(
             text = { Text(title) },
-            selected = selectedTabIndex == index,
-            onClick = { selectedTabIndex = index },
+            selected = pagerState.currentPage == index,
+            onClick = { coroutineScope.launch { pagerState.animateScrollToPage(index) } },
             modifier = Modifier.testTag("Tab${title.replace(" ", "")}"))
       }
     }
 
-    when (selectedTabIndex) {
-      0 -> FavoriteParkingsSection(userViewModel, parkingViewModel, navigationActions)
-      1 -> UserReviewsSection(reviewViewModel, userViewModel, parkingViewModel, navigationActions)
+    HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
+      when (page) {
+        0 -> FavoriteParkingsSection(userViewModel, parkingViewModel, navigationActions)
+        1 ->
+            UserReviewsSection(
+                reviewViewModel,
+                userViewModel,
+                parkingViewModel,
+                navigationActions,
+                reviewToParkingMap)
+      }
     }
   }
 }
@@ -232,82 +276,117 @@ private fun FavoriteParkingsSection(
 ) {
   val favoriteParkings = userViewModel.favoriteParkings.collectAsState().value
 
-  if (favoriteParkings.isEmpty()) {
-    Text(
-        text = stringResource(R.string.view_profile_screen_no_favorite_parking),
-        style = MaterialTheme.typography.bodyMedium,
-        modifier = Modifier.testTag("NoFavoritesMessage").padding(16.dp))
-  } else {
-    LazyRow(
-        modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("FavoriteParkingList"),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-          itemsIndexed(favoriteParkings) { index, parking ->
-            FavoriteParkingCard(
-                parking = parking,
-                index = index,
-                onRemove = { userViewModel.removeFavoriteParkingFromSelectedUser(parking) },
-                parkingViewModel,
-                navigationActions)
+  Box(modifier = Modifier.fillMaxSize()) {
+    if (favoriteParkings.isEmpty()) {
+      Text(
+          text = stringResource(R.string.view_profile_screen_no_favorite_parking),
+          style = MaterialTheme.typography.bodyMedium,
+          modifier = Modifier.testTag("NoFavoritesMessage").padding(16.dp))
+    } else {
+      LazyColumn(
+          modifier = Modifier.fillMaxWidth().testTag("FavoriteParkingList"),
+          contentPadding = PaddingValues(16.dp)) {
+            itemsIndexed(favoriteParkings) { index, parking ->
+              FavoriteParkingCard(
+                  navigationActions, parkingViewModel, userViewModel, parking, index)
+            }
           }
-        }
+    }
   }
 }
 
 @Composable
-private fun FavoriteParkingCard(
-    parking: Parking,
-    index: Int,
-    onRemove: () -> Unit,
+fun FavoriteParkingCard(
+    navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel,
-    navigationActions: NavigationActions
+    userViewModel: UserViewModel,
+    parking: Parking,
+    index: Int
 ) {
+  val userState by userViewModel.currentUser.collectAsState()
   var showConfirmDialog by remember { mutableStateOf(false) }
 
   Card(
       modifier =
-          Modifier.size(120.dp)
+          Modifier.fillMaxWidth()
               .padding(8.dp)
               .clickable(
                   onClick = {
                     parkingViewModel.selectParking(parking)
                     navigationActions.navigateTo(Screen.PARKING_DETAILS)
-                  }),
-      shape = MaterialTheme.shapes.medium) {
-        Box(modifier = Modifier.fillMaxSize()) {
-          Text(
-              text = parking.optName ?: "",
-              style = MaterialTheme.typography.bodySmall,
-              modifier =
-                  Modifier.align(Alignment.Center).padding(8.dp).testTag("ParkingItem_$index"))
+                  })
+              .testTag("ParkingItem$index"),
+      colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+      elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
+        Row(
+            modifier = Modifier.fillMaxSize().padding(16.dp).testTag("ParkingContent$index"),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween) {
+              Column(
+                  modifier = Modifier.weight(1f),
+                  verticalArrangement = Arrangement.spacedBy(8.dp)) {
 
-          androidx.compose.material3.IconButton(
-              onClick = { showConfirmDialog = true },
-              modifier =
-                  Modifier.align(Alignment.TopEnd).size(32.dp).testTag("FavoriteToggle_$index")) {
-                Icon(
-                    imageVector = Icons.Default.Favorite,
-                    contentDescription =
-                        stringResource(R.string.view_profile_screen_remove_from_favorite),
-                    tint = Red,
-                    modifier = Modifier.size(20.dp))
-              }
-        }
+                    // Parking name
+                    androidx.compose.material3.Text(
+                        text = parking.optName ?: stringResource(R.string.default_parking_name),
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.testTag("ParkingName$index"))
+
+                    // Display the personal note if it exists. Otherwise, display a message
+                    // indicating that there is no note.
+                    val personalNote = userState?.details?.personalNotes?.get(parking.uid)
+                    Text(
+                        text =
+                            if (personalNote.isNullOrBlank()) {
+                              stringResource(R.string.view_profile_screen_no_note)
+                            } else {
+                              stringResource(R.string.view_profile_screen_note, personalNote)
+                            },
+                        style =
+                            if (personalNote.isNullOrBlank())
+                                MaterialTheme.typography.bodyMedium.copy(
+                                    fontStyle = FontStyle.Italic, fontSize = 12.sp)
+                            else MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.testTag("ParkingNote$index"),
+                        textAlign = TextAlign.Justify)
+                  }
+
+              Spacer(modifier = Modifier.weight(0.1f).width(8.dp))
+
+              // Favorite icon
+              androidx.compose.material3.IconButton(
+                  onClick = { showConfirmDialog = true },
+                  modifier = Modifier.size(32.dp).testTag("FavoriteToggle$index")) {
+                    Icon(
+                        imageVector = Icons.Default.Favorite,
+                        contentDescription = "Favorite Parking",
+                        tint = Color.Red)
+                  }
+            }
       }
 
   if (showConfirmDialog) {
     AlertDialog(
         onDismissRequest = { showConfirmDialog = false },
-        title = { Text(stringResource(R.string.view_profile_screen_remove_favorite_dialog_title)) },
+        title = {
+          Text(
+              stringResource(R.string.view_profile_screen_remove_favorite_dialog_title),
+              style = MaterialTheme.typography.titleMedium)
+        },
         text = {
           Text(
               stringResource(
                   R.string.view_profile_screen_remove_favorite_dialog_message,
-                  parking.optName ?: stringResource(R.string.default_parking_name)))
+                  parking.optName ?: stringResource(R.string.default_parking_name)),
+              textAlign = TextAlign.Justify)
         },
         confirmButton = {
           TextButton(
               onClick = {
-                onRemove()
+                userViewModel.removeFavoriteParkingFromSelectedUser(parking)
                 showConfirmDialog = false
               }) {
                 Text(
@@ -328,49 +407,54 @@ private fun UserReviewsSection(
     reviewViewModel: ReviewViewModel,
     userViewModel: UserViewModel,
     parkingViewModel: ParkingViewModel,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    reviewToParkingMap: Map<String, Parking>
 ) {
   val userState by userViewModel.currentUser.collectAsState()
-  val userReviews by reviewViewModel.userReviews.collectAsState()
 
   LaunchedEffect(userState?.public?.userId) {
-    userState?.public?.userId?.let { userId -> reviewViewModel.getReviewsByOwnerId(userId) }
+    userState?.public?.userId?.let { userId ->
+      Log.d("ViewProfileScreen", "Fetching reviews for user $userId")
+      reviewViewModel.getReviewsByOwnerId(userId)
+    }
   }
 
-  if (userReviews.isEmpty()) {
-    Text(
-        text = stringResource(R.string.view_profile_screen_no_reviews_message),
-        style = MaterialTheme.typography.bodyMedium,
-        modifier = Modifier.padding(16.dp).testTag("NoReviewsMessage"))
-  } else {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize().testTag("UserReviewsList"),
-        contentPadding = PaddingValues(16.dp)) {
-          items(items = userReviews, key = { it.uid }) { curReview ->
-            val index = userReviews.indexOf(curReview)
-            val isExpanded = true
+  val userReviews by reviewViewModel.userReviews.collectAsState()
 
-            // We need to get the parking associated with the review to allow clicking on the card
-            var parking by remember { mutableStateOf<Parking?>(null) }
-            parkingViewModel.getParkingById(curReview.parking, { parking = it }, {})
+  Box(modifier = Modifier.fillMaxSize()) {
+    if (userReviews.isEmpty()) {
+      Text(
+          text = stringResource(R.string.view_profile_screen_no_reviews_message),
+          style = MaterialTheme.typography.bodyMedium,
+          modifier = Modifier.padding(16.dp).testTag("NoReviewsMessage"))
+    } else {
+      LazyColumn(
+          modifier = Modifier.fillMaxWidth().testTag("UserReviewsList"),
+          contentPadding = PaddingValues(16.dp)) {
+            items(
+                // Filter out reviews that do not have a corresponding parking (desynced data)
+                items = userReviews.filter { reviewToParkingMap.containsKey(it.uid) },
+                key = { it.uid }) { curReview ->
+                  val index = userReviews.indexOf(curReview)
+                  val isExpanded = true
 
-            // We only display the review if the parking exists in the database
-            val defaultName = stringResource(R.string.default_parking_name)
-            parking?.let {
-              ReviewCard(
-                  review = curReview,
-                  title = it.optName ?: defaultName,
-                  index = index,
-                  isExpanded = isExpanded,
-                  onCardClick = {
-                    parkingViewModel.selectParking(it)
-                    navigationActions.navigateTo(Screen.PARKING_DETAILS)
-                  },
-                  options = mapOf(),
-                  userViewModel = userViewModel,
-                  reviewViewModel = reviewViewModel)
-            }
+                  // We can assert parking is not null thanks to the filter above
+                  val parking = reviewToParkingMap[curReview.uid]!!
+
+                  ReviewCard(
+                      review = curReview,
+                      title = parking.optName ?: stringResource(R.string.default_parking_name),
+                      index = index,
+                      isExpanded = isExpanded,
+                      onCardClick = {
+                        parkingViewModel.selectParking(parking)
+                        navigationActions.navigateTo(Screen.PARKING_DETAILS)
+                      },
+                      options = mapOf(),
+                      userViewModel = userViewModel,
+                      reviewViewModel = reviewViewModel)
+                }
           }
-        }
+    }
   }
 }
