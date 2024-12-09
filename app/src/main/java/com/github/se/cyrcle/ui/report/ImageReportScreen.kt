@@ -35,6 +35,7 @@ import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.molecules.ReportInputs
 import com.github.se.cyrcle.ui.theme.molecules.ReportTextBlock
+import com.github.se.cyrcle.ui.theme.molecules.ReportTopAppBar
 import com.github.se.cyrcle.ui.theme.molecules.SubmitButtonWithDialog
 
 @SuppressLint("StateFlowValueCalledInComposition")
@@ -101,11 +102,7 @@ fun ImageReportScreen(
   Scaffold(
       modifier = Modifier.testTag("ImageReportScreen"),
       topBar = {
-        // ReportTopAppBar(
-        //    navigationActions,
-        //    title =
-        //    stringResource(R.string.report_an_image)
-        //        .format(imageViewModel.selectedImage.value?.url?.take(30) ?: imageId))
+        ReportTopAppBar(navigationActions, title = stringResource(R.string.report_an_image))
       }) { padding ->
         val scaledPaddingValues =
             PaddingValues(horizontal = horizontalPadding, vertical = verticalPadding)
