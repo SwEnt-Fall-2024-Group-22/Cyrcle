@@ -68,7 +68,7 @@ fun ParkingDetailsAlertDialogShowImage(
                         modifier = Modifier,
                         icon = Icons.Outlined.Flag,
                         contentDescription = "Report",
-                        onClick = onDismiss,
+                        onClick = { navigationActions.navigateTo(Screen.IMAGE_REPORT) },
                         inverted = true,
                         colorLevel = ColorLevel.ERROR)
                   }
