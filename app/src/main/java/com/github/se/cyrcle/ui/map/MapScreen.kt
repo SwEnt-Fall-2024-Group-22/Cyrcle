@@ -5,15 +5,20 @@ import android.graphics.BitmapFactory
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -33,7 +38,6 @@ import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CardDefaults.cardColors
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,6 +47,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.TextButton
@@ -51,6 +56,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -81,7 +87,6 @@ import com.github.se.cyrcle.permission.PermissionHandler
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
-import com.github.se.cyrcle.ui.theme.Black
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.IconButton
@@ -90,7 +95,6 @@ import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.defaultOnColor
 import com.github.se.cyrcle.ui.theme.getOutlinedTextFieldColorsSearchBar
-import com.github.se.cyrcle.ui.theme.invertColor
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.github.se.cyrcle.ui.theme.molecules.FilterPanel
 import com.google.gson.Gson
@@ -193,13 +197,19 @@ fun MapScreen(
   val virtualKeyboardManager = LocalSoftwareKeyboardController.current
 
   // List of suggestions from NominatimAPI
-  val listOfSuggestions = addressViewModel.addressList.collectAsState()
+  val listOfSuggestions by addressViewModel.addressList.collectAsState()
+  // We map the list of suggestions to a list of unique suggestions
+  val uniqueSuggestions by
+      remember(listOfSuggestions) {
+        derivedStateOf {
+          listOfSuggestions.distinctBy {
+            it.suggestionFormatDisplayName(MAX_SUGGESTION_DISPLAY_NAME_LENGTH_MAP, Address.Mode.MAP)
+          }
+        }
+      }
 
   // Show suggestions screen
   val showSuggestions = remember { mutableStateOf(false) }
-
-  // Chosen location by the user
-  val chosenLocation = addressViewModel.address.collectAsState()
 
   val bitmap = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.dot)
   val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 80, 80, false)
@@ -547,26 +557,13 @@ fun MapScreen(
               onDismiss = { showFilter.value = false })
         }
 
-        if (showSuggestions.value &&
-            listOfSuggestions.value.size != 1 &&
-            listOfSuggestions.value.isNotEmpty()) {
-
-          SuggestionMenu(showSuggestions, listOfSuggestions, mapViewportState, mapViewModel)
-        } else if (showSuggestions.value && listOfSuggestions.value.size == 1) {
-          chosenLocation.value.let {
-            mapViewportState.transitionToOverviewState(
-                OverviewViewportStateOptions.Builder()
-                    .geometry(mapViewportState.cameraState!!.center)
-                    .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
-                    .build())
-
-            mapViewModel.updateTrackingMode(false)
-
-            mapViewportState.setCameraOptions {
-              center(Point.fromLngLat(it.longitude.toDouble(), it.latitude.toDouble()))
-            }
+        if (showSuggestions.value) {
+          if (uniqueSuggestions.size > 1) { // If multiple suggestions, show the suggestion menu
+            SuggestionMenu(showSuggestions, uniqueSuggestions, mapViewportState, mapViewModel)
+          } else if (uniqueSuggestions.size == 1) { // If one suggestion, center the camera on it
+            handleSuggestionClick(
+                uniqueSuggestions[0], showSuggestions, mapViewportState, mapViewModel)
           }
-          showSuggestions.value = false
         }
       }
 }
@@ -575,7 +572,7 @@ fun MapScreen(
  * Composable function to display the suggestion menu.
  *
  * @param showSuggestions The state of the suggestion menu.
- * @param listOfSuggestions The list of suggestions extracted from the NominatimAPI.
+ * @param uniqueSuggestions The list of unique suggestions to display.
  * @param mapViewportState The viewport state of the map.
  * @param mapViewModel The ViewModel for managing map-related data and actions.
  */
@@ -583,73 +580,87 @@ fun MapScreen(
 @Composable
 fun SuggestionMenu(
     showSuggestions: MutableState<Boolean>,
-    listOfSuggestions: State<List<Address>>,
+    uniqueSuggestions: List<Address>,
     mapViewportState: MapViewportState,
     mapViewModel: MapViewModel
 ) {
-
-  val uniqueSuggestions = remember { mutableStateOf(listOf<Address>()) }
-
   ModalBottomSheet(
       onDismissRequest = { showSuggestions.value = false },
-      modifier = Modifier.testTag("SuggestionsMenu")) {
-        LazyColumn {
-          val seenNames = mutableSetOf<String>()
-          uniqueSuggestions.value =
-              listOfSuggestions.value.filter { suggestion ->
-                val displayName =
-                    suggestion.suggestionFormatDisplayName(
-                        MAX_SUGGESTION_DISPLAY_NAME_LENGTH_MAP, Address.Mode.MAP)
-                if (displayName in seenNames) {
-                  false
-                } else {
-                  seenNames.add(displayName)
-                  true
-                }
+      modifier = Modifier.testTag("SuggestionsMenu"),
+      dragHandle = { SuggestionsMenuDragHandle() }) {
+        LazyColumn(
+            contentPadding =
+                PaddingValues(
+                    // Add padding for the android navigation bar according to the system insets
+                    bottom =
+                        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
+                            4.dp)) {
+              items(uniqueSuggestions) { suggestion ->
+                Surface(
+                    onClick = {
+                      handleSuggestionClick(
+                          suggestion, showSuggestions, mapViewportState, mapViewModel)
+                    },
+                    color = MaterialTheme.colorScheme.surface,
+                    modifier =
+                        Modifier.fillMaxWidth().testTag("suggestionItem${suggestion.city}")) {
+                      Text(
+                          text =
+                              suggestion.suggestionFormatDisplayName(
+                                  MAX_SUGGESTION_DISPLAY_NAME_LENGTH_MAP, Address.Mode.MAP),
+                          modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                          style = MaterialTheme.typography.bodyMedium)
+                    }
+                HorizontalDivider(
+                    thickness = 0.5.dp,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.24f))
               }
-          items(uniqueSuggestions.value) { suggestion ->
-            Card(
-                onClick = {
-                  showSuggestions.value = false
-
-                  mapViewportState.transitionToOverviewState(
-                      OverviewViewportStateOptions.Builder()
-                          .geometry(mapViewportState.cameraState!!.center)
-                          .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
-                          .build())
-                  mapViewModel.updateTrackingMode(false)
-
-                  mapViewportState.setCameraOptions {
-                    center(
-                        Point.fromLngLat(
-                            suggestion.longitude.toDouble(), suggestion.latitude.toDouble()))
-                  }
-
-                  Log.e(
-                      "Selected Location",
-                      Point.fromLngLat(
-                              suggestion.longitude.toDouble(), suggestion.latitude.toDouble())
-                          .toString())
-                },
-                colors =
-                    CardColors(
-                        containerColor = invertColor(defaultOnColor()),
-                        contentColor = defaultOnColor(),
-                        disabledContainerColor = invertColor(defaultOnColor()),
-                        disabledContentColor = defaultOnColor()),
-                modifier = Modifier.fillMaxSize().testTag("suggestionCard${suggestion.city}")) {
-                  Text(
-                      text =
-                          suggestion.suggestionFormatDisplayName(
-                              MAX_SUGGESTION_DISPLAY_NAME_LENGTH_MAP, Address.Mode.MAP),
-                      Modifier.padding(5.dp),
-                      textAlign = TextAlign.Start)
-                }
-
-            androidx.compose.material.Divider(Modifier.fillMaxWidth(), color = Black)
-          }
-        }
+            }
       }
+}
+
+/** Composable function to display the drag handle for the suggestion menu. */
+@Composable
+fun SuggestionsMenuDragHandle() {
+  Row(
+      modifier =
+          Modifier.padding(vertical = 12.dp)
+              .width(32.dp)
+              .height(4.dp)
+              .background(
+                  color = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                  shape = RoundedCornerShape(2.dp)),
+      horizontalArrangement = Arrangement.Center) {}
+}
+
+/**
+ * Function to handle the click on a suggestion. It will center the camera on the suggestion and
+ * update the tracking mode to false.
+ *
+ * @param suggestion The suggestion clicked.
+ * @param showSuggestions The state of the suggestion menu.
+ * @param mapViewportState The viewport state of the map.
+ * @param mapViewModel The ViewModel for managing map-related data and actions.
+ */
+private fun handleSuggestionClick(
+    suggestion: Address,
+    showSuggestions: MutableState<Boolean>,
+    mapViewportState: MapViewportState,
+    mapViewModel: MapViewModel
+) {
+  showSuggestions.value = false
+
+  mapViewportState.transitionToOverviewState(
+      OverviewViewportStateOptions.Builder()
+          .geometry(mapViewportState.cameraState!!.center)
+          .padding(EdgeInsets(100.0, 100.0, 100.0, 100.0))
+          .build())
+  mapViewModel.updateTrackingMode(false)
+
+  val suggestionCoords =
+      Point.fromLngLat(suggestion.longitude.toDouble(), suggestion.latitude.toDouble())
+  mapViewportState.setCameraOptions { center(suggestionCoords) }
+  Log.d("Selected Location", suggestionCoords.toString())
 }
 
 /**
