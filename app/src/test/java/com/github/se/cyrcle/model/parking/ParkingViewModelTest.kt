@@ -502,4 +502,73 @@ class ParkingViewModelTest {
     if (rackTypes) assert(parkingViewModel.selectedRackTypes.value.isEmpty())
     if (capacities) assert(parkingViewModel.selectedCapacities.value.isEmpty())
   }
+
+  @Test
+  fun addImageReport_maxSeverity_createsReportedObject() {
+    val parking =
+        TestInstancesParking.parking1.copy(
+            images = listOf("imagePath1"),
+            reportedImages = listOf(ParkingImage("", "imagePath1", 2, 2)))
+    val user = TestInstancesUser.user1
+    val imageReport =
+        ImageReport(
+            uid = "ImageReportUID",
+            reason = ImageReportReason.ILLEGAL_CONTENT,
+            userId = user.public.userId,
+            image = "imagePath1")
+
+    // Mock behaviors for dependent methods
+    `when`(parkingRepository.getNewUid()).thenReturn("ValidUid")
+    `when`(reportedObjectRepository.checkIfObjectExists(any(), any(), any())).then {
+      it.getArgument<(String?) -> Unit>(1).invoke(null) // Simulate no existing reported object
+    }
+    `when`(parkingRepository.addImageReport(any(), any(), any(), any())).then {
+      it.getArgument<(ImageReport) -> Unit>(2)
+          .invoke(imageReport) // Simulate success for adding report
+    }
+
+    // Select parking and image
+    parkingViewModel.selectParking(parking)
+    parkingViewModel.selectImage("imagePath1")
+
+    // Act
+    parkingViewModel.addImageReport(imageReport, user)
+
+    // Verify interactions
+    verify(parkingRepository).addImageReport(eq(imageReport), eq(parking.uid), any(), any())
+    verify(reportedObjectRepository)
+        .addReportedObject(
+            eq(
+                ReportedObject(
+                    objectUID = "imagePath1",
+                    reportUID = "ImageReportUID",
+                    nbOfTimesReported = 3,
+                    nbOfTimesMaxSeverityReported = 3,
+                    userUID = user.public.userId,
+                    objectType = ReportedObjectType.IMAGE)),
+            any(),
+            any())
+  }
+
+  @Test
+  fun addReport_belowThreshold_doesNotCreateReportedObject() {
+    val parking = TestInstancesParking.parking1.copy(nbReports = 0, nbMaxSeverityReports = 0)
+    val user = TestInstancesUser.user1
+    val report =
+        ParkingReport(
+            uid = "ReportUID",
+            parking = parking.uid,
+            reason = ParkingReportReason.INEXISTANT,
+            userId = user.public.userId)
+
+    `when`(parkingRepository.addReport(any(), any(), any())).then {
+      it.getArgument<(ParkingReport) -> Unit>(1).invoke(report) // Simulate success
+    }
+
+    parkingViewModel.selectParking(parking)
+    parkingViewModel.addReport(report, user)
+
+    verify(parkingRepository).addReport(eq(report), any(), any())
+    verify(reportedObjectRepository, never()).addReportedObject(any(), any(), any())
+  }
 }

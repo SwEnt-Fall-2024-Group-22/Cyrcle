@@ -443,4 +443,27 @@ class UserViewModelTest {
     userViewModel.editCurrentUserPersonalNoteForParking(parking, "New note")
     assert(userViewModel.currentUser.value == userCase0bis)
   }
+
+  @Test
+  fun addReportedImageToSelectedUserTest() {
+    // Set the current user and add a reported image to the user
+    val user =
+        TestInstancesUser.user1.copy(
+            details = TestInstancesUser.user1.details?.copy(reportedImages = emptyList()))
+    userViewModel.setCurrentUser(user)
+
+    val newReportedImage = "Test_image_1"
+    userViewModel.addReportedImageToSelectedUser(newReportedImage)
+
+    // Create a copy of the user with the reported image added
+    val updatedUser =
+        user.copy(
+            details =
+                user.details?.copy(
+                    reportedImages = user.details!!.reportedImages + newReportedImage))
+
+    // Check if the reported image was added to the selected user
+    verify(userRepository).updateUser(eq(updatedUser), any(), any())
+    assert(userViewModel.currentUser.value == updatedUser)
+  }
 }

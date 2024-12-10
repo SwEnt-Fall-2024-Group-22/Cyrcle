@@ -1,7 +1,6 @@
 package com.github.se.cyrcle.ui.parkingDetails
 
 import android.annotation.SuppressLint
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -119,7 +118,6 @@ fun ParkingDetailsScreen(
         newParkingImageLocalPath = newParkingImageLocalPath,
         onAccept = {
           showDialog.value = false
-          Log.d("DA NEW PATH", newParkingImageLocalPath)
           parkingViewModel.uploadImage(newParkingImageLocalPath, context) {}
         })
   }
