@@ -56,6 +56,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -197,6 +198,15 @@ fun MapScreen(
 
   // List of suggestions from NominatimAPI
   val listOfSuggestions by addressViewModel.addressList.collectAsState()
+  // We map the list of suggestions to a list of unique suggestions
+  val uniqueSuggestions by
+      remember(listOfSuggestions) {
+        derivedStateOf {
+          listOfSuggestions.distinctBy {
+            it.suggestionFormatDisplayName(MAX_SUGGESTION_DISPLAY_NAME_LENGTH_MAP, Address.Mode.MAP)
+          }
+        }
+      }
 
   // Show suggestions screen
   val showSuggestions = remember { mutableStateOf(false) }
@@ -548,11 +558,11 @@ fun MapScreen(
         }
 
         if (showSuggestions.value) {
-          if (listOfSuggestions.size > 1) { // If multiple suggestions, show the suggestion menu
-            SuggestionMenu(showSuggestions, listOfSuggestions, mapViewportState, mapViewModel)
-          } else if (listOfSuggestions.size == 1) { // If one suggestion, center the camera on it
+          if (uniqueSuggestions.size > 1) { // If multiple suggestions, show the suggestion menu
+            SuggestionMenu(showSuggestions, uniqueSuggestions, mapViewportState, mapViewModel)
+          } else if (uniqueSuggestions.size == 1) { // If one suggestion, center the camera on it
             handleSuggestionClick(
-                listOfSuggestions[0], showSuggestions, mapViewportState, mapViewModel)
+                uniqueSuggestions[0], showSuggestions, mapViewportState, mapViewModel)
           }
         }
       }
@@ -562,7 +572,7 @@ fun MapScreen(
  * Composable function to display the suggestion menu.
  *
  * @param showSuggestions The state of the suggestion menu.
- * @param listOfSuggestions The list of suggestions extracted from the NominatimAPI.
+ * @param uniqueSuggestions The list of unique suggestions to display.
  * @param mapViewportState The viewport state of the map.
  * @param mapViewModel The ViewModel for managing map-related data and actions.
  */
@@ -570,17 +580,10 @@ fun MapScreen(
 @Composable
 fun SuggestionMenu(
     showSuggestions: MutableState<Boolean>,
-    listOfSuggestions: List<Address>,
+    uniqueSuggestions: List<Address>,
     mapViewportState: MapViewportState,
     mapViewModel: MapViewModel
 ) {
-  // Remove duplicates from the list of suggestions
-  val uniqueSuggestions = remember {
-    listOfSuggestions.distinctBy {
-      it.suggestionFormatDisplayName(MAX_SUGGESTION_DISPLAY_NAME_LENGTH_MAP, Address.Mode.MAP)
-    }
-  }
-
   ModalBottomSheet(
       onDismissRequest = { showSuggestions.value = false },
       modifier = Modifier.testTag("SuggestionsMenu"),
