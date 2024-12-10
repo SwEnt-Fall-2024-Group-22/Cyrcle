@@ -98,20 +98,21 @@ fun ViewProfileScreen(
             selectedItem = Route.VIEW_PROFILE)
       }) { innerPadding ->
         Box(Modifier.fillMaxSize().padding(innerPadding)) {
+          IconButton(
+              modifier = Modifier.padding(10.dp).align(Alignment.TopEnd),
+              icon = Icons.Filled.Outbox,
+              contentDescription = "Sign Out",
+              testTag = "SignOutButton",
+              onClick = { signOut = true })
+
           if (userViewModel.currentUser.collectAsState().value?.details?.isAdmin == true) {
             IconButton(
-                modifier = Modifier.padding(10.dp).align(Alignment.TopEnd),
-                icon = Icons.Filled.Outbox,
-                contentDescription = "Sign Out",
-                testTag = "SignOutButton",
-                onClick = { signOut = true })
+                modifier = Modifier.padding(10.dp).align(Alignment.TopEnd).padding(80.dp),
+                icon = Icons.Filled.AddModerator,
+                contentDescription = "Admin",
+                testTag = "AdminButton",
+                onClick = { navigationActions.navigateTo(Screen.ADMIN) })
           }
-          IconButton(
-              modifier = Modifier.padding(10.dp).align(Alignment.TopEnd).padding(80.dp),
-              icon = Icons.Filled.AddModerator,
-              contentDescription = "Admin",
-              testTag = "AdminButton",
-              onClick = { navigationActions.navigateTo(Screen.ADMIN) })
 
           IconButton(
               modifier = Modifier.padding(10.dp).align(Alignment.TopStart),
