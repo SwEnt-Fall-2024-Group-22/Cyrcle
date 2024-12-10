@@ -1,5 +1,7 @@
 package com.github.se.cyrcle.di.mocks
 
+import com.github.se.cyrcle.model.parking.ImageReport
+import com.github.se.cyrcle.model.parking.ImageReportReason
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingReport
 import com.github.se.cyrcle.model.parking.ParkingReportReason
@@ -15,6 +17,8 @@ class MockParkingRepository @Inject constructor() : ParkingRepository {
       mutableListOf(
           ParkingReport(
               "1", ParkingReportReason.INEXISTANT, "1", TestInstancesParking.parking1.uid, ""))
+  private val reports2 =
+      mutableListOf(ImageReport("1", ImageReportReason.WRONG, "2", "parking/2/b.png", ""))
 
   override fun getNewUid(): String {
     return (uid++).toString()
@@ -33,6 +37,24 @@ class MockParkingRepository @Inject constructor() : ParkingRepository {
       onFailure(Exception("Parking ID cannot be empty"))
     } else {
       val associatedReports = reports.filter { it.parking == parkingId }
+      if (associatedReports.isEmpty()) {
+        onFailure(Exception("No reports found for the given parking ID"))
+      } else {
+        onSuccess(associatedReports)
+      }
+    }
+  }
+
+  override fun getReportsForImage(
+      parkingId: String,
+      imageId: String,
+      onSuccess: (List<ImageReport>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    if (parkingId.isEmpty()) {
+      onFailure(Exception("Parking ID cannot be empty"))
+    } else {
+      val associatedReports = reports2.filter { it.uid == parkingId }
       if (associatedReports.isEmpty()) {
         onFailure(Exception("No reports found for the given parking ID"))
       } else {
@@ -109,5 +131,15 @@ class MockParkingRepository @Inject constructor() : ParkingRepository {
   ) {
     if (report.uid == "") onFailure(Exception("Error adding report"))
     onSuccess(reports[0])
+  }
+
+  override fun addImageReport(
+      report: ImageReport,
+      parking: String,
+      onSuccess: (ImageReport) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    if (report.uid == "") onFailure(Exception("Error adding report"))
+    onSuccess(reports2[0])
   }
 }

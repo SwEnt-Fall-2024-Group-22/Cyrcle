@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -18,7 +19,10 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
+import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.atoms.IconButton
+import com.github.se.cyrcle.ui.theme.atoms.Text
 
 /**
  * Alert dialog to show the image of a parking spot. This composable is displayed when the user
@@ -29,9 +33,12 @@ import com.github.se.cyrcle.ui.theme.atoms.IconButton
  */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun ParkingDetailsAlertDialogShowImage(onDismiss: () -> Unit, imageUrl: String) {
+fun ParkingDetailsAlertDialogShowImage(
+    onDismiss: () -> Unit,
+    imageUrl: String,
+    navigationActions: NavigationActions
+) {
   val alertDialogMaxHeight = LocalConfiguration.current.screenHeightDp.dp * 0.8f
-
   BasicAlertDialog(
       modifier = Modifier.testTag("ParkingDetailsAlertDialogShowImage").wrapContentSize(),
       onDismissRequest = onDismiss,
@@ -55,6 +62,10 @@ fun ParkingDetailsAlertDialogShowImage(onDismiss: () -> Unit, imageUrl: String) 
                   contentDescription = "Back",
                   onClick = onDismiss,
                   inverted = true)
+              FloatingActionButton(
+                  onClick = { navigationActions.navigateTo(Screen.IMAGE_REPORT) },
+                  modifier = Modifier.padding(8.dp),
+                  content = { Text("REPORT IMAGE") })
             }
       })
 }

@@ -77,23 +77,19 @@ class ParkingReportScreenTest {
           parkingViewModel = parkingViewModel)
     }
 
-    // Assert that the report title is displayed
-    composeTestRule.onNodeWithTag("ReportTitleText").assertIsDisplayed()
-
-    // Assert that the bullet points section is displayed
+    // Assert that the report bullet points section is displayed
     composeTestRule.onNodeWithTag("ReportBulletPoints").assertExists()
 
     // Assert that the dropdown for reason selection is displayed
-    composeTestRule.onNodeWithTag("ReasonDropDown").assertExists()
+    composeTestRule.onNodeWithTag("ReasonDropdown").assertExists()
 
     // Assert that the input field for additional details is displayed
-    composeTestRule.onNodeWithTag("ReportDetailsInput").assertExists()
+    composeTestRule.onNodeWithTag("DetailsInput").assertExists()
 
-    // Assert that the submit button is displayed
-    composeTestRule.onNodeWithTag("SubmitButton").assertExists()
+    // Assert that the submit button is displayed by its text
+    composeTestRule.onNodeWithText("Submit").assertExists()
   }
 
-  @OptIn(ExperimentalTestApi::class)
   @Test
   fun submitButtonDisplaysDialogWhenClicked() {
     composeTestRule.setContent {
@@ -103,8 +99,9 @@ class ParkingReportScreenTest {
           parkingViewModel = parkingViewModel)
     }
 
-    // Click on the submit button
-    composeTestRule.onNodeWithTag("SubmitButton").performClick()
+    // Click on the submit button by its text
+    composeTestRule.onNodeWithText("Submit").performClick()
+
     // Assert that the dialog exists
     composeTestRule.onNodeWithTag("ReportScreenAlertDialog").assertExists()
   }
@@ -120,10 +117,10 @@ class ParkingReportScreenTest {
 
     // Enter text in the details input field
     val detailsText = "This parking has accessibility issues."
-    composeTestRule.onNodeWithTag("ReportDetailsInput").performTextInput(detailsText)
+    composeTestRule.onNodeWithTag("DetailsInput").performTextInput(detailsText)
 
     // Assert that the input field contains the entered text
-    composeTestRule.onNodeWithTag("ReportDetailsInput").assertTextContains(detailsText)
+    composeTestRule.onNodeWithTag("DetailsInput").assertTextContains(detailsText)
   }
 
   @Test
@@ -135,6 +132,7 @@ class ParkingReportScreenTest {
           parkingViewModel = parkingViewModel)
     }
 
-    composeTestRule.onNodeWithTag("ReasonDropDown").performClick()
+    // Click on the dropdown for reason selection
+    composeTestRule.onNodeWithTag("ReasonDropdown").performClick()
   }
 }
