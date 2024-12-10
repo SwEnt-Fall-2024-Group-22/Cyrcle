@@ -149,6 +149,7 @@ fun SpotListScreen(
                 HorizontalDivider(
                     thickness = 1.dp, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
               }
+              // pinned parkings
               // The parkings are sorted by distance to the user's location (default being the EPFL)
               // or by distance to the chosen location if any
               items(
@@ -189,14 +190,7 @@ fun SpotListScreen(
                       parkingViewModel = parkingViewModel,
                       userViewModel = userViewModel,
                       parking = parking,
-                      distance =
-                          TurfMeasurement.distance(
-                              if (myLocation.value) userPosition
-                              else
-                                  Point.fromLngLat(
-                                      chosenLocation.value.longitude.toDouble(),
-                                      chosenLocation.value.latitude.toDouble()),
-                              parking.location.center))
+                      distance = computeDistance(parking))
 
                   if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1) {
                     parkingViewModel.incrementRadius()
