@@ -99,7 +99,7 @@ fun ViewProfileScreen(
       },
       floatingActionButton = {
         if (userState?.public?.userId != null) {
-          if (userViewModel.currentUser.value?.details?.isAdmin == true) {
+          if (userState?.details?.isAdmin == true) {
             FloatingActionButton(
                 onClick = { navigationActions.navigateTo(Screen.ADMIN) },
                 modifier = Modifier.testTag("AdminFAB"),

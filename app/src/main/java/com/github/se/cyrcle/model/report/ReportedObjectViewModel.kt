@@ -7,11 +7,15 @@ import com.github.se.cyrcle.model.review.ReviewReport
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
+/** sealed class defining a Polymorphic Report to use in the profile screens */
 sealed class Report {
+  /** data class to use if the report is a ParkingReport */
   data class Parking(val parkingReport: ParkingReport) : Report()
 
+  /** data class to use if the report is a ReviewReport */
   data class Review(val reviewReport: ReviewReport) : Report()
 
+  /** data class to use if the report is a ReviewReport */
   data class Image(val imageReport: ImageReport) : Report()
 }
 

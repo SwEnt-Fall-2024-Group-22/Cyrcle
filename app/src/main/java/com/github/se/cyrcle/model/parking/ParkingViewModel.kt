@@ -82,18 +82,15 @@ class ParkingViewModel(
   private val _selectedParking = MutableStateFlow<Parking?>(null)
   val selectedParking: StateFlow<Parking?> = _selectedParking
 
+  /** Selected parking to review/edit */
   private val _selectedImage = MutableStateFlow<String?>(null)
   val selectedImage: StateFlow<String?> = _selectedImage
 
-  /** Selected parking to review/edit */
-  private val _selectedParkingImage = MutableStateFlow<ParkingImage?>(null)
-  val selectedParkingImage: StateFlow<ParkingImage?> = _selectedParkingImage
-
-  /** Selected parking to review/edit */
+  /** Selected parking reports to view */
   private val _selectedParkingReports = MutableStateFlow<List<ParkingReport>>(emptyList())
   val selectedParkingReports: StateFlow<List<ParkingReport>> = _selectedParkingReports
 
-  /** Selected parking to review/edit */
+  /** Selected image reports to view */
   private val _selectedImageReports = MutableStateFlow<List<ImageReport>>(emptyList())
   val selectedImageReports: StateFlow<List<ImageReport>> = _selectedImageReports
 
@@ -128,6 +125,11 @@ class ParkingViewModel(
         uid, {}, { Log.d("ParkingViewModel", "Error deleting Parking") })
   }
 
+  /**
+   * Assigns selectedImage attribute to image in imagePath passed as argument
+   *
+   * @param imagePath the path of image to assign
+   */
   fun selectImage(imagePath: String) {
     _selectedImage.value = imagePath
     loadSelectedImageReports()

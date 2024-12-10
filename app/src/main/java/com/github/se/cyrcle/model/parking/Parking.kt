@@ -50,7 +50,7 @@ data class Parking(
     const val TABLE_NAME = "parkings"
   }
 }
-
+/** data class representing an image of a Parking. */
 data class ParkingImage(
     val uid: String = "",
     val imagePath: String = "",
@@ -58,6 +58,7 @@ data class ParkingImage(
     var nbMaxSeverityReports: Int = 0
 )
 
+/** data class representing a report of a Parking. */
 data class ParkingReport(
     val uid: String = "",
     val reason: ParkingReportReason = ParkingReportReason.OTHER,
@@ -66,6 +67,7 @@ data class ParkingReport(
     val description: String = ""
 )
 
+/** data class representing a report of a ParkingImage. */
 data class ImageReport(
     val uid: String = "",
     val reason: ImageReportReason = ImageReportReason.OTHER,
