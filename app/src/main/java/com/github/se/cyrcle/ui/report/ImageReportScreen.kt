@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.report
 
-import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -16,6 +15,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -42,7 +42,6 @@ const val HORIZONTAL_PADDING = 0.03f
 const val VERTICAL_PADDING = 0.02f
 const val TOP_BOX_HEIGHT = 0.10f
 
-@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ImageReportScreen(
     navigationActions: NavigationActions,
@@ -60,7 +59,7 @@ fun ImageReportScreen(
   // State for dialog and inputs
   val showDialog = remember { mutableStateOf(false) }
   val selectedReason = rememberSaveable { mutableStateOf(ImageReportReason.USELESS) }
-  val imageId = parkingViewModel.selectedImage.value
+  val imageId = parkingViewModel.selectedImage.collectAsState().value
   if (imageId == null) {
     Log.e("ImageReportScreen", "No selected image found!")
     return

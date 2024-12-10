@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.report
 
-import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -33,7 +32,6 @@ import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 const val MAX_CHARACTERS = 256
 const val MAX_LINES = 6
 
-@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ParkingReportScreen(
     navigationActions: NavigationActions,
@@ -55,9 +53,9 @@ fun ParkingReportScreen(
 
   // State for report inputs
   val selectedReason = rememberSaveable { mutableStateOf(ParkingReportReason.INEXISTANT) }
-  val parkingId = parkingViewModel.selectedParking.value?.uid
+  val parkingId = parkingViewModel.selectedParking.collectAsState().value?.uid
   val reportDescription = rememberSaveable { mutableStateOf("") }
-  val userId = userViewModel.currentUser.value?.public?.userId!!
+  val userId = userViewModel.currentUser.collectAsState().value?.public?.userId!!
 
   fun onSubmit() {
     val report =
