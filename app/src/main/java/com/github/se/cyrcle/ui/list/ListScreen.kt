@@ -103,13 +103,15 @@ fun SpotListScreen(
         if (myLocation.value) userPosition
         else
             Point.fromLngLat(
-                chosenLocation.value.longitude.toDouble(), chosenLocation.value.latitude.toDouble()),
+                chosenLocation.value.longitude.toDouble(),
+                chosenLocation.value.latitude.toDouble()),
         parking.location.center)
   }
 
   LaunchedEffect(userPosition, myLocation, chosenLocation.value) {
 
-    // if suggestion MyLocation is chosen and user has location permission then set the circle center
+    // if suggestion MyLocation is chosen and user has location permission then set the circle
+    // center
     // to user position
     if (locPermission && myLocation.value) parkingViewModel.setCircleCenter(userPosition)
 
@@ -153,17 +155,14 @@ fun SpotListScreen(
                   items =
                       filteredParkingSpots
                           .filter { it in pinnedParkings }
-                          .sortedBy {
-                            computeDistance(it)
-                          },
+                          .sortedBy { computeDistance(it) },
                   key = { parking -> parking.uid + "pin" }) { parking ->
                     SpotCard(
                         navigationActions = navigationActions,
                         parkingViewModel = parkingViewModel,
                         userViewModel = userViewModel,
                         parking = parking,
-                        distance =
-                        computeDistance(parking))
+                        distance = computeDistance(parking))
                   }
               item { Spacer(modifier = Modifier.height(32.dp)) }
             }
@@ -183,10 +182,7 @@ fun SpotListScreen(
             // The parkings are sorted by distance to the user's location (default being the EPFL)
             // or by distance to the chosen location if any
             items(
-                items =
-                    filteredParkingSpots.sortedBy {
-                        computeDistance(it)
-                    },
+                items = filteredParkingSpots.sortedBy { computeDistance(it) },
                 key = { parking -> parking.uid }) { parking ->
                   SpotCard(
                       navigationActions = navigationActions,
