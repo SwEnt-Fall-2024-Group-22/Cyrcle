@@ -282,12 +282,13 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
     // To track and display XP increment temporarily
     var xpIncrement by remember { mutableStateOf(0.0) }
     var showXpIncrement by remember { mutableStateOf(false) }
+    var rarityText by remember { mutableStateOf("") }
 
     // Timer to hide the XP increment message
     LaunchedEffect(xpIncrement) {
         if (xpIncrement > 0) {
             showXpIncrement = true
-            delay(3000) // Show for 3 seconds
+            delay(2000)
             showXpIncrement = false
         }
     }
@@ -328,6 +329,22 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
                     modifier = Modifier.testTag("coin_display"),
                     style = MaterialTheme.typography.headlineMedium
                 )
+
+                // Animated XP increment below coins display
+                AnimatedVisibility(
+                    visible = showXpIncrement && (xpIncrement > 0),
+                    enter = fadeIn(animationSpec = tween(durationMillis = 500)),
+                    exit = fadeOut(animationSpec = tween(durationMillis = 500))
+                ) {
+                    Text(
+                        text = "$rarityText: +%.2f XP!".format(xpIncrement),
+                        style = MaterialTheme.typography.bodyMedium.copy(color = Color.Green),
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .padding(top = 16.dp)
+                            .testTag("xp_increment_text")
+                    )
+                }
             }
 
             WheelView(
@@ -352,25 +369,11 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
                         userViewModel.updateUser(user = updatedUser)
                     }
 
-                    // Show the XP increment temporarily
+                    // Set the XP increment and rarity text
                     xpIncrement = reputationIncrement
+                    rarityText = segmentName
                 }
             ).let { spinFn -> wheelSpinFunction = spinFn }
-
-            AnimatedVisibility(
-                visible = showXpIncrement && (xpIncrement > 0),
-                enter = fadeIn(animationSpec = tween(durationMillis = 900)),
-                exit = fadeOut(animationSpec = tween(durationMillis = 900))
-            ) {
-                Text(
-                    text = "+%.2f XP".format(xpIncrement),
-                    style = MaterialTheme.typography.bodyMedium.copy(color = Color.Green),
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 50.dp)
-                        .testTag("xp_increment_text")
-                )
-            }
 
             val canSpin = userState?.details?.wallet?.isSolvable(SPIN_COST, 0) == true
 
@@ -420,4 +423,5 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
         }
     }
 }
+
 
