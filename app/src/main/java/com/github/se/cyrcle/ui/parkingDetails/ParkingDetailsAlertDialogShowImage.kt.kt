@@ -71,7 +71,6 @@ fun ParkingDetailsAlertDialogShowImage(
                         inverted = true,
                         colorLevel = ColorLevel.ERROR)
                   }
-              // Back button
               IconButton(
                   modifier =
                       Modifier.padding(8.dp)
