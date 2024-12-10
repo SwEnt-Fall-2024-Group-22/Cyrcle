@@ -284,6 +284,9 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
     var showXpIncrement by remember { mutableStateOf(false) }
     var rarityText by remember { mutableStateOf("") }
 
+    // Add a state to track if the wheel is spinning
+    var isSpinning by remember { mutableStateOf(false) }
+
     // Timer to hide the XP increment message
     LaunchedEffect(xpIncrement) {
         if (xpIncrement > 0) {
@@ -372,13 +375,17 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
                     // Set the XP increment and rarity text
                     xpIncrement = reputationIncrement
                     rarityText = segmentName
+
+                    // Set isSpinning to false once the spin finishes
+                    isSpinning = false
                 }
             ).let { spinFn -> wheelSpinFunction = spinFn }
 
-            val canSpin = userState?.details?.wallet?.isSolvable(SPIN_COST, 0) == true
+            val canSpin = userState?.details?.wallet?.isSolvable(SPIN_COST, 0) == true && !isSpinning
 
             Button(
                 onClick = {
+                    isSpinning = true // Disable the button immediately after click
                     userViewModel.tryDebitCoinsFromCurrentUser(
                         SPIN_COST,
                         0,
@@ -423,5 +430,6 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
         }
     }
 }
+
 
 
