@@ -98,9 +98,18 @@ fun SpotListScreen(
   // location permission from location manager
   val locPermission = permissionHandler.getLocalisationPerm().collectAsState().value
 
+  fun computeDistance(parking: Parking): Double {
+    return TurfMeasurement.distance(
+        if (myLocation.value) userPosition
+        else
+            Point.fromLngLat(
+                chosenLocation.value.longitude.toDouble(), chosenLocation.value.latitude.toDouble()),
+        parking.location.center)
+  }
+
   LaunchedEffect(userPosition, myLocation, chosenLocation.value) {
 
-    // if suggestion MyLocatio is chosen and user has location permission then set the circle center
+    // if suggestion MyLocation is chosen and user has location permission then set the circle center
     // to user position
     if (locPermission && myLocation.value) parkingViewModel.setCircleCenter(userPosition)
 
@@ -145,13 +154,7 @@ fun SpotListScreen(
                       filteredParkingSpots
                           .filter { it in pinnedParkings }
                           .sortedBy {
-                            TurfMeasurement.distance(
-                                if (myLocation.value) userPosition
-                                else
-                                    Point.fromLngLat(
-                                        chosenLocation.value.longitude.toDouble(),
-                                        chosenLocation.value.latitude.toDouble()),
-                                it.location.center)
+                            computeDistance(it)
                           },
                   key = { parking -> parking.uid + "pin" }) { parking ->
                     SpotCard(
@@ -160,13 +163,7 @@ fun SpotListScreen(
                         userViewModel = userViewModel,
                         parking = parking,
                         distance =
-                            TurfMeasurement.distance(
-                                if (myLocation.value) userPosition
-                                else
-                                    Point.fromLngLat(
-                                        chosenLocation.value.longitude.toDouble(),
-                                        chosenLocation.value.latitude.toDouble()),
-                                parking.location.center))
+                        computeDistance(parking))
                   }
               item { Spacer(modifier = Modifier.height(32.dp)) }
             }
@@ -188,13 +185,7 @@ fun SpotListScreen(
             items(
                 items =
                     filteredParkingSpots.sortedBy {
-                      TurfMeasurement.distance(
-                          if (myLocation.value) userPosition
-                          else
-                              Point.fromLngLat(
-                                  chosenLocation.value.longitude.toDouble(),
-                                  chosenLocation.value.latitude.toDouble()),
-                          it.location.center)
+                        computeDistance(it)
                     },
                 key = { parking -> parking.uid }) { parking ->
                   SpotCard(
