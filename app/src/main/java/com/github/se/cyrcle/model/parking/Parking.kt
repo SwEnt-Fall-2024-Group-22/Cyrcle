@@ -30,7 +30,7 @@ data class Parking(
     val optName: String?,
     val optDescription: String?,
     val location: Location,
-    val images: List<(String)>,
+    val images: List<String>,
     var maxNumOfImages: Int = 0,
     var reportedImages: List<ParkingImage>,
     val capacity: ParkingCapacity,

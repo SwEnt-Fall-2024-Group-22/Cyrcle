@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.report
 
-import android.util.Log
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
@@ -74,7 +73,6 @@ fun ViewReportsScreen(
                   ReportedObjectType.REVIEW -> reviewViewModel.deleteReviewById(uidOfObject)
                   ReportedObjectType.IMAGE -> {
                     val uidOfParking = parkingViewModel.getParkingFromImagePath(uidOfObject)
-                    Log.d("$uidOfParking", "$uidOfObject")
                     parkingViewModel.deleteImageFromParking(uidOfParking, uidOfObject)
                   }
                 }

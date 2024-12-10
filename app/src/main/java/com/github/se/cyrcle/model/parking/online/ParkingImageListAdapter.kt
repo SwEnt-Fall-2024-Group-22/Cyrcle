@@ -8,6 +8,7 @@ import com.google.gson.reflect.TypeToken
 class ParkingImageListAdapter {
 
   private val gson = Gson()
+  private val listType = object : TypeToken<List<ParkingImage>>() {}.type
 
   @TypeConverter
   fun fromParkingImageList(value: List<ParkingImage>?): String? {
@@ -16,7 +17,6 @@ class ParkingImageListAdapter {
 
   @TypeConverter
   fun toParkingImageList(value: String?): List<ParkingImage>? {
-    val listType = object : TypeToken<List<ParkingImage>>() {}.type
     return gson.fromJson(value, listType)
   }
 }

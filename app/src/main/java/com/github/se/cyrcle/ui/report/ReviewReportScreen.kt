@@ -34,8 +34,8 @@ import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.molecules.ReportInputs
 import com.github.se.cyrcle.ui.theme.molecules.ReportTextBlock
-import com.github.se.cyrcle.ui.theme.molecules.ReportTopAppBar
 import com.github.se.cyrcle.ui.theme.molecules.SubmitButtonWithDialog
+import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
@@ -83,7 +83,7 @@ fun ReviewReportScreen(
   Scaffold(
       modifier = Modifier.testTag("ReviewReportScreen"),
       topBar = {
-        ReportTopAppBar(
+        TopAppBar(
             navigationActions,
             title =
                 stringResource(R.string.report_a_review)

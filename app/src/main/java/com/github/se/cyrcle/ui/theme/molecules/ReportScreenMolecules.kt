@@ -24,17 +24,11 @@ import com.github.se.cyrcle.model.parking.ImageReportReason
 import com.github.se.cyrcle.model.parking.ParkingReportReason
 import com.github.se.cyrcle.model.report.ReportedObjectType
 import com.github.se.cyrcle.model.review.ReviewReportReason
-import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.report.ReportScreenAlertDialog
 import com.github.se.cyrcle.ui.theme.atoms.BulletPoint
 import com.github.se.cyrcle.ui.theme.atoms.ConditionCheckingInputText
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.disabledColor
-
-@Composable
-fun ReportTopAppBar(navigationActions: NavigationActions, title: String) {
-  TopAppBar(navigationActions, title = title)
-}
 
 @Composable
 fun ReportTextBlock(title: String, bulletPoints: List<String>, modifier: Modifier = Modifier) {
@@ -57,9 +51,9 @@ fun ReportTextBlock(title: String, bulletPoints: List<String>, modifier: Modifie
 
 @Composable
 fun ReportInputs(
-    selectedReasonIfParking: MutableState<ParkingReportReason>? = null,
-    selectedReasonIfReview: MutableState<ReviewReportReason>? = null,
-    selectedReasonIfImage: MutableState<ImageReportReason>? = null,
+    selectedReasonIfParking: MutableState<ParkingReportReason>?,
+    selectedReasonIfReview: MutableState<ReviewReportReason>?,
+    selectedReasonIfImage: MutableState<ImageReportReason>?,
     reportedObjectType: ReportedObjectType,
     reportDescription: MutableState<String>,
     horizontalPadding: Dp,

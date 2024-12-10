@@ -27,8 +27,8 @@ import com.github.se.cyrcle.ui.addParking.attributes.DESCRIPTION_MIN_LENGTH
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.molecules.ReportInputs
 import com.github.se.cyrcle.ui.theme.molecules.ReportTextBlock
-import com.github.se.cyrcle.ui.theme.molecules.ReportTopAppBar
 import com.github.se.cyrcle.ui.theme.molecules.SubmitButtonWithDialog
+import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
 const val MAX_CHARACTERS = 256
 const val MAX_LINES = 6
@@ -81,7 +81,7 @@ fun ParkingReportScreen(
   Scaffold(
       modifier = Modifier.testTag("ParkingReportScreen"),
       topBar = {
-        ReportTopAppBar(
+        TopAppBar(
             navigationActions,
             title =
                 stringResource(R.string.report_parking)

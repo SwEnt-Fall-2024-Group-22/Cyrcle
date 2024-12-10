@@ -361,7 +361,7 @@ class ParkingViewModel(
   }
 
   fun getParkingFromImagePath(imagePath: String): String {
-    val id = imagePath.split("/")[1] // Extracts "IrVBJ7R96UaPIs5WtuVP"
+    val id = imagePath.split("/")[1] // Extracts ParkingID out of imagePath
     return id
   }
 
@@ -611,8 +611,8 @@ class ParkingViewModel(
             ?.let { it.value to it.index } ?: (null to -1)
 
     // If not, add it to the list of Reported Images
-    val parkingImageToAdd = ParkingImage(parkingRepository.getNewUid(), selectedImage, 1, 0)
     if (foundReportedImage == null) {
+      val parkingImageToAdd = ParkingImage(parkingRepository.getNewUid(), selectedImage, 1, 0)
       Log.d("ParkingViewModel", "No existing report for this image. Creating a new one.")
 
       // add the Image Report to the "images_reports" subcollection
@@ -717,7 +717,7 @@ class ParkingViewModel(
           })
     }
   }
-  // function to update the Image's metrics locally before sending to Firestore
+  /** function to update the Image's metrics locally before sending to Firestore */
   fun updateLocalImageAndMetrics(report: ImageReport, updatedImage: ParkingImage) {
     val selectedParking = _selectedParking.value ?: return
     val reportedImages =

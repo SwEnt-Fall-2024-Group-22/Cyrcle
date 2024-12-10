@@ -123,6 +123,17 @@ interface ParkingRepository {
       onFailure: (Exception) -> Unit
   )
 
+  /**
+   * Adds a report for the currently selected parking image.
+   *
+   * This function first verifies that a parking image is selected. If no image is selected, it logs
+   * an error and returns. It then creates an `ImageReport` and stores it in the appropriate
+   * repository. Additionally, this function ensures that the user cannot report the same image
+   * multiple times.
+   *
+   * @param report The report to be added, which includes details such as the reason and user ID.
+   * @param user The user submitting the report, required for identifying the reporter.
+   */
   fun addImageReport(
       report: ImageReport,
       parking: String,

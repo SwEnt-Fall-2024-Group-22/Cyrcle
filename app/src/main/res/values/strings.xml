@@ -265,7 +265,7 @@
     <string name="sort_reported_images">Get Reported Images (Most Reported First)</string>
     <string name="view_reports">View Reports</string>
     <string name="sort_reports">Get Reported Reviews (Most Reported First)</string>
-    <string name="choose_parkingorreview">Parkings, Reviews, or Images?</string>
+    <string name="choose_parking_review_or_image">Parkings, Reviews, or Images?</string>
     <string name="object_deleted">Object Deleted in all Repositories</string>
     <string name="delete_object">Delete Object</string>
     <string name="no_reports_available">No Reports Available.</string>

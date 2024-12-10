@@ -194,7 +194,7 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
       onSuccess: (List<ParkingReport>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    db.collection("parkings")
+    db.collection(collectionPath)
         .document(parkingId)
         .collection("reports")
         .get()
@@ -214,7 +214,7 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
       onSuccess: (List<ImageReport>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    db.collection("parkings")
+    db.collection(collectionPath)
         .document(parkingId)
         .collection("image_reports")
         .whereEqualTo("image", imageId)

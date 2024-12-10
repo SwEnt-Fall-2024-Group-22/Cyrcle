@@ -26,19 +26,18 @@ class ImageReportScreenTest {
   @Before
   fun setUp() {
     navigationActions = Mockito.mock(NavigationActions::class.java)
+    val imageRepository = MockImageRepository()
+    val parkingRepository = MockParkingRepository()
+    val offlineParkingRepository = MockOfflineParkingRepository()
+    val reportedObjectRepository = MockReportedObjectRepository()
+    val userRepository = MockUserRepository()
+    val authenticationRepository = MockAuthenticationRepository()
 
     parkingViewModel =
         ParkingViewModel(
-            MockImageRepository(),
-            MockParkingRepository(),
-            MockOfflineParkingRepository(),
-            MockReportedObjectRepository())
+            imageRepository, parkingRepository, offlineParkingRepository, reportedObjectRepository)
     userViewModel =
-        UserViewModel(
-            MockUserRepository(),
-            MockParkingRepository(),
-            MockImageRepository(),
-            MockAuthenticationRepository())
+        UserViewModel(userRepository, parkingRepository, imageRepository, authenticationRepository)
 
     userViewModel.setCurrentUser(TestInstancesUser.user1)
     parkingViewModel.selectImage("testImage123") // Simulating an image is selected

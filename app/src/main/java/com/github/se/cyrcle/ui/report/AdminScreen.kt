@@ -94,7 +94,7 @@ fun FilterHeader(
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically) {
           Text(
-              text = stringResource(R.string.choose_parkingorreview),
+              text = stringResource(R.string.choose_parking_review_or_image),
               modifier = Modifier.weight(1f),
               style = MaterialTheme.typography.headlineMedium,
               color = MaterialTheme.colorScheme.onSurface)

@@ -215,6 +215,12 @@ class UserViewModel(
     }
   }
 
+  /**
+   * Adds an image to the list of reported images for the selected user and updates the reported
+   * images state.
+   *
+   * @param image The image ID to add to the list of reported images.
+   */
   fun addReportedImageToSelectedUser(image: String) {
     currentUser.value?.let { user ->
       val updatedDetails = user.details?.copy(reportedImages = user.details.reportedImages + image)
@@ -542,6 +548,4 @@ class UserViewModel(
   fun setHasConnection(hasConnection: Boolean) {
     _hasConnection.value = hasConnection
   }
-
-  fun getUserById(userId: String) {}
 }
