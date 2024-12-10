@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.model.parking.online
 
+import com.github.se.cyrcle.model.parking.ImageReport
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingReport
 import com.github.se.cyrcle.model.parking.Tile
@@ -73,6 +74,20 @@ interface ParkingRepository {
   )
 
   /**
+   * Get the reports for an image
+   *
+   * @param imageId the identifier of the image
+   * @param onSuccess a callback that is called when the reports are retrieved
+   * @param onFailure a callback that is called when an error occurs
+   */
+  fun getReportsForImage(
+      parkingId: String,
+      imageId: String,
+      onSuccess: (List<ImageReport>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  /**
    * Delete a parking by its identifier
    *
    * @param id the identifier of the parking to delete
@@ -105,6 +120,24 @@ interface ParkingRepository {
   fun addReport(
       report: ParkingReport,
       onSuccess: (ParkingReport) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  /**
+   * Adds a report for the currently selected parking image.
+   *
+   * This function first verifies that a parking image is selected. If no image is selected, it logs
+   * an error and returns. It then creates an `ImageReport` and stores it in the appropriate
+   * repository. Additionally, this function ensures that the user cannot report the same image
+   * multiple times.
+   *
+   * @param report The report to be added, which includes details such as the reason and user ID.
+   * @param user The user submitting the report, required for identifying the reporter.
+   */
+  fun addImageReport(
+      report: ImageReport,
+      parking: String,
+      onSuccess: (ImageReport) -> Unit,
       onFailure: (Exception) -> Unit
   )
 }

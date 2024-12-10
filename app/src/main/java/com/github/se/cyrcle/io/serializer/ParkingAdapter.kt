@@ -129,7 +129,8 @@ class ParkingAdapter : JsonSerializer<Parking>, JsonDeserializer<Parking> {
     return parking.copy(
         tile = parking.tile ?: TileUtils.getTileFromPoint(parking.location.center),
         owner = parking.owner ?: "Unknown Owner", // Replace with your default owner value
-        reportingUsers = parking.reportingUsers ?: emptyList()) // Default to empty list
+        reportingUsers = parking.reportingUsers ?: emptyList(),
+        reportedImages = parking.reportedImages ?: emptyList()) // Default to empty list
   }
 
   /**

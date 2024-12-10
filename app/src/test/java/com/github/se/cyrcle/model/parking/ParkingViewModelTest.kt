@@ -406,6 +406,83 @@ class ParkingViewModelTest {
     verify(parkingRepository).updateParking(any(), any(), any())
   }
 
+  @Test
+  fun addImageReportTest() {
+    val parking = TestInstancesParking.parking1.copy(images = listOf("imagePath1"))
+    val user = TestInstancesUser.user1
+    val imageReport =
+        ImageReport(
+            uid = "ImageReportUID",
+            reason = ImageReportReason.USELESS,
+            userId = user.public.userId,
+            image = "imagePath1")
+
+    val updatedImage =
+        ParkingImage(
+            uid = "ValidUid", imagePath = "imagePath1", nbReports = 1, nbMaxSeverityReports = 0)
+
+    `when`(parkingRepository.getNewUid()).thenReturn("ValidUid")
+
+    parkingViewModel.selectParking(parking)
+    parkingViewModel.selectImage("imagePath1")
+
+    // Mock addImageReport behavior
+    `when`(parkingRepository.addImageReport(any(), eq(parking.uid), any(), any())).then {
+      it.getArgument<(ImageReport) -> Unit>(2).invoke(imageReport)
+    }
+
+    parkingViewModel.addImageReport(imageReport, user)
+    // Verify image report was added and parking was updated
+    verify(parkingRepository).addImageReport(eq(imageReport), eq(parking.uid), any(), any())
+    verify(parkingRepository)
+        .updateParking(eq(parking.copy(reportedImages = listOf(updatedImage))), any(), any())
+  }
+
+  @Test
+  fun updateLocalImageAndMetricsTest() {
+    // Arrange
+    val parking =
+        TestInstancesParking.parking1.copy(
+            reportedImages =
+                listOf(
+                    ParkingImage(
+                        uid = "imageUID1",
+                        imagePath = "imagePath1",
+                        nbReports = 1,
+                        nbMaxSeverityReports = 0)))
+    val report =
+        ImageReport(
+            uid = "reportUID1",
+            image = "imagePath1",
+            reason = ImageReportReason.USELESS,
+            userId = TestInstancesUser.user1.public.userId,
+            description = "This image is irrelevant")
+    val updatedImage =
+        ParkingImage(
+            uid = "imageUID1",
+            imagePath = "imagePath1",
+            nbReports = 2, // Incremented by the method
+            nbMaxSeverityReports = 1 // Incremented by the method
+            )
+
+    parkingViewModel.selectParking(parking)
+
+    // Act
+    parkingViewModel.updateLocalImageAndMetrics(report, updatedImage)
+
+    // Assert
+    val selectedParking = parkingViewModel.selectedParking.value
+    assert(selectedParking != null)
+    assertEquals(1, selectedParking?.reportedImages?.size)
+    assertEquals(updatedImage, selectedParking?.reportedImages?.first())
+    assertEquals(3, selectedParking?.reportedImages?.first()?.nbReports)
+    assertEquals(1, selectedParking?.reportedImages?.first()?.nbMaxSeverityReports)
+
+    // Verify the parking repository was updated with the new metrics
+    verify(parkingRepository)
+        .updateParking(eq(parking.copy(reportedImages = listOf(updatedImage))), any(), any())
+  }
+
   // Helper functions to assert the state of the filter options
   private fun assertFull(protection: Boolean, rackTypes: Boolean, capacities: Boolean) {
     if (protection) {
@@ -424,5 +501,74 @@ class ParkingViewModelTest {
     if (protection) assert(parkingViewModel.selectedProtection.value.isEmpty())
     if (rackTypes) assert(parkingViewModel.selectedRackTypes.value.isEmpty())
     if (capacities) assert(parkingViewModel.selectedCapacities.value.isEmpty())
+  }
+
+  @Test
+  fun addImageReport_maxSeverity_createsReportedObject() {
+    val parking =
+        TestInstancesParking.parking1.copy(
+            images = listOf("imagePath1"),
+            reportedImages = listOf(ParkingImage("", "imagePath1", 2, 2)))
+    val user = TestInstancesUser.user1
+    val imageReport =
+        ImageReport(
+            uid = "ImageReportUID",
+            reason = ImageReportReason.ILLEGAL_CONTENT,
+            userId = user.public.userId,
+            image = "imagePath1")
+
+    // Mock behaviors for dependent methods
+    `when`(parkingRepository.getNewUid()).thenReturn("ValidUid")
+    `when`(reportedObjectRepository.checkIfObjectExists(any(), any(), any())).then {
+      it.getArgument<(String?) -> Unit>(1).invoke(null) // Simulate no existing reported object
+    }
+    `when`(parkingRepository.addImageReport(any(), any(), any(), any())).then {
+      it.getArgument<(ImageReport) -> Unit>(2)
+          .invoke(imageReport) // Simulate success for adding report
+    }
+
+    // Select parking and image
+    parkingViewModel.selectParking(parking)
+    parkingViewModel.selectImage("imagePath1")
+
+    // Act
+    parkingViewModel.addImageReport(imageReport, user)
+
+    // Verify interactions
+    verify(parkingRepository).addImageReport(eq(imageReport), eq(parking.uid), any(), any())
+    verify(reportedObjectRepository)
+        .addReportedObject(
+            eq(
+                ReportedObject(
+                    objectUID = "imagePath1",
+                    reportUID = "ImageReportUID",
+                    nbOfTimesReported = 3,
+                    nbOfTimesMaxSeverityReported = 3,
+                    userUID = user.public.userId,
+                    objectType = ReportedObjectType.IMAGE)),
+            any(),
+            any())
+  }
+
+  @Test
+  fun addReport_belowThreshold_doesNotCreateReportedObject() {
+    val parking = TestInstancesParking.parking1.copy(nbReports = 0, nbMaxSeverityReports = 0)
+    val user = TestInstancesUser.user1
+    val report =
+        ParkingReport(
+            uid = "ReportUID",
+            parking = parking.uid,
+            reason = ParkingReportReason.INEXISTANT,
+            userId = user.public.userId)
+
+    `when`(parkingRepository.addReport(any(), any(), any())).then {
+      it.getArgument<(ParkingReport) -> Unit>(1).invoke(report) // Simulate success
+    }
+
+    parkingViewModel.selectParking(parking)
+    parkingViewModel.addReport(report, user)
+
+    verify(parkingRepository).addReport(eq(report), any(), any())
+    verify(reportedObjectRepository, never()).addReportedObject(any(), any(), any())
   }
 }

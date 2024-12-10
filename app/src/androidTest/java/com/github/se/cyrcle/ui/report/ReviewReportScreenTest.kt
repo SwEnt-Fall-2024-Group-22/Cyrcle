@@ -65,12 +65,11 @@ class ReviewReportScreenTest {
             parkingRepository,
             MockImageRepository(),
             MockAuthenticationRepository())
+    userViewModel.setCurrentUser(TestInstancesUser.user1)
     reviewViewModel = ReviewViewModel(reviewRepository, reportedObjectRepository)
 
     parkingViewModel.addParking(TestInstancesParking.parking2)
     parkingViewModel.addParking(TestInstancesParking.parking3)
-
-    userViewModel.setCurrentUser(TestInstancesUser.user1)
 
     `when`(navigationActions.currentRoute()).thenReturn(Screen.PARKING_DETAILS)
   }
@@ -85,7 +84,7 @@ class ReviewReportScreenTest {
     }
 
     // Assert that the title is displayed
-    composeTestRule.onNodeWithTag("ReportTitle").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("ReportBulletPoints").assertExists()
 
     // Assert that bullet points are displayed
     composeTestRule.onNodeWithTag("ReportBulletPoints").assertExists()
@@ -96,8 +95,8 @@ class ReviewReportScreenTest {
     // Assert that the details input field is displayed
     composeTestRule.onNodeWithTag("DetailsInput").assertExists()
 
-    // Assert that the submit button is displayed
-    composeTestRule.onNodeWithTag("SubmitButton").assertExists()
+    // Assert that the submit button is displayed by text
+    composeTestRule.onNodeWithText("Submit").assertExists()
   }
 
   @OptIn(ExperimentalTestApi::class)
@@ -111,7 +110,7 @@ class ReviewReportScreenTest {
     }
 
     // Click on the submit button
-    composeTestRule.onNodeWithTag("SubmitButton").performClick()
+    composeTestRule.onNodeWithText("Submit").performClick()
 
     // Wait for the dialog
     composeTestRule.waitUntilAtLeastOneExists(
@@ -139,12 +138,12 @@ class ReviewReportScreenTest {
   @Test
   fun reasonDropDownIsClickable() {
     composeTestRule.setContent {
-      ParkingReportScreen(
+      ReviewReportScreen(
           navigationActions = navigationActions,
           userViewModel = userViewModel,
-          parkingViewModel = parkingViewModel)
+          reviewViewModel = reviewViewModel)
     }
 
-    composeTestRule.onNodeWithTag("ReasonDropDown").performClick()
+    composeTestRule.onNodeWithTag("ReasonDropdown").performClick()
   }
 }

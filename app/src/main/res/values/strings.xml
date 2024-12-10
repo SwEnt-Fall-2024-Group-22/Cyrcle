@@ -238,7 +238,8 @@
     <!-- Report Screens -->
     <string name="report_title">The following will be submitted in your report:</string>
     <string name="report_parking">Report Parking: %s</string>
-    <string name="report_a_review">Report Parking: %s</string>
+    <string name="report_a_review">Report Review: %s</string>
+    <string name="report_an_image">Report Image</string>
     <string name="report_bullet_point_1">Your User Information</string>
     <string name="report_bullet_point_2_parking">This Parking\'s information</string>
     <string name="report_bullet_point_2_review">This Review\'s information</string>
@@ -258,11 +259,13 @@
     <string name="check_reports">Check Reports</string>
     <string name="parking_reports">Parking Reports</string>
     <string name="review_reports">Review Reports</string>
+    <string name="image_reports">Image Reports</string>
     <string name="sort_reported_parkings">Get Reported Parkings (Most Reported First)</string>
     <string name="sort_reported_reviews">Get Reported Reviews (Most Reported First)</string>
+    <string name="sort_reported_images">Get Reported Images (Most Reported First)</string>
     <string name="view_reports">View Reports</string>
     <string name="sort_reports">Get Reported Reviews (Most Reported First)</string>
-    <string name="choose_parkingorreview">Parkings or Reports?</string>
+    <string name="choose_parking_review_or_image">Parkings, Reviews, or Images?</string>
     <string name="object_deleted">Object Deleted in all Repositories</string>
     <string name="delete_object">Delete Object</string>
     <string name="no_reports_available">No Reports Available.</string>

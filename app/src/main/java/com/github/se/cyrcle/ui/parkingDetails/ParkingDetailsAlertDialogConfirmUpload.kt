@@ -20,7 +20,7 @@ import com.github.se.cyrcle.R
 import com.github.se.cyrcle.ui.theme.atoms.Text
 
 /**
- * Alert dialog to confirm the upload of a new parking image.
+ * Alert dialog to confirm the upload of a new parking image, as well as report it when necessary
  *
  * @param onDismiss Callback when the dialog is dismissed.
  * @param onAccept Callback when the dialog is accepted.

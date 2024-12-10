@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -29,7 +29,6 @@ import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.AddAPhoto
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.PushPin
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -69,7 +68,6 @@ import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
-@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ParkingDetailsScreen(
@@ -87,7 +85,9 @@ fun ParkingDetailsScreen(
   var newParkingImageLocalPath by remember { mutableStateOf("") }
   val showDialog = remember { mutableStateOf(false) }
   val imagesUrls by parkingViewModel.selectedParkingImagesUrls.collectAsState()
+  val imagesPaths by parkingViewModel.selectedParkingAssociatedPaths.collectAsState()
   val showDialogImage = remember { mutableStateOf<String?>(null) }
+  val showDialogImageDestinationPath = remember { mutableStateOf<String?>("") }
   if (selectedParking.owner != "Unknown Owner" && selectedParking.owner != null) {
     userViewModel.selectSelectedParkingUser(parkingViewModel.selectedParking.value?.owner!!)
   } else {
@@ -122,8 +122,14 @@ fun ParkingDetailsScreen(
         })
   }
   if (showDialogImage.value != null) {
+    parkingViewModel.selectImage(showDialogImageDestinationPath.value!!)
     ParkingDetailsAlertDialogShowImage(
-        onDismiss = { showDialogImage.value = null }, imageUrl = showDialogImage.value!!)
+        onDismiss = {
+          showDialogImage.value = null
+          showDialogImageDestinationPath.value = ""
+        },
+        imageUrl = showDialogImage.value!!,
+        navigationActions)
   }
 
   Scaffold(
@@ -345,14 +351,18 @@ fun ParkingDetailsScreen(
                           modifier =
                               Modifier.weight(2f).fillMaxHeight().testTag("ParkingImagesRow"),
                           horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            items(imagesUrls) { url ->
+                            itemsIndexed(imagesUrls) { index, url ->
                               Image(
                                   painter = rememberAsyncImagePainter(url),
                                   contentDescription = "Parking Image",
                                   contentScale = ContentScale.Crop,
                                   modifier =
                                       Modifier.fillMaxHeight().width(150.dp).clickable {
+                                        // Set both imageUrl and destinationPath in the state
                                         showDialogImage.value = url
+                                        showDialogImageDestinationPath.value =
+                                            showDialogImageDestinationPath.value.plus(
+                                                imagesPaths[index])
                                       })
                             }
                           }

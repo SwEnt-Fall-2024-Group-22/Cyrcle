@@ -5,9 +5,11 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.se.cyrcle.ui.navigation.NavigationActions
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
 
 @RunWith(AndroidJUnit4::class)
 class ParkingDetailsScreenAlertDialogTest {
@@ -38,7 +40,9 @@ class ParkingDetailsScreenAlertDialogTest {
     var dismissedCalled = false
     composeTestRule.setContent {
       ParkingDetailsAlertDialogShowImage(
-          onDismiss = { dismissedCalled = true }, imageUrl = "https://picsum.photos/200/300")
+          onDismiss = { dismissedCalled = true },
+          navigationActions = mock(NavigationActions::class.java),
+          imageUrl = "https://picsum.photos/200/300")
     }
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("ParkingDetailsAlertDialogShowImage").assertIsDisplayed()

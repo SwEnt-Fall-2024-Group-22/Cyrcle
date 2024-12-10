@@ -216,6 +216,20 @@ class UserViewModel(
   }
 
   /**
+   * Adds an image to the list of reported images for the selected user and updates the reported
+   * images state.
+   *
+   * @param image The image ID to add to the list of reported images.
+   */
+  fun addReportedImageToSelectedUser(image: String) {
+    currentUser.value?.let { user ->
+      val updatedDetails = user.details?.copy(reportedImages = user.details.reportedImages + image)
+      val updatedUser = user.copy(details = updatedDetails)
+      updateUser(updatedUser) { _reportedParkings.value += image }
+    }
+  }
+
+  /**
    * Removes parking from the list of favorite parkings for the selected user and updates the
    * favorite parkings state.
    *

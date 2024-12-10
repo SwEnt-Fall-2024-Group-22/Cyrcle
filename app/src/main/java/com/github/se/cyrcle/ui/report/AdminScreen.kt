@@ -51,7 +51,8 @@ import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
 enum class ReportSortingOption {
   Parking,
-  Review
+  Review,
+  Image
 }
 
 @Composable
@@ -93,9 +94,7 @@ fun FilterHeader(
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically) {
           Text(
-              text =
-                  stringResource(
-                      R.string.choose_parkingorreview), // "Sort Reviews" or similar title
+              text = stringResource(R.string.choose_parking_review_or_image),
               modifier = Modifier.weight(1f),
               style = MaterialTheme.typography.headlineMedium,
               color = MaterialTheme.colorScheme.onSurface)
@@ -109,7 +108,7 @@ fun FilterHeader(
 
     if (showFilters) {
       FilterSection(
-          title = stringResource(R.string.view_reports), // "Sort Reviews" title
+          title = stringResource(R.string.view_reports),
           isExpanded = true,
           onToggle = { /* No toggle needed for always-visible sorting options */}) {
             SortingOptionSelector(
@@ -126,47 +125,35 @@ fun SortingOptionSelector(
     onOptionSelected: (ReportSortingOption) -> Unit
 ) {
   Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-    Row(
-        modifier =
-            Modifier.fillMaxWidth()
-                .padding(vertical = 4.dp)
-                .clickable { onOptionSelected(ReportSortingOption.Parking) }
-                .background(
-                    color =
-                        if (selectedSortingOption == ReportSortingOption.Parking)
-                            MaterialTheme.colorScheme.secondaryContainer
-                        else Color.Transparent,
-                    shape = MaterialTheme.shapes.small)
-                .padding(12.dp)) {
-          Text(
-              text = stringResource(R.string.sort_reported_parkings),
-              style = MaterialTheme.typography.bodyMedium,
-              color =
-                  if (selectedSortingOption == ReportSortingOption.Parking)
-                      MaterialTheme.colorScheme.onSecondaryContainer
-                  else MaterialTheme.colorScheme.primary)
-        }
-
-    Row(
-        modifier =
-            Modifier.fillMaxWidth()
-                .padding(vertical = 4.dp)
-                .clickable { onOptionSelected(ReportSortingOption.Review) }
-                .background(
-                    color =
-                        if (selectedSortingOption == ReportSortingOption.Review)
-                            MaterialTheme.colorScheme.secondaryContainer
-                        else Color.Transparent,
-                    shape = MaterialTheme.shapes.small)
-                .padding(12.dp)) {
-          Text(
-              text = stringResource(R.string.sort_reported_reviews),
-              style = MaterialTheme.typography.bodyMedium,
-              color =
-                  if (selectedSortingOption == ReportSortingOption.Review)
-                      MaterialTheme.colorScheme.onSecondaryContainer
-                  else MaterialTheme.colorScheme.primary)
-        }
+    ReportSortingOption.values().forEach { sortingOption ->
+      Row(
+          modifier =
+              Modifier.fillMaxWidth()
+                  .padding(vertical = 4.dp)
+                  .clickable { onOptionSelected(sortingOption) }
+                  .background(
+                      color =
+                          if (selectedSortingOption == sortingOption)
+                              MaterialTheme.colorScheme.secondaryContainer
+                          else Color.Transparent,
+                      shape = MaterialTheme.shapes.small)
+                  .padding(12.dp)) {
+            Text(
+                text =
+                    stringResource(
+                        id =
+                            when (sortingOption) {
+                              ReportSortingOption.Parking -> R.string.sort_reported_parkings
+                              ReportSortingOption.Review -> R.string.sort_reported_reviews
+                              ReportSortingOption.Image -> R.string.sort_reported_images
+                            }),
+                style = MaterialTheme.typography.bodyMedium,
+                color =
+                    if (selectedSortingOption == sortingOption)
+                        MaterialTheme.colorScheme.onSecondaryContainer
+                    else MaterialTheme.colorScheme.primary)
+          }
+    }
   }
 }
 
@@ -193,11 +180,10 @@ fun AdminScreen(
                   reportsList.filter { it.objectType == ReportedObjectType.PARKING }
               ReportSortingOption.Review ->
                   reportsList.filter { it.objectType == ReportedObjectType.REVIEW }
+              ReportSortingOption.Image ->
+                  reportsList.filter { it.objectType == ReportedObjectType.IMAGE }
             }
-        when (selectedSortingOption) {
-          ReportSortingOption.Parking -> filteredReports.sortedByDescending { it.nbOfTimesReported }
-          ReportSortingOption.Review -> filteredReports.sortedByDescending { it.nbOfTimesReported }
-        }
+        filteredReports.sortedByDescending { it.nbOfTimesReported }
       }
 
   Scaffold(
@@ -272,22 +258,42 @@ fun AdminScreen(
                                         val currentObject =
                                             reportedObjectViewModel.selectedObject.value
                                         if (currentObject != null) {
-                                          if (curReport.objectType == ReportedObjectType.PARKING) {
-                                            parkingViewModel.getParkingById(
-                                                curReport.objectUID,
-                                                onSuccess = { parking ->
-                                                  parkingViewModel.selectParking(parking)
-                                                  navigationActions.navigateTo(Screen.VIEW_REPORTS)
-                                                },
-                                                onFailure = {})
-                                          } else {
-                                            reviewViewModel.getReviewById(
-                                                curReport.objectUID,
-                                                onSuccess = { review ->
-                                                  reviewViewModel.selectReviewAdminScreen(review)
-                                                  navigationActions.navigateTo(Screen.VIEW_REPORTS)
-                                                },
-                                                onFailure = {})
+                                          when (curReport.objectType) {
+                                            ReportedObjectType.PARKING -> {
+                                              parkingViewModel.getParkingById(
+                                                  curReport.objectUID,
+                                                  onSuccess = { parking ->
+                                                    parkingViewModel.selectParking(parking)
+                                                    navigationActions.navigateTo(
+                                                        Screen.VIEW_REPORTS)
+                                                  },
+                                                  onFailure = {})
+                                            }
+                                            ReportedObjectType.REVIEW -> {
+                                              reviewViewModel.getReviewById(
+                                                  curReport.objectUID,
+                                                  onSuccess = { review ->
+                                                    reviewViewModel.selectReviewAdminScreen(review)
+                                                    navigationActions.navigateTo(
+                                                        Screen.VIEW_REPORTS)
+                                                  },
+                                                  onFailure = {})
+                                            }
+                                            ReportedObjectType.IMAGE -> {
+                                              val parkingUID =
+                                                  parkingViewModel.getParkingFromImagePath(
+                                                      curReport.objectUID)
+                                              parkingViewModel.getParkingById(
+                                                  parkingUID,
+                                                  { parking ->
+                                                    parkingViewModel.selectParking(parking)
+                                                    parkingViewModel.selectImage(
+                                                        curReport.objectUID)
+                                                    navigationActions.navigateTo(
+                                                        Screen.VIEW_REPORTS)
+                                                  },
+                                                  {})
+                                            }
                                           }
                                         } else {
                                           Log.e("AdminScreen", "Failed to set selectedObject")

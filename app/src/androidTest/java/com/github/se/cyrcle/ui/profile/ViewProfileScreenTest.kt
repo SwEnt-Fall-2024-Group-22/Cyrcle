@@ -428,6 +428,8 @@ class ViewProfileScreenTest {
             Location(Point.fromLngLat(7.19, 47.19)),
             listOf(
                 "https://upload.wikimedia.org/wikipedia/commons/7/78/%22G%C3%A4nsemarkt%22_in_Amance_-_panoramio.jpg"),
+            0,
+            emptyList(),
             ParkingCapacity.LARGE,
             ParkingRackType.TWO_TIER,
             ParkingProtection.COVERED,

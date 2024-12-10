@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.report
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -26,10 +27,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.model.parking.ImageReport
+import com.github.se.cyrcle.model.parking.ImageReportReason
+import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.report.ReportedObjectType
-import com.github.se.cyrcle.model.review.ReviewReport
-import com.github.se.cyrcle.model.review.ReviewReportReason
-import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.molecules.ReportInputs
@@ -37,25 +38,42 @@ import com.github.se.cyrcle.ui.theme.molecules.ReportTextBlock
 import com.github.se.cyrcle.ui.theme.molecules.SubmitButtonWithDialog
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
+const val HORIZONTAL_PADDING = 0.03f
+const val VERTICAL_PADDING = 0.02f
+const val TOP_BOX_HEIGHT = 0.10f
+
 @Composable
-fun ReviewReportScreen(
+fun ImageReportScreen(
     navigationActions: NavigationActions,
     userViewModel: UserViewModel,
-    reviewViewModel: ReviewViewModel,
+    parkingViewModel: ParkingViewModel
 ) {
   val configuration = LocalConfiguration.current
   val screenWidth = configuration.screenWidthDp.dp
   val screenHeight = configuration.screenHeightDp.dp
+
   val horizontalPadding = screenWidth * HORIZONTAL_PADDING
   val topBoxHeight = screenHeight * TOP_BOX_HEIGHT
   val verticalPadding = screenHeight * VERTICAL_PADDING
 
   // State for dialog and inputs
   val showDialog = remember { mutableStateOf(false) }
-  val selectedReason = rememberSaveable { mutableStateOf(ReviewReportReason.IRRELEVANT) }
-  val reviewId = reviewViewModel.selectedReview.collectAsState().value?.uid
+  val selectedReason = rememberSaveable { mutableStateOf(ImageReportReason.USELESS) }
+  val imageId = parkingViewModel.selectedImage.collectAsState().value
+  if (imageId == null) {
+    Log.e("ImageReportScreen", "No selected image found!")
+    return
+  }
+  Log.d("ImageReportScreen", "Image ID: $imageId")
+
   val reportDescription = rememberSaveable { mutableStateOf("") }
-  val userId = userViewModel.currentUser.collectAsState().value?.public?.userId!!
+  val userId = userViewModel.currentUser.value?.public?.userId ?: ""
+  if (userId.isEmpty()) {
+    Log.e("ImageReportScreen", "User ID is empty!")
+    return
+  }
+  Log.d("ImageReportScreen", "User ID: $userId")
+
   val context = LocalContext.current
 
   // Toast messages
@@ -64,29 +82,31 @@ fun ReviewReportScreen(
 
   fun onSubmit() {
     val report =
-        ReviewReport(
-            uid = reviewViewModel.getNewUid(),
+        ImageReport(
+            uid = parkingViewModel.getNewUid(),
             reason = selectedReason.value,
             userId = userId,
-            review = reviewId!!,
+            image = imageId,
             description = reportDescription.value)
-    reviewViewModel.addReport(report, userViewModel.currentUser.value!!)
-    if (reviewViewModel.hasAlreadyReported.value) {
+    Log.d("ImageReportScreen", "Submitting report: $report")
+
+    if (userViewModel.currentUser.value?.details?.reportedImages?.contains(imageId) == true) {
+      Log.d("ImageReportScreen", "Image already reported by the user.")
       Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
     } else {
+      Log.d("ImageReportScreen", "Adding image report...")
+      parkingViewModel.addImageReport(report, userViewModel.currentUser.value!!)
+      userViewModel.addReportedImageToSelectedUser(imageId)
       Toast.makeText(context, strResToast2, Toast.LENGTH_SHORT).show()
     }
+    Log.d("ImageReportScreen", "Navigating back after reporting.")
     navigationActions.goBack()
   }
 
   Scaffold(
-      modifier = Modifier.testTag("ReviewReportScreen"),
+      modifier = Modifier.testTag("ImageReportScreen"),
       topBar = {
-        TopAppBar(
-            navigationActions,
-            title =
-                stringResource(R.string.report_a_review)
-                    .format(reviewViewModel.selectedReview.value?.text?.take(30) ?: reviewId))
+        TopAppBar(navigationActions, title = stringResource(R.string.report_an_image))
       }) { padding ->
         val scaledPaddingValues =
             PaddingValues(horizontal = horizontalPadding, vertical = verticalPadding)
@@ -96,7 +116,7 @@ fun ReviewReportScreen(
                 Modifier.fillMaxSize()
                     .padding(scaledPaddingValues)
                     .verticalScroll(rememberScrollState())
-                    .testTag("ReviewReportColumn"),
+                    .testTag("ImageReportColumn"),
             horizontalAlignment = Alignment.Start) {
               Box(
                   modifier =
@@ -115,18 +135,15 @@ fun ReviewReportScreen(
                   modifier = Modifier.testTag("ReportBulletPoints"))
 
               // Select Reason
-              // Select Reason
               ReportInputs(
                   selectedReasonIfParking = null,
-                  selectedReasonIfReview = selectedReason,
-                  selectedReasonIfImage = null,
-                  reportedObjectType = ReportedObjectType.REVIEW,
+                  selectedReasonIfReview = null,
+                  selectedReasonIfImage = selectedReason,
+                  reportedObjectType = ReportedObjectType.IMAGE,
                   reportDescription = reportDescription,
                   horizontalPadding = horizontalPadding)
 
               val validInputs = areInputsValid(reportDescription.value)
-
-              // Submit Button with Dialog
               SubmitButtonWithDialog(
                   showDialog = showDialog, validInputs = validInputs, onSubmit = { onSubmit() })
             }

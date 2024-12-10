@@ -31,6 +31,8 @@ data class Parking(
     val optDescription: String?,
     val location: Location,
     val images: List<String>,
+    var maxNumOfImages: Int = 0,
+    var reportedImages: List<ParkingImage>,
     val capacity: ParkingCapacity,
     val rackType: ParkingRackType,
     val protection: ParkingProtection,
@@ -48,12 +50,29 @@ data class Parking(
     const val TABLE_NAME = "parkings"
   }
 }
+/** data class representing an image of a Parking. */
+data class ParkingImage(
+    val uid: String = "",
+    val imagePath: String = "",
+    var nbReports: Int = 0,
+    var nbMaxSeverityReports: Int = 0
+)
 
+/** data class representing a report of a Parking. */
 data class ParkingReport(
     val uid: String = "",
     val reason: ParkingReportReason = ParkingReportReason.OTHER,
     val userId: String = "",
     val parking: String = "",
+    val description: String = ""
+)
+
+/** data class representing a report of a ParkingImage. */
+data class ImageReport(
+    val uid: String = "",
+    val reason: ImageReportReason = ImageReportReason.OTHER,
+    val userId: String = "",
+    val image: String = "",
     val description: String = ""
 )
 
@@ -76,6 +95,17 @@ enum class ParkingReportReason(override val description: String, val severity: I
   ILLEGAL_SPOT("This Spot is in an Illegal Place", 3),
   SAFETY_CONCERN("This Spot is in an Dangerous Place", 3),
   INEXISTANT("This Spot does Not Exist", 3),
+  OTHER("OTHER", 1)
+}
+
+// Reasons for reporting a Parking
+enum class ImageReportReason(override val description: String, val severity: Int) :
+    DropDownableEnum {
+  USELESS("This Image isn't useful ", 1),
+  MISLEADING("This Image doesn't Represent the Parking", 2),
+  WRONG("This Image isn't related to the Parking", 3),
+  SAFETY_CONCERN("I'm in this picture and I don't like it", 3),
+  ILLEGAL_CONTENT("This Image contains illegal content", 3),
   OTHER("OTHER", 1)
 }
 

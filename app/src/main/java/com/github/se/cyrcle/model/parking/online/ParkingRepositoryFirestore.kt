@@ -2,6 +2,7 @@ package com.github.se.cyrcle.model.parking.online
 
 import android.util.Log
 import com.github.se.cyrcle.io.serializer.ParkingAdapter
+import com.github.se.cyrcle.model.parking.ImageReport
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingReport
 import com.github.se.cyrcle.model.parking.Tile
@@ -193,7 +194,7 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
       onSuccess: (List<ParkingReport>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    db.collection("parkings")
+    db.collection(collectionPath)
         .document(parkingId)
         .collection("reports")
         .get()
@@ -201,6 +202,27 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
           val reports =
               querySnapshot.documents.mapNotNull { document ->
                 document.toObject(ParkingReport::class.java)
+              }
+          onSuccess(reports)
+        }
+        .addOnFailureListener { exception -> onFailure(exception) }
+  }
+
+  override fun getReportsForImage(
+      parkingId: String,
+      imageId: String,
+      onSuccess: (List<ImageReport>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    db.collection(collectionPath)
+        .document(parkingId)
+        .collection("image_reports")
+        .whereEqualTo("image", imageId)
+        .get()
+        .addOnSuccessListener { querySnapshot ->
+          val reports =
+              querySnapshot.documents.mapNotNull { document ->
+                document.toObject(ImageReport::class.java)
               }
           onSuccess(reports)
         }
@@ -220,5 +242,27 @@ class ParkingRepositoryFirestore @Inject constructor(private val db: FirebaseFir
         .set(report)
         .addOnSuccessListener { onSuccess(report) }
         .addOnFailureListener { onFailure(it) }
+  }
+
+  override fun addImageReport(
+      report: ImageReport,
+      parking: String,
+      onSuccess: (ImageReport) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    val reportId = getNewUid() // Generate a new unique ID for the report
+    db.collection(collectionPath)
+        .document(parking) // Check if this is a valid parking ID
+        .collection("image_reports")
+        .document(reportId)
+        .set(report)
+        .addOnSuccessListener {
+          Log.d("ParkingRepositoryFirestore", "Image report added: $reportId")
+          onSuccess(report)
+        }
+        .addOnFailureListener {
+          Log.e("ParkingRepositoryFirestore", "Failed to add image report: ${it.message}")
+          onFailure(it)
+        }
   }
 }
