@@ -259,7 +259,6 @@ class GamblingScreenTest {
       // Try checking for XP increment visibility
       while (elapsedTime < timeoutMs) {
         composeTestRule.mainClock.advanceTimeBy(incrementMs)
-        composeTestRule.waitForIdle()
         Thread.sleep(1000)
 
         xpIncrementVisible =

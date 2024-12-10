@@ -1,5 +1,9 @@
 package com.github.se.cyrcle.ui.gambling
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -160,7 +164,7 @@ fun WheelView(
 
         requiredRotation += randomOffset
         if (requiredRotation <= 0) requiredRotation += 360
-        val fullRotations = (6..7).random() * 360
+        val fullRotations = (6..10).random() * 360
         targetRotation = rotation - (requiredRotation + fullRotations)
         currentRotation = rotation
         spinStartTime = System.currentTimeMillis()
@@ -184,8 +188,6 @@ fun WheelView(
           onSegmentLanded?.invoke(segments[getSegmentAtPointer(rotation)].name)
           delay(2000)
           pauseAfterSpin = false
-
-
         }
       }
     }
@@ -210,15 +212,27 @@ fun WheelView(
 
           val startAngle = index * segmentAngle
           val middleAngle = Math.toRadians((startAngle + segmentAngle / 2.0))
-          val textRadius = radius * 0.6f
+          val textRadius = radius * 0.65f
           val textX = centerX + cos(middleAngle).toFloat() * textRadius
           val textY = centerY + sin(middleAngle).toFloat() * textRadius
+          val textLayoutResult =
+              textMeasurer.measure(
+                  text = segment.name,
+                  style =
+                      TextStyle(
+                          color = Color.White,
+                          fontSize = (radius * 0.06f).sp,
+                          textAlign = TextAlign.Center))
 
           rotate(startAngle + segmentAngle / 2 + 90, Offset(textX, textY)) {
             drawText(
                 textMeasurer = textMeasurer,
                 text = segment.name,
-                topLeft = Offset(textX - 25f, textY - 10f),
+                topLeft =
+                    Offset(
+                        textX - textLayoutResult.size.width / 2f, // Center horizontally
+                        textY - textLayoutResult.size.height / 2f // Center vertically
+                        ),
                 style =
                     TextStyle(
                         color = Color.White,
@@ -253,12 +267,27 @@ fun WheelView(
 
 @Composable
 fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserViewModel) {
-    val rarityLegendary = stringResource(R.string.rarity_legendary)
-    val rarityCommon = stringResource(R.string.rarity_common)
-    val rarityRare = stringResource(R.string.rarity_rare)
-    val rarityEpic = stringResource(R.string.rarity_epic)
+  val rarityLegendary = stringResource(R.string.rarity_legendary)
+  val rarityCommon = stringResource(R.string.rarity_common)
+  val rarityRare = stringResource(R.string.rarity_rare)
+  val rarityEpic = stringResource(R.string.rarity_epic)
+
   val userState by userViewModel.currentUser.collectAsState()
   var coins by remember { mutableStateOf(userState?.details?.wallet?.getCoins()) }
+  val currentLevel = userState?.public?.userReputationScore ?: 0.0
+
+  // To track and display XP increment temporarily
+  var xpIncrement by remember { mutableStateOf(0.0) }
+  var showXpIncrement by remember { mutableStateOf(false) }
+
+  // Timer to hide the XP increment message
+  LaunchedEffect(xpIncrement) {
+    if (xpIncrement > 0) {
+      showXpIncrement = true
+      delay(3000) // Show for 3 seconds
+      showXpIncrement = false
+    }
+  }
 
   Scaffold(
       topBar = {
@@ -280,37 +309,52 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
                           .testTag("coin_display"),
                   style = MaterialTheme.typography.headlineMedium)
 
-            WheelView(
-                modifier = Modifier.size(300.dp).testTag("wheel_view"),
-                onSegmentLanded = { segmentName ->
-                    val currentLevel = userState?.public?.userReputationScore ?: 0.0
-                    // Define the mapping of segment names to reputation increments
-                    // Get the increment for the landed segment
-                    val reputationIncrement = when (segmentName) {
-                        rarityLegendary -> 10.0 // Legendary always adds 10.0 level no matter what
-                        rarityCommon -> 1.0 / sqrt(currentLevel + 1.0)
-                        rarityRare -> 2.0 / sqrt(currentLevel + 1.0)
-                        rarityEpic -> 16.0 / sqrt(currentLevel + 1.0)
-                        else -> 0.0 // Nothing gives no increment no matter what
-                    }
+              WheelView(
+                      modifier = Modifier.size(300.dp).testTag("wheel_view"),
+                      onSegmentLanded = { segmentName ->
+                        // Define the mapping of segment names to reputation increments
+                        val reputationIncrement =
+                            when (segmentName) {
+                              rarityLegendary -> 10.0
+                              rarityCommon -> 1.0 / sqrt(currentLevel + 1.0)
+                              rarityRare -> 2.0 / sqrt(currentLevel + 1.0)
+                              rarityEpic -> 16.0 / sqrt(currentLevel + 1.0)
+                              else -> 0.0
+                            }
 
+                        // Update the user with the new reputation score
+                        val updatedUser =
+                            userState?.copy(
+                                public =
+                                    userState!!
+                                        .public
+                                        .copy(
+                                            userReputationScore =
+                                                userState!!.public.userReputationScore +
+                                                    reputationIncrement))
+                        if (updatedUser != null) {
+                          userViewModel.updateUser(user = updatedUser)
+                        }
 
-                    // Update the user with the new reputation score
-                    val updatedUser = userState?.copy(
-                        public = userState!!.public.copy(
-                            userReputationScore = userState!!.public.userReputationScore + reputationIncrement
-                        )
-                    )
+                        // Show the XP increment temporarily
+                        xpIncrement = reputationIncrement
+                      })
+                  .let { spinFn -> wheelSpinFunction = spinFn }
 
-                    // Call the ViewModel to update the user
-                    if (updatedUser != null) {
-                        userViewModel.updateUser(user = updatedUser)
-                    }
-                }
-            ).let { spinFn -> wheelSpinFunction = spinFn }
+              AnimatedVisibility(
+                  visible = showXpIncrement && (xpIncrement > 0),
+                  enter = fadeIn(animationSpec = tween(durationMillis = 900)),
+                  exit = fadeOut(animationSpec = tween(durationMillis = 900))) {
+                    Text(
+                        text = "+%.2f XP".format(xpIncrement),
+                        style = MaterialTheme.typography.bodyMedium.copy(color = Color.Green),
+                        modifier =
+                            Modifier.align(Alignment.BottomCenter)
+                                .padding(bottom = 50.dp)
+                                .testTag("xp_increment_text"))
+                  }
 
-
-            val canSpin = userState?.details?.wallet?.isSolvable(SPIN_COST, 0) == true
+              val canSpin = userState?.details?.wallet?.isSolvable(SPIN_COST, 0) == true
 
               Button(
                   onClick = {
@@ -327,12 +371,24 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
                   colors =
                       ButtonDefaults.buttonColors(
                           containerColor = Color.Red, disabledContainerColor = Color.Gray)) {
-                    Text(
-                        text = stringResource(R.string.spin_button_text),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.wrapContentSize().testTag("spin_button_text"))
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.wrapContentSize()) {
+                          Text(
+                              text = stringResource(R.string.spin_button_text),
+                              fontSize = 16.sp,
+                              fontWeight = FontWeight.Bold,
+                              textAlign = TextAlign.Center,
+                              modifier = Modifier.testTag("spin_button_text"))
+                          Text(
+                              text =
+                                  stringResource(
+                                      R.string.gambling_screen_spin_button_cost, SPIN_COST),
+                              fontSize = 9.sp,
+                              fontWeight = FontWeight.Medium,
+                              textAlign = TextAlign.Center,
+                              modifier = Modifier.testTag("spin_cost_text"))
+                        }
                   }
             }
       }
