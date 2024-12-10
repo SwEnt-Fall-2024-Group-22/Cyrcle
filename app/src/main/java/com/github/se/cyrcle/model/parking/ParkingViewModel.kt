@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.se.cyrcle.model.address.Address
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.parking.offline.OfflineParkingRepository
 import com.github.se.cyrcle.model.parking.online.ParkingRepository
@@ -12,6 +13,7 @@ import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.report.ReportedObjectType
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.zone.Zone
+import com.github.se.cyrcle.ui.map.MapConfig
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
@@ -102,6 +104,35 @@ class ParkingViewModel(
 
   // Map a tile to the parkings that are in it.
   private val tilesToParking = LinkedHashMap<Tile, List<Parking>>(10, 1f, true)
+
+  private val _chosenLocation: MutableStateFlow<Address> =
+      MutableStateFlow(
+          Address(
+              latitude = MapConfig.defaultCameraState().center.latitude().toString(),
+              longitude = MapConfig.defaultCameraState().center.longitude().toString()))
+  val chosenLocation: StateFlow<Address> = _chosenLocation
+
+  // value that says wether the user clicked on my Location Suggestion or not
+  private val _myLocation = MutableStateFlow(true)
+  val myLocation: StateFlow<Boolean> = _myLocation
+
+  /**
+   * Set the value of the myLocation variable
+   *
+   * @param value the value to set
+   */
+  fun setMyLocation(value: Boolean) {
+    _myLocation.value = value
+  }
+
+  /**
+   * Set the chosen location to the given address
+   *
+   * @param address the address to set as the chosen location
+   */
+  fun setChosenLocation(address: Address) {
+    _chosenLocation.value = address
+  }
 
   /**
    * Generates a new unique identifier for a parking.
@@ -431,6 +462,7 @@ class ParkingViewModel(
   // ================== Helper functions ==================
 
   // ================== Reports ==================
+
   /**
    * Adds a report for the currently selected parking and updates the repository.
    *
@@ -516,6 +548,7 @@ class ParkingViewModel(
   }
 
   // ================== Reviews ==================
+
   /**
    * Handles the deletion of a review for a given parking. Adjusts the average score and the number
    * of reviews accordingly.

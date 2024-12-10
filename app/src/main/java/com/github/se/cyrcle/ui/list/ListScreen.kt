@@ -32,11 +32,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -54,14 +52,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
-import com.github.se.cyrcle.model.address.Address
 import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.permission.PermissionHandler
-import com.github.se.cyrcle.ui.map.MapConfig
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
@@ -75,8 +71,8 @@ import kotlin.math.roundToInt
 
 const val CARD_HEIGHT = 120
 const val MAX_SWIPE_DISTANCE = 150
-const val maxSuggestionDisplayNameLengthList = 70
-const val NumberOfSuggestionsForMenu = 6
+const val MAX_SUGGESTION_DISPLAY_NAME_LENGTH_LIST = 70
+const val NUMBER_OF_SUGGESTIONS_FOR_MENU = 6
 
 @Composable
 fun SpotListScreen(
@@ -94,22 +90,28 @@ fun SpotListScreen(
   val pinnedParkings by parkingViewModel.pinnedParkings.collectAsState()
 
   // chosen location by the user for the list Screen
-  val chosenLocation: MutableState<Address> = remember {
-    mutableStateOf(
-        Address(
-            latitude = MapConfig.defaultCameraState().center.latitude().toString(),
-            longitude = MapConfig.defaultCameraState().center.longitude().toString()))
-  }
+  val chosenLocation = parkingViewModel.chosenLocation.collectAsState()
 
   // value that says wether the user clicked on my Location Suggestion or not
-  val myLocation = remember { mutableStateOf(true) }
+  val myLocation = parkingViewModel.myLocation.collectAsState()
 
   // location permission from location manager
   val locPermission = permissionHandler.getLocalisationPerm().collectAsState().value
 
+  fun computeDistance(parking: Parking): Double {
+    return TurfMeasurement.distance(
+        if (myLocation.value) userPosition
+        else
+            Point.fromLngLat(
+                chosenLocation.value.longitude.toDouble(),
+                chosenLocation.value.latitude.toDouble()),
+        parking.location.center)
+  }
+
   LaunchedEffect(userPosition, myLocation, chosenLocation.value) {
 
-    // if suggestion MyLocatio is chosen and user has location permission then set the circle center
+    // if suggestion MyLocation is chosen and user has location permission then set the circle
+    // center
     // to user position
     if (locPermission && myLocation.value) parkingViewModel.setCircleCenter(userPosition)
 
@@ -147,16 +149,21 @@ fun SpotListScreen(
                 HorizontalDivider(
                     thickness = 1.dp, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
               }
+              // pinned parkings
+              // The parkings are sorted by distance to the user's location (default being the EPFL)
+              // or by distance to the chosen location if any
               items(
-                  items = filteredParkingSpots.filter { it in pinnedParkings },
+                  items =
+                      filteredParkingSpots
+                          .filter { it in pinnedParkings }
+                          .sortedBy { computeDistance(it) },
                   key = { parking -> parking.uid + "pin" }) { parking ->
-                    val distance = TurfMeasurement.distance(userPosition, parking.location.center)
                     SpotCard(
                         navigationActions = navigationActions,
                         parkingViewModel = parkingViewModel,
                         userViewModel = userViewModel,
                         parking = parking,
-                        distance = distance)
+                        distance = computeDistance(parking))
                   }
               item { Spacer(modifier = Modifier.height(32.dp)) }
             }
@@ -173,19 +180,22 @@ fun SpotListScreen(
             }
 
             // All parking spots
-            items(items = filteredParkingSpots, key = { parking -> parking.uid }) { parking ->
-              val distance = TurfMeasurement.distance(userPosition, parking.location.center)
-              SpotCard(
-                  navigationActions = navigationActions,
-                  parkingViewModel = parkingViewModel,
-                  userViewModel = userViewModel,
-                  parking = parking,
-                  distance = distance)
+            // The parkings are sorted by distance to the user's location (default being the EPFL)
+            // or by distance to the chosen location if any
+            items(
+                items = filteredParkingSpots.sortedBy { computeDistance(it) },
+                key = { parking -> parking.uid }) { parking ->
+                  SpotCard(
+                      navigationActions = navigationActions,
+                      parkingViewModel = parkingViewModel,
+                      userViewModel = userViewModel,
+                      parking = parking,
+                      distance = computeDistance(parking))
 
-              if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1) {
-                parkingViewModel.incrementRadius()
-              }
-            }
+                  if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1) {
+                    parkingViewModel.incrementRadius()
+                  }
+                }
           }
         }
       }
