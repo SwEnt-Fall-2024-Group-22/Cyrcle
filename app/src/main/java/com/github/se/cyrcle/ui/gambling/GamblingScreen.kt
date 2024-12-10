@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -267,129 +268,156 @@ fun WheelView(
 
 @Composable
 fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserViewModel) {
-  val rarityLegendary = stringResource(R.string.rarity_legendary)
-  val rarityCommon = stringResource(R.string.rarity_common)
-  val rarityRare = stringResource(R.string.rarity_rare)
-  val rarityEpic = stringResource(R.string.rarity_epic)
+    val rarityLegendary = stringResource(R.string.rarity_legendary)
+    val rarityCommon = stringResource(R.string.rarity_common)
+    val rarityRare = stringResource(R.string.rarity_rare)
+    val rarityEpic = stringResource(R.string.rarity_epic)
 
-  val userState by userViewModel.currentUser.collectAsState()
-  var coins by remember { mutableStateOf(userState?.details?.wallet?.getCoins()) }
-  val currentLevel = userState?.public?.userReputationScore ?: 0.0
+    val userState by userViewModel.currentUser.collectAsState()
+    var coins by remember { mutableStateOf(userState?.details?.wallet?.getCoins()) }
+    val currentLevel = userState?.public?.userReputationScore ?: 0.0
+    val flooredLevel = currentLevel.toInt()
+    val progressToNextLevel = (currentLevel - flooredLevel).toFloat()
 
-  // To track and display XP increment temporarily
-  var xpIncrement by remember { mutableStateOf(0.0) }
-  var showXpIncrement by remember { mutableStateOf(false) }
+    // To track and display XP increment temporarily
+    var xpIncrement by remember { mutableStateOf(0.0) }
+    var showXpIncrement by remember { mutableStateOf(false) }
 
-  // Timer to hide the XP increment message
-  LaunchedEffect(xpIncrement) {
-    if (xpIncrement > 0) {
-      showXpIncrement = true
-      delay(3000) // Show for 3 seconds
-      showXpIncrement = false
+    // Timer to hide the XP increment message
+    LaunchedEffect(xpIncrement) {
+        if (xpIncrement > 0) {
+            showXpIncrement = true
+            delay(3000) // Show for 3 seconds
+            showXpIncrement = false
+        }
     }
-  }
 
-  Scaffold(
-      topBar = {
-        TopAppBar(
-            navigationActions = navigationActions,
-            title = stringResource(R.string.gambling_screen_title),
-            testTag = "gambling_screen_top_bar")
-      }) { paddingValues ->
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                navigationActions = navigationActions,
+                title = stringResource(R.string.gambling_screen_title),
+                testTag = "gambling_screen_top_bar"
+            )
+        }
+    ) { paddingValues ->
         Box(
-            modifier = Modifier.fillMaxSize().padding(paddingValues).testTag("gambling_screen"),
-            contentAlignment = Alignment.Center) {
-              var wheelSpinFunction by remember { mutableStateOf<(() -> Unit)?>(null) }
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .testTag("gambling_screen"),
+            contentAlignment = Alignment.Center
+        ) {
+            var wheelSpinFunction by remember { mutableStateOf<(() -> Unit)?>(null) }
 
-              Text(
-                  text = stringResource(R.string.gambling_screen_coins_display, coins ?: 0),
-                  modifier =
-                      Modifier.align(Alignment.TopCenter)
-                          .padding(top = 16.dp)
-                          .testTag("coin_display"),
-                  style = MaterialTheme.typography.headlineMedium)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.align(Alignment.TopCenter)
+            ) {
+                LinearProgressIndicator(
+                    progress = { progressToNextLevel },
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .height(8.dp)
+                        .testTag("level_progress_bar"),
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.gambling_screen_coins_display, coins ?: 0),
+                    modifier = Modifier.testTag("coin_display"),
+                    style = MaterialTheme.typography.headlineMedium
+                )
+            }
 
-              WheelView(
-                      modifier = Modifier.size(300.dp).testTag("wheel_view"),
-                      onSegmentLanded = { segmentName ->
-                        // Define the mapping of segment names to reputation increments
-                        val reputationIncrement =
-                            when (segmentName) {
-                              rarityLegendary -> 10.0
-                              rarityCommon -> 1.0 / sqrt(currentLevel + 1.0)
-                              rarityRare -> 2.0 / sqrt(currentLevel + 1.0)
-                              rarityEpic -> 16.0 / sqrt(currentLevel + 1.0)
-                              else -> 0.0
-                            }
+            WheelView(
+                modifier = Modifier.size(300.dp).testTag("wheel_view"),
+                onSegmentLanded = { segmentName ->
+                    // Define the mapping of segment names to reputation increments
+                    val reputationIncrement = when (segmentName) {
+                        rarityLegendary -> 10.0
+                        rarityCommon -> 1.0 / sqrt(currentLevel + 1.0)
+                        rarityRare -> 2.0 / sqrt(currentLevel + 1.0)
+                        rarityEpic -> 16.0 / sqrt(currentLevel + 1.0)
+                        else -> 0.0
+                    }
 
-                        // Update the user with the new reputation score
-                        val updatedUser =
-                            userState?.copy(
-                                public =
-                                    userState!!
-                                        .public
-                                        .copy(
-                                            userReputationScore =
-                                                userState!!.public.userReputationScore +
-                                                    reputationIncrement))
-                        if (updatedUser != null) {
-                          userViewModel.updateUser(user = updatedUser)
-                        }
+                    // Update the user with the new reputation score
+                    val updatedUser = userState?.copy(
+                        public = userState!!.public.copy(
+                            userReputationScore = userState!!.public.userReputationScore + reputationIncrement
+                        )
+                    )
+                    if (updatedUser != null) {
+                        userViewModel.updateUser(user = updatedUser)
+                    }
 
-                        // Show the XP increment temporarily
-                        xpIncrement = reputationIncrement
-                      })
-                  .let { spinFn -> wheelSpinFunction = spinFn }
+                    // Show the XP increment temporarily
+                    xpIncrement = reputationIncrement
+                }
+            ).let { spinFn -> wheelSpinFunction = spinFn }
 
-              AnimatedVisibility(
-                  visible = showXpIncrement && (xpIncrement > 0),
-                  enter = fadeIn(animationSpec = tween(durationMillis = 900)),
-                  exit = fadeOut(animationSpec = tween(durationMillis = 900))) {
-                    Text(
-                        text = "+%.2f XP".format(xpIncrement),
-                        style = MaterialTheme.typography.bodyMedium.copy(color = Color.Green),
-                        modifier =
-                            Modifier.align(Alignment.BottomCenter)
-                                .padding(bottom = 50.dp)
-                                .testTag("xp_increment_text"))
-                  }
+            AnimatedVisibility(
+                visible = showXpIncrement && (xpIncrement > 0),
+                enter = fadeIn(animationSpec = tween(durationMillis = 900)),
+                exit = fadeOut(animationSpec = tween(durationMillis = 900))
+            ) {
+                Text(
+                    text = "+%.2f XP".format(xpIncrement),
+                    style = MaterialTheme.typography.bodyMedium.copy(color = Color.Green),
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 50.dp)
+                        .testTag("xp_increment_text")
+                )
+            }
 
-              val canSpin = userState?.details?.wallet?.isSolvable(SPIN_COST, 0) == true
+            val canSpin = userState?.details?.wallet?.isSolvable(SPIN_COST, 0) == true
 
-              Button(
-                  onClick = {
+            Button(
+                onClick = {
                     userViewModel.tryDebitCoinsFromCurrentUser(
                         SPIN_COST,
                         0,
                         onSuccess = {
-                          coins = userState?.details?.wallet?.getCoins()
-                          wheelSpinFunction?.invoke()
-                        })
-                  },
-                  enabled = canSpin,
-                  modifier = Modifier.size(90.dp).clip(CircleShape).testTag("spin_button"),
-                  colors =
-                      ButtonDefaults.buttonColors(
-                          containerColor = Color.Red, disabledContainerColor = Color.Gray)) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.wrapContentSize()) {
-                          Text(
-                              text = stringResource(R.string.spin_button_text),
-                              fontSize = 16.sp,
-                              fontWeight = FontWeight.Bold,
-                              textAlign = TextAlign.Center,
-                              modifier = Modifier.testTag("spin_button_text"))
-                          Text(
-                              text =
-                                  stringResource(
-                                      R.string.gambling_screen_spin_button_cost, SPIN_COST),
-                              fontSize = 9.sp,
-                              fontWeight = FontWeight.Medium,
-                              textAlign = TextAlign.Center,
-                              modifier = Modifier.testTag("spin_cost_text"))
+                            coins = userState?.details?.wallet?.getCoins()
+                            wheelSpinFunction?.invoke()
                         }
-                  }
+                    )
+                },
+                enabled = canSpin,
+                modifier = Modifier
+                    .size(90.dp)
+                    .clip(CircleShape)
+                    .testTag("spin_button"),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Red,
+                    disabledContainerColor = Color.Gray
+                )
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.wrapContentSize()
+                ) {
+                    Text(
+                        text = stringResource(R.string.spin_button_text),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.testTag("spin_button_text")
+                    )
+                    Text(
+                        text = stringResource(
+                            R.string.gambling_screen_spin_button_cost, SPIN_COST
+                        ),
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Medium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.testTag("spin_cost_text")
+                    )
+                }
             }
-      }
+        }
+    }
 }
+
