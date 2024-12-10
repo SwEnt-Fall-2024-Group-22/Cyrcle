@@ -542,4 +542,6 @@ class UserViewModel(
   fun setHasConnection(hasConnection: Boolean) {
     _hasConnection.value = hasConnection
   }
+
+  fun getUserById(userId: String) {}
 }

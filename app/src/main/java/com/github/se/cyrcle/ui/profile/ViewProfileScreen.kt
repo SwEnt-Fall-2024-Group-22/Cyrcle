@@ -101,12 +101,14 @@ fun ViewProfileScreen(
       },
       floatingActionButton = {
         if (userState?.public?.userId != null) {
-          FloatingActionButton(
-              onClick = { navigationActions.navigateTo(Screen.ADMIN) },
-              modifier = Modifier.testTag("AdminFAB"),
-              containerColor = MaterialTheme.colorScheme.primary) {
-                Text(text = "Admin", color = MaterialTheme.colorScheme.onPrimary)
-              }
+          if (userState?.details?.isAdmin == true) {
+            FloatingActionButton(
+                onClick = { navigationActions.navigateTo(Screen.ADMIN) },
+                modifier = Modifier.testTag("AdminFAB"),
+                containerColor = MaterialTheme.colorScheme.primary) {
+                  Text(text = "Admin", color = MaterialTheme.colorScheme.onPrimary)
+                }
+          }
         }
       }) { innerPadding ->
         Box(Modifier.fillMaxSize().padding(innerPadding)) {
