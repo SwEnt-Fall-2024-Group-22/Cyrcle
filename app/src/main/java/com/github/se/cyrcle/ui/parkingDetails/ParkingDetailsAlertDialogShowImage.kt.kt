@@ -58,24 +58,18 @@ fun ParkingDetailsAlertDialogShowImage(
                           .padding(4.dp)
                           .testTag("parkingDetailsAlertDialogImage"))
               // Use Box for aligning the buttons
-              Box(
-                  modifier =
-                      Modifier.align(
-                              Alignment.TopEnd)
-                          .padding(6.dp)) {
-                    // Report button
-                    IconButton(
-                        modifier = Modifier,
-                        icon = Icons.Outlined.Flag,
-                        contentDescription = "Report",
-                        onClick = { navigationActions.navigateTo(Screen.IMAGE_REPORT) },
-                        inverted = true,
-                        colorLevel = ColorLevel.ERROR)
-                  }
+              Box(modifier = Modifier.align(Alignment.TopEnd).padding(6.dp)) {
+                // Report button
+                IconButton(
+                    modifier = Modifier,
+                    icon = Icons.Outlined.Flag,
+                    contentDescription = "Report",
+                    onClick = { navigationActions.navigateTo(Screen.IMAGE_REPORT) },
+                    inverted = true,
+                    colorLevel = ColorLevel.ERROR)
+              }
               IconButton(
-                  modifier =
-                      Modifier.padding(6.dp)
-                          .align(Alignment.TopStart),
+                  modifier = Modifier.padding(6.dp).align(Alignment.TopStart),
                   icon = Icons.AutoMirrored.Filled.ArrowBack,
                   contentDescription = "Back",
                   onClick = { navigationActions.navigateTo(Screen.IMAGE_REPORT) },
