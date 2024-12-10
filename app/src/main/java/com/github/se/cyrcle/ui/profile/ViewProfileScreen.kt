@@ -104,14 +104,14 @@ fun ViewProfileScreen(
                 icon = Icons.Filled.Outbox,
                 contentDescription = "Sign Out",
                 testTag = "SignOutButton",
-                onClick = { navigationActions.navigateTo(Screen.ADMIN) })
+                onClick = { signOut = true })
           }
           IconButton(
               modifier = Modifier.padding(10.dp).align(Alignment.TopEnd).padding(80.dp),
               icon = Icons.Filled.AddModerator,
               contentDescription = "Admin",
               testTag = "AdminButton",
-              onClick = { signOut = true })
+              onClick = { navigationActions.navigateTo(Screen.ADMIN) })
 
           IconButton(
               modifier = Modifier.padding(10.dp).align(Alignment.TopStart),
