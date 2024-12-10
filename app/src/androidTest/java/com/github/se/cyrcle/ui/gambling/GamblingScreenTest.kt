@@ -4,9 +4,11 @@ import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
@@ -229,5 +231,64 @@ class GamblingScreenTest {
 
     // Verify that navigationActions.goBack() was called
     verify(mockNavigationActions).goBack()
+  }
+
+  @Test
+  fun verify_xp_increment_visible_after_spin() {
+    // Add coins to the user's wallet to allow for spins
+    userViewModel.creditCoinsToCurrentUser(1000)
+
+    composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
+
+    composeTestRule.mainClock.autoAdvance = false
+
+    // Perform a spin
+    composeTestRule.onNodeWithTag("spin_button").performClick()
+
+    // Retry logic: maximum number of retries
+    val maxRetries = 100 // if that's not enough ill play the loto
+    var retries = 0
+    var xpIncrementVisible = false
+
+    while (retries < maxRetries) {
+      // Wait for the XP increment to appear
+      val timeoutMs = 15000L // 15 seconds timeout
+      val incrementMs = 1000L // Check every second
+      var elapsedTime = 0L
+
+      // Try checking for XP increment visibility
+      while (elapsedTime < timeoutMs) {
+        composeTestRule.mainClock.advanceTimeBy(incrementMs)
+        composeTestRule.waitForIdle()
+        Thread.sleep(1000)
+
+        xpIncrementVisible =
+            composeTestRule
+                .onAllNodesWithTag("xp_increment_text")
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+
+        if (xpIncrementVisible) break // Exit the loop if the XP increment becomes visible
+        elapsedTime += incrementMs
+      }
+
+      if (xpIncrementVisible) break // If XP increment became visible, exit outer loop
+
+      retries++
+      if (retries < maxRetries) {
+        // If the retry limit is not reached, try again by clicking the spin button again
+        composeTestRule.onNodeWithTag("spin_button").performClick()
+      }
+    }
+    // Assert the XP increment text
+    composeTestRule
+        .onNodeWithTag("xp_increment_text")
+        .assertTextContains("XP", substring = true) // Ensure XP increment is displayed
+
+    // Advance time to let the animation fade out
+    composeTestRule.mainClock.advanceTimeBy(3000) // Simulate 3 seconds of animation
+    composeTestRule
+        .onNodeWithTag("xp_increment_text")
+        .assertDoesNotExist() // Ensure XP increment text is no longer visible after 3 seconds
   }
 }
