@@ -71,7 +71,9 @@ object MapConfig {
    */
   fun downloadZone(
       zone: Zone,
-      progressState: MutableState<TileRegionLoadProgress?> = mutableStateOf(null)) {
+      progressState: MutableState<TileRegionLoadProgress?> = mutableStateOf(null),
+      onFailure: () -> Unit = {}
+  ) {
     // Defines the area to download
     val geometry =
         Polygon.fromLngLats(
@@ -108,7 +110,10 @@ object MapConfig {
             // Tile region download finishes successfully
             expected.value?.let { Log.d("ZoneManager", "Tile region downloaded: $it") }
           }
-          expected.error?.let { Log.e("ZoneManager", "Tile region download error: $it") }
+          expected.error?.let {
+            onFailure()
+            Log.e("ZoneManager", "Tile region download error: $it")
+          }
         }
   }
 

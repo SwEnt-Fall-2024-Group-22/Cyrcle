@@ -59,7 +59,7 @@ class ZoneSelectionScreenTest {
   @Test
   fun checkAllUIElementsAreDisplayed() {
     composeTestRule.setContent {
-      ZoneSelectionScreen(navigationActions, mapViewModel, parkingViewModel, addressViewModel)
+      ZoneSelectionScreen(navigationActions, mapViewModel, parkingViewModel)
     }
 
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("TopAppBar"))

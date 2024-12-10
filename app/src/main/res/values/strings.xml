@@ -300,6 +300,8 @@
     <string name ="zone_selection_button_accept">Confirm</string>
     <string name ="zone_selection_button_cancel">Cancel</string>
     <string name ="zone_selection_download_error">Error downloading zone</string>
+    <string name="zone_selection_downloading_progress">Downloading : %.0f%%</string>
+    <string name ="zone_selection_hide">hide</string>
 
     <!-- Connectivity Alert Dialog -->
     <string name="connectivity_alert_offline_title">No Internet Connection</string>

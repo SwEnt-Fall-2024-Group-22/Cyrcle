@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.zone
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -11,7 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -29,9 +28,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
-import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.map.MapViewModel.LocationPickerState
 import com.github.se.cyrcle.model.parking.ParkingViewModel
@@ -51,7 +53,6 @@ import com.mapbox.maps.extension.compose.DisposableMapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.plugin.gestures.gestures
 import kotlinx.coroutines.launch
-import kotlin.math.round
 
 const val MAX_ZONE_NAME_LENGTH = 32
 const val MIN_ZONE_NAME_LENGTH = 1
@@ -61,16 +62,15 @@ const val MIN_ZONE_NAME_LENGTH = 1
 fun ZoneSelectionScreen(
     navigationActions: NavigationActions,
     mapViewModel: MapViewModel,
-    parkingViewModel: ParkingViewModel,
-    addressViewModel: AddressViewModel // Possibility to use this to suggest a name for the zone.
+    parkingViewModel: ParkingViewModel
 ) {
   val downloadErrorText = stringResource(R.string.zone_selection_download_error)
   var showAlertDialogPickName by remember { mutableStateOf(false) }
   val boundingBox = remember { mutableStateOf<BoundingBox?>(null) }
   val zoneName = remember { mutableStateOf("") }
   val mapView = remember { mutableStateOf<MapView?>(null) }
-    val mapBoxprogressState = remember { mutableStateOf<TileRegionLoadProgress?>(null) }
-    val parkingProgressState = remember { mutableStateOf<Boolean>(false) }
+  val mapBoxProgressState = remember { mutableStateOf<TileRegionLoadProgress?>(null) }
+  val finishedParkingsDownload = remember { mutableStateOf(false) }
   val locationPickerState by
       mapViewModel.locationPickerState
           .collectAsState() // state representing where the user is in the location selection
@@ -111,21 +111,45 @@ fun ZoneSelectionScreen(
       showAlertDialogPickName = true
     }
   }
-    if(mapBoxprogressState.value != null) {
-        val progress = mapBoxprogressState.value!!
-        val progressPercentage: Double = round((progress.completedResourceCount.toDouble() / progress.requiredResourceCount.toDouble())*100)
-        BasicAlertDialog(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.background, shape = MaterialTheme.shapes.small)
+  // === Alert dialog to show the download progress  ===
+  if (mapBoxProgressState.value != null) {
+    // compute progress percentage
+    val progress = mapBoxProgressState.value!!
+    val progressPercentage: Double =
+        (progress.completedResourceCount.toDouble() / progress.requiredResourceCount.toDouble()) *
+            100
+    BasicAlertDialog(
+        modifier =
+            Modifier.background(
+                    MaterialTheme.colorScheme.background, shape = MaterialTheme.shapes.small)
                 .padding(16.dp),
-            onDismissRequest = {},
-            content = { Text("Downloading : $progressPercentage %") },
-        )
-        if (progress.completedResourceCount == progress.requiredResourceCount) {
-            navigationActions.goBack()
-            mapBoxprogressState.value = null
-        }
+        onDismissRequest = {}, // no dismiss unless click on Hide
+        content = {
+          Column(
+              horizontalAlignment = Alignment.CenterHorizontally,
+          ) {
+            Text(
+                stringResource(R.string.zone_selection_downloading_progress, progressPercentage),
+            )
+            Spacer(modifier = Modifier.padding(8.dp))
+            ClickableText(
+                text = AnnotatedString(stringResource(R.string.zone_selection_hide)),
+                style =
+                    TextStyle(
+                        textDecoration = TextDecoration.Underline, fontStyle = FontStyle.Italic),
+                onClick = { navigationActions.goBack() })
+          }
+        },
+    )
+    // Check if the download is done
+    if (progress.completedResourceCount == progress.requiredResourceCount) {
+      navigationActions.goBack()
+      mapBoxProgressState.value = null
     }
+  }
+  // === END Of Alert dialog to show the download progress  ===
+
+  // === Alert dialog to pick the name of the zone ===
   if (showAlertDialogPickName) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -134,15 +158,20 @@ fun ZoneSelectionScreen(
           zoneName.value = it
           coroutineScope.launch {
             val zone = Zone.createZone(boundingBox.value!!, it, context)
-            MapConfig.downloadZone(zone, mapBoxprogressState)
+            MapConfig.downloadZone(zone, mapBoxProgressState) {
+              finishedParkingsDownload.value = false
+              mapBoxProgressState.value = null
+              Zone.deleteZone(zone, context)
+              Toast.makeText(context, downloadErrorText, Toast.LENGTH_SHORT).show()
+            }
             parkingViewModel.downloadZone(
                 zone,
-                {
-                    parkingProgressState.value = true
-                },
+                { finishedParkingsDownload.value = true },
                 {
                   // On failure, avoid keeping stale zone
                   Zone.deleteZone(zone, context)
+                  finishedParkingsDownload.value = false
+                  mapBoxProgressState.value = null
                   Toast.makeText(context, downloadErrorText, Toast.LENGTH_SHORT).show()
                 })
           }
@@ -152,6 +181,7 @@ fun ZoneSelectionScreen(
           mapViewModel.updateLocationPickerState(LocationPickerState.NONE_SET)
         })
   }
+  // === END Of Alert dialog to pick the name of the zone ===
 
   Scaffold(
       topBar = {
