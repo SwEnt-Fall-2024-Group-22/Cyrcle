@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Announcement
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -21,12 +21,13 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.IconButton
 
 /**
  * Alert dialog to show the image of a parking spot. This composable is displayed when the user
- * clicks on an image of a parking spot.
+ * clicks on an image of a parking spot, as well as report it when necessary
  *
  * @param onDismiss Callback when the dialog is dismissed.
  * @param imageUrl URL of the image to display.
@@ -61,11 +62,11 @@ fun ParkingDetailsAlertDialogShowImage(
                   modifier =
                       Modifier.align(
                               Alignment.TopEnd) // Align this Box to the top-end of the parent
-                          .padding(8.dp)) {
+                          .padding(6.dp)) {
                     // Report button
                     IconButton(
                         modifier = Modifier,
-                        icon = Icons.AutoMirrored.Filled.Announcement,
+                        icon = Icons.Outlined.Flag,
                         contentDescription = "Report",
                         onClick = onDismiss,
                         inverted = true,
@@ -73,11 +74,11 @@ fun ParkingDetailsAlertDialogShowImage(
                   }
               IconButton(
                   modifier =
-                      Modifier.padding(8.dp)
+                      Modifier.padding(6.dp)
                           .align(Alignment.TopStart), // Align this to the top-start of the parent
                   icon = Icons.AutoMirrored.Filled.ArrowBack,
                   contentDescription = "Back",
-                  onClick = onDismiss,
+                  onClick = { navigationActions.navigateTo(Screen.IMAGE_REPORT) },
                   inverted = true)
             }
       })

@@ -22,13 +22,13 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddModerator
 import androidx.compose.material.icons.filled.Diamond
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Outbox
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -96,25 +96,21 @@ fun ViewProfileScreen(
             navigationActions = navigationActions,
             tabList = LIST_TOP_LEVEL_DESTINATION,
             selectedItem = Route.VIEW_PROFILE)
-      },
-      floatingActionButton = {
-        if (userState?.public?.userId != null) {
-          if (userState?.details?.isAdmin == true) {
-            FloatingActionButton(
-                onClick = { navigationActions.navigateTo(Screen.ADMIN) },
-                modifier = Modifier.testTag("AdminFAB"),
-                containerColor = MaterialTheme.colorScheme.primary) {
-                  Text(text = "Admin", color = MaterialTheme.colorScheme.onPrimary)
-                }
-          }
-        }
       }) { innerPadding ->
         Box(Modifier.fillMaxSize().padding(innerPadding)) {
+          if (userViewModel.currentUser.collectAsState().value?.details?.isAdmin == true) {
+            IconButton(
+                modifier = Modifier.padding(10.dp).align(Alignment.TopEnd),
+                icon = Icons.Filled.Outbox,
+                contentDescription = "Sign Out",
+                testTag = "SignOutButton",
+                onClick = { navigationActions.navigateTo(Screen.ADMIN) })
+          }
           IconButton(
-              modifier = Modifier.padding(10.dp).align(Alignment.TopEnd),
-              icon = Icons.Filled.Outbox,
-              contentDescription = "Sign Out",
-              testTag = "SignOutButton",
+              modifier = Modifier.padding(10.dp).align(Alignment.TopEnd).padding(80.dp),
+              icon = Icons.Filled.AddModerator,
+              contentDescription = "Admin",
+              testTag = "AdminButton",
               onClick = { signOut = true })
 
           IconButton(
