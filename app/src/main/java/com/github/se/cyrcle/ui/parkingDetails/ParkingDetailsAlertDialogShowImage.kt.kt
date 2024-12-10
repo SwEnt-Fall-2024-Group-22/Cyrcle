@@ -61,7 +61,7 @@ fun ParkingDetailsAlertDialogShowImage(
               Box(
                   modifier =
                       Modifier.align(
-                              Alignment.TopEnd) // Align this Box to the top-end of the parent
+                              Alignment.TopEnd)
                           .padding(6.dp)) {
                     // Report button
                     IconButton(
@@ -75,7 +75,7 @@ fun ParkingDetailsAlertDialogShowImage(
               IconButton(
                   modifier =
                       Modifier.padding(6.dp)
-                          .align(Alignment.TopStart), // Align this to the top-start of the parent
+                          .align(Alignment.TopStart),
                   icon = Icons.AutoMirrored.Filled.ArrowBack,
                   contentDescription = "Back",
                   onClick = { navigationActions.navigateTo(Screen.IMAGE_REPORT) },
