@@ -30,6 +30,7 @@ import com.github.se.cyrcle.ui.theme.atoms.ConditionCheckingInputText
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.disabledColor
 
+/** Displays a text block with a title and a list of bullet points. */
 @Composable
 fun ReportTextBlock(title: String, bulletPoints: List<String>, modifier: Modifier = Modifier) {
   Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -49,6 +50,9 @@ fun ReportTextBlock(title: String, bulletPoints: List<String>, modifier: Modifie
   }
 }
 
+/**
+ * Renders input fields for reporting different object types with dropdowns and a description field.
+ */
 @Composable
 fun ReportInputs(
     selectedReasonIfParking: MutableState<ParkingReportReason>?,
@@ -92,6 +96,7 @@ fun ReportInputs(
           Modifier.fillMaxWidth().padding(horizontal = horizontalPadding).testTag("DetailsInput"))
 }
 
+/** Displays a submit button with a confirmation dialog when clicked. */
 @Composable
 fun SubmitButtonWithDialog(
     showDialog: MutableState<Boolean>,

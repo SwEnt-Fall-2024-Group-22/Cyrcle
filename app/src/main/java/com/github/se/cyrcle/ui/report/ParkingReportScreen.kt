@@ -43,9 +43,9 @@ fun ParkingReportScreen(
   val configuration = LocalConfiguration.current
   val screenWidth = configuration.screenWidthDp.dp
   val screenHeight = configuration.screenHeightDp.dp
-  val horizontalPadding = screenWidth * 0.03f
-  val topBoxHeight = screenHeight * 0.10f
-  val verticalPadding = screenHeight * 0.02f
+  val horizontalPadding = screenWidth * HORIZONTAL_PADDING
+  val topBoxHeight = screenHeight * TOP_BOX_HEIGHT
+  val verticalPadding = screenHeight * VERTICAL_PADDING
 
   val showDialog = remember { mutableStateOf(false) }
   val context = LocalContext.current

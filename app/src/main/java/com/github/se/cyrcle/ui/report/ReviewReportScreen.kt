@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.report
 
-import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -15,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -37,7 +37,6 @@ import com.github.se.cyrcle.ui.theme.molecules.ReportTextBlock
 import com.github.se.cyrcle.ui.theme.molecules.SubmitButtonWithDialog
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
-@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ReviewReportScreen(
     navigationActions: NavigationActions,
@@ -47,16 +46,16 @@ fun ReviewReportScreen(
   val configuration = LocalConfiguration.current
   val screenWidth = configuration.screenWidthDp.dp
   val screenHeight = configuration.screenHeightDp.dp
-  val horizontalPadding = screenWidth * 0.03f
-  val topBoxHeight = screenHeight * 0.10f
-  val verticalPadding = screenHeight * 0.02f
+  val horizontalPadding = screenWidth * HORIZONTAL_PADDING
+  val topBoxHeight = screenHeight * TOP_BOX_HEIGHT
+  val verticalPadding = screenHeight * VERTICAL_PADDING
 
   // State for dialog and inputs
   val showDialog = remember { mutableStateOf(false) }
   val selectedReason = rememberSaveable { mutableStateOf(ReviewReportReason.IRRELEVANT) }
-  val reviewId = reviewViewModel.selectedReview.value?.uid
+  val reviewId = reviewViewModel.selectedReview.collectAsState().value?.uid
   val reportDescription = rememberSaveable { mutableStateOf("") }
-  val userId = userViewModel.currentUser.value?.public?.userId!!
+  val userId = userViewModel.currentUser.collectAsState().value?.public?.userId!!
   val context = LocalContext.current
 
   // Toast messages

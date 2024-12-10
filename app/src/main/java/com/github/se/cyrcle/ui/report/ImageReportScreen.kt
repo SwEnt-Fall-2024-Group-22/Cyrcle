@@ -38,6 +38,10 @@ import com.github.se.cyrcle.ui.theme.molecules.ReportTextBlock
 import com.github.se.cyrcle.ui.theme.molecules.SubmitButtonWithDialog
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
+const val HORIZONTAL_PADDING = 0.03f
+const val VERTICAL_PADDING = 0.02f
+const val TOP_BOX_HEIGHT = 0.10f
+
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ImageReportScreen(
@@ -48,9 +52,10 @@ fun ImageReportScreen(
   val configuration = LocalConfiguration.current
   val screenWidth = configuration.screenWidthDp.dp
   val screenHeight = configuration.screenHeightDp.dp
-  val horizontalPadding = screenWidth * 0.03f
-  val topBoxHeight = screenHeight * 0.10f
-  val verticalPadding = screenHeight * 0.02f
+
+  val horizontalPadding = screenWidth * HORIZONTAL_PADDING
+  val topBoxHeight = screenHeight * TOP_BOX_HEIGHT
+  val verticalPadding = screenHeight * VERTICAL_PADDING
 
   // State for dialog and inputs
   val showDialog = remember { mutableStateOf(false) }
