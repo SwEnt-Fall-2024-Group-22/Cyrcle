@@ -26,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -45,225 +46,229 @@ fun WheelView(
     modifier: Modifier = Modifier,
     onSegmentLanded: ((String) -> Unit)? = null
 ): () -> Unit {
-  data class Segment(val name: String, val color: Color, val probability: Float)
+    data class Segment(val name: String, val color: Color, val probability: Float)
 
-  val rarityNothing = stringResource(R.string.rarity_nothing)
-  val rarityLegendary = stringResource(R.string.rarity_legendary)
-  val rarityCommon = stringResource(R.string.rarity_common)
-  val rarityRare = stringResource(R.string.rarity_rare)
-  val rarityEpic = stringResource(R.string.rarity_epic)
+    val rarityNothing = stringResource(R.string.rarity_nothing)
+    val rarityLegendary = stringResource(R.string.rarity_legendary)
+    val rarityCommon = stringResource(R.string.rarity_common)
+    val rarityRare = stringResource(R.string.rarity_rare)
+    val rarityEpic = stringResource(R.string.rarity_epic)
 
-  val segments = remember {
-    listOf(
-        Segment(rarityNothing, Color.Gray, 50f),
-        Segment(rarityLegendary, Color(0xFFFFD700), 0.1f),
-        Segment(rarityCommon, Color.Green, 32f),
-        Segment(rarityRare, Color.Blue, 16f),
-        Segment(rarityEpic, Color(0xFF800080), 1.9f))
-  }
-
-  val probabilityRanges = remember {
-    var currentValue = 0
-    segments.map { segment ->
-      val range = (segment.probability * 10).toInt()
-      val start = currentValue
-      currentValue += range
-      start until currentValue
+    val segments = remember {
+        listOf(
+            Segment(rarityNothing, Color.Gray, 50f),
+            Segment(rarityLegendary, Color(0xFFFFD700), 0.1f),
+            Segment(rarityCommon, Color.Green, 32f),
+            Segment(rarityRare, Color.Blue, 16f),
+            Segment(rarityEpic, Color(0xFF800080), 1.9f))
     }
-  }
 
-  var rotation by remember { mutableFloatStateOf(0f) }
-  var isSpinning by remember { mutableStateOf(false) }
-  var targetRotation by remember { mutableFloatStateOf(0f) }
-  var currentRotation by remember { mutableFloatStateOf(0f) }
-  var spinStartTime by remember { mutableLongStateOf(0L) }
-  var pauseAfterSpin by remember { mutableStateOf(false) }
-  var expectedSegment by remember { mutableIntStateOf(0) }
-  val textMeasurer = rememberTextMeasurer()
-
-  fun getSegmentAtPointer(rotation: Float): Int {
-    val segmentAngle = 360f / segments.size
-    val normalizedAngle = (270 - rotation) % 360
-    return (normalizedAngle / segmentAngle).toInt()
-  }
-
-  fun determineTargetSegment(): Int {
-    val randomValue = (0..999).random()
-    for (i in probabilityRanges.indices) {
-      if (randomValue in probabilityRanges[i]) {
-        return i
-      }
-    }
-    return 0
-  }
-
-  LaunchedEffect(Unit) {
-    while (true) {
-      if (!isSpinning && !pauseAfterSpin) {
-        rotation -= 0.2f
-        if (rotation <= -360f) rotation += 360f
-      }
-      delay(16)
-    }
-  }
-
-  val spinFunction = remember {
-    {
-      if (!isSpinning && !pauseAfterSpin) {
-        val currentSegment = getSegmentAtPointer(rotation)
-        val targetSegment = determineTargetSegment()
-        expectedSegment = targetSegment
-
-        val segmentAngle = 360f / segments.size
-        var requiredRotation = ((targetSegment - currentSegment) * segmentAngle)
-        val landingAngle = (270 - rotation + requiredRotation) % 360
-        val angleWithinSegment = landingAngle % segmentAngle
-        val shouldTriggerNearMiss = Math.random() < 0.33f
-        var randomOffset = 0f
-
-        when (targetSegment) {
-          0 -> {
-            if (shouldTriggerNearMiss) {
-              if (Math.random() < 0.6) {
-                val maxOffsetLeft = angleWithinSegment
-                randomOffset = -maxOffsetLeft * (0.85f + (Math.random() * 0.13f).toFloat())
-              } else {
-                val maxOffsetRight = segmentAngle - angleWithinSegment
-                randomOffset = maxOffsetRight * (0.95f + (Math.random() * 0.03f).toFloat())
-              }
-            }
-          }
-          1 -> {
-            if (Math.random() < 0.8f) {
-              val maxOffsetLeft = angleWithinSegment
-              val maxOffsetRight = segmentAngle - angleWithinSegment
-              val nearWinOffset = minOf(maxOffsetLeft, maxOffsetRight) * 0.05f
-              randomOffset = (Math.random() * 2 * nearWinOffset - nearWinOffset).toFloat()
-            }
-          }
-          2 -> {
-            if (shouldTriggerNearMiss) {
-              val maxOffsetLeft = angleWithinSegment
-              randomOffset = -maxOffsetLeft * (0.80f + (Math.random() * 0.18f).toFloat())
-            }
-          }
-          3 -> {
-            if (shouldTriggerNearMiss) {
-              val maxOffsetRight = segmentAngle - angleWithinSegment
-              randomOffset = maxOffsetRight * (0.80f + (Math.random() * 0.18f).toFloat())
-            }
-          }
-          4 -> {
-            if (Math.random() < 0.8f) {
-              val maxOffsetLeft = angleWithinSegment
-              val maxOffsetRight = segmentAngle - angleWithinSegment
-              val nearWinOffset = minOf(maxOffsetLeft, maxOffsetRight) * 0.05f
-              randomOffset = (Math.random() * 2 * nearWinOffset - nearWinOffset).toFloat()
-            }
-          }
+    val probabilityRanges = remember {
+        var currentValue = 0
+        segments.map { segment ->
+            val range = (segment.probability * 10).toInt()
+            val start = currentValue
+            currentValue += range
+            start until currentValue
         }
+    }
 
-        requiredRotation += randomOffset
-        if (requiredRotation <= 0) requiredRotation += 360
-        val fullRotations = (6..10).random() * 360
-        targetRotation = rotation - (requiredRotation + fullRotations)
-        currentRotation = rotation
-        spinStartTime = System.currentTimeMillis()
-        isSpinning = true
+    var rotation by remember { mutableFloatStateOf(0f) }
+    var isSpinning by remember { mutableStateOf(false) }
+    var targetRotation by remember { mutableFloatStateOf(0f) }
+    var currentRotation by remember { mutableFloatStateOf(0f) }
+    var spinStartTime by remember { mutableLongStateOf(0L) }
+    var pauseAfterSpin by remember { mutableStateOf(false) }
+    var expectedSegment by remember { mutableIntStateOf(0) }
+    val textMeasurer = rememberTextMeasurer()
 
-        CoroutineScope(Dispatchers.Default).launch {
-          val spinDuration = 10000L
-          var progress = 0f
-          val startTime = System.currentTimeMillis()
+    fun getSegmentAtPointer(rotation: Float): Int {
+        val segmentAngle = 360f / segments.size
+        val normalizedAngle = (270 - rotation) % 360
+        return (normalizedAngle / segmentAngle).toInt()
+    }
 
-          while (progress < 1f) {
-            progress = (System.currentTimeMillis() - startTime).toFloat() / spinDuration
-            val easeOut = 1f - (1f - progress) * (1f - progress) * (1f - progress) * (1f - progress)
-            rotation = currentRotation + (targetRotation - currentRotation) * easeOut
+    fun determineTargetSegment(): Int {
+        val randomValue = (0..999).random()
+        for (i in probabilityRanges.indices) {
+            if (randomValue in probabilityRanges[i]) {
+                return i
+            }
+        }
+        return 0
+    }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            if (!isSpinning && !pauseAfterSpin) {
+                rotation -= 0.2f
+                if (rotation <= -360f) rotation += 360f
+            }
             delay(16)
-          }
-
-          rotation = targetRotation % 360
-          isSpinning = false
-          pauseAfterSpin = true
-          onSegmentLanded?.invoke(segments[getSegmentAtPointer(rotation)].name)
-          delay(2000)
-          pauseAfterSpin = false
         }
-      }
     }
-  }
 
-  Box(modifier = modifier.testTag("wheel_view_container")) {
-    Canvas(modifier = Modifier.testTag("wheel_canvas").aspectRatio(1f)) {
-      val centerX = size.width / 2f
-      val centerY = size.height / 2f
-      val radius = minOf(size.width, size.height) / 2f * 0.9f
+    val spinFunction = remember {
+        {
+            if (!isSpinning && !pauseAfterSpin) {
+                val currentSegment = getSegmentAtPointer(rotation)
+                val targetSegment = determineTargetSegment()
+                expectedSegment = targetSegment
 
-      rotate(rotation, Offset(centerX, centerY)) {
-        val segmentAngle = 360f / segments.size
-        segments.forEachIndexed { index, segment ->
-          drawArc(
-              color = segment.color,
-              startAngle = index * segmentAngle,
-              sweepAngle = segmentAngle,
-              useCenter = true,
-              topLeft = Offset(centerX - radius, centerY - radius),
-              size = Size(radius * 2, radius * 2))
+                val segmentAngle = 360f / segments.size
+                var requiredRotation = ((targetSegment - currentSegment) * segmentAngle)
+                val landingAngle = (270 - rotation + requiredRotation) % 360
+                val angleWithinSegment = landingAngle % segmentAngle
+                val shouldTriggerNearMiss = Math.random() < 0.33f
+                var randomOffset = 0f
 
-          val startAngle = index * segmentAngle
-          val middleAngle = Math.toRadians((startAngle + segmentAngle / 2.0))
-          val textRadius = radius * 0.65f
-          val textX = centerX + cos(middleAngle).toFloat() * textRadius
-          val textY = centerY + sin(middleAngle).toFloat() * textRadius
-          val textLayoutResult =
-              textMeasurer.measure(
-                  text = segment.name,
-                  style =
-                      TextStyle(
-                          color = Color.White,
-                          fontSize = (radius * 0.06f).sp,
-                          textAlign = TextAlign.Center))
+                when (targetSegment) {
+                    0 -> {
+                        if (shouldTriggerNearMiss) {
+                            if (Math.random() < 0.6) {
+                                val maxOffsetLeft = angleWithinSegment
+                                randomOffset = -maxOffsetLeft * (0.85f + (Math.random() * 0.13f).toFloat())
+                            } else {
+                                val maxOffsetRight = segmentAngle - angleWithinSegment
+                                randomOffset = maxOffsetRight * (0.95f + (Math.random() * 0.03f).toFloat())
+                            }
+                        }
+                    }
+                    1 -> {
+                        if (Math.random() < 0.8f) {
+                            val maxOffsetLeft = angleWithinSegment
+                            val maxOffsetRight = segmentAngle - angleWithinSegment
+                            val nearWinOffset = minOf(maxOffsetLeft, maxOffsetRight) * 0.05f
+                            randomOffset = (Math.random() * 2 * nearWinOffset - nearWinOffset).toFloat()
+                        }
+                    }
+                    2 -> {
+                        if (shouldTriggerNearMiss) {
+                            val maxOffsetLeft = angleWithinSegment
+                            randomOffset = -maxOffsetLeft * (0.80f + (Math.random() * 0.18f).toFloat())
+                        }
+                    }
+                    3 -> {
+                        if (shouldTriggerNearMiss) {
+                            val maxOffsetRight = segmentAngle - angleWithinSegment
+                            randomOffset = maxOffsetRight * (0.80f + (Math.random() * 0.18f).toFloat())
+                        }
+                    }
+                    4 -> {
+                        if (Math.random() < 0.8f) {
+                            val maxOffsetLeft = angleWithinSegment
+                            val maxOffsetRight = segmentAngle - angleWithinSegment
+                            val nearWinOffset = minOf(maxOffsetLeft, maxOffsetRight) * 0.05f
+                            randomOffset = (Math.random() * 2 * nearWinOffset - nearWinOffset).toFloat()
+                        }
+                    }
+                }
 
-          rotate(startAngle + segmentAngle / 2 + 90, Offset(textX, textY)) {
-            drawText(
-                textMeasurer = textMeasurer,
-                text = segment.name,
-                topLeft =
-                    Offset(
-                        textX - textLayoutResult.size.width / 2f, // Center horizontally
-                        textY - textLayoutResult.size.height / 2f // Center vertically
-                        ),
-                style =
-                    TextStyle(
-                        color = Color.White,
-                        fontSize = (radius * 0.06f).sp,
-                        textAlign = TextAlign.Center))
-          }
+                requiredRotation += randomOffset
+                if (requiredRotation <= 0) requiredRotation += 360
+                val fullRotations = (6..10).random() * 360
+                targetRotation = rotation - (requiredRotation + fullRotations)
+                currentRotation = rotation
+                spinStartTime = System.currentTimeMillis()
+                isSpinning = true
+
+                CoroutineScope(Dispatchers.Default).launch {
+                    val spinDuration = 10000L
+                    var progress = 0f
+                    val startTime = System.currentTimeMillis()
+
+                    while (progress < 1f) {
+                        progress = (System.currentTimeMillis() - startTime).toFloat() / spinDuration
+                        val easeOut = 1f - (1f - progress) * (1f - progress) * (1f - progress) * (1f - progress)
+                        rotation = currentRotation + (targetRotation - currentRotation) * easeOut
+                        delay(16)
+                    }
+
+                    rotation = targetRotation % 360
+                    isSpinning = false
+                    pauseAfterSpin = true
+                    onSegmentLanded?.invoke(segments[getSegmentAtPointer(rotation)].name)
+                    delay(2000)
+
+                    withContext(Dispatchers.Main) {
+                        pauseAfterSpin = false
+                        delay(16)
+                    }
+                }
+            }
         }
-      }
-
-      drawPath(
-          path =
-              Path().apply {
-                val pointerWidth = radius * 0.1f
-                val pointerHeight = radius * 0.1f
-                moveTo(centerX, centerY - radius + pointerHeight * 1.5f)
-                lineTo(centerX - pointerWidth / 2, centerY - radius - pointerHeight / 2)
-                lineTo(centerX + pointerWidth / 2, centerY - radius - pointerHeight / 2)
-                close()
-              },
-          color = Color.Red)
     }
-  }
 
-  Box(
-      modifier =
-          Modifier.testTag("wheel_spin_state").semantics {
+    Box(modifier = modifier.testTag("wheel_view_container")) {
+        Canvas(modifier = Modifier.testTag("wheel_canvas").aspectRatio(1f)) {
+            val centerX = size.width / 2f
+            val centerY = size.height / 2f
+            val radius = minOf(size.width, size.height) / 2f * 0.9f
+
+            rotate(rotation, Offset(centerX, centerY)) {
+                val segmentAngle = 360f / segments.size
+                segments.forEachIndexed { index, segment ->
+                    drawArc(
+                        color = segment.color,
+                        startAngle = index * segmentAngle,
+                        sweepAngle = segmentAngle,
+                        useCenter = true,
+                        topLeft = Offset(centerX - radius, centerY - radius),
+                        size = Size(radius * 2, radius * 2))
+
+                    val startAngle = index * segmentAngle
+                    val middleAngle = Math.toRadians((startAngle + segmentAngle / 2.0))
+                    val textRadius = radius * 0.65f
+                    val textX = centerX + cos(middleAngle).toFloat() * textRadius
+                    val textY = centerY + sin(middleAngle).toFloat() * textRadius
+                    val textLayoutResult =
+                        textMeasurer.measure(
+                            text = segment.name,
+                            style =
+                            TextStyle(
+                                color = Color.White,
+                                fontSize = (radius * 0.06f).sp,
+                                textAlign = TextAlign.Center))
+
+                    rotate(startAngle + segmentAngle / 2 + 90, Offset(textX, textY)) {
+                        drawText(
+                            textMeasurer = textMeasurer,
+                            text = segment.name,
+                            topLeft =
+                            Offset(
+                                textX - textLayoutResult.size.width / 2f,
+                                textY - textLayoutResult.size.height / 2f
+                            ),
+                            style =
+                            TextStyle(
+                                color = Color.White,
+                                fontSize = (radius * 0.06f).sp,
+                                textAlign = TextAlign.Center))
+                    }
+                }
+            }
+
+            drawPath(
+                path =
+                Path().apply {
+                    val pointerWidth = radius * 0.1f
+                    val pointerHeight = radius * 0.1f
+                    moveTo(centerX, centerY - radius + pointerHeight * 1.5f)
+                    lineTo(centerX - pointerWidth / 2, centerY - radius - pointerHeight / 2)
+                    lineTo(centerX + pointerWidth / 2, centerY - radius - pointerHeight / 2)
+                    close()
+                },
+                color = Color.Red)
+        }
+    }
+
+    Box(
+        modifier =
+        Modifier.testTag("wheel_spin_state").semantics {
             contentDescription = "Spinning: $isSpinning, Paused: $pauseAfterSpin"
-          })
+        })
 
-  return spinFunction
+    return spinFunction
 }
 
 @Composable
@@ -279,15 +284,12 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
     val flooredLevel = currentLevel.toInt()
     val progressToNextLevel = (currentLevel - flooredLevel).toFloat()
 
-    // To track and display XP increment temporarily
     var xpIncrement by remember { mutableStateOf(0.0) }
     var showXpIncrement by remember { mutableStateOf(false) }
     var rarityText by remember { mutableStateOf("") }
 
-    // Add a state to track if the wheel is spinning
     var isSpinning by remember { mutableStateOf(false) }
 
-    // Timer to hide the XP increment message
     LaunchedEffect(xpIncrement) {
         if (xpIncrement > 0) {
             showXpIncrement = true
@@ -333,14 +335,13 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
                     style = MaterialTheme.typography.headlineMedium
                 )
 
-                // Animated XP increment below coins display
                 AnimatedVisibility(
                     visible = showXpIncrement && (xpIncrement > 0),
                     enter = fadeIn(animationSpec = tween(durationMillis = 500)),
                     exit = fadeOut(animationSpec = tween(durationMillis = 500))
                 ) {
                     Text(
-                        text = "$rarityText: +%.2f XP!".format(xpIncrement),
+                        text = "${rarityText}: +%.2f XP!".format(xpIncrement),
                         style = MaterialTheme.typography.bodyMedium.copy(color = Color.Green),
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally)
@@ -353,7 +354,6 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
             WheelView(
                 modifier = Modifier.size(300.dp).testTag("wheel_view"),
                 onSegmentLanded = { segmentName ->
-                    // Define the mapping of segment names to reputation increments
                     val reputationIncrement = when (segmentName) {
                         rarityLegendary -> 10.0
                         rarityCommon -> 1.0 / sqrt(currentLevel + 1.0)
@@ -362,7 +362,6 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
                         else -> 0.0
                     }
 
-                    // Update the user with the new reputation score
                     val updatedUser = userState?.copy(
                         public = userState!!.public.copy(
                             userReputationScore = userState!!.public.userReputationScore + reputationIncrement
@@ -372,28 +371,31 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
                         userViewModel.updateUser(user = updatedUser)
                     }
 
-                    // Set the XP increment and rarity text
                     xpIncrement = reputationIncrement
                     rarityText = segmentName
-
-                    // Set isSpinning to false once the spin finishes
                     isSpinning = false
                 }
             ).let { spinFn -> wheelSpinFunction = spinFn }
 
-            val canSpin = userState?.details?.wallet?.isSolvable(SPIN_COST, 0) == true && !isSpinning
+            val canSpin = remember(userState, isSpinning) {
+                userState?.details?.wallet?.isSolvable(SPIN_COST, 0) == true &&
+                        !isSpinning &&
+                        wheelSpinFunction != null
+            }
 
             Button(
                 onClick = {
-                    isSpinning = true // Disable the button immediately after click
-                    userViewModel.tryDebitCoinsFromCurrentUser(
-                        SPIN_COST,
-                        0,
-                        onSuccess = {
-                            coins = userState?.details?.wallet?.getCoins()
-                            wheelSpinFunction?.invoke()
-                        }
-                    )
+                    if (canSpin) {
+                        userViewModel.tryDebitCoinsFromCurrentUser(
+                            SPIN_COST,
+                            0,
+                            onSuccess = {
+                                coins = userState?.details?.wallet?.getCoins()
+                                isSpinning = true
+                                wheelSpinFunction?.invoke()
+                            }
+                        )
+                    }
                 },
                 enabled = canSpin,
                 modifier = Modifier
