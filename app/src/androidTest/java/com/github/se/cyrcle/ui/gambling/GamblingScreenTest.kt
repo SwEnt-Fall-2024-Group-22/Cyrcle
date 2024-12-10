@@ -107,6 +107,7 @@ class GamblingScreenTest {
 
   @Test
   fun spin_button_triggers_wheel_spin() {
+    userViewModel.creditCoinsToCurrentUser(1000000)
     composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
 
     composeTestRule.onNodeWithTag("spin_button").performClick()
@@ -124,9 +125,18 @@ class GamblingScreenTest {
     composeTestRule
         .onNodeWithTag("spin_button")
         .assertHasClickAction()
-        .assertTextEquals("SPIN")
         .assertHeightIsEqualTo(90.dp)
         .assertWidthIsEqualTo(90.dp)
+
+    composeTestRule
+        .onNodeWithTag("spin_button_text", useUnmergedTree = true)
+        .assertExists()
+        .assertTextEquals("SPIN")
+
+    composeTestRule
+        .onNodeWithTag("spin_cost_text", useUnmergedTree = true)
+        .assertExists()
+        .assertTextEquals("(10 coins)")
   }
 
   @Test
@@ -183,6 +193,7 @@ class GamblingScreenTest {
 
   @Test
   fun verify_wheel_spin_state_changes() {
+    userViewModel.creditCoinsToCurrentUser(1000000)
     composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
 
     // Initial state check
