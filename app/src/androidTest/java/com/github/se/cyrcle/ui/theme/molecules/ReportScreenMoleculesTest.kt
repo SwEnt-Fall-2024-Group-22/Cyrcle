@@ -27,7 +27,7 @@ class ReportScreenMoleculesTest {
   @Test
   fun reportTopAppBar_displaysTitleCorrectly() {
     composeTestRule.setContent {
-      ReportTopAppBar(navigationActions = mock(NavigationActions::class.java), title = "Test Title")
+      TopAppBar(navigationActions = mock(NavigationActions::class.java), title = "Test Title")
     }
 
     composeTestRule.onNodeWithText("Test Title").assertExists().assertIsDisplayed()
