@@ -1,9 +1,13 @@
 package com.github.se.cyrcle.ui.gambling
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -282,13 +286,43 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
     var coins by remember { mutableStateOf(userState?.details?.wallet?.getCoins()) }
     val currentLevel = userState?.public?.userReputationScore ?: 0.0
     val flooredLevel = currentLevel.toInt()
-    val progressToNextLevel = (currentLevel - flooredLevel).toFloat()
+    val targetProgress = (currentLevel - flooredLevel).toFloat()
+
+    var displayedLevel by remember { mutableIntStateOf(flooredLevel) }
+    val animatedProgress = remember { Animatable(targetProgress) }
 
     var xpIncrement by remember { mutableStateOf(0.0) }
     var showXpIncrement by remember { mutableStateOf(false) }
     var rarityText by remember { mutableStateOf("") }
-
     var isSpinning by remember { mutableStateOf(false) }
+
+    LaunchedEffect(currentLevel) {
+        val startLevel = displayedLevel
+        val endLevel = flooredLevel
+
+        if (endLevel > startLevel) {
+            for (level in startLevel until endLevel) {
+                animatedProgress.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(
+                        durationMillis = 500,
+                        easing = FastOutSlowInEasing
+                    )
+                )
+                displayedLevel = level + 1
+                animatedProgress.snapTo(0f)
+            }
+        }
+
+        animatedProgress.animateTo(
+            targetValue = targetProgress,
+            animationSpec = tween(
+                durationMillis = 500,
+                easing = FastOutSlowInEasing
+            )
+        )
+        displayedLevel = flooredLevel
+    }
 
     LaunchedEffect(xpIncrement) {
         if (xpIncrement > 0) {
@@ -320,15 +354,48 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.align(Alignment.TopCenter)
             ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .padding(bottom = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Level ${displayedLevel}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.testTag("current_level_text")
+                    )
+                    Text(
+                        text = "Level ${displayedLevel + 1}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.testTag("next_level_text")
+                    )
+                }
+
                 LinearProgressIndicator(
-                    progress = { progressToNextLevel },
+                    progress = { animatedProgress.value },
                     modifier = Modifier
                         .fillMaxWidth(0.8f)
                         .height(8.dp)
                         .testTag("level_progress_bar"),
                     color = MaterialTheme.colorScheme.primary,
                 )
+
                 Spacer(modifier = Modifier.height(8.dp))
+
+                AnimatedVisibility(
+                    visible = displayedLevel < flooredLevel,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
+                    Text(
+                        text = "Level Up!",
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.headlineSmall,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                }
+
                 Text(
                     text = stringResource(R.string.gambling_screen_coins_display, coins ?: 0),
                     modifier = Modifier.testTag("coin_display"),
