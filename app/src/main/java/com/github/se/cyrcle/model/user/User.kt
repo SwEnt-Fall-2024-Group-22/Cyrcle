@@ -78,17 +78,17 @@ object UserLevelDisplay {
 
     // Map of level ranges (0-9, 10-19, etc.) to their display properties
     private val levelRanges = mapOf(
-        0 to LevelRange("⭒", "#808080"),  // Gray (0-19)
-        10 to LevelRange("☆", "#808080"),
-        20 to LevelRange("✧", "#4169E1"), // Blue (20-39)
-        30 to LevelRange("✵", "#4169E1"),
-        40 to LevelRange("❁", "#32CD32"), // Green (40-59)
-        50 to LevelRange("❂", "#32CD32"),
+        0 to LevelRange("⭒", "#696969"),  // Dim Gray
+        10 to LevelRange("☆", "#708090"), // Slate Gray
+        20 to LevelRange("✧", "#1E90FF"), // Dodger Blue
+        30 to LevelRange("✵", "#4682B4"), // Steel Blue
+        40 to LevelRange("❁", "#228B22"), // Forest Green
+        50 to LevelRange("❂", "#32CD32"), // Lime Green
         60 to LevelRange("ღ", "#FFC0CB"), // Pink
         70 to LevelRange("დ", "#800080"), // Purple
         80 to LevelRange("ლ", "#8B0000"), // Dark Red
         90 to LevelRange("☤", "#FFD700"), // Gold
-        100 to LevelRange("♔", "rainbow")  // Special case for rainbow effect
+        100 to LevelRange("♔", "rainbow") // Special case for rainbow effect
     )
 
     /**
