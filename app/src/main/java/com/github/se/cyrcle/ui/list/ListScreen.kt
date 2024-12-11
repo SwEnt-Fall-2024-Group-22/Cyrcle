@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.list
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -113,8 +112,6 @@ fun SpotListScreen(
   }
 
   LaunchedEffect(userPosition, myLocation.value, chosenLocation.value) {
-    Log.e("SpotListScreen", "userPosition: $userPosition and chosenLocation: $chosenLocation")
-
     // if suggestion MyLocation is chosen and user has location permission then set the circle
     // center
     // to user position

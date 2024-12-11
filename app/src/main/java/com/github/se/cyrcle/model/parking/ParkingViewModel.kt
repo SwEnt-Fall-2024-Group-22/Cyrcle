@@ -509,7 +509,7 @@ class ParkingViewModel(
     // This coroutine will update the closest parkings when all the tiles have been fetched. Note
     // that we don't need to apply the filter again since we use the filteredRectParkings flow.
     viewModelScope.launch {
-      Log.e("ParkingViewModelCenter", "${_circleCenter.value}")
+      Log.d("ParkingViewModelCenter", "${_circleCenter.value}")
       filteredRectParkings
           .map { parkings ->
             parkings
