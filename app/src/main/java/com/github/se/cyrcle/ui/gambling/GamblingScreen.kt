@@ -447,7 +447,6 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
 
             Button(
                 onClick = {
-                    if (canSpin) {
                         userViewModel.tryDebitCoinsFromCurrentUser(
                             SPIN_COST,
                             0,
@@ -457,7 +456,6 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
                                 wheelSpinFunction?.invoke()
                             }
                         )
-                    }
                 },
                 enabled = canSpin,
                 modifier = Modifier
