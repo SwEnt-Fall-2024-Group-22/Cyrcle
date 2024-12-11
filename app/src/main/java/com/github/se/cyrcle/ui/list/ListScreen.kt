@@ -98,6 +98,10 @@ fun SpotListScreen(
   // location permission from location manager
   val locPermission = permissionHandler.getLocalisationPerm().collectAsState().value
 
+  /*
+   * Function that computes the distance between the user's location and a parking spot
+   * @param parking: the parking spot for which we want to compute the distance
+   */
   fun computeDistance(parking: Parking): Double {
     return TurfMeasurement.distance(
         if (myLocation.value) userPosition
@@ -113,7 +117,9 @@ fun SpotListScreen(
     // if suggestion MyLocation is chosen and user has location permission then set the circle
     // center
     // to user position
-    if (locPermission && myLocation.value) parkingViewModel.setCircleCenter(userPosition)
+    if (locPermission && myLocation.value) {
+      parkingViewModel.setCircleCenter(userPosition)
+    }
 
     // else if the user has chosen a location or hasn't given his location permission then set the
     // circle center to the chosen location (default position is EPFL)
@@ -132,8 +138,7 @@ fun SpotListScreen(
               parkingViewModel = parkingViewModel,
               displayHeader = true,
               addressViewModel,
-              myLocation,
-              chosenLocation,
+              mapViewModel,
               permissionHandler)
           val listState = rememberLazyListState()
           LazyColumn(state = listState, modifier = Modifier.testTag("SpotListColumn")) {

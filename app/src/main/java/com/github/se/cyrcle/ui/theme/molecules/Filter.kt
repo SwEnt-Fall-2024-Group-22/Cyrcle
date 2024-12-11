@@ -33,7 +33,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -58,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.address.Address
 import com.github.se.cyrcle.model.address.AddressViewModel
+import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingCapacity
 import com.github.se.cyrcle.model.parking.ParkingProtection
 import com.github.se.cyrcle.model.parking.ParkingRackType
@@ -96,9 +96,7 @@ fun FilterPanel(
     parkingViewModel: ParkingViewModel,
     displayHeader: Boolean,
     addressViewModel: AddressViewModel,
-    myLocation: State<Boolean> = mutableStateOf(false),
-    chosenLocation: State<Address> =
-        mutableStateOf(Address(latitude = "46.518467", longitude = "6.566397")),
+    mapViewModel: MapViewModel,
     permissionHandler: PermissionHandler
 ) {
   val showProtectionOptions = remember { mutableStateOf(false) }
@@ -141,9 +139,8 @@ fun FilterPanel(
                   addressViewModel,
                   parkingViewModel,
                   isTextFieldVisible,
-                  myLocation,
-                  chosenLocation,
                   permissionHandler,
+                  mapViewModel,
                   textFieldValue)
             } else {
               Text(
@@ -333,10 +330,10 @@ fun FilterSection(
  * Composable function that displays a search bar for the list screen.
  *
  * @param addressViewModel The ViewModel responsible for managing addresses.
+ * @param parkingViewModel the ViewModel responsible for managing parkings
  * @param isTextFieldVisible A state that controls the visibility of the text field.
- * @param myLocation A state that indicates whether the user has selected "My Location".
- * @param chosenLocation A state that holds the address chosen by the user.
  * @param permissionHandler The handler for managing permissions.
+ * @param mapViewModel The ViewModel reponsible for the Map
  * @param textFieldValue The current value of the text field.
  */
 @Composable
@@ -344,9 +341,8 @@ fun SearchBarListScreen(
     addressViewModel: AddressViewModel,
     parkingViewModel: ParkingViewModel,
     isTextFieldVisible: MutableState<Boolean>,
-    myLocation: State<Boolean>,
-    chosenLocation: State<Address>,
     permissionHandler: PermissionHandler,
+    mapViewModel: MapViewModel,
     textFieldValue: MutableState<String>
 ) {
 
@@ -428,6 +424,7 @@ fun SearchBarListScreen(
                   modifier = Modifier.testTag("MyLocationSuggestionMenuItem"),
                   contentPadding = PaddingValues(8.dp),
                   onClick = {
+                    parkingViewModel.setCircleCenter(mapViewModel.userPosition.value)
                     parkingViewModel.setMyLocation(true)
                     showSuggestions.value = false
                     textFieldValue.value = context.resources.getString(R.string.my_location)
