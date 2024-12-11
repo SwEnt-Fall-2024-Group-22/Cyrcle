@@ -112,19 +112,20 @@ fun SpotListScreen(
         parking.location.center)
   }
 
-  LaunchedEffect(userPosition, myLocation, chosenLocation.value) {
+  LaunchedEffect(userPosition, myLocation.value, chosenLocation.value) {
+
+      Log.e("SpotListScreen", "userPosition: $userPosition and chosenLocation: $chosenLocation")
 
     // if suggestion MyLocation is chosen and user has location permission then set the circle
     // center
     // to user position
     if (locPermission && myLocation.value) {
-        Log.e("SpotListScreen", "User Position: $userPosition")
-      parkingViewModel.setCircleCenter(userPosition)
+        parkingViewModel.setCircleCenter(userPosition)
     }
 
     // else if the user has chosen a location or hasn't given his location permission then set the
     // circle center to the chosen location (default position is EPFL)
-    else Log.d("SpotListScreen", parkingViewModel.closestParkings.value.toString())
+    else
     parkingViewModel.setCircleCenter(
         Point.fromLngLat(
             chosenLocation.value.longitude.toDouble(), chosenLocation.value.latitude.toDouble()))
