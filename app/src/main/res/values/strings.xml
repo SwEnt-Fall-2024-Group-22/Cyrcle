@@ -332,6 +332,12 @@
     <string name="connectivity_alert_online_message">Do you want to use the Online Maps ? </string>
     <string name="connectivity_alert_button_confirm">Yes</string>
 
+    <!-- BikeLocation Dialog -->
+    <string name="bike_location_dialog_title">Bike Location</string>
+    <string name="bike_location_dialog_message">Do you want the app to forget the location of your bike ?</string>
+    <string name="bike_location_dialog_button_confirm">Forget</string>
+    <string name="bike_location_dialog_button_cancel">Keep remembering</string>
+
     <!-- Easter Egg Toast Messages -->
     <string name="easter_egg_coins_greedy_message">Greedy, aren\'t you? All your coins are gone!</string>
     <string name="easter_egg_coins_credited_message">You\'ve been credited %1$d coins!</string>

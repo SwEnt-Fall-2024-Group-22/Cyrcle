@@ -186,6 +186,9 @@ fun MapScreen(
   // Mutable state to store the PointAnnotationManager for parking labels
   var pLabelAnnotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
 
+  // TODO
+  var bikeLocationAnnotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
+
   // Mutable state to store the visibility of the preview card
   var showPreviewCard by remember { mutableStateOf(false) }
 
@@ -235,6 +238,8 @@ fun MapScreen(
   LaunchedEffect(isOnlineMode) {
     parkingViewModel.getParkingsInRect(screenCoordinates.first, screenCoordinates.second)
   }
+
+  val forgetBikeLocation = remember { mutableStateOf(false) }
 
   val giveCoinsRegex = Regex("^/give coins (\\d+)$", RegexOption.IGNORE_CASE)
   val killRegex = Regex("^/kill$", RegexOption.IGNORE_CASE)
@@ -469,13 +474,14 @@ fun MapScreen(
               Modifier.align(Alignment.BottomEnd)
                   .padding(bottom = 25.dp, end = 16.dp)
                   .scale(1.2f)) {
+                BikeLocationButton(
+                    bikeLocationViewModel, mapViewModel, navigationActions, forgetBikeLocation)
 
                 if (locationEnabled) {
                   IconButton(
                       icon = Icons.Default.MyLocation,
                       contentDescription = "Recenter on Location",
-                      modifier =
-                        Modifier.testTag("recenterButton"),
+                      modifier = Modifier.testTag("recenterButton"),
                       onClick = {
                         showPreviewCard = false
                         mapViewModel.updateTrackingMode(true)
@@ -585,6 +591,10 @@ fun MapScreen(
               mapViewModel,
               navigationActions,
               onDismiss = { showSettings.value = false })
+        }
+
+        if (forgetBikeLocation.value) {
+          RemoveBikeLocationPopup(bikeLocationViewModel, forgetBikeLocation)
         }
 
         // Filter dialog is shown when the showFilter state is true, until the user dismisses it by
@@ -949,19 +959,20 @@ fun PreviewCard(navigationActions: NavigationActions, parkingViewModel: ParkingV
 }
 
 /**
- *  Composable function to display the Bike Location Floating action button.
- *  QUESTION : Should this be visible if the user doesn't have GPS enable, and if so, should we have
- *   a screen to add the location manually ?
+ * Composable function to display the Bike Location Floating action button. QUESTION : Should this
+ * be visible if the user doesn't have GPS enable, and if so, should we have a screen to add the
+ * location manually ?
  *
- *   @param bikeLocationViewModel The ViewModel for managing bike location-related data and actions.
- *   @param mapViewModel The ViewModel for managing map-related data and actions.
- *   @param navigationActions The actions to navigate to different screens.
+ * @param bikeLocationViewModel The ViewModel for managing bike location-related data and actions.
+ * @param mapViewModel The ViewModel for managing map-related data and actions.
+ * @param navigationActions The actions to navigate to different screens.
  */
 @Composable
 fun BikeLocationButton(
     bikeLocationViewModel: BikeLocationViewModel,
     mapViewModel: MapViewModel,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    forgetBikeLocation: MutableState<Boolean>
 ) {
   val bikeLocationState by bikeLocationViewModel.bikeLocationState.collectAsState()
   val userPosition: Point by mapViewModel.userPosition.collectAsState()
@@ -983,27 +994,56 @@ fun BikeLocationButton(
       onClick = {
         when (bikeLocationState) {
           NO_LOCATION -> {
-            Log.d("BikeLocationButton", "on NO_LOCATION (${userPosition})")
             bikeLocationViewModel.parkBike(userPosition)
-            // TODO Add a marker on the map
+            Log.d("BikeLocationButton", "on NO_LOCATION (${userPosition})")
           }
           LOCATION_STORED_UNUSED -> {
-            val bikeLocation = Location(bikeLocationViewModel.goToMyBike()!!.location!!)
+            val bikeLocation = Location(bikeLocationViewModel.goToMyBike()?.location!!)
+            mapViewModel.zoomOnLocation(navigationActions, bikeLocation)
             Log.d("BikeLocationButton", "on LOCATION_STORED_UNUSED (${bikeLocation})")
-            mapViewModel.zoomOnLocation(bikeLocation)
-            navigationActions.navigateTo(Route.MAP)
           }
           LOCATION_STORED_USED -> {
-            Log.d("BikeLocationButton", "on LOCATION_STORED_USED")
-            // TODO Make pop-up to remove the location of the bike (?)
-            bikeLocationViewModel.removeBikeLocation()
+            val bikeLocation = Location(bikeLocationViewModel.goToMyBike()?.location!!)
+            mapViewModel.zoomOnLocation(navigationActions, bikeLocation)
+            Log.d("BikeLocationButton", "on LOCATION_STORED_USED (${bikeLocation})")
+
+            forgetBikeLocation.value = true
           }
         }
       },
       colorLevel =
           when (bikeLocationState) {
             NO_LOCATION -> ColorLevel.PRIMARY
-            LOCATION_STORED_UNUSED -> ColorLevel.SECONDARY
+            LOCATION_STORED_UNUSED -> ColorLevel.PRIMARY
             LOCATION_STORED_USED -> ColorLevel.SECONDARY
           })
+}
+
+@Composable
+fun RemoveBikeLocationPopup(
+    bikeLocationViewModel: BikeLocationViewModel,
+    forgetBikeLocation: MutableState<Boolean>
+) {
+  AlertDialog(
+      modifier = Modifier.testTag("RemoveBikeLocationDialog"),
+      onDismissRequest = {},
+      title = { Text(stringResource(R.string.bike_location_dialog_title)) },
+      text = { Text(stringResource(R.string.bike_location_dialog_message)) },
+      confirmButton = {
+        TextButton(
+            modifier = Modifier.testTag("RemoveBikeLocationDialogConfirmButton"),
+            onClick = { bikeLocationViewModel.removeBikeLocation() }) {
+              Text(stringResource(R.string.bike_location_dialog_button_confirm))
+            }
+      },
+      dismissButton = {
+        TextButton(
+            modifier = Modifier.testTag("RemoveBikeLocationDialogCancelButton"),
+            onClick = { forgetBikeLocation.value = false }) {
+              Text(stringResource(R.string.bike_location_dialog_button_cancel))
+            }
+      },
+      containerColor = MaterialTheme.colorScheme.surface,
+      tonalElevation = 8.dp,
+      shape = RoundedCornerShape(24.dp))
 }
