@@ -246,7 +246,7 @@
     <string name="report_bullet_point_3">Reason + Description below</string>
     <string name="report_reason">Reason for Reporting</string>
     <string name="report_details">Additional Details (Optional)</string>
-    <string name="alert_content">We take reports very seriously. Please make sure that the information you have mentioned is accurate. If enough users also submit reports on this object, it will be flagged for administrator review. Do you still want to add this Report?</string>
+    <string name="alert_content">We take reports very seriously. Please make sure that the information you have mentioned is accurate. Do you want to add this Report?</string>
     <string name="alert_title">Are You Sure?</string>
     <string name="report_added">Report added</string>
     <string name="report_already">You Have Already Reported This Object</string>

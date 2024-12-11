@@ -30,7 +30,18 @@ import com.github.se.cyrcle.ui.theme.atoms.ConditionCheckingInputText
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.disabledColor
 
-/** Displays a text block with a title and a list of bullet points. */
+/**
+ * Displays a formatted text block with a title and a list of bullet points.
+ *
+ * This composable is useful for presenting structured information in a clear and concise format. It
+ * ensures consistent styling for the title and bullet points and provides spacing for better
+ * readability.
+ *
+ * @param title The title of the text block, displayed prominently at the top.
+ * @param bulletPoints A list of strings representing the bullet points to be displayed under the
+ *   title.
+ * @param modifier A [Modifier] to customize the appearance and layout of the text block.
+ */
 @Composable
 fun ReportTextBlock(title: String, bulletPoints: List<String>, modifier: Modifier = Modifier) {
   Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -51,7 +62,24 @@ fun ReportTextBlock(title: String, bulletPoints: List<String>, modifier: Modifie
 }
 
 /**
- * Renders input fields for reporting different object types with dropdowns and a description field.
+ * Renders input fields for reporting various object types, including a dropdown for selecting the
+ * reason and a description input field.
+ *
+ * This composable dynamically adjusts its input fields based on the type of the object being
+ * reported (e.g., parking, review, image). It ensures consistent styling and validation for the
+ * report details input field.
+ *
+ * @param selectedReasonIfParking A mutable state holding the selected reason if the object type is
+ *   parking.
+ * @param selectedReasonIfReview A mutable state holding the selected reason if the object type is a
+ *   review.
+ * @param selectedReasonIfImage A mutable state holding the selected reason if the object type is an
+ *   image.
+ * @param reportedObjectType The type of the object being reported, determining which dropdown is
+ *   displayed.
+ * @param reportDescription A mutable state holding the description provided by the user.
+ * @param horizontalPadding Padding applied to the input fields for consistent alignment.
+ * @param modifier A [Modifier] to customize the appearance and layout of the inputs.
  */
 @Composable
 fun ReportInputs(
@@ -96,7 +124,18 @@ fun ReportInputs(
           Modifier.fillMaxWidth().padding(horizontal = horizontalPadding).testTag("DetailsInput"))
 }
 
-/** Displays a submit button with a confirmation dialog when clicked. */
+/**
+ * Displays a submit button with a confirmation dialog.
+ *
+ * When the button is clicked, a confirmation dialog is displayed. If the user confirms, the
+ * provided onSubmit callback is executed. The button is styled to visually indicate whether the
+ * inputs are valid or not.
+ *
+ * @param showDialog A mutable state controlling the visibility of the confirmation dialog.
+ * @param validInputs A boolean indicating whether the form inputs are valid. This affects the
+ *   button's visual state.
+ * @param onSubmit A callback function to be executed when the user confirms the submission.
+ */
 @Composable
 fun SubmitButtonWithDialog(
     showDialog: MutableState<Boolean>,

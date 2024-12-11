@@ -9,11 +9,12 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
@@ -21,12 +22,12 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
+import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.IconButton
-import com.github.se.cyrcle.ui.theme.atoms.Text
 
 /**
  * Alert dialog to show the image of a parking spot. This composable is displayed when the user
- * clicks on an image of a parking spot.
+ * clicks on an image of a parking spot, as well as report it when necessary
  *
  * @param onDismiss Callback when the dialog is dismissed.
  * @param imageUrl URL of the image to display.
@@ -56,16 +57,23 @@ fun ParkingDetailsAlertDialogShowImage(
                               MaterialTheme.shapes.small) // Set the background color
                           .padding(4.dp)
                           .testTag("parkingDetailsAlertDialogImage"))
+              // Use Box for aligning the buttons
+              Box(modifier = Modifier.align(Alignment.TopEnd).padding(6.dp)) {
+                // Report button
+                IconButton(
+                    modifier = Modifier,
+                    icon = Icons.Outlined.Flag,
+                    contentDescription = "Report",
+                    onClick = { navigationActions.navigateTo(Screen.IMAGE_REPORT) },
+                    inverted = true,
+                    colorLevel = ColorLevel.ERROR)
+              }
               IconButton(
-                  modifier = Modifier.padding(8.dp),
+                  modifier = Modifier.padding(6.dp).align(Alignment.TopStart),
                   icon = Icons.AutoMirrored.Filled.ArrowBack,
                   contentDescription = "Back",
                   onClick = onDismiss,
                   inverted = true)
-              FloatingActionButton(
-                  onClick = { navigationActions.navigateTo(Screen.IMAGE_REPORT) },
-                  modifier = Modifier.padding(8.dp),
-                  content = { Text("REPORT IMAGE") })
             }
       })
 }

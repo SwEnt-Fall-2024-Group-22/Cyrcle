@@ -26,7 +26,7 @@ class ReportScreenAlertDialogTest {
     composeTestRule
         .onNodeWithTag("AlertDialogContent")
         .assertTextContains(
-            "We take reports very seriously. Please make sure that the information you have mentioned is accurate. If enough users also submit reports on this object, it will be flagged for administrator review. Do you still want to add this Report?")
+            "We take reports very seriously. Please make sure that the information you have mentioned is accurate. Do you want to add this Report?")
 
     // Check for "Yes" and "No" buttons
     composeTestRule.onNodeWithTag("CancelButton").assertIsDisplayed().assertTextEquals("No")
