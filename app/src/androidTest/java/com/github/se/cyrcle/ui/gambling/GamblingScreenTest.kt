@@ -89,16 +89,55 @@ class GamblingScreenTest {
     composeTestRule.mainClock.autoAdvance = false
 
     composeTestRule.onNodeWithTag("coin_display").assertTextEquals("Coins: 25")
+
     // First spin (25 coins -> 15 coins)
     composeTestRule.onNodeWithTag("spin_button").assertIsEnabled()
     composeTestRule.onNodeWithTag("spin_button").performClick()
-    composeTestRule.mainClock.advanceTimeBy(10000)
+
+    // Wait for first spin to complete
+    run {
+      val timeoutMs = 15000L
+      val incrementMs = 1000L
+      var elapsedTime = 0L
+
+      while (elapsedTime < timeoutMs) {
+        composeTestRule.mainClock.advanceTimeBy(incrementMs)
+        Thread.sleep(1000)
+
+        try {
+          composeTestRule.onNodeWithTag("spin_button").assertIsEnabled()
+          break
+        } catch (e: AssertionError) {
+          // Button still disabled, continue waiting
+        }
+        elapsedTime += incrementMs
+      }
+    }
 
     // Second spin (15 coins -> 5 coins)
     composeTestRule.onNodeWithTag("coin_display").assertTextEquals("Coins: 15")
     composeTestRule.onNodeWithTag("spin_button").assertIsEnabled()
     composeTestRule.onNodeWithTag("spin_button").performClick()
-    composeTestRule.mainClock.advanceTimeBy(10000)
+
+    // Wait for second spin to complete
+    run {
+      val timeoutMs = 15000L
+      val incrementMs = 1000L
+      var elapsedTime = 0L
+
+      while (elapsedTime < timeoutMs) {
+        composeTestRule.mainClock.advanceTimeBy(incrementMs)
+        Thread.sleep(1000)
+
+        try {
+          composeTestRule.onNodeWithTag("spin_button").assertIsEnabled()
+          break
+        } catch (e: AssertionError) {
+          // Button still disabled, continue waiting
+        }
+        elapsedTime += incrementMs
+      }
+    }
 
     // Third spin attempt (5 coins, should be disabled)
     composeTestRule.onNodeWithTag("coin_display").assertTextEquals("Coins: 5")
@@ -160,7 +199,25 @@ class GamblingScreenTest {
     composeTestRule.mainClock.autoAdvance = false
 
     composeTestRule.onNodeWithTag("spin_button").performClick()
-    composeTestRule.mainClock.advanceTimeBy(10000)
+    // Wait for second spin to complete
+    run {
+      val timeoutMs = 15000L
+      val incrementMs = 1000L
+      var elapsedTime = 0L
+
+      while (elapsedTime < timeoutMs) {
+        composeTestRule.mainClock.advanceTimeBy(incrementMs)
+        Thread.sleep(1000)
+
+        try {
+          composeTestRule.onNodeWithTag("spin_button").assertIsEnabled()
+          break
+        } catch (e: AssertionError) {
+          // Button still disabled, continue waiting
+        }
+        elapsedTime += incrementMs
+      }
+    }
     composeTestRule.onNodeWithTag("spin_button").assertIsEnabled()
 
     composeTestRule.mainClock.autoAdvance = true
@@ -186,7 +243,26 @@ class GamblingScreenTest {
 
     repeat(3) {
       composeTestRule.onNodeWithTag("spin_button").performClick()
-      composeTestRule.mainClock.advanceTimeBy(10000)
+
+      run {
+        val timeoutMs = 15000L
+        val incrementMs = 1000L
+        var elapsedTime = 0L
+
+        while (elapsedTime < timeoutMs) {
+          composeTestRule.mainClock.advanceTimeBy(incrementMs)
+          Thread.sleep(1000)
+
+          try {
+            composeTestRule.onNodeWithTag("spin_button").assertIsEnabled()
+            break
+          } catch (e: AssertionError) {
+            // Button still disabled, continue waiting
+          }
+          elapsedTime += incrementMs
+        }
+      }
+
       composeTestRule.onNodeWithTag("spin_button").assertIsEnabled()
     }
 
@@ -352,6 +428,7 @@ class GamblingScreenTest {
 
     // If level up occurred, verify the level up components
     if (levelUpVisible) {
+      userViewModel.getUserById("1", {}, {})
       composeTestRule.onNodeWithTag("level_up_text").assertExists()
       composeTestRule.onNodeWithTag("level_progress_bar").assertExists()
       composeTestRule.mainClock.advanceTimeBy(500) // Give time for progress bar animation
