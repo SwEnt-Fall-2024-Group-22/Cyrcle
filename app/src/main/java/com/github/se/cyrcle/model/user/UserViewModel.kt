@@ -60,6 +60,9 @@ class UserViewModel(
   private val _reportedParkings = MutableStateFlow<List<String>>(emptyList())
   val reportedParkings: StateFlow<List<String>> = _reportedParkings
 
+  private val _reviewedParkings = MutableStateFlow<List<String>>(emptyList())
+  val reviewedParkings: StateFlow<List<String>> = _reviewedParkings
+
   private val _reportedReviews = MutableStateFlow<List<String>>(emptyList())
   val reportedReviews: StateFlow<List<String>> = _reportedReviews
 
@@ -201,6 +204,21 @@ class UserViewModel(
   }
 
   /**
+   * Adds a parking to the list of reviewed parkings for the selected user and updates the reviewed
+   * parkings state.
+   *
+   * @param parking The parking ID to add to the list of reviewed parkings.
+   */
+  fun addReviewedParkingToSelectedUser(parking: String) {
+    currentUser.value?.let { user ->
+      val updatedDetails =
+          user.details?.copy(reviewedParkings = user.details.reviewedParkings + parking)
+      val updatedUser = user.copy(details = updatedDetails)
+      updateUser(updatedUser) { _reviewedParkings.value += parking }
+    }
+  }
+
+  /**
    * Adds a review to the list of reported reviews for the selected user and updates the reported
    * reviews state.
    *
@@ -211,7 +229,7 @@ class UserViewModel(
       val updatedDetails =
           user.details?.copy(reportedReviews = user.details.reportedReviews + review)
       val updatedUser = user.copy(details = updatedDetails)
-      updateUser(updatedUser) { _reportedParkings.value += review }
+      updateUser(updatedUser) { _reportedReviews.value += review }
     }
   }
 
