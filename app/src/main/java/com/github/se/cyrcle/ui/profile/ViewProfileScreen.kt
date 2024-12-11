@@ -4,6 +4,7 @@ import android.app.Activity
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -55,6 +57,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberImagePainter
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
@@ -231,39 +234,39 @@ private fun TabLayout(
     navigationActions: NavigationActions,
     reviewToParkingMap: Map<String, Parking>
 ) {
-  val tabs =
-      listOf(
-          stringResource(R.string.view_profile_screen_favorite_parkings),
-          stringResource(R.string.view_profile_screen_my_reviews))
+    val tabs = listOf(
+        stringResource(R.string.view_profile_screen_favorite_parkings),
+        stringResource(R.string.view_profile_screen_my_reviews),
+        stringResource(R.string.view_profile_screen_my_images) // Add the new tab
+    )
 
-  val pagerState = rememberPagerState(pageCount = { tabs.size })
-  val coroutineScope = rememberCoroutineScope()
+    val pagerState = rememberPagerState(pageCount = { tabs.size })
+    val coroutineScope = rememberCoroutineScope()
 
-  Column(modifier = Modifier.fillMaxWidth().padding(top = 24.dp)) {
-    TabRow(selectedTabIndex = pagerState.currentPage, modifier = Modifier.testTag("TabRow")) {
-      tabs.forEachIndexed { index, title ->
-        Tab(
-            text = { Text(title) },
-            selected = pagerState.currentPage == index,
-            onClick = { coroutineScope.launch { pagerState.animateScrollToPage(index) } },
-            modifier = Modifier.testTag("Tab${title.replace(" ", "")}"))
-      }
+    Column(modifier = Modifier.fillMaxWidth().padding(top = 24.dp)) {
+        TabRow(selectedTabIndex = pagerState.currentPage, modifier = Modifier.testTag("TabRow")) {
+            tabs.forEachIndexed { index, title ->
+                Tab(
+                    text = { Text(title) },
+                    selected = pagerState.currentPage == index,
+                    onClick = { coroutineScope.launch { pagerState.animateScrollToPage(index) } },
+                    modifier = Modifier.testTag("Tab${title.replace(" ", "")}")
+                )
+            }
+        }
+
+        HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
+            when (page) {
+                0 -> FavoriteParkingsSection(userViewModel, parkingViewModel, navigationActions)
+                1 -> UserReviewsSection(
+                    reviewViewModel, userViewModel, parkingViewModel, navigationActions, reviewToParkingMap
+                )
+                2 -> UserImagesSection(userViewModel) // Add the new section
+            }
+        }
     }
-
-    HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
-      when (page) {
-        0 -> FavoriteParkingsSection(userViewModel, parkingViewModel, navigationActions)
-        1 ->
-            UserReviewsSection(
-                reviewViewModel,
-                userViewModel,
-                parkingViewModel,
-                navigationActions,
-                reviewToParkingMap)
-      }
-    }
-  }
 }
+
 
 @Composable
 private fun FavoriteParkingsSection(
@@ -454,4 +457,58 @@ private fun UserReviewsSection(
           }
     }
   }
+}
+
+
+@Composable
+private fun UserImagesSection(userViewModel: UserViewModel) {
+    val userImages by userViewModel.userImages.collectAsState()
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        if (userImages.isEmpty()) {
+            Text(
+                text = stringResource(R.string.view_profile_screen_no_images_message),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(16.dp).testTag("NoImagesMessage")
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth().testTag("UserImagesList"),
+                contentPadding = PaddingValues(16.dp)
+            ) {
+                itemsIndexed(userImages) { index, image ->
+                    UserImageCard(image = image, index = index)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun UserImageCard(image: String, index: Int) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .testTag("ImageItem$index"),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            androidx.compose.material3.Text(
+                text = stringResource(R.string.view_profile_screen_image_item, index + 1),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.testTag("ImageTitle$index")
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Image(
+                painter = rememberImagePainter(data = image),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .testTag("Image$index")
+            )
+        }
+    }
 }

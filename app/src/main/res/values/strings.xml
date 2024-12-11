@@ -178,6 +178,9 @@
     <string name="view_profile_screen_no_note">No personal notes to this parking yet</string>
     <string name="view_profile_screen_note">Note: %s</string>
     <string name="view_profile_screen_no_reviews_message">You haven\'t written any reviews yet</string>
+    <string name="view_profile_screen_my_images">My Images</string>
+    <string name="view_profile_screen_no_images_message">No images to display.</string>
+    <string name="view_profile_screen_image_item">Image #%d</string>
 
     <!-- All Reviews Screen -->
     <string name="all_review_title">All Reviews For %s</string>
