@@ -39,6 +39,7 @@ import com.github.se.cyrcle.model.review.TestInstancesReview
 import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserDetails
+import com.github.se.cyrcle.model.user.UserLevelDisplay
 import com.github.se.cyrcle.model.user.UserPublic
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
@@ -83,7 +84,7 @@ class ViewProfileScreenTest {
 
     val user =
         User(
-            UserPublic("1", "janesmith", "http://example.com/jane.jpg"),
+            UserPublic("1", "janesmith", "http://example.com/jane.jpg",92.5),
             UserDetails("Jane", "Smith", "jane.smith@example.com"))
 
     userViewModel =
@@ -164,7 +165,7 @@ class ViewProfileScreenTest {
     composeTestRule.onNodeWithTag("EditButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("DisplayFirstName").assertTextEquals("Jane")
     composeTestRule.onNodeWithTag("DisplayLastName").assertTextEquals("Smith")
-    composeTestRule.onNodeWithTag("DisplayUsername").assertTextEquals("@janesmith")
+    composeTestRule.onNodeWithTag("DisplayUsernameWithLevel").assertTextEquals("[☤92] janesmith")
   }
 
   @Test
@@ -200,7 +201,7 @@ class ViewProfileScreenTest {
     composeTestRule.onNodeWithTag("EditButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("DisplayFirstName").assertTextEquals("Alice")
     composeTestRule.onNodeWithTag("DisplayLastName").assertTextEquals("Johnson")
-    composeTestRule.onNodeWithTag("DisplayUsername").assertTextEquals("@alicejohnson")
+    composeTestRule.onNodeWithTag("DisplayUsernameWithLevel").assertTextEquals("[☤92] alicejohnson")
   }
 
   @Test
@@ -222,7 +223,7 @@ class ViewProfileScreenTest {
     composeTestRule.onNodeWithTag("EditButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("DisplayFirstName").assertTextEquals("Jane")
     composeTestRule.onNodeWithTag("DisplayLastName").assertTextEquals("Smith")
-    composeTestRule.onNodeWithTag("DisplayUsername").assertTextEquals("@janesmith")
+    composeTestRule.onNodeWithTag("DisplayUsernameWithLevel").assertTextEquals("[☤92] janesmith")
   }
 
   @Test
@@ -464,7 +465,7 @@ class ViewProfileScreenTest {
     composeTestRule.waitForIdle()
 
     // Verify that the display reflects the new username
-    composeTestRule.onNodeWithTag("DisplayUsername").assertTextEquals("@alicejohnson")
+    composeTestRule.onNodeWithTag("DisplayUsernameWithLevel").assertTextEquals("[☤92] alicejohnson")
 
     // Enter edit mode again and cancel
     composeTestRule.onNodeWithTag("EditButton").performClick()
@@ -473,7 +474,7 @@ class ViewProfileScreenTest {
     composeTestRule.waitForIdle()
 
     // Verify that the display still reflects the new username
-    composeTestRule.onNodeWithTag("DisplayUsername").assertTextEquals("@alicejohnson")
+    composeTestRule.onNodeWithTag("DisplayUsernameWithLevel").assertTextEquals("[☤92] alicejohnson")
   }
 
   @Test

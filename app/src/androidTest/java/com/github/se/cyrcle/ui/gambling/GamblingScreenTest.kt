@@ -428,10 +428,9 @@ class GamblingScreenTest {
 
     // If level up occurred, verify the level up components
     if (levelUpVisible) {
-      userViewModel.getUserById("1", {}, {})
       composeTestRule.onNodeWithTag("level_up_text").assertExists()
       composeTestRule.onNodeWithTag("level_progress_bar").assertExists()
-      composeTestRule.mainClock.advanceTimeBy(500) // Give time for progress bar animation
+      composeTestRule.mainClock.advanceTimeBy(2000) // Give time for progress bar animation
       composeTestRule
           .onNodeWithTag("current_level_text")
           .assertExists()
