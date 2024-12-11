@@ -80,18 +80,19 @@ object UserLevelDisplay {
 
     // Map of level ranges (0-9, 10-19, etc.) to their display properties
     private val levelRanges = mapOf(
-        0 to LevelRange("⭒", "#696969"),  // Dim Gray
-        10 to LevelRange("☆", "#708090"), // Slate Gray
-        20 to LevelRange("✧", "#1E90FF"), // Dodger Blue
-        30 to LevelRange("✵", "#4682B4"), // Steel Blue
-        40 to LevelRange("❁", "#228B22"), // Forest Green
-        50 to LevelRange("❂", "#32CD32"), // Lime Green
-        60 to LevelRange("ღ", "#FFC0CB"), // Pink
-        70 to LevelRange("დ", "#800080"), // Purple
+        0 to LevelRange("⭒", "#2B2B2B"),  // Dark Gray
+        10 to LevelRange("☆", "#1C1C1C"), // Even Darker Gray
+        20 to LevelRange("✧", "#104E8B"), // Dark Dodger Blue
+        30 to LevelRange("✵", "#27408B"), // Dark Royal Blue
+        40 to LevelRange("❁", "#006400"), // Dark Green
+        50 to LevelRange("❂", "#228B22"), // Forest Green
+        60 to LevelRange("ღ", "#FF6347"), // Dark Orange (Tomato)
+        70 to LevelRange("დ", "#4B0082"), // Dark Purple (Indigo)
         80 to LevelRange("ლ", "#8B0000"), // Dark Red
-        90 to LevelRange("☤", "#FFD700"), // Gold
+        90 to LevelRange("☤", "#B8860B"), // Dark Gold (Goldenrod)
         100 to LevelRange("♔", "rainbow") // Special case for rainbow effect
     )
+
 
     /**
      * Gets the appropriate level range properties for a given score
