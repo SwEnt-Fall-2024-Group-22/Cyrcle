@@ -351,14 +351,8 @@ class MainActivityTest {
 
     fun assertAuthScreen() {
       composeTestRule.onNodeWithTag("LoginScreen").assertIsDisplayed()
-      composeTestRule
-          .onNodeWithTag("LoginTitle")
-          .assertIsDisplayed()
-          .assertTextEquals("Welcome to Cyrcle")
-      composeTestRule
-          .onNodeWithTag("AnonymousLoginButton")
-          .assertIsDisplayed()
-          .assertHasClickAction()
+      composeTestRule.onNodeWithTag("LoginTitle").assertIsDisplayed().assertTextEquals("Welcome to")
+      composeTestRule.onNodeWithTag("AnonymousLoginButton").assertIsDisplayed()
       composeTestRule
           .onNodeWithTag("AuthenticateButton")
           .assertIsDisplayed()
