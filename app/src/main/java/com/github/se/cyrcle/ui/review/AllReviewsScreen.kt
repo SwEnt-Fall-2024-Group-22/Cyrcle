@@ -49,6 +49,8 @@ import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.review.Review
 import com.github.se.cyrcle.model.review.ReviewViewModel
+import com.github.se.cyrcle.model.user.User
+import com.github.se.cyrcle.model.user.UserLevelDisplay
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
@@ -330,8 +332,16 @@ fun ReviewCard(
     userViewModel: UserViewModel,
     reviewViewModel: ReviewViewModel
 ) {
-  val currentUser by userViewModel.currentUser.collectAsState()
-  val userSignedIn by userViewModel.isSignedIn.collectAsState(false)
+    val currentUser by userViewModel.currentUser.collectAsState()
+    val userSignedIn by userViewModel.isSignedIn.collectAsState(false)
+
+    var ownerReputationScore = 0.0
+    userViewModel.getUserById(
+        review.owner,
+        onSuccess = { ownerReputationScore = it.public.userReputationScore }
+    )
+    val range = UserLevelDisplay.getLevelRange(ownerReputationScore)
+    val level = ownerReputationScore.toInt()
 
   Card(
       modifier =
@@ -352,12 +362,28 @@ fun ReviewCard(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically) {
-                      androidx.compose.material3.Text(
-                          text = title,
-                          style = MaterialTheme.typography.bodySmall,
-                          modifier = Modifier.weight(1f).testTag("ReviewTitle$index"),
-                          maxLines = 1,
-                          overflow = TextOverflow.Ellipsis)
+                      if (range.color == "rainbow") {
+                          androidx.compose.material3.Text(
+                              text = "[${range.symbol}$level] $title",
+                              style = MaterialTheme.typography.bodySmall,
+                              modifier = Modifier
+                                  .weight(1f)
+                                  .testTag("ReviewTitle$index"),
+                              maxLines = 1,
+                              overflow = TextOverflow.Ellipsis
+                          )
+                      } else {
+                          androidx.compose.material3.Text(
+                              text = "[${range.symbol}$level] $title",
+                              style = MaterialTheme.typography.bodySmall,
+                              color = Color(android.graphics.Color.parseColor(range.color)),
+                              modifier = Modifier
+                                  .weight(1f)
+                                  .testTag("ReviewTitle$index"),
+                              maxLines = 1,
+                              overflow = TextOverflow.Ellipsis
+                          )
+                      }
 
                       // Icon buttons for like, dislike, and more options
                       Row(
