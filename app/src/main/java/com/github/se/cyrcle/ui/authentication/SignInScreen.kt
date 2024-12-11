@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
@@ -134,7 +135,9 @@ fun SignInScreen(navigationActions: NavigationActions, userViewModel: UserViewMo
                           }
                     },
                 modifier = Modifier.testTag("AnonymousLoginButton").padding(4.dp),
-                style = TextStyle(textDecoration = TextDecoration.Underline),
+                style =
+                    TextStyle(
+                        textDecoration = TextDecoration.Underline, fontStyle = FontStyle.Italic),
                 onClick = {
                   coroutineScope.launch {
                     clickAnimation(alphaOfGuestButton)
@@ -163,7 +166,9 @@ fun SignInScreen(navigationActions: NavigationActions, userViewModel: UserViewMo
                           }
                     },
                 modifier = Modifier.testTag("OfflineModeButton").padding(4.dp),
-                style = TextStyle(textDecoration = TextDecoration.Underline),
+                style =
+                    TextStyle(
+                        textDecoration = TextDecoration.Underline, fontStyle = FontStyle.Italic),
                 onClick = {
                   coroutineScope.launch {
                     clickAnimation(alphaOfOfflineButton)
