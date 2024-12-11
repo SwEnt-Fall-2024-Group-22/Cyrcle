@@ -8,6 +8,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -102,6 +103,7 @@ fun CreateProfileScreen(navigationActions: NavigationActions, userViewModel: Use
                     else
                         Toast.makeText(context, incorrectFieldsToastText, Toast.LENGTH_SHORT).show()
                   },
+                  modifier = Modifier.testTag("AuthenticateButton"),
                   text = "Create")
             },
             cancelButton = {})
