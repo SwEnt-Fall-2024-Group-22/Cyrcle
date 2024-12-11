@@ -54,7 +54,7 @@ class GamblingScreenTest {
 
     val user =
         User(
-            UserPublic("1", "janesmith", "http://example.com/jane.jpg"),
+            UserPublic("1", "janesmith", "http://example.com/jane.jpg", 0.7),
             UserDetails("Jane", "Smith", "jane.smith@example.com", wallet = Wallet.empty()))
 
     userViewModel =
@@ -252,7 +252,7 @@ class GamblingScreenTest {
 
     while (retries < maxRetries) {
       // Wait for the XP increment to appear
-      val timeoutMs = 15000L // 15 seconds timeout
+      val timeoutMs = 12000L // 12 seconds timeout
       val incrementMs = 1000L // Check every second
       var elapsedTime = 0L
 
@@ -267,7 +267,8 @@ class GamblingScreenTest {
                 .fetchSemanticsNodes()
                 .isNotEmpty()
 
-        if (xpIncrementVisible) break // Exit the loop if the XP increment becomes visible
+        if (xpIncrementVisible) break // Exit the inner loop if the XP increment becomes visible
+
         elapsedTime += incrementMs
       }
 
@@ -289,5 +290,85 @@ class GamblingScreenTest {
     composeTestRule
         .onNodeWithTag("xp_increment_text")
         .assertDoesNotExist() // Ensure XP increment text is no longer visible after 3 seconds
+  }
+
+  @Test
+  fun verify_progress_bar_and_level_up_mechanism_after_xp_reward() {
+    // Add coins to the user's wallet to allow for spins
+    userViewModel.creditCoinsToCurrentUser(1000)
+
+    composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
+
+    composeTestRule.mainClock.autoAdvance = false
+
+    // Verify initial level components exist
+    composeTestRule.onNodeWithTag("level_progress_bar").assertExists()
+    composeTestRule
+        .onNodeWithTag("current_level_text")
+        .assertExists()
+        .assertTextContains(
+            "Level ${userViewModel.currentUser.value!!.public.userReputationScore.toInt()}")
+    composeTestRule
+        .onNodeWithTag("next_level_text")
+        .assertExists()
+        .assertTextContains(
+            "Level ${userViewModel.currentUser.value!!.public.userReputationScore.toInt() + 1}")
+
+    // Perform a spin
+    composeTestRule.onNodeWithTag("spin_button").performClick()
+
+    // Retry logic: maximum number of retries
+    val maxRetries = 100 // if that's not enough ill play the loto
+    var retries = 0
+    var levelUpVisible = false
+
+    while (retries < maxRetries) {
+      val timeoutMs = 12000L // 12 seconds timeout
+      val incrementMs = 500L // Check every second
+      var elapsedTime = 0L
+
+      // Try checking for XP increment visibility
+      while (elapsedTime < timeoutMs) {
+        composeTestRule.mainClock.advanceTimeBy(incrementMs)
+        Thread.sleep(500)
+
+        // Also check for level up text if it appears
+        levelUpVisible =
+            composeTestRule.onAllNodesWithTag("level_up_text").fetchSemanticsNodes().isNotEmpty()
+
+        if (levelUpVisible) break // Exit the inner loop if the level up text becomes visible
+
+        elapsedTime += incrementMs
+      }
+
+      if (levelUpVisible) break // If level up text became visible, exit outer loop
+
+      retries++
+      if (retries < maxRetries) {
+        // If the retry limit is not reached, try again by clicking the spin button again
+        composeTestRule.onNodeWithTag("spin_button").performClick()
+      }
+    }
+
+    // If level up occurred, verify the level up components
+    if (levelUpVisible) {
+      composeTestRule.onNodeWithTag("level_up_text").assertExists()
+      composeTestRule.onNodeWithTag("level_progress_bar").assertExists()
+      composeTestRule.mainClock.advanceTimeBy(500) // Give time for progress bar animation
+      composeTestRule
+          .onNodeWithTag("current_level_text")
+          .assertExists()
+          .assertTextContains(
+              "Level ${userViewModel.currentUser.value!!.public.userReputationScore.toInt()}")
+      composeTestRule
+          .onNodeWithTag("next_level_text")
+          .assertExists()
+          .assertTextContains(
+              "Level ${userViewModel.currentUser.value!!.public.userReputationScore.toInt() + 1}")
+    }
+
+    // Advance time to let the animation fade out
+    composeTestRule.mainClock.advanceTimeBy(3000) // Simulate 3 seconds of animation
+    composeTestRule.onNodeWithTag("level_up_text").assertDoesNotExist()
   }
 }
