@@ -12,6 +12,7 @@ import com.github.se.cyrcle.model.report.ReportedObject
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.report.ReportedObjectType
 import com.github.se.cyrcle.model.user.User
+import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.model.zone.Zone
 import com.github.se.cyrcle.ui.map.MapConfig
 import com.mapbox.geojson.Point
@@ -43,6 +44,7 @@ const val PARKING_MAX_SIDE_LENGTH = 50.0
  */
 class ParkingViewModel(
     private val imageRepository: ImageRepository,
+    private val userViewModel: UserViewModel,
     private val onlineParkingRepository: ParkingRepository,
     private val offlineParkingRepository: OfflineParkingRepository,
     private val reportedObjectRepository: ReportedObjectRepository,
@@ -398,6 +400,16 @@ class ParkingViewModel(
     return id
   }
 
+  /**
+   * Finds a ParkingImage in the imageObjects list that matches the given imagePath.
+   *
+   * @param destinationPath The imagePath to match.
+   * @return The ParkingImage with the matching imagePath, or null if no match is found.
+   */
+  fun Parking.findImageByPath(destinationPath: String): ParkingImage? {
+    return imageObjects.find { it.imagePath == destinationPath }
+  }
+
   private val _onlyWithCCTV = MutableStateFlow(false)
   val onlyWithCCTV: StateFlow<Boolean> = _onlyWithCCTV
 
@@ -565,7 +577,7 @@ class ParkingViewModel(
                       if (report.reason.severity == MAX_SEVERITY)
                           _selectedParking.value?.nbMaxSeverityReports!! + 1
                       else _selectedParking.value?.nbMaxSeverityReports!!,
-                  userUID = user.public.userId,
+                  userUID = _selectedParking.value?.owner!!,
                   objectType = ReportedObjectType.PARKING,
               )
           reportedObjectRepository.checkIfObjectExists(
@@ -647,23 +659,28 @@ class ParkingViewModel(
 
     // If not, add it to the list of Reported Images
     if (foundReportedImage == null) {
-      val parkingImageToAdd = ParkingImage(parkingRepository.getNewUid(), selectedImage, 1, 0)
-      Log.d("ParkingViewModel", "No existing report for this image. Creating a new one.")
-
-      // add the Image Report to the "images_reports" subcollection
-      _selectedParking.value =
-          _selectedParking.value?.copy(
-              reportedImages = _selectedParking.value?.reportedImages?.plus(parkingImageToAdd)!!)
-      parkingRepository.addImageReport(
-          report,
-          selectedParking.value?.uid!!,
-          onSuccess = {
-            Log.d("ParkingViewModel", "Successfully added image report to repository.")
-            parkingRepository.updateParking(_selectedParking.value!!, {}, {})
-          },
-          onFailure = { exception ->
-            Log.e("ParkingViewModel", "Failed to add image report: ${exception.message}")
-          })
+      // look for the object in the Image Objects, it's there even if not in the ReportedImages
+      val associatedImageObject = selectedParking.value?.findImageByPath(selectedImage)
+      if (associatedImageObject != null) {
+        val parkingImageToAdd =
+            ParkingImage(
+                parkingRepository.getNewUid(), selectedImage, associatedImageObject.owner, 1, 0)
+        Log.d("ParkingViewModel", "No existing report for this image. Creating a new one.")
+        // add the Image Report to the "images_reports" subcollection
+        _selectedParking.value =
+            _selectedParking.value?.copy(
+                reportedImages = _selectedParking.value?.reportedImages?.plus(parkingImageToAdd)!!)
+        parkingRepository.addImageReport(
+            report,
+            selectedParking.value?.uid!!,
+            onSuccess = {
+              Log.d("ParkingViewModel", "Successfully added image report to repository.")
+              parkingRepository.updateParking(_selectedParking.value!!, {}, {})
+            },
+            onFailure = { exception ->
+              Log.e("ParkingViewModel", "Failed to add image report: ${exception.message}")
+            })
+      }
       // if the image already is in the Reported Images, update it
     } else {
 
@@ -677,6 +694,7 @@ class ParkingViewModel(
           ParkingImage(
               uid = foundReportedImage.uid,
               imagePath = foundReportedImage.imagePath,
+              owner = foundReportedImage.owner,
               nbReports = foundReportedImage.nbReports + 1,
               nbMaxSeverityReports = numMaxSeverityReports)
 
@@ -700,7 +718,7 @@ class ParkingViewModel(
                     reportUID = report.uid,
                     nbOfTimesReported = updatedImage.nbReports,
                     nbOfTimesMaxSeverityReported = updatedImage.nbMaxSeverityReports,
-                    userUID = user.public.userId,
+                    userUID = updatedImage.owner,
                     objectType = ReportedObjectType.IMAGE)
 
             // since it's already a Reported Image, check it shouldn't become a Reported Object
@@ -906,6 +924,14 @@ class ParkingViewModel(
     // maxNumOfImages ensures that 2 Parkings don't have the same destinationPath (which was
     // possible when the next line used size of images field)
     val destinationPath = "parking/${selectedParking.uid}/${selectedParking.maxNumOfImages}"
+    userViewModel.addImageToUserImages(destinationPath)
+    val imageToUpload =
+        ParkingImage(
+            parkingRepository.getNewUid(),
+            destinationPath,
+            userViewModel.currentUser.value?.public?.userId!!,
+            0,
+            0)
     imageRepository.uploadImage(
         context = context,
         fileUri = imageUri,
@@ -915,6 +941,7 @@ class ParkingViewModel(
               // adapt Parking's reportedImages field
               selectedParking.copy(
                   images = selectedParking.images.plus(destinationPath),
+                  imageObjects = selectedParking.imageObjects.plus(imageToUpload),
                   maxNumOfImages = selectedParking.maxNumOfImages + 1)
           selectParking(updatedParking)
           parkingRepository.updateParking(

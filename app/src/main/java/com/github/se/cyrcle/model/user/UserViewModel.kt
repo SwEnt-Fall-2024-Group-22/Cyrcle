@@ -229,6 +229,14 @@ class UserViewModel(
     }
   }
 
+  fun addImageToUserImages(image: String) {
+    currentUser.value?.let { user ->
+      val updatedDetails = user.details?.copy(userImages = user.details.userImages + image)
+      val updatedUser = user.copy(details = updatedDetails)
+      updateUser(updatedUser) { _reportedParkings.value += image }
+    }
+  }
+
   /**
    * Removes parking from the list of favorite parkings for the selected user and updates the
    * favorite parkings state.
