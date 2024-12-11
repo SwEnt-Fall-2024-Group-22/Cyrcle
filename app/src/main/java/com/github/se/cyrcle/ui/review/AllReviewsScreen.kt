@@ -249,7 +249,9 @@ fun AllReviewsScreen(
                                             navigationActions.goBack()
                                           }),
                               userViewModel = userViewModel,
-                              reviewViewModel = reviewViewModel)
+                              reviewViewModel = reviewViewModel,
+                              ownerReputationScore = currentUser?.public?.userReputationScore
+                          )
                         }
                       } else {
                         // Add review button
@@ -291,8 +293,13 @@ fun AllReviewsScreen(
                       val signInToReport = stringResource(R.string.sign_in_to_report_review)
 
                       var ownerUsername by remember { mutableStateOf(defaultUsername) }
+                      var ownerReputationScore = 0.0
+
                       userViewModel.getUserById(
-                          curReview.owner, onSuccess = { ownerUsername = it.public.username })
+                          curReview.owner, onSuccess = {
+                              ownerUsername = it.public.username
+                              ownerReputationScore = it.public.userReputationScore
+                          })
 
                       ReviewCard(
                           review = curReview,
@@ -314,7 +321,8 @@ fun AllReviewsScreen(
                                         }
                                       }),
                           userViewModel = userViewModel,
-                          reviewViewModel = reviewViewModel)
+                          reviewViewModel = reviewViewModel,
+                          ownerReputationScore = ownerReputationScore)
                     }
               }
         }
@@ -330,18 +338,11 @@ fun ReviewCard(
     onCardClick: () -> Unit,
     options: Map<String, () -> Unit>,
     userViewModel: UserViewModel,
-    reviewViewModel: ReviewViewModel
+    reviewViewModel: ReviewViewModel,
+    ownerReputationScore: Double?
 ) {
     val currentUser by userViewModel.currentUser.collectAsState()
     val userSignedIn by userViewModel.isSignedIn.collectAsState(false)
-
-    var ownerReputationScore = 0.0
-    userViewModel.getUserById(
-        review.owner,
-        onSuccess = { ownerReputationScore = it.public.userReputationScore }
-    )
-    val range = UserLevelDisplay.getLevelRange(ownerReputationScore)
-    val level = ownerReputationScore.toInt()
 
   Card(
       modifier =
@@ -358,32 +359,44 @@ fun ReviewCard(
                   Modifier.fillMaxWidth()
                       .padding(horizontal = 16.dp, vertical = 8.dp)
                       .testTag("ReviewCardContent$index")) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
+                Row(modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically) {
-                      if (range.color == "rainbow") {
-                          androidx.compose.material3.Text(
-                              text = "[${range.symbol}$level] $title",
-                              style = MaterialTheme.typography.bodySmall,
-                              modifier = Modifier
-                                  .weight(1f)
-                                  .testTag("ReviewTitle$index"),
-                              maxLines = 1,
-                              overflow = TextOverflow.Ellipsis
-                          )
-                      } else {
-                          androidx.compose.material3.Text(
-                              text = "[${range.symbol}$level] $title",
-                              style = MaterialTheme.typography.bodySmall,
-                              color = Color(android.graphics.Color.parseColor(range.color)),
-                              modifier = Modifier
-                                  .weight(1f)
-                                  .testTag("ReviewTitle$index"),
-                              maxLines = 1,
-                              overflow = TextOverflow.Ellipsis
-                          )
-                      }
+                        if (ownerReputationScore != null) {
+                            val range = UserLevelDisplay.getLevelRange(ownerReputationScore)
+                            val level = ownerReputationScore.toInt()
+                            if (range.color == "rainbow") {
+                                androidx.compose.material3.Text(
+                                    text = "[${range.symbol}$level] $title",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    //TODO color rainbow
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .testTag("ReviewTitle$index"),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            } else {
+                                androidx.compose.material3.Text(
+                                    text = "[${range.symbol}$level] $title",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color(android.graphics.Color.parseColor(range.color)),
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .testTag("ReviewTitle$index"),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        } else {
+                            androidx.compose.material3.Text(
+                                text = title,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.weight(1f).testTag("ReviewTitle$index"),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis)
+                        }
+
 
                       // Icon buttons for like, dislike, and more options
                       Row(
