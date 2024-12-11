@@ -204,6 +204,11 @@
     <string name="all_reviews_your_review">Your Review</string>
     <string name="all_reviews_other_reviews">Other Reviews</string>
     <string name="all_reviews_all_reviews">All Reviews</string>
+    <string name="view_profile_screen_image_dialog_title">Image Details</string>
+    <string name="view_profile_screen_image_dialog_description">Preview of the selected image:</string>
+    <string name="view_profile_screen_image_dialog_close">Close</string>
+    <string name="view_profile_screen_image_dialog_go_to_parking">Go To Parking</string>
+    <string name="view_profile_screen_image_path">Path: %s</string>
 
     <!-- Review Screen -->
     <string name="review_screen_title_new_review">Add your review</string>

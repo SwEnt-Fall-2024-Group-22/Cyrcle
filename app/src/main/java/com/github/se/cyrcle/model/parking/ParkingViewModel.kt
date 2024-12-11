@@ -90,7 +90,12 @@ class ParkingViewModel(
   private val _selectedImage = MutableStateFlow<String?>(null)
   val selectedImage: StateFlow<String?> = _selectedImage
 
-  /** Selected parking reports to view */
+  /** Selected parking to review/edit */
+  private val _selectedImageObject = MutableStateFlow<ParkingImage?>(null)
+  val selectedImageObject: StateFlow<ParkingImage?> = _selectedImageObject
+
+
+    /** Selected parking reports to view */
   private val _selectedParkingReports = MutableStateFlow<List<ParkingReport>>(emptyList())
   val selectedParkingReports: StateFlow<List<ParkingReport>> = _selectedParkingReports
 
@@ -165,6 +170,7 @@ class ParkingViewModel(
    */
   fun selectImage(imagePath: String) {
     _selectedImage.value = imagePath
+    _selectedImageObject.value = selectedParking.value?.findImageByPath(imagePath)
     loadSelectedImageReports()
   }
 

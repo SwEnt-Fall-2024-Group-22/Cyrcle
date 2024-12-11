@@ -89,8 +89,13 @@ fun ViewProfileScreen(
   val userState by userViewModel.currentUser.collectAsState()
   var isEditing by remember { mutableStateOf(false) }
   var signOut by remember { mutableStateOf(false) }
-
   val signOutToastText = stringResource(R.string.view_profile_on_sign_out_toast)
+
+
+  LaunchedEffect(Unit, userState) {
+      userViewModel.loadSelectedUserImages()
+  }
+
 
   Scaffold(
       modifier = Modifier.testTag("ViewProfileScreen"),
@@ -238,8 +243,7 @@ private fun TabLayout(
       listOf(
           stringResource(R.string.view_profile_screen_favorite_parkings),
           stringResource(R.string.view_profile_screen_my_reviews),
-          stringResource(R.string.view_profile_screen_my_images) // Add the new tab
-          )
+          stringResource(R.string.view_profile_screen_my_images))
 
   val pagerState = rememberPagerState(pageCount = { tabs.size })
   val coroutineScope = rememberCoroutineScope()
@@ -265,7 +269,7 @@ private fun TabLayout(
                 parkingViewModel,
                 navigationActions,
                 reviewToParkingMap)
-        2 -> UserImagesSection(userViewModel) // Add the new section
+        2 -> UserImagesSection(userViewModel, parkingViewModel, navigationActions)
       }
     }
   }
@@ -463,50 +467,101 @@ private fun UserReviewsSection(
 }
 
 @Composable
-private fun UserImagesSection(userViewModel: UserViewModel) {
-  val userImages = userViewModel.currentUser.collectAsState().value?.details?.userImages
+private fun UserImagesSection(userViewModel: UserViewModel, parkingViewModel: ParkingViewModel, navigationActions: NavigationActions) {
 
-  Box(modifier = Modifier.fillMaxSize()) {
-    if (userImages != null) {
-      if (userImages.isEmpty()) {
-        Text(
-            text = stringResource(R.string.view_profile_screen_no_images_message),
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(16.dp).testTag("NoImagesMessage"))
-      } else {
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth().testTag("UserImagesList"),
-            contentPadding = PaddingValues(16.dp)) {
-              itemsIndexed(userImages) { index, image ->
-                UserImageCard(image = image, index = index)
-              }
+    val imagesUrls = userViewModel.selectedUserImageUrls.collectAsState().value
+    val imagesPaths = userViewModel.selectedUserAssociatedImages.collectAsState().value
+    val showDialogImage = remember { mutableStateOf<String?>(null) }
+    val showDialogParking = remember { mutableStateOf<String?>(null) }
+    val showDialogImageDestinationPath = remember { mutableStateOf<List<String>>(emptyList()) }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        if (imagesUrls.isEmpty()) {
+            Text(
+                text = stringResource(R.string.view_profile_screen_no_images_message),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(16.dp).testTag("NoImagesMessage")
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth().testTag("UserImagesList"),
+                contentPadding = PaddingValues(16.dp)
+            ) {
+                itemsIndexed(imagesUrls) { index, url ->
+                    UserImageCard(
+                        url = url,
+                        onClick = {
+                            showDialogImage.value = url
+                            showDialogImageDestinationPath.value =
+                                showDialogImageDestinationPath.value.plus(it)
+                            showDialogParking.value = parkingViewModel.getParkingFromImagePath(imagesPaths[index])
+                        }
+                    )
+                }
             }
-      }
-    } else {
-      Text(
-          text = stringResource(R.string.view_profile_screen_no_images_message),
-          style = MaterialTheme.typography.bodyMedium,
-          modifier = Modifier.padding(16.dp).testTag("NoImagesMessage"))
+        }
     }
-  }
+
+    // Show dialog if an image is clicked
+    showDialogImage.value?.let { imageUrl ->
+        AlertDialog(
+            onDismissRequest = { showDialogImage.value = null },
+            title = { Text(stringResource(R.string.view_profile_screen_image_dialog_title)) },
+            text = {
+                Column {
+                    Text(stringResource(R.string.view_profile_screen_image_dialog_description))
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Image(
+                        painter = rememberImagePainter(data = imageUrl),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxWidth().height(200.dp)
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showDialogImage.value = null }) {
+                    Text(stringResource(R.string.view_profile_screen_image_dialog_close))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    parkingViewModel.getParkingById(showDialogParking.value!!, { parkingForPath ->
+                        parkingViewModel.selectParking(parkingForPath)
+                        navigationActions.navigateTo(Screen.PARKING_DETAILS)
+                    }, {})
+
+                }) {
+                    Text(stringResource(R.string.view_profile_screen_image_dialog_go_to_parking))
+                }
+            }
+        )
+    }
 }
 
 @Composable
-private fun UserImageCard(image: String, index: Int) {
-  Card(
-      modifier = Modifier.fillMaxWidth().padding(8.dp).testTag("ImageItem$index"),
-      colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-      elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
+private fun UserImageCard(
+    url: String,
+    onClick: (String) -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .clickable { onClick(url) } // Attach onClick here
+            .testTag("ImageCard"),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
         Column(modifier = Modifier.padding(16.dp)) {
-          androidx.compose.material3.Text(
-              text = stringResource(R.string.view_profile_screen_image_item, index + 1),
-              style = MaterialTheme.typography.titleMedium,
-              modifier = Modifier.testTag("ImageTitle$index"))
-          Spacer(modifier = Modifier.height(8.dp))
-          Image(
-              painter = rememberImagePainter(data = image),
-              contentDescription = null,
-              modifier = Modifier.fillMaxWidth().height(200.dp).testTag("Image$index"))
+            Spacer(modifier = Modifier.height(8.dp))
+            Image(
+                painter = rememberImagePainter(data = url),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .testTag("ImageContent")
+            )
         }
-      }
+    }
 }

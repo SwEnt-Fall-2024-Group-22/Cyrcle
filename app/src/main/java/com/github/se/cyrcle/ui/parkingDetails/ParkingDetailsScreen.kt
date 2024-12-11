@@ -124,6 +124,8 @@ fun ParkingDetailsScreen(
   if (showDialogImage.value != null) {
     parkingViewModel.selectImage(showDialogImageDestinationPath.value!!)
     ParkingDetailsAlertDialogShowImage(
+        parkingViewModel,
+        userViewModel,
         onDismiss = {
           showDialogImage.value = null
           showDialogImageDestinationPath.value = ""
