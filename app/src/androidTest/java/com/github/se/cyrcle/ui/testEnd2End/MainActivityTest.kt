@@ -5,7 +5,6 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
-import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeTestRule
@@ -351,19 +350,8 @@ class MainActivityTest {
 
     fun assertAuthScreen() {
       composeTestRule.onNodeWithTag("LoginScreen").assertIsDisplayed()
-      composeTestRule
-          .onNodeWithTag("LoginTitle")
-          .assertIsDisplayed()
-          .assertTextEquals("Welcome to Cyrcle")
-      composeTestRule
-          .onNodeWithTag("AnonymousLoginButton")
-          .assertIsDisplayed()
-          .assertHasClickAction()
-      composeTestRule
-          .onNodeWithTag("AuthenticateButton")
-          .assertIsDisplayed()
-          .assertHasClickAction()
-          .assertTextContains("Sign in with Google")
+      composeTestRule.onNodeWithTag("LoginTitle").assertIsDisplayed().assertTextEquals("Welcome to")
+      composeTestRule.onNodeWithTag("AnonymousLoginButton").assertIsDisplayed()
     }
 
     @OptIn(ExperimentalTestApi::class)

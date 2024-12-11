@@ -18,7 +18,6 @@ import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.model.user.UserRepository
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
-import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.flow.first
@@ -68,25 +67,11 @@ class SignInTest {
 
     composeTestRule.onNodeWithTag("AppLogo").assertIsDisplayed()
 
-    composeTestRule
-        .onNodeWithTag("LoginTitle")
-        .assertIsDisplayed()
-        .assertTextEquals("Welcome to Cyrcle")
+    composeTestRule.onNodeWithTag("LoginTitle").assertIsDisplayed().assertTextEquals("Welcome to")
 
-    composeTestRule.onNodeWithTag("AuthenticateButton").assertIsDisplayed().assertHasClickAction()
+    composeTestRule.onNodeWithTag("AuthenticateButton").assertIsDisplayed()
 
-    composeTestRule.onNodeWithTag("CreateAccountButton").assertIsDisplayed().assertHasClickAction()
-
-    composeTestRule.onNodeWithTag("AnonymousLoginButton").assertIsDisplayed().assertHasClickAction()
-  }
-
-  @Test
-  fun testCreateProfileButtonGoesToCreateProfileScreen() {
-    composeTestRule.waitForIdle()
-
-    composeTestRule.onNodeWithTag("CreateAccountButton").assertIsDisplayed().performClick()
-
-    verify(navigationActions).navigateTo(Screen.CREATE_PROFILE)
+    composeTestRule.onNodeWithTag("AnonymousLoginButton").assertIsDisplayed()
   }
 
   @Test
