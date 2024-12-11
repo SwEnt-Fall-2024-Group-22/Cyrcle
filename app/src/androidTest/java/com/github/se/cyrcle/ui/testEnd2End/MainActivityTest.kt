@@ -127,6 +127,26 @@ class MainActivityTest {
     mapRobot.assertIsOfflineMode()
   }
 
+  @Test
+  fun testReview(){
+
+    // Authenticated user
+    authRobot.assertAuthScreen()
+    authRobot.performSignIn()
+
+    mapRobot.assertMapScreen()
+
+
+    // Anonymous user
+    authRobot.assertAuthScreen()
+    authRobot.performAnonymousSignIn()
+
+    mapRobot.assertMapScreen()
+
+
+
+  }
+
   // ============================================================================
   // ============================ ADDPARKINGS ROBOT =============================
   // ============================================================================
@@ -437,6 +457,16 @@ class MainActivityTest {
       composeTestRule.waitUntilExactlyOneExists(hasTestTag("LoginScreen"))
     }
   }
+  // ============================================================================
+  // ============================= REVIEW SCREEN ROBOT =============================
+  // ============================================================================
+  private class ReviewRobot(val composeTestRule: ComposeTestRule) {
+
+
+
+
+  }
+
 
   // ============================================================================
   // ============================= HELPER FUNCTIONS =============================
