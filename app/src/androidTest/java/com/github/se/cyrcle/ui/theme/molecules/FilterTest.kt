@@ -22,6 +22,7 @@ import com.github.se.cyrcle.di.mocks.MockPermissionHandler
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.image.ImageRepository
+import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingCapacity
 import com.github.se.cyrcle.model.parking.ParkingProtection
 import com.github.se.cyrcle.model.parking.ParkingRackType
@@ -47,6 +48,7 @@ class FilterTest {
   private lateinit var parkingViewModel: ParkingViewModel
   private lateinit var addressViewModel: AddressViewModel
   private lateinit var permissionHandler: MockPermissionHandler
+  private lateinit var mapViewModel: MapViewModel
 
   @Before
   fun setUp() {
@@ -58,6 +60,7 @@ class FilterTest {
     mockAddressRepository = MockAddressRepository()
 
     addressViewModel = AddressViewModel(mockAddressRepository)
+    mapViewModel = MapViewModel()
     permissionHandler = MockPermissionHandler()
     parkingViewModel =
         ParkingViewModel(
@@ -73,7 +76,12 @@ class FilterTest {
   @Test
   fun testCCTVCheckboxInteraction() {
     composeTestRule.setContent {
-      FilterPanel(parkingViewModel, true, addressViewModel, permissionHandler = permissionHandler)
+      FilterPanel(
+          parkingViewModel,
+          true,
+          addressViewModel,
+          permissionHandler = permissionHandler,
+          mapViewModel = mapViewModel)
     }
 
     // Show filters first
@@ -87,7 +95,12 @@ class FilterTest {
   @Test
   fun testShowFiltersButtonInitiallyDisplaysShowFilters() {
     composeTestRule.setContent {
-      FilterPanel(parkingViewModel, true, addressViewModel, permissionHandler = permissionHandler)
+      FilterPanel(
+          parkingViewModel,
+          true,
+          addressViewModel,
+          permissionHandler = permissionHandler,
+          mapViewModel = mapViewModel)
     }
 
     // Act & Assert
@@ -98,7 +111,12 @@ class FilterTest {
   @OptIn(ExperimentalTestApi::class)
   fun testShowFiltersButtonTogglesFilterSection() {
     composeTestRule.setContent {
-      FilterPanel(parkingViewModel, true, addressViewModel, permissionHandler = permissionHandler)
+      FilterPanel(
+          parkingViewModel,
+          true,
+          addressViewModel,
+          permissionHandler = permissionHandler,
+          mapViewModel = mapViewModel)
     }
 
     // Act: Click to show filters
@@ -125,7 +143,12 @@ class FilterTest {
   fun testProtectionFilters() {
 
     composeTestRule.setContent {
-      FilterPanel(parkingViewModel, true, addressViewModel, permissionHandler = permissionHandler)
+      FilterPanel(
+          parkingViewModel,
+          true,
+          addressViewModel,
+          permissionHandler = permissionHandler,
+          mapViewModel = mapViewModel)
     }
 
     // Act: Click to show filters
@@ -160,7 +183,12 @@ class FilterTest {
   @OptIn(ExperimentalTestApi::class)
   fun testRackTypeFilters() {
     composeTestRule.setContent {
-      FilterPanel(parkingViewModel, true, addressViewModel, permissionHandler = permissionHandler)
+      FilterPanel(
+          parkingViewModel,
+          true,
+          addressViewModel,
+          permissionHandler = permissionHandler,
+          mapViewModel = mapViewModel)
     }
 
     // Act: Click to show filters
@@ -194,7 +222,12 @@ class FilterTest {
   @OptIn(ExperimentalTestApi::class)
   fun testCapacityFilters() {
     composeTestRule.setContent {
-      FilterPanel(parkingViewModel, true, addressViewModel, permissionHandler = permissionHandler)
+      FilterPanel(
+          parkingViewModel,
+          true,
+          addressViewModel,
+          permissionHandler = permissionHandler,
+          mapViewModel = mapViewModel)
     }
 
     // Act: Click to show filters
