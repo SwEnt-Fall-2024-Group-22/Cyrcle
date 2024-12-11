@@ -449,7 +449,8 @@ private fun UserReviewsSection(
                       },
                       options = mapOf(),
                       userViewModel = userViewModel,
-                      reviewViewModel = reviewViewModel)
+                      reviewViewModel = reviewViewModel,
+                      ownerReputationScore = null)
                 }
           }
     }
