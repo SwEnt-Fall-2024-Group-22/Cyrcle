@@ -240,6 +240,10 @@ fun MapScreen(
   }
 
   val forgetBikeLocation = remember { mutableStateOf(false) }
+  val bikeLocationBitmap =
+      BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.dot)
+  val bikeLocationMarker =
+      resizedBitmap // Bitmap.createScaledBitmap(bikeLocationBitmap, 80, 80, false)
 
   val giveCoinsRegex = Regex("^/give coins (\\d+)$", RegexOption.IGNORE_CASE)
   val killRegex = Regex("^/kill$", RegexOption.IGNORE_CASE)
@@ -276,6 +280,17 @@ fun MapScreen(
             mapViewModel.updateMapRecentering(true)
           }
     }
+  }
+
+  LaunchedEffect(bikeLocationViewModel.bikeLocationState) {
+    Log.d(
+        "BikeLocationState",
+        "${bikeLocationViewModel.bikeLocationState.value} | ${bikeLocationViewModel.bikeLocation.value}")
+    mapViewModel.drawBikeLocation(
+        bikeLocationAnnotationManager,
+        bikeLocationViewModel.bikeLocation.value.location,
+        bikeLocationMarker,
+        remove = !bikeLocationViewModel.bikeLocation.value.isValid)
   }
 
   Scaffold(
@@ -334,10 +349,12 @@ fun MapScreen(
                                                             CLUSTER_COLORS)))))))
                 // Create polygon annotation manager to draw rectangles
                 rectangleAnnotationManager =
-                    mapView.annotations.createPolygonAnnotationManager(
-                        annotationConfig = AnnotationConfig())
+                    mapView.annotations.createPolygonAnnotationManager(AnnotationConfig())
                 // Create point annotation manager to draw parking labels
                 pLabelAnnotationManager =
+                    mapView.annotations.createPointAnnotationManager(AnnotationConfig())
+                // Create point annotation manager to draw bike location
+                bikeLocationAnnotationManager =
                     mapView.annotations.createPointAnnotationManager(AnnotationConfig())
                 // ======================= ANNOTATIONS =======================
 
@@ -475,7 +492,12 @@ fun MapScreen(
                   .padding(bottom = 25.dp, end = 16.dp)
                   .scale(1.2f)) {
                 BikeLocationButton(
-                    bikeLocationViewModel, mapViewModel, navigationActions, forgetBikeLocation)
+                    bikeLocationViewModel,
+                    mapViewModel,
+                    navigationActions,
+                    bikeLocationAnnotationManager,
+                    bikeLocationMarker,
+                    forgetBikeLocation)
 
                 if (locationEnabled) {
                   IconButton(
@@ -972,6 +994,8 @@ fun BikeLocationButton(
     bikeLocationViewModel: BikeLocationViewModel,
     mapViewModel: MapViewModel,
     navigationActions: NavigationActions,
+    bikeLocationAnnotationManager: PointAnnotationManager?,
+    bikeLocationMarker: Bitmap,
     forgetBikeLocation: MutableState<Boolean>
 ) {
   val bikeLocationState by bikeLocationViewModel.bikeLocationState.collectAsState()
@@ -999,6 +1023,8 @@ fun BikeLocationButton(
           }
           LOCATION_STORED_UNUSED -> {
             val bikeLocation = Location(bikeLocationViewModel.goToMyBike()?.location!!)
+            mapViewModel.drawBikeLocation(
+                bikeLocationAnnotationManager, bikeLocation.center, bikeLocationMarker)
             mapViewModel.zoomOnLocation(navigationActions, bikeLocation)
             Log.d("BikeLocationButton", "on LOCATION_STORED_UNUSED (${bikeLocation})")
           }
