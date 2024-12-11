@@ -8,6 +8,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -20,7 +21,7 @@ import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.model.user.Wallet
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
-import com.github.se.cyrcle.ui.theme.atoms.GoogleSignInButton
+import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
@@ -96,10 +97,14 @@ fun CreateProfileScreen(navigationActions: NavigationActions, userViewModel: Use
                   stringResource(R.string.create_profile_sign_in_explanation),
                   modifier = Modifier.padding(bottom = 5.dp),
                   style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold))
-              GoogleSignInButton {
-                if (validInputs) onSignInClick(userAttempt)
-                else Toast.makeText(context, incorrectFieldsToastText, Toast.LENGTH_SHORT).show()
-              }
+              Button(
+                  onClick = {
+                    if (validInputs) onSignInClick(userAttempt)
+                    else
+                        Toast.makeText(context, incorrectFieldsToastText, Toast.LENGTH_SHORT).show()
+                  },
+                  modifier = Modifier.testTag("AuthenticateButton"),
+                  text = "Create")
             },
             cancelButton = {})
       }
