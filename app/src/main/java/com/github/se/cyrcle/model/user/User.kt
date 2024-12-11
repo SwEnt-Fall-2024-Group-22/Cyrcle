@@ -100,7 +100,7 @@ object UserLevelDisplay {
     fun getLevelRange(score: Double): LevelRange {
         val level = score.toInt()
         val rangeStart = ((level / 10) * 10).coerceAtMost(100)
-        return levelRanges[rangeStart] ?: LevelRange("⭒", "#808080") // Default fallback
+        return levelRanges[rangeStart] ?: LevelRange("⭒", "#2B2B2B") // Default fallback
     }
 }
 
