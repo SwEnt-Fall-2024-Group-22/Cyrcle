@@ -464,20 +464,29 @@ private fun UserReviewsSection(
 
 @Composable
 private fun UserImagesSection(userViewModel: UserViewModel) {
-  val userImages by userViewModel.userImages.collectAsState()
+  val userImages = userViewModel.currentUser.collectAsState().value?.details?.userImages
 
   Box(modifier = Modifier.fillMaxSize()) {
-    if (userImages.isEmpty()) {
+    if (userImages != null) {
+      if (userImages.isEmpty()) {
+        Text(
+            text = stringResource(R.string.view_profile_screen_no_images_message),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(16.dp).testTag("NoImagesMessage"))
+      } else {
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth().testTag("UserImagesList"),
+            contentPadding = PaddingValues(16.dp)) {
+              itemsIndexed(userImages) { index, image ->
+                UserImageCard(image = image, index = index)
+              }
+            }
+      }
+    } else {
       Text(
           text = stringResource(R.string.view_profile_screen_no_images_message),
           style = MaterialTheme.typography.bodyMedium,
           modifier = Modifier.padding(16.dp).testTag("NoImagesMessage"))
-    } else {
-      LazyColumn(
-          modifier = Modifier.fillMaxWidth().testTag("UserImagesList"),
-          contentPadding = PaddingValues(16.dp)) {
-            itemsIndexed(userImages) { index, image -> UserImageCard(image = image, index = index) }
-          }
     }
   }
 }

@@ -63,7 +63,7 @@ class MainActivity : ComponentActivity() {
   private val parkingViewModel: ParkingViewModel by viewModels {
     CustomViewModelFactory {
       ParkingViewModel(
-          imageRepository, parkingRepository, offlineParkingRepository, reportedObjectRepository)
+          imageRepository, userViewModel, parkingRepository, offlineParkingRepository, reportedObjectRepository)
     }
   }
   private val reportedObjectViewModel: ReportedObjectViewModel by viewModels {

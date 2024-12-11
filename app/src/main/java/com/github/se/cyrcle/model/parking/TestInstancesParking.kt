@@ -15,6 +15,7 @@ object TestInstancesParking {
           null,
           Location(EPFLCenter),
           listOf("parkings/Test_spot_1/1.jpg"),
+          emptyList(),
           0,
           emptyList(),
           ParkingCapacity.LARGE,
@@ -33,6 +34,7 @@ object TestInstancesParking {
           null,
           Location(Point.fromLngLat(6.7, 46.3)),
           listOf("parkings/Test_spot_2/1.jpg", "parkings/Test_spot_2/2.jpg"),
+          emptyList(),
           0,
           emptyList(),
           ParkingCapacity.SMALL,
@@ -50,6 +52,7 @@ object TestInstancesParking {
           Location(Point.fromLngLat(7.1, 47.1)),
           listOf(
               "https://upload.wikimedia.org/wikipedia/commons/7/78/%22G%C3%A4nsemarkt%22_in_Amance_-_panoramio.jpg"),
+          emptyList(),
           0,
           emptyList(),
           ParkingCapacity.LARGE,
@@ -67,6 +70,7 @@ object TestInstancesParking {
           Location(Point.fromLngLat(7.111, 47.111)),
           listOf(
               "https://upload.wikimedia.org/wikipedia/commons/7/78/%22G%C3%A4nsemarkt%22_in_Amance_-_panoramio.jpg"),
+          emptyList(),
           0,
           emptyList(),
           ParkingCapacity.LARGE,
@@ -84,6 +88,7 @@ object TestInstancesParking {
           Location(Point.fromLngLat(7.112, 47.112)),
           listOf(
               "https://upload.wikimedia.org/wikipedia/commons/7/78/%22G%C3%A4nsemarkt%22_in_Amance_-_panoramio.jpg"),
+          emptyList(),
           0,
           emptyList(),
           ParkingCapacity.LARGE,
