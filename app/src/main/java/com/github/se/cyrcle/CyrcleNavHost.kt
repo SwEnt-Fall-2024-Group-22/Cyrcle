@@ -70,7 +70,7 @@ fun CyrcleNavHost(
             permissionHandler)
       }
       composable(Screen.PARKING_DETAILS) {
-        ParkingDetailsScreen(navigationActions, parkingViewModel, userViewModel)
+        ParkingDetailsScreen(mapViewModel, navigationActions, parkingViewModel, userViewModel)
       }
       composable(Screen.PARKING_REPORT) {
         ParkingReportScreen(navigationActions, userViewModel, parkingViewModel)
