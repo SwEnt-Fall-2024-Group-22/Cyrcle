@@ -151,7 +151,12 @@ constructor(private val db: FirebaseFirestore, private val auth: FirebaseAuth) :
 
   private fun deserializeUserPublic(data: Map<String, Any>): UserPublic {
     val gson = Gson()
-    return gson.fromJson(gson.toJson(data), UserPublic::class.java)
+    val processedData = data.toMutableMap()
+    // Ensure default values for missing fields
+    val userReputationScore = (data["userReputationScore"] as? Number)?.toDouble() ?: 0.0
+    val json = gson.toJson(processedData)
+    val userPublic = gson.fromJson(json, UserPublic::class.java)
+    return userPublic.copy(userReputationScore = userReputationScore)
   }
 
   private fun deserializeUserDetails(data: Map<String, Any>): UserDetails {

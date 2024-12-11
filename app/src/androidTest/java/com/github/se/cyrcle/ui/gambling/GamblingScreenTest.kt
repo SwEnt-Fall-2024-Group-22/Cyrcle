@@ -4,9 +4,11 @@ import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
@@ -52,7 +54,7 @@ class GamblingScreenTest {
 
     val user =
         User(
-            UserPublic("1", "janesmith", "http://example.com/jane.jpg"),
+            UserPublic("1", "janesmith", "http://example.com/jane.jpg", 0.7),
             UserDetails("Jane", "Smith", "jane.smith@example.com", wallet = Wallet.empty()))
 
     userViewModel =
@@ -87,16 +89,55 @@ class GamblingScreenTest {
     composeTestRule.mainClock.autoAdvance = false
 
     composeTestRule.onNodeWithTag("coin_display").assertTextEquals("Coins: 25")
+
     // First spin (25 coins -> 15 coins)
     composeTestRule.onNodeWithTag("spin_button").assertIsEnabled()
     composeTestRule.onNodeWithTag("spin_button").performClick()
-    composeTestRule.mainClock.advanceTimeBy(10000)
+
+    // Wait for first spin to complete
+    run {
+      val timeoutMs = 15000L
+      val incrementMs = 1000L
+      var elapsedTime = 0L
+
+      while (elapsedTime < timeoutMs) {
+        composeTestRule.mainClock.advanceTimeBy(incrementMs)
+        Thread.sleep(1000)
+
+        try {
+          composeTestRule.onNodeWithTag("spin_button").assertIsEnabled()
+          break
+        } catch (e: AssertionError) {
+          // Button still disabled, continue waiting
+        }
+        elapsedTime += incrementMs
+      }
+    }
 
     // Second spin (15 coins -> 5 coins)
     composeTestRule.onNodeWithTag("coin_display").assertTextEquals("Coins: 15")
     composeTestRule.onNodeWithTag("spin_button").assertIsEnabled()
     composeTestRule.onNodeWithTag("spin_button").performClick()
-    composeTestRule.mainClock.advanceTimeBy(10000)
+
+    // Wait for second spin to complete
+    run {
+      val timeoutMs = 15000L
+      val incrementMs = 1000L
+      var elapsedTime = 0L
+
+      while (elapsedTime < timeoutMs) {
+        composeTestRule.mainClock.advanceTimeBy(incrementMs)
+        Thread.sleep(1000)
+
+        try {
+          composeTestRule.onNodeWithTag("spin_button").assertIsEnabled()
+          break
+        } catch (e: AssertionError) {
+          // Button still disabled, continue waiting
+        }
+        elapsedTime += incrementMs
+      }
+    }
 
     // Third spin attempt (5 coins, should be disabled)
     composeTestRule.onNodeWithTag("coin_display").assertTextEquals("Coins: 5")
@@ -158,7 +199,25 @@ class GamblingScreenTest {
     composeTestRule.mainClock.autoAdvance = false
 
     composeTestRule.onNodeWithTag("spin_button").performClick()
-    composeTestRule.mainClock.advanceTimeBy(10000)
+    // Wait for second spin to complete
+    run {
+      val timeoutMs = 15000L
+      val incrementMs = 1000L
+      var elapsedTime = 0L
+
+      while (elapsedTime < timeoutMs) {
+        composeTestRule.mainClock.advanceTimeBy(incrementMs)
+        Thread.sleep(1000)
+
+        try {
+          composeTestRule.onNodeWithTag("spin_button").assertIsEnabled()
+          break
+        } catch (e: AssertionError) {
+          // Button still disabled, continue waiting
+        }
+        elapsedTime += incrementMs
+      }
+    }
     composeTestRule.onNodeWithTag("spin_button").assertIsEnabled()
 
     composeTestRule.mainClock.autoAdvance = true
@@ -184,7 +243,26 @@ class GamblingScreenTest {
 
     repeat(3) {
       composeTestRule.onNodeWithTag("spin_button").performClick()
-      composeTestRule.mainClock.advanceTimeBy(10000)
+
+      run {
+        val timeoutMs = 15000L
+        val incrementMs = 1000L
+        var elapsedTime = 0L
+
+        while (elapsedTime < timeoutMs) {
+          composeTestRule.mainClock.advanceTimeBy(incrementMs)
+          Thread.sleep(1000)
+
+          try {
+            composeTestRule.onNodeWithTag("spin_button").assertIsEnabled()
+            break
+          } catch (e: AssertionError) {
+            // Button still disabled, continue waiting
+          }
+          elapsedTime += incrementMs
+        }
+      }
+
       composeTestRule.onNodeWithTag("spin_button").assertIsEnabled()
     }
 
@@ -229,5 +307,145 @@ class GamblingScreenTest {
 
     // Verify that navigationActions.goBack() was called
     verify(mockNavigationActions).goBack()
+  }
+
+  @Test
+  fun verify_xp_increment_visible_after_spin() {
+    // Add coins to the user's wallet to allow for spins
+    userViewModel.creditCoinsToCurrentUser(1000)
+
+    composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
+
+    composeTestRule.mainClock.autoAdvance = false
+
+    // Perform a spin
+    composeTestRule.onNodeWithTag("spin_button").performClick()
+
+    // Retry logic: maximum number of retries
+    val maxRetries = 100 // if that's not enough ill play the loto
+    var retries = 0
+    var xpIncrementVisible = false
+
+    while (retries < maxRetries) {
+      // Wait for the XP increment to appear
+      val timeoutMs = 12000L // 12 seconds timeout
+      val incrementMs = 1000L // Check every second
+      var elapsedTime = 0L
+
+      // Try checking for XP increment visibility
+      while (elapsedTime < timeoutMs) {
+        composeTestRule.mainClock.advanceTimeBy(incrementMs)
+        Thread.sleep(1000)
+
+        xpIncrementVisible =
+            composeTestRule
+                .onAllNodesWithTag("xp_increment_text")
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+
+        if (xpIncrementVisible) break // Exit the inner loop if the XP increment becomes visible
+
+        elapsedTime += incrementMs
+      }
+
+      if (xpIncrementVisible) break // If XP increment became visible, exit outer loop
+
+      retries++
+      if (retries < maxRetries) {
+        // If the retry limit is not reached, try again by clicking the spin button again
+        composeTestRule.onNodeWithTag("spin_button").performClick()
+      }
+    }
+    // Assert the XP increment text
+    composeTestRule
+        .onNodeWithTag("xp_increment_text")
+        .assertTextContains("XP", substring = true) // Ensure XP increment is displayed
+
+    // Advance time to let the animation fade out
+    composeTestRule.mainClock.advanceTimeBy(3000) // Simulate 3 seconds of animation
+    composeTestRule
+        .onNodeWithTag("xp_increment_text")
+        .assertDoesNotExist() // Ensure XP increment text is no longer visible after 3 seconds
+  }
+
+  @Test
+  fun verify_progress_bar_and_level_up_mechanism_after_xp_reward() {
+    // Add coins to the user's wallet to allow for spins
+    userViewModel.creditCoinsToCurrentUser(1000)
+
+    composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
+
+    composeTestRule.mainClock.autoAdvance = false
+
+    // Verify initial level components exist
+    composeTestRule.onNodeWithTag("level_progress_bar").assertExists()
+    composeTestRule
+        .onNodeWithTag("current_level_text")
+        .assertExists()
+        .assertTextContains(
+            "Level ${userViewModel.currentUser.value!!.public.userReputationScore.toInt()}")
+    composeTestRule
+        .onNodeWithTag("next_level_text")
+        .assertExists()
+        .assertTextContains(
+            "Level ${userViewModel.currentUser.value!!.public.userReputationScore.toInt() + 1}")
+
+    // Perform a spin
+    composeTestRule.onNodeWithTag("spin_button").performClick()
+
+    // Retry logic: maximum number of retries
+    val maxRetries = 100 // if that's not enough ill play the loto
+    var retries = 0
+    var levelUpVisible = false
+
+    while (retries < maxRetries) {
+      val timeoutMs = 12000L // 12 seconds timeout
+      val incrementMs = 500L // Check every second
+      var elapsedTime = 0L
+
+      // Try checking for XP increment visibility
+      while (elapsedTime < timeoutMs) {
+        composeTestRule.mainClock.advanceTimeBy(incrementMs)
+        Thread.sleep(500)
+
+        // Also check for level up text if it appears
+        levelUpVisible =
+            composeTestRule.onAllNodesWithTag("level_up_text").fetchSemanticsNodes().isNotEmpty()
+
+        if (levelUpVisible) break // Exit the inner loop if the level up text becomes visible
+
+        elapsedTime += incrementMs
+      }
+
+      if (levelUpVisible) break // If level up text became visible, exit outer loop
+
+      retries++
+      if (retries < maxRetries) {
+        // If the retry limit is not reached, try again by clicking the spin button again
+        composeTestRule.onNodeWithTag("spin_button").performClick()
+      }
+    }
+
+    // If level up occurred, verify the level up components
+    if (levelUpVisible) {
+      userViewModel.getUserById("1", {}, {})
+      composeTestRule.onNodeWithTag("level_up_text").assertExists()
+      composeTestRule.onNodeWithTag("level_progress_bar").assertExists()
+      composeTestRule.mainClock.advanceTimeBy(500) // Give time for progress bar animation
+      composeTestRule
+          .onNodeWithTag("current_level_text")
+          .assertExists()
+          .assertTextContains(
+              "Level ${userViewModel.currentUser.value!!.public.userReputationScore.toInt()}")
+      composeTestRule
+          .onNodeWithTag("next_level_text")
+          .assertExists()
+          .assertTextContains(
+              "Level ${userViewModel.currentUser.value!!.public.userReputationScore.toInt() + 1}")
+    }
+
+    // Advance time to let the animation fade out
+    composeTestRule.mainClock.advanceTimeBy(3000) // Simulate 3 seconds of animation
+    composeTestRule.onNodeWithTag("level_up_text").assertDoesNotExist()
   }
 }

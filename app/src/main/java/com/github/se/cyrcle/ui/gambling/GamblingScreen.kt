@@ -1,10 +1,19 @@
 package com.github.se.cyrcle.ui.gambling
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -160,7 +169,7 @@ fun WheelView(
 
         requiredRotation += randomOffset
         if (requiredRotation <= 0) requiredRotation += 360
-        val fullRotations = (6..7).random() * 360
+        val fullRotations = (6..10).random() * 360
         targetRotation = rotation - (requiredRotation + fullRotations)
         currentRotation = rotation
         spinStartTime = System.currentTimeMillis()
@@ -181,10 +190,8 @@ fun WheelView(
           rotation = targetRotation % 360
           isSpinning = false
           pauseAfterSpin = true
-          delay(2000)
-          pauseAfterSpin = false
-
           onSegmentLanded?.invoke(segments[getSegmentAtPointer(rotation)].name)
+          pauseAfterSpin = false
         }
       }
     }
@@ -209,11 +216,9 @@ fun WheelView(
 
           val startAngle = index * segmentAngle
           val middleAngle = Math.toRadians((startAngle + segmentAngle / 2.0))
-          val textRadius = radius * 0.65f // Moved closer to edge (was 0.6f)
+          val textRadius = radius * 0.65f
           val textX = centerX + cos(middleAngle).toFloat() * textRadius
           val textY = centerY + sin(middleAngle).toFloat() * textRadius
-
-          // Measure text size first
           val textLayoutResult =
               textMeasurer.measure(
                   text = segment.name,
@@ -266,8 +271,52 @@ fun WheelView(
 
 @Composable
 fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserViewModel) {
+  val rarityLegendary = stringResource(R.string.rarity_legendary)
+  val rarityCommon = stringResource(R.string.rarity_common)
+  val rarityRare = stringResource(R.string.rarity_rare)
+  val rarityEpic = stringResource(R.string.rarity_epic)
+
   val userState by userViewModel.currentUser.collectAsState()
   var coins by remember { mutableStateOf(userState?.details?.wallet?.getCoins()) }
+  val currentLevel = userState?.public?.userReputationScore ?: 0.0
+  val flooredLevel = currentLevel.toInt()
+  val targetProgress = (currentLevel - flooredLevel).toFloat()
+
+  var displayedLevel by remember { mutableIntStateOf(flooredLevel) }
+  val animatedProgress = remember { Animatable(targetProgress) }
+
+  var xpIncrement by remember { mutableStateOf(0.0) }
+  var showXpIncrement by remember { mutableStateOf(false) }
+  var rarityText by remember { mutableStateOf("") }
+  var isSpinning by remember { mutableStateOf(false) }
+
+  LaunchedEffect(currentLevel) {
+    val startLevel = displayedLevel
+    val endLevel = flooredLevel
+
+    if (endLevel > startLevel) {
+      for (level in startLevel until endLevel) {
+        animatedProgress.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing))
+        displayedLevel = level + 1
+        animatedProgress.snapTo(0f)
+      }
+    }
+
+    animatedProgress.animateTo(
+        targetValue = targetProgress,
+        animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing))
+    displayedLevel = flooredLevel
+  }
+
+  LaunchedEffect(xpIncrement) {
+    if (xpIncrement > 0) {
+      showXpIncrement = true
+      delay(2000)
+      showXpIncrement = false
+    }
+  }
 
   Scaffold(
       topBar = {
@@ -281,20 +330,98 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
             contentAlignment = Alignment.Center) {
               var wheelSpinFunction by remember { mutableStateOf<(() -> Unit)?>(null) }
 
-              Text(
-                  text = stringResource(R.string.gambling_screen_coins_display, coins ?: 0),
-                  modifier =
-                      Modifier.align(Alignment.TopCenter)
-                          .padding(top = 16.dp)
-                          .testTag("coin_display"),
-                  style = MaterialTheme.typography.headlineMedium)
+              Column(
+                  horizontalAlignment = Alignment.CenterHorizontally,
+                  modifier = Modifier.align(Alignment.TopCenter)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(0.8f).padding(bottom = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween) {
+                          Text(
+                              text = "Level ${displayedLevel}",
+                              style = MaterialTheme.typography.bodyMedium,
+                              modifier = Modifier.testTag("current_level_text"))
+                          Text(
+                              text = "Level ${displayedLevel + 1}",
+                              style = MaterialTheme.typography.bodyMedium,
+                              modifier = Modifier.testTag("next_level_text"))
+                        }
+
+                    LinearProgressIndicator(
+                        progress = { animatedProgress.value },
+                        modifier =
+                            Modifier.fillMaxWidth(0.8f).height(8.dp).testTag("level_progress_bar"),
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    AnimatedVisibility(
+                        visible = displayedLevel < flooredLevel,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()) {
+                          Text(
+                              text = "Level Up!",
+                              color = MaterialTheme.colorScheme.primary,
+                              style = MaterialTheme.typography.headlineSmall,
+                              modifier = Modifier.padding(vertical = 8.dp).testTag("level_up_text"))
+                        }
+
+                    Text(
+                        text = stringResource(R.string.gambling_screen_coins_display, coins ?: 0),
+                        modifier = Modifier.testTag("coin_display"),
+                        style = MaterialTheme.typography.headlineMedium)
+
+                    AnimatedVisibility(
+                        visible = showXpIncrement && (xpIncrement > 0),
+                        enter = fadeIn(animationSpec = tween(durationMillis = 500)),
+                        exit = fadeOut(animationSpec = tween(durationMillis = 500))) {
+                          Text(
+                              text = "${rarityText}: +%.2f XP!".format(xpIncrement),
+                              style = MaterialTheme.typography.bodyMedium.copy(color = Color.Green),
+                              modifier =
+                                  Modifier.align(Alignment.CenterHorizontally)
+                                      .padding(top = 16.dp)
+                                      .testTag("xp_increment_text"))
+                        }
+                  }
 
               WheelView(
                       modifier = Modifier.size(300.dp).testTag("wheel_view"),
-                      onSegmentLanded = { /* Handle landing */})
+                      onSegmentLanded = { segmentName ->
+                        val reputationIncrement =
+                            when (segmentName) {
+                              rarityLegendary -> 10.0
+                              rarityCommon -> 1.0 / sqrt(currentLevel + 1.0)
+                              rarityRare -> 2.0 / sqrt(currentLevel + 1.0)
+                              rarityEpic -> 16.0 / sqrt(currentLevel + 1.0)
+                              else -> 0.0
+                            }
+
+                        val updatedUser =
+                            userState?.copy(
+                                public =
+                                    userState!!
+                                        .public
+                                        .copy(
+                                            userReputationScore =
+                                                userState!!.public.userReputationScore +
+                                                    reputationIncrement))
+                        if (updatedUser != null) {
+                          userViewModel.updateUser(user = updatedUser)
+                        }
+
+                        xpIncrement = reputationIncrement
+                        rarityText = segmentName
+                        isSpinning = false
+                      })
                   .let { spinFn -> wheelSpinFunction = spinFn }
 
-              val canSpin = userState?.details?.wallet?.isSolvable(SPIN_COST, 0) == true
+              val canSpin =
+                  remember(userState, isSpinning) {
+                    userState?.details?.wallet?.isSolvable(SPIN_COST, 0) == true &&
+                        !isSpinning &&
+                        wheelSpinFunction != null
+                  }
 
               Button(
                   onClick = {
@@ -303,6 +430,7 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
                         0,
                         onSuccess = {
                           coins = userState?.details?.wallet?.getCoins()
+                          isSpinning = true
                           wheelSpinFunction?.invoke()
                         })
                   },
