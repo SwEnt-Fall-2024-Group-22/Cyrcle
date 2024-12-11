@@ -72,7 +72,7 @@ fun ParkingDetailsAlertDialogShowImage(
                   modifier = Modifier.padding(6.dp).align(Alignment.TopStart),
                   icon = Icons.AutoMirrored.Filled.ArrowBack,
                   contentDescription = "Back",
-                  onClick = { navigationActions.navigateTo(Screen.IMAGE_REPORT) },
+                  onClick = onDismiss,
                   inverted = true)
             }
       })
