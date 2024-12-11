@@ -209,6 +209,7 @@
     <string name="view_profile_screen_image_dialog_close">Close</string>
     <string name="view_profile_screen_image_dialog_go_to_parking">Go To Parking</string>
     <string name="view_profile_screen_image_path">Path: %s</string>
+    <string name="view_profile_screen_image_deleted">Image deleted!</string>
 
     <!-- Review Screen -->
     <string name="review_screen_title_new_review">Add your review</string>

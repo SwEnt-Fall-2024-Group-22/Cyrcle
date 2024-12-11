@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.parkingDetails
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -19,9 +20,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
+import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
@@ -45,6 +49,8 @@ fun ParkingDetailsAlertDialogShowImage(
     imageUrl: String,
     navigationActions: NavigationActions
 ) {
+  val context = LocalContext.current
+  val strResToast = stringResource(R.string.view_profile_screen_image_deleted)
   val alertDialogMaxHeight = LocalConfiguration.current.screenHeightDp.dp * 0.8f
   BasicAlertDialog(
       modifier = Modifier.testTag("ParkingDetailsAlertDialogShowImage").wrapContentSize(),
@@ -86,6 +92,7 @@ fun ParkingDetailsAlertDialogShowImage(
                       parkingViewModel.selectedParking.value?.uid!!,
                       parkingViewModel.selectedImageObject.value?.imagePath!!)
                   navigationActions.navigateTo(Screen.PARKING_DETAILS)
+                  Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
                 },
                 inverted = true)
           } else {

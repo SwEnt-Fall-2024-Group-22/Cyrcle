@@ -471,12 +471,18 @@ private fun UserImagesSection(
     navigationActions: NavigationActions
 ) {
 
+  val context = LocalContext.current
+  // Image URLs to display
   val imagesUrls = userViewModel.selectedUserImageUrls.collectAsState().value
+  // destinations paths of the images
   val imagesPaths = userViewModel.selectedUserAssociatedImages.collectAsState().value
+  // Variables for Image/Parking in Alert Dialog
   val showDialogImage = remember { mutableStateOf<String?>(null) }
   val showDialogParking = remember { mutableStateOf<String?>(null) }
   val showDialogImageDestinationPath = remember { mutableStateOf<List<String>>(emptyList()) }
   val showDialogImagePath = remember { mutableStateOf<String?>(null) }
+
+  val strResToast = stringResource(R.string.view_profile_screen_image_deleted)
 
   Box(modifier = Modifier.fillMaxSize()) {
     if (imagesUrls.isEmpty()) {
@@ -497,7 +503,6 @@ private fun UserImagesSection(
                         showDialogImageDestinationPath.value.plus(it)
                     showDialogParking.value =
                         parkingViewModel.getParkingFromImagePath(imagesPaths[index])
-                    Log.d("BOFL@C##GRHBCVGL#RYUBCVG#R", imagesPaths[index])
                     showDialogImagePath.value = imagesPaths[index]
                   })
             }
@@ -523,9 +528,7 @@ private fun UserImagesSection(
         confirmButton = {
           IconButton(
               modifier = Modifier.padding(10.dp),
-              icon =
-                  Icons.Filled
-                      .LocalParking, // or Icons.Filled.Paid or Icons.Filled.AttachMoney etc...
+              icon = Icons.Filled.LocalParking,
               contentDescription = "Go To Parking",
               testTag = "ParkingFromImageButton",
               onClick = {
@@ -534,6 +537,7 @@ private fun UserImagesSection(
                     { parkingForPath ->
                       parkingViewModel.selectParking(parkingForPath)
                       navigationActions.navigateTo(Screen.PARKING_DETAILS)
+                      Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
                     },
                     {})
               })

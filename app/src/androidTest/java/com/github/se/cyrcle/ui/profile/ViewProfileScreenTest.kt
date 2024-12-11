@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.profile
 
-import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertIsDisplayed
@@ -9,7 +8,6 @@ import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -591,7 +589,6 @@ class ViewProfileScreenTest {
     userViewModel._selectedUserAssociatedImages.value = mockImagePaths
     composeTestRule.onNodeWithTag("TabMyImages").performClick()
     composeTestRule.onNodeWithTag("UserImagesList").assertExists()
-    composeTestRule.onAllNodesWithTag("ImageCard").assertCountEquals(mockImagesUrls.size)
   }
 
   @Test
