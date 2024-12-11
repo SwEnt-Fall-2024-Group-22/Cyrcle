@@ -192,12 +192,7 @@ fun WheelView(
                     isSpinning = false
                     pauseAfterSpin = true
                     onSegmentLanded?.invoke(segments[getSegmentAtPointer(rotation)].name)
-                    delay(2000)
-
-                    withContext(Dispatchers.Main) {
-                        pauseAfterSpin = false
-                        delay(16)
-                    }
+                    pauseAfterSpin = false
                 }
             }
         }
@@ -240,8 +235,8 @@ fun WheelView(
                             text = segment.name,
                             topLeft =
                             Offset(
-                                textX - textLayoutResult.size.width / 2f,
-                                textY - textLayoutResult.size.height / 2f
+                                textX - textLayoutResult.size.width / 2f, // Center horizontally
+                                textY - textLayoutResult.size.height / 2f // Center vertically
                             ),
                             style =
                             TextStyle(
