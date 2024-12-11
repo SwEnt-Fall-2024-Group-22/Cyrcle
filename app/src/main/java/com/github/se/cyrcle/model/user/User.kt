@@ -66,3 +66,38 @@ data class User(
     val details: UserDetails?,
     val localSession: LocalSession? = null
 )
+
+
+
+object UserLevelDisplay {
+    // Represents a level range with its associated symbol and color
+    data class LevelRange(
+        val symbol: String,
+        val color: String
+    )
+
+    // Map of level ranges (0-9, 10-19, etc.) to their display properties
+    private val levelRanges = mapOf(
+        0 to LevelRange("⭒", "#808080"),  // Gray (0-19)
+        10 to LevelRange("☆", "#808080"),
+        20 to LevelRange("✧", "#4169E1"), // Blue (20-39)
+        30 to LevelRange("✵", "#4169E1"),
+        40 to LevelRange("❁", "#32CD32"), // Green (40-59)
+        50 to LevelRange("❂", "#32CD32"),
+        60 to LevelRange("ღ", "#FFC0CB"), // Pink
+        70 to LevelRange("დ", "#800080"), // Purple
+        80 to LevelRange("ლ", "#8B0000"), // Dark Red
+        90 to LevelRange("☤", "#FFD700"), // Gold
+        100 to LevelRange("♔", "rainbow")  // Special case for rainbow effect
+    )
+
+    /**
+     * Gets the appropriate level range properties for a given score
+     */
+    fun getLevelRange(score: Double): LevelRange {
+        val level = score.toInt()
+        val rangeStart = ((level / 10) * 10).coerceAtMost(100)
+        return levelRanges[rangeStart] ?: LevelRange("⭒", "#808080") // Default fallback
+    }
+}
+
