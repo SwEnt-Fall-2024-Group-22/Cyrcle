@@ -25,11 +25,11 @@ class UserViewModel(
   private val _selectedParkingOwner = MutableStateFlow<User?>(null)
   val selectedParkingOwner: StateFlow<User?> = _selectedParkingOwner
 
-  private val _selectedUserImageUrls = MutableStateFlow<List<String>>(emptyList())
-  val selectedUserImageUrls: StateFlow<List<String>> = _selectedUserImageUrls
+  var _selectedUserImageUrls = MutableStateFlow<List<String>>(emptyList())
+  var selectedUserImageUrls: StateFlow<List<String>> = _selectedUserImageUrls
 
-  private val _selectedUserAssociatedImages = MutableStateFlow<List<String>>(emptyList())
-  val selectedUserAssociatedImages: StateFlow<List<String>> = _selectedUserAssociatedImages
+  var _selectedUserAssociatedImages = MutableStateFlow<List<String>>(emptyList())
+  var selectedUserAssociatedImages: StateFlow<List<String>> = _selectedUserAssociatedImages
 
   val isSignedIn: Flow<Boolean>
     get() = currentUser.map { it != null }
@@ -55,23 +55,22 @@ class UserViewModel(
     _currentUser.value = user
   }
 
+  fun loadSelectedUserImages() {
+    // clear the list of URLs each time we request the images (prevent duplicates and old images
+    // from being displayed)
+    _selectedUserImageUrls.value = emptyList()
+    _selectedUserAssociatedImages.value = emptyList()
 
-    fun loadSelectedUserImages() {
-        // clear the list of URLs each time we request the images (prevent duplicates and old images
-        // from being displayed)
-        _selectedUserImageUrls.value = emptyList()
-        _selectedUserAssociatedImages.value = emptyList()
-
-        currentUser.value!!.details?.userImages?.forEach { imagePath ->
-            _selectedUserAssociatedImages.value = _selectedUserAssociatedImages.value.plus(imagePath)
-            imageRepository.getUrl(
-                path = imagePath,
-                onSuccess = { url ->
-                    _selectedUserImageUrls.value = _selectedUserImageUrls.value.plus(url)
-                },
-                onFailure = { Log.e("ParkingViewModel", "Error getting image URL for path") })
-        }
+    currentUser.value!!.details?.userImages?.forEach { imagePath ->
+      _selectedUserAssociatedImages.value = _selectedUserAssociatedImages.value.plus(imagePath)
+      imageRepository.getUrl(
+          path = imagePath,
+          onSuccess = { url ->
+            _selectedUserImageUrls.value = _selectedUserImageUrls.value.plus(url)
+          },
+          onFailure = { Log.e("ParkingViewModel", "Error getting image URL for path") })
     }
+  }
 
   fun setParkingUser(user: User?) {
     Log.d("UserViewModel", "Setting the current user in viewmodel : $user")
@@ -258,6 +257,14 @@ class UserViewModel(
       val updatedDetails = user.details?.copy(userImages = user.details.userImages + image)
       val updatedUser = user.copy(details = updatedDetails)
       updateUser(updatedUser) { _reportedParkings.value += image }
+    }
+  }
+
+  fun removeImageFromUserImages(image: String) {
+    currentUser.value?.let { user ->
+      val updatedDetails = user.details?.copy(userImages = user.details.userImages - image)
+      val updatedUser = user.copy(details = updatedDetails)
+      updateUser(updatedUser) { _selectedUserAssociatedImages.value -= image }
     }
   }
 

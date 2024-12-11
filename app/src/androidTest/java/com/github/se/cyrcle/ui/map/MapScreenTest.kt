@@ -64,14 +64,16 @@ class MapScreenTest {
     val authenticationRepository = MockAuthenticationRepository()
     val addressRepository = MockAddressRepository()
 
+    userViewModel =
+        UserViewModel(userRepository, parkingRepository, imageRepository, authenticationRepository)
+
     parkingViewModel =
         ParkingViewModel(
             imageRepository,
+            userViewModel,
             parkingRepository,
             offlineParkingRepository,
             mockReportedObjectRepository)
-    userViewModel =
-        UserViewModel(userRepository, parkingRepository, imageRepository, authenticationRepository)
     mapViewModel = MapViewModel()
     permissionHandler = MockPermissionHandler()
     addressViewModel = AddressViewModel(addressRepository)

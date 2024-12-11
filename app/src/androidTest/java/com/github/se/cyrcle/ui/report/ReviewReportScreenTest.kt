@@ -53,12 +53,6 @@ class ReviewReportScreenTest {
     reviewRepository = MockReviewRepository()
     reportedObjectRepository = MockReportedObjectRepository()
 
-    parkingViewModel =
-        ParkingViewModel(
-            MockImageRepository(),
-            parkingRepository,
-            MockOfflineParkingRepository(),
-            reportedObjectRepository)
     userViewModel =
         UserViewModel(
             userRepository,
@@ -66,6 +60,14 @@ class ReviewReportScreenTest {
             MockImageRepository(),
             MockAuthenticationRepository())
     userViewModel.setCurrentUser(TestInstancesUser.user1)
+    parkingViewModel =
+        ParkingViewModel(
+            MockImageRepository(),
+            userViewModel,
+            parkingRepository,
+            MockOfflineParkingRepository(),
+            reportedObjectRepository)
+
     reviewViewModel = ReviewViewModel(reviewRepository, reportedObjectRepository)
 
     parkingViewModel.addParking(TestInstancesParking.parking2)

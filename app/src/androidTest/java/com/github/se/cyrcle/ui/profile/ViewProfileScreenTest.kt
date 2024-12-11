@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.profile
 
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertIsDisplayed
@@ -8,6 +9,7 @@ import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -91,6 +93,7 @@ class ViewProfileScreenTest {
     parkingViewModel =
         ParkingViewModel(
             mockImageRepository,
+            userViewModel,
             mockParkingRepository,
             mockOfflineParkingRepository,
             mockReportedObjectRepository)
@@ -428,6 +431,7 @@ class ViewProfileScreenTest {
             Location(Point.fromLngLat(7.19, 47.19)),
             listOf(
                 "https://upload.wikimedia.org/wikipedia/commons/7/78/%22G%C3%A4nsemarkt%22_in_Amance_-_panoramio.jpg"),
+            emptyList(),
             0,
             emptyList(),
             ParkingCapacity.LARGE,
@@ -574,9 +578,58 @@ class ViewProfileScreenTest {
       swipeRight(startX = this.width * 0.1f, endX = this.width * 0.9f)
     }
     composeTestRule.waitForIdle()
-
-    // Check that we're still on the first tab
     composeTestRule.onNodeWithTag("TabFavoriteParkings").assertIsSelected()
     composeTestRule.onNodeWithTag("FavoriteParkingList").assertIsDisplayed()
+  }
+
+  @Test
+  fun testDisplaysImagesListWhenNotEmpty() {
+    // Add mock images to the user view model
+    val mockImagesUrls = listOf("https://example.com/image1.jpg", "https://example.com/image2.jpg")
+    val mockImagePaths = listOf("path1", "path2")
+    userViewModel._selectedUserImageUrls.value = mockImagesUrls
+    userViewModel._selectedUserAssociatedImages.value = mockImagePaths
+    composeTestRule.onNodeWithTag("TabMyImages").performClick()
+    composeTestRule.onNodeWithTag("UserImagesList").assertExists()
+    composeTestRule.onAllNodesWithTag("ImageCard").assertCountEquals(mockImagesUrls.size)
+  }
+
+  @Test
+  fun testImageClickDisplaysDialog() {
+    val mockImageUrl = "https://example.com/image1.jpg"
+    val mockImagePath = "parking/mockParkingId/1"
+    userViewModel._selectedUserImageUrls.value = listOf(mockImageUrl)
+    userViewModel._selectedUserAssociatedImages.value = listOf(mockImagePath)
+    composeTestRule.onNodeWithTag("TabMyImages").performClick()
+    composeTestRule.onNodeWithTag("ImageCard").performClick()
+    composeTestRule.onNodeWithTag("ParkingFromImageButton").assertExists()
+  }
+
+  @Test
+  fun testDeleteImageFromDialogCallsRemoveImageFromUserImages() {
+    val mockImageUrl = "https://example.com/image1.jpg"
+    val mockImagePath = "parking/mockParkingId/1"
+    userViewModel._selectedUserImageUrls.value = listOf(mockImageUrl)
+    userViewModel._selectedUserAssociatedImages.value = listOf(mockImagePath)
+    composeTestRule.onNodeWithTag("TabMyImages").performClick()
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("ImageCard").performClick()
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("DeleteImageButton").performClick()
+    composeTestRule.waitForIdle()
+    val associatedImages = userViewModel._selectedUserAssociatedImages.value
+    assert(!associatedImages.contains(mockImagePath)) {
+      "Expected $mockImagePath to be removed from associated images, but it still exists."
+    }
+  }
+
+  @Test
+  fun testDisplaysNoImagesWhenListIsEmpty() {
+    // Set up empty image lists in the user view model
+    userViewModel._selectedUserImageUrls.value = emptyList()
+    userViewModel._selectedUserAssociatedImages.value = emptyList()
+    composeTestRule.onNodeWithTag("TabMyImages").performClick()
+    composeTestRule.onNodeWithTag("NoImagesMessage").assertExists()
+    composeTestRule.onNodeWithTag("UserImagesList").assertDoesNotExist()
   }
 }

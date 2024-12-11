@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.parkingDetails
 
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -20,7 +19,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
@@ -47,75 +45,58 @@ fun ParkingDetailsAlertDialogShowImage(
     imageUrl: String,
     navigationActions: NavigationActions
 ) {
-    val alertDialogMaxHeight = LocalConfiguration.current.screenHeightDp.dp * 0.8f
-    BasicAlertDialog(
-        modifier = Modifier.testTag("ParkingDetailsAlertDialogShowImage").wrapContentSize(),
-        onDismissRequest = onDismiss,
-        content = {
-            Box(
-                modifier = Modifier
-                    .heightIn(max = alertDialogMaxHeight)
-                    .wrapContentSize()
-            ) {
-                // Image
-                Image(
-                    painter = rememberAsyncImagePainter(imageUrl),
-                    contentDescription = "Parking spot image",
-                    modifier = Modifier
-                        .wrapContentWidth()
-                        .background(
-                            MaterialTheme.colorScheme.background,
-                            MaterialTheme.shapes.small
-                        ) // Set the background color
-                        .padding(4.dp)
-                        .testTag("parkingDetailsAlertDialogImage")
-                )
+  val alertDialogMaxHeight = LocalConfiguration.current.screenHeightDp.dp * 0.8f
+  BasicAlertDialog(
+      modifier = Modifier.testTag("ParkingDetailsAlertDialogShowImage").wrapContentSize(),
+      onDismissRequest = onDismiss,
+      content = {
+        Box(modifier = Modifier.heightIn(max = alertDialogMaxHeight).wrapContentSize()) {
+          // Image
+          Image(
+              painter = rememberAsyncImagePainter(imageUrl),
+              contentDescription = "Parking spot image",
+              modifier =
+                  Modifier.wrapContentWidth()
+                      .background(
+                          MaterialTheme.colorScheme.background,
+                          MaterialTheme.shapes.small) // Set the background color
+                      .padding(4.dp)
+                      .testTag("parkingDetailsAlertDialogImage"))
 
-                // Back Button (Top Left)
-                IconButton(
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(6.dp),
-                    icon = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    onClick = onDismiss,
-                    inverted = true
-                )
+          // Back Button (Top Left)
+          IconButton(
+              modifier = Modifier.align(Alignment.TopStart).padding(6.dp),
+              icon = Icons.AutoMirrored.Filled.ArrowBack,
+              contentDescription = "Back",
+              onClick = onDismiss,
+              inverted = true)
 
+          // Conditional Delete or Report Button (Top Right)
+          val isOwner =
+              parkingViewModel.selectedImageObject.collectAsState().value?.owner ==
+                  userViewModel.currentUser.collectAsState().value?.public?.userId
 
-                // Conditional Delete or Report Button (Top Right)
-                val isOwner = parkingViewModel.selectedImageObject.collectAsState().value?.owner ==
-                        userViewModel.currentUser.collectAsState().value?.public?.userId
-
-                if (isOwner) {
-                    IconButton(
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(6.dp),
-                        icon = Icons.Outlined.RestoreFromTrash,
-                        contentDescription = "Delete",
-                        onClick = {
-                            parkingViewModel.deleteImageFromParking(
-                                parkingViewModel.selectedParking.value?.uid!!,
-                                parkingViewModel.selectedImageObject.value?.imagePath!!
-                            )
-                            navigationActions.navigateTo(Screen.PARKING_DETAILS)
-                        },
-                        inverted = true
-                    )
-                } else {
-                    IconButton(
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(6.dp),
-                        icon = Icons.Outlined.Flag,
-                        contentDescription = "Report",
-                        onClick = { navigationActions.navigateTo(Screen.IMAGE_REPORT) },
-                        inverted = true,
-                        colorLevel = ColorLevel.ERROR
-                    )
-                }
-            }
+          if (isOwner) {
+            IconButton(
+                modifier = Modifier.align(Alignment.TopEnd).padding(6.dp),
+                icon = Icons.Outlined.RestoreFromTrash,
+                contentDescription = "Delete",
+                onClick = {
+                  parkingViewModel.deleteImageFromParking(
+                      parkingViewModel.selectedParking.value?.uid!!,
+                      parkingViewModel.selectedImageObject.value?.imagePath!!)
+                  navigationActions.navigateTo(Screen.PARKING_DETAILS)
+                },
+                inverted = true)
+          } else {
+            IconButton(
+                modifier = Modifier.align(Alignment.TopEnd).padding(6.dp),
+                icon = Icons.Outlined.Flag,
+                contentDescription = "Report",
+                onClick = { navigationActions.navigateTo(Screen.IMAGE_REPORT) },
+                inverted = true,
+                colorLevel = ColorLevel.ERROR)
+          }
         }
-    )
+      })
 }
