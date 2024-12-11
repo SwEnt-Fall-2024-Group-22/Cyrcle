@@ -87,8 +87,7 @@ import kotlinx.coroutines.runBlocking
  *   a floating action button will be displayed to show/hide the filter options. If false, the
  *   filter the filter options and sections will be expanded and not collapsible.
  * @param addressViewModel The view model that contains the address search functionality
- * @param myLocation A state that indicates whether the user has selected "My Location"
- * @param chosenLocation A state that holds the address chosen by the user
+ * @param mapViewModel The view model that manage the Map
  * @param permissionHandler The handler for managing permissions
  */
 @Composable

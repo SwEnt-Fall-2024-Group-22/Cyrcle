@@ -92,7 +92,7 @@ fun SpotListScreen(
   // chosen location by the user for the list Screen
   val chosenLocation = parkingViewModel.chosenLocation.collectAsState()
 
-  // value that says wether the user clicked on my Location Suggestion or not
+  // value that says whether the user clicked on my Location Suggestion or not
   val myLocation = parkingViewModel.myLocation.collectAsState()
 
   // location permission from location manager
@@ -118,6 +118,7 @@ fun SpotListScreen(
     // center
     // to user position
     if (locPermission && myLocation.value) {
+        Log.e("SpotListScreen", "User Position: $userPosition")
       parkingViewModel.setCircleCenter(userPosition)
     }
 
@@ -188,7 +189,8 @@ fun SpotListScreen(
             // The parkings are sorted by distance to the user's location (default being the EPFL)
             // or by distance to the chosen location if any
             items(
-                items = filteredParkingSpots.sortedBy { computeDistance(it) },
+                items = filteredParkingSpots.sortedBy {
+                    computeDistance(it) },
                 key = { parking -> parking.uid }) { parking ->
                   SpotCard(
                       navigationActions = navigationActions,
