@@ -177,7 +177,7 @@ fun AllReviewsScreen(
   val sortedReviews =
       remember(reviewsList, selectedSortingOption) {
         when (selectedSortingOption) {
-          ReviewSortingOption.DateTime -> reviewsList.sortedByDescending { it.time.nanoseconds }
+          ReviewSortingOption.DateTime -> reviewsList.sortedByDescending { it.time.seconds }
           ReviewSortingOption.ReviewScore -> reviewsList.sortedByDescending { it.rating }
           ReviewSortingOption.Interactions ->
               reviewsList.sortedByDescending { it.likedBy.size + it.dislikedBy.size }
@@ -452,6 +452,7 @@ fun ReviewCard(
       }
 }
 
+/** Converts a [Timestamp] to a formatted date string. */
 fun Timestamp?.toFormattedDate(): String {
   return if (this != null) {
     val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
