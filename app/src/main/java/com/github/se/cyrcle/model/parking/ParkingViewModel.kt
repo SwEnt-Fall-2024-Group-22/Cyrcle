@@ -503,7 +503,7 @@ class ParkingViewModel(
    *   the function will update the closest parkings and if the result is empty, it will increment
    *   the radius.
    */
-  fun updateClosestParkings(nbRequestLeft: Int = 0) {
+  private fun updateClosestParkings(nbRequestLeft: Int = 0) {
     if (_circleCenter.value == null || nbRequestLeft != 0) return // avoid updating if not ready
 
     // This coroutine will update the closest parkings when all the tiles have been fetched. Note
