@@ -51,6 +51,7 @@ class MainActivityTest {
   private lateinit var cardRobot: ParkingDetailsScreenRobot
   private lateinit var addParkingRobot: AddParkingRobot
   private lateinit var allReviewsRobot: AllReviewRobot
+  private lateinit var reviewRobot: ReviewRobot
 
   private lateinit var permissionHandler: PermissionHandler
 
@@ -67,6 +68,7 @@ class MainActivityTest {
     cardRobot = ParkingDetailsScreenRobot(composeTestRule)
     addParkingRobot = AddParkingRobot(composeTestRule)
     allReviewsRobot = AllReviewRobot(composeTestRule)
+    reviewRobot = ReviewRobot(composeTestRule)
   }
 
   @Test
@@ -132,6 +134,8 @@ class MainActivityTest {
   @Test
   fun testReview() {
 
+    composeTestRule.activity.userRepository.addUser(TestInstancesUser.user1, {}, {})
+
     // Authenticated user
     authRobot.assertAuthScreen()
     authRobot.performSignIn()
@@ -147,6 +151,11 @@ class MainActivityTest {
 
     allReviewsRobot.assertAllReviewScreen(true)
     allReviewsRobot.goToReview()
+
+    reviewRobot.assertReviewScreen()
+    reviewRobot.addReview()
+
+    allReviewsRobot.assertReviewIsAdded()
 
     // Anonymous user
     authRobot.assertAuthScreen()
@@ -515,6 +524,35 @@ class MainActivityTest {
           .assertIsDisplayed()
           .assertHasClickAction()
           .performClick()
+    }
+
+    fun assertReviewIsAdded() {
+      composeTestRule.onNodeWithTag("ReviewCard-1").assertIsDisplayed()
+    }
+  }
+
+  // ============================================================================
+  // ============================= MAPSCREEN ROBOT ==============================
+  // ============================================================================
+  private class ReviewRobot(val composeTestRule: ComposeTestRule) {
+
+    fun assertReviewScreen() {
+      composeTestRule.onNodeWithTag("ExperienceText").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("Slider").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("ReviewInput").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("AddReviewButton")
+    }
+
+    fun addReview() {
+      composeTestRule.onNodeWithTag("Slider").performTouchInput {
+        swipe(start = Offset(0f, centerY), end = Offset(1f, centerY))
+      }
+
+      composeTestRule
+          .onNodeWithTag("ReviewInput")
+          .performTextInput("Trop bien mais juste pour test")
+
+      composeTestRule.onNodeWithTag("AddReviewButton").assertHasClickAction().performClick()
     }
   }
 
