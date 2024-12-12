@@ -54,7 +54,7 @@ class GamblingScreenTest {
 
     val user =
         User(
-            UserPublic("1", "janesmith", "http://example.com/jane.jpg", 12.7),
+            UserPublic("1", "janesmith", "http://example.com/jane.jpg", 2.7),
             UserDetails("Jane", "Smith", "jane.smith@example.com", wallet = Wallet.empty()))
 
     userViewModel =
