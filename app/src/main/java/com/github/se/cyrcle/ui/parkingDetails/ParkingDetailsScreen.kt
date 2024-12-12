@@ -492,30 +492,22 @@ fun ParkingDetailsScreen(
                                   text = stringResource(R.string.card_screen_user),
                                   style = MaterialTheme.typography.bodyMedium,
                                   color = MaterialTheme.colorScheme.onBackground)
-                              if (range.color == stringResource(R.string.rainbow_text_color)) {
-                                Text(
-                                    text =
-                                        stringResource(
-                                            R.string.display_user_tag_format,
-                                            range.symbol,
-                                            level,
-                                            ownerUsername),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color =
+                              Text(
+                                  text =
+                                      stringResource(
+                                          R.string.display_user_tag_format,
+                                          range.symbol,
+                                          level,
+                                          ownerUsername),
+                                  style = MaterialTheme.typography.bodyMedium,
+                                  color =
+                                      if (range.color ==
+                                          stringResource(R.string.rainbow_text_color)) {
                                         MaterialTheme.colorScheme
                                             .onSurface // TODO rainbow text color
-                                    )
-                              } else {
-                                Text(
-                                    text =
-                                        stringResource(
-                                            R.string.display_user_tag_format,
-                                            range.symbol,
-                                            level,
-                                            ownerUsername),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = Color(parseColor(range.color)))
-                              }
+                                      } else {
+                                        Color(parseColor(range.color))
+                                      })
                             }
                           }
                     }

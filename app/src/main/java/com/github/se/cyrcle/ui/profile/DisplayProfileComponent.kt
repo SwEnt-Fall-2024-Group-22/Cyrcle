@@ -67,23 +67,18 @@ fun DisplayProfileComponent(user: User?, extras: @Composable () -> Unit) {
 
               Spacer(modifier = Modifier.height(8.dp))
 
-              if (range.color == stringResource(R.string.rainbow_text_color)) {
-                Text(
-                    text =
-                        stringResource(
-                            R.string.display_user_tag_format, range.symbol, level, username),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface, // TODO rainbow color
-                    modifier = Modifier.testTag("RainbowText"))
-              } else {
-                Text(
-                    text =
-                        stringResource(
-                            R.string.display_user_tag_format, range.symbol, level, username),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color(parseColor(range.color)),
-                    modifier = Modifier.testTag("DisplayUsernameWithLevel"))
-              }
+              Text(
+                  text =
+                      stringResource(
+                          R.string.display_user_tag_format, range.symbol, level, username),
+                  style = MaterialTheme.typography.bodyMedium,
+                  color =
+                      if (range.color == stringResource(R.string.rainbow_text_color)) {
+                        MaterialTheme.colorScheme.onSurface // TODO rainbow color
+                      } else {
+                        Color(parseColor(range.color))
+                      },
+                  modifier = Modifier.testTag("DisplayUsernameWithLevel"))
 
               Spacer(modifier = Modifier.height(16.dp))
             }

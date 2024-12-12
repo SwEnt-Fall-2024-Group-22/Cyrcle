@@ -367,27 +367,20 @@ fun ReviewCard(
                       if (ownerReputationScore != null) {
                         val range = UserLevelDisplay.getLevelRange(ownerReputationScore)
                         val level = ownerReputationScore.toInt()
-                        if (range.color == stringResource(R.string.rainbow_text_color)) {
-                          Text(
-                              text =
-                                  stringResource(
-                                      R.string.display_user_tag_format, range.symbol, level, title),
-                              style = MaterialTheme.typography.bodySmall,
-                              // TODO color rainbow
-                              modifier = Modifier.weight(1f).testTag("ReviewTitle$index"),
-                              maxLines = 1,
-                              overflow = TextOverflow.Ellipsis)
-                        } else {
-                          Text(
-                              text =
-                                  stringResource(
-                                      R.string.display_user_tag_format, range.symbol, level, title),
-                              style = MaterialTheme.typography.bodySmall,
-                              color = Color(parseColor(range.color)),
-                              modifier = Modifier.weight(1f).testTag("ReviewTitle$index"),
-                              maxLines = 1,
-                              overflow = TextOverflow.Ellipsis)
-                        }
+                        Text(
+                            text =
+                                stringResource(
+                                    R.string.display_user_tag_format, range.symbol, level, title),
+                            style = MaterialTheme.typography.bodySmall,
+                            color =
+                                if (range.color == stringResource(R.string.rainbow_text_color)) {
+                                  MaterialTheme.colorScheme.onSurface // TODO color rainbow
+                                } else {
+                                  Color(parseColor(range.color))
+                                },
+                            modifier = Modifier.weight(1f).testTag("ReviewTitle$index"),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis)
                       } else {
                         Text(
                             text = title,
