@@ -5,12 +5,14 @@ import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
@@ -323,15 +325,16 @@ class ParkingDetailsScreenTest {
       ParkingDetailsScreen(mapViewModel, navigationActions, parkingViewModel, userViewModel)
     }
 
-    // TODO Find a way to display the button in the screen, as it is not visible by default (too
-    // low)
+    composeTestRule
+        .onNodeWithTag("ParkingDetailsColumn")
+        .performScrollToNode(hasTestTag("ShowInMapButton"))
     composeTestRule
         .onNodeWithTag("ShowInMapButton")
-        .assertExists() // Hard to make display assertions on this button
+        .assertIsDisplayed()
+        .performScrollTo()
         .assertHasClickAction()
-    // .performClick()
+        .performClick()
 
-    // This doesn't work on the CI for unknown reasons
-    //  verify(navigationActions).navigateTo(Screen.MAP)
+    verify(navigationActions).navigateTo(Screen.MAP)
   }
 }
