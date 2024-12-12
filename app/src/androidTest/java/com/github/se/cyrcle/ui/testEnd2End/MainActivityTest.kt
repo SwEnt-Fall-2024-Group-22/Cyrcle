@@ -540,7 +540,6 @@ class MainActivityTest {
           .assertIsDisplayed()
           .assertHasClickAction()
           .performClick()
-      Thread.sleep(5000)
       composeTestRule
           .onNodeWithTag(TopLevelDestinations.PROFILE.textId)
           .assertHasClickAction()
