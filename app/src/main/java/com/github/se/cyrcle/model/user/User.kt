@@ -86,7 +86,7 @@ object UserLevelDisplay {
           70 to LevelRange("დ", "#4B0082"), // Dark Purple (Indigo)
           80 to LevelRange("ლ", "#8B0000"), // Dark Red
           90 to LevelRange("☤", "#B8860B"), // Dark Gold (Goldenrod)
-          100 to LevelRange("♔", "rainbow") // Special case for rainbow effect
+          100 to LevelRange("♔", "rainbow") // TODO Special case for rainbow effect
           )
 
   /** Gets the appropriate level range properties for a given score */
