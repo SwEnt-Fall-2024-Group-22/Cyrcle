@@ -1,6 +1,7 @@
 package com.github.se.cyrcle.ui.parkingDetails
 
 import android.annotation.SuppressLint
+import android.graphics.Color.parseColor
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -16,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
@@ -55,7 +55,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.github.se.cyrcle.R
-import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.user.MAX_NOTE_LENGTH
 import com.github.se.cyrcle.model.user.UserLevelDisplay
@@ -75,54 +74,48 @@ import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ParkingDetailsScreen(
-    mapViewModel: MapViewModel,
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel,
     userViewModel: UserViewModel
 ) {
-    val selectedParking = parkingViewModel.selectedParking.collectAsState().value
-        ?: return Text(stringResource(R.string.no_selected_parking_error))
-    val userSignedIn by userViewModel.isSignedIn.collectAsState(false)
-    val scrollState = rememberScrollState()
-    val context = LocalContext.current
+  val selectedParking =
+      parkingViewModel.selectedParking.collectAsState().value
+          ?: return Text(stringResource(R.string.no_selected_parking_error))
+  val userSignedIn by userViewModel.isSignedIn.collectAsState(false)
+  val scrollState = rememberScrollState()
+  val context = LocalContext.current
 
-    // === States for the images ===
-    var newParkingImageLocalPath by remember { mutableStateOf("") }
-    val showDialog = remember { mutableStateOf(false) }
-    val imagesUrls by parkingViewModel.selectedParkingImagesUrls.collectAsState()
-    val imagesPaths by parkingViewModel.selectedParkingAssociatedPaths.collectAsState()
-    val showDialogImage = remember { mutableStateOf<String?>(null) }
-    val showDialogImageDestinationPath = remember { mutableStateOf<String?>("") }
+  // === States for the images ===
+  var newParkingImageLocalPath by remember { mutableStateOf("") }
+  val showDialog = remember { mutableStateOf(false) }
+  val imagesUrls by parkingViewModel.selectedParkingImagesUrls.collectAsState()
+  val imagesPaths by parkingViewModel.selectedParkingAssociatedPaths.collectAsState()
+  val showDialogImage = remember { mutableStateOf<String?>(null) }
+  val showDialogImageDestinationPath = remember { mutableStateOf<String?>("") }
 
-    var ownerReputationScore = 0.0
-    var ownerUsername = stringResource(R.string.undefined_username)
-    if (selectedParking.owner != "Unknown Owner" && selectedParking.owner != null) {
-        userViewModel.getUserById(
-            selectedParking.owner,
-            onSuccess = {
-                ownerReputationScore = it.public.userReputationScore
-                ownerUsername = it.public.username
-            }
-        )
-    }
-    val range = UserLevelDisplay.getLevelRange(ownerReputationScore)
-    val level = ownerReputationScore.toInt()
+  var ownerReputationScore = 0.0
+  var ownerUsername = stringResource(R.string.undefined_username)
+  if (selectedParking.owner != "Unknown Owner" && selectedParking.owner != null) {
+    userViewModel.getUserById(
+        selectedParking.owner,
+        onSuccess = {
+          ownerReputationScore = it.public.userReputationScore
+          ownerUsername = it.public.username
+        })
+  }
+  val range = UserLevelDisplay.getLevelRange(ownerReputationScore)
+  val level = ownerReputationScore.toInt()
+
   // === === === === === === ===
 
-  LaunchedEffect(Unit, selectedParking) {
-    // On first load of the screen, request the images
-    // This will update the imagesUrls state and trigger a recomposition
-    parkingViewModel.loadSelectedParkingImages()
-  }
-  // Copied from the editProfileScreen. This is the image picker launcher that set the Uri state
-  // with the selected image by the user.
-  // It also change the showDialog state to true to show the dialog with the user selected image.
+  LaunchedEffect(Unit, selectedParking) { parkingViewModel.loadSelectedParkingImages() }
+
   val imagePickerLauncher =
       rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let { newParkingImageLocalPath = it.toString() }
         showDialog.value = newParkingImageLocalPath.isNotEmpty()
       }
-  // Dialog to confirm the image upload with the user.
+
   if (showDialog.value) {
     ParkingDetailsAlertDialogConfirmUpload(
         onDismiss = {
@@ -135,6 +128,7 @@ fun ParkingDetailsScreen(
           parkingViewModel.uploadImage(newParkingImageLocalPath, context) {}
         })
   }
+
   if (showDialogImage.value != null) {
     parkingViewModel.selectImage(showDialogImageDestinationPath.value!!)
     ParkingDetailsAlertDialogShowImage(
@@ -156,61 +150,59 @@ fun ParkingDetailsScreen(
                 .format(selectedParking.optName ?: stringResource(R.string.default_parking_name)))
       },
       modifier = Modifier.testTag("ParkingDetailsScreen")) { padding ->
-      LazyColumn(
-          modifier =
-          Modifier.fillMaxSize()
-              .padding(padding)
-              .padding(32.dp)
-              .testTag("ParkingDetailsColumn")) {
-          item {
+        Column(
+            modifier =
+                Modifier.fillMaxSize()
+                    .padding(padding)
+                    .padding(32.dp)
+                    .verticalScroll(scrollState)
+                    .testTag("ParkingDetailsColumn")) {
               Row(
                   modifier =
-                  Modifier.fillMaxWidth()
-                      .padding(vertical = 8.dp)
-                      .testTag("TopInteractionRow"),
+                      Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("TopInteractionRow"),
                   verticalAlignment = Alignment.CenterVertically,
                   horizontalArrangement = Arrangement.SpaceBetween) {
-                  val parkingNote =
-                      userViewModel.currentUser
-                          .collectAsState()
-                          .value
-                          ?.details
-                          ?.personalNotes
-                          ?.get(selectedParking.uid)
+                    val parkingNote =
+                        userViewModel.currentUser
+                            .collectAsState()
+                            .value
+                            ?.details
+                            ?.personalNotes
+                            ?.get(selectedParking.uid)
 
-                  val editingNote = remember { mutableStateOf(false) }
-                  val editingNoteText = remember { mutableStateOf(parkingNote ?: "") }
+                    val editingNote = remember { mutableStateOf(false) }
+                    val editingNoteText = remember { mutableStateOf(parkingNote ?: "") }
 
-                  // Column to handle text wrapping
-                  Column(
-                      modifier =
-                      Modifier.weight(1f) // Allow this column to take available space
-                          .padding(end = 16.dp) // Space for icons
-                  ) {
-                      if (editingNote.value) {
-                          ConditionCheckingInputText(
-                              value = editingNoteText.value,
-                              onValueChange = { editingNoteText.value = it },
-                              label = stringResource(R.string.list_screen_edit_note),
-                              minCharacters = 0,
-                              maxCharacters = MAX_NOTE_LENGTH,
-                              maxLines = 2,
-                              testTag = "NoteInputText")
-                      } else {
-                          if (userSignedIn) {
+                    // Column to handle text wrapping
+                    Column(
+                        modifier =
+                            Modifier.weight(1f) // Allow this column to take available space
+                                .padding(end = 16.dp) // Space for icons
+                        ) {
+                          if (editingNote.value) {
+                            ConditionCheckingInputText(
+                                value = editingNoteText.value,
+                                onValueChange = { editingNoteText.value = it },
+                                label = stringResource(R.string.list_screen_edit_note),
+                                minCharacters = 0,
+                                maxCharacters = MAX_NOTE_LENGTH,
+                                maxLines = 2,
+                                testTag = "NoteInputText")
+                          } else {
+                            if (userSignedIn) {
                               Text(
                                   text =
-                                  parkingNote ?: stringResource(R.string.list_screen_no_note),
+                                      parkingNote ?: stringResource(R.string.list_screen_no_note),
                                   style =
-                                  MaterialTheme.typography.bodyLarge.copy(
-                                      fontStyle =
-                                      if (parkingNote.isNullOrBlank()) FontStyle.Italic
-                                      else FontStyle.Normal),
+                                      MaterialTheme.typography.bodyLarge.copy(
+                                          fontStyle =
+                                              if (parkingNote.isNullOrBlank()) FontStyle.Italic
+                                              else FontStyle.Normal),
                                   textAlign = TextAlign.Left,
                                   modifier = Modifier.testTag("NoteText"))
+                            }
                           }
-                      }
-                  }
+                        }
 
                     // Icons Row
                     Row(
@@ -476,58 +468,63 @@ fun ParkingDetailsScreen(
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface)
                           }
-                        Column(modifier = Modifier.weight(1f).testTag("UserColumn")) {
+                          Column(modifier = Modifier.weight(1f).testTag("UserColumn")) {
                             Text(
                                 text = stringResource(R.string.card_screen_user),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onBackground
-                            )
-                            if (range.color == "rainbow") {
-                                Text(
-                                    text = "[${range.symbol}$level] $ownerUsername",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurface //TODO rainbow text
-                                )
+                                color = MaterialTheme.colorScheme.onBackground)
+                            if (range.color == stringResource(R.string.rainbow_text_color)) {
+                              Text(
+                                  text =
+                                      stringResource(
+                                          R.string.display_user_tag_format,
+                                          range.symbol,
+                                          level,
+                                          ownerUsername),
+                                  style = MaterialTheme.typography.bodyMedium,
+                                  color =
+                                      MaterialTheme.colorScheme.onSurface // TODO rainbow text color
+                                  )
                             } else {
-                                Text(
-                                    text = "[${range.symbol}$level] $ownerUsername",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = Color(android.graphics.Color.parseColor(range.color))
-                                )
+                              Text(
+                                  text =
+                                      stringResource(
+                                          R.string.display_user_tag_format,
+                                          range.symbol,
+                                          level,
+                                          ownerUsername),
+                                  style = MaterialTheme.typography.bodyMedium,
+                                  color = Color(parseColor(range.color)))
                             }
+                          }
                         }
-
-                    }
-              }
+                  }
 
               Column(
                   modifier = Modifier.fillMaxWidth().testTag("ButtonsColumn"),
                   verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                  Button(
-                      text = stringResource(R.string.card_screen_show_map),
-                      onClick = {
-                          parkingViewModel.selectParking(selectedParking)
+                    Button(
+                        text = stringResource(R.string.card_screen_show_map),
+                        onClick = {
+                          Toast.makeText(
+                                  context,
+                                  "A feature to show the parking on the map will be added later",
+                                  Toast.LENGTH_LONG)
+                              .show()
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colorLevel = ColorLevel.PRIMARY,
+                        testTag = "ShowInMapButton")
 
-                          mapViewModel.updateTrackingMode(false)
-                          mapViewModel.updateMapRecentering(true)
-                          mapViewModel.zoomOnLocation(selectedParking.location)
-
-                          navigationActions.navigateTo(Screen.MAP)
-                      },
-                      modifier = Modifier.fillMaxWidth(),
-                      colorLevel = ColorLevel.PRIMARY,
-                      testTag = "ShowInMapButton")
-
-                  if (userViewModel.currentUser.value != null) {
+                    if (userViewModel.currentUser.value != null) {
                       Button(
                           text = stringResource(R.string.card_screen_report),
                           onClick = { navigationActions.navigateTo(Screen.PARKING_REPORT) },
                           modifier = Modifier.fillMaxWidth(),
                           colorLevel = ColorLevel.ERROR,
                           testTag = "ReportButton")
+                    }
                   }
-              }
-          }
+            }
       }
-  }
 }

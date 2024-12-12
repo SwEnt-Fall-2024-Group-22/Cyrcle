@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.profile
 
+import android.graphics.Color.parseColor
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,70 +28,65 @@ import com.github.se.cyrcle.ui.theme.atoms.Text
  */
 @Composable
 fun DisplayProfileComponent(user: User?, extras: @Composable () -> Unit) {
-    if (user == null) {
-        Text(stringResource(R.string.profile_is_null), Modifier.testTag("NullUserText"))
-        return
-    }
+  if (user == null) {
+    Text(stringResource(R.string.profile_is_null), Modifier.testTag("NullUserText"))
+    return
+  }
 
-    val firstName = user.details?.firstName ?: ""
-    val lastName = user.details?.lastName ?: ""
-    val username = user.public.username
-    val profilePictureUrl = user.localSession?.profilePictureUrl ?: ""
-    val reputationScore = user.public.userReputationScore
-    val range = UserLevelDisplay.getLevelRange(reputationScore)
-    val level = reputationScore.toInt()
+  val firstName = user.details?.firstName ?: ""
+  val lastName = user.details?.lastName ?: ""
+  val username = user.public.username
+  val profilePictureUrl = user.localSession?.profilePictureUrl ?: ""
+  val reputationScore = user.public.userReputationScore
+  val range = UserLevelDisplay.getLevelRange(reputationScore)
+  val level = reputationScore.toInt()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .testTag("ProfileContent"),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+  Column(
+      modifier = Modifier.fillMaxSize().testTag("ProfileContent"),
+      horizontalAlignment = Alignment.CenterHorizontally) {
         Column(
             modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = firstName,
-                style = MaterialTheme.typography.headlineMedium,
-                testTag = "DisplayFirstName"
-            )
+            horizontalAlignment = Alignment.CenterHorizontally) {
+              Text(
+                  text = firstName,
+                  style = MaterialTheme.typography.headlineMedium,
+                  testTag = "DisplayFirstName")
 
-            Text(
-                text = lastName,
-                style = MaterialTheme.typography.headlineMedium,
-                testTag = "DisplayLastName"
-            )
+              Text(
+                  text = lastName,
+                  style = MaterialTheme.typography.headlineMedium,
+                  testTag = "DisplayLastName")
 
-            Spacer(modifier = Modifier.height(16.dp))
+              Spacer(modifier = Modifier.height(16.dp))
 
-            ProfileImageComponent(
-                url = profilePictureUrl,
-                onClick = {},
-                isEditable = false,
-                modifier = Modifier.testTag("ProfileImage")
-            )
+              ProfileImageComponent(
+                  url = profilePictureUrl,
+                  onClick = {},
+                  isEditable = false,
+                  modifier = Modifier.testTag("ProfileImage"))
 
-            Spacer(modifier = Modifier.height(8.dp))
+              Spacer(modifier = Modifier.height(8.dp))
 
-            if (range.color == "rainbow") {
+              if (range.color == stringResource(R.string.rainbow_text_color)) {
                 Text(
-                    text = "[${range.symbol}$level] $username",
+                    text =
+                        stringResource(
+                            R.string.display_user_tag_format, range.symbol, level, username),
                     style = MaterialTheme.typography.bodyMedium,
-                    //TODO rainbow color
-                    modifier = Modifier.testTag("RainbowText")
-                )
-            } else {
+                    color = MaterialTheme.colorScheme.onSurface, // TODO rainbow color
+                    modifier = Modifier.testTag("RainbowText"))
+              } else {
                 Text(
-                    text = "[${range.symbol}$level] $username",
+                    text =
+                        stringResource(
+                            R.string.display_user_tag_format, range.symbol, level, username),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color(android.graphics.Color.parseColor(range.color)),
-                    modifier = Modifier.testTag("DisplayUsernameWithLevel")
-                )
+                    color = Color(parseColor(range.color)),
+                    modifier = Modifier.testTag("DisplayUsernameWithLevel"))
+              }
+
+              Spacer(modifier = Modifier.height(16.dp))
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-        }
         extras()
-    }
+      }
 }
