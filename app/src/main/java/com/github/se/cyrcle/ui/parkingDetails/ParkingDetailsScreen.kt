@@ -17,10 +17,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
@@ -55,6 +55,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.user.MAX_NOTE_LENGTH
 import com.github.se.cyrcle.model.user.UserLevelDisplay
@@ -74,6 +75,7 @@ import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ParkingDetailsScreen(
+    mapViewModel: MapViewModel,
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel,
     userViewModel: UserViewModel
@@ -150,59 +152,61 @@ fun ParkingDetailsScreen(
                 .format(selectedParking.optName ?: stringResource(R.string.default_parking_name)))
       },
       modifier = Modifier.testTag("ParkingDetailsScreen")) { padding ->
-        Column(
-            modifier =
-                Modifier.fillMaxSize()
-                    .padding(padding)
-                    .padding(32.dp)
-                    .verticalScroll(scrollState)
-                    .testTag("ParkingDetailsColumn")) {
+      LazyColumn(
+          modifier =
+          Modifier.fillMaxSize()
+              .padding(padding)
+              .padding(32.dp)
+              .testTag("ParkingDetailsColumn")) {
+          item {
               Row(
                   modifier =
-                      Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("TopInteractionRow"),
+                  Modifier.fillMaxWidth()
+                      .padding(vertical = 8.dp)
+                      .testTag("TopInteractionRow"),
                   verticalAlignment = Alignment.CenterVertically,
                   horizontalArrangement = Arrangement.SpaceBetween) {
-                    val parkingNote =
-                        userViewModel.currentUser
-                            .collectAsState()
-                            .value
-                            ?.details
-                            ?.personalNotes
-                            ?.get(selectedParking.uid)
+                  val parkingNote =
+                      userViewModel.currentUser
+                          .collectAsState()
+                          .value
+                          ?.details
+                          ?.personalNotes
+                          ?.get(selectedParking.uid)
 
-                    val editingNote = remember { mutableStateOf(false) }
-                    val editingNoteText = remember { mutableStateOf(parkingNote ?: "") }
+                  val editingNote = remember { mutableStateOf(false) }
+                  val editingNoteText = remember { mutableStateOf(parkingNote ?: "") }
 
-                    // Column to handle text wrapping
-                    Column(
-                        modifier =
-                            Modifier.weight(1f) // Allow this column to take available space
-                                .padding(end = 16.dp) // Space for icons
-                        ) {
-                          if (editingNote.value) {
-                            ConditionCheckingInputText(
-                                value = editingNoteText.value,
-                                onValueChange = { editingNoteText.value = it },
-                                label = stringResource(R.string.list_screen_edit_note),
-                                minCharacters = 0,
-                                maxCharacters = MAX_NOTE_LENGTH,
-                                maxLines = 2,
-                                testTag = "NoteInputText")
-                          } else {
-                            if (userSignedIn) {
+                  // Column to handle text wrapping
+                  Column(
+                      modifier =
+                      Modifier.weight(1f) // Allow this column to take available space
+                          .padding(end = 16.dp) // Space for icons
+                  ) {
+                      if (editingNote.value) {
+                          ConditionCheckingInputText(
+                              value = editingNoteText.value,
+                              onValueChange = { editingNoteText.value = it },
+                              label = stringResource(R.string.list_screen_edit_note),
+                              minCharacters = 0,
+                              maxCharacters = MAX_NOTE_LENGTH,
+                              maxLines = 2,
+                              testTag = "NoteInputText")
+                      } else {
+                          if (userSignedIn) {
                               Text(
                                   text =
-                                      parkingNote ?: stringResource(R.string.list_screen_no_note),
+                                  parkingNote ?: stringResource(R.string.list_screen_no_note),
                                   style =
-                                      MaterialTheme.typography.bodyLarge.copy(
-                                          fontStyle =
-                                              if (parkingNote.isNullOrBlank()) FontStyle.Italic
-                                              else FontStyle.Normal),
+                                  MaterialTheme.typography.bodyLarge.copy(
+                                      fontStyle =
+                                      if (parkingNote.isNullOrBlank()) FontStyle.Italic
+                                      else FontStyle.Normal),
                                   textAlign = TextAlign.Left,
                                   modifier = Modifier.testTag("NoteText"))
-                            }
                           }
-                        }
+                      }
+                  }
 
                     // Icons Row
                     Row(
@@ -506,11 +510,10 @@ fun ParkingDetailsScreen(
                     Button(
                         text = stringResource(R.string.card_screen_show_map),
                         onClick = {
-                          Toast.makeText(
-                                  context,
-                                  "A feature to show the parking on the map will be added later",
-                                  Toast.LENGTH_LONG)
-                              .show()
+                          parkingViewModel.selectParking(selectedParking)
+                          mapViewModel.updateTrackingMode(false)
+                          mapViewModel.updateMapRecentering(true)
+                          mapViewModel.zoomOnLocation(selectedParking.location)
                         },
                         modifier = Modifier.fillMaxWidth(),
                         colorLevel = ColorLevel.PRIMARY,
@@ -527,4 +530,5 @@ fun ParkingDetailsScreen(
                   }
             }
       }
+}
 }
