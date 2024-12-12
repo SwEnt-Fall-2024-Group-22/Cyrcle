@@ -358,47 +358,6 @@ class MapViewModel : ViewModel() {
   }
 
   /**
-   * Draw the bike location on the map. If [remove] is false, then [location] and [image] must be
-   * non-null and the bike location is drawn on the map. If [remove] is true, then the bike location
-   * is removed from the map, independently of the content of [location] or [image]. In the case of
-   * null image but remove is set to true, nothing happens // TODO
-   *
-   * @param location the location of the bike
-   * @param image the image to use at the bike location
-   * @param remove true if the bike location should be removed, false otherwise
-   */
-  fun drawBikeLocation(
-      pointAnnotationManager: PointAnnotationManager?,
-      location: Point?,
-      image: Bitmap?,
-      remove: Boolean = false
-  ) {
-    Log.d("MapViewModel", "drawBikeLocation: CALL")
-    if (remove) {
-      // Remove the bike location from the map
-      pointAnnotationManager?.deleteAll()
-      Log.d("MapViewModel", "drawBikeLocation: remove")
-    } else {
-      // Draw the bike location on the map
-      if (image == null || location == null) {
-        Log.d("MapViewModel", "drawBikeLocation: image is null")
-        return
-      } else {
-        Log.d(
-            "MapViewModel",
-            "drawBikeLocation| pointAnnotationManager:$pointAnnotationManager, location:$location, image:$image")
-        pointAnnotationManager?.create(
-            PointAnnotationOptions()
-                .withPoint(location)
-                .withIconImage(image)
-                .withIconAnchor(IconAnchor.BOTTOM)
-                .withIconOffset(listOf(0.0, image.height / 12.0))
-                .withData(Gson().toJsonTree(location)))
-      }
-    }
-  }
-
-  /**
    * Enum class to represent the state of the location picker, This state is used to determine which
    * steps of the process to set the new location are completed NONE_SET: No location is set
    * TOP_LEFT_SET: The top left corner of the rectangle is set BOTTOM_RIGHT_SET: The bottom right
