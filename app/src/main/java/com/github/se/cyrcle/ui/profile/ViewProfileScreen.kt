@@ -25,6 +25,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddModerator
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Diamond
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.LocalParking
@@ -544,7 +545,7 @@ private fun UserImagesSection(
         dismissButton = {
           IconButton(
               modifier = Modifier.padding(10.dp),
-              icon = Icons.Filled.RestoreFromTrash,
+              icon = Icons.Filled.Delete,
               contentDescription = "Delete",
               testTag = "DeleteImageButton",
               onClick = {

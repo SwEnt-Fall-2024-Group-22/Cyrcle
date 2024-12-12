@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material.icons.outlined.RestoreFromTrash
 import androidx.compose.material3.BasicAlertDialog
@@ -85,7 +86,7 @@ fun ParkingDetailsAlertDialogShowImage(
           if (isOwner) {
             IconButton(
                 modifier = Modifier.align(Alignment.TopEnd).padding(6.dp),
-                icon = Icons.Outlined.RestoreFromTrash,
+                icon = Icons.Outlined.Delete,
                 contentDescription = "Delete",
                 onClick = {
                   parkingViewModel.deleteImageFromParking(
