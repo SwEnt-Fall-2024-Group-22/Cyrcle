@@ -38,7 +38,6 @@ import com.github.se.cyrcle.model.review.TestInstancesReview
 import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserDetails
-import com.github.se.cyrcle.model.user.UserLevelDisplay
 import com.github.se.cyrcle.model.user.UserPublic
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
@@ -83,7 +82,7 @@ class ViewProfileScreenTest {
 
     val user =
         User(
-            UserPublic("1", "janesmith", "http://example.com/jane.jpg",92.5),
+            UserPublic("1", "janesmith", "http://example.com/jane.jpg", 92.5),
             UserDetails("Jane", "Smith", "jane.smith@example.com"))
 
     userViewModel =

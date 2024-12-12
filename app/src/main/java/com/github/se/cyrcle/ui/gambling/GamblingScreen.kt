@@ -337,11 +337,11 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
                         modifier = Modifier.fillMaxWidth(0.8f).padding(bottom = 4.dp),
                         horizontalArrangement = Arrangement.SpaceBetween) {
                           Text(
-                              text = "Level ${displayedLevel}",
+                              text = stringResource(R.string.level_display, displayedLevel),
                               style = MaterialTheme.typography.bodyMedium,
                               modifier = Modifier.testTag("current_level_text"))
                           Text(
-                              text = "Level ${displayedLevel + 1}",
+                              text = stringResource(R.string.level_display, (displayedLevel + 1)),
                               style = MaterialTheme.typography.bodyMedium,
                               modifier = Modifier.testTag("next_level_text"))
                         }
@@ -360,7 +360,7 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
                         enter = fadeIn() + expandVertically(),
                         exit = fadeOut() + shrinkVertically()) {
                           Text(
-                              text = "Level Up!",
+                              text = stringResource(R.string.level_up),
                               color = MaterialTheme.colorScheme.primary,
                               style = MaterialTheme.typography.headlineSmall,
                               modifier = Modifier.padding(vertical = 8.dp).testTag("level_up_text"))
@@ -376,7 +376,7 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
                         enter = fadeIn(animationSpec = tween(durationMillis = 500)),
                         exit = fadeOut(animationSpec = tween(durationMillis = 500))) {
                           Text(
-                              text = "${rarityText}: +%.2f XP!".format(xpIncrement),
+                              text = stringResource(R.string.xp_increment, rarityText, xpIncrement),
                               style = MaterialTheme.typography.bodyMedium.copy(color = Color.Green),
                               modifier =
                                   Modifier.align(Alignment.CenterHorizontally)

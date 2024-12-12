@@ -233,6 +233,11 @@
     <string name="gambling_screen_title">Gambling</string>
     <string name="gambling_screen_coins_display">Coins: %d</string>
     <string name="gambling_screen_spin_button_cost">(%d coins)</string>
+    <string name="level_display">Level %d</string>
+    <string name="level_up">Level Up!</string>
+    <string name="xp_increment">%s: +%.2f XP!</string>
+    <string name="display_user_tag_format">[%s%d] %s</string>
+    <string name="rainbow_text_color">rainbow</string>
 
 
     <!-- Report Screens -->
