@@ -1,6 +1,8 @@
 package com.github.se.cyrcle.model.parking
 
 import android.content.Context
+import android.util.Log
+import com.github.se.cyrcle.model.authentication.AuthenticationRepository
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.parking.offline.OfflineParkingRepository
 import com.github.se.cyrcle.model.parking.online.ParkingRepository
@@ -8,6 +10,8 @@ import com.github.se.cyrcle.model.report.ReportedObject
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.report.ReportedObjectType
 import com.github.se.cyrcle.model.user.TestInstancesUser
+import com.github.se.cyrcle.model.user.UserRepository
+import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.model.zone.Zone
 import com.mapbox.geojson.BoundingBox
 import com.mapbox.geojson.Point
@@ -34,8 +38,10 @@ class ParkingViewModelTest {
 
   @Mock private lateinit var parkingViewModel: ParkingViewModel
   @Mock private lateinit var parkingRepository: ParkingRepository
+  @Mock private lateinit var userRepository: UserRepository
   @Mock private lateinit var offlineParkingRepository: OfflineParkingRepository
   @Mock private lateinit var imageRepository: ImageRepository
+  @Mock private lateinit var authenticationRepository: AuthenticationRepository
   @Mock private lateinit var reportedObjectRepository: ReportedObjectRepository
   @Mock private lateinit var context: Context
 
@@ -43,9 +49,16 @@ class ParkingViewModelTest {
   fun setUp() {
     MockitoAnnotations.openMocks(this)
 
+    val userViewModel =
+        UserViewModel(userRepository, parkingRepository, imageRepository, authenticationRepository)
+    userViewModel.setCurrentUser(TestInstancesUser.user1)
     parkingViewModel =
         ParkingViewModel(
-            imageRepository, parkingRepository, offlineParkingRepository, reportedObjectRepository)
+            imageRepository,
+            userViewModel,
+            parkingRepository,
+            offlineParkingRepository,
+            reportedObjectRepository)
   }
 
   @Test
@@ -306,16 +319,23 @@ class ParkingViewModelTest {
   @Test
   fun uploadImageTest() {
     parkingViewModel.selectParking(TestInstancesParking.parking1)
+    `when`(parkingRepository.getNewUid()).thenReturn("ValidUid")
     parkingViewModel.uploadImage("localPath/image.jpg", context) {}
     verify(imageRepository).uploadImage(any(), any(), any(), any(), any())
   }
 
   @Test
   fun uploadImageWithoutParkingSelectedTest() {
+    val userViewModel =
+        UserViewModel(userRepository, parkingRepository, imageRepository, authenticationRepository)
     // assert nothing is called when no parking is selected
     val emptyParkingViewModel =
         ParkingViewModel(
-            imageRepository, parkingRepository, offlineParkingRepository, reportedObjectRepository)
+            imageRepository,
+            userViewModel,
+            parkingRepository,
+            offlineParkingRepository,
+            reportedObjectRepository)
     emptyParkingViewModel.uploadImage("localPath/image.jpg", context) {}
     verify(imageRepository, never()).uploadImage(any(), any(), any(), any(), any())
   }
@@ -389,58 +409,20 @@ class ParkingViewModelTest {
             parking = parking.uid,
             reason = ParkingReportReason.INEXISTANT,
             userId = user.public.userId)
-
     `when`(parkingRepository.addReport(any(), any(), any())).then {
       it.getArgument<(ParkingReport) -> Unit>(1).invoke(report) // Trigger onSuccess
     }
-
     `when`(reportedObjectRepository.checkIfObjectExists(eq(parking.uid), any(), any())).then {
       it.getArgument<(String?) -> Unit>(1).invoke(null) // Trigger onSuccess with no existing object
     }
-
     parkingViewModel.selectParking(parking)
     parkingViewModel.addReport(report, user)
-
-    // Verify report is added to the repository
     verify(parkingRepository).addReport(eq(report), any(), any())
     verify(parkingRepository).updateParking(any(), any(), any())
   }
 
   @Test
-  fun addImageReportTest() {
-    val parking = TestInstancesParking.parking1.copy(images = listOf("imagePath1"))
-    val user = TestInstancesUser.user1
-    val imageReport =
-        ImageReport(
-            uid = "ImageReportUID",
-            reason = ImageReportReason.USELESS,
-            userId = user.public.userId,
-            image = "imagePath1")
-
-    val updatedImage =
-        ParkingImage(
-            uid = "ValidUid", imagePath = "imagePath1", nbReports = 1, nbMaxSeverityReports = 0)
-
-    `when`(parkingRepository.getNewUid()).thenReturn("ValidUid")
-
-    parkingViewModel.selectParking(parking)
-    parkingViewModel.selectImage("imagePath1")
-
-    // Mock addImageReport behavior
-    `when`(parkingRepository.addImageReport(any(), eq(parking.uid), any(), any())).then {
-      it.getArgument<(ImageReport) -> Unit>(2).invoke(imageReport)
-    }
-
-    parkingViewModel.addImageReport(imageReport, user)
-    // Verify image report was added and parking was updated
-    verify(parkingRepository).addImageReport(eq(imageReport), eq(parking.uid), any(), any())
-    verify(parkingRepository)
-        .updateParking(eq(parking.copy(reportedImages = listOf(updatedImage))), any(), any())
-  }
-
-  @Test
   fun updateLocalImageAndMetricsTest() {
-    // Arrange
     val parking =
         TestInstancesParking.parking1.copy(
             reportedImages =
@@ -466,18 +448,13 @@ class ParkingViewModelTest {
             )
 
     parkingViewModel.selectParking(parking)
-
-    // Act
     parkingViewModel.updateLocalImageAndMetrics(report, updatedImage)
-
-    // Assert
     val selectedParking = parkingViewModel.selectedParking.value
     assert(selectedParking != null)
     assertEquals(1, selectedParking?.reportedImages?.size)
     assertEquals(updatedImage, selectedParking?.reportedImages?.first())
     assertEquals(3, selectedParking?.reportedImages?.first()?.nbReports)
     assertEquals(1, selectedParking?.reportedImages?.first()?.nbMaxSeverityReports)
-
     // Verify the parking repository was updated with the new metrics
     verify(parkingRepository)
         .updateParking(eq(parking.copy(reportedImages = listOf(updatedImage))), any(), any())
@@ -504,53 +481,6 @@ class ParkingViewModelTest {
   }
 
   @Test
-  fun addImageReport_maxSeverity_createsReportedObject() {
-    val parking =
-        TestInstancesParking.parking1.copy(
-            images = listOf("imagePath1"),
-            reportedImages = listOf(ParkingImage("", "imagePath1", 2, 2)))
-    val user = TestInstancesUser.user1
-    val imageReport =
-        ImageReport(
-            uid = "ImageReportUID",
-            reason = ImageReportReason.ILLEGAL_CONTENT,
-            userId = user.public.userId,
-            image = "imagePath1")
-
-    // Mock behaviors for dependent methods
-    `when`(parkingRepository.getNewUid()).thenReturn("ValidUid")
-    `when`(reportedObjectRepository.checkIfObjectExists(any(), any(), any())).then {
-      it.getArgument<(String?) -> Unit>(1).invoke(null) // Simulate no existing reported object
-    }
-    `when`(parkingRepository.addImageReport(any(), any(), any(), any())).then {
-      it.getArgument<(ImageReport) -> Unit>(2)
-          .invoke(imageReport) // Simulate success for adding report
-    }
-
-    // Select parking and image
-    parkingViewModel.selectParking(parking)
-    parkingViewModel.selectImage("imagePath1")
-
-    // Act
-    parkingViewModel.addImageReport(imageReport, user)
-
-    // Verify interactions
-    verify(parkingRepository).addImageReport(eq(imageReport), eq(parking.uid), any(), any())
-    verify(reportedObjectRepository)
-        .addReportedObject(
-            eq(
-                ReportedObject(
-                    objectUID = "imagePath1",
-                    reportUID = "ImageReportUID",
-                    nbOfTimesReported = 3,
-                    nbOfTimesMaxSeverityReported = 3,
-                    userUID = user.public.userId,
-                    objectType = ReportedObjectType.IMAGE)),
-            any(),
-            any())
-  }
-
-  @Test
   fun addReport_belowThreshold_doesNotCreateReportedObject() {
     val parking = TestInstancesParking.parking1.copy(nbReports = 0, nbMaxSeverityReports = 0)
     val user = TestInstancesUser.user1
@@ -560,15 +490,154 @@ class ParkingViewModelTest {
             parking = parking.uid,
             reason = ParkingReportReason.INEXISTANT,
             userId = user.public.userId)
-
     `when`(parkingRepository.addReport(any(), any(), any())).then {
       it.getArgument<(ParkingReport) -> Unit>(1).invoke(report) // Simulate success
     }
-
     parkingViewModel.selectParking(parking)
     parkingViewModel.addReport(report, user)
-
+    // verify that "add reported object" associated functions are not called
     verify(parkingRepository).addReport(eq(report), any(), any())
     verify(reportedObjectRepository, never()).addReportedObject(any(), any(), any())
+  }
+
+  @Test
+  fun addImageReport_updatesExistingImageReport() {
+    val parking =
+        TestInstancesParking.parking1.copy(
+            images = listOf("imagePath1"),
+            reportedImages =
+                listOf(
+                    ParkingImage(
+                        uid = "ExistingImageUID",
+                        imagePath = "imagePath1",
+                        owner = "user1",
+                        nbReports = 1,
+                        nbMaxSeverityReports = 0)))
+    val imageReport =
+        ImageReport(
+            uid = "ImageReportUID",
+            reason = ImageReportReason.WRONG,
+            userId = "user1",
+            image = "imagePath1")
+    val updatedImage =
+        ParkingImage(
+            uid = "ExistingImageUID",
+            imagePath = "imagePath1",
+            owner = "user1",
+            nbReports = 2,
+            nbMaxSeverityReports = 1)
+
+    `when`(parkingRepository.addImageReport(any(), any(), any(), any())).then {
+      it.getArgument<(ImageReport) -> Unit>(2).invoke(imageReport) // Simulate success
+    }
+    parkingViewModel.selectParking(parking)
+    parkingViewModel.selectImage("imagePath1")
+    parkingViewModel.addImageReport(imageReport, TestInstancesUser.user1)
+    // verify that adding image report has effect on repository
+    verify(parkingRepository).addImageReport(eq(imageReport), eq(parking.uid), any(), any())
+    verify(parkingRepository)
+        .updateParking(eq(parking.copy(reportedImages = listOf(updatedImage))), any(), any())
+  }
+
+  @Test
+  fun addImageReport_belowThreshold_doesNotCreateReportedObject() {
+    val parking =
+        TestInstancesParking.parking1.copy(
+            images = listOf("imagePath1"),
+            reportedImages =
+                listOf(
+                    ParkingImage(
+                        uid = "ExistingImageUID",
+                        imagePath = "imagePath1",
+                        owner = "user1",
+                        nbReports = 0,
+                        nbMaxSeverityReports = 0)))
+    val imageReport =
+        ImageReport(
+            uid = "ImageReportUID",
+            reason = ImageReportReason.USELESS,
+            userId = "user1",
+            image = "imagePath1")
+    `when`(parkingRepository.addImageReport(any(), any(), any(), any())).then {
+      it.getArgument<(ImageReport) -> Unit>(2).invoke(imageReport) // Simulate success
+    }
+
+    `when`(reportedObjectRepository.checkIfObjectExists(any(), any(), any())).then {
+      it.getArgument<(String?) -> Unit>(1).invoke(null) // No existing reported object
+    }
+    parkingViewModel.selectParking(parking)
+    parkingViewModel.selectImage("imagePath1")
+    parkingViewModel.addImageReport(imageReport, TestInstancesUser.user1)
+    // verify that adding image report this time has NO effect on repository
+    verify(parkingRepository).addImageReport(eq(imageReport), eq(parking.uid), any(), any())
+  }
+
+  @Test
+  fun addImageReport_exceedsThreshold_createsReportedObject() {
+    val parking =
+        TestInstancesParking.parking1.copy(
+            images = listOf("imagePath1"),
+            reportedImages =
+                listOf(
+                    ParkingImage(
+                        uid = "ExistingImageUID",
+                        imagePath = "imagePath1",
+                        owner = "user1",
+                        nbReports = 3,
+                        nbMaxSeverityReports = 1)))
+    val imageReport =
+        ImageReport(
+            uid = "ImageReportUID",
+            reason = ImageReportReason.ILLEGAL_CONTENT,
+            userId = "user1",
+            image = "imagePath1")
+    val reportedObject =
+        ReportedObject(
+            objectUID = "imagePath1",
+            reportUID = "ImageReportUID",
+            nbOfTimesReported = 4,
+            nbOfTimesMaxSeverityReported = 2,
+            userUID = "user1",
+            objectType = ReportedObjectType.IMAGE)
+    `when`(parkingRepository.addImageReport(any(), any(), any(), any())).then {
+      it.getArgument<(ImageReport) -> Unit>(2).invoke(imageReport) // Simulate success
+    }
+
+    `when`(reportedObjectRepository.checkIfObjectExists(any(), any(), any())).then {
+      it.getArgument<(String?) -> Unit>(1).invoke(null) // No existing reported object
+    }
+
+    parkingViewModel.selectParking(parking)
+    parkingViewModel.selectImage("imagePath1")
+    parkingViewModel.addImageReport(imageReport, TestInstancesUser.user1)
+    // verify that reported object was created as expected
+    verify(parkingRepository).addImageReport(eq(imageReport), eq(parking.uid), any(), any())
+    verify(reportedObjectRepository).addReportedObject(eq(reportedObject), any(), any())
+    verify(parkingRepository, times(2)).updateParking(any(), any(), any())
+  }
+
+  @Test
+  fun removeNonExistentParkingLogsError() {
+    val nonExistentParkingId = "NonExistentParkingID"
+    val expectedLogMessage = "Error deleting Parking"
+    `when`(parkingRepository.deleteParkingById(eq(nonExistentParkingId), any(), any())).then {
+      it.getArgument<(Exception) -> Unit>(2)(Exception("Parking not found"))
+    }
+    parkingViewModel.deleteParkingByUid(nonExistentParkingId)
+    verify(parkingRepository).deleteParkingById(eq(nonExistentParkingId), any(), any())
+    // Verify that the error log was written
+    verify(Log::class.java) { Log.d("ParkingViewModel", expectedLogMessage) }
+  }
+
+  @Test
+  fun removeParkingNotOwnedByUserLogsError() {
+    val notOwnedParkingId = "NotOwnedParkingID"
+    val expectedLogMessage = "Error deleting Parking"
+    `when`(parkingRepository.deleteParkingById(eq(notOwnedParkingId), any(), any())).then {
+      it.getArgument<(Exception) -> Unit>(2)(Exception("Permission denied"))
+    }
+    parkingViewModel.deleteParkingByUid(notOwnedParkingId)
+    verify(parkingRepository).deleteParkingById(eq(notOwnedParkingId), any(), any())
+    verify(Log::class.java) { Log.d("ParkingViewModel", expectedLogMessage) }
   }
 }

@@ -131,7 +131,11 @@ fun CyrcleNavHost(
       }
       composable(Screen.VIEW_REPORTS) {
         ViewReportsScreen(
-            navigationActions, reportedObjectViewModel, parkingViewModel, reviewViewModel)
+            navigationActions,
+            reportedObjectViewModel,
+            parkingViewModel,
+            reviewViewModel,
+            userViewModel)
       }
     }
 

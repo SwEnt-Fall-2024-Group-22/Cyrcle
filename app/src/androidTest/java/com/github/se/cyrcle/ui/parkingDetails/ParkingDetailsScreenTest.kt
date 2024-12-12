@@ -78,9 +78,12 @@ class ParkingDetailsScreenTest {
     mockReportedObjectRepository = MockReportedObjectRepository()
 
     mapViewModel = MapViewModel()
+    userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository, authenticator)
+
     parkingViewModel =
         ParkingViewModel(
             imageRepository,
+            userViewModel,
             parkingRepository,
             offlineParkingRepository,
             mockReportedObjectRepository)

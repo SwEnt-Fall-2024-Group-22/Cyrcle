@@ -24,6 +24,7 @@ import com.github.se.cyrcle.model.report.ReportedObjectType
 import com.github.se.cyrcle.model.report.ReportedObjectViewModel
 import com.github.se.cyrcle.model.review.ReviewReport
 import com.github.se.cyrcle.model.review.ReviewViewModel
+import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
@@ -42,7 +43,8 @@ fun ViewReportsScreen(
     navigationActions: NavigationActions,
     reportedObjectViewModel: ReportedObjectViewModel,
     parkingViewModel: ParkingViewModel,
-    reviewViewModel: ReviewViewModel
+    reviewViewModel: ReviewViewModel,
+    userViewModel: UserViewModel
 ) {
   // Observing the current selected reported object and its type
   val currentObject by reportedObjectViewModel.selectedObject.collectAsState()
@@ -74,6 +76,7 @@ fun ViewReportsScreen(
                   ReportedObjectType.IMAGE -> {
                     val uidOfParking = parkingViewModel.getParkingFromImagePath(uidOfObject)
                     parkingViewModel.deleteImageFromParking(uidOfParking, uidOfObject)
+                    userViewModel.removeImageFromUserImages(uidOfObject)
                   }
                 }
                 Toast.makeText(context, successDeleteText, Toast.LENGTH_LONG).show()

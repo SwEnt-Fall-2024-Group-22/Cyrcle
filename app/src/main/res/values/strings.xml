@@ -178,6 +178,9 @@
     <string name="view_profile_screen_no_note">No personal notes to this parking yet</string>
     <string name="view_profile_screen_note">Note: %s</string>
     <string name="view_profile_screen_no_reviews_message">You haven\'t written any reviews yet</string>
+    <string name="view_profile_screen_my_images">My Images</string>
+    <string name="view_profile_screen_no_images_message">No images to display.</string>
+    <string name="view_profile_screen_image_item">Image #%d</string>
 
     <!-- All Reviews Screen -->
     <string name="all_review_title">All Reviews For %s</string>
@@ -201,6 +204,12 @@
     <string name="all_reviews_your_review">Your Review</string>
     <string name="all_reviews_other_reviews">Other Reviews</string>
     <string name="all_reviews_all_reviews">All Reviews</string>
+    <string name="view_profile_screen_image_dialog_title">Image Details</string>
+    <string name="view_profile_screen_image_dialog_description">Preview of the selected image:</string>
+    <string name="view_profile_screen_image_dialog_close">Close</string>
+    <string name="view_profile_screen_image_dialog_go_to_parking">Go To Parking</string>
+    <string name="view_profile_screen_image_path">Path: %s</string>
+    <string name="view_profile_screen_image_deleted">Image deleted!</string>
 
     <!-- Review Screen -->
     <string name="review_screen_title_new_review">Add your review</string>

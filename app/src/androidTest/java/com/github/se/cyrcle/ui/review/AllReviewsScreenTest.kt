@@ -57,11 +57,16 @@ class AllReviewsScreenTest {
     authenticator = MockAuthenticationRepository()
     reportedObjectRepository = MockReportedObjectRepository()
 
+    userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository, authenticator)
+
     parkingViewModel =
         ParkingViewModel(
-            imageRepository, parkingRepository, offlineParkingRepository, reportedObjectRepository)
+            imageRepository,
+            userViewModel,
+            parkingRepository,
+            offlineParkingRepository,
+            reportedObjectRepository)
     reviewViewModel = ReviewViewModel(reviewRepository, reportedObjectRepository)
-    userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository, authenticator)
 
     reviewViewModel.addReview(TestInstancesReview.review4)
     reviewViewModel.addReview(TestInstancesReview.review3)

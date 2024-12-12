@@ -32,12 +32,16 @@ class ImageReportScreenTest {
     val reportedObjectRepository = MockReportedObjectRepository()
     val userRepository = MockUserRepository()
     val authenticationRepository = MockAuthenticationRepository()
+    userViewModel =
+        UserViewModel(userRepository, parkingRepository, imageRepository, authenticationRepository)
 
     parkingViewModel =
         ParkingViewModel(
-            imageRepository, parkingRepository, offlineParkingRepository, reportedObjectRepository)
-    userViewModel =
-        UserViewModel(userRepository, parkingRepository, imageRepository, authenticationRepository)
+            imageRepository,
+            userViewModel,
+            parkingRepository,
+            offlineParkingRepository,
+            reportedObjectRepository)
 
     userViewModel.setCurrentUser(TestInstancesUser.user1)
     parkingViewModel.selectImage("testImage123") // Simulating an image is selected

@@ -15,11 +15,13 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockAddressRepository
+import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockOfflineParkingRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockPermissionHandler
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
+import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.map.MapViewModel
@@ -30,6 +32,7 @@ import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.model.parking.online.ParkingRepository
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
+import com.github.se.cyrcle.model.user.UserViewModel
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -65,6 +68,12 @@ class FilterTest {
     parkingViewModel =
         ParkingViewModel(
             mockImageRepository,
+            userViewModel =
+                UserViewModel(
+                    MockUserRepository(),
+                    MockParkingRepository(),
+                    MockImageRepository(),
+                    MockAuthenticationRepository()),
             mockParkingRepository,
             mockOfflineParkingRepository,
             mockReportedObjectRepository)
