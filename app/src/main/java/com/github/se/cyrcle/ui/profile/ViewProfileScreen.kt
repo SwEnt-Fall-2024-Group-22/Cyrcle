@@ -464,6 +464,7 @@ private fun UserReviewsSection(
   }
 }
 
+/** Section where all the User Images are displayed */
 @Composable
 private fun UserImagesSection(
     userViewModel: UserViewModel,
@@ -564,7 +565,7 @@ private fun UserImagesSection(
         })
   }
 }
-
+/** Card representing a UserImage to display in the above column */
 @Composable
 private fun UserImageCard(url: String, onClick: (String) -> Unit) {
   Card(
