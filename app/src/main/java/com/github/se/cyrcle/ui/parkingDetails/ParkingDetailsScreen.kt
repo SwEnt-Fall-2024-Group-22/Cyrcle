@@ -98,13 +98,14 @@ fun ParkingDetailsScreen(
   var ownerReputationScore = 0.0
   var ownerUsername = stringResource(R.string.undefined_username)
   if (selectedParking.owner != "Unknown Owner" && selectedParking.owner != null) {
+    userViewModel.selectSelectedParkingUser(parkingViewModel.selectedParking.value?.owner!!)
     userViewModel.getUserById(
         selectedParking.owner,
         onSuccess = {
           ownerReputationScore = it.public.userReputationScore
           ownerUsername = it.public.username
         })
-  }
+  } else userViewModel.setParkingUser(null)
   val range = UserLevelDisplay.getLevelRange(ownerReputationScore)
   val level = ownerReputationScore.toInt()
 

@@ -44,6 +44,8 @@ import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 import kotlin.math.*
 import kotlinx.coroutines.*
 
+private const val textProportion = 0.65f
+
 @Composable
 fun WheelView(
     modifier: Modifier = Modifier,
@@ -216,7 +218,7 @@ fun WheelView(
 
           val startAngle = index * segmentAngle
           val middleAngle = Math.toRadians((startAngle + segmentAngle / 2.0))
-          val textRadius = radius * 0.65f
+          val textRadius = radius * textProportion
           val textX = centerX + cos(middleAngle).toFloat() * textRadius
           val textY = centerY + sin(middleAngle).toFloat() * textRadius
           val textLayoutResult =
@@ -388,12 +390,13 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
               WheelView(
                       modifier = Modifier.size(300.dp).testTag("wheel_view"),
                       onSegmentLanded = { segmentName ->
+                        val normalizationFactor = sqrt(currentLevel + 1.0)
                         val reputationIncrement =
                             when (segmentName) {
                               rarityLegendary -> 10.0
-                              rarityCommon -> 1.0 / sqrt(currentLevel + 1.0)
-                              rarityRare -> 2.0 / sqrt(currentLevel + 1.0)
-                              rarityEpic -> 16.0 / sqrt(currentLevel + 1.0)
+                              rarityCommon -> 1.0 / normalizationFactor
+                              rarityRare -> 2.0 / normalizationFactor
+                              rarityEpic -> 16.0 / normalizationFactor
                               else -> 0.0
                             }
 

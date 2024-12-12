@@ -96,7 +96,6 @@ class GamblingScreenTest {
 
     // Wait for first spin to complete
     run {
-      val timeoutMs = 15000L
       val incrementMs = 1000L
       var elapsedTime = 0L
 
@@ -121,7 +120,6 @@ class GamblingScreenTest {
 
     // Wait for second spin to complete
     run {
-      val timeoutMs = 15000L
       val incrementMs = 1000L
       var elapsedTime = 0L
 
@@ -201,7 +199,6 @@ class GamblingScreenTest {
     composeTestRule.onNodeWithTag("spin_button").performClick()
     // Wait for second spin to complete
     run {
-      val timeoutMs = 15000L
       val incrementMs = 1000L
       var elapsedTime = 0L
 
@@ -245,7 +242,6 @@ class GamblingScreenTest {
       composeTestRule.onNodeWithTag("spin_button").performClick()
 
       run {
-        val timeoutMs = 15000L
         val incrementMs = 1000L
         var elapsedTime = 0L
 
@@ -321,14 +317,11 @@ class GamblingScreenTest {
     // Perform a spin
     composeTestRule.onNodeWithTag("spin_button").performClick()
 
-    // Retry logic: maximum number of retries
-    val maxRetries = 100 // if that's not enough ill play the loto
     var retries = 0
     var xpIncrementVisible = false
 
     while (retries < maxRetries) {
       // Wait for the XP increment to appear
-      val timeoutMs = 12000L // 12 seconds timeout
       val incrementMs = 1000L // Check every second
       var elapsedTime = 0L
 
@@ -394,12 +387,10 @@ class GamblingScreenTest {
     composeTestRule.onNodeWithTag("spin_button").performClick()
 
     // Retry logic: maximum number of retries
-    val maxRetries = 100 // if that's not enough ill play the loto
     var retries = 0
     var levelUpVisible = false
 
     while (retries < maxRetries) {
-      val timeoutMs = 12000L // 12 seconds timeout
       val incrementMs = 500L // Check every second
       var elapsedTime = 0L
 
@@ -446,5 +437,10 @@ class GamblingScreenTest {
     // Advance time to let the animation fade out
     composeTestRule.mainClock.advanceTimeBy(3000) // Simulate 3 seconds of animation
     composeTestRule.onNodeWithTag("level_up_text").assertDoesNotExist()
+  }
+
+  companion object {
+    private const val timeoutMs = 15000L
+    private const val maxRetries = 100 // if that's not enough ill play the loto
   }
 }
