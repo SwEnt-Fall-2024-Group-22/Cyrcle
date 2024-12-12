@@ -1,6 +1,7 @@
 package com.github.se.cyrcle.ui.parkingDetails
 
 import android.annotation.SuppressLint
+import android.graphics.Color.parseColor
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
@@ -35,12 +37,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -55,6 +59,7 @@ import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.user.MAX_NOTE_LENGTH
+import com.github.se.cyrcle.model.user.UserLevelDisplay
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
@@ -80,7 +85,9 @@ fun ParkingDetailsScreen(
       parkingViewModel.selectedParking.collectAsState().value
           ?: return Text(stringResource(R.string.no_selected_parking_error))
   val userSignedIn by userViewModel.isSignedIn.collectAsState(false)
+  val scrollState = rememberScrollState()
   val context = LocalContext.current
+
   // === States for the images ===
   var newParkingImageLocalPath by remember { mutableStateOf("") }
   val showDialog = remember { mutableStateOf(false) }
@@ -88,11 +95,22 @@ fun ParkingDetailsScreen(
   val imagesPaths by parkingViewModel.selectedParkingAssociatedPaths.collectAsState()
   val showDialogImage = remember { mutableStateOf<String?>(null) }
   val showDialogImageDestinationPath = remember { mutableStateOf<String?>("") }
+
+  val defaultUsername = stringResource(R.string.undefined_username)
+  var ownerReputationScore by remember { mutableDoubleStateOf(0.0) }
+  var ownerUsername by remember { mutableStateOf(defaultUsername) }
   if (selectedParking.owner != "Unknown Owner" && selectedParking.owner != null) {
     userViewModel.selectSelectedParkingUser(parkingViewModel.selectedParking.value?.owner!!)
-  } else {
-    userViewModel.setParkingUser(null)
-  }
+    userViewModel.getUserById(
+        selectedParking.owner,
+        onSuccess = {
+          ownerReputationScore = it.public.userReputationScore
+          ownerUsername = it.public.username
+        })
+  } else userViewModel.setParkingUser(null)
+  val range = UserLevelDisplay.getLevelRange(ownerReputationScore)
+  val level = ownerReputationScore.toInt()
+
   // === === === === === === ===
 
   LaunchedEffect(Unit, selectedParking) {
@@ -103,11 +121,13 @@ fun ParkingDetailsScreen(
   // Copied from the editProfileScreen. This is the image picker launcher that set the Uri state
   // with the selected image by the user.
   // It also change the showDialog state to true to show the dialog with the user selected image.
+
   val imagePickerLauncher =
       rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let { newParkingImageLocalPath = it.toString() }
         showDialog.value = newParkingImageLocalPath.isNotEmpty()
       }
+
   // Dialog to confirm the image upload with the user.
   if (showDialog.value) {
     ParkingDetailsAlertDialogConfirmUpload(
@@ -121,6 +141,7 @@ fun ParkingDetailsScreen(
           parkingViewModel.uploadImage(newParkingImageLocalPath, context) {}
         })
   }
+
   if (showDialogImage.value != null) {
     parkingViewModel.selectImage(showDialogImageDestinationPath.value!!)
     ParkingDetailsAlertDialogShowImage(
@@ -474,13 +495,20 @@ fun ParkingDetailsScreen(
                                   color = MaterialTheme.colorScheme.onBackground)
                               Text(
                                   text =
-                                      if (userViewModel.selectedParkingOwner.value != null)
-                                          userViewModel.selectedParkingOwner.value
-                                              ?.public
-                                              ?.username!!
-                                      else stringResource(R.string.undefined_username),
+                                      stringResource(
+                                          R.string.display_user_tag_format,
+                                          range.symbol,
+                                          level,
+                                          ownerUsername),
                                   style = MaterialTheme.typography.bodyMedium,
-                                  color = MaterialTheme.colorScheme.onSurface)
+                                  color =
+                                      if (range.color ==
+                                          stringResource(R.string.rainbow_text_color)) {
+                                        MaterialTheme.colorScheme
+                                            .onSurface // TODO rainbow text color
+                                      } else {
+                                        Color(parseColor(range.color))
+                                      })
                             }
                           }
                     }
@@ -492,11 +520,9 @@ fun ParkingDetailsScreen(
                           text = stringResource(R.string.card_screen_show_map),
                           onClick = {
                             parkingViewModel.selectParking(selectedParking)
-
                             mapViewModel.updateTrackingMode(false)
                             mapViewModel.updateMapRecentering(true)
                             mapViewModel.zoomOnLocation(selectedParking.location)
-
                             navigationActions.navigateTo(Screen.MAP)
                           },
                           modifier = Modifier.fillMaxWidth(),
