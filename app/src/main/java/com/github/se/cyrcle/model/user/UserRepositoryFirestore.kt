@@ -149,13 +149,17 @@ constructor(private val db: FirebaseFirestore, private val auth: FirebaseAuth) :
         .addOnFailureListener { onFailure(it) }
   }
 
-  private fun deserializeUserPublic(data: Map<String, Any>): UserPublic {
+  /*private fun deserializeUserPublic(data: Map<String, Any>): UserPublic {
     val gson = Gson()
     val json = gson.toJson(data)
     val userPublic = gson.fromJson(json, UserPublic::class.java)
     // Ensure default values for missing fields
     val userReputationScore = (data["userReputationScore"] as? Number)?.toDouble() ?: 0.0
     return userPublic.copy(userReputationScore = userReputationScore)
+  }*/
+  private fun deserializeUserPublic(data: Map<String, Any>): UserPublic {
+    val gson = Gson()
+    return gson.fromJson(gson.toJson(data), UserPublic::class.java)
   }
 
   private fun deserializeUserDetails(data: Map<String, Any>): UserDetails {
