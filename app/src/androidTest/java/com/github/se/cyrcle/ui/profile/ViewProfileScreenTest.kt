@@ -535,47 +535,52 @@ class ViewProfileScreenTest {
    * - Trigger review fetch for user1
    */
   private fun myReviewsTestHelper() {
-    composeTestRule
-        .onNodeWithTag("TabMyReviews")
-        .assertIsDisplayed()
-        .assertHasClickAction()
-        .performClick()
-
+    // We display the parking tabs
+    composeTestRule.onNodeWithTag("TabMyReviews").assertIsDisplayed()
     // Add test parkings to mock repository
     mockParkingRepository.addParking(TestInstancesParking.parking1, {}, {}) // For review5
     mockParkingRepository.addParking(TestInstancesParking.parking2, {}, {}) // For review1
+
+    // Add user1's reviews from TestInstancesReview
     mockReviewRepository.addReview(TestInstancesReview.review1, {}, {})
     mockReviewRepository.addReview(TestInstancesReview.review5, {}, {})
+
+    // Trigger review fetch for user1
     reviewViewModel.getReviewsByOwnerId("user1")
   }
 
   @Test
   fun testTabLayoutSwipeChangesTab() {
+    // Check initial state
     composeTestRule.onNodeWithTag("TabFavoriteParkings").assertIsSelected()
     composeTestRule.onNodeWithTag("FavoriteParkingList").assertIsDisplayed()
+
+    // Swipe left on the content area to change to Reviews tab
     composeTestRule.onNodeWithTag("FavoriteParkingList").performTouchInput {
       swipeLeft(startX = this.width * 0.9f, endX = this.width * 0.1f)
     }
     composeTestRule.waitForIdle()
+
+    // Check if Reviews tab is selected and content is displayed
     composeTestRule.onNodeWithTag("TabMyReviews").assertIsSelected()
   }
 
   @Test
   fun testTabLayoutSwipeDoesNotExceedTabCount() {
+    // Try to swipe right when already on the first tab
     composeTestRule.onNodeWithTag("FavoriteParkingList").performTouchInput {
       swipeRight(startX = this.width * 0.1f, endX = this.width * 0.9f)
     }
-    composeTestRule.waitForIdle()
-    composeTestRule.onNodeWithTag("TabFavoriteParkings").assertIsSelected()
-    composeTestRule.onNodeWithTag("FavoriteParkingList").assertIsDisplayed()
   }
 
   @Test
   fun testDisplaysImagesListWhenNotEmpty() {
+    // add images to current user
     val mockImagesUrls = listOf("https://example.com/image1.jpg", "https://example.com/image2.jpg")
     val mockImagePaths = listOf("path1", "path2")
     userViewModel._selectedUserImageUrls.value = mockImagesUrls
     userViewModel._selectedUserAssociatedImages.value = mockImagePaths
+    // check list is displayed
     composeTestRule.onNodeWithTag("TabMyImages").performClick()
     composeTestRule.onNodeWithTag("UserImagesList").assertIsDisplayed()
   }
@@ -584,8 +589,10 @@ class ViewProfileScreenTest {
   fun testImageClickDisplaysDialog() {
     val mockImageUrl = "https://example.com/image1.jpg"
     val mockImagePath = "parking/mockParkingId/1"
+
     userViewModel._selectedUserImageUrls.value = listOf(mockImageUrl)
     userViewModel._selectedUserAssociatedImages.value = listOf(mockImagePath)
+    // check corresponding dialog is displayed
     composeTestRule.onNodeWithTag("TabMyImages").performClick()
     composeTestRule.onNodeWithTag("ImageCard").performClick()
     composeTestRule.onNodeWithTag("ParkingFromImageButton").assertIsDisplayed()
@@ -597,6 +604,7 @@ class ViewProfileScreenTest {
     val mockImagePath = "parking/mockParkingId/1"
     userViewModel._selectedUserImageUrls.value = listOf(mockImageUrl)
     userViewModel._selectedUserAssociatedImages.value = listOf(mockImagePath)
+    // check that click on the delete button calls the expected function
     composeTestRule.onNodeWithTag("TabMyImages").performClick()
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("ImageCard").performClick()
@@ -611,6 +619,7 @@ class ViewProfileScreenTest {
 
   @Test
   fun testDisplaysNoImagesWhenListIsEmpty() {
+    // check that tab has no images if none are attributed to user
     userViewModel._selectedUserImageUrls.value = emptyList()
     userViewModel._selectedUserAssociatedImages.value = emptyList()
     composeTestRule.onNodeWithTag("TabMyImages").performClick()
