@@ -91,7 +91,7 @@ fun ParkingDetailsAlertDialogShowImage(
                   parkingViewModel.deleteImageFromParking(
                       parkingViewModel.selectedParking.value?.uid!!,
                       parkingViewModel.selectedImageObject.value?.imagePath!!)
-                  navigationActions.navigateTo(Screen.PARKING_DETAILS)
+                  navigationActions.navigateTo(Screen.LIST)
                   Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
                 },
                 inverted = true)
