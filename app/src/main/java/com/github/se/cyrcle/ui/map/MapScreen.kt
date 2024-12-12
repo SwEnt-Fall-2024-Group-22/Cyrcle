@@ -554,6 +554,7 @@ fun MapScreen(
               parkingViewModel,
               addressViewModel,
               permissionHandler,
+              mapViewModel,
               onDismiss = { showFilter.value = false })
         }
 
@@ -777,6 +778,9 @@ fun SettingsDialog(
  * Composable function to display the filter dialog.
  *
  * @param parkingViewModel The ViewModel for managing parking-related data and actions.
+ * @param addressViewModel The ViewModel for managing address-related data and actions.
+ * @param permissionHandler The handler for managing permissions.
+ * @param mapViewModel The ViewModel for managing map-related data and actions.
  * @param onDismiss The function to dismiss the dialog.
  */
 @Composable
@@ -784,6 +788,7 @@ fun FilterDialog(
     parkingViewModel: ParkingViewModel,
     addressViewModel: AddressViewModel,
     permissionHandler: PermissionHandler,
+    mapViewModel: MapViewModel,
     onDismiss: () -> Unit
 ) {
   AlertDialog(
@@ -800,6 +805,7 @@ fun FilterDialog(
               parkingViewModel,
               displayHeader = false,
               addressViewModel,
+              mapViewModel,
               permissionHandler = permissionHandler)
         }
       },

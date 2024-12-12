@@ -16,10 +16,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
@@ -53,6 +52,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.github.se.cyrcle.R
+import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.user.MAX_NOTE_LENGTH
 import com.github.se.cyrcle.model.user.UserViewModel
@@ -71,6 +71,7 @@ import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ParkingDetailsScreen(
+    mapViewModel: MapViewModel,
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel,
     userViewModel: UserViewModel
@@ -79,7 +80,6 @@ fun ParkingDetailsScreen(
       parkingViewModel.selectedParking.collectAsState().value
           ?: return Text(stringResource(R.string.no_selected_parking_error))
   val userSignedIn by userViewModel.isSignedIn.collectAsState(false)
-  val scrollState = rememberScrollState()
   val context = LocalContext.current
   // === States for the images ===
   var newParkingImageLocalPath by remember { mutableStateOf("") }
@@ -140,355 +140,367 @@ fun ParkingDetailsScreen(
                 .format(selectedParking.optName ?: stringResource(R.string.default_parking_name)))
       },
       modifier = Modifier.testTag("ParkingDetailsScreen")) { padding ->
-        Column(
+        LazyColumn(
             modifier =
                 Modifier.fillMaxSize()
                     .padding(padding)
                     .padding(32.dp)
-                    .verticalScroll(scrollState)
                     .testTag("ParkingDetailsColumn")) {
-              Row(
-                  modifier =
-                      Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("TopInteractionRow"),
-                  verticalAlignment = Alignment.CenterVertically,
-                  horizontalArrangement = Arrangement.SpaceBetween) {
-                    val parkingNote =
-                        userViewModel.currentUser
-                            .collectAsState()
-                            .value
-                            ?.details
-                            ?.personalNotes
-                            ?.get(selectedParking.uid)
+              item {
+                Row(
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                            .testTag("TopInteractionRow"),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween) {
+                      val parkingNote =
+                          userViewModel.currentUser
+                              .collectAsState()
+                              .value
+                              ?.details
+                              ?.personalNotes
+                              ?.get(selectedParking.uid)
 
-                    val editingNote = remember { mutableStateOf(false) }
-                    val editingNoteText = remember { mutableStateOf(parkingNote ?: "") }
+                      val editingNote = remember { mutableStateOf(false) }
+                      val editingNoteText = remember { mutableStateOf(parkingNote ?: "") }
 
-                    // Column to handle text wrapping
-                    Column(
-                        modifier =
-                            Modifier.weight(1f) // Allow this column to take available space
-                                .padding(end = 16.dp) // Space for icons
-                        ) {
-                          if (editingNote.value) {
-                            ConditionCheckingInputText(
-                                value = editingNoteText.value,
-                                onValueChange = { editingNoteText.value = it },
-                                label = stringResource(R.string.list_screen_edit_note),
-                                minCharacters = 0,
-                                maxCharacters = MAX_NOTE_LENGTH,
-                                maxLines = 2,
-                                testTag = "NoteInputText")
-                          } else {
-                            if (userSignedIn) {
-                              Text(
-                                  text =
-                                      parkingNote ?: stringResource(R.string.list_screen_no_note),
-                                  style =
-                                      MaterialTheme.typography.bodyLarge.copy(
-                                          fontStyle =
-                                              if (parkingNote.isNullOrBlank()) FontStyle.Italic
-                                              else FontStyle.Normal),
-                                  textAlign = TextAlign.Left,
-                                  modifier = Modifier.testTag("NoteText"))
+                      // Column to handle text wrapping
+                      Column(
+                          modifier =
+                              Modifier.weight(1f) // Allow this column to take available space
+                                  .padding(end = 16.dp) // Space for icons
+                          ) {
+                            if (editingNote.value) {
+                              ConditionCheckingInputText(
+                                  value = editingNoteText.value,
+                                  onValueChange = { editingNoteText.value = it },
+                                  label = stringResource(R.string.list_screen_edit_note),
+                                  minCharacters = 0,
+                                  maxCharacters = MAX_NOTE_LENGTH,
+                                  maxLines = 2,
+                                  testTag = "NoteInputText")
+                            } else {
+                              if (userSignedIn) {
+                                Text(
+                                    text =
+                                        parkingNote ?: stringResource(R.string.list_screen_no_note),
+                                    style =
+                                        MaterialTheme.typography.bodyLarge.copy(
+                                            fontStyle =
+                                                if (parkingNote.isNullOrBlank()) FontStyle.Italic
+                                                else FontStyle.Normal),
+                                    textAlign = TextAlign.Left,
+                                    modifier = Modifier.testTag("NoteText"))
+                              }
                             }
                           }
-                        }
 
-                    // Icons Row
-                    Row(
-                        modifier = Modifier.testTag("IconsRow"),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                          // Save or Add/Edit Note Icon
-                          if (editingNote.value) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = "Save Note",
-                                tint = Black,
-                                modifier =
-                                    Modifier.clickable {
-                                          if (editingNoteText.value.length <= MAX_NOTE_LENGTH) {
-                                            userViewModel.editCurrentUserPersonalNoteForParking(
-                                                selectedParking, editingNoteText.value)
-                                            editingNote.value = false
-                                          }
-                                        }
-                                        .testTag("SaveNoteIcon"))
-                          } else {
-                            // Add icon if no note, Edit icon if note exists
-                            if (parkingNote == null) {
-                              val toastMsgNote = stringResource(R.string.sign_in_to_add_note)
+                      // Icons Row
+                      Row(
+                          modifier = Modifier.testTag("IconsRow"),
+                          verticalAlignment = Alignment.CenterVertically,
+                          horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            // Save or Add/Edit Note Icon
+                            if (editingNote.value) {
                               Icon(
-                                  imageVector = Icons.Default.Add,
-                                  contentDescription = "Add Note",
+                                  imageVector = Icons.Default.Check,
+                                  contentDescription = "Save Note",
                                   tint = Black,
                                   modifier =
                                       Modifier.clickable {
-                                            if (userSignedIn) editingNote.value = true
-                                            else
-                                                Toast.makeText(
-                                                        context, toastMsgNote, Toast.LENGTH_SHORT)
-                                                    .show()
+                                            if (editingNoteText.value.length <= MAX_NOTE_LENGTH) {
+                                              userViewModel.editCurrentUserPersonalNoteForParking(
+                                                  selectedParking, editingNoteText.value)
+                                              editingNote.value = false
+                                            }
                                           }
-                                          .testTag("AddNoteIcon"))
+                                          .testTag("SaveNoteIcon"))
                             } else {
-                              Icon(
-                                  imageVector = Icons.Default.Edit,
-                                  contentDescription = "Edit Note",
-                                  tint = Black,
-                                  modifier =
-                                      Modifier.clickable { editingNote.value = true }
-                                          .testTag("EditNoteIcon"))
+                              // Add icon if no note, Edit icon if note exists
+                              if (parkingNote == null) {
+                                val toastMsgNote = stringResource(R.string.sign_in_to_add_note)
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = "Add Note",
+                                    tint = Black,
+                                    modifier =
+                                        Modifier.clickable {
+                                              if (userSignedIn) editingNote.value = true
+                                              else
+                                                  Toast.makeText(
+                                                          context, toastMsgNote, Toast.LENGTH_SHORT)
+                                                      .show()
+                                            }
+                                            .testTag("AddNoteIcon"))
+                              } else {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = "Edit Note",
+                                    tint = Black,
+                                    modifier =
+                                        Modifier.clickable { editingNote.value = true }
+                                            .testTag("EditNoteIcon"))
+                              }
                             }
-                          }
 
-                          // Pin Icon
-                          val isPinned =
-                              parkingViewModel.pinnedParkings
-                                  .collectAsState()
-                                  .value
-                                  .contains(selectedParking)
-                          Icon(
-                              imageVector =
-                                  if (isPinned) Icons.Default.PushPin else Icons.Outlined.PushPin,
-                              contentDescription = "Pin",
-                              tint = Black,
-                              modifier =
-                                  Modifier.clickable {
-                                        parkingViewModel.togglePinStatus(selectedParking)
-                                      }
-                                      .rotate(45f)
-                                      .testTag("PinIcon"))
-
-                          // Favorite Icon
-                          val isFavorite =
-                              userSignedIn &&
-                                  userViewModel.favoriteParkings
-                                      .collectAsState()
-                                      .value
-                                      .contains(selectedParking)
-                          val toastMsgFavorite = stringResource(R.string.sign_in_to_add_favorites)
-                          Icon(
-                              imageVector =
-                                  if (isFavorite) Icons.Default.Favorite
-                                  else Icons.Outlined.FavoriteBorder,
-                              contentDescription = "Favorite",
-                              tint = if (isFavorite) Red else Black,
-                              modifier =
-                                  Modifier.clickable {
-                                        if (userSignedIn) {
-                                          if (isFavorite) {
-                                            userViewModel.removeFavoriteParkingFromSelectedUser(
-                                                selectedParking)
-                                          } else {
-                                            userViewModel.addFavoriteParkingToSelectedUser(
-                                                selectedParking)
-                                          }
-                                        } else {
-                                          Toast.makeText(
-                                                  context, toastMsgFavorite, Toast.LENGTH_SHORT)
-                                              .show()
+                            // Pin Icon
+                            val isPinned =
+                                parkingViewModel.pinnedParkings
+                                    .collectAsState()
+                                    .value
+                                    .contains(selectedParking)
+                            Icon(
+                                imageVector =
+                                    if (isPinned) Icons.Default.PushPin else Icons.Outlined.PushPin,
+                                contentDescription = "Pin",
+                                tint = Black,
+                                modifier =
+                                    Modifier.clickable {
+                                          parkingViewModel.togglePinStatus(selectedParking)
                                         }
-                                      }
-                                      .testTag(
-                                          if (isFavorite) "RedFilledFavoriteIcon"
-                                          else "BlackOutlinedFavoriteIcon"))
-                        }
-                  }
-              // Reviews
-              Row(
-                  modifier =
-                      Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("AverageRatingRow"),
-                  verticalAlignment = Alignment.CenterVertically,
-                  horizontalArrangement = Arrangement.SpaceBetween) {
-                    if (selectedParking.nbReviews > 0) {
-                      Row {
-                        ScoreStars(
-                            selectedParking.avgScore,
-                            scale = 0.8f,
-                            text =
-                                pluralStringResource(
-                                        R.plurals.reviews_count, count = selectedParking.nbReviews)
-                                    .format(selectedParking.nbReviews))
-                      }
-                    } else {
-                      Text(
-                          text = stringResource(R.string.no_reviews),
-                          style = MaterialTheme.typography.bodyMedium,
-                          color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
-                          testTag = "ParkingNoReviews")
+                                        .rotate(45f)
+                                        .testTag("PinIcon"))
+
+                            // Favorite Icon
+                            val isFavorite =
+                                userSignedIn &&
+                                    userViewModel.favoriteParkings
+                                        .collectAsState()
+                                        .value
+                                        .contains(selectedParking)
+                            val toastMsgFavorite = stringResource(R.string.sign_in_to_add_favorites)
+                            Icon(
+                                imageVector =
+                                    if (isFavorite) Icons.Default.Favorite
+                                    else Icons.Outlined.FavoriteBorder,
+                                contentDescription = "Favorite",
+                                tint = if (isFavorite) Red else Black,
+                                modifier =
+                                    Modifier.clickable {
+                                          if (userSignedIn) {
+                                            if (isFavorite) {
+                                              userViewModel.removeFavoriteParkingFromSelectedUser(
+                                                  selectedParking)
+                                            } else {
+                                              userViewModel.addFavoriteParkingToSelectedUser(
+                                                  selectedParking)
+                                            }
+                                          } else {
+                                            Toast.makeText(
+                                                    context, toastMsgFavorite, Toast.LENGTH_SHORT)
+                                                .show()
+                                          }
+                                        }
+                                        .testTag(
+                                            if (isFavorite) "RedFilledFavoriteIcon"
+                                            else "BlackOutlinedFavoriteIcon"))
+                          }
                     }
-                    Text(
-                        text = stringResource(R.string.card_screen_see_review),
-                        style =
-                            MaterialTheme.typography.bodyMedium.copy(
-                                textDecoration = TextDecoration.Underline),
-                        color = MaterialTheme.colorScheme.primary,
-                        testTag = "SeeAllReviewsText",
-                        modifier =
-                            Modifier.clickable { navigationActions.navigateTo(Screen.ALL_REVIEWS) })
-                  }
-
-              Spacer(modifier = Modifier.height(16.dp))
-
-              // Images
-              Row(
-                  modifier = Modifier.height(150.dp).fillMaxWidth().testTag("ImagesRow"),
-                  horizontalArrangement = Arrangement.spacedBy(8.dp),
-                  verticalAlignment = Alignment.CenterVertically) {
-                    // No images
-                    if (selectedParking.images.isEmpty()) {
+                // Reviews
+                Row(
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                            .testTag("AverageRatingRow"),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween) {
+                      if (selectedParking.nbReviews > 0) {
+                        Row {
+                          ScoreStars(
+                              selectedParking.avgScore,
+                              scale = 0.8f,
+                              text =
+                                  pluralStringResource(
+                                          R.plurals.reviews_count,
+                                          count = selectedParking.nbReviews)
+                                      .format(selectedParking.nbReviews))
+                        }
+                      } else {
+                        Text(
+                            text = stringResource(R.string.no_reviews),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
+                            testTag = "ParkingNoReviews")
+                      }
                       Text(
-                          text = stringResource(R.string.card_screen_no_image),
-                          color = MaterialTheme.colorScheme.onSurface,
-                          style = MaterialTheme.typography.bodyMedium,
-                          modifier = Modifier.weight(3f),
-                          textAlign = TextAlign.Left,
-                          testTag = "NoImageText")
-                      // There are images to display
-                    } else {
-                      LazyRow(
+                          text = stringResource(R.string.card_screen_see_review),
+                          style =
+                              MaterialTheme.typography.bodyMedium.copy(
+                                  textDecoration = TextDecoration.Underline),
+                          color = MaterialTheme.colorScheme.primary,
+                          testTag = "SeeAllReviewsText",
                           modifier =
-                              Modifier.weight(2f).fillMaxHeight().testTag("ParkingImagesRow"),
-                          horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            itemsIndexed(imagesUrls) { index, url ->
-                              Image(
-                                  painter = rememberAsyncImagePainter(url),
-                                  contentDescription = "Parking Image",
-                                  contentScale = ContentScale.Crop,
-                                  modifier =
-                                      Modifier.fillMaxHeight().width(150.dp).clickable {
-                                        // Set both imageUrl and destinationPath in the state
-                                        showDialogImage.value = url
-                                        showDialogImageDestinationPath.value =
-                                            showDialogImageDestinationPath.value.plus(
-                                                imagesPaths[index])
-                                      })
+                              Modifier.clickable {
+                                navigationActions.navigateTo(Screen.ALL_REVIEWS)
+                              })
+                    }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Images
+                Row(
+                    modifier = Modifier.height(150.dp).fillMaxWidth().testTag("ImagesRow"),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically) {
+                      // No images
+                      if (selectedParking.images.isEmpty()) {
+                        Text(
+                            text = stringResource(R.string.card_screen_no_image),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.weight(3f),
+                            textAlign = TextAlign.Left,
+                            testTag = "NoImageText")
+                        // There are images to display
+                      } else {
+                        LazyRow(
+                            modifier =
+                                Modifier.weight(2f).fillMaxHeight().testTag("ParkingImagesRow"),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                              itemsIndexed(imagesUrls) { index, url ->
+                                Image(
+                                    painter = rememberAsyncImagePainter(url),
+                                    contentDescription = "Parking Image",
+                                    contentScale = ContentScale.Crop,
+                                    modifier =
+                                        Modifier.fillMaxHeight().width(150.dp).clickable {
+                                          // Set both imageUrl and destinationPath in the state
+                                          showDialogImage.value = url
+                                          showDialogImageDestinationPath.value =
+                                              showDialogImageDestinationPath.value.plus(
+                                                  imagesPaths[index])
+                                        })
+                              }
+                            }
+                      }
+                      IconButton(
+                          icon = Icons.Outlined.AddAPhoto,
+                          contentDescription = "Add Image",
+                          onClick = { imagePickerLauncher.launch("image/*") },
+                          enabled = userSignedIn,
+                          testTag = "AddImageIconButton",
+                          modifier = Modifier.padding(start = 8.dp).height(32.dp).weight(1f))
+                    }
+
+                // Information
+                Column(
+                    modifier =
+                        Modifier.fillMaxWidth().padding(vertical = 32.dp).testTag("InfoColumn"),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                      Row(
+                          modifier = Modifier.fillMaxWidth().testTag("RowCapacityRack"),
+                          horizontalArrangement = Arrangement.SpaceBetween) {
+                            Column(modifier = Modifier.weight(1f).testTag("CapacityColumn")) {
+                              Text(
+                                  text = stringResource(R.string.card_screen_capacity),
+                                  style = MaterialTheme.typography.bodyMedium,
+                                  color = MaterialTheme.colorScheme.onBackground)
+                              Text(
+                                  text = selectedParking.capacity.description,
+                                  style = MaterialTheme.typography.bodyMedium,
+                                  color = MaterialTheme.colorScheme.onSurface)
+                            }
+                            Column(modifier = Modifier.weight(1f).testTag("RackTypeColumn")) {
+                              Text(
+                                  text = stringResource(R.string.card_screen_rack_type),
+                                  style = MaterialTheme.typography.bodyMedium,
+                                  color = MaterialTheme.colorScheme.onBackground)
+                              Text(
+                                  text = selectedParking.rackType.description,
+                                  style = MaterialTheme.typography.bodyMedium,
+                                  color = MaterialTheme.colorScheme.onSurface)
+                            }
+                          }
+
+                      Row(
+                          modifier = Modifier.fillMaxWidth().testTag("RowProtectionPrice"),
+                          horizontalArrangement = Arrangement.SpaceBetween) {
+                            Column(modifier = Modifier.weight(1f).testTag("ProtectionColumn")) {
+                              Text(
+                                  text = stringResource(R.string.card_screen_protection),
+                                  style = MaterialTheme.typography.bodyMedium,
+                                  color = MaterialTheme.colorScheme.onBackground)
+                              Text(
+                                  text = selectedParking.protection.description,
+                                  style = MaterialTheme.typography.bodyMedium,
+                                  color = MaterialTheme.colorScheme.onSurface)
+                            }
+                            Column(modifier = Modifier.weight(1f).testTag("PriceColumn")) {
+                              Text(
+                                  text = stringResource(R.string.card_screen_price),
+                                  style = MaterialTheme.typography.bodyMedium,
+                                  color = MaterialTheme.colorScheme.onBackground)
+                              val price = selectedParking.price
+                              Text(
+                                  text =
+                                      if (price == 0.0) stringResource(R.string.free) else "$price",
+                                  style = MaterialTheme.typography.bodyMedium,
+                                  color = MaterialTheme.colorScheme.onSurface)
+                            }
+                          }
+
+                      Row(
+                          modifier = Modifier.fillMaxWidth().testTag("RowSecurity"),
+                          horizontalArrangement = Arrangement.SpaceBetween) {
+                            Column(modifier = Modifier.weight(1f).testTag("SecurityColumn")) {
+                              Text(
+                                  text = stringResource(R.string.card_screen_surveillance),
+                                  style = MaterialTheme.typography.bodyMedium,
+                                  color = MaterialTheme.colorScheme.onBackground)
+                              Text(
+                                  text =
+                                      if (selectedParking.hasSecurity) stringResource(R.string.yes)
+                                      else stringResource(R.string.no),
+                                  style = MaterialTheme.typography.bodyMedium,
+                                  color = MaterialTheme.colorScheme.onSurface)
+                            }
+                            Column(modifier = Modifier.weight(1f).testTag("UserColumn")) {
+                              Text(
+                                  text = stringResource(R.string.card_screen_user),
+                                  style = MaterialTheme.typography.bodyMedium,
+                                  color = MaterialTheme.colorScheme.onBackground)
+                              Text(
+                                  text =
+                                      if (userViewModel.selectedParkingOwner.value != null)
+                                          userViewModel.selectedParkingOwner.value
+                                              ?.public
+                                              ?.username!!
+                                      else stringResource(R.string.undefined_username),
+                                  style = MaterialTheme.typography.bodyMedium,
+                                  color = MaterialTheme.colorScheme.onSurface)
                             }
                           }
                     }
-                    IconButton(
-                        icon = Icons.Outlined.AddAPhoto,
-                        contentDescription = "Add Image",
-                        onClick = { imagePickerLauncher.launch("image/*") },
-                        enabled = userSignedIn,
-                        testTag = "AddImageIconButton",
-                        modifier = Modifier.padding(start = 8.dp).height(32.dp).weight(1f))
-                  }
 
-              // Information
-              Column(
-                  modifier =
-                      Modifier.fillMaxWidth().padding(vertical = 32.dp).testTag("InfoColumn"),
-                  verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().testTag("RowCapacityRack"),
-                        horizontalArrangement = Arrangement.SpaceBetween) {
-                          Column(modifier = Modifier.weight(1f).testTag("CapacityColumn")) {
-                            Text(
-                                text = stringResource(R.string.card_screen_capacity),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onBackground)
-                            Text(
-                                text = selectedParking.capacity.description,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface)
-                          }
-                          Column(modifier = Modifier.weight(1f).testTag("RackTypeColumn")) {
-                            Text(
-                                text = stringResource(R.string.card_screen_rack_type),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onBackground)
-                            Text(
-                                text = selectedParking.rackType.description,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface)
-                          }
-                        }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth().testTag("RowProtectionPrice"),
-                        horizontalArrangement = Arrangement.SpaceBetween) {
-                          Column(modifier = Modifier.weight(1f).testTag("ProtectionColumn")) {
-                            Text(
-                                text = stringResource(R.string.card_screen_protection),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onBackground)
-                            Text(
-                                text = selectedParking.protection.description,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface)
-                          }
-                          Column(modifier = Modifier.weight(1f).testTag("PriceColumn")) {
-                            Text(
-                                text = stringResource(R.string.card_screen_price),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onBackground)
-                            val price = selectedParking.price
-                            Text(
-                                text =
-                                    if (price == 0.0) stringResource(R.string.free) else "$price",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface)
-                          }
-                        }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth().testTag("RowSecurity"),
-                        horizontalArrangement = Arrangement.SpaceBetween) {
-                          Column(modifier = Modifier.weight(1f).testTag("SecurityColumn")) {
-                            Text(
-                                text = stringResource(R.string.card_screen_surveillance),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onBackground)
-                            Text(
-                                text =
-                                    if (selectedParking.hasSecurity) stringResource(R.string.yes)
-                                    else stringResource(R.string.no),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface)
-                          }
-                          Column(modifier = Modifier.weight(1f).testTag("UserColumn")) {
-                            Text(
-                                text = stringResource(R.string.card_screen_user),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onBackground)
-                            Text(
-                                text =
-                                    if (userViewModel.selectedParkingOwner.value != null)
-                                        userViewModel.selectedParkingOwner.value?.public?.username!!
-                                    else stringResource(R.string.undefined_username),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface)
-                          }
-                        }
-                  }
-
-              Column(
-                  modifier = Modifier.fillMaxWidth().testTag("ButtonsColumn"),
-                  verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Button(
-                        text = stringResource(R.string.card_screen_show_map),
-                        onClick = {
-                          Toast.makeText(
-                                  context,
-                                  "A feature to show the parking on the map will be added later",
-                                  Toast.LENGTH_LONG)
-                              .show()
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        colorLevel = ColorLevel.PRIMARY,
-                        testTag = "ShowInMapButton")
-
-                    if (userViewModel.currentUser.value != null) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().testTag("ButtonsColumn"),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)) {
                       Button(
-                          text = stringResource(R.string.card_screen_report),
-                          onClick = { navigationActions.navigateTo(Screen.PARKING_REPORT) },
+                          text = stringResource(R.string.card_screen_show_map),
+                          onClick = {
+                            parkingViewModel.selectParking(selectedParking)
+
+                            mapViewModel.updateTrackingMode(false)
+                            mapViewModel.updateMapRecentering(true)
+                            mapViewModel.zoomOnLocation(selectedParking.location)
+
+                            navigationActions.navigateTo(Screen.MAP)
+                          },
                           modifier = Modifier.fillMaxWidth(),
-                          colorLevel = ColorLevel.ERROR,
-                          testTag = "ReportButton")
+                          colorLevel = ColorLevel.PRIMARY,
+                          testTag = "ShowInMapButton")
+
+                      if (userViewModel.currentUser.value != null) {
+                        Button(
+                            text = stringResource(R.string.card_screen_report),
+                            onClick = { navigationActions.navigateTo(Screen.PARKING_REPORT) },
+                            modifier = Modifier.fillMaxWidth(),
+                            colorLevel = ColorLevel.ERROR,
+                            testTag = "ReportButton")
+                      }
                     }
-                  }
+              }
             }
       }
 }
