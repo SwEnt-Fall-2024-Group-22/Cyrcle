@@ -34,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -293,7 +294,7 @@ fun AllReviewsScreen(
                       val signInToReport = stringResource(R.string.sign_in_to_report_review)
 
                       var ownerUsername by remember { mutableStateOf(defaultUsername) }
-                      var ownerReputationScore = 0.0
+                      var ownerReputationScore by remember { mutableDoubleStateOf(0.0) }
 
                       userViewModel.getUserById(
                           curReview.owner,
