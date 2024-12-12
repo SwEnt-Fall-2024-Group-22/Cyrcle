@@ -12,7 +12,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Flag
-import androidx.compose.material.icons.outlined.RestoreFromTrash
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -91,6 +90,8 @@ fun ParkingDetailsAlertDialogShowImage(
                 onClick = {
                   parkingViewModel.deleteImageFromParking(
                       parkingViewModel.selectedParking.value?.uid!!,
+                      parkingViewModel.selectedImageObject.value?.imagePath!!)
+                  userViewModel.removeImageFromUserImages(
                       parkingViewModel.selectedImageObject.value?.imagePath!!)
                   navigationActions.navigateTo(Screen.LIST)
                   Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
