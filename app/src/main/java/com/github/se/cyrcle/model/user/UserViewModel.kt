@@ -55,6 +55,12 @@ class UserViewModel(
     _currentUser.value = user
   }
 
+  /**
+   * Loads the current user's images and updates the associated state flows. Clears the existing
+   * image URLs and paths, then retrieves URLs for the image paths listed in
+   * `currentUser.details.userImages`. Updates `_selectedUserImageUrls` with the retrieved URLs and
+   * `_selectedUserAssociatedImages` with the image paths. Logs an error if URL retrieval fails.
+   */
   fun loadSelectedUserImages() {
     // clear the list of URLs each time we request the images (prevent duplicates and old images
     // from being displayed)
@@ -71,7 +77,12 @@ class UserViewModel(
           onFailure = { Log.e("ParkingViewModel", "Error getting image URL for path") })
     }
   }
-
+  /**
+   * Sets the selected parking owner in the view model. Updates `_selectedParkingOwner` with the
+   * provided user and logs the action.
+   *
+   * @param user The user to set as the selected parking owner, or `null` to clear the selection.
+   */
   fun setParkingUser(user: User?) {
     Log.d("UserViewModel", "Setting the current user in viewmodel : $user")
     _selectedParkingOwner.value = user
@@ -252,6 +263,12 @@ class UserViewModel(
     }
   }
 
+  /**
+   * Adds an image to the current user's list of images. Updates the user's `userImages` field and
+   * saves the updated user in the database. Also updates the `_reportedParkings` state.
+   *
+   * @param image The image path to add to the user's list of images.
+   */
   fun addImageToUserImages(image: String) {
     currentUser.value?.let { user ->
       val updatedDetails = user.details?.copy(userImages = user.details.userImages + image)
@@ -260,6 +277,13 @@ class UserViewModel(
     }
   }
 
+  /**
+   * Removes an image from the current user's list of images. Updates the user's `userImages` field
+   * and saves the updated user in the database. Also updates the `_selectedUserAssociatedImages`
+   * state.
+   *
+   * @param image The image path to remove from the user's list of images.
+   */
   fun removeImageFromUserImages(image: String) {
     currentUser.value?.let { user ->
       val updatedDetails = user.details?.copy(userImages = user.details.userImages - image)

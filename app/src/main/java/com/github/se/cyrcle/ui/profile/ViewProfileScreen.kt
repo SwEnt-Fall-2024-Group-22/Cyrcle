@@ -537,7 +537,6 @@ private fun UserImagesSection(
                     { parkingForPath ->
                       parkingViewModel.selectParking(parkingForPath)
                       navigationActions.navigateTo(Screen.PARKING_DETAILS)
-                      Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
                     },
                     {})
               })
@@ -545,9 +544,7 @@ private fun UserImagesSection(
         dismissButton = {
           IconButton(
               modifier = Modifier.padding(10.dp),
-              icon =
-                  Icons.Filled
-                      .RestoreFromTrash, // or Icons.Filled.Paid or Icons.Filled.AttachMoney etc...
+              icon = Icons.Filled.RestoreFromTrash,
               contentDescription = "Delete",
               testTag = "DeleteImageButton",
               onClick = {
@@ -559,6 +556,7 @@ private fun UserImagesSection(
                       parkingViewModel.deleteImageFromParking(
                           parkingViewModel.selectedParking.value?.uid!!,
                           showDialogImagePath.value!!)
+                      Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
                       navigationActions.navigateTo(Screen.VIEW_PROFILE)
                     },
                     {})
