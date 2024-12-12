@@ -37,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -95,8 +96,9 @@ fun ParkingDetailsScreen(
   val showDialogImage = remember { mutableStateOf<String?>(null) }
   val showDialogImageDestinationPath = remember { mutableStateOf<String?>("") }
 
-  var ownerReputationScore = 0.0
-  var ownerUsername = stringResource(R.string.undefined_username)
+  val defaultUsername = stringResource(R.string.undefined_username)
+  var ownerReputationScore by remember { mutableDoubleStateOf(0.0) }
+  var ownerUsername by remember { mutableStateOf(defaultUsername) }
   if (selectedParking.owner != "Unknown Owner" && selectedParking.owner != null) {
     userViewModel.selectSelectedParkingUser(parkingViewModel.selectedParking.value?.owner!!)
     userViewModel.getUserById(
