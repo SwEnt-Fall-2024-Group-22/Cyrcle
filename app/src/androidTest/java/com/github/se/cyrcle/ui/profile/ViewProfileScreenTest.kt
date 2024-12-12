@@ -505,26 +505,51 @@ class ViewProfileScreenTest {
 
   @Test
   fun whenUserHasReviews_showsReviewsList() {
+    println("Test started: whenUserHasReviews_showsReviewsList")
+
+    // Helper to set up the reviews
     myReviewsTestHelper()
     composeTestRule.waitForIdle()
-    composeTestRule.onNodeWithTag("UserReviewsList").assertIsDisplayed()
+    println("Helper executed, waiting for idle state.")
 
+    Thread.sleep(3000) // Simulating any potential loading delays
+    println("Finished waiting for potential loading.")
+
+    // Verify UserReviewsList is displayed
+    composeTestRule.onNodeWithTag("UserReviewsList").assertIsDisplayed()
+    println("UserReviewsList is displayed.")
+
+    // Scroll and verify the first review card
     composeTestRule
         .onNodeWithTag("ReviewCard0", useUnmergedTree = true)
         .performScrollTo()
         .assertIsDisplayed()
+    println("ReviewCard0 is displayed after scrolling.")
 
+    // Verify the title of the review
     composeTestRule
         .onNodeWithTag("ReviewTitle0", useUnmergedTree = true)
         .assertIsDisplayed()
         .assertTextEquals(TestInstancesParking.parking2.optName!!)
+    println("ReviewTitle0 matches expected text: ${TestInstancesParking.parking2.optName!!}")
 
-    // Ensure the card is clickable and it takes us the all reviews screen
+    // Verify card click action and navigation
     composeTestRule.onNodeWithTag("ReviewCard0").assertHasClickAction().performClick()
-    composeTestRule.waitForIdle()
+    println("ReviewCard0 is clickable and click action performed.")
 
+    composeTestRule.waitForIdle()
+    println("Waiting for navigation to complete.")
+
+    // Verify navigation and selected parking
     verify(mockNavigationActions).navigateTo(Screen.PARKING_DETAILS)
-    assert(parkingViewModel.selectedParking.value == TestInstancesParking.parking2)
+    println("Navigation to PARKING_DETAILS verified.")
+
+    assert(parkingViewModel.selectedParking.value == TestInstancesParking.parking2) {
+      "Selected parking does not match expected value."
+    }
+    println("Selected parking matches expected value: ${TestInstancesParking.parking2}")
+
+    println("Test completed: whenUserHasReviews_showsReviewsList")
   }
 
   /**
@@ -536,7 +561,11 @@ class ViewProfileScreenTest {
    */
   private fun myReviewsTestHelper() {
     // We display the parking tabs
-    composeTestRule.onNodeWithTag("TabMyReviews").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag("TabMyReviews")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
     // Add test parkings to mock repository
     mockParkingRepository.addParking(TestInstancesParking.parking1, {}, {}) // For review5
     mockParkingRepository.addParking(TestInstancesParking.parking2, {}, {}) // For review1
