@@ -50,6 +50,7 @@ class MainActivityTest {
   private lateinit var userProfileRobot: UserProfileRobot
   private lateinit var cardRobot: ParkingDetailsScreenRobot
   private lateinit var addParkingRobot: AddParkingRobot
+  private lateinit var allReviewsRobot: AllReviewRobot
 
   private lateinit var permissionHandler: PermissionHandler
 
@@ -65,6 +66,7 @@ class MainActivityTest {
     userProfileRobot = UserProfileRobot(composeTestRule)
     cardRobot = ParkingDetailsScreenRobot(composeTestRule)
     addParkingRobot = AddParkingRobot(composeTestRule)
+    allReviewsRobot = AllReviewRobot(composeTestRule)
   }
 
   @Test
@@ -128,23 +130,38 @@ class MainActivityTest {
   }
 
   @Test
-  fun testReview(){
+  fun testReview() {
 
     // Authenticated user
     authRobot.assertAuthScreen()
     authRobot.performSignIn()
 
     mapRobot.assertMapScreen()
+    mapRobot.toList()
 
+    listRobot.assertListScreen()
+    listRobot.toCard(0)
+
+    cardRobot.assertParkingDetailsScreen()
+    cardRobot.goAllReviews()
+
+    allReviewsRobot.assertAllReviewScreen(true)
+    allReviewsRobot.goToReview()
 
     // Anonymous user
     authRobot.assertAuthScreen()
     authRobot.performAnonymousSignIn()
 
     mapRobot.assertMapScreen()
+    mapRobot.toList()
 
+    listRobot.assertListScreen()
+    listRobot.toCard(0)
 
+    cardRobot.assertParkingDetailsScreen()
+    cardRobot.goAllReviews()
 
+    allReviewsRobot.assertAllReviewScreen(false)
   }
 
   // ============================================================================
@@ -245,6 +262,16 @@ class MainActivityTest {
           .performClick()
       composeTestRule.waitUntilAtLeastOneExists(
           hasTestTag("SpotListScreen").or(hasTestTag("MapScreen")))
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    fun goAllReviews() {
+      composeTestRule
+          .onNodeWithTag("SeeAllReviewsText")
+          .assertIsDisplayed()
+          .assertHasClickAction()
+          .performClick()
+      composeTestRule.waitUntilExactlyOneExists(hasTestTag("ReviewCard0"))
     }
   }
 
@@ -458,15 +485,38 @@ class MainActivityTest {
     }
   }
   // ============================================================================
-  // ============================= REVIEW SCREEN ROBOT =============================
+  // ============================= ALL REVIEWS SCREEN ROBOT =============================
   // ============================================================================
-  private class ReviewRobot(val composeTestRule: ComposeTestRule) {
+  private class AllReviewRobot(val composeTestRule: ComposeTestRule) {
 
+    fun assertAllReviewScreen(SignedIn: Boolean) {
+      composeTestRule.onNodeWithTag("ReviewCard0").assertIsDisplayed()
+      composeTestRule
+          .onNodeWithTag("ReviewTitle0")
+          .assertIsDisplayed()
+          .assertTextEquals("All Reviews")
+      composeTestRule.onNodeWithTag("ReviewCardContent0").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("ReviewActions0").assertIsDisplayed().assertHasClickAction()
+      composeTestRule.onNodeWithTag("LikeButton0").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("DislikeButton0").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("LikeCount0").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("DislikeCount0").assertIsDisplayed()
 
+      if (SignedIn) {
+        composeTestRule.onNodeWithTag("AddReviewButton").assertIsDisplayed().assertHasClickAction()
+      } else {
+        composeTestRule.onNodeWithTag("AddReviewButton").assertIsNotDisplayed()
+      }
+    }
 
-
+    fun goToReview() {
+      composeTestRule
+          .onNodeWithTag("AddReviewButton")
+          .assertIsDisplayed()
+          .assertHasClickAction()
+          .performClick()
+    }
   }
-
 
   // ============================================================================
   // ============================= HELPER FUNCTIONS =============================
