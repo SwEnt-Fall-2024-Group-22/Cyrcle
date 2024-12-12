@@ -39,8 +39,11 @@ data class Settings(
     return result
   }
 
-  class Serializer :
-      ProtoGenericSerializer<Settings>(Settings("John Doe", 42, 420000, 4.2f, 4.425397, true)) {
+  class Serializer : ProtoGenericSerializer<Settings>() {
+    override fun defaultValue(): Settings {
+      return Settings("John Doe", 42, 420000, 4.2f, 4.425397, true)
+    }
+
     override suspend fun readFrom(input: InputStream): Settings {
       return try {
         Settings(
