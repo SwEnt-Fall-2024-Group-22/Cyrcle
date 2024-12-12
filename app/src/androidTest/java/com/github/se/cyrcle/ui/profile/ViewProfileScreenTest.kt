@@ -505,53 +505,35 @@ class ViewProfileScreenTest {
 
   @Test
   fun whenUserHasReviews_showsReviewsList() {
-    println("Test started: whenUserHasReviews_showsReviewsList")
-
-    // Helper to set up the reviews
     myReviewsTestHelper()
     composeTestRule.waitForIdle()
-    println("Helper executed, waiting for idle state.")
-
-    Thread.sleep(3000) // Simulating any potential loading delays
-    println("Finished waiting for potential loading.")
-
-    // Verify UserReviewsList is displayed
     composeTestRule.onNodeWithTag("UserReviewsList").assertIsDisplayed()
-    println("UserReviewsList is displayed.")
 
-    // Scroll and verify the first review card
     composeTestRule
         .onNodeWithTag("ReviewCard0", useUnmergedTree = true)
         .performScrollTo()
         .assertIsDisplayed()
-    println("ReviewCard0 is displayed after scrolling.")
 
-    // Verify the title of the review
     composeTestRule
         .onNodeWithTag("ReviewTitle0", useUnmergedTree = true)
         .assertIsDisplayed()
         .assertTextEquals(TestInstancesParking.parking2.optName!!)
-    println("ReviewTitle0 matches expected text: ${TestInstancesParking.parking2.optName!!}")
 
-    // Verify card click action and navigation
+    // Ensure the card is clickable and it takes us the all reviews screen
     composeTestRule.onNodeWithTag("ReviewCard0").assertHasClickAction().performClick()
-    println("ReviewCard0 is clickable and click action performed.")
-
     composeTestRule.waitForIdle()
-    println("Waiting for navigation to complete.")
 
-    // Verify navigation and selected parking
     verify(mockNavigationActions).navigateTo(Screen.PARKING_DETAILS)
-    println("Navigation to PARKING_DETAILS verified.")
-
-    assert(parkingViewModel.selectedParking.value == TestInstancesParking.parking2) {
-      "Selected parking does not match expected value."
-    }
-    println("Selected parking matches expected value: ${TestInstancesParking.parking2}")
-
-    println("Test completed: whenUserHasReviews_showsReviewsList")
+    assert(parkingViewModel.selectedParking.value == TestInstancesParking.parking2)
   }
 
+  /**
+   * Helper function to set up the test environment for the "My Reviews" tab.
+   * - Select the "My Reviews" tab
+   * - Add test parkings to the mock repository
+   * - Add user1's reviews from TestInstancesReview
+   * - Trigger review fetch for user1
+   */
   /**
    * Helper function to set up the test environment for the "My Reviews" tab.
    * - Select the "My Reviews" tab
