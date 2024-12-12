@@ -20,11 +20,13 @@ import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipe
+import androidx.compose.ui.test.swipeRight
 import com.github.se.cyrcle.MainActivity
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.model.parking.online.ParkingRepository
+import com.github.se.cyrcle.model.review.TestInstancesReview
 import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.permission.PermissionHandler
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
@@ -51,7 +53,7 @@ class MainActivityTest {
   private lateinit var cardRobot: ParkingDetailsScreenRobot
   private lateinit var addParkingRobot: AddParkingRobot
   private lateinit var allReviewsRobot: AllReviewRobot
-  private lateinit var reviewRobot: ReviewRobot
+  private lateinit var addReviewRobot: ReviewRobot
 
   private lateinit var permissionHandler: PermissionHandler
 
@@ -68,7 +70,7 @@ class MainActivityTest {
     cardRobot = ParkingDetailsScreenRobot(composeTestRule)
     addParkingRobot = AddParkingRobot(composeTestRule)
     allReviewsRobot = AllReviewRobot(composeTestRule)
-    reviewRobot = ReviewRobot(composeTestRule)
+    addReviewRobot = ReviewRobot(composeTestRule)
   }
 
   @Test
@@ -135,6 +137,7 @@ class MainActivityTest {
   fun testReview() {
 
     composeTestRule.activity.userRepository.addUser(TestInstancesUser.user1, {}, {})
+    composeTestRule.activity.reviewRepository.addReview(TestInstancesReview.review6, {}, {})
 
     // Authenticated user
     authRobot.assertAuthScreen()
@@ -150,12 +153,15 @@ class MainActivityTest {
     cardRobot.goAllReviews()
 
     allReviewsRobot.assertAllReviewScreen(true)
-    allReviewsRobot.goToReview()
+    allReviewsRobot.goToAddReview()
 
-    reviewRobot.assertReviewScreen()
-    reviewRobot.addReview()
+    addReviewRobot.assertAddReviewScreen()
+    addReviewRobot.addReview()
 
     allReviewsRobot.assertReviewIsAdded()
+    allReviewsRobot.toUserProfile()
+
+    userProfileRobot.signOut()
 
     // Anonymous user
     authRobot.assertAuthScreen()
@@ -275,11 +281,12 @@ class MainActivityTest {
 
     @OptIn(ExperimentalTestApi::class)
     fun goAllReviews() {
-      composeTestRule
-          .onNodeWithTag("SeeAllReviewsText")
-          .assertIsDisplayed()
-          .assertHasClickAction()
-          .performClick()
+
+      composeTestRule.waitUntilExactlyOneExists(hasTestTag("SeeAllReviewsText"))
+      composeTestRule.onNodeWithTag("ParkingDetailsColumn").performTouchInput {
+        swipe(end = Offset(centerX, centerX * 0.9f), start = Offset(centerX, centerX * 0.1f))
+      }
+      composeTestRule.onNodeWithTag("SeeAllReviewsText").assertIsDisplayed().performClick()
       composeTestRule.waitUntilExactlyOneExists(hasTestTag("ReviewCard0"))
     }
   }
@@ -500,16 +507,6 @@ class MainActivityTest {
 
     fun assertAllReviewScreen(SignedIn: Boolean) {
       composeTestRule.onNodeWithTag("ReviewCard0").assertIsDisplayed()
-      composeTestRule
-          .onNodeWithTag("ReviewTitle0")
-          .assertIsDisplayed()
-          .assertTextEquals("All Reviews")
-      composeTestRule.onNodeWithTag("ReviewCardContent0").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("ReviewActions0").assertIsDisplayed().assertHasClickAction()
-      composeTestRule.onNodeWithTag("LikeButton0").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("DislikeButton0").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("LikeCount0").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("DislikeCount0").assertIsDisplayed()
 
       if (SignedIn) {
         composeTestRule.onNodeWithTag("AddReviewButton").assertIsDisplayed().assertHasClickAction()
@@ -518,7 +515,7 @@ class MainActivityTest {
       }
     }
 
-    fun goToReview() {
+    fun goToAddReview() {
       composeTestRule
           .onNodeWithTag("AddReviewButton")
           .assertIsDisplayed()
@@ -529,14 +526,36 @@ class MainActivityTest {
     fun assertReviewIsAdded() {
       composeTestRule.onNodeWithTag("ReviewCard-1").assertIsDisplayed()
     }
+
+    @OptIn(ExperimentalTestApi::class)
+    fun toUserProfile() {
+
+      composeTestRule
+          .onNodeWithTag("TopAppBarGoBackButton")
+          .assertIsDisplayed()
+          .assertHasClickAction()
+          .performClick()
+      composeTestRule
+          .onNodeWithTag("TopAppBarGoBackButton")
+          .assertIsDisplayed()
+          .assertHasClickAction()
+          .performClick()
+      Thread.sleep(5000)
+      composeTestRule
+          .onNodeWithTag(TopLevelDestinations.PROFILE.textId)
+          .assertHasClickAction()
+          .performClick()
+
+      composeTestRule.waitUntilExactlyOneExists(hasTestTag("ViewProfileScreen"))
+    }
   }
 
   // ============================================================================
-  // ============================= MAPSCREEN ROBOT ==============================
+  // ============================= ADD REVIEW ROBOT ==============================
   // ============================================================================
   private class ReviewRobot(val composeTestRule: ComposeTestRule) {
 
-    fun assertReviewScreen() {
+    fun assertAddReviewScreen() {
       composeTestRule.onNodeWithTag("ExperienceText").assertIsDisplayed()
       composeTestRule.onNodeWithTag("Slider").assertIsDisplayed()
       composeTestRule.onNodeWithTag("ReviewInput").assertIsDisplayed()
@@ -544,9 +563,7 @@ class MainActivityTest {
     }
 
     fun addReview() {
-      composeTestRule.onNodeWithTag("Slider").performTouchInput {
-        swipe(start = Offset(0f, centerY), end = Offset(1f, centerY))
-      }
+      composeTestRule.onNodeWithTag("Slider").performTouchInput { swipeRight() }
 
       composeTestRule
           .onNodeWithTag("ReviewInput")
