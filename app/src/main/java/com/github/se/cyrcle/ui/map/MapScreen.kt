@@ -249,12 +249,13 @@ fun MapScreen(
       BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.app_logo_name)
   var lastBikeLocation: Point? = null
 
-  fun bikeLocationMarker(bikeLocation: Point) = PointAnnotationOptions()
-    .withPoint(bikeLocation)
-    .withIconImage(bikeLocationBitmap)
-    .withIconAnchor(IconAnchor.BOTTOM)
-    //.withIconOffset(listOf(0.0, bikeLocationBitmap.height/12.0))
-    .withIconSize(0.25)
+  fun bikeLocationMarker(bikeLocation: Point) =
+      PointAnnotationOptions()
+          .withPoint(bikeLocation)
+          .withIconImage(bikeLocationBitmap)
+          .withIconAnchor(IconAnchor.BOTTOM)
+          // .withIconOffset(listOf(0.0, bikeLocationBitmap.height/12.0))
+          .withIconSize(0.25)
 
   val giveCoinsRegex = Regex("^/give coins (\\d+)$", RegexOption.IGNORE_CASE)
   val killRegex = Regex("^/kill$", RegexOption.IGNORE_CASE)
@@ -263,7 +264,10 @@ fun MapScreen(
 
   // Draw markers on the map when the list of parkings changes
   LaunchedEffect(
-      listOfParkings, /*markerAnnotationManager,*/ selectedParking?.nbReviews, mapMode.value, bikeLocationTriggerRedraw) {
+      listOfParkings, /*markerAnnotationManager,*/
+      selectedParking?.nbReviews,
+      mapMode.value,
+      bikeLocationTriggerRedraw) {
         Log.d("MapScreen", "Redrawing markers")
         pLabelAnnotationManager?.deleteAll()
         markerAnnotationManager?.deleteAll()
@@ -274,12 +278,14 @@ fun MapScreen(
                 rectangleAnnotationManager, pLabelAnnotationManager, listOfParkings)
         else mapViewModel.drawMarkers(markerAnnotationManager, listOfParkings, resizedBitmap)
 
-        if(bikeLocationViewModel.bikeLocationState.value != NO_LOCATION) {
+        if (bikeLocationViewModel.bikeLocationState.value != NO_LOCATION) {
           lastBikeLocation = bikeLocationViewModel.bikeLocation.value.location!!
-          markerAnnotationManager?.create(bikeLocationMarker(bikeLocationViewModel.bikeLocation.value.location!!))
+          markerAnnotationManager?.create(
+              bikeLocationMarker(bikeLocationViewModel.bikeLocation.value.location!!))
         } else {
-          if(lastBikeLocation != null) {
-            markerAnnotationManager?.delete(bikeLocationMarker(lastBikeLocation!!).build("", markerAnnotationManager!!))
+          if (lastBikeLocation != null) {
+            markerAnnotationManager?.delete(
+                bikeLocationMarker(lastBikeLocation!!).build("", markerAnnotationManager!!))
           }
         }
 
@@ -503,10 +509,7 @@ fun MapScreen(
                   .padding(bottom = 25.dp, end = 16.dp)
                   .scale(1.2f)) {
                 BikeLocationButton(
-                    bikeLocationViewModel,
-                    mapViewModel,
-                    navigationActions,
-                    forgetBikeLocation)
+                    bikeLocationViewModel, mapViewModel, navigationActions, forgetBikeLocation)
 
                 if (locationEnabled) {
                   IconButton(
