@@ -110,14 +110,14 @@ fun ParkingDetailsScreen(
 
   // === === === === === === ===
 
-    LaunchedEffect(Unit, selectedParking) {
-        // On first load of the screen, request the images
-        // This will update the imagesUrls state and trigger a recomposition
-        parkingViewModel.loadSelectedParkingImages()
-    }
-    // Copied from the editProfileScreen. This is the image picker launcher that set the Uri state
-    // with the selected image by the user.
-    // It also change the showDialog state to true to show the dialog with the user selected image.
+  LaunchedEffect(Unit, selectedParking) {
+    // On first load of the screen, request the images
+    // This will update the imagesUrls state and trigger a recomposition
+    parkingViewModel.loadSelectedParkingImages()
+  }
+  // Copied from the editProfileScreen. This is the image picker launcher that set the Uri state
+  // with the selected image by the user.
+  // It also change the showDialog state to true to show the dialog with the user selected image.
 
   val imagePickerLauncher =
       rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
@@ -125,6 +125,7 @@ fun ParkingDetailsScreen(
         showDialog.value = newParkingImageLocalPath.isNotEmpty()
       }
 
+  // Dialog to confirm the image upload with the user.
   if (showDialog.value) {
     ParkingDetailsAlertDialogConfirmUpload(
         onDismiss = {
@@ -515,6 +516,7 @@ fun ParkingDetailsScreen(
                             mapViewModel.updateTrackingMode(false)
                             mapViewModel.updateMapRecentering(true)
                             mapViewModel.zoomOnLocation(selectedParking.location)
+                            navigationActions.navigateTo(Screen.MAP)
                           },
                           modifier = Modifier.fillMaxWidth(),
                           colorLevel = ColorLevel.PRIMARY,
