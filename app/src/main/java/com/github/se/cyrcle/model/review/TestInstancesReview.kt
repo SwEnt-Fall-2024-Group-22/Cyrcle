@@ -50,4 +50,14 @@ object TestInstancesReview {
           dislikedBy = listOf(),
           time = Timestamp.now(),
           reportingUsers = emptyList())
+
+  val review6 =
+      Review(
+          uid = "2",
+          owner = "user2",
+          text = "Okay parking.",
+          rating = 3.0,
+          parking = "Test_spot_1",
+          time = Timestamp.now(),
+          reportingUsers = emptyList())
 }
