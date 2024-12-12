@@ -356,30 +356,36 @@ fun ParkingDetailsScreen(
                             testTag = "NoImageText")
                         // There are images to display
                       } else {
-                        LazyRow(
-                            modifier =
-                                Modifier.weight(2f).fillMaxHeight().testTag("ParkingImagesRow"),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                              itemsIndexed(
-                                  items = imagesUrls,
-                                  key = { index, url ->
-                                    imagesPaths[index]
-                                  } // Use associated paths as stable keys
+                          if (imagesUrls.isEmpty()) {
+                              Text(stringResource(R.string.card_screen_no_image))
+                          } else {
+                              LazyRow(
+                                  modifier =
+                                  Modifier.weight(2f).fillMaxHeight().testTag("ParkingImagesRow"),
+                                  horizontalArrangement = Arrangement.spacedBy(8.dp)
+                              ) {
+                                  itemsIndexed(
+                                      items = imagesUrls,
+                                      key = { index, url ->
+                                          imagesPaths[index]
+                                      } // Use associated paths as stable keys
                                   ) { index, url ->
-                                    Image(
-                                        painter = rememberAsyncImagePainter(url),
-                                        contentDescription = "Parking Image",
-                                        contentScale = ContentScale.Crop,
-                                        modifier =
-                                            Modifier.fillMaxHeight().width(150.dp).clickable {
+                                      Image(
+                                          painter = rememberAsyncImagePainter(url),
+                                          contentDescription = "Parking Image",
+                                          contentScale = ContentScale.Crop,
+                                          modifier =
+                                          Modifier.fillMaxHeight().width(150.dp).clickable {
                                               // Set both imageUrl and destinationPath in the state
                                               showDialogImage.value = url
                                               showDialogImageDestinationPath.value =
                                                   showDialogImageDestinationPath.value.plus(
-                                                      imagesPaths[index])
-                                            })
+                                                      imagesPaths[index]
+                                                  )
+                                          })
                                   }
-                            }
+                              }
+                          }
                       }
                       IconButton(
                           icon = Icons.Outlined.AddAPhoto,
