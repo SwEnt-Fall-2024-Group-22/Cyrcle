@@ -896,19 +896,22 @@ class ParkingViewModel(
       Log.e("ParkingViewModel", "No parking selected while trying to load images")
       return
     }
-    // clear the list of URLs each time we request the images (prevent duplicates and old images
-    // from being displayed)
-    _selectedParkingImagesUrls.value = emptyList()
-    _selectedParkingAssociatedPaths.value = emptyList()
 
-    _selectedParking.value!!.images.forEach { imagePath ->
-      _selectedParkingAssociatedPaths.value = _selectedParkingAssociatedPaths.value.plus(imagePath)
+    val imagePaths = selectedParking.value!!.images.sorted()
+    val urlMap = mutableMapOf<String, String>()
+
+    imagePaths.forEach { imagePath ->
       imageRepository.getUrl(
           path = imagePath,
           onSuccess = { url ->
-            _selectedParkingImagesUrls.value = _selectedParkingImagesUrls.value.plus(url)
+            urlMap[imagePath] = url
+            if (urlMap.size == imagePaths.size) {
+              // Update state once all URLs are fetched
+              _selectedParkingImagesUrls.value = imagePaths.map { urlMap[it]!! }
+              _selectedParkingAssociatedPaths.value = imagePaths
+            }
           },
-          onFailure = { Log.e("ParkingViewModel", "Error getting image URL for path") })
+          onFailure = { Log.e("ParkingViewModel", "Error getting image URL for path: $imagePath") })
     }
   }
 
