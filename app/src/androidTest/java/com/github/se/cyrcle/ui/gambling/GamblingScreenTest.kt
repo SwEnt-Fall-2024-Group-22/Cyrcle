@@ -72,11 +72,11 @@ class GamblingScreenTest {
   fun gambling_screen_shows_all_elements() {
     composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
 
-    composeTestRule.onNodeWithTag("coin_display").assertTextEquals("Coins: 0")
-    composeTestRule.onNodeWithTag("spin_button").assertIsNotEnabled()
-    composeTestRule.onNodeWithTag("gambling_screen").assertExists()
-    composeTestRule.onNodeWithTag("wheel_canvas").assertExists()
-    composeTestRule.onNodeWithTag("spin_button").assertExists()
+    composeTestRule.onNodeWithTag("CoinDisplay").assertTextEquals("Coins: 0")
+    composeTestRule.onNodeWithTag("SpinButton").assertIsNotEnabled()
+    composeTestRule.onNodeWithTag("GamblingScreen").assertExists()
+    composeTestRule.onNodeWithTag("WheelCanvas").assertExists()
+    composeTestRule.onNodeWithTag("SpinButton").assertExists()
   }
 
   @Test
@@ -88,11 +88,11 @@ class GamblingScreenTest {
 
     composeTestRule.mainClock.autoAdvance = false
 
-    composeTestRule.onNodeWithTag("coin_display").assertTextEquals("Coins: 25")
+    composeTestRule.onNodeWithTag("CoinDisplay").assertTextEquals("Coins: 25")
 
     // First spin (25 coins -> 15 coins)
-    composeTestRule.onNodeWithTag("spin_button").assertIsEnabled()
-    composeTestRule.onNodeWithTag("spin_button").performClick()
+    composeTestRule.onNodeWithTag("SpinButton").assertIsEnabled()
+    composeTestRule.onNodeWithTag("SpinButton").performClick()
 
     // Wait for first spin to complete
     run {
@@ -104,7 +104,7 @@ class GamblingScreenTest {
         Thread.sleep(1000)
 
         try {
-          composeTestRule.onNodeWithTag("spin_button").assertIsEnabled()
+          composeTestRule.onNodeWithTag("SpinButton").assertIsEnabled()
           break
         } catch (e: AssertionError) {
           // Button still disabled, continue waiting
@@ -114,9 +114,9 @@ class GamblingScreenTest {
     }
 
     // Second spin (15 coins -> 5 coins)
-    composeTestRule.onNodeWithTag("coin_display").assertTextEquals("Coins: 15")
-    composeTestRule.onNodeWithTag("spin_button").assertIsEnabled()
-    composeTestRule.onNodeWithTag("spin_button").performClick()
+    composeTestRule.onNodeWithTag("CoinDisplay").assertTextEquals("Coins: 15")
+    composeTestRule.onNodeWithTag("SpinButton").assertIsEnabled()
+    composeTestRule.onNodeWithTag("SpinButton").performClick()
 
     // Wait for second spin to complete
     run {
@@ -128,7 +128,7 @@ class GamblingScreenTest {
         Thread.sleep(1000)
 
         try {
-          composeTestRule.onNodeWithTag("spin_button").assertIsEnabled()
+          composeTestRule.onNodeWithTag("SpinButton").assertIsEnabled()
           break
         } catch (e: AssertionError) {
           // Button still disabled, continue waiting
@@ -138,8 +138,8 @@ class GamblingScreenTest {
     }
 
     // Third spin attempt (5 coins, should be disabled)
-    composeTestRule.onNodeWithTag("coin_display").assertTextEquals("Coins: 5")
-    composeTestRule.onNodeWithTag("spin_button").assertIsNotEnabled()
+    composeTestRule.onNodeWithTag("CoinDisplay").assertTextEquals("Coins: 5")
+    composeTestRule.onNodeWithTag("SpinButton").assertIsNotEnabled()
 
     composeTestRule.mainClock.autoAdvance = true
   }
@@ -149,12 +149,12 @@ class GamblingScreenTest {
     userViewModel.creditCoinsToCurrentUser(1000000)
     composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
 
-    composeTestRule.onNodeWithTag("spin_button").performClick()
+    composeTestRule.onNodeWithTag("SpinButton").performClick()
     // Wait for spin animation to start
     composeTestRule.waitForIdle()
 
     // Verify wheel is spinning (through visual state or properties)
-    composeTestRule.onNodeWithTag("wheel_canvas").assertExists()
+    composeTestRule.onNodeWithTag("WheelCanvas").assertExists()
   }
 
   @Test
@@ -162,18 +162,18 @@ class GamblingScreenTest {
     composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
 
     composeTestRule
-        .onNodeWithTag("spin_button")
+        .onNodeWithTag("SpinButton")
         .assertHasClickAction()
         .assertHeightIsEqualTo(90.dp)
         .assertWidthIsEqualTo(90.dp)
 
     composeTestRule
-        .onNodeWithTag("spin_button_text", useUnmergedTree = true)
+        .onNodeWithTag("SpinButtonText", useUnmergedTree = true)
         .assertExists()
         .assertTextEquals("SPIN")
 
     composeTestRule
-        .onNodeWithTag("spin_cost_text", useUnmergedTree = true)
+        .onNodeWithTag("SpinCostText", useUnmergedTree = true)
         .assertExists()
         .assertTextEquals("(10 coins)")
   }
@@ -183,7 +183,7 @@ class GamblingScreenTest {
     composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
 
     composeTestRule
-        .onNodeWithTag("wheel_canvas")
+        .onNodeWithTag("WheelCanvas")
         .assertHeightIsEqualTo(300.dp)
         .assertWidthIsEqualTo(300.dp)
   }
@@ -196,7 +196,7 @@ class GamblingScreenTest {
 
     composeTestRule.mainClock.autoAdvance = false
 
-    composeTestRule.onNodeWithTag("spin_button").performClick()
+    composeTestRule.onNodeWithTag("SpinButton").performClick()
     // Wait for second spin to complete
     run {
       val incrementMs = 1000L
@@ -207,7 +207,7 @@ class GamblingScreenTest {
         Thread.sleep(1000)
 
         try {
-          composeTestRule.onNodeWithTag("spin_button").assertIsEnabled()
+          composeTestRule.onNodeWithTag("SpinButton").assertIsEnabled()
           break
         } catch (e: AssertionError) {
           // Button still disabled, continue waiting
@@ -215,7 +215,7 @@ class GamblingScreenTest {
         elapsedTime += incrementMs
       }
     }
-    composeTestRule.onNodeWithTag("spin_button").assertIsEnabled()
+    composeTestRule.onNodeWithTag("SpinButton").assertIsEnabled()
 
     composeTestRule.mainClock.autoAdvance = true
   }
@@ -226,7 +226,7 @@ class GamblingScreenTest {
 
     // Verify wheel performs idle animation
     runBlocking { delay(100) }
-    composeTestRule.onNodeWithTag("wheel_canvas").assertExists()
+    composeTestRule.onNodeWithTag("WheelCanvas").assertExists()
   }
 
   @Test
@@ -239,7 +239,7 @@ class GamblingScreenTest {
     composeTestRule.mainClock.autoAdvance = false
 
     repeat(3) {
-      composeTestRule.onNodeWithTag("spin_button").performClick()
+      composeTestRule.onNodeWithTag("SpinButton").performClick()
 
       run {
         val incrementMs = 1000L
@@ -250,7 +250,7 @@ class GamblingScreenTest {
           Thread.sleep(1000)
 
           try {
-            composeTestRule.onNodeWithTag("spin_button").assertIsEnabled()
+            composeTestRule.onNodeWithTag("SpinButton").assertIsEnabled()
             break
           } catch (e: AssertionError) {
             // Button still disabled, continue waiting
@@ -259,7 +259,7 @@ class GamblingScreenTest {
         }
       }
 
-      composeTestRule.onNodeWithTag("spin_button").assertIsEnabled()
+      composeTestRule.onNodeWithTag("SpinButton").assertIsEnabled()
     }
 
     composeTestRule.mainClock.autoAdvance = true
@@ -271,21 +271,21 @@ class GamblingScreenTest {
     composeTestRule.setContent { GamblingScreen(mockNavigationActions, userViewModel) }
 
     // Initial state check
-    composeTestRule.onNodeWithTag("wheel_spin_state").assertExists()
+    composeTestRule.onNodeWithTag("WheelSpinState").assertExists()
 
     // Trigger spin
-    composeTestRule.onNodeWithTag("spin_button").performClick()
+    composeTestRule.onNodeWithTag("SpinButton").performClick()
 
     // Wait and check various states
     composeTestRule.mainClock.autoAdvance = false // Prevent clock from auto advancing
 
     // Advance through the spin animation
     composeTestRule.mainClock.advanceTimeBy(10000)
-    composeTestRule.onNodeWithTag("wheel_spin_state").assertExists()
+    composeTestRule.onNodeWithTag("WheelSpinState").assertExists()
 
     // Advance through the pause
     composeTestRule.mainClock.advanceTimeBy(2000)
-    composeTestRule.onNodeWithTag("wheel_spin_state").assertExists()
+    composeTestRule.onNodeWithTag("WheelSpinState").assertExists()
 
     composeTestRule.mainClock.autoAdvance = true // Re-enable auto advance
   }
@@ -296,7 +296,7 @@ class GamblingScreenTest {
 
     // Find and click the back button
     composeTestRule
-        .onNodeWithTag("gambling_screen_top_barGoBackButton")
+        .onNodeWithTag("GamblingScreenTopBarGoBackButton")
         .assertExists()
         .assertHasClickAction()
         .performClick()
@@ -315,7 +315,7 @@ class GamblingScreenTest {
     composeTestRule.mainClock.autoAdvance = false
 
     // Perform a spin
-    composeTestRule.onNodeWithTag("spin_button").performClick()
+    composeTestRule.onNodeWithTag("SpinButton").performClick()
 
     var retries = 0
     var xpIncrementVisible = false
@@ -331,10 +331,7 @@ class GamblingScreenTest {
         Thread.sleep(1000)
 
         xpIncrementVisible =
-            composeTestRule
-                .onAllNodesWithTag("xp_increment_text")
-                .fetchSemanticsNodes()
-                .isNotEmpty()
+            composeTestRule.onAllNodesWithTag("xpIncrementText").fetchSemanticsNodes().isNotEmpty()
 
         if (xpIncrementVisible) break // Exit the inner loop if the XP increment becomes visible
 
@@ -346,18 +343,18 @@ class GamblingScreenTest {
       retries++
       if (retries < maxRetries) {
         // If the retry limit is not reached, try again by clicking the spin button again
-        composeTestRule.onNodeWithTag("spin_button").performClick()
+        composeTestRule.onNodeWithTag("SpinButton").performClick()
       }
     }
     // Assert the XP increment text
     composeTestRule
-        .onNodeWithTag("xp_increment_text")
+        .onNodeWithTag("xpIncrementText")
         .assertTextContains("XP", substring = true) // Ensure XP increment is displayed
 
     // Advance time to let the animation fade out
     composeTestRule.mainClock.advanceTimeBy(3000) // Simulate 3 seconds of animation
     composeTestRule
-        .onNodeWithTag("xp_increment_text")
+        .onNodeWithTag("xpIncrementText")
         .assertDoesNotExist() // Ensure XP increment text is no longer visible after 3 seconds
   }
 
@@ -371,20 +368,20 @@ class GamblingScreenTest {
     composeTestRule.mainClock.autoAdvance = false
 
     // Verify initial level components exist
-    composeTestRule.onNodeWithTag("level_progress_bar").assertExists()
+    composeTestRule.onNodeWithTag("LevelProgressBar").assertExists()
     composeTestRule
-        .onNodeWithTag("current_level_text")
+        .onNodeWithTag("CurrentLevelText")
         .assertExists()
         .assertTextContains(
             "Level ${userViewModel.currentUser.value!!.public.userReputationScore.toInt()}")
     composeTestRule
-        .onNodeWithTag("next_level_text")
+        .onNodeWithTag("NextLevelText")
         .assertExists()
         .assertTextContains(
             "Level ${userViewModel.currentUser.value!!.public.userReputationScore.toInt() + 1}")
 
     // Perform a spin
-    composeTestRule.onNodeWithTag("spin_button").performClick()
+    composeTestRule.onNodeWithTag("SpinButton").performClick()
 
     // Retry logic: maximum number of retries
     var retries = 0
@@ -401,7 +398,7 @@ class GamblingScreenTest {
 
         // Also check for level up text if it appears
         levelUpVisible =
-            composeTestRule.onAllNodesWithTag("level_up_text").fetchSemanticsNodes().isNotEmpty()
+            composeTestRule.onAllNodesWithTag("LevelUpText").fetchSemanticsNodes().isNotEmpty()
 
         if (levelUpVisible) break // Exit the inner loop if the level up text becomes visible
 
@@ -413,22 +410,22 @@ class GamblingScreenTest {
       retries++
       if (retries < maxRetries) {
         // If the retry limit is not reached, try again by clicking the spin button again
-        composeTestRule.onNodeWithTag("spin_button").performClick()
+        composeTestRule.onNodeWithTag("SpinButton").performClick()
       }
     }
 
     // If level up occurred, verify the level up components
     if (levelUpVisible) {
-      composeTestRule.onNodeWithTag("level_up_text").assertExists()
-      composeTestRule.onNodeWithTag("level_progress_bar").assertExists()
+      composeTestRule.onNodeWithTag("LevelUpText").assertExists()
+      composeTestRule.onNodeWithTag("LevelProgressBar").assertExists()
       composeTestRule.mainClock.advanceTimeBy(2000) // Give time for progress bar animation
       composeTestRule
-          .onNodeWithTag("current_level_text")
+          .onNodeWithTag("CurrentLevelText")
           .assertExists()
           .assertTextContains(
               "Level ${userViewModel.currentUser.value!!.public.userReputationScore.toInt()}")
       composeTestRule
-          .onNodeWithTag("next_level_text")
+          .onNodeWithTag("NextLevelText")
           .assertExists()
           .assertTextContains(
               "Level ${userViewModel.currentUser.value!!.public.userReputationScore.toInt() + 1}")
@@ -436,7 +433,7 @@ class GamblingScreenTest {
 
     // Advance time to let the animation fade out
     composeTestRule.mainClock.advanceTimeBy(3000) // Simulate 3 seconds of animation
-    composeTestRule.onNodeWithTag("level_up_text").assertDoesNotExist()
+    composeTestRule.onNodeWithTag("LevelUpText").assertDoesNotExist()
   }
 
   companion object {

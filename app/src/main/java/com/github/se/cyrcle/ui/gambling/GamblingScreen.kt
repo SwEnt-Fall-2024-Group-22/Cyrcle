@@ -46,6 +46,58 @@ import kotlinx.coroutines.*
 
 private const val textProportion = 0.65f
 
+/**
+ * A sophisticated wheel-based gambling interface implementing complex probability and animation
+ * systems.
+ *
+ * Mathematical Components:
+ * 1. Probability System:
+ *     - Uses a 1000-point scale (0-999) for precise probability distribution
+ *     - Segments mapped to probability ranges:
+ *         * Nothing: 500 points (50%)
+ *         * Legendary: 1 point (0.1%)
+ *         * Common: 320 points (32%)
+ *         * Rare: 160 points (16%)
+ *         * Epic: 19 points (1.9%)
+ * 2. Rotation Mathematics:
+ *     - Base rotation system: Uses 360-degree circular motion
+ *     - Idle animation: -0.2° continuous decrements
+ *     - Pointer position fixed at 270° (top of wheel)
+ *     - Segment calculation: normalizedAngle = (270 - rotation) % 360
+ * 3. Near-Miss System:
+ *     - Implements psychological near-miss effects with segment-specific behaviors:
+ *     - Nothing (0):
+ *         * 33% chance of near-miss
+ *         * Left bias: 85-98% of segment width
+ *         * Right bias: 95-98% of segment width
+ *     - Legendary (1):
+ *         * 80% chance of near-perfect landing
+ *         * Tiny offset: ±5% of segment width
+ *     - Common (2):
+ *         * 33% chance of left-side near-miss
+ *         * Offset: 80-98% of segment width
+ *     - Rare (3):
+ *         * 33% chance of right-side near-miss
+ *         * Offset: 80-98% of segment width
+ *     - Epic (4):
+ *         * Similar to Legendary behavior
+ * 4. Spinning Animation:
+ *     - Duration: 10 seconds (10000ms)
+ *     - Base rotations: Random 6-10 full turns (2160°-3600°)
+ *     - Easing function: Quartic ease-out
+ *         * Formula: rotation = 1 - (1-t)⁴
+ *         * Provides realistic deceleration
+ *     - Frame rate: ~60fps (16ms delay)
+ * 5. Text Positioning:
+ *     - Radial text placement using polar coordinates
+ *     - Text radius: 65% of wheel radius (textProportion = 0.65f)
+ *     - Text rotation: Compensates for segment angle + 90° for readability
+ *     - Dynamic scaling: Font size = 6% of wheel radius
+ *
+ * @param modifier Modifier for the composable
+ * @param onSegmentLanded Callback triggered when wheel stops on a segment
+ * @return A function that triggers the wheel spin
+ */
 @Composable
 fun WheelView(
     modifier: Modifier = Modifier,
@@ -199,8 +251,8 @@ fun WheelView(
     }
   }
 
-  Box(modifier = modifier.testTag("wheel_view_container")) {
-    Canvas(modifier = Modifier.testTag("wheel_canvas").aspectRatio(1f)) {
+  Box(modifier = modifier.testTag("WheelViewContainer")) {
+    Canvas(modifier = Modifier.testTag("WheelCanvas").aspectRatio(1f)) {
       val centerX = size.width / 2f
       val centerY = size.height / 2f
       val radius = minOf(size.width, size.height) / 2f * 0.9f
@@ -264,13 +316,37 @@ fun WheelView(
 
   Box(
       modifier =
-          Modifier.testTag("wheel_spin_state").semantics {
+          Modifier.testTag("WheelSpinState").semantics {
             contentDescription = "Spinning: $isSpinning, Paused: $pauseAfterSpin"
           })
 
   return spinFunction
 }
 
+/**
+ * Main gambling interface that manages user progression, animations, and wheel interactions.
+ *
+ * Level System Mathematics:
+ * 1. Experience Points (XP):
+ *     - Base XP rewards:
+ *         * Legendary: 10.0 flat XP
+ *         * Common: 1.0 / sqrt(level + 1)
+ *         * Rare: 2.0 / sqrt(level + 1)
+ *         * Epic: 16.0 / sqrt(level + 1)
+ *     - Normalization factor: sqrt(currentLevel + 1)
+ *         * Ensures XP gains decrease as level increases
+ *         * Creates logarithmic progression curve
+ * 2. Level Progress Animation:
+ *     - Uses FastOutSlowInEasing for smooth transitions
+ *     - Multi-level progression:
+ *         * Fills bar to 100% for each level gained
+ *         * Resets to 0% and increments level
+ *     - Animation duration: 500ms per transition
+ *     - XP popup duration: 2000ms
+ *
+ * @param navigationActions Navigation handler for the screen
+ * @param userViewModel ViewModel managing user state and progression
+ */
 @Composable
 fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserViewModel) {
   val rarityLegendary = stringResource(R.string.rarity_legendary)
@@ -325,10 +401,10 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
         TopAppBar(
             navigationActions = navigationActions,
             title = stringResource(R.string.gambling_screen_title),
-            testTag = "gambling_screen_top_bar")
+            testTag = "GamblingScreenTopBar")
       }) { paddingValues ->
         Box(
-            modifier = Modifier.fillMaxSize().padding(paddingValues).testTag("gambling_screen"),
+            modifier = Modifier.fillMaxSize().padding(paddingValues).testTag("GamblingScreen"),
             contentAlignment = Alignment.Center) {
               var wheelSpinFunction by remember { mutableStateOf<(() -> Unit)?>(null) }
 
@@ -341,17 +417,17 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
                           Text(
                               text = stringResource(R.string.level_display, displayedLevel),
                               style = MaterialTheme.typography.bodyMedium,
-                              modifier = Modifier.testTag("current_level_text"))
+                              modifier = Modifier.testTag("CurrentLevelText"))
                           Text(
                               text = stringResource(R.string.level_display, (displayedLevel + 1)),
                               style = MaterialTheme.typography.bodyMedium,
-                              modifier = Modifier.testTag("next_level_text"))
+                              modifier = Modifier.testTag("NextLevelText"))
                         }
 
                     LinearProgressIndicator(
                         progress = { animatedProgress.value },
                         modifier =
-                            Modifier.fillMaxWidth(0.8f).height(8.dp).testTag("level_progress_bar"),
+                            Modifier.fillMaxWidth(0.8f).height(8.dp).testTag("LevelProgressBar"),
                         color = MaterialTheme.colorScheme.primary,
                     )
 
@@ -365,12 +441,12 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
                               text = stringResource(R.string.level_up),
                               color = MaterialTheme.colorScheme.primary,
                               style = MaterialTheme.typography.headlineSmall,
-                              modifier = Modifier.padding(vertical = 8.dp).testTag("level_up_text"))
+                              modifier = Modifier.padding(vertical = 8.dp).testTag("LevelUpText"))
                         }
 
                     Text(
                         text = stringResource(R.string.gambling_screen_coins_display, coins ?: 0),
-                        modifier = Modifier.testTag("coin_display"),
+                        modifier = Modifier.testTag("CoinDisplay"),
                         style = MaterialTheme.typography.headlineMedium)
 
                     AnimatedVisibility(
@@ -383,12 +459,12 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
                               modifier =
                                   Modifier.align(Alignment.CenterHorizontally)
                                       .padding(top = 16.dp)
-                                      .testTag("xp_increment_text"))
+                                      .testTag("xpIncrementText"))
                         }
                   }
 
               WheelView(
-                      modifier = Modifier.size(300.dp).testTag("wheel_view"),
+                      modifier = Modifier.size(300.dp).testTag("WheelView"),
                       onSegmentLanded = { segmentName ->
                         val normalizationFactor = sqrt(currentLevel + 1.0)
                         val reputationIncrement =
@@ -438,7 +514,7 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
                         })
                   },
                   enabled = canSpin,
-                  modifier = Modifier.size(90.dp).clip(CircleShape).testTag("spin_button"),
+                  modifier = Modifier.size(90.dp).clip(CircleShape).testTag("SpinButton"),
                   colors =
                       ButtonDefaults.buttonColors(
                           containerColor = Color.Red, disabledContainerColor = Color.Gray)) {
@@ -450,7 +526,7 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
                               fontSize = 16.sp,
                               fontWeight = FontWeight.Bold,
                               textAlign = TextAlign.Center,
-                              modifier = Modifier.testTag("spin_button_text"))
+                              modifier = Modifier.testTag("SpinButtonText"))
                           Text(
                               text =
                                   stringResource(
@@ -458,7 +534,7 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
                               fontSize = 9.sp,
                               fontWeight = FontWeight.Medium,
                               textAlign = TextAlign.Center,
-                              modifier = Modifier.testTag("spin_cost_text"))
+                              modifier = Modifier.testTag("SpinCostText"))
                         }
                   }
             }
