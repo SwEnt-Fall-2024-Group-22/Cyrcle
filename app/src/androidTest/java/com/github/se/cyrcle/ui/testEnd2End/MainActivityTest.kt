@@ -159,6 +159,7 @@ class MainActivityTest {
     addReviewRobot.addReview()
 
     allReviewsRobot.assertReviewIsAdded()
+    allReviewsRobot.deleteReviewAndAssertDeleted()
     allReviewsRobot.toUserProfile()
 
     userProfileRobot.signOut()
@@ -536,16 +537,27 @@ class MainActivityTest {
           .assertHasClickAction()
           .performClick()
       composeTestRule
-          .onNodeWithTag("TopAppBarGoBackButton")
-          .assertIsDisplayed()
-          .assertHasClickAction()
-          .performClick()
-      composeTestRule
           .onNodeWithTag(TopLevelDestinations.PROFILE.textId)
           .assertHasClickAction()
           .performClick()
 
       composeTestRule.waitUntilExactlyOneExists(hasTestTag("ViewProfileScreen"))
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    fun deleteReviewAndAssertDeleted() {
+      composeTestRule
+          .onNodeWithTag("MoreOptions-1Button")
+          .assertIsDisplayed()
+          .assertHasClickAction()
+          .performClick()
+      composeTestRule.waitUntilExactlyOneExists(hasTestTag("MoreOptions-1DeleteReviewItem"))
+      composeTestRule
+          .onNodeWithTag("MoreOptions-1DeleteReviewItem")
+          .assertIsDisplayed()
+          .assertHasClickAction()
+          .performClick()
+      composeTestRule.onNodeWithTag("ReviewCard-1").assertIsNotDisplayed().assertDoesNotExist()
     }
   }
 
