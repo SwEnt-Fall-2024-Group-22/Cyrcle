@@ -361,51 +361,51 @@ fun ParkingDetailsScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                  // Images
-                  Row(
-                      modifier = Modifier.height(150.dp).fillMaxWidth().testTag("ImagesRow"),
-                      horizontalArrangement = Arrangement.spacedBy(8.dp),
-                      verticalAlignment = Alignment.CenterVertically) {
+                // Images
+                Row(
+                    modifier = Modifier.height(150.dp).fillMaxWidth().testTag("ImagesRow"),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically) {
                       // No images
                       if (selectedParking.images.isEmpty()) {
-                          Text(
-                              text = stringResource(R.string.card_screen_no_image),
-                              color = MaterialTheme.colorScheme.onSurface,
-                              style = MaterialTheme.typography.bodyMedium,
-                              modifier = Modifier.weight(3f),
-                              textAlign = TextAlign.Left,
-                              testTag = "NoImageText")
-                          // There are images to display
+                        Text(
+                            text = stringResource(R.string.card_screen_no_image),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.weight(3f),
+                            textAlign = TextAlign.Left,
+                            testTag = "NoImageText")
+                        // There are images to display
                       } else {
-                          if (imagesUrls.isEmpty()) {
-                              Text(stringResource(R.string.card_screen_no_image))
-                          } else {
-                              LazyRow(
-                                  modifier =
+                        if (imagesUrls.isEmpty()) {
+                          Text(stringResource(R.string.card_screen_no_image))
+                        } else {
+                          LazyRow(
+                              modifier =
                                   Modifier.weight(2f).fillMaxHeight().testTag("ParkingImagesRow"),
-                                  horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                  itemsIndexed(
-                                      items = imagesUrls,
-                                      key = { index, url ->
-                                          imagesPaths[index]
-                                      } // Use associated paths as stable keys
-                                  ) { index, url ->
+                              horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                itemsIndexed(
+                                    items = imagesUrls,
+                                    key = { index, url ->
+                                      imagesPaths[index]
+                                    } // Use associated paths as stable keys
+                                    ) { index, url ->
                                       Image(
                                           painter = rememberAsyncImagePainter(url),
                                           contentDescription = "Parking Image",
                                           contentScale = ContentScale.Crop,
                                           modifier =
-                                          Modifier.fillMaxHeight().width(150.dp).clickable {
-                                              // Set both imageUrl and destinationPath in the
-                                              // state
-                                              showDialogImage.value = url
-                                              showDialogImageDestinationPath.value =
-                                                  showDialogImageDestinationPath.value.plus(
-                                                      imagesPaths[index])
-                                          })
-                                  }
+                                              Modifier.fillMaxHeight().width(150.dp).clickable {
+                                                // Set both imageUrl and destinationPath in the
+                                                // state
+                                                showDialogImage.value = url
+                                                showDialogImageDestinationPath.value =
+                                                    showDialogImageDestinationPath.value.plus(
+                                                        imagesPaths[index])
+                                              })
+                                    }
                               }
-                          }
+                        }
                       }
                       IconButton(
                           icon = Icons.Outlined.AddAPhoto,
@@ -414,8 +414,7 @@ fun ParkingDetailsScreen(
                           enabled = userSignedIn,
                           testTag = "AddImageIconButton",
                           modifier = Modifier.padding(start = 8.dp).height(32.dp).weight(1f))
-                  }
-
+                    }
 
                 // Information
                 Column(
