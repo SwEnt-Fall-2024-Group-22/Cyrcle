@@ -88,7 +88,8 @@ class ViewReportsScreenTest {
           navigationActions = navigationActions,
           reportedObjectViewModel = reportedObjectViewModel,
           parkingViewModel = parkingViewModel,
-          reviewViewModel = reviewViewModel)
+          reviewViewModel = reviewViewModel,
+          userViewModel = userViewModel)
     }
 
     composeTestRule.onNodeWithTag("NoReportsText").assertExists()
@@ -102,7 +103,8 @@ class ViewReportsScreenTest {
           navigationActions = navigationActions,
           reportedObjectViewModel = reportedObjectViewModel,
           parkingViewModel = parkingViewModel,
-          reviewViewModel = reviewViewModel)
+          reviewViewModel = reviewViewModel,
+          userViewModel = userViewModel)
     }
 
     val parkingReport = ParkingReport()
@@ -130,7 +132,8 @@ class ViewReportsScreenTest {
           navigationActions = navigationActions,
           reportedObjectViewModel = reportedObjectViewModel,
           parkingViewModel = parkingViewModel,
-          reviewViewModel = reviewViewModel)
+          reviewViewModel = reviewViewModel,
+          userViewModel = userViewModel)
     }
 
     composeTestRule.onNodeWithTag("DeleteFloatingActionButton").performClick()
