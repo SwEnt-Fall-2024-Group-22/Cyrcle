@@ -38,7 +38,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -48,6 +47,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
@@ -315,15 +315,21 @@ fun SpotCard(
                       .testTag("SpotCardContent"),
               verticalAlignment = Alignment.Top,
               horizontalArrangement = Arrangement.SpaceBetween) {
-                Column {
-                  Text(
-                      text =
-                          parking.optName?.let { if (it.length > 35) it.take(32) + "..." else it }
-                              ?: stringResource(R.string.default_parking_name),
+                Column(
+                    modifier =
+                        Modifier.weight(1f) // Allowing this column to take available space
+                            .padding(end = 16.dp),
+                ) {
+                  androidx.compose.material3.Text(
+                      text = parking.optName ?: stringResource(R.string.default_parking_name),
                       style = MaterialTheme.typography.bodyLarge,
-                      testTag = "ParkingName")
+                      maxLines = 1, // Limit to one line
+                      overflow = TextOverflow.Ellipsis, // Use ellipsis for overflow
+                      modifier = Modifier.fillMaxWidth().testTag("ParkingName"),
+                  )
 
                   Spacer(modifier = Modifier.height(8.dp))
+
                   if (parking.nbReviews > 0) {
                     ScoreStars(
                         parking.avgScore,
@@ -339,6 +345,7 @@ fun SpotCard(
                         testTag = "ParkingNoReviews")
                   }
                 }
+
                 Column(horizontalAlignment = Alignment.End) {
                   Text(
                       text =
