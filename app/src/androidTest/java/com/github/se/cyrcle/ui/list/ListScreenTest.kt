@@ -119,6 +119,7 @@ class ListScreenTest {
           parkingViewModel,
           userViewModel,
           TestInstancesParking.parking1,
+          0.0,
           0.0)
     }
 
@@ -135,6 +136,7 @@ class ListScreenTest {
           parkingViewModel,
           userViewModel,
           TestInstancesParking.parking1,
+          0.0,
           0.0)
     }
 
@@ -153,6 +155,7 @@ class ListScreenTest {
           parkingViewModel,
           userViewModel,
           TestInstancesParking.parking3, // not in our user's favorites
+          0.0,
           0.0)
     }
 
@@ -169,6 +172,7 @@ class ListScreenTest {
           parkingViewModel,
           userViewModel,
           TestInstancesParking.parking1, // in our user's favorites
+          0.0,
           0.0)
     }
 
@@ -185,6 +189,7 @@ class ListScreenTest {
           parkingViewModel,
           userViewModel,
           TestInstancesParking.parking3,
+          0.0,
           0.0)
     }
 
@@ -217,6 +222,7 @@ class ListScreenTest {
           parkingViewModel,
           userViewModel,
           TestInstancesParking.parking1, // already in favorites
+          0.0,
           0.0)
     }
 
@@ -250,6 +256,7 @@ class ListScreenTest {
           parkingViewModel,
           userViewModel,
           TestInstancesParking.parking3,
+          0.0,
           0.0)
     }
 
@@ -341,7 +348,8 @@ class ListScreenTest {
           parkingViewModel = parkingViewModel,
           userViewModel = userViewModel,
           parking = TestInstancesParking.parking1,
-          distance = 0.0)
+          distance = 0.0,
+          0.0)
     }
 
     composeTestRule.onNodeWithTag("SpotListItem", useUnmergedTree = true).assertIsDisplayed()
@@ -353,6 +361,7 @@ class ListScreenTest {
         .onNodeWithTag("ParkingDistance", useUnmergedTree = true)
         .assertIsDisplayed()
         .assertTextEquals(String.format("%.0f m", 0.0))
+    composeTestRule.onNodeWithTag("BearingIcon", useUnmergedTree = true).assertIsDisplayed()
     composeTestRule.onNodeWithTag("ParkingNoReviews", useUnmergedTree = true).assertIsNotDisplayed()
   }
 
@@ -364,7 +373,8 @@ class ListScreenTest {
           parkingViewModel = parkingViewModel,
           userViewModel = userViewModel,
           parking = TestInstancesParking.parking2,
-          distance = 0.0)
+          distance = 0.0,
+          0.0)
     }
 
     composeTestRule
@@ -388,8 +398,8 @@ class ListScreenTest {
           parkingViewModel = parkingViewModel,
           userViewModel = userViewModel,
           parking = TestInstancesParking.parking1,
-          distance = 0.5 // 500m
-          )
+          distance = 0.5, // 500m
+          bearing = 12.0)
     }
 
     // Test meters display
@@ -406,8 +416,8 @@ class ListScreenTest {
           parkingViewModel = parkingViewModel,
           userViewModel = userViewModel,
           parking = TestInstancesParking.parking1,
-          distance = 2.5 // 2.5km
-          )
+          distance = 2.5, // 2.5km
+          bearing = 12.0)
     }
 
     // Test kilometers display
@@ -429,7 +439,8 @@ class ListScreenTest {
           parkingViewModel = parkingViewModel,
           userViewModel = userViewModel,
           parking = longNameParking,
-          distance = 0.0)
+          distance = 0.0,
+          0.0)
     }
 
     composeTestRule

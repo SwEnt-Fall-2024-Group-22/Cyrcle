@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material3.Card
@@ -111,6 +112,20 @@ fun SpotListScreen(
         parking.location.center)
   }
 
+  /*
+   * Function that computes the bearing between the user's location and a parking spot
+   * @param parking: the parking spot for which we want to compute the bearing
+   */
+  fun computeBearing(parking: Parking): Double {
+    return TurfMeasurement.bearing(
+        if (myLocation.value) userPosition
+        else
+            Point.fromLngLat(
+                chosenLocation.value.longitude.toDouble(),
+                chosenLocation.value.latitude.toDouble()),
+        parking.location.center)
+  }
+
   LaunchedEffect(userPosition, myLocation.value, chosenLocation.value) {
     // if suggestion MyLocation is chosen and user has location permission then set the circle
     // center
@@ -167,7 +182,8 @@ fun SpotListScreen(
                         parkingViewModel = parkingViewModel,
                         userViewModel = userViewModel,
                         parking = parking,
-                        distance = computeDistance(parking))
+                        distance = computeDistance(parking),
+                        bearing = computeBearing(parking))
                   }
               item { Spacer(modifier = Modifier.height(32.dp)) }
             }
@@ -194,7 +210,8 @@ fun SpotListScreen(
                       parkingViewModel = parkingViewModel,
                       userViewModel = userViewModel,
                       parking = parking,
-                      distance = computeDistance(parking))
+                      distance = computeDistance(parking),
+                      bearing = computeBearing(parking))
 
                   if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1) {
                     parkingViewModel.incrementRadius()
@@ -211,7 +228,8 @@ fun SpotCard(
     parkingViewModel: ParkingViewModel,
     userViewModel: UserViewModel,
     parking: Parking,
-    distance: Double
+    distance: Double,
+    bearing: Double
 ) {
   val context = LocalContext.current
 
@@ -347,13 +365,24 @@ fun SpotCard(
                 }
 
                 Column(horizontalAlignment = Alignment.End) {
-                  Text(
-                      text =
-                          if (distance < 1)
-                              stringResource(R.string.distance_m).format(distance * 1000)
-                          else stringResource(R.string.distance_km).format(distance),
-                      style = MaterialTheme.typography.bodySmall,
-                      testTag = "ParkingDistance")
+                  Row {
+                    // Bearing wrt user's location. This is the orientation wrt north
+                    Icon(
+                        imageVector = Icons.Default.ArrowUpward,
+                        contentDescription = "Bearing",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier =
+                            Modifier.size(20.dp).rotate(bearing.toFloat()).testTag("BearingIcon"))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text =
+                            if (distance < 1)
+                                stringResource(R.string.distance_m).format(distance * 1000)
+                            else stringResource(R.string.distance_km).format(distance),
+                        style = MaterialTheme.typography.bodySmall,
+                        testTag = "ParkingDistance")
+                  }
+
                   if (isPinned) {
                     Icon(
                         imageVector = Icons.Default.PushPin,
