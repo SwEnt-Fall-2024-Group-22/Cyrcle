@@ -23,6 +23,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.model.zone.Zone
 import com.github.se.cyrcle.ui.map.MapConfig
 import com.github.se.cyrcle.ui.navigation.NavigationActions
@@ -52,10 +54,12 @@ import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 fun ZoneManagerScreen(
     mapViewModel: MapViewModel,
     parkingViewModel: ParkingViewModel,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    userViewModel: UserViewModel
 ) {
   val context = LocalContext.current
   val zones = remember { mutableStateOf<List<Zone>>(emptyList()) }
+  val displayOnlineElement = userViewModel.displayOnlineElementFlow.collectAsState(initial = false)
   LaunchedEffect(Unit) {
     zones.value = Zone.loadZones(context)
     Log.d("ZoneManagerScreen", "Zones: ${zones.value}")
@@ -92,7 +96,10 @@ fun ZoneManagerScreen(
             }
           }
           // === Overlay ===
-          AddZoneButton(mapViewModel, navigationActions)
+          if (displayOnlineElement.value) {
+            AddZoneButton(mapViewModel, navigationActions)
+          }
+
           // ===  === ===  ===
         }
       }

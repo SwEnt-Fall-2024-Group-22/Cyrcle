@@ -97,6 +97,7 @@ fun SpotListScreen(
   // location permission from location manager
   val locPermission = permissionHandler.getLocalisationPerm().collectAsState().value
 
+  val displayOnlineElement = userViewModel.displayOnlineElementFlow.collectAsState(initial = false)
   /*
    * Function that computes the distance between the user's location and a parking spot
    * @param parking: the parking spot for which we want to compute the distance
@@ -138,7 +139,8 @@ fun SpotListScreen(
               displayHeader = true,
               addressViewModel,
               mapViewModel,
-              permissionHandler)
+              permissionHandler,
+              userViewModel)
           val listState = rememberLazyListState()
           LazyColumn(state = listState, modifier = Modifier.testTag("SpotListColumn")) {
             // Pinned parking spots if any (includes titles and dividers)
