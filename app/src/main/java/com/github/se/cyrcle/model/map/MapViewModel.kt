@@ -126,13 +126,14 @@ class MapViewModel : ViewModel() {
    * is set to the max zoom defined in the UI.
    *
    * @param location the location to zoom on.
+   * @param zoom the zoom level to set.
    */
-  fun zoomOnLocation(location: Location) {
+  fun zoomOnLocation(location: Location, zoom: Double = maxZoom) {
     _cameraPosition.value =
         CameraState(
             location.center,
             MapConfig.defaultCameraState().padding,
-            maxZoom,
+            zoom,
             MapConfig.defaultCameraState().bearing,
             MapConfig.defaultCameraState().pitch)
   }
