@@ -149,7 +149,7 @@ private fun TutorialWelcomeScreen() {
 
   Text(
       text = stringResource(R.string.tutorial_screen_welcome_subtitle),
-      style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp, lineHeight = 11.sp),
+      style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp, lineHeight = 20.sp),
       modifier = Modifier.padding(generalPadding),
       testTag = "TutorialScreenWelcomeSubtitle")
 }
@@ -181,7 +181,7 @@ fun ThankYouScreen() {
       text = stringResource(R.string.tutorial_screen_thank_you_title),
       style =
           MaterialTheme.typography.headlineLarge.copy(
-              fontWeight = FontWeight.SemiBold, fontSize = 45.sp, lineHeight = 64.sp),
+              fontWeight = FontWeight.SemiBold, fontSize = 45.sp, lineHeight = 20.sp),
       modifier = Modifier.padding(generalPadding),
       testTag = "TutorialScreenThankYouTitle")
 
