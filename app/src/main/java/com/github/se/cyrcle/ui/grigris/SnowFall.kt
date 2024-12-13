@@ -11,6 +11,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.tooling.preview.Preview
+import com.github.se.cyrcle.ui.theme.CeruleanLowest
 import kotlin.random.Random
 import kotlinx.coroutines.delay
 
@@ -22,13 +23,13 @@ import kotlinx.coroutines.delay
 @Composable
 fun SnowfallAnimation() {
   // The size of the canvas (available drawing area)
-  var size by remember { mutableStateOf(Size.Zero) }
+  var size by remember { mutableStateOf(Size(1000f, 500f)) }
 
   // Create a list of 100 snowflakes, initialized with the canvas size
   val snowflakes = remember { List(100) { Snowflake(size) } }
 
   // Draw a slightly transparent blue background to simulate the sky
-  Box(modifier = Modifier.fillMaxSize().background(Color(0xFF216B8D).copy(alpha = 0.1f))) {
+  Box(modifier = Modifier.fillMaxSize().background(CeruleanLowest.copy(alpha = 0.1f))) {
     // Draw the snowflakes on the canvas
     Canvas(modifier = Modifier.fillMaxSize()) {
       // Update the canvas size when it becomes available
