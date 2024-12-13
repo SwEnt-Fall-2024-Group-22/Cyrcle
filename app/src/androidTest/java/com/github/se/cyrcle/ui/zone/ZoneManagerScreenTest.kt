@@ -81,7 +81,9 @@ class ZoneManagerScreenTest {
             "Test Zone",
         )
     val zonesState = mutableStateOf(listOf(zone))
-    composeTestRule.setContent { ZoneCard(parkingViewModel, zone, zonesState) }
+    composeTestRule.setContent {
+      ZoneCard(parkingViewModel, mapViewModel, navigationActions, zone, zonesState)
+    }
     composeTestRule
         .onNodeWithContentDescription("Refresh")
         .assertIsDisplayed()
