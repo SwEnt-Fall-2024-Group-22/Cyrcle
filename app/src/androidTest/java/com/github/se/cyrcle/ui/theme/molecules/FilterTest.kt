@@ -48,6 +48,8 @@ class FilterTest {
   private lateinit var mockImageRepository: ImageRepository
   private lateinit var mockAddressRepository: MockAddressRepository
   private lateinit var mockReportedObjectRepository: ReportedObjectRepository
+  private lateinit var mockUserRepository: MockUserRepository
+  private lateinit var userViewModel: UserViewModel
   private lateinit var parkingViewModel: ParkingViewModel
   private lateinit var addressViewModel: AddressViewModel
   private lateinit var permissionHandler: MockPermissionHandler
@@ -61,19 +63,21 @@ class FilterTest {
     mockImageRepository = MockImageRepository()
     mockReportedObjectRepository = MockReportedObjectRepository()
     mockAddressRepository = MockAddressRepository()
+    mockUserRepository = MockUserRepository()
 
+    userViewModel =
+        UserViewModel(
+            MockUserRepository(),
+            MockParkingRepository(),
+            MockImageRepository(),
+            MockAuthenticationRepository())
     addressViewModel = AddressViewModel(mockAddressRepository)
     mapViewModel = MapViewModel()
     permissionHandler = MockPermissionHandler()
     parkingViewModel =
         ParkingViewModel(
             mockImageRepository,
-            userViewModel =
-                UserViewModel(
-                    MockUserRepository(),
-                    MockParkingRepository(),
-                    MockImageRepository(),
-                    MockAuthenticationRepository()),
+            userViewModel,
             mockParkingRepository,
             mockOfflineParkingRepository,
             mockReportedObjectRepository)
@@ -90,7 +94,8 @@ class FilterTest {
           true,
           addressViewModel,
           permissionHandler = permissionHandler,
-          mapViewModel = mapViewModel)
+          mapViewModel = mapViewModel,
+          userViewModel = userViewModel)
     }
 
     // Show filters first
@@ -109,7 +114,8 @@ class FilterTest {
           true,
           addressViewModel,
           permissionHandler = permissionHandler,
-          mapViewModel = mapViewModel)
+          mapViewModel = mapViewModel,
+          userViewModel = userViewModel)
     }
 
     // Act & Assert
@@ -125,7 +131,8 @@ class FilterTest {
           true,
           addressViewModel,
           permissionHandler = permissionHandler,
-          mapViewModel = mapViewModel)
+          mapViewModel = mapViewModel,
+          userViewModel = userViewModel)
     }
 
     // Act: Click to show filters
@@ -157,7 +164,8 @@ class FilterTest {
           true,
           addressViewModel,
           permissionHandler = permissionHandler,
-          mapViewModel = mapViewModel)
+          mapViewModel = mapViewModel,
+          userViewModel = userViewModel)
     }
 
     // Act: Click to show filters
@@ -197,7 +205,8 @@ class FilterTest {
           true,
           addressViewModel,
           permissionHandler = permissionHandler,
-          mapViewModel = mapViewModel)
+          mapViewModel = mapViewModel,
+          userViewModel = userViewModel)
     }
 
     // Act: Click to show filters
@@ -236,7 +245,8 @@ class FilterTest {
           true,
           addressViewModel,
           permissionHandler = permissionHandler,
-          mapViewModel = mapViewModel)
+          mapViewModel = mapViewModel,
+          userViewModel = userViewModel)
     }
 
     // Act: Click to show filters

@@ -389,6 +389,7 @@ fun SearchBarListScreen(
 
   val giveCoinsRegex = Regex("^/give coins (\\d+)$", RegexOption.IGNORE_CASE)
   val killRegex = Regex("^/kill$", RegexOption.IGNORE_CASE)
+  val jokeRegex = Regex("^/joke$", RegexOption.IGNORE_CASE)
 
   Box {
     // Callback for when a suggestion is clicked. Either called with a valid (non-null) address or
@@ -475,6 +476,15 @@ fun SearchBarListScreen(
                     textFieldValue.value = ""
                     Toast.makeText(context, "Goodbye, cruel world!", Toast.LENGTH_SHORT).show()
                     throw RuntimeException("Goodbye, cruel world!")
+                  }
+
+                  // Easter Egg 3: Joke Command
+                  val matchJoke = jokeRegex.matchEntire(textFieldValue.value.trim())
+                  if (matchJoke != null) {
+                    textFieldValue.value = ""
+                    Toast.makeText(context, "You're the joke \uD83E\uDD21", Toast.LENGTH_SHORT)
+                        .show()
+                    return@KeyboardActions
                   }
 
                   // Default search behavior (if no Easter egg is triggered)

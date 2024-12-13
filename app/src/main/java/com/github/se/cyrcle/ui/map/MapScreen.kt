@@ -233,6 +233,7 @@ fun MapScreen(
   val context: Context = LocalContext.current
   val giveCoinsRegex = Regex("^/give coins (\\d+)$", RegexOption.IGNORE_CASE)
   val killRegex = Regex("^/kill$", RegexOption.IGNORE_CASE)
+  val jokeRegex = Regex("^/joke$", RegexOption.IGNORE_CASE)
 
   // Draw markers on the map when the list of parkings changes
   LaunchedEffect(
@@ -550,6 +551,16 @@ fun MapScreen(
                                 Toast.makeText(context, "Goodbye, cruel world!", Toast.LENGTH_SHORT)
                                     .show()
                                 throw RuntimeException("Goodbye, cruel world !")
+                              }
+
+                              // Easter Egg 3: Joke Command
+                              val matchJoke = jokeRegex.matchEntire(searchQuery.value.trim())
+                              if (matchJoke != null) {
+                                searchQuery.value = ""
+                                Toast.makeText(
+                                        context, "You're the joke \uD83E\uDD21", Toast.LENGTH_SHORT)
+                                    .show()
+                                return@KeyboardActions
                               }
 
                               // If no Easter egg is triggered, proceed with the search
