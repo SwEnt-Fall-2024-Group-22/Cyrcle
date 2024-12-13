@@ -21,6 +21,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipe
 import androidx.compose.ui.test.swipeRight
+import androidx.compose.ui.test.swipeUp
 import com.github.se.cyrcle.MainActivity
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.model.parking.Parking
@@ -202,8 +203,9 @@ class MainActivityTest {
 
     @OptIn(ExperimentalTestApi::class)
     fun makeRectangleAndNext() = runTest {
-      composeTestRule.onNodeWithTag("LocationPickerScreen").performTouchInput {
-        swipe(start = Offset(0.5f, 0.5f), end = Offset(0.7f, 0.7f), durationMillis = 10)
+      composeTestRule.onNodeWithTag("canvas").performTouchInput {
+        swipeUp(bottom, bottom - 50)
+        swipeRight(left, left + 50)
       }
       composeTestRule.awaitIdle()
       composeTestRule.onNodeWithTag("nextButton").performClick()

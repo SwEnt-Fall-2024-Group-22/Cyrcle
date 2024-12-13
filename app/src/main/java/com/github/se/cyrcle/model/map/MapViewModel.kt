@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.model.parking.PARKING_MAX_AREA
 import com.github.se.cyrcle.model.parking.PARKING_MAX_SIDE_LENGTH
+import com.github.se.cyrcle.model.parking.PARKING_MIN_AREA
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.ui.map.MapConfig
@@ -48,6 +49,7 @@ class MapViewModel : ViewModel() {
             val heightAndWidth = location.computeHeightAndWidth()
             heightAndWidth.first <= PARKING_MAX_SIDE_LENGTH &&
                 heightAndWidth.second <= PARKING_MAX_SIDE_LENGTH &&
+                area >= PARKING_MIN_AREA &&
                 area <= PARKING_MAX_AREA
           } ?: false
         }

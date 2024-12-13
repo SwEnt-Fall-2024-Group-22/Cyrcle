@@ -34,6 +34,7 @@ const val NB_REPORTS_THRESH = 1
 const val NB_REPORTS_MAXSEVERITY_THRESH = 4
 const val MAX_SEVERITY = 3
 
+const val PARKING_MIN_AREA = 5.0
 const val PARKING_MAX_AREA = 1000.0
 const val PARKING_MAX_SIDE_LENGTH = 50.0
 
