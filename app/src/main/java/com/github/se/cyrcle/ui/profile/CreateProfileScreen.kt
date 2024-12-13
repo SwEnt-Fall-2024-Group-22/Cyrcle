@@ -20,7 +20,7 @@ import com.github.se.cyrcle.model.user.UserPublic
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.model.user.Wallet
 import com.github.se.cyrcle.ui.navigation.NavigationActions
-import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
+import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
@@ -68,7 +68,7 @@ fun CreateProfileScreen(navigationActions: NavigationActions, userViewModel: Use
                     userViewModel.updateUser(userWithCoins, context)
                     userViewModel.setIsOnlineMode(true)
                     Toast.makeText(context, combinedToastText, Toast.LENGTH_LONG).show()
-                    navigationActions.navigateTo(TopLevelDestinations.MAP)
+                    navigationActions.navigateTo(Screen.TUTORIAL)
                   },
                   {
                     Log.e("CreateProfileScreen", "Error adding user")

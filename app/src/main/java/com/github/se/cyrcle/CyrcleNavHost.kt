@@ -33,6 +33,7 @@ import com.github.se.cyrcle.ui.report.ReviewReportScreen
 import com.github.se.cyrcle.ui.report.ViewReportsScreen
 import com.github.se.cyrcle.ui.review.AllReviewsScreen
 import com.github.se.cyrcle.ui.review.ReviewScreen
+import com.github.se.cyrcle.ui.tutorial.TutorialScreen
 import com.github.se.cyrcle.ui.zone.ZoneManagerScreen
 import com.github.se.cyrcle.ui.zone.ZoneSelectionScreen
 
@@ -56,6 +57,13 @@ fun CyrcleNavHost(
     ) {
       composable(Screen.AUTH) { SignInScreen(navigationActions, userViewModel) }
       composable(Screen.CREATE_PROFILE) { CreateProfileScreen(navigationActions, userViewModel) }
+    }
+
+    navigation(
+        startDestination = Screen.CREATE_PROFILE,
+        route = Route.TUTORIAL,
+    ) {
+      composable(Screen.TUTORIAL) { TutorialScreen(navigationActions) }
     }
 
     navigation(

@@ -343,6 +343,16 @@
     <string name="bike_location_dialog_button_confirm">Forget</string>
     <string name="bike_location_dialog_button_cancel">Keep remembering</string>
 
+    <!-- Tutorial Screens -->
+    <string name="tutorial_screen_welcome_title">Welcome to Cyrcle !</string>
+    <string name="tutorial_screen_welcome_subtitle">Here is a small tutorial to help you take the app in your hand !</string>
+    <string name="tutorial_screen_button_start">Start</string>
+    <string name="tutorial_screen_button_next">Next</string>
+    <string name="tutorial_screen_button_finish">Finish</string>
+    <string name="tutorial_screen_button_skip">Skip</string>
+    <string name="tutorial_screen_thank_you_title">You\'re all done !</string>
+    <string name="tutorial_screen_thank_you_subtitle">Thank you for using Cyrcle !</string>
+
     <!-- Easter Egg Toast Messages -->
     <string name="easter_egg_coins_greedy_message">Greedy, aren\'t you? All your coins are gone!</string>
     <string name="easter_egg_coins_credited_message">You\'ve been credited %1$d coins!</string>
