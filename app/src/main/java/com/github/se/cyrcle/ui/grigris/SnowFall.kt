@@ -22,8 +22,9 @@ import kotlinx.coroutines.delay
  */
 @Composable
 fun SnowfallAnimation() {
-  // The size of the canvas (available drawing area)
-  var size by remember { mutableStateOf(Size(1000f, 500f)) }
+  // The size of the canvas (available drawing area). Initialized with a default size of 1000x500.
+  // This value is updated when the canvas size becomes available.
+  var size by remember { mutableStateOf(Size(1000f, 800f)) }
 
   // Create a list of 100 snowflakes, initialized with the canvas size
   val snowflakes = remember { List(100) { Snowflake(size) } }

@@ -43,10 +43,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlin.math.sqrt
 
-// The threshold for shake detection
-const val SHAKE_THRESHOLD = 800
-
-const val SHAKE_SLOP_TIME_MS = 500
+// Constants for the shake detection
+const val SHAKE_THRESHOLD = 650
+const val SHAKE_SLOP_TIME_MS = 100
+const val SHAKE_COOLDOWN_MS = 2000
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity(), SensorEventListener {
@@ -68,8 +68,6 @@ class MainActivity : ComponentActivity(), SensorEventListener {
   @Inject lateinit var authenticationRepository: AuthenticationRepository
 
   @Inject lateinit var offlineParkingRepository: OfflineParkingRepository
-
-  private var showSnow by mutableStateOf(false)
 
   private val reviewViewModel: ReviewViewModel by viewModels {
     CustomViewModelFactory { ReviewViewModel(reviewRepository, reportedObjectRepository) }
@@ -96,6 +94,8 @@ class MainActivity : ComponentActivity(), SensorEventListener {
   private val addressViewModel: AddressViewModel by viewModels {
     CustomViewModelFactory { AddressViewModel(addressRepository) }
   }
+
+  private var showSnow by mutableStateOf(false)
 
   // Variables for the accelerometer sensor
   private lateinit var sensorManager: SensorManager
@@ -156,6 +156,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
   // Variables to keep track of the last x, y, z values and the last update time
   private var lastUpdate: Long = 0
+  private var lastShakeTime: Long = 0
   private var lastX = 0f
   private var lastY = 0f
   private var lastZ = 0f
@@ -180,9 +181,13 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                 (x - lastX) * (x - lastX) + (y - lastY) * (y - lastY) + (z - lastZ) * (z - lastZ)) /
                 diffTime * 10000
 
-        // If the speed is greater than the threshold, consider it a shake
-        if (speed > SHAKE_THRESHOLD) {
+        // If the speed is greater than the threshold and cooldown has passed, consider it a shake
+        if ((speed > SHAKE_THRESHOLD) && (curTime - lastShakeTime > SHAKE_COOLDOWN_MS)) {
           showSnow = !showSnow
+
+          // Update toggle time after changing snow state
+          lastShakeTime = curTime
+
           if (showSnow) {
             Toast.makeText(this, "It's snowing! Shake again to stop", Toast.LENGTH_SHORT).show()
           } else {
