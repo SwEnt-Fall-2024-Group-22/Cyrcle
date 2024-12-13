@@ -11,8 +11,12 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.github.se.cyrcle.model.CustomViewModelFactory
@@ -32,6 +36,7 @@ import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.UserRepository
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.permission.PermissionHandler
+import com.github.se.cyrcle.ui.grigris.SnowfallAnimation
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.CyrcleTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -40,6 +45,8 @@ import kotlin.math.sqrt
 
 // The threshold for shake detection
 const val SHAKE_THRESHOLD = 800
+
+const val SHAKE_SLOP_TIME_MS = 500
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity(), SensorEventListener {
@@ -61,6 +68,8 @@ class MainActivity : ComponentActivity(), SensorEventListener {
   @Inject lateinit var authenticationRepository: AuthenticationRepository
 
   @Inject lateinit var offlineParkingRepository: OfflineParkingRepository
+
+  private var showSnow by mutableStateOf(false)
 
   private val reviewViewModel: ReviewViewModel by viewModels {
     CustomViewModelFactory { ReviewViewModel(reviewRepository, reportedObjectRepository) }
@@ -110,16 +119,22 @@ class MainActivity : ComponentActivity(), SensorEventListener {
           val navController = rememberNavController()
           val navigationActions = NavigationActions(navController)
 
-          CyrcleNavHost(
-              navigationActions,
-              navController,
-              parkingViewModel,
-              reviewViewModel,
-              userViewModel,
-              mapViewModel,
-              addressViewModel,
-              reportedObjectViewModel,
-              permissionsHandler)
+          Box {
+            CyrcleNavHost(
+                navigationActions,
+                navController,
+                parkingViewModel,
+                reviewViewModel,
+                userViewModel,
+                mapViewModel,
+                addressViewModel,
+                reportedObjectViewModel,
+                permissionsHandler)
+
+            if (showSnow) {
+              SnowfallAnimation()
+            }
+          }
         }
       }
     }
@@ -149,8 +164,8 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     // Check if the sensor type is accelerometer
     if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
       val curTime = System.currentTimeMillis()
-      // Only allow one update every 100ms
-      if ((curTime - lastUpdate) > 100) {
+      // Only allow one update after a certain time interval
+      if ((curTime - lastUpdate) > SHAKE_SLOP_TIME_MS) {
         val diffTime = curTime - lastUpdate
         lastUpdate = curTime
 
@@ -167,7 +182,12 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
         // If the speed is greater than the threshold, consider it a shake
         if (speed > SHAKE_THRESHOLD) {
-          Toast.makeText(this, "You've shaken the phone", Toast.LENGTH_SHORT).show()
+          showSnow = !showSnow
+          if (showSnow) {
+            Toast.makeText(this, "It's snowing! Shake again to stop", Toast.LENGTH_SHORT).show()
+          } else {
+            Toast.makeText(this, "The snow has stopped", Toast.LENGTH_SHORT).show()
+          }
         }
 
         // Update the last x, y, z values
