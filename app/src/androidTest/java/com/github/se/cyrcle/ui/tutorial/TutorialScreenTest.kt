@@ -1,15 +1,12 @@
 package com.github.se.cyrcle.ui.tutorial
 
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.tooling.preview.Preview
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
-import com.github.se.cyrcle.ui.theme.CyrcleTheme
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -85,4 +82,3 @@ class TutorialScreenTest {
     verify(navigationActions).navigateTo(Route.MAP)
   }
 }
-

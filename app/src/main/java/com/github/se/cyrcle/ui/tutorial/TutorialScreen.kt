@@ -198,6 +198,5 @@ fun ThankYouScreen() {
 @Preview
 @Composable
 fun PreviewTutorialScreen() {
-  CyrcleTheme { TutorialScreen(NavigationActions(rememberNavController()))}
+  CyrcleTheme { TutorialScreen(NavigationActions(rememberNavController())) }
 }
-
