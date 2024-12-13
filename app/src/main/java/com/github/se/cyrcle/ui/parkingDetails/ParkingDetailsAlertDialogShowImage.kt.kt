@@ -4,10 +4,9 @@ import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Delete
@@ -19,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -51,18 +51,19 @@ fun ParkingDetailsAlertDialogShowImage(
 ) {
   val context = LocalContext.current
   val strResToast = stringResource(R.string.view_profile_screen_image_deleted)
-  val alertDialogMaxHeight = LocalConfiguration.current.screenHeightDp.dp * 0.8f
+  val imageMinWidth = LocalConfiguration.current.screenWidthDp.dp * 0.8f
   BasicAlertDialog(
       modifier = Modifier.testTag("ParkingDetailsAlertDialogShowImage").wrapContentSize(),
       onDismissRequest = onDismiss,
       content = {
-        Box(modifier = Modifier.heightIn(max = alertDialogMaxHeight).wrapContentSize()) {
+        Box(modifier = Modifier.wrapContentSize()) {
           // Image
           Image(
               painter = rememberAsyncImagePainter(imageUrl),
               contentDescription = "Parking spot image",
+              contentScale = ContentScale.FillWidth,
               modifier =
-                  Modifier.wrapContentWidth()
+                  Modifier.width(imageMinWidth)
                       .background(
                           MaterialTheme.colorScheme.background,
                           MaterialTheme.shapes.small) // Set the background color
