@@ -11,7 +11,6 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
@@ -119,21 +118,20 @@ class MainActivity : ComponentActivity(), SensorEventListener {
           val navController = rememberNavController()
           val navigationActions = NavigationActions(navController)
 
-          Box {
-            CyrcleNavHost(
-                navigationActions,
-                navController,
-                parkingViewModel,
-                reviewViewModel,
-                userViewModel,
-                mapViewModel,
-                addressViewModel,
-                reportedObjectViewModel,
-                permissionsHandler)
+          CyrcleNavHost(
+              navigationActions,
+              navController,
+              parkingViewModel,
+              reviewViewModel,
+              userViewModel,
+              mapViewModel,
+              addressViewModel,
+              reportedObjectViewModel,
+              permissionsHandler)
 
-            if (showSnow) {
-              SnowfallAnimation()
-            }
+          // Show the snowfall animation if the `showSnow` flag is true
+          if (showSnow) {
+            SnowfallAnimation()
           }
         }
       }
@@ -188,8 +186,9 @@ class MainActivity : ComponentActivity(), SensorEventListener {
           // Update toggle time after changing snow state
           lastShakeTime = curTime
 
+          // Can't use string resources because we're not in a Composable
           if (showSnow) {
-            Toast.makeText(this, "It's snowing! Shake again to stop", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "It's snowing ❄️! Shake again to stop", Toast.LENGTH_SHORT).show()
           } else {
             Toast.makeText(this, "The snow has stopped", Toast.LENGTH_SHORT).show()
           }
