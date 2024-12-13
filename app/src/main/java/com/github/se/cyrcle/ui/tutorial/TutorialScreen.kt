@@ -30,11 +30,14 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.rememberNavController
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
+import com.github.se.cyrcle.ui.theme.CyrcleTheme
 import com.github.se.cyrcle.ui.theme.atoms.Text
 
 // Border padding
@@ -71,14 +74,14 @@ fun TutorialScreen(navigationActions: NavigationActions) {
             0 -> TutorialWelcomeScreen()
             1 ->
                 ImageSubScreen(
-                    imageId = R.drawable.app_logo_name,
-                    contentDescription = "Tutorial screen 1",
-                    testTag = "TutorialScreenImage1")
+                    imageId = R.drawable.tutorial_map_screen,
+                    contentDescription = "Map Tutorial screen",
+                    testTag = "TutorialScreenImageMap")
             2 ->
                 ImageSubScreen(
-                    imageId = R.drawable.dot,
-                    contentDescription = "Tutorial screen 2",
-                    testTag = "TutorialScreenImage2")
+                    imageId = R.drawable.tutorial_list_screen,
+                    contentDescription = "List Tutorial screen",
+                    testTag = "TutorialScreenImageList")
             3 -> ThankYouScreen()
           }
         }
@@ -191,10 +194,10 @@ fun ThankYouScreen() {
       testTag = "TutorialScreenThankYouSubtitle")
 }
 
-/* // Uncomment to have a preview of the Tutorial
+// Uncomment to have a preview of the Tutorial
 @Preview
 @Composable
 fun PreviewTutorialScreen() {
   CyrcleTheme { TutorialScreen(NavigationActions(rememberNavController()))}
 }
-*/
+
