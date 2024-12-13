@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.map
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
@@ -228,6 +229,10 @@ fun MapScreen(
   LaunchedEffect(isOnlineMode) {
     parkingViewModel.getParkingsInRect(screenCoordinates.first, screenCoordinates.second)
   }
+
+  val context: Context = LocalContext.current
+  val giveCoinsRegex = Regex("^/give coins (\\d+)$", RegexOption.IGNORE_CASE)
+  val killRegex = Regex("^/kill$", RegexOption.IGNORE_CASE)
 
   // Draw markers on the map when the list of parkings changes
   LaunchedEffect(
@@ -522,6 +527,32 @@ fun MapScreen(
                         KeyboardActions(
                             onSearch = {
                               virtualKeyboardManager?.hide()
+
+                              // Easter Egg 1: Give Coins
+                              val matchGiveCoins =
+                                  giveCoinsRegex.matchEntire(searchQuery.value.trim())
+                              if (matchGiveCoins != null) {
+                                val amount = matchGiveCoins.groupValues[1].toInt()
+                                userViewModel.creditCoinsToCurrentUser(amount)
+                                searchQuery.value = ""
+                                Toast.makeText(
+                                        context,
+                                        "You've been credited $amount coins!",
+                                        Toast.LENGTH_SHORT)
+                                    .show()
+                                return@KeyboardActions
+                              }
+
+                              // Easter Egg 2: Kill Command
+                              val matchKill = killRegex.matchEntire(searchQuery.value.trim())
+                              if (matchKill != null) {
+                                searchQuery.value = ""
+                                Toast.makeText(context, "Goodbye, cruel world!", Toast.LENGTH_SHORT)
+                                    .show()
+                                throw RuntimeException("Goodbye, cruel world !")
+                              }
+
+                              // If no Easter egg is triggered, proceed with the search
                               runBlocking { addressViewModel.search(searchQuery.value) }
                               showSuggestions.value = true
                             }))
@@ -568,6 +599,7 @@ fun MapScreen(
               addressViewModel,
               permissionHandler,
               mapViewModel,
+              userViewModel,
               onDismiss = { showFilter.value = false })
         }
 
@@ -802,6 +834,7 @@ fun FilterDialog(
     addressViewModel: AddressViewModel,
     permissionHandler: PermissionHandler,
     mapViewModel: MapViewModel,
+    userViewModel: UserViewModel,
     onDismiss: () -> Unit
 ) {
   AlertDialog(
@@ -819,7 +852,8 @@ fun FilterDialog(
               displayHeader = false,
               addressViewModel,
               mapViewModel,
-              permissionHandler = permissionHandler)
+              permissionHandler = permissionHandler,
+              userViewModel)
         }
       },
       confirmButton = {

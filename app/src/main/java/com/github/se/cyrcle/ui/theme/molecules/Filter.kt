@@ -1,6 +1,8 @@
 package com.github.se.cyrcle.ui.theme.molecules
 
 import android.content.Context
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -65,6 +67,7 @@ import com.github.se.cyrcle.model.parking.ParkingCapacity
 import com.github.se.cyrcle.model.parking.ParkingProtection
 import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.permission.PermissionHandler
 import com.github.se.cyrcle.ui.list.MAX_SUGGESTION_DISPLAY_NAME_LENGTH_LIST
 import com.github.se.cyrcle.ui.list.NUMBER_OF_SUGGESTIONS_FOR_MENU
@@ -99,7 +102,8 @@ fun FilterPanel(
     displayHeader: Boolean,
     addressViewModel: AddressViewModel,
     mapViewModel: MapViewModel,
-    permissionHandler: PermissionHandler
+    permissionHandler: PermissionHandler,
+    userViewModel: UserViewModel
 ) {
   val showProtectionOptions = remember { mutableStateOf(false) }
   val showRackTypeOptions = remember { mutableStateOf(false) }
@@ -143,7 +147,8 @@ fun FilterPanel(
                   isTextFieldVisible,
                   permissionHandler,
                   mapViewModel,
-                  textFieldValue)
+                  textFieldValue,
+                  userViewModel)
             } else {
               Text(
                   text = stringResource(R.string.all_parkings_radius, radius.value.toInt()),
@@ -345,7 +350,8 @@ fun SearchBarListScreen(
     isTextFieldVisible: MutableState<Boolean>,
     permissionHandler: PermissionHandler,
     mapViewModel: MapViewModel,
-    textFieldValue: MutableState<String>
+    textFieldValue: MutableState<String>,
+    userViewModel: UserViewModel
 ) {
 
   val context: Context = LocalContext.current
@@ -381,6 +387,9 @@ fun SearchBarListScreen(
   val slideOffset by
       animateDpAsState(targetValue = if (isTextFieldVisible.value) 0.dp else (-200).dp, label = "")
 
+  val giveCoinsRegex = Regex("^/give coins (\\d+)$", RegexOption.IGNORE_CASE)
+  val killRegex = Regex("^/kill$", RegexOption.IGNORE_CASE)
+
   Box {
     // Callback for when a suggestion is clicked. Either called with a valid (non-null) address or
     // explicitly called with null to indicate we want to use the user's location.
@@ -403,7 +412,9 @@ fun SearchBarListScreen(
 
     OutlinedTextField(
         value = textFieldValue.value,
-        onValueChange = { textFieldValue.value = it },
+        onValueChange = {
+          textFieldValue.value = it // Update the text field value
+        },
         placeholder = { Text(text = stringResource(R.string.search_bar_placeholder)) },
         modifier =
             Modifier.padding(start = 4.dp, end = 8.dp)
@@ -443,7 +454,30 @@ fun SearchBarListScreen(
             KeyboardActions(
                 onSearch = {
                   virtualKeyboardManager?.hide()
+                  Log.e("FAVORITE_TAG", "onSearch")
 
+                  // Easter Egg 1: Give Coins
+                  val matchGiveCoins = giveCoinsRegex.matchEntire(textFieldValue.value.trim())
+                  if (matchGiveCoins != null) {
+                    val amount = matchGiveCoins.groupValues[1].toInt()
+                    userViewModel.creditCoinsToCurrentUser(amount)
+                    textFieldValue.value = ""
+                    Toast.makeText(
+                            context, "You've been credited $amount coins!", Toast.LENGTH_SHORT)
+                        .show()
+                    return@KeyboardActions
+                  }
+
+                  // Easter Egg 2: Kill Command
+                  val matchKill = killRegex.matchEntire(textFieldValue.value.trim())
+                  if (matchKill != null) {
+                    Log.e("FAVORITE_TAG", "/kill")
+                    textFieldValue.value = ""
+                    Toast.makeText(context, "Goodbye, cruel world!", Toast.LENGTH_SHORT).show()
+                    throw RuntimeException("Goodbye, cruel world!")
+                  }
+
+                  // Default search behavior (if no Easter egg is triggered)
                   runBlocking { addressViewModel.search(textFieldValue.value) }
 
                   showSuggestions.value = true
