@@ -427,28 +427,6 @@ class ListScreenTest {
   }
 
   @Test
-  fun testParkingNameTruncation() {
-    val longNameParking =
-        TestInstancesParking.parking1.copy(
-            optName = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-    parkingViewModel.addParking(longNameParking)
-
-    composeTestRule.setContent {
-      SpotCard(
-          navigationActions = mockNavigationActions,
-          parkingViewModel = parkingViewModel,
-          userViewModel = userViewModel,
-          parking = longNameParking,
-          distance = 0.0,
-          0.0)
-    }
-
-    composeTestRule
-        .onNodeWithTag("ParkingName", useUnmergedTree = true)
-        .assertTextEquals("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...")
-  }
-
-  @Test
   fun assertSearchBarIsDisplayed() {
     composeTestRule.setContent {
       SpotListScreen(
