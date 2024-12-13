@@ -164,6 +164,8 @@ fun MapScreen(
   // Collect the boolean to enable the parking addition from the UserViewModel as a state
   val enableParkingAddition by userViewModel.isSignedIn.collectAsState(false)
 
+  val displayOnlineElement = userViewModel.displayOnlineElementFlow.collectAsState(initial = false)
+
   // create a remember  state to store if the markers or the rectangles are displayed
   val mapMode: State<MapViewModel.MapMode> = mapViewModel.mapMode.collectAsState()
 
@@ -506,7 +508,8 @@ fun MapScreen(
           // Search bar and Settings button row
           Row(
               modifier = Modifier.fillMaxWidth().padding(5.dp).align(Alignment.TopStart),
-              verticalAlignment = Alignment.CenterVertically) {
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.End) {
                 // Search bar
                 OutlinedTextField(
                     value = searchQuery.value,

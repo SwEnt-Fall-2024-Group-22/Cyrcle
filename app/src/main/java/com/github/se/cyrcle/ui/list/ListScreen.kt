@@ -103,6 +103,7 @@ fun SpotListScreen(
   // location permission from location manager
   val locPermission = permissionHandler.getLocalisationPerm().collectAsState().value
 
+  val displayOnlineElement = userViewModel.displayOnlineElementFlow.collectAsState(initial = false)
   /*
    * Function that computes the distance between the user's location and a parking spot
    * @param parking: the parking spot for which we want to compute the distance
