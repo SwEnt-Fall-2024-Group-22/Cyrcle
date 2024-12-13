@@ -204,8 +204,8 @@ class MainActivityTest {
     @OptIn(ExperimentalTestApi::class)
     fun makeRectangleAndNext() = runTest {
       composeTestRule.onNodeWithTag("canvas").performTouchInput {
-        swipeUp(bottom, bottom - 50)
-        swipeRight(left, left + 50)
+        swipeUp(bottom, bottom - 30)
+        swipeRight(left, left + 30)
       }
       composeTestRule.awaitIdle()
       composeTestRule.onNodeWithTag("nextButton").performClick()
