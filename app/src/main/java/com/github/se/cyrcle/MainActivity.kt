@@ -1,7 +1,13 @@
 package com.github.se.cyrcle
 
+import android.content.Context
 import android.content.pm.ActivityInfo
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -30,9 +36,13 @@ import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.CyrcleTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import kotlin.math.sqrt
+
+// The threshold for shake detection
+const val SHAKE_THRESHOLD = 800
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity(), SensorEventListener {
 
   @Inject lateinit var parkingRepository: ParkingRepository
 
@@ -78,9 +88,17 @@ class MainActivity : ComponentActivity() {
     CustomViewModelFactory { AddressViewModel(addressRepository) }
   }
 
+  // Variables for the accelerometer sensor
+  private lateinit var sensorManager: SensorManager
+  private var accelerometer: Sensor? = null
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
+    // Initialize the sensor manager and accelerometer sensor
+    sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
     permissionsHandler.initHandler(this@MainActivity)
 
@@ -105,5 +123,62 @@ class MainActivity : ComponentActivity() {
         }
       }
     }
+  }
+
+  override fun onResume() {
+    super.onResume()
+    // Register the accelerometer sensor listener
+    accelerometer?.let {
+      sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
+    }
+  }
+
+  override fun onPause() {
+    super.onPause()
+    // Unregister the accelerometer sensor listener
+    sensorManager.unregisterListener(this)
+  }
+
+  // Variables to keep track of the last x, y, z values and the last update time
+  private var lastUpdate: Long = 0
+  private var lastX = 0f
+  private var lastY = 0f
+  private var lastZ = 0f
+
+  override fun onSensorChanged(event: SensorEvent) {
+    // Check if the sensor type is accelerometer
+    if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
+      val curTime = System.currentTimeMillis()
+      // Only allow one update every 100ms
+      if ((curTime - lastUpdate) > 100) {
+        val diffTime = curTime - lastUpdate
+        lastUpdate = curTime
+
+        // Get the current x, y, z values from the accelerometer
+        val x = event.values[0]
+        val y = event.values[1]
+        val z = event.values[2]
+
+        // Calculate the speed of the shake
+        val speed =
+            sqrt(
+                (x - lastX) * (x - lastX) + (y - lastY) * (y - lastY) + (z - lastZ) * (z - lastZ)) /
+                diffTime * 10000
+
+        // If the speed is greater than the threshold, consider it a shake
+        if (speed > SHAKE_THRESHOLD) {
+          Toast.makeText(this, "You've shaken the phone", Toast.LENGTH_SHORT).show()
+        }
+
+        // Update the last x, y, z values
+        lastX = x
+        lastY = y
+        lastZ = z
+      }
+    }
+  }
+
+  override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+    // Not needed for this implementation. Still need to override it.
   }
 }

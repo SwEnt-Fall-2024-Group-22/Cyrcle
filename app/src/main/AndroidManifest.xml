@@ -5,7 +5,10 @@
     <!-- Permission of MapBox to access Coarse Location of the user -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-   <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+
+    <!-- Permission to access the sensor of the device -->
+    <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="true" />
 
 
     <application
