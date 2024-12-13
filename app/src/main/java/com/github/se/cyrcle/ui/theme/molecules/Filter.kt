@@ -381,6 +381,24 @@ fun SearchBarListScreen(
       animateDpAsState(targetValue = if (isTextFieldVisible.value) 0.dp else (-200).dp)
 
   Box {
+    // Callback for when a suggestion is clicked. If address is null, the user's location is set.
+    val onLocationClicked: (Address?) -> Unit = {
+      if (it == null) {
+        parkingViewModel.setCircleCenter(mapViewModel.userPosition.value)
+        parkingViewModel.setMyLocation(true)
+        textFieldValue.value = context.resources.getString(R.string.my_location)
+      } else {
+        parkingViewModel.setChosenLocation(it)
+        parkingViewModel.setMyLocation(false)
+        textFieldValue.value =
+            it.suggestionFormatDisplayName(
+                MAX_SUGGESTION_DISPLAY_NAME_LENGTH_LIST, Address.Mode.LIST)
+      }
+      showSuggestions.value = false
+      isTextFieldVisible.value = false
+      focusManager.clearFocus()
+    }
+
     OutlinedTextField(
         value = textFieldValue.value,
         onValueChange = { textFieldValue.value = it },
@@ -393,6 +411,7 @@ fun SearchBarListScreen(
                 .testTag("SearchBarListScreen"),
         colors = getOutlinedTextFieldColorsSearchBar(ColorLevel.PRIMARY),
         trailingIcon = {
+          // Clear button
           if (textFieldValue.value.isNotEmpty()) {
             Icon(
                 imageVector = Icons.Filled.Clear,
@@ -404,20 +423,15 @@ fun SearchBarListScreen(
                           showSuggestions.value = false
                         }
                         .testTag("ClearSearchButtonListScreen"))
+            // If the text field is empty and the user has granted location permission, display the
+            // my location button
           } else if (permissionHandler.getLocalisationPerm().collectAsState().value) {
             Icon(
                 imageVector = Icons.Filled.LocationOn,
                 contentDescription = "My location",
-                tint = defaultOnColor(),
+                tint = MaterialTheme.colorScheme.secondary,
                 modifier =
-                    Modifier.clickable {
-                          parkingViewModel.setCircleCenter(mapViewModel.userPosition.value)
-                          parkingViewModel.setMyLocation(true)
-                          showSuggestions.value = false
-                          textFieldValue.value = context.resources.getString(R.string.my_location)
-                          isTextFieldVisible.value = false
-                          focusManager.clearFocus()
-                        }
+                    Modifier.clickable { onLocationClicked(null) }
                         .testTag("MyLocationButtonListScreen"))
           }
         },
@@ -439,6 +453,7 @@ fun SearchBarListScreen(
         modifier =
             Modifier.width(with(LocalDensity.current) { textFieldSize.value.width.toDp() })
                 .testTag("SuggestionsMenuListScreen")) {
+          // If there are no suggestions, display a message
           if (listOfSuggestions.isEmpty()) {
             DropdownMenuItem(
                 text = {
@@ -450,6 +465,7 @@ fun SearchBarListScreen(
                 onClick = {},
                 enabled = false)
           }
+          // Display a certain number of suggestions
           for (address in uniqueSuggestions.take(NUMBER_OF_SUGGESTIONS_FOR_MENU)) {
             DropdownMenuItem(
                 text = {
@@ -460,16 +476,7 @@ fun SearchBarListScreen(
                 },
                 modifier = Modifier.testTag("SuggestionMenuItem${address.city}"),
                 contentPadding = PaddingValues(8.dp),
-                onClick = {
-                  parkingViewModel.setChosenLocation(address)
-                  showSuggestions.value = false
-                  parkingViewModel.setMyLocation(false)
-                  isTextFieldVisible.value = false
-                  textFieldValue.value =
-                      address.suggestionFormatDisplayName(
-                          MAX_SUGGESTION_DISPLAY_NAME_LENGTH_LIST, Address.Mode.LIST)
-                  focusManager.clearFocus()
-                })
+                onClick = { onLocationClicked(address) })
           }
         }
   }
