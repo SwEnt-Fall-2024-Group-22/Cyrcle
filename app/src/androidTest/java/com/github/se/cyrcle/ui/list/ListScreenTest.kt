@@ -80,15 +80,17 @@ class ListScreenTest {
     addressRepository = MockAddressRepository()
 
     permissionHandler = MockPermissionHandler()
-    parkingViewModel =
-        ParkingViewModel(
-            mockImageRepository,
-            mockParkingRepository,
-            mockOfflineParkingRepository,
-            mockReportedObjectRepository)
+
     mapViewModel = MapViewModel()
     userViewModel =
         UserViewModel(mockUserRepository, mockParkingRepository, mockImageRepository, authenticator)
+    parkingViewModel =
+        ParkingViewModel(
+            mockImageRepository,
+            userViewModel,
+            mockParkingRepository,
+            mockOfflineParkingRepository,
+            mockReportedObjectRepository)
     addressViewModel = AddressViewModel(addressRepository)
 
     `when`(mockNavigationActions.currentRoute()).thenReturn(Screen.LIST)

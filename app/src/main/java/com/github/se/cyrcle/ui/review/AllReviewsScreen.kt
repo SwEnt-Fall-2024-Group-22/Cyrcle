@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.review
 
+import android.graphics.Color.parseColor
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -28,10 +29,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,6 +52,7 @@ import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.review.Review
 import com.github.se.cyrcle.model.review.ReviewViewModel
+import com.github.se.cyrcle.model.user.UserLevelDisplay
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
@@ -247,7 +251,8 @@ fun AllReviewsScreen(
                                             navigationActions.goBack()
                                           }),
                               userViewModel = userViewModel,
-                              reviewViewModel = reviewViewModel)
+                              reviewViewModel = reviewViewModel,
+                              ownerReputationScore = currentUser?.public?.userReputationScore)
                         }
                       } else {
                         // Add review button
@@ -289,8 +294,14 @@ fun AllReviewsScreen(
                       val signInToReport = stringResource(R.string.sign_in_to_report_review)
 
                       var ownerUsername by remember { mutableStateOf(defaultUsername) }
+                      var ownerReputationScore by remember { mutableDoubleStateOf(0.0) }
+
                       userViewModel.getUserById(
-                          curReview.owner, onSuccess = { ownerUsername = it.public.username })
+                          curReview.owner,
+                          onSuccess = {
+                            ownerUsername = it.public.username
+                            ownerReputationScore = it.public.userReputationScore
+                          })
 
                       ReviewCard(
                           review = curReview,
@@ -312,7 +323,8 @@ fun AllReviewsScreen(
                                         }
                                       }),
                           userViewModel = userViewModel,
-                          reviewViewModel = reviewViewModel)
+                          reviewViewModel = reviewViewModel,
+                          ownerReputationScore = ownerReputationScore)
                     }
               }
         }
@@ -328,7 +340,8 @@ fun ReviewCard(
     onCardClick: () -> Unit,
     options: Map<String, () -> Unit>,
     userViewModel: UserViewModel,
-    reviewViewModel: ReviewViewModel
+    reviewViewModel: ReviewViewModel,
+    ownerReputationScore: Double?
 ) {
   val currentUser by userViewModel.currentUser.collectAsState()
   val userSignedIn by userViewModel.isSignedIn.collectAsState(false)
@@ -352,12 +365,31 @@ fun ReviewCard(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically) {
-                      androidx.compose.material3.Text(
-                          text = title,
-                          style = MaterialTheme.typography.bodySmall,
-                          modifier = Modifier.weight(1f).testTag("ReviewTitle$index"),
-                          maxLines = 1,
-                          overflow = TextOverflow.Ellipsis)
+                      if (ownerReputationScore != null) {
+                        val range = UserLevelDisplay.getLevelRange(ownerReputationScore)
+                        val level = ownerReputationScore.toInt()
+                        Text(
+                            text =
+                                stringResource(
+                                    R.string.display_user_tag_format, range.symbol, level, title),
+                            style = MaterialTheme.typography.bodySmall,
+                            color =
+                                if (range.color == stringResource(R.string.rainbow_text_color)) {
+                                  MaterialTheme.colorScheme.onSurface // TODO color rainbow
+                                } else {
+                                  Color(parseColor(range.color))
+                                },
+                            modifier = Modifier.weight(1f).testTag("ReviewTitle$index"),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis)
+                      } else {
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.weight(1f).testTag("ReviewTitle$index"),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis)
+                      }
 
                       // Icon buttons for like, dislike, and more options
                       Row(
@@ -440,7 +472,7 @@ fun ReviewCard(
                     text = review.time.toFormattedDate(),
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                androidx.compose.material3.Text(
+                Text(
                     text = review.text,
                     style = MaterialTheme.typography.bodySmall,
                     textAlign = TextAlign.Justify,

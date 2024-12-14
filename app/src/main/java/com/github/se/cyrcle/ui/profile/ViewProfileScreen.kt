@@ -4,6 +4,7 @@ import android.app.Activity
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,8 +25,10 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddModerator
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Diamond
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.LocalParking
 import androidx.compose.material.icons.filled.Outbox
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -55,6 +59,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberImagePainter
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
@@ -86,8 +91,9 @@ fun ViewProfileScreen(
   val userState by userViewModel.currentUser.collectAsState()
   var isEditing by remember { mutableStateOf(false) }
   var signOut by remember { mutableStateOf(false) }
-
   val signOutToastText = stringResource(R.string.view_profile_on_sign_out_toast)
+
+  LaunchedEffect(Unit, userState) { userViewModel.loadSelectedUserImages() }
 
   Scaffold(
       modifier = Modifier.testTag("ViewProfileScreen"),
@@ -234,7 +240,8 @@ private fun TabLayout(
   val tabs =
       listOf(
           stringResource(R.string.view_profile_screen_favorite_parkings),
-          stringResource(R.string.view_profile_screen_my_reviews))
+          stringResource(R.string.view_profile_screen_my_reviews),
+          stringResource(R.string.view_profile_screen_my_images))
 
   val pagerState = rememberPagerState(pageCount = { tabs.size })
   val coroutineScope = rememberCoroutineScope()
@@ -260,6 +267,7 @@ private fun TabLayout(
                 parkingViewModel,
                 navigationActions,
                 reviewToParkingMap)
+        2 -> UserImagesSection(userViewModel, parkingViewModel, navigationActions)
       }
     }
   }
@@ -449,9 +457,132 @@ private fun UserReviewsSection(
                       },
                       options = mapOf(),
                       userViewModel = userViewModel,
-                      reviewViewModel = reviewViewModel)
+                      reviewViewModel = reviewViewModel,
+                      ownerReputationScore = null)
                 }
           }
     }
   }
+}
+
+/** Section where all the User Images are displayed */
+@Composable
+private fun UserImagesSection(
+    userViewModel: UserViewModel,
+    parkingViewModel: ParkingViewModel,
+    navigationActions: NavigationActions
+) {
+
+  val context = LocalContext.current
+  // Image URLs to display
+  val imagesUrls = userViewModel.selectedUserImageUrls.collectAsState().value
+  // destinations paths of the images
+  val imagesPaths = userViewModel.selectedUserAssociatedImages.collectAsState().value
+  // Variables for Image/Parking in Alert Dialog
+  val showDialogImage = remember { mutableStateOf<String?>(null) }
+  val showDialogParking = remember { mutableStateOf<String?>(null) }
+  val showDialogImageDestinationPath = remember { mutableStateOf<List<String>>(emptyList()) }
+  val showDialogImagePath = remember { mutableStateOf<String?>(null) }
+
+  val strResToast = stringResource(R.string.view_profile_screen_image_deleted)
+
+  Box(modifier = Modifier.fillMaxSize()) {
+    if (imagesUrls.isEmpty()) {
+      Text(
+          text = stringResource(R.string.view_profile_screen_no_images_message),
+          style = MaterialTheme.typography.bodyMedium,
+          modifier = Modifier.padding(16.dp).testTag("NoImagesMessage"))
+    } else {
+      LazyColumn(
+          modifier = Modifier.fillMaxWidth().testTag("UserImagesList"),
+          contentPadding = PaddingValues(16.dp)) {
+            itemsIndexed(imagesUrls) { index, url ->
+              UserImageCard(
+                  url = url,
+                  onClick = {
+                    showDialogImage.value = url
+                    showDialogImageDestinationPath.value =
+                        showDialogImageDestinationPath.value.plus(it)
+                    showDialogParking.value =
+                        parkingViewModel.getParkingFromImagePath(imagesPaths[index])
+                    showDialogImagePath.value = imagesPaths[index]
+                  })
+            }
+          }
+    }
+  }
+
+  // Show dialog if an image is clicked
+  showDialogImage.value?.let { imageUrl ->
+    AlertDialog(
+        onDismissRequest = { showDialogImage.value = null },
+        title = { Text(stringResource(R.string.view_profile_screen_image_dialog_title)) },
+        text = {
+          Column {
+            Text(stringResource(R.string.view_profile_screen_image_dialog_description))
+            Spacer(modifier = Modifier.height(16.dp))
+            Image(
+                painter = rememberImagePainter(data = imageUrl),
+                contentDescription = null,
+                modifier = Modifier.fillMaxWidth().height(200.dp))
+          }
+        },
+        confirmButton = {
+          IconButton(
+              modifier = Modifier.padding(10.dp),
+              icon = Icons.Filled.LocalParking,
+              contentDescription = "Go To Parking",
+              testTag = "ParkingFromImageButton",
+              onClick = {
+                parkingViewModel.getParkingById(
+                    showDialogParking.value!!,
+                    { parkingForPath ->
+                      parkingViewModel.selectParking(parkingForPath)
+                      navigationActions.navigateTo(Screen.PARKING_DETAILS)
+                    },
+                    {})
+              })
+        },
+        dismissButton = {
+          IconButton(
+              modifier = Modifier.padding(10.dp),
+              icon = Icons.Filled.Delete,
+              contentDescription = "Delete",
+              testTag = "DeleteImageButton",
+              onClick = {
+                userViewModel.removeImageFromUserImages(showDialogImagePath.value!!)
+                parkingViewModel.getParkingById(
+                    showDialogParking.value!!,
+                    { parkingForPath ->
+                      parkingViewModel.selectParking(parkingForPath)
+                      parkingViewModel.deleteImageFromParking(
+                          parkingViewModel.selectedParking.value?.uid!!,
+                          showDialogImagePath.value!!)
+                      Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
+                      navigationActions.navigateTo(Screen.VIEW_PROFILE)
+                    },
+                    {})
+              })
+        })
+  }
+}
+/** Card representing a UserImage to display in the above column */
+@Composable
+private fun UserImageCard(url: String, onClick: (String) -> Unit) {
+  Card(
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(8.dp)
+              .clickable { onClick(url) } // Attach onClick here
+              .testTag("ImageCard"),
+      colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+      elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
+          Spacer(modifier = Modifier.height(8.dp))
+          Image(
+              painter = rememberImagePainter(data = url),
+              contentDescription = null,
+              modifier = Modifier.fillMaxWidth().height(200.dp).testTag("ImageContent"))
+        }
+      }
 }

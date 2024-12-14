@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.profile
 
+import android.graphics.Color.parseColor
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,11 +10,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.user.User
+import com.github.se.cyrcle.model.user.UserLevelDisplay
 import com.github.se.cyrcle.ui.theme.atoms.Text
 
 /**
@@ -34,6 +37,9 @@ fun DisplayProfileComponent(user: User?, extras: @Composable () -> Unit) {
   val lastName = user.details?.lastName ?: ""
   val username = user.public.username
   val profilePictureUrl = user.localSession?.profilePictureUrl ?: ""
+  val reputationScore = user.public.userReputationScore
+  val range = UserLevelDisplay.getLevelRange(reputationScore)
+  val level = reputationScore.toInt()
 
   Column(
       modifier = Modifier.fillMaxSize().testTag("ProfileContent"),
@@ -62,9 +68,17 @@ fun DisplayProfileComponent(user: User?, extras: @Composable () -> Unit) {
               Spacer(modifier = Modifier.height(8.dp))
 
               Text(
-                  text = stringResource(R.string.view_profile_screen_display_username, username),
+                  text =
+                      stringResource(
+                          R.string.display_user_tag_format, range.symbol, level, username),
                   style = MaterialTheme.typography.bodyMedium,
-                  testTag = "DisplayUsername")
+                  color =
+                      if (range.color == stringResource(R.string.rainbow_text_color)) {
+                        MaterialTheme.colorScheme.onSurface // TODO rainbow color
+                      } else {
+                        Color(parseColor(range.color))
+                      },
+                  modifier = Modifier.testTag("DisplayUsernameWithLevel"))
 
               Spacer(modifier = Modifier.height(16.dp))
             }

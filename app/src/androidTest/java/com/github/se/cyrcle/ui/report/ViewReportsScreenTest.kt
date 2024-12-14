@@ -3,11 +3,13 @@ package com.github.se.cyrcle.ui.report
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockOfflineParkingRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockReviewRepository
+import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.parking.ParkingReport
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
@@ -15,6 +17,7 @@ import com.github.se.cyrcle.model.report.ReportedObject
 import com.github.se.cyrcle.model.report.ReportedObjectType
 import com.github.se.cyrcle.model.report.ReportedObjectViewModel
 import com.github.se.cyrcle.model.review.ReviewViewModel
+import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
 import org.junit.Before
@@ -33,15 +36,22 @@ class ViewReportsScreenTest {
   private lateinit var reportedObjectViewModel: ReportedObjectViewModel
   private lateinit var parkingViewModel: ParkingViewModel
   private lateinit var reviewViewModel: ReviewViewModel
+  private lateinit var userViewModel: UserViewModel
 
   @Before
   fun setUp() {
     navigationActions = mock(NavigationActions::class.java)
 
-    // Initialize ViewModels with Mock Repositories
+    userViewModel =
+        UserViewModel(
+            MockUserRepository(),
+            MockParkingRepository(),
+            MockImageRepository(),
+            MockAuthenticationRepository())
     parkingViewModel =
         ParkingViewModel(
             MockImageRepository(),
+            userViewModel,
             MockParkingRepository(),
             MockOfflineParkingRepository(),
             MockReportedObjectRepository())
@@ -78,7 +88,8 @@ class ViewReportsScreenTest {
           navigationActions = navigationActions,
           reportedObjectViewModel = reportedObjectViewModel,
           parkingViewModel = parkingViewModel,
-          reviewViewModel = reviewViewModel)
+          reviewViewModel = reviewViewModel,
+          userViewModel = userViewModel)
     }
 
     composeTestRule.onNodeWithTag("NoReportsText").assertExists()
@@ -92,7 +103,8 @@ class ViewReportsScreenTest {
           navigationActions = navigationActions,
           reportedObjectViewModel = reportedObjectViewModel,
           parkingViewModel = parkingViewModel,
-          reviewViewModel = reviewViewModel)
+          reviewViewModel = reviewViewModel,
+          userViewModel = userViewModel)
     }
 
     val parkingReport = ParkingReport()
@@ -120,7 +132,8 @@ class ViewReportsScreenTest {
           navigationActions = navigationActions,
           reportedObjectViewModel = reportedObjectViewModel,
           parkingViewModel = parkingViewModel,
-          reviewViewModel = reviewViewModel)
+          reviewViewModel = reviewViewModel,
+          userViewModel = userViewModel)
     }
 
     composeTestRule.onNodeWithTag("DeleteFloatingActionButton").performClick()

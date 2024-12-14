@@ -72,6 +72,7 @@ class AddScreensNavigationTest {
     parkingViewModel =
         ParkingViewModel(
             mockImageRepository,
+            userViewModel,
             mockParkingRepository,
             mockOfflineParkingRepository,
             reportedObjectRepository)

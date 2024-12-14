@@ -75,6 +75,7 @@ class ReviewScreenTest {
     parkingViewModel =
         ParkingViewModel(
             mockImageRepository,
+            userViewModel,
             mockParkingRepository,
             mockOfflineParkingRepository,
             mockReportedObjectRepository)

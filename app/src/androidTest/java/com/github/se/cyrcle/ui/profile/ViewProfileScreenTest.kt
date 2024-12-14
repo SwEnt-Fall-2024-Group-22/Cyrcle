@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.profile
 
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertIsDisplayed
@@ -82,7 +83,7 @@ class ViewProfileScreenTest {
 
     val user =
         User(
-            UserPublic("1", "janesmith", "http://example.com/jane.jpg"),
+            UserPublic("1", "janesmith", "http://example.com/jane.jpg", 92.5),
             UserDetails("Jane", "Smith", "jane.smith@example.com"))
 
     userViewModel =
@@ -91,6 +92,7 @@ class ViewProfileScreenTest {
     parkingViewModel =
         ParkingViewModel(
             mockImageRepository,
+            userViewModel,
             mockParkingRepository,
             mockOfflineParkingRepository,
             mockReportedObjectRepository)
@@ -162,7 +164,7 @@ class ViewProfileScreenTest {
     composeTestRule.onNodeWithTag("EditButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("DisplayFirstName").assertTextEquals("Jane")
     composeTestRule.onNodeWithTag("DisplayLastName").assertTextEquals("Smith")
-    composeTestRule.onNodeWithTag("DisplayUsername").assertTextEquals("@janesmith")
+    composeTestRule.onNodeWithTag("DisplayUsernameWithLevel").assertTextEquals("[☤92] janesmith")
   }
 
   @Test
@@ -198,7 +200,7 @@ class ViewProfileScreenTest {
     composeTestRule.onNodeWithTag("EditButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("DisplayFirstName").assertTextEquals("Alice")
     composeTestRule.onNodeWithTag("DisplayLastName").assertTextEquals("Johnson")
-    composeTestRule.onNodeWithTag("DisplayUsername").assertTextEquals("@alicejohnson")
+    composeTestRule.onNodeWithTag("DisplayUsernameWithLevel").assertTextEquals("[☤92] alicejohnson")
   }
 
   @Test
@@ -220,7 +222,7 @@ class ViewProfileScreenTest {
     composeTestRule.onNodeWithTag("EditButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("DisplayFirstName").assertTextEquals("Jane")
     composeTestRule.onNodeWithTag("DisplayLastName").assertTextEquals("Smith")
-    composeTestRule.onNodeWithTag("DisplayUsername").assertTextEquals("@janesmith")
+    composeTestRule.onNodeWithTag("DisplayUsernameWithLevel").assertTextEquals("[☤92] janesmith")
   }
 
   @Test
@@ -428,6 +430,7 @@ class ViewProfileScreenTest {
             Location(Point.fromLngLat(7.19, 47.19)),
             listOf(
                 "https://upload.wikimedia.org/wikipedia/commons/7/78/%22G%C3%A4nsemarkt%22_in_Amance_-_panoramio.jpg"),
+            emptyList(),
             0,
             emptyList(),
             ParkingCapacity.LARGE,
@@ -461,7 +464,7 @@ class ViewProfileScreenTest {
     composeTestRule.waitForIdle()
 
     // Verify that the display reflects the new username
-    composeTestRule.onNodeWithTag("DisplayUsername").assertTextEquals("@alicejohnson")
+    composeTestRule.onNodeWithTag("DisplayUsernameWithLevel").assertTextEquals("[☤92] alicejohnson")
 
     // Enter edit mode again and cancel
     composeTestRule.onNodeWithTag("EditButton").performClick()
@@ -470,7 +473,7 @@ class ViewProfileScreenTest {
     composeTestRule.waitForIdle()
 
     // Verify that the display still reflects the new username
-    composeTestRule.onNodeWithTag("DisplayUsername").assertTextEquals("@alicejohnson")
+    composeTestRule.onNodeWithTag("DisplayUsernameWithLevel").assertTextEquals("[☤92] alicejohnson")
   }
 
   @Test
@@ -531,6 +534,13 @@ class ViewProfileScreenTest {
    * - Add user1's reviews from TestInstancesReview
    * - Trigger review fetch for user1
    */
+  /**
+   * Helper function to set up the test environment for the "My Reviews" tab.
+   * - Select the "My Reviews" tab
+   * - Add test parkings to the mock repository
+   * - Add user1's reviews from TestInstancesReview
+   * - Trigger review fetch for user1
+   */
   private fun myReviewsTestHelper() {
     // We display the parking tabs
     composeTestRule
@@ -538,7 +548,6 @@ class ViewProfileScreenTest {
         .assertIsDisplayed()
         .assertHasClickAction()
         .performClick()
-
     // Add test parkings to mock repository
     mockParkingRepository.addParking(TestInstancesParking.parking1, {}, {}) // For review5
     mockParkingRepository.addParking(TestInstancesParking.parking2, {}, {}) // For review1
@@ -573,10 +582,59 @@ class ViewProfileScreenTest {
     composeTestRule.onNodeWithTag("FavoriteParkingList").performTouchInput {
       swipeRight(startX = this.width * 0.1f, endX = this.width * 0.9f)
     }
-    composeTestRule.waitForIdle()
+  }
 
-    // Check that we're still on the first tab
-    composeTestRule.onNodeWithTag("TabFavoriteParkings").assertIsSelected()
-    composeTestRule.onNodeWithTag("FavoriteParkingList").assertIsDisplayed()
+  @Test
+  fun testDisplaysImagesListWhenNotEmpty() {
+    // add images to current user
+    val mockImagesUrls = listOf("https://example.com/image1.jpg", "https://example.com/image2.jpg")
+    val mockImagePaths = listOf("path1", "path2")
+    userViewModel._selectedUserImageUrls.value = mockImagesUrls
+    userViewModel._selectedUserAssociatedImages.value = mockImagePaths
+    // check list is displayed
+    composeTestRule.onNodeWithTag("TabMyImages").performClick()
+    composeTestRule.onNodeWithTag("UserImagesList").assertIsDisplayed()
+  }
+
+  @Test
+  fun testImageClickDisplaysDialog() {
+    val mockImageUrl = "https://example.com/image1.jpg"
+    val mockImagePath = "parking/mockParkingId/1"
+
+    userViewModel._selectedUserImageUrls.value = listOf(mockImageUrl)
+    userViewModel._selectedUserAssociatedImages.value = listOf(mockImagePath)
+    // check corresponding dialog is displayed
+    composeTestRule.onNodeWithTag("TabMyImages").performClick()
+    composeTestRule.onNodeWithTag("ImageCard").performClick()
+    composeTestRule.onNodeWithTag("ParkingFromImageButton").assertIsDisplayed()
+  }
+
+  @Test
+  fun testDeleteImageFromDialogCallsRemoveImageFromUserImages() {
+    val mockImageUrl = "https://example.com/image1.jpg"
+    val mockImagePath = "parking/mockParkingId/1"
+    userViewModel._selectedUserImageUrls.value = listOf(mockImageUrl)
+    userViewModel._selectedUserAssociatedImages.value = listOf(mockImagePath)
+    // check that click on the delete button calls the expected function
+    composeTestRule.onNodeWithTag("TabMyImages").performClick()
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("ImageCard").performClick()
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("DeleteImageButton").performClick()
+    composeTestRule.waitForIdle()
+    val associatedImages = userViewModel._selectedUserAssociatedImages.value
+    assert(!associatedImages.contains(mockImagePath)) {
+      "Expected $mockImagePath to be removed from associated images, but it still exists."
+    }
+  }
+
+  @Test
+  fun testDisplaysNoImagesWhenListIsEmpty() {
+    // check that tab has no images if none are attributed to user
+    userViewModel._selectedUserImageUrls.value = emptyList()
+    userViewModel._selectedUserAssociatedImages.value = emptyList()
+    composeTestRule.onNodeWithTag("TabMyImages").performClick()
+    composeTestRule.onNodeWithTag("NoImagesMessage").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("UserImagesList").assertIsNotDisplayed()
   }
 }

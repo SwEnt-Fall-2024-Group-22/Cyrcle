@@ -9,6 +9,7 @@ import com.github.se.cyrcle.model.report.ReportedObject
 import com.github.se.cyrcle.model.report.ReportedObjectType
 import com.github.se.cyrcle.model.report.ReportedObjectViewModel
 import com.github.se.cyrcle.model.review.ReviewViewModel
+import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import org.junit.Before
 import org.junit.Rule
@@ -34,6 +35,12 @@ class AdminScreenTest {
     parkingViewModel =
         ParkingViewModel(
             MockImageRepository(),
+            userViewModel =
+                UserViewModel(
+                    MockUserRepository(),
+                    MockParkingRepository(),
+                    MockImageRepository(),
+                    MockAuthenticationRepository()),
             MockParkingRepository(),
             MockOfflineParkingRepository(),
             MockReportedObjectRepository())

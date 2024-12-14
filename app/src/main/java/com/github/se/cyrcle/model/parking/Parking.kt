@@ -30,9 +30,10 @@ data class Parking(
     val optName: String?,
     val optDescription: String?,
     val location: Location,
-    val images: List<String>,
+    val images: List<String>, // List of Image paths in Cloud Repository
+    val imageObjects: List<ParkingImage>, // List of Image paths to repository for general purposes
     var maxNumOfImages: Int = 0,
-    var reportedImages: List<ParkingImage>,
+    var reportedImages: List<ParkingImage>, // List of Image paths to repository for report purposes
     val capacity: ParkingCapacity,
     val rackType: ParkingRackType,
     val protection: ParkingProtection,
@@ -54,6 +55,7 @@ data class Parking(
 data class ParkingImage(
     val uid: String = "",
     val imagePath: String = "",
+    val owner: String = "",
     var nbReports: Int = 0,
     var nbMaxSeverityReports: Int = 0
 )

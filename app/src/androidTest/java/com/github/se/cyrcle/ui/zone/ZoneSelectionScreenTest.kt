@@ -8,13 +8,16 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockAddressRepository
+import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
 import com.github.se.cyrcle.di.mocks.MockOfflineParkingRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
+import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import org.junit.Before
 import org.junit.Rule
@@ -40,6 +43,12 @@ class ZoneSelectionScreenTest {
     parkingViewModel =
         ParkingViewModel(
             MockImageRepository(),
+            userViewModel =
+                UserViewModel(
+                    MockUserRepository(),
+                    MockParkingRepository(),
+                    MockImageRepository(),
+                    MockAuthenticationRepository()),
             MockParkingRepository(),
             MockOfflineParkingRepository(),
             MockReportedObjectRepository())

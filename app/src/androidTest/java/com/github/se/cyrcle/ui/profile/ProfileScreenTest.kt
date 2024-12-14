@@ -58,7 +58,11 @@ class ProfileScreenTest {
     userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository, authenticator)
     parkingViewModel =
         ParkingViewModel(
-            imageRepository, parkingRepository, offlineParkingRepository, reportedObjectRepository)
+            imageRepository,
+            userViewModel,
+            parkingRepository,
+            offlineParkingRepository,
+            reportedObjectRepository)
     reviewViewModel = ReviewViewModel(reviewRepository, reportedObjectRepository)
 
     composeTestRule.setContent {
