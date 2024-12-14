@@ -33,16 +33,19 @@ import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.model.parking.online.ParkingRepository
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.user.UserViewModel
+import com.github.se.cyrcle.ui.navigation.NavigationActions
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidJUnit4::class)
 class FilterTest {
   @get:Rule val composeTestRule = createComposeRule()
 
+  private lateinit var mockNavigationActions: NavigationActions
   private lateinit var mockParkingRepository: ParkingRepository
   private lateinit var mockOfflineParkingRepository: MockOfflineParkingRepository
   private lateinit var mockImageRepository: ImageRepository
@@ -58,6 +61,7 @@ class FilterTest {
   @Before
   fun setUp() {
     MockitoAnnotations.openMocks(this)
+    mockNavigationActions = mock(NavigationActions::class.java)
     mockParkingRepository = MockParkingRepository()
     mockOfflineParkingRepository = MockOfflineParkingRepository()
     mockImageRepository = MockImageRepository()
@@ -95,7 +99,8 @@ class FilterTest {
           addressViewModel,
           permissionHandler = permissionHandler,
           mapViewModel = mapViewModel,
-          userViewModel = userViewModel)
+          userViewModel = userViewModel,
+          navigationActions = mockNavigationActions)
     }
 
     // Show filters first
@@ -115,7 +120,8 @@ class FilterTest {
           addressViewModel,
           permissionHandler = permissionHandler,
           mapViewModel = mapViewModel,
-          userViewModel = userViewModel)
+          userViewModel = userViewModel,
+          navigationActions = mockNavigationActions)
     }
 
     // Act & Assert
@@ -132,7 +138,8 @@ class FilterTest {
           addressViewModel,
           permissionHandler = permissionHandler,
           mapViewModel = mapViewModel,
-          userViewModel = userViewModel)
+          userViewModel = userViewModel,
+          navigationActions = mockNavigationActions)
     }
 
     // Act: Click to show filters
@@ -165,7 +172,8 @@ class FilterTest {
           addressViewModel,
           permissionHandler = permissionHandler,
           mapViewModel = mapViewModel,
-          userViewModel = userViewModel)
+          userViewModel = userViewModel,
+          navigationActions = mockNavigationActions)
     }
 
     // Act: Click to show filters
@@ -206,7 +214,8 @@ class FilterTest {
           addressViewModel,
           permissionHandler = permissionHandler,
           mapViewModel = mapViewModel,
-          userViewModel = userViewModel)
+          userViewModel = userViewModel,
+          navigationActions = mockNavigationActions)
     }
 
     // Act: Click to show filters
@@ -246,7 +255,8 @@ class FilterTest {
           addressViewModel,
           permissionHandler = permissionHandler,
           mapViewModel = mapViewModel,
-          userViewModel = userViewModel)
+          userViewModel = userViewModel,
+          navigationActions = mockNavigationActions)
     }
 
     // Act: Click to show filters

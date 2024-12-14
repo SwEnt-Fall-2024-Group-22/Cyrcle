@@ -71,6 +71,8 @@ import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.permission.PermissionHandler
 import com.github.se.cyrcle.ui.list.MAX_SUGGESTION_DISPLAY_NAME_LENGTH_LIST
 import com.github.se.cyrcle.ui.list.NUMBER_OF_SUGGESTIONS_FOR_MENU
+import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
@@ -103,7 +105,8 @@ fun FilterPanel(
     addressViewModel: AddressViewModel,
     mapViewModel: MapViewModel,
     permissionHandler: PermissionHandler,
-    userViewModel: UserViewModel
+    userViewModel: UserViewModel,
+    navigationActions: NavigationActions
 ) {
   val showProtectionOptions = remember { mutableStateOf(false) }
   val showRackTypeOptions = remember { mutableStateOf(false) }
@@ -148,7 +151,8 @@ fun FilterPanel(
                   permissionHandler,
                   mapViewModel,
                   textFieldValue,
-                  userViewModel)
+                  userViewModel,
+                  navigationActions)
             } else {
               Text(
                   text = stringResource(R.string.all_parkings_radius, radius.value.toInt()),
@@ -351,7 +355,8 @@ fun SearchBarListScreen(
     permissionHandler: PermissionHandler,
     mapViewModel: MapViewModel,
     textFieldValue: MutableState<String>,
-    userViewModel: UserViewModel
+    userViewModel: UserViewModel,
+    navigationActions: NavigationActions
 ) {
 
   val context: Context = LocalContext.current
@@ -390,6 +395,7 @@ fun SearchBarListScreen(
   val giveCoinsRegex = Regex("^/give coins (\\d+)$", RegexOption.IGNORE_CASE)
   val killRegex = Regex("^/kill$", RegexOption.IGNORE_CASE)
   val jokeRegex = Regex("^/joke$", RegexOption.IGNORE_CASE)
+  val teleportRegex = Regex("^/tp$", RegexOption.IGNORE_CASE)
 
   Box {
     // Callback for when a suggestion is clicked. Either called with a valid (non-null) address or
@@ -455,17 +461,31 @@ fun SearchBarListScreen(
             KeyboardActions(
                 onSearch = {
                   virtualKeyboardManager?.hide()
-                  Log.e("FAVORITE_TAG", "onSearch")
 
                   // Easter Egg 1: Give Coins
                   val matchGiveCoins = giveCoinsRegex.matchEntire(textFieldValue.value.trim())
                   if (matchGiveCoins != null) {
                     val amount = matchGiveCoins.groupValues[1].toInt()
-                    userViewModel.creditCoinsToCurrentUser(amount)
-                    textFieldValue.value = ""
-                    Toast.makeText(
-                            context, "You've been credited $amount coins!", Toast.LENGTH_SHORT)
-                        .show()
+
+                    if (amount > 10) {
+                      // User loses all coins if they try to add more than 1000 coins
+                      userViewModel.currentUser.value?.details?.wallet?.let {
+                        userViewModel.tryDebitCoinsFromCurrentUser(it.getCoins())
+                      } // Implement a function to reset coins
+                      textFieldValue.value = ""
+                      Toast.makeText(
+                              context,
+                              "Greedy, aren't you? All your coins are gone!",
+                              Toast.LENGTH_SHORT)
+                          .show()
+                    } else {
+                      // Credit the specified amount
+                      userViewModel.creditCoinsToCurrentUser(amount)
+                      textFieldValue.value = ""
+                      Toast.makeText(
+                              context, "You've been credited $amount coins!", Toast.LENGTH_SHORT)
+                          .show()
+                    }
                     return@KeyboardActions
                   }
 
@@ -484,6 +504,25 @@ fun SearchBarListScreen(
                     textFieldValue.value = ""
                     Toast.makeText(context, "You're the joke \uD83E\uDD21", Toast.LENGTH_SHORT)
                         .show()
+                    return@KeyboardActions
+                  }
+
+                  // Easter Egg 4 : Teleport
+                  val matchTeleport = teleportRegex.matchEntire(textFieldValue.value.trim())
+                  if (matchTeleport != null) {
+                    textFieldValue.value = ""
+                    val availableScreens =
+                        listOf(
+                            Screen.MAP,
+                            Screen.VIEW_PROFILE,
+                            Screen.GAMBLING,
+                            Screen.RACK_INFO,
+                            Screen.ADMIN, // this one's hilarious, imagine you're not admin
+                        )
+                    val randomScreen = availableScreens.random()
+                    Toast.makeText(context, "Teleporting to $randomScreen", Toast.LENGTH_SHORT)
+                        .show()
+                    navigationActions.navigateTo(randomScreen)
                     return@KeyboardActions
                   }
 

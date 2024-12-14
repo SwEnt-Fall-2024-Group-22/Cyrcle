@@ -234,6 +234,7 @@ fun MapScreen(
   val giveCoinsRegex = Regex("^/give coins (\\d+)$", RegexOption.IGNORE_CASE)
   val killRegex = Regex("^/kill$", RegexOption.IGNORE_CASE)
   val jokeRegex = Regex("^/joke$", RegexOption.IGNORE_CASE)
+  val teleportRegex = Regex("^/tp$", RegexOption.IGNORE_CASE)
 
   // Draw markers on the map when the list of parkings changes
   LaunchedEffect(
@@ -529,30 +530,35 @@ fun MapScreen(
                             onSearch = {
                               virtualKeyboardManager?.hide()
 
-                                // Easter Egg 1: Give Coins
-                                val matchGiveCoins = giveCoinsRegex.matchEntire(searchQuery.value.trim())
-                                if (matchGiveCoins != null) {
-                                    val amount = matchGiveCoins.groupValues[1].toInt()
+                              // Easter Egg 1: Give Coins
+                              val matchGiveCoins =
+                                  giveCoinsRegex.matchEntire(searchQuery.value.trim())
+                              if (matchGiveCoins != null) {
+                                val amount = matchGiveCoins.groupValues[1].toInt()
 
-                                    if (amount > 10) {
-                                        // User loses all coins if they try to add more than 1000 coins
-                                        userViewModel.currentUser.value?.details?.wallet?.let {
-                                            userViewModel.tryDebitCoinsFromCurrentUser(it.getCoins())
-                                        } // Implement a function to reset coins
-                                        searchQuery.value = ""
-                                        Toast.makeText(
-                                            context, "Greedy, aren't you? All your coins are gone!", Toast.LENGTH_SHORT
-                                        ).show()
-                                    } else {
-                                        // Credit the specified amount
-                                        userViewModel.creditCoinsToCurrentUser(amount)
-                                        searchQuery.value = ""
-                                        Toast.makeText(
-                                            context, "You've been credited $amount coins!", Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                    return@KeyboardActions
+                                if (amount > 10) {
+                                  // User loses all coins if they try to add more than 1000 coins
+                                  userViewModel.currentUser.value?.details?.wallet?.let {
+                                    userViewModel.tryDebitCoinsFromCurrentUser(it.getCoins())
+                                  } // Implement a function to reset coins
+                                  searchQuery.value = ""
+                                  Toast.makeText(
+                                          context,
+                                          "Greedy, aren't you? All your coins are gone!",
+                                          Toast.LENGTH_SHORT)
+                                      .show()
+                                } else {
+                                  // Credit the specified amount
+                                  userViewModel.creditCoinsToCurrentUser(amount)
+                                  searchQuery.value = ""
+                                  Toast.makeText(
+                                          context,
+                                          "You've been credited $amount coins!",
+                                          Toast.LENGTH_SHORT)
+                                      .show()
                                 }
+                                return@KeyboardActions
+                              }
 
                               // Easter Egg 2: Kill Command
                               val matchKill = killRegex.matchEntire(searchQuery.value.trim())
@@ -570,6 +576,29 @@ fun MapScreen(
                                 Toast.makeText(
                                         context, "You're the joke \uD83E\uDD21", Toast.LENGTH_SHORT)
                                     .show()
+                                return@KeyboardActions
+                              }
+
+                              // Easter Egg 4 : Teleport
+                              val matchTeleport =
+                                  teleportRegex.matchEntire(searchQuery.value.trim())
+                              if (matchTeleport != null) {
+                                searchQuery.value = ""
+                                val availableScreens =
+                                    listOf(
+                                        Screen.LIST,
+                                        Screen.VIEW_PROFILE,
+                                        Screen.GAMBLING,
+                                        Screen.RACK_INFO,
+                                        Screen
+                                            .ADMIN, // this one's hilarious, imagine you're not
+                                                    // admin
+                                    )
+                                val randomScreen = availableScreens.random()
+                                Toast.makeText(
+                                        context, "Teleporting to $randomScreen", Toast.LENGTH_SHORT)
+                                    .show()
+                                navigationActions.navigateTo(randomScreen)
                                 return@KeyboardActions
                               }
 
@@ -621,6 +650,7 @@ fun MapScreen(
               permissionHandler,
               mapViewModel,
               userViewModel,
+              navigationActions,
               onDismiss = { showFilter.value = false })
         }
 
@@ -856,6 +886,7 @@ fun FilterDialog(
     permissionHandler: PermissionHandler,
     mapViewModel: MapViewModel,
     userViewModel: UserViewModel,
+    navigationActions: NavigationActions,
     onDismiss: () -> Unit
 ) {
   AlertDialog(
@@ -874,7 +905,8 @@ fun FilterDialog(
               addressViewModel,
               mapViewModel,
               permissionHandler = permissionHandler,
-              userViewModel)
+              userViewModel,
+              navigationActions)
         }
       },
       confirmButton = {
