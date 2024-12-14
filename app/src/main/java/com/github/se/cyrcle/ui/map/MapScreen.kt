@@ -529,20 +529,30 @@ fun MapScreen(
                             onSearch = {
                               virtualKeyboardManager?.hide()
 
-                              // Easter Egg 1: Give Coins
-                              val matchGiveCoins =
-                                  giveCoinsRegex.matchEntire(searchQuery.value.trim())
-                              if (matchGiveCoins != null) {
-                                val amount = matchGiveCoins.groupValues[1].toInt()
-                                userViewModel.creditCoinsToCurrentUser(amount)
-                                searchQuery.value = ""
-                                Toast.makeText(
-                                        context,
-                                        "You've been credited $amount coins!",
-                                        Toast.LENGTH_SHORT)
-                                    .show()
-                                return@KeyboardActions
-                              }
+                                // Easter Egg 1: Give Coins
+                                val matchGiveCoins = giveCoinsRegex.matchEntire(searchQuery.value.trim())
+                                if (matchGiveCoins != null) {
+                                    val amount = matchGiveCoins.groupValues[1].toInt()
+
+                                    if (amount > 10) {
+                                        // User loses all coins if they try to add more than 1000 coins
+                                        userViewModel.currentUser.value?.details?.wallet?.let {
+                                            userViewModel.tryDebitCoinsFromCurrentUser(it.getCoins())
+                                        } // Implement a function to reset coins
+                                        searchQuery.value = ""
+                                        Toast.makeText(
+                                            context, "Greedy, aren't you? All your coins are gone!", Toast.LENGTH_SHORT
+                                        ).show()
+                                    } else {
+                                        // Credit the specified amount
+                                        userViewModel.creditCoinsToCurrentUser(amount)
+                                        searchQuery.value = ""
+                                        Toast.makeText(
+                                            context, "You've been credited $amount coins!", Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                    return@KeyboardActions
+                                }
 
                               // Easter Egg 2: Kill Command
                               val matchKill = killRegex.matchEntire(searchQuery.value.trim())
