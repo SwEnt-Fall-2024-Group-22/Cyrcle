@@ -1,5 +1,10 @@
 package com.github.se.cyrcle.ui.theme.molecules
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -14,6 +19,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.Typography
@@ -36,9 +44,12 @@ fun TopAppBar(navigationActions: NavigationActions, title: String, testTag: Stri
       title = {
         Text(
             text = title,
-            style = Typography.titleLarge.copy(fontSize = scaledFontSize),
+            style =
+                Typography.titleLarge.copy(fontSize = scaledFontSize, fontWeight = FontWeight.Bold),
             color = Color.White,
-            modifier = Modifier.testTag("${testTag}Title"))
+            modifier = Modifier.testTag("${testTag}Title"),
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis)
       },
       colors =
           TopAppBarColors(
@@ -49,10 +60,18 @@ fun TopAppBar(navigationActions: NavigationActions, title: String, testTag: Stri
               scrolledContainerColor = MaterialTheme.colorScheme.primaryContainer),
       modifier = Modifier.testTag(testTag),
       navigationIcon = {
-        IconButton(
-            onClick = { navigationActions.goBack() },
-            modifier = Modifier.testTag("${testTag}GoBackButton")) {
-              Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Go Back")
-            }
+        Box(modifier = Modifier.padding(8.dp)) {
+          IconButton(
+              onClick = { navigationActions.goBack() },
+              modifier =
+                  Modifier.testTag("${testTag}GoBackButton")
+                      .background(Color.White.copy(alpha = 0.1f), shape = RoundedCornerShape(12.dp))
+                      .size(40.dp)) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Go Back",
+                    modifier = Modifier.size(24.dp))
+              }
+        }
       })
 }
