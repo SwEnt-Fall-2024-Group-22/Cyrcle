@@ -290,6 +290,11 @@
     <string name="admin_reason">Reason: %s</string>
     <string name="admin_reportedBy">Reported By: %s</string>
     <string name="admin_description">Description: %s</string>
+    <string name="more_options">More Options</string>
+    <string name="options_for_report">Options for Report</string>
+    <string name="choose_action_for_report">Choose an action for this report</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
 
     <!-- Zone Screens -->
     <string name="zone_manager_screen_title">Offline Maps</string>

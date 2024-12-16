@@ -19,9 +19,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
@@ -170,6 +174,20 @@ fun AdminScreen(
   var selectedCardIndex by remember { mutableStateOf(-1) }
   val context = LocalContext.current
   var selectedSortingOption by remember { mutableStateOf(ReportSortingOption.Parking) }
+  val chooseParkingReviewOrImage = stringResource(R.string.choose_parking_review_or_image)
+  val viewReports = stringResource(R.string.view_reports)
+  val sortReportedParkings = stringResource(R.string.sort_reported_parkings)
+  val sortReportedReviews = stringResource(R.string.sort_reported_reviews)
+  val sortReportedImages = stringResource(R.string.sort_reported_images)
+  val adminTopAppBarTitle = stringResource(R.string.admin_topappbar_title)
+  val adminTimesBeenMaxReported = stringResource(R.string.admin_timesbeenmaxreported)
+  val adminTimesBeenReported = stringResource(R.string.admin_timesbeenreported)
+  val checkReports = stringResource(R.string.check_reports)
+  val moreOptions = stringResource(R.string.more_options)
+  val optionsForReport = stringResource(R.string.options_for_report)
+  val chooseActionForReport = stringResource(R.string.choose_action_for_report)
+  val confirm = stringResource(R.string.confirm)
+  val cancel = stringResource(R.string.cancel)
 
   // Filter and sort reports based on the selected sorting option
   val sortedReports =
@@ -207,14 +225,13 @@ fun AdminScreen(
           LazyColumn(
               modifier = Modifier.weight(1f).padding(horizontal = 16.dp).testTag("ReportList"),
               contentPadding = PaddingValues(bottom = 16.dp)) {
+                // Inside LazyColumn -> items section
                 items(items = sortedReports) { curReport ->
                   val index = sortedReports.indexOf(curReport)
                   val isExpanded = selectedCardIndex == index
-                  val cardHeight by
-                      animateDpAsState(
-                          if (isExpanded) 150.dp
-                          else 100.dp) // Adjust card height based on selection
+                  val cardHeight by animateDpAsState(if (isExpanded) 150.dp else 100.dp)
                   val cardColor = MaterialTheme.colorScheme.surfaceContainer
+                  var showDialog by remember { mutableStateOf(false) } // Dialog visibility state
 
                   Card(
                       modifier =
@@ -247,14 +264,61 @@ fun AdminScreen(
                                     style = MaterialTheme.typography.bodySmall,
                                     modifier = Modifier.testTag("TimesReported$index"))
 
+                                // IconButton for dialog
+                                IconButton(
+                                    onClick = { showDialog = true },
+                                    modifier =
+                                        Modifier.align(Alignment.End)
+                                            .testTag("MoreOptionsButton$index")) {
+                                      Icon(
+                                          imageVector = Icons.Default.MoreVert,
+                                          contentDescription = moreOptions)
+                                    }
+
+                                // AlertDialog for card actions
+                                if (showDialog) {
+                                  AlertDialog(
+                                      onDismissRequest = { showDialog = false },
+                                      confirmButton = {
+                                        Text(
+                                            text = confirm,
+                                            modifier =
+                                                Modifier.clickable {
+                                                  // Handle confirm action
+                                                  showDialog = false
+                                                },
+                                            color = MaterialTheme.colorScheme.primary)
+                                      },
+                                      dismissButton = {
+                                        Text(
+                                            text = cancel,
+                                            modifier =
+                                                Modifier.clickable {
+                                                  // Handle cancel action
+                                                  showDialog = false
+                                                },
+                                            color = MaterialTheme.colorScheme.secondary)
+                                      },
+                                      title = {
+                                        Text(
+                                            text = optionsForReport,
+                                            style = MaterialTheme.typography.titleMedium)
+                                      },
+                                      text = {
+                                        Text(
+                                            text =
+                                                chooseActionForReport.format(
+                                                    curReport.nbOfTimesReported),
+                                            style = MaterialTheme.typography.bodyMedium)
+                                      })
+                                }
+
                                 // Conditionally show the Report Review button only when the card is
                                 // expanded
                                 if (isExpanded) {
                                   FloatingActionButton(
                                       onClick = {
                                         reportedObjectViewModel.selectObject(curReport)
-
-                                        // Ensure the selectedObject is not null before proceeding
                                         val currentObject =
                                             reportedObjectViewModel.selectedObject.value
                                         if (currentObject != null) {
