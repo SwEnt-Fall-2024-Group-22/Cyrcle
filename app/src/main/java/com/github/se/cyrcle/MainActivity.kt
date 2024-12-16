@@ -118,10 +118,7 @@ class MainActivity : ComponentActivity() {
               reportedObjectViewModel,
               permissionsHandler)
 
-          // Show the snowfall animation if the `showSnow` flag is true
-          if (showSnow) {
-            SnowfallAnimation()
-          }
+          if (showSnow) SnowfallAnimation()
         }
       }
     }

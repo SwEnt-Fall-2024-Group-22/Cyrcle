@@ -30,9 +30,7 @@ class ShakeDetector(context: Context, private val onShakeDetected: () -> Unit) :
   }
 
   /** Stop listening for shake events. */
-  fun stop() {
-    sensorManager.unregisterListener(this)
-  }
+  fun stop() = sensorManager.unregisterListener(this)
 
   override fun onSensorChanged(event: SensorEvent) {
     // Check if the sensor type is accelerometer
@@ -57,10 +55,9 @@ class ShakeDetector(context: Context, private val onShakeDetected: () -> Unit) :
         // If the speed is greater than the threshold and cooldown has passed, consider it a shake
         if ((speed > SHAKE_THRESHOLD) && (curTime - lastShakeTime > SHAKE_COOLDOWN_MS)) {
           onShakeDetected()
-          lastShakeTime = curTime // Update toggle time after changing snow state
+          lastShakeTime = curTime
         }
 
-        // Update the last x, y, z values
         lastX = x
         lastY = y
         lastZ = z
