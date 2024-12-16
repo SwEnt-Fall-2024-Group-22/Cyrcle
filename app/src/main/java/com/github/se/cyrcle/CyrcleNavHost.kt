@@ -153,7 +153,7 @@ fun CyrcleNavHost(
         ZoneManagerScreen(mapViewModel, parkingViewModel, navigationActions)
       }
       composable(Screen.ZONE_SELECTION) {
-        ZoneSelectionScreen(navigationActions, mapViewModel, parkingViewModel, addressViewModel)
+        ZoneSelectionScreen(navigationActions, mapViewModel, parkingViewModel)
       }
     }
   }
