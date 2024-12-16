@@ -142,6 +142,9 @@ fun MapScreen(
     addressViewModel: AddressViewModel,
     zoomState: MutableState<Double> = remember { mutableDoubleStateOf(defaultZoom) }
 ) {
+
+  val context = LocalContext.current
+
   // Collect the list of parkings from the ParkingViewModel as a state
   val listOfParkings by parkingViewModel.filteredRectParkings.collectAsState(emptyList())
 
@@ -211,8 +214,10 @@ fun MapScreen(
   // Show suggestions screen
   val showSuggestions = remember { mutableStateOf(false) }
 
-  val bitmap = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.dot)
-  val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 80, 80, false)
+  val resizedBitmap = remember {
+    val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.dot)
+    Bitmap.createScaledBitmap(bitmap, 80, 80, false)
+  }
 
   // Draw markers on the map when the list of parkings changes
   LaunchedEffect(
