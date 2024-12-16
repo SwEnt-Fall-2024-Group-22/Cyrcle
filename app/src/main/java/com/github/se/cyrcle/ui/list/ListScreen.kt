@@ -454,7 +454,9 @@ fun BearingIcon(bearing: Double) {
             shape = RoundedCornerShape(8.dp),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)),
             shadowElevation = 4.dp,
-            modifier = Modifier.padding(start = 128.dp, end = 16.dp, top = 20.dp)) {
+            modifier =
+                Modifier.padding(start = 128.dp, end = 16.dp, top = 20.dp)
+                    .testTag("BearingPopUp")) {
               Text(
                   text = stringResource(R.string.list_screen_bearing_popup),
                   modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),

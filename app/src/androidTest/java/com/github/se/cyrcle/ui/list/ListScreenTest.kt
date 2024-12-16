@@ -427,6 +427,26 @@ class ListScreenTest {
   }
 
   @Test
+  fun testBearingPopUp() {
+    composeTestRule.setContent {
+      SpotCard(
+          navigationActions = mockNavigationActions,
+          parkingViewModel = parkingViewModel,
+          userViewModel = userViewModel,
+          parking = TestInstancesParking.parking1,
+          distance = 0.5, // 500m
+          bearing = 12.0)
+    }
+    // Open the bearing pop up
+    composeTestRule
+        .onNodeWithTag("BearingIcon")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+    composeTestRule.onNodeWithTag("BearingPopUp").assertIsDisplayed()
+  }
+
+  @Test
   fun assertSearchBarIsDisplayed() {
     composeTestRule.setContent {
       SpotListScreen(
