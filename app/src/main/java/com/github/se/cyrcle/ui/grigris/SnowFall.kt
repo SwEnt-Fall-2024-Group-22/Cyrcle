@@ -1,5 +1,7 @@
 package com.github.se.cyrcle.ui.grigris
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -10,7 +12,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.tooling.preview.Preview
+import com.github.se.cyrcle.R
 import com.github.se.cyrcle.ui.theme.CeruleanLowest
 import kotlin.random.Random
 import kotlinx.coroutines.delay
@@ -105,8 +107,8 @@ fun DrawScope.drawSnowflake(snowflake: Snowflake) {
       color = Color.White, radius = snowflake.radius, center = Offset(snowflake.x, snowflake.y))
 }
 
-@Preview
-@Composable
-fun SnowfallAnimationPreview() {
-  SnowfallAnimation()
+/** Shows a toast message indicating whether it's snowing or not. */
+fun snowToast(isSnowing: Boolean, context: Context) {
+  val toastMessageRes = if (isSnowing) R.string.snow_enabled else R.string.snow_disabled
+  Toast.makeText(context, context.getString(toastMessageRes), Toast.LENGTH_SHORT).show()
 }

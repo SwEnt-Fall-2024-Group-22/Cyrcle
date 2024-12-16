@@ -2,6 +2,10 @@
     <string name="app_name">Cyrcle</string>
     <string name="default_web_client_id">836297757379-3rvkggdu23fdvnof5nko2lablc993e0u.apps.googleusercontent.com</string>
 
+    <!-- Snow section -->
+    <string name="snow_enabled">It\'s snowing ❄️! Shake again to stop</string>
+    <string name="snow_disabled">The snow has stopped</string>
+
     <!-- Common section -->
     <string name="yes">Yes</string>
     <string name="no">No</string>

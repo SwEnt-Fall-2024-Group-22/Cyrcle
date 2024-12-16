@@ -2,7 +2,6 @@ package com.github.se.cyrcle
 
 import android.content.pm.ActivityInfo
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -32,6 +31,7 @@ import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.permission.PermissionHandler
 import com.github.se.cyrcle.sensor.ShakeDetector
 import com.github.se.cyrcle.ui.grigris.SnowfallAnimation
+import com.github.se.cyrcle.ui.grigris.snowToast
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.CyrcleTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -94,11 +94,7 @@ class MainActivity : ComponentActivity() {
     shakeDetector =
         ShakeDetector(this) {
           showSnow = !showSnow
-          if (showSnow) {
-            Toast.makeText(this, "It's snowing ❄️! Shake again to stop", Toast.LENGTH_SHORT).show()
-          } else {
-            Toast.makeText(this, "The snow has stopped", Toast.LENGTH_SHORT).show()
-          }
+          snowToast(showSnow, this)
         }
 
     permissionsHandler.initHandler(this@MainActivity)
