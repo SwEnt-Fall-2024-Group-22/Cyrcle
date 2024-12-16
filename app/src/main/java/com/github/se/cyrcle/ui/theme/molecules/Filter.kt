@@ -381,7 +381,8 @@ fun SearchBarListScreen(
       animateDpAsState(targetValue = if (isTextFieldVisible.value) 0.dp else (-200).dp)
 
   Box {
-    // Callback for when a suggestion is clicked. If address is null, the user's location is set.
+    // Callback for when a suggestion is clicked. Either called with a valid (non-null) address or
+    // explicitly called with null to indicate we want to use the user's location.
     val onLocationClicked: (Address?) -> Unit = {
       if (it == null) {
         parkingViewModel.setCircleCenter(mapViewModel.userPosition.value)
