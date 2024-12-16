@@ -415,6 +415,23 @@ class ParkingViewModel(
     return imageObjects.find { it.imagePath == destinationPath }
   }
 
+  /**
+   * Retrieves the image URL for a given image path.
+   *
+   * @param imagePath The path of the image stored in the repository.
+   * @param onSuccess A callback invoked with the image URL upon successful retrieval.
+   * @param onFailure A callback invoked if there is an error fetching the image URL.
+   */
+  fun getImageUrlFromImagePath(imagePath: String, onSuccess: (String) -> Unit) {
+    imageRepository.getUrl(
+        path = imagePath,
+        onSuccess = { url ->
+          Log.d("ParkingViewModel", "Image URL fetched successfully: $url")
+          onSuccess(url)
+        },
+        {})
+  }
+
   private val _onlyWithCCTV = MutableStateFlow(false)
   val onlyWithCCTV: StateFlow<Boolean> = _onlyWithCCTV
 

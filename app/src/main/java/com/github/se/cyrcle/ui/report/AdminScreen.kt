@@ -2,6 +2,7 @@ package com.github.se.cyrcle.ui.report
 
 import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -41,14 +42,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberImagePainter
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.report.ReportedObjectType
 import com.github.se.cyrcle.model.report.ReportedObjectViewModel
+import com.github.se.cyrcle.model.review.Review
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
+import com.github.se.cyrcle.ui.theme.atoms.BulletPoint
 import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
@@ -83,6 +87,60 @@ fun FilterSection(
           content()
         }
       }
+}
+
+@Composable
+fun ReportDetailsContent(
+    objectType: ReportedObjectType,
+    objectUID: String?,
+    userUID: String?,
+    reviewViewModel: ReviewViewModel,
+    parkingViewModel: ParkingViewModel
+) {
+
+  when (objectType) {
+    ReportedObjectType.REVIEW -> {
+      var review by remember { mutableStateOf<Review?>(null) }
+      LaunchedEffect(objectUID) {
+        reviewViewModel.getReviewById(objectUID!!, { result -> review = result }, {})
+      }
+      review?.let {
+        Column {
+          BulletPoint(text = "Review UID: $objectUID", testTag = "BulletPointReviewUID")
+          BulletPoint(text = "Parking ID: ${it.parking}", testTag = "BulletPointParkingID")
+          BulletPoint(text = "User ID: $userUID", testTag = "BulletPointUserID")
+        }
+      } ?: Text("Loading review details...")
+    }
+    ReportedObjectType.PARKING -> {
+      var parking by remember { mutableStateOf<Parking?>(null) }
+      LaunchedEffect(objectUID) {
+        parkingViewModel.getParkingById(objectUID!!, { result -> parking = result }, {})
+      }
+      parking?.let {
+        Column {
+          BulletPoint(text = "Parking UID: $objectUID", testTag = "BulletPointParkingUID")
+          BulletPoint(text = "Location: ${it.owner}", testTag = "BulletPointParkingLocation")
+        }
+      } ?: Text("Loading parking details...")
+    }
+    ReportedObjectType.IMAGE -> {
+      var imageUrl by remember { mutableStateOf<String?>(null) }
+      var parking by remember { mutableStateOf<Parking?>(null) }
+      LaunchedEffect(objectUID) {
+        parkingViewModel.getParkingById(objectUID!!, { result -> parking = result }, {})
+      }
+      parkingViewModel.getImageUrlFromImagePath(objectUID!!) { url -> imageUrl = url }
+      Column {
+        Image(
+            painter = rememberImagePainter(data = imageUrl),
+            contentDescription = null,
+            modifier = Modifier.fillMaxWidth().height(200.dp).testTag("ImageContent"))
+      }
+      BulletPoint(text = "Image Path: $objectUID", testTag = "BulletPointImagePath")
+      BulletPoint(text = "User UID: $userUID", testTag = "BulletPointImageUserID")
+    }
+  }
 }
 
 @Composable
@@ -254,59 +312,99 @@ fun AdminScreen(
                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                                     style = MaterialTheme.typography.bodySmall,
                                     modifier = Modifier.testTag("TimesReported$index"))
-
-                                // IconButton for dialog
-                                IconButton(
-                                    onClick = { showDialog = true },
-                                    modifier =
-                                        Modifier.align(Alignment.End)
-                                            .testTag("MoreOptionsButton$index")) {
-                                      Icon(
-                                          imageVector = Icons.Default.MoreVert,
-                                          contentDescription = moreOptions)
-                                    }
-
-                                // AlertDialog for card actions
-                                if (showDialog) {
-                                  AlertDialog(
-                                      onDismissRequest = { showDialog = false },
-                                      confirmButton = {
-                                        Text(
-                                            text = confirm,
-                                            modifier =
-                                                Modifier.clickable {
-                                                  // Handle confirm action
-                                                  showDialog = false
-                                                },
-                                            color = MaterialTheme.colorScheme.primary)
-                                      },
-                                      dismissButton = {
-                                        Text(
-                                            text = cancel,
-                                            modifier =
-                                                Modifier.clickable {
-                                                  // Handle cancel action
-                                                  showDialog = false
-                                                },
-                                            color = MaterialTheme.colorScheme.secondary)
-                                      },
-                                      title = {
-                                        Text(
-                                            text = optionsForReport,
-                                            style = MaterialTheme.typography.titleMedium)
-                                      },
-                                      text = {
-                                        Text(
-                                            text =
-                                                chooseActionForReport.format(
-                                                    curReport.nbOfTimesReported),
-                                            style = MaterialTheme.typography.bodyMedium)
-                                      })
-                                }
-
                                 // Conditionally show the Report Review button only when the card is
                                 // expanded
                                 if (isExpanded) {
+                                  IconButton(
+                                      onClick = { showDialog = true },
+                                      modifier =
+                                          Modifier.align(Alignment.End)
+                                              .testTag("MoreOptionsButton$index")) {
+                                        Icon(
+                                            imageVector = Icons.Default.MoreVert,
+                                            contentDescription = moreOptions)
+                                      }
+
+                                  if (showDialog) {
+                                    reportedObjectViewModel.selectObject(curReport)
+                                    AlertDialog(
+                                        onDismissRequest = { showDialog = false },
+                                        confirmButton = {
+                                          Text(
+                                              text = confirm,
+                                              modifier = Modifier.clickable { showDialog = false },
+                                              color = MaterialTheme.colorScheme.primary)
+                                        },
+                                        dismissButton = {
+                                          if (selectedObject?.objectType !=
+                                              ReportedObjectType.REVIEW) {
+                                            Text(
+                                                text = cancel,
+                                                modifier =
+                                                    Modifier.clickable {
+                                                      if ((selectedObject?.objectType) ==
+                                                          ReportedObjectType.PARKING) {
+                                                        parkingViewModel.getParkingById(
+                                                            selectedObject?.objectUID!!,
+                                                            { parking ->
+                                                              parkingViewModel.selectParking(
+                                                                  parking)
+                                                              navigationActions.navigateTo(
+                                                                  Screen.PARKING_DETAILS)
+                                                            },
+                                                            {})
+                                                      } else if ((selectedObject?.objectType) ==
+                                                          ReportedObjectType.IMAGE) {
+                                                        val parkID =
+                                                            parkingViewModel
+                                                                .getParkingFromImagePath(
+                                                                    selectedObject?.objectUID!!)
+                                                        parkingViewModel.getParkingById(
+                                                            parkID,
+                                                            { parking ->
+                                                              parkingViewModel.selectParking(
+                                                                  parking)
+                                                              navigationActions.navigateTo(
+                                                                  Screen.PARKING_DETAILS)
+                                                            },
+                                                            {})
+                                                      } else {
+                                                        reviewViewModel.getReviewById(
+                                                            selectedObject?.objectUID!!,
+                                                            { review ->
+                                                              parkingViewModel.getParkingById(
+                                                                  review.parking,
+                                                                  { parking ->
+                                                                    parkingViewModel.selectParking(
+                                                                        parking)
+                                                                    navigationActions.navigateTo(
+                                                                        Screen.PARKING_DETAILS)
+                                                                  },
+                                                                  {})
+                                                            },
+                                                            {})
+                                                      }
+                                                    },
+                                                color = MaterialTheme.colorScheme.secondary)
+                                          }
+                                        },
+                                        title = {
+                                          Text(
+                                              text = optionsForReport,
+                                              style = MaterialTheme.typography.titleMedium)
+                                        },
+                                        text = {
+                                          Column {
+                                            ReportDetailsContent(
+                                                selectedObject!!.objectType,
+                                                selectedObject!!.objectUID,
+                                                selectedObject!!.userUID,
+                                                reviewViewModel,
+                                                parkingViewModel)
+                                          }
+                                        })
+                                  }
+
                                   FloatingActionButton(
                                       onClick = {
                                         reportedObjectViewModel.selectObject(curReport)
