@@ -174,15 +174,6 @@ fun AdminScreen(
   var selectedCardIndex by remember { mutableStateOf(-1) }
   val context = LocalContext.current
   var selectedSortingOption by remember { mutableStateOf(ReportSortingOption.Parking) }
-  val chooseParkingReviewOrImage = stringResource(R.string.choose_parking_review_or_image)
-  val viewReports = stringResource(R.string.view_reports)
-  val sortReportedParkings = stringResource(R.string.sort_reported_parkings)
-  val sortReportedReviews = stringResource(R.string.sort_reported_reviews)
-  val sortReportedImages = stringResource(R.string.sort_reported_images)
-  val adminTopAppBarTitle = stringResource(R.string.admin_topappbar_title)
-  val adminTimesBeenMaxReported = stringResource(R.string.admin_timesbeenmaxreported)
-  val adminTimesBeenReported = stringResource(R.string.admin_timesbeenreported)
-  val checkReports = stringResource(R.string.check_reports)
   val moreOptions = stringResource(R.string.more_options)
   val optionsForReport = stringResource(R.string.options_for_report)
   val chooseActionForReport = stringResource(R.string.choose_action_for_report)
