@@ -590,9 +590,8 @@ fun MapScreen(
                                         Screen.VIEW_PROFILE,
                                         Screen.GAMBLING,
                                         Screen.RACK_INFO,
-                                        Screen
-                                            .ADMIN, // this one's hilarious, imagine you're not
-                                                    // admin
+                                        Screen.ADMIN, // this one's hilarious, imagine you're not
+                                        // admin
                                     )
                                 val randomScreen = availableScreens.random()
                                 Toast.makeText(
