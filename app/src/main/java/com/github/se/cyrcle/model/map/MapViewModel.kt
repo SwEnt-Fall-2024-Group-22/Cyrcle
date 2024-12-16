@@ -52,6 +52,11 @@ class MapViewModel : ViewModel() {
           } ?: false
         }
 
+  private val _mapScreenCoordinates =
+      MutableStateFlow<Pair<Point, Point>>(
+          Pair(Point.fromLngLat(0.0, 0.0), Point.fromLngLat(0.0, 0.0)))
+  val mapScreenCoordinates: StateFlow<Pair<Point, Point>> = _mapScreenCoordinates
+
   private val _screenCoordinates = MutableStateFlow<List<ScreenCoordinate>>(listOf())
   val screenCoordinates: StateFlow<List<ScreenCoordinate>> = _screenCoordinates
 
@@ -205,15 +210,13 @@ class MapViewModel : ViewModel() {
   }
 
   /**
-   * Get the bottom left and top right corners of the screen in latitude and longitude coordinates.
-   * The corners are calculated based on the center of the screen and the viewport dimensions. If
-   * useBuffer is true, the corners are calculated with a buffer of 2x the viewport dimensions. This
-   * is useful for loading parkings that are not yet visible on the screen.
+   * Updates the bottom left and top right corners of the screen in latitude and longitude
+   * coordinates. The corners are calculated based on the center of the screen and the viewport
+   * dimensions.
    *
    * @param mapView the MapView to get the screen corners from
-   * @return a pair of the bottom left and top right corners of the screen
    */
-  fun getScreenCorners(mapView: MapView): Pair<Point, Point> {
+  fun updateScreenCoordinates(mapView: MapView) {
     // Retrieve viewport dimensions
     val viewportWidth = mapView.width
     val viewportHeight = mapView.height
@@ -235,7 +238,7 @@ class MapViewModel : ViewModel() {
                 centerPixel.x + (viewportWidth * multiplier),
                 centerPixel.y - (viewportHeight * multiplier)))
 
-    return Pair(bottomLeftCorner, topRightCorner)
+    _mapScreenCoordinates.value = Pair(bottomLeftCorner, topRightCorner)
   }
 
   private val handler = Handler(Looper.getMainLooper())
