@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 
-const val NB_REPORTS_THRESH = 10
+const val NB_REPORTS_THRESH = 1
 const val NB_REPORTS_MAXSEVERITY_THRESH = 3
 const val MAX_SEVERITY = 3
 

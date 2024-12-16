@@ -106,9 +106,9 @@ fun ReportDetailsContent(
       }
       review?.let {
         Column {
-          BulletPoint(text = "Review UID: $objectUID", testTag = "BulletPointReviewUID")
-          BulletPoint(text = "Parking ID: ${it.parking}", testTag = "BulletPointParkingID")
-          BulletPoint(text = "User ID: $userUID", testTag = "BulletPointUserID")
+          BulletPoint(text = "Review: $objectUID", testTag = "BulletPointReviewUID")
+          BulletPoint(text = "Parking: ${it.parking}", testTag = "BulletPointReviewUID")
+          BulletPoint(text = "Text: ${it.text}", testTag = "BulletPointUserID")
         }
       } ?: Text("Loading review details...")
     }
@@ -120,7 +120,7 @@ fun ReportDetailsContent(
       parking?.let {
         Column {
           BulletPoint(text = "Parking UID: $objectUID", testTag = "BulletPointParkingUID")
-          BulletPoint(text = "Location: ${it.owner}", testTag = "BulletPointParkingLocation")
+          BulletPoint(text = "Owner: ${it.owner}", testTag = "BulletPointParkingLocation")
         }
       } ?: Text("Loading parking details...")
     }
@@ -137,8 +137,7 @@ fun ReportDetailsContent(
             contentDescription = null,
             modifier = Modifier.fillMaxWidth().height(200.dp).testTag("ImageContent"))
       }
-      BulletPoint(text = "Image Path: $objectUID", testTag = "BulletPointImagePath")
-      BulletPoint(text = "User UID: $userUID", testTag = "BulletPointImageUserID")
+      BulletPoint(text = "Owner: $userUID", testTag = "BulletPointImageUserID")
     }
   }
 }
@@ -336,57 +335,51 @@ fun AdminScreen(
                                               color = MaterialTheme.colorScheme.primary)
                                         },
                                         dismissButton = {
-                                          if (selectedObject?.objectType !=
-                                              ReportedObjectType.REVIEW) {
-                                            Text(
-                                                text = cancel,
-                                                modifier =
-                                                    Modifier.clickable {
-                                                      if ((selectedObject?.objectType) ==
-                                                          ReportedObjectType.PARKING) {
-                                                        parkingViewModel.getParkingById(
-                                                            selectedObject?.objectUID!!,
-                                                            { parking ->
-                                                              parkingViewModel.selectParking(
-                                                                  parking)
-                                                              navigationActions.navigateTo(
-                                                                  Screen.PARKING_DETAILS)
-                                                            },
-                                                            {})
-                                                      } else if ((selectedObject?.objectType) ==
-                                                          ReportedObjectType.IMAGE) {
-                                                        val parkID =
-                                                            parkingViewModel
-                                                                .getParkingFromImagePath(
-                                                                    selectedObject?.objectUID!!)
-                                                        parkingViewModel.getParkingById(
-                                                            parkID,
-                                                            { parking ->
-                                                              parkingViewModel.selectParking(
-                                                                  parking)
-                                                              navigationActions.navigateTo(
-                                                                  Screen.PARKING_DETAILS)
-                                                            },
-                                                            {})
-                                                      } else {
-                                                        reviewViewModel.getReviewById(
-                                                            selectedObject?.objectUID!!,
-                                                            { review ->
-                                                              parkingViewModel.getParkingById(
-                                                                  review.parking,
-                                                                  { parking ->
-                                                                    parkingViewModel.selectParking(
-                                                                        parking)
-                                                                    navigationActions.navigateTo(
-                                                                        Screen.PARKING_DETAILS)
-                                                                  },
-                                                                  {})
-                                                            },
-                                                            {})
-                                                      }
-                                                    },
-                                                color = MaterialTheme.colorScheme.secondary)
-                                          }
+                                          Text(
+                                              text = cancel,
+                                              modifier =
+                                                  Modifier.clickable {
+                                                    if ((selectedObject?.objectType) ==
+                                                        ReportedObjectType.PARKING) {
+                                                      parkingViewModel.getParkingById(
+                                                          selectedObject?.objectUID!!,
+                                                          { parking ->
+                                                            parkingViewModel.selectParking(parking)
+                                                            navigationActions.navigateTo(
+                                                                Screen.PARKING_DETAILS)
+                                                          },
+                                                          {})
+                                                    } else if ((selectedObject?.objectType) ==
+                                                        ReportedObjectType.IMAGE) {
+                                                      val parkID =
+                                                          parkingViewModel.getParkingFromImagePath(
+                                                              selectedObject?.objectUID!!)
+                                                      parkingViewModel.getParkingById(
+                                                          parkID,
+                                                          { parking ->
+                                                            parkingViewModel.selectParking(parking)
+                                                            navigationActions.navigateTo(
+                                                                Screen.PARKING_DETAILS)
+                                                          },
+                                                          {})
+                                                    } else {
+                                                      reviewViewModel.getReviewById(
+                                                          selectedObject?.objectUID!!,
+                                                          { review ->
+                                                            parkingViewModel.getParkingById(
+                                                                review.parking,
+                                                                { parking ->
+                                                                  parkingViewModel.selectParking(
+                                                                      parking)
+                                                                  navigationActions.navigateTo(
+                                                                      Screen.PARKING_DETAILS)
+                                                                },
+                                                                {})
+                                                          },
+                                                          {})
+                                                    }
+                                                  },
+                                              color = MaterialTheme.colorScheme.secondary)
                                         },
                                         title = {
                                           Text(
@@ -394,11 +387,15 @@ fun AdminScreen(
                                               style = MaterialTheme.typography.titleMedium)
                                         },
                                         text = {
+                                          val selectedObject =
+                                              reportedObjectViewModel.selectedObject
+                                                  .collectAsState()
+                                                  .value
                                           Column {
                                             ReportDetailsContent(
                                                 selectedObject!!.objectType,
-                                                selectedObject!!.objectUID,
-                                                selectedObject!!.userUID,
+                                                selectedObject.objectUID,
+                                                selectedObject.userUID,
                                                 reviewViewModel,
                                                 parkingViewModel)
                                           }
