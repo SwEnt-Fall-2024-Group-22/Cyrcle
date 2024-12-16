@@ -7,6 +7,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.github.se.cyrcle.model.CustomViewModelFactory
@@ -26,6 +29,9 @@ import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.UserRepository
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.permission.PermissionHandler
+import com.github.se.cyrcle.sensor.ShakeDetector
+import com.github.se.cyrcle.ui.grigris.SnowfallAnimation
+import com.github.se.cyrcle.ui.grigris.snowToast
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.CyrcleTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -78,9 +84,18 @@ class MainActivity : ComponentActivity() {
     CustomViewModelFactory { AddressViewModel(addressRepository) }
   }
 
+  private var showSnow by mutableStateOf(false)
+  private lateinit var shakeDetector: ShakeDetector
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
+    shakeDetector =
+        ShakeDetector(this) {
+          showSnow = !showSnow
+          snowToast(showSnow, this)
+        }
 
     permissionsHandler.initHandler(this@MainActivity)
 
@@ -102,8 +117,20 @@ class MainActivity : ComponentActivity() {
               addressViewModel,
               reportedObjectViewModel,
               permissionsHandler)
+
+          if (showSnow) SnowfallAnimation()
         }
       }
     }
+  }
+
+  override fun onResume() {
+    super.onResume()
+    shakeDetector.start()
+  }
+
+  override fun onPause() {
+    super.onPause()
+    shakeDetector.stop()
   }
 }
