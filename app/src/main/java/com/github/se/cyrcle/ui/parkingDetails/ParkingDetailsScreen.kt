@@ -413,7 +413,11 @@ fun ParkingDetailsScreen(
                           onClick = { imagePickerLauncher.launch("image/*") },
                           enabled = userSignedIn,
                           testTag = "AddImageIconButton",
-                          modifier = Modifier.padding(start = 8.dp).height(32.dp).weight(1f))
+                          modifier =
+                              Modifier.padding(start = 8.dp)
+                                  .height(32.dp)
+                                  .weight(1f)
+                                  .testTag("addPhotoButton"))
                     }
 
                 // Information

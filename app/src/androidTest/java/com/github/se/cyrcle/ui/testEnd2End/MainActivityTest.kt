@@ -100,10 +100,10 @@ class MainActivityTest {
     mapRobot.assertMapScreen()
     mapRobot.toList()
 
-    listRobot.assertListScreen()
+    listRobot.assertListScreen(false)
     listRobot.toCard(0)
 
-    cardRobot.assertParkingDetailsScreen()
+    cardRobot.assertParkingDetailsScreen(false)
   }
 
   @Test
@@ -146,10 +146,10 @@ class MainActivityTest {
     mapRobot.assertMapScreen()
     mapRobot.toList()
 
-    listRobot.assertListScreen()
+    listRobot.assertListScreen(true)
     listRobot.toCard(0)
 
-    cardRobot.assertParkingDetailsScreen()
+    cardRobot.assertParkingDetailsScreen(true)
     cardRobot.goAllReviews()
 
     allReviewsRobot.assertAllReviewScreen(true)
@@ -162,6 +162,7 @@ class MainActivityTest {
     allReviewsRobot.deleteReviewAndAssertDeleted()
     allReviewsRobot.toUserProfile()
 
+    userProfileRobot.assertUserProfileScreen(true)
     userProfileRobot.signOut()
 
     // Anonymous user
@@ -171,10 +172,10 @@ class MainActivityTest {
     mapRobot.assertMapScreen()
     mapRobot.toList()
 
-    listRobot.assertListScreen()
+    listRobot.assertListScreen(false)
     listRobot.toCard(0)
 
-    cardRobot.assertParkingDetailsScreen()
+    cardRobot.assertParkingDetailsScreen(false)
     cardRobot.goAllReviews()
 
     allReviewsRobot.assertAllReviewScreen(false)
@@ -260,13 +261,34 @@ class MainActivityTest {
   // =========================== PARKINGDETAILS ROBOT ===========================
   // ============================================================================
   private class ParkingDetailsScreenRobot(val composeTestRule: ComposeTestRule) {
-    fun assertParkingDetailsScreen() {
+    fun assertParkingDetailsScreen(signedIn: Boolean) {
       composeTestRule.onNodeWithTag("TopAppBar").assertIsDisplayed()
       composeTestRule.onNodeWithTag("RowCapacityRack").assertIsDisplayed()
       composeTestRule.onNodeWithTag("RowProtectionPrice").assertIsDisplayed()
       composeTestRule.onNodeWithTag("RowSecurity").assertIsDisplayed()
       composeTestRule.onNodeWithTag("ButtonsColumn").performScrollTo().assertIsDisplayed()
       composeTestRule.onNodeWithTag("ShowInMapButton").assertIsDisplayed().assertHasClickAction()
+      composeTestRule.onNodeWithTag("ParkingDetailsScreen").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("ParkingDetailsColumn").assertIsDisplayed()
+
+      composeTestRule.onNodeWithTag("ParkingDetailsColumn").performTouchInput {
+        swipe(end = Offset(centerX, centerX * 0.9f), start = Offset(centerX, centerX * 0.1f))
+      }
+
+      composeTestRule.onNodeWithTag("TopInteractionRow").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("IconsRow").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("PinIcon").assertIsDisplayed().assertHasClickAction()
+      composeTestRule.onNodeWithTag("AverageRatingRow").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("ImagesRow").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("addPhotoButton").assertIsDisplayed().assertHasClickAction()
+      composeTestRule.onNodeWithTag("InfoColumn").assertIsDisplayed()
+
+      if (!signedIn) {
+        composeTestRule
+            .onNodeWithTag("BlackOutlinedFavoriteIcon")
+            .assertIsDisplayed()
+            .assertHasClickAction()
+      }
     }
 
     @OptIn(ExperimentalTestApi::class)
@@ -310,12 +332,22 @@ class MainActivityTest {
       composeTestRule.waitUntilExactlyOneExists(hasTestTag("ParkingDetailsScreen"))
     }
 
-    fun assertListScreen() {
+    fun assertListScreen(signedIn: Boolean) {
       composeTestRule.onNodeWithTag("NavigationBar").assertIsDisplayed()
       composeTestRule.onNodeWithTag("SpotListColumn").assertIsDisplayed()
       composeTestRule.onNodeWithTag("ShowFiltersButton").assertIsDisplayed().assertHasClickAction()
 
-      // TODO check that the cards are displayed
+      composeTestRule.onNodeWithTag("SpotListItem").assertIsDisplayed().assertHasClickAction()
+      composeTestRule.onNodeWithTag("SpotCardContent", useUnmergedTree = true).assertExists()
+      composeTestRule.onNodeWithTag("ParkingName", useUnmergedTree = true).assertExists()
+      composeTestRule.onNodeWithTag("ParkingDistance", useUnmergedTree = true).assertExists()
+      composeTestRule.onNodeWithTag("PinActionCard", useUnmergedTree = true).assertExists()
+
+      if (!signedIn) {
+        composeTestRule
+            .onNodeWithTag("AddToFavoriteActionCard", useUnmergedTree = true)
+            .assertExists()
+      }
     }
 
     @OptIn(ExperimentalTestApi::class)
@@ -361,6 +393,7 @@ class MainActivityTest {
       composeTestRule.onNodeWithTag("MapScreen").assertIsDisplayed()
       composeTestRule.onNodeWithTag("NavigationBar").assertIsDisplayed()
 
+      composeTestRule.onNodeWithTag("SearchBar").assertIsDisplayed().assertHasClickAction()
       if (permissionHandler.getLocalisationPerm().value)
           composeTestRule.onNodeWithTag("recenterButton").assertIsDisplayed().assertHasClickAction()
     }
@@ -422,6 +455,8 @@ class MainActivityTest {
           .assertIsDisplayed()
           .assertHasClickAction()
           .assertTextContains("Sign in with Google")
+      composeTestRule.onNodeWithTag("AppLogo").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("OfflineModeButton").assertIsDisplayed()
     }
 
     @OptIn(ExperimentalTestApi::class)
