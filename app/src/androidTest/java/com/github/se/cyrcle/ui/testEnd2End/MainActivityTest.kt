@@ -94,6 +94,30 @@ class MainActivityTest {
 
   @Test
   fun testReviewCard() {
+
+    composeTestRule.activity.userRepository.addUser(TestInstancesUser.user1, {}, {})
+
+    // Authenticated user
+
+    authRobot.assertAuthScreen()
+    authRobot.performSignIn()
+
+    mapRobot.assertMapScreen()
+    mapRobot.toList()
+
+    listRobot.assertListScreen(true)
+    listRobot.toCard(0)
+
+    cardRobot.assertParkingDetailsScreen(true)
+    cardRobot.goBack()
+
+    listRobot.toUserProfile()
+
+    userProfileRobot.assertUserProfileScreen(true)
+    userProfileRobot.signOut()
+
+    // Anonymous user
+
     authRobot.assertAuthScreen()
     authRobot.performAnonymousSignIn()
 
@@ -101,9 +125,6 @@ class MainActivityTest {
     mapRobot.toList()
 
     listRobot.assertListScreen(false)
-    listRobot.toCard(0)
-
-    cardRobot.assertParkingDetailsScreen(false)
   }
 
   @Test
@@ -131,6 +152,8 @@ class MainActivityTest {
     authRobot.performOfflineSignIn()
     mapRobot.assertMapScreen()
     mapRobot.assertIsOfflineMode()
+    mapRobot.toAnonymousUserProfile()
+    userProfileRobot.assertUserProfileScreen(false)
   }
 
   @Test
@@ -294,7 +317,7 @@ class MainActivityTest {
     @OptIn(ExperimentalTestApi::class)
     fun goBack() {
       composeTestRule
-          .onNodeWithTag("GoBackButton")
+          .onNodeWithTag("TopAppBarGoBackButton")
           .assertIsDisplayed()
           .assertHasClickAction()
           .performClick()
@@ -484,6 +507,7 @@ class MainActivityTest {
   // ============================ USER PROFILE ROBOT ============================
   // ============================================================================
   private class UserProfileRobot(val composeTestRule: ComposeTestRule) {
+    @OptIn(ExperimentalTestApi::class)
     fun assertUserProfileScreen(isUserSignedIn: Boolean) {
       if (isUserSignedIn) {
         composeTestRule.onNodeWithTag("ViewProfileScreen").assertIsDisplayed()
