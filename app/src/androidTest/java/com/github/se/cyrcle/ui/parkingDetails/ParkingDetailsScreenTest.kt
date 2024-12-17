@@ -23,19 +23,26 @@ import com.github.se.cyrcle.di.mocks.MockReviewRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.map.MapViewModel
+import com.github.se.cyrcle.model.parking.Location
+import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingCapacity
 import com.github.se.cyrcle.model.parking.ParkingProtection
 import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
+import com.github.se.cyrcle.model.parking.TestInstancesParking.EPFLCenter
 import com.github.se.cyrcle.model.parking.offline.OfflineParkingRepository
 import com.github.se.cyrcle.model.parking.online.ParkingRepository
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.review.ReviewRepository
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.TestInstancesUser
+import com.github.se.cyrcle.model.user.User
+import com.github.se.cyrcle.model.user.UserDetails
+import com.github.se.cyrcle.model.user.UserPublic
 import com.github.se.cyrcle.model.user.UserRepository
 import com.github.se.cyrcle.model.user.UserViewModel
+import com.github.se.cyrcle.model.user.Wallet
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
 import org.junit.Before
@@ -176,10 +183,12 @@ class ParkingDetailsScreenTest {
 
   @Test
   fun displayAllComponents() {
+      userViewModel.addUser(TestInstancesUser.user1, {}, {})
     parkingViewModel.selectParking(TestInstancesParking.parking1)
     composeTestRule.setContent {
       ParkingDetailsScreen(mapViewModel, navigationActions, parkingViewModel, userViewModel)
     }
+      Thread.sleep(15000)
 
     // Verify the top app bar
     composeTestRule.onNodeWithTag("TopAppBar").assertIsDisplayed()
