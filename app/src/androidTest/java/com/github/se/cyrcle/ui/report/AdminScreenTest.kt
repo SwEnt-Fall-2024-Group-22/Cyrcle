@@ -176,7 +176,9 @@ class AdminScreenTest {
           reviewViewModel = reviewViewModel)
     }
 
+    composeTestRule.onNodeWithTag("ReportCard0").assertHasClickAction()
     composeTestRule.onNodeWithTag("ReportCard0").performClick()
+    composeTestRule.onNodeWithTag("CheckReportsButton0").assertHasClickAction()
     composeTestRule.onNodeWithTag("CheckReportsButton0").performClick()
   }
 
