@@ -429,7 +429,7 @@ class ParkingViewModel(
           Log.d("ParkingViewModel", "Image URL fetched successfully: $url")
           onSuccess(url)
         },
-        {})
+        { Log.d("ParkingViewModel", "Error fecthing Image URL") })
   }
 
   private val _onlyWithCCTV = MutableStateFlow(false)

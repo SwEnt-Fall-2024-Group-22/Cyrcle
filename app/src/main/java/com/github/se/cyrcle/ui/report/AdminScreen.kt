@@ -110,8 +110,8 @@ fun FilterSection(
 @Composable
 fun ReportDetailsContent(
     objectType: ReportedObjectType,
-    objectUID: String?,
-    userUID: String?,
+    objectUID: String,
+    userUID: String,
     reviewViewModel: ReviewViewModel,
     parkingViewModel: ParkingViewModel
 ) {
@@ -119,7 +119,7 @@ fun ReportDetailsContent(
     ReportedObjectType.REVIEW -> {
       var review by remember { mutableStateOf<Review?>(null) }
       LaunchedEffect(objectUID) {
-        reviewViewModel.getReviewById(objectUID!!, { result -> review = result }, {})
+        reviewViewModel.getReviewById(objectUID, { result -> review = result }, {})
       }
       review?.let {
         Column(modifier = Modifier.testTag("ReportDetailsContentReview")) {
@@ -141,7 +141,7 @@ fun ReportDetailsContent(
     ReportedObjectType.PARKING -> {
       var parking by remember { mutableStateOf<Parking?>(null) }
       LaunchedEffect(objectUID) {
-        parkingViewModel.getParkingById(objectUID!!, { result -> parking = result }, {})
+        parkingViewModel.getParkingById(objectUID, { result -> parking = result }, {})
       }
       parking?.let {
         Column(modifier = Modifier.testTag("ReportDetailsContentParking")) {
@@ -465,12 +465,14 @@ fun AdminScreen(
                                                   .collectAsState()
                                                   .value
                                           Column {
-                                            ReportDetailsContent(
-                                                selectedObject!!.objectType,
-                                                selectedObject.objectUID,
-                                                selectedObject.userUID,
-                                                reviewViewModel,
-                                                parkingViewModel)
+                                            if (selectedObject != null) {
+                                              ReportDetailsContent(
+                                                  selectedObject.objectType,
+                                                  selectedObject.objectUID,
+                                                  selectedObject.userUID,
+                                                  reviewViewModel,
+                                                  parkingViewModel)
+                                            }
                                           }
                                         })
                                   }

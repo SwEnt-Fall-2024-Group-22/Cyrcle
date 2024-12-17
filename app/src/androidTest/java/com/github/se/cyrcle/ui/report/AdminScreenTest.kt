@@ -101,10 +101,10 @@ class AdminScreenTest {
     }
 
     // Check if the top bar is displayed
-    composeTestRule.onNodeWithTag("TopAppBar").assertExists()
+    composeTestRule.onNodeWithTag("TopAppBar").assertIsDisplayed()
 
     // Check if the report list is displayed
-    composeTestRule.onNodeWithTag("ReportList").assertExists()
+    composeTestRule.onNodeWithTag("ReportList").assertIsDisplayed()
   }
 
   @Test
@@ -186,32 +186,18 @@ class AdminScreenTest {
           parkingViewModel = parkingViewModel,
           reviewViewModel = reviewViewModel)
     }
-
-    // Expand the first report card
     composeTestRule.onNodeWithTag("ReportCard0").performClick()
     composeTestRule.waitForIdle()
-
-    // Click the More Options button
     composeTestRule.onNodeWithTag("MoreOptionsButton0").performClick()
     composeTestRule.waitForIdle()
-
-    // Assert dialog appears
-    composeTestRule.onNode(isDialog()).assertExists()
-
-    // Validate dialog content
-    composeTestRule.onNodeWithText("Details for this Reported Object:").assertExists()
-    composeTestRule.onNodeWithText("Loading parking details...").assertExists()
-
-    // Validate buttons
-    composeTestRule.onNodeWithText("Go To Parking").assertExists().assertHasClickAction()
-    composeTestRule.onNodeWithText("Return").assertExists().assertHasClickAction()
-
-    // Dismiss the dialog
+    composeTestRule.onNode(isDialog()).assertIsDisplayed()
+    composeTestRule.onNodeWithText("Details for this Reported Object:").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Loading parking details...").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Go To Parking").assertIsDisplayed().assertHasClickAction()
+    composeTestRule.onNodeWithText("Return").assertIsDisplayed().assertHasClickAction()
     composeTestRule.onNodeWithText("Return").performClick()
     composeTestRule.waitForIdle()
-
-    // Ensure dialog is dismissed
-    composeTestRule.onNode(isDialog()).assertDoesNotExist()
+    composeTestRule.onNode(isDialog()).assertIsNotDisplayed()
   }
 
   @Test
@@ -226,18 +212,15 @@ class AdminScreenTest {
     }
     composeTestRule
         .onNodeWithTag("BulletPointParkingUID")
-        .assertExists()
-        .onChildren() // Focus on child nodes to inspect contents
+        .assertIsDisplayed()
+        .onChildren()
         .assertAny(hasText("Parking UID: Test_spot_1"))
 
     composeTestRule
         .onNodeWithTag("BulletPointParkingOwner")
-        .assertExists()
+        .assertIsDisplayed()
         .onChildren()
         .assertAny(hasText("Owner: user1"))
-
-    // Print the state of the root composable after validation
-    composeTestRule.onRoot().printToLog("ParkingDetailsTestRootAfterValidation")
   }
 
   @Test
@@ -252,6 +235,6 @@ class AdminScreenTest {
     }
 
     composeTestRule.waitForIdle()
-    composeTestRule.onNodeWithText("Owner: user1").assertExists()
+    composeTestRule.onNodeWithText("Owner: user1").assertIsDisplayed()
   }
 }
