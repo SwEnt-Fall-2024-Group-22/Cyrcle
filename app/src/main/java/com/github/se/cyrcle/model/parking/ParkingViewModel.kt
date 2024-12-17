@@ -420,7 +420,6 @@ class ParkingViewModel(
    *
    * @param imagePath The path of the image stored in the repository.
    * @param onSuccess A callback invoked with the image URL upon successful retrieval.
-   * @param onFailure A callback invoked if there is an error fetching the image URL.
    */
   fun getImageUrlFromImagePath(imagePath: String, onSuccess: (String) -> Unit) {
     imageRepository.getUrl(
@@ -429,7 +428,7 @@ class ParkingViewModel(
           Log.d("ParkingViewModel", "Image URL fetched successfully: $url")
           onSuccess(url)
         },
-        { Log.d("ParkingViewModel", "Error fecthing Image URL") })
+        { Log.e("ParkingViewModel", "Error fecthing Image URL") })
   }
 
   private val _onlyWithCCTV = MutableStateFlow(false)

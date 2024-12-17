@@ -154,8 +154,11 @@ class AdminScreenTest {
           reviewViewModel = reviewViewModel)
     }
 
-    // Click on sort by Parking
+    composeTestRule.onNodeWithTag("ShowFiltersButton").assertHasClickAction()
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
+    composeTestRule
+        .onNodeWithText("Get Reported Parkings (Most Reported First)")
+        .assertHasClickAction()
     composeTestRule.onNodeWithText("Get Reported Parkings (Most Reported First)").performClick()
 
     // Check if the list is sorted by Parking
@@ -210,17 +213,15 @@ class AdminScreenTest {
           reviewViewModel = reviewViewModel,
           parkingViewModel = parkingViewModel)
     }
-    composeTestRule
-        .onNodeWithTag("BulletPointParkingUID")
-        .assertIsDisplayed()
-        .onChildren()
-        .assertAny(hasText("Parking UID: Test_spot_1"))
+    composeTestRule.onNodeWithTag("BulletPointParkingUID").assertIsDisplayed().onChildren()
 
     composeTestRule
-        .onNodeWithTag("BulletPointParkingOwner")
-        .assertIsDisplayed()
-        .onChildren()
-        .assertAny(hasText("Owner: user1"))
+        .onNodeWithTag("BulletPointParkingUID")
+        .assertTextContains("Parking UID: Test_spot_1")
+
+    composeTestRule.onNodeWithTag("BulletPointParkingOwner").assertIsDisplayed().onChildren()
+
+    composeTestRule.onNodeWithTag("BulletPointParkingOwner").assertTextContains("Owner: user1")
   }
 
   @Test
