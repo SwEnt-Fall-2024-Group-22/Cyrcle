@@ -2,6 +2,7 @@ package com.github.se.cyrcle.ui.report
 
 import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,11 +20,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -37,24 +41,36 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberImagePainter
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.report.ReportedObjectType
 import com.github.se.cyrcle.model.report.ReportedObjectViewModel
+import com.github.se.cyrcle.model.review.Review
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
+import com.github.se.cyrcle.ui.theme.atoms.BulletPoint
 import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
+/** Enum class representing the available sorting options for reports. */
 enum class ReportSortingOption {
   Parking,
   Review,
   Image
 }
 
+/**
+ * A reusable composable that represents an expandable section with a title and content.
+ *
+ * @param title The title of the filter section.
+ * @param isExpanded A flag indicating if the section should show its content.
+ * @param onToggle A callback to handle expanding or collapsing the section.
+ * @param content The composable content to display when the section is expanded.
+ */
 @Composable
 fun FilterSection(
     title: String,
@@ -81,6 +97,92 @@ fun FilterSection(
       }
 }
 
+/**
+ * Displays details of a reported object based on its type: REVIEW, PARKING, or IMAGE.
+ *
+ * @param objectType The type of the reported object (REVIEW, PARKING, or IMAGE).
+ * @param objectUID The unique identifier of the reported object.
+ * @param userUID The unique identifier of the user associated with the report.
+ * @param reviewViewModel The ViewModel used to fetch review-related data.
+ * @param parkingViewModel The ViewModel used to fetch parking or image data.
+ */
+@Composable
+fun ReportDetailsContent(
+    objectType: ReportedObjectType,
+    objectUID: String,
+    userUID: String,
+    reviewViewModel: ReviewViewModel,
+    parkingViewModel: ParkingViewModel
+) {
+  when (objectType) {
+    ReportedObjectType.REVIEW -> {
+      var review by remember { mutableStateOf<Review?>(null) }
+      LaunchedEffect(objectUID) {
+        reviewViewModel.getReviewById(objectUID, { result -> review = result }, {})
+      }
+      review?.let {
+        Column(modifier = Modifier.testTag("ReportDetailsContentReview")) {
+          BulletPoint(
+              text = stringResource(R.string.report_details_review_uid).format(objectUID),
+              testTag = "BulletPointReviewUID")
+          BulletPoint(
+              text = stringResource(id = R.string.report_details_review_parking, it.parking),
+              testTag = "BulletPointReviewParking")
+          BulletPoint(
+              text = stringResource(id = R.string.report_details_review_text, it.text),
+              testTag = "BulletPointReviewText")
+        }
+      }
+          ?: Text(
+              text = stringResource(R.string.loading_review_details),
+              modifier = Modifier.testTag("LoadingReviewDetails"))
+    }
+    ReportedObjectType.PARKING -> {
+      var parking by remember { mutableStateOf<Parking?>(null) }
+      LaunchedEffect(objectUID) {
+        parkingViewModel.getParkingById(objectUID, { result -> parking = result }, {})
+      }
+      parking?.let {
+        Column(modifier = Modifier.testTag("ReportDetailsContentParking")) {
+          BulletPoint(
+              text = stringResource(R.string.report_details_parking_uid).format(objectUID),
+              testTag = "BulletPointParkingUID")
+          BulletPoint(
+              text = stringResource(id = R.string.report_details_parking_owner, it.owner),
+              testTag = "BulletPointParkingOwner")
+        }
+      }
+          ?: Text(
+              text = stringResource(R.string.loading_parking_details),
+              modifier = Modifier.testTag("LoadingParkingDetails"))
+    }
+    ReportedObjectType.IMAGE -> {
+      var imageUrl by remember { mutableStateOf<String?>(null) }
+      LaunchedEffect(objectUID) {
+        parkingViewModel.getImageUrlFromImagePath(objectUID) { url -> imageUrl = url }
+      }
+      Column(modifier = Modifier.testTag("ReportDetailsContentImage")) {
+        Image(
+            painter = rememberImagePainter(data = imageUrl),
+            contentDescription = stringResource(R.string.reported_image_description),
+            modifier = Modifier.fillMaxWidth().height(200.dp).testTag("ImageContent"))
+        BulletPoint(
+            text = stringResource(R.string.report_details_image_owner).format(userUID),
+            testTag = "BulletPointImageOwner")
+        BulletPoint(
+            text = stringResource(R.string.report_details_image_uid).format(objectUID),
+            testTag = "BulletPointImageID")
+      }
+    }
+  }
+}
+
+/**
+ * Displays a filter header containing a toggleable sorting options menu.
+ *
+ * @param selectedSortingOption The currently selected sorting option.
+ * @param onSortingOptionSelected A callback invoked when a new sorting option is selected.
+ */
 @Composable
 fun FilterHeader(
     selectedSortingOption: ReportSortingOption,
@@ -119,6 +221,12 @@ fun FilterHeader(
   }
 }
 
+/**
+ * Displays a selectable list of sorting options for reports.
+ *
+ * @param selectedSortingOption The currently selected sorting option.
+ * @param onOptionSelected A callback invoked when a sorting option is selected.
+ */
 @Composable
 fun SortingOptionSelector(
     selectedSortingOption: ReportSortingOption,
@@ -170,6 +278,11 @@ fun AdminScreen(
   var selectedCardIndex by remember { mutableStateOf(-1) }
   val context = LocalContext.current
   var selectedSortingOption by remember { mutableStateOf(ReportSortingOption.Parking) }
+  val moreOptions = stringResource(R.string.more_options)
+  val optionsForReport = stringResource(R.string.options_for_report)
+  val chooseActionForReport = stringResource(R.string.choose_action_for_report)
+  val confirm = stringResource(R.string.Return)
+  val cancel = stringResource(R.string.go_to_parking)
 
   // Filter and sort reports based on the selected sorting option
   val sortedReports =
@@ -207,14 +320,13 @@ fun AdminScreen(
           LazyColumn(
               modifier = Modifier.weight(1f).padding(horizontal = 16.dp).testTag("ReportList"),
               contentPadding = PaddingValues(bottom = 16.dp)) {
+                // Inside LazyColumn -> items section
                 items(items = sortedReports) { curReport ->
                   val index = sortedReports.indexOf(curReport)
                   val isExpanded = selectedCardIndex == index
-                  val cardHeight by
-                      animateDpAsState(
-                          if (isExpanded) 150.dp
-                          else 100.dp) // Adjust card height based on selection
+                  val cardHeight by animateDpAsState(if (isExpanded) 150.dp else 100.dp)
                   val cardColor = MaterialTheme.colorScheme.surfaceContainer
+                  var showDialog by remember { mutableStateOf(false) } // Dialog visibility state
 
                   Card(
                       modifier =
@@ -246,15 +358,140 @@ fun AdminScreen(
                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                                     style = MaterialTheme.typography.bodySmall,
                                     modifier = Modifier.testTag("TimesReported$index"))
-
                                 // Conditionally show the Report Review button only when the card is
                                 // expanded
                                 if (isExpanded) {
+                                  TextButton(
+                                      onClick = { showDialog = true },
+                                      modifier =
+                                          Modifier.align(Alignment.End)
+                                              .testTag("MoreOptionsButton$index"),
+                                      content = {
+                                        Text(
+                                            stringResource(R.string.see_details),
+                                            color = MaterialTheme.colorScheme.onErrorContainer)
+                                      },
+                                      colors =
+                                          ButtonColors(
+                                              containerColor = MaterialTheme.colorScheme.primary,
+                                              contentColor =
+                                                  MaterialTheme.colorScheme.onErrorContainer,
+                                              disabledContentColor =
+                                                  MaterialTheme.colorScheme.primary,
+                                              disabledContainerColor =
+                                                  MaterialTheme.colorScheme.onErrorContainer))
+
+                                  if (showDialog) {
+                                    reportedObjectViewModel.selectObject(curReport)
+                                    AlertDialog(
+                                        onDismissRequest = { showDialog = false },
+                                        confirmButton = {
+                                          Text(
+                                              text = confirm,
+                                              modifier = Modifier.clickable { showDialog = false },
+                                              color = MaterialTheme.colorScheme.primary)
+                                        },
+                                        dismissButton = {
+                                          Text(
+                                              text = cancel,
+                                              modifier =
+                                                  Modifier.clickable {
+                                                    when (selectedObject?.objectType) {
+                                                      ReportedObjectType.PARKING -> {
+                                                        parkingViewModel.getParkingById(
+                                                            selectedObject?.objectUID!!,
+                                                            onSuccess = { parking ->
+                                                              parkingViewModel.selectParking(
+                                                                  parking)
+                                                              navigationActions.navigateTo(
+                                                                  Screen.PARKING_DETAILS)
+                                                            },
+                                                            onFailure = { error ->
+                                                              // Handle failure for PARKING
+                                                              // retrieval
+                                                              Log.e(
+                                                                  "ParkingError",
+                                                                  "Failed to get parking: ${error.message}")
+                                                            })
+                                                      }
+                                                      ReportedObjectType.IMAGE -> {
+                                                        val parkID =
+                                                            parkingViewModel
+                                                                .getParkingFromImagePath(
+                                                                    selectedObject?.objectUID!!)
+                                                        parkingViewModel.getParkingById(
+                                                            parkID,
+                                                            onSuccess = { parking ->
+                                                              parkingViewModel.selectParking(
+                                                                  parking)
+                                                              navigationActions.navigateTo(
+                                                                  Screen.PARKING_DETAILS)
+                                                            },
+                                                            onFailure = { error ->
+                                                              // Handle failure for IMAGE-based
+                                                              // parking retrieval
+                                                              Log.e(
+                                                                  "ImageError",
+                                                                  "Failed to get parking from image: ${error.message}")
+                                                            })
+                                                      }
+                                                      else -> {
+                                                        reviewViewModel.getReviewById(
+                                                            selectedObject?.objectUID!!,
+                                                            onSuccess = { review ->
+                                                              parkingViewModel.getParkingById(
+                                                                  review.parking,
+                                                                  onSuccess = { parking ->
+                                                                    parkingViewModel.selectParking(
+                                                                        parking)
+                                                                    navigationActions.navigateTo(
+                                                                        Screen.PARKING_DETAILS)
+                                                                  },
+                                                                  onFailure = { error ->
+                                                                    // Handle failure for parking
+                                                                    // retrieval from review
+                                                                    Log.e(
+                                                                        "ParkingFromReviewError",
+                                                                        "Failed to get parking: ${error.message}")
+                                                                  })
+                                                            },
+                                                            onFailure = { error ->
+                                                              // Handle failure for review retrieval
+                                                              Log.e(
+                                                                  "ReviewError",
+                                                                  "Failed to get review: ${error.message}")
+                                                            })
+                                                      }
+                                                    }
+                                                  },
+                                              color = MaterialTheme.colorScheme.secondary)
+                                        },
+                                        title = {
+                                          Text(
+                                              text = optionsForReport,
+                                              style = MaterialTheme.typography.titleMedium)
+                                        },
+                                        text = {
+                                          val selectedObject =
+                                              reportedObjectViewModel.selectedObject
+                                                  .collectAsState()
+                                                  .value
+                                          Column {
+                                            if (selectedObject != null) {
+                                              ReportDetailsContent(
+                                                  selectedObject.objectType,
+                                                  selectedObject.objectUID,
+                                                  selectedObject.userUID,
+                                                  reviewViewModel,
+                                                  parkingViewModel)
+                                            }
+                                          }
+                                        })
+                                  }
+
                                   FloatingActionButton(
                                       onClick = {
                                         reportedObjectViewModel.selectObject(curReport)
-
-                                        // Ensure the selectedObject is not null before proceeding
                                         val currentObject =
                                             reportedObjectViewModel.selectedObject.value
                                         if (currentObject != null) {

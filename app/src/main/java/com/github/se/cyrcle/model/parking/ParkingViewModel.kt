@@ -31,7 +31,7 @@ const val MAX_RADIUS = 1000.0
 const val RADIUS_INCREMENT = 100.0
 const val MIN_NB_PARKINGS = 10
 const val NB_REPORTS_THRESH = 1
-const val NB_REPORTS_MAXSEVERITY_THRESH = 4
+const val NB_REPORTS_MAXSEVERITY_THRESH = 1
 const val MAX_SEVERITY = 3
 
 const val PARKING_MAX_AREA = 1000.0
@@ -413,6 +413,22 @@ class ParkingViewModel(
    */
   fun Parking.findImageByPath(destinationPath: String): ParkingImage? {
     return imageObjects.find { it.imagePath == destinationPath }
+  }
+
+  /**
+   * Retrieves the image URL for a given image path.
+   *
+   * @param imagePath The path of the image stored in the repository.
+   * @param onSuccess A callback invoked with the image URL upon successful retrieval.
+   */
+  fun getImageUrlFromImagePath(imagePath: String, onSuccess: (String) -> Unit) {
+    imageRepository.getUrl(
+        path = imagePath,
+        onSuccess = { url ->
+          Log.d("ParkingViewModel", "Image URL fetched successfully: $url")
+          onSuccess(url)
+        },
+        { Log.e("ParkingViewModel", "Error fecthing Image URL") })
   }
 
   private val _onlyWithCCTV = MutableStateFlow(false)

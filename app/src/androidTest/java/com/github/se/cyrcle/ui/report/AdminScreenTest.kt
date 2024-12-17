@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.*
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.parking.TestInstancesParking.parking1
 import com.github.se.cyrcle.model.report.ReportedObject
 import com.github.se.cyrcle.model.report.ReportedObjectType
 import com.github.se.cyrcle.model.report.ReportedObjectViewModel
@@ -23,29 +24,48 @@ class AdminScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var navigationActions: NavigationActions
+
+  // Repositories
+  private lateinit var imageRepository: MockImageRepository
+  private lateinit var userRepository: MockUserRepository
+  private lateinit var parkingRepository: MockParkingRepository
+  private lateinit var offlineParkingRepository: MockOfflineParkingRepository
+  private lateinit var reportedObjectRepository: MockReportedObjectRepository
+  private lateinit var reviewRepository: MockReviewRepository
+  private lateinit var authenticationRepository: MockAuthenticationRepository
+
+  // ViewModels
   private lateinit var parkingViewModel: ParkingViewModel
   private lateinit var reviewViewModel: ReviewViewModel
   private lateinit var reportedObjectViewModel: ReportedObjectViewModel
 
   @Before
   fun setUp() {
+    // Initialize Repositories
+    imageRepository = MockImageRepository()
+    userRepository = MockUserRepository()
+    parkingRepository = MockParkingRepository()
+    offlineParkingRepository = MockOfflineParkingRepository()
+    reportedObjectRepository = MockReportedObjectRepository()
+    reviewRepository = MockReviewRepository()
+    authenticationRepository = MockAuthenticationRepository()
+
+    // Initialize Navigation Actions
     navigationActions = mock(NavigationActions::class.java)
 
     // Initialize ViewModels with Mock Repositories
     parkingViewModel =
         ParkingViewModel(
-            MockImageRepository(),
+            imageRepository,
             userViewModel =
                 UserViewModel(
-                    MockUserRepository(),
-                    MockParkingRepository(),
-                    MockImageRepository(),
-                    MockAuthenticationRepository()),
-            MockParkingRepository(),
-            MockOfflineParkingRepository(),
-            MockReportedObjectRepository())
-    reviewViewModel = ReviewViewModel(MockReviewRepository(), MockReportedObjectRepository())
-    reportedObjectViewModel = ReportedObjectViewModel(MockReportedObjectRepository())
+                    userRepository, parkingRepository, imageRepository, authenticationRepository),
+            parkingRepository,
+            offlineParkingRepository,
+            reportedObjectRepository)
+
+    reviewViewModel = ReviewViewModel(reviewRepository, reportedObjectRepository)
+    reportedObjectViewModel = ReportedObjectViewModel(reportedObjectRepository)
 
     val mockReport1 =
         ReportedObject(
@@ -81,10 +101,10 @@ class AdminScreenTest {
     }
 
     // Check if the top bar is displayed
-    composeTestRule.onNodeWithTag("TopAppBar").assertExists()
+    composeTestRule.onNodeWithTag("TopAppBar").assertIsDisplayed()
 
     // Check if the report list is displayed
-    composeTestRule.onNodeWithTag("ReportList").assertExists()
+    composeTestRule.onNodeWithTag("ReportList").assertIsDisplayed()
   }
 
   @Test
@@ -134,8 +154,11 @@ class AdminScreenTest {
           reviewViewModel = reviewViewModel)
     }
 
-    // Click on sort by Parking
+    composeTestRule.onNodeWithTag("ShowFiltersButton").assertHasClickAction()
     composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
+    composeTestRule
+        .onNodeWithText("Get Reported Parkings (Most Reported First)")
+        .assertHasClickAction()
     composeTestRule.onNodeWithText("Get Reported Parkings (Most Reported First)").performClick()
 
     // Check if the list is sorted by Parking
@@ -153,7 +176,63 @@ class AdminScreenTest {
           reviewViewModel = reviewViewModel)
     }
 
+    composeTestRule.onNodeWithTag("ReportCard0").assertHasClickAction()
     composeTestRule.onNodeWithTag("ReportCard0").performClick()
+    composeTestRule.onNodeWithTag("CheckReportsButton0").assertHasClickAction()
     composeTestRule.onNodeWithTag("CheckReportsButton0").performClick()
+  }
+
+  @Test
+  fun testAlertDialogAppearsOnMoreOptionsClick() {
+    composeTestRule.setContent {
+      AdminScreen(
+          navigationActions = navigationActions,
+          reportedObjectViewModel = reportedObjectViewModel,
+          parkingViewModel = parkingViewModel,
+          reviewViewModel = reviewViewModel)
+    }
+    composeTestRule.onNodeWithTag("ReportCard0").performClick()
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("MoreOptionsButton0").performClick()
+    composeTestRule.waitForIdle()
+    composeTestRule.onNode(isDialog()).assertIsDisplayed()
+    composeTestRule.onNodeWithText("Details for this Reported Object:").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Loading parking details...").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Go To Parking").assertIsDisplayed().assertHasClickAction()
+    composeTestRule.onNodeWithText("Return").assertIsDisplayed().assertHasClickAction()
+    composeTestRule.onNodeWithText("Return").performClick()
+    composeTestRule.waitForIdle()
+    composeTestRule.onNode(isDialog()).assertIsNotDisplayed()
+  }
+
+  @Test
+  fun testReportDetailsContentForParkingType() {
+    composeTestRule.setContent {
+      ReportDetailsContent(
+          objectType = ReportedObjectType.PARKING,
+          objectUID = parking1.uid,
+          userUID = parking1.owner,
+          reviewViewModel = reviewViewModel,
+          parkingViewModel = parkingViewModel)
+    }
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithText("Parking UID: Test_spot_1").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Owner: user1").assertIsDisplayed()
+  }
+
+  @Test
+  fun testReportDetailsContentForImageType() {
+    composeTestRule.setContent {
+      ReportDetailsContent(
+          objectType = ReportedObjectType.IMAGE,
+          objectUID = "image_456",
+          userUID = "user1",
+          reviewViewModel = reviewViewModel,
+          parkingViewModel = parkingViewModel)
+    }
+
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithText("Owner: user1").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Image UID: image_456").assertIsDisplayed()
   }
 }
