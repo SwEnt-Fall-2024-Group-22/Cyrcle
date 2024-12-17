@@ -131,6 +131,7 @@ const val thresholdDisplayZoom = 13.0
 const val ADVANCED_MODE_ZOOM_THRESHOLD = 15.5
 const val CLUSTER_COLORS = "#1A4988"
 const val MAX_SUGGESTION_DISPLAY_NAME_LENGTH_MAP = 100
+const val PIN_BITMAP_SIZE = 80
 
 @Composable
 fun MapScreen(
@@ -142,6 +143,15 @@ fun MapScreen(
     addressViewModel: AddressViewModel,
     zoomState: MutableState<Double> = remember { mutableDoubleStateOf(defaultZoom) }
 ) {
+
+  val context = LocalContext.current
+
+  // Collect the online mode status
+  val isOnlineMode by userViewModel.isOnlineMode.collectAsState()
+
+  // Collect the screen coordinates to update the list of parkings on network change
+  val screenCoordinates by mapViewModel.mapScreenCoordinates.collectAsState()
+
   // Collect the list of parkings from the ParkingViewModel as a state
   val listOfParkings by parkingViewModel.filteredRectParkings.collectAsState(emptyList())
 
@@ -172,8 +182,6 @@ fun MapScreen(
   // Mutable state to store the visibility of the preview card
   var showPreviewCard by remember { mutableStateOf(false) }
 
-  Log.d("MapScreen", "showPreviewCard: $showPreviewCard")
-
   // Collect the selected parking from the ParkingViewModel as a state
   val selectedParking by parkingViewModel.selectedParking.collectAsState()
 
@@ -198,6 +206,7 @@ fun MapScreen(
 
   // List of suggestions from NominatimAPI
   val listOfSuggestions by addressViewModel.addressList.collectAsState()
+
   // We map the list of suggestions to a list of unique suggestions
   val uniqueSuggestions by
       remember(listOfSuggestions) {
@@ -211,8 +220,14 @@ fun MapScreen(
   // Show suggestions screen
   val showSuggestions = remember { mutableStateOf(false) }
 
-  val bitmap = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.dot)
-  val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 80, 80, false)
+  val resizedBitmap = remember {
+    val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.dot)
+    Bitmap.createScaledBitmap(bitmap, PIN_BITMAP_SIZE, PIN_BITMAP_SIZE, false)
+  }
+
+  LaunchedEffect(isOnlineMode) {
+    parkingViewModel.getParkingsInRect(screenCoordinates.first, screenCoordinates.second)
+  }
 
   // Draw markers on the map when the list of parkings changes
   LaunchedEffect(
@@ -275,9 +290,9 @@ fun MapScreen(
                     CameraBoundsOptions.Builder().minZoom(minZoom).maxZoom(maxZoom).build()
                 mapView.mapboxMap.setBounds(cameraBoundsOptions)
 
-                // Get parkings in the current view
-                val (loadedBottomLeft, loadedTopRight) = mapViewModel.getScreenCorners(mapView)
-                parkingViewModel.getParkingsInRect(loadedBottomLeft, loadedTopRight)
+                mapViewModel.updateScreenCoordinates(mapView)
+                parkingViewModel.getParkingsInRect(
+                    screenCoordinates.first, screenCoordinates.second)
 
                 // When map is loaded, check if the location permission is granted and initialize
                 // the
@@ -332,6 +347,7 @@ fun MapScreen(
                       }
 
                       override fun onMove(detector: MoveGestureDetector): Boolean {
+                        mapViewModel.updateScreenCoordinates(mapView)
                         return false
                       }
 
@@ -393,13 +409,10 @@ fun MapScreen(
                 // =======================  CAMERA  LISTENER  =======================
                 mapView.mapboxMap.subscribeCameraChanged {
 
-                  // Get the top right and bottom left coordinates of the current view only when
-                  // what the user sees is outside the screen
-                  val (currentBottomLeft, currentTopRight) = mapViewModel.getScreenCorners(mapView)
-
                   // Temporary fix to avoid loading too much parkings when zoomed out
                   if (mapView.mapboxMap.cameraState.zoom > thresholdDisplayZoom) {
-                    parkingViewModel.getParkingsInRect(currentBottomLeft, currentTopRight)
+                    parkingViewModel.getParkingsInRect(
+                        screenCoordinates.first, screenCoordinates.second)
                   }
                   // On zoom-out past the threshold, switch to the markers mode
                   if (mapView.mapboxMap.cameraState.zoom < ADVANCED_MODE_ZOOM_THRESHOLD &&
