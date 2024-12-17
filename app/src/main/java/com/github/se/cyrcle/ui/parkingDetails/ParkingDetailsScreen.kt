@@ -1,6 +1,7 @@
 package com.github.se.cyrcle.ui.parkingDetails
 
 import android.graphics.Color.parseColor
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -63,6 +64,7 @@ import com.github.se.cyrcle.model.user.UserLevelDisplay
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
+import com.github.se.cyrcle.ui.profile.RainbowText
 import com.github.se.cyrcle.ui.theme.Black
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.Red
@@ -509,22 +511,29 @@ fun ParkingDetailsScreen(
                                   text = stringResource(R.string.card_screen_user),
                                   style = MaterialTheme.typography.bodyMedium,
                                   color = MaterialTheme.colorScheme.onBackground)
-                              Text(
-                                  text =
-                                      stringResource(
-                                          R.string.display_user_tag_format,
-                                          range.symbol,
-                                          level,
-                                          ownerUsername),
-                                  style = MaterialTheme.typography.bodyMedium,
-                                  color =
-                                      if (range.color ==
-                                          stringResource(R.string.rainbow_text_color)) {
-                                        MaterialTheme.colorScheme
-                                            .onSurface // TODO rainbow text color
-                                      } else {
-                                        Color(parseColor(range.color))
-                                      })
+                                if (range.color == stringResource(R.string.rainbow_text_color)) {
+                                    RainbowText(
+                                        text = stringResource(
+                                            R.string.display_user_tag_format,
+                                            range.symbol,
+                                            level,
+                                            ownerUsername
+                                        ),
+                                        modifier = Modifier.testTag("RainbowUserTag")
+                                    )
+                                } else {
+                                    Text(
+                                        text = stringResource(
+                                            R.string.display_user_tag_format,
+                                            range.symbol,
+                                            level,
+                                            ownerUsername
+                                        ),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = Color(parseColor(range.color)),
+                                        modifier = Modifier.testTag("UserTag")
+                                    )
+                                }
                             }
                           }
                     }
