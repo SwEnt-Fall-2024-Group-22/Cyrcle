@@ -131,6 +131,7 @@ const val thresholdDisplayZoom = 13.0
 const val ADVANCED_MODE_ZOOM_THRESHOLD = 15.5
 const val CLUSTER_COLORS = "#1A4988"
 const val MAX_SUGGESTION_DISPLAY_NAME_LENGTH_MAP = 100
+const val PIN_BITMAP_SIZE = 80
 
 @Composable
 fun MapScreen(
@@ -221,7 +222,7 @@ fun MapScreen(
 
   val resizedBitmap = remember {
     val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.dot)
-    Bitmap.createScaledBitmap(bitmap, 80, 80, false)
+    Bitmap.createScaledBitmap(bitmap, PIN_BITMAP_SIZE, PIN_BITMAP_SIZE, false)
   }
 
   LaunchedEffect(isOnlineMode) {

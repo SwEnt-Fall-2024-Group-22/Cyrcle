@@ -54,7 +54,7 @@ class MapViewModel : ViewModel() {
 
   private val _mapScreenCoordinates =
       MutableStateFlow<Pair<Point, Point>>(
-          Pair(Point.fromLngLat(0.0, 0.0), Point.fromLngLat(0.0, 0.0)))
+          Pair(TestInstancesParking.EPFLCenter, TestInstancesParking.EPFLCenter))
   val mapScreenCoordinates: StateFlow<Pair<Point, Point>> = _mapScreenCoordinates
 
   private val _screenCoordinates = MutableStateFlow<List<ScreenCoordinate>>(listOf())
