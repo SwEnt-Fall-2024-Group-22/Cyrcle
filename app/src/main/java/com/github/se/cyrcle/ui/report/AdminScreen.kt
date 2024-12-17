@@ -57,12 +57,21 @@ import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
+/** Enum class representing the available sorting options for reports. */
 enum class ReportSortingOption {
   Parking,
   Review,
   Image
 }
 
+/**
+ * A reusable composable that represents an expandable section with a title and content.
+ *
+ * @param title The title of the filter section.
+ * @param isExpanded A flag indicating if the section should show its content.
+ * @param onToggle A callback to handle expanding or collapsing the section.
+ * @param content The composable content to display when the section is expanded.
+ */
 @Composable
 fun FilterSection(
     title: String,
@@ -89,6 +98,15 @@ fun FilterSection(
       }
 }
 
+/**
+ * Displays details of a reported object based on its type: REVIEW, PARKING, or IMAGE.
+ *
+ * @param objectType The type of the reported object (REVIEW, PARKING, or IMAGE).
+ * @param objectUID The unique identifier of the reported object.
+ * @param userUID The unique identifier of the user associated with the report.
+ * @param reviewViewModel The ViewModel used to fetch review-related data.
+ * @param parkingViewModel The ViewModel used to fetch parking or image data.
+ */
 @Composable
 fun ReportDetailsContent(
     objectType: ReportedObjectType,
@@ -105,11 +123,20 @@ fun ReportDetailsContent(
       }
       review?.let {
         Column(modifier = Modifier.testTag("ReportDetailsContentReview")) {
-          BulletPoint(text = "Review: $objectUID", testTag = "BulletPointReviewUID")
-          BulletPoint(text = "Parking: ${it.parking}", testTag = "BulletPointReviewParking")
-          BulletPoint(text = "Text: ${it.text}", testTag = "BulletPointReviewText")
+          BulletPoint(
+              text = stringResource(R.string.report_details_review_uid).format(objectUID),
+              testTag = "BulletPointReviewUID")
+          BulletPoint(
+              text = stringResource(id = R.string.report_details_review_parking, it.parking),
+              testTag = "BulletPointReviewParking")
+          BulletPoint(
+              text = stringResource(id = R.string.report_details_review_text, it.text),
+              testTag = "BulletPointReviewText")
         }
-      } ?: Text("Loading review details...", Modifier.testTag("LoadingReviewDetails"))
+      }
+          ?: Text(
+              text = stringResource(R.string.loading_review_details),
+              modifier = Modifier.testTag("LoadingReviewDetails"))
     }
     ReportedObjectType.PARKING -> {
       var parking by remember { mutableStateOf<Parking?>(null) }
@@ -118,10 +145,17 @@ fun ReportDetailsContent(
       }
       parking?.let {
         Column(modifier = Modifier.testTag("ReportDetailsContentParking")) {
-          BulletPoint(text = "Parking UID: $objectUID", testTag = "BulletPointParkingUID")
-          BulletPoint(text = "Owner: ${it.owner}", testTag = "BulletPointParkingOwner")
+          BulletPoint(
+              text = stringResource(R.string.report_details_parking_uid).format(objectUID),
+              testTag = "BulletPointParkingUID")
+          BulletPoint(
+              text = stringResource(id = R.string.report_details_parking_owner, it.owner),
+              testTag = "BulletPointParkingOwner")
         }
-      } ?: Text("Loading parking details...", Modifier.testTag("LoadingParkingDetails"))
+      }
+          ?: Text(
+              text = stringResource(R.string.loading_parking_details),
+              modifier = Modifier.testTag("LoadingParkingDetails"))
     }
     ReportedObjectType.IMAGE -> {
       var imageUrl by remember { mutableStateOf<String?>(null) }
@@ -131,14 +165,22 @@ fun ReportDetailsContent(
       Column(modifier = Modifier.testTag("ReportDetailsContentImage")) {
         Image(
             painter = rememberImagePainter(data = imageUrl),
-            contentDescription = "Reported Image",
+            contentDescription = stringResource(R.string.reported_image_description),
             modifier = Modifier.fillMaxWidth().height(200.dp).testTag("ImageContent"))
-        BulletPoint(text = "Owner: $userUID", testTag = "BulletPointImageOwner")
+        BulletPoint(
+            text = stringResource(R.string.report_details_image_owner).format(userUID),
+            testTag = "BulletPointImageOwner")
       }
     }
   }
 }
 
+/**
+ * Displays a filter header containing a toggleable sorting options menu.
+ *
+ * @param selectedSortingOption The currently selected sorting option.
+ * @param onSortingOptionSelected A callback invoked when a new sorting option is selected.
+ */
 @Composable
 fun FilterHeader(
     selectedSortingOption: ReportSortingOption,
@@ -177,6 +219,12 @@ fun FilterHeader(
   }
 }
 
+/**
+ * Displays a selectable list of sorting options for reports.
+ *
+ * @param selectedSortingOption The currently selected sorting option.
+ * @param onOptionSelected A callback invoked when a sorting option is selected.
+ */
 @Composable
 fun SortingOptionSelector(
     selectedSortingOption: ReportSortingOption,
@@ -231,8 +279,8 @@ fun AdminScreen(
   val moreOptions = stringResource(R.string.more_options)
   val optionsForReport = stringResource(R.string.options_for_report)
   val chooseActionForReport = stringResource(R.string.choose_action_for_report)
-  val confirm = stringResource(R.string.confirm)
-  val cancel = stringResource(R.string.cancel)
+  val confirm = stringResource(R.string.Return)
+  val cancel = stringResource(R.string.go_to_parking)
 
   // Filter and sort reports based on the selected sorting option
   val sortedReports =
@@ -336,44 +384,72 @@ fun AdminScreen(
                                               text = cancel,
                                               modifier =
                                                   Modifier.clickable {
-                                                    if ((selectedObject?.objectType) ==
-                                                        ReportedObjectType.PARKING) {
-                                                      parkingViewModel.getParkingById(
-                                                          selectedObject?.objectUID!!,
-                                                          { parking ->
-                                                            parkingViewModel.selectParking(parking)
-                                                            navigationActions.navigateTo(
-                                                                Screen.PARKING_DETAILS)
-                                                          },
-                                                          {})
-                                                    } else if ((selectedObject?.objectType) ==
-                                                        ReportedObjectType.IMAGE) {
-                                                      val parkID =
-                                                          parkingViewModel.getParkingFromImagePath(
-                                                              selectedObject?.objectUID!!)
-                                                      parkingViewModel.getParkingById(
-                                                          parkID,
-                                                          { parking ->
-                                                            parkingViewModel.selectParking(parking)
-                                                            navigationActions.navigateTo(
-                                                                Screen.PARKING_DETAILS)
-                                                          },
-                                                          {})
-                                                    } else {
-                                                      reviewViewModel.getReviewById(
-                                                          selectedObject?.objectUID!!,
-                                                          { review ->
-                                                            parkingViewModel.getParkingById(
-                                                                review.parking,
-                                                                { parking ->
-                                                                  parkingViewModel.selectParking(
-                                                                      parking)
-                                                                  navigationActions.navigateTo(
-                                                                      Screen.PARKING_DETAILS)
-                                                                },
-                                                                {})
-                                                          },
-                                                          {})
+                                                    when (selectedObject?.objectType) {
+                                                      ReportedObjectType.PARKING -> {
+                                                        parkingViewModel.getParkingById(
+                                                            selectedObject?.objectUID!!,
+                                                            onSuccess = { parking ->
+                                                              parkingViewModel.selectParking(
+                                                                  parking)
+                                                              navigationActions.navigateTo(
+                                                                  Screen.PARKING_DETAILS)
+                                                            },
+                                                            onFailure = { error ->
+                                                              // Handle failure for PARKING
+                                                              // retrieval
+                                                              Log.e(
+                                                                  "ParkingError",
+                                                                  "Failed to get parking: ${error.message}")
+                                                            })
+                                                      }
+                                                      ReportedObjectType.IMAGE -> {
+                                                        val parkID =
+                                                            parkingViewModel
+                                                                .getParkingFromImagePath(
+                                                                    selectedObject?.objectUID!!)
+                                                        parkingViewModel.getParkingById(
+                                                            parkID,
+                                                            onSuccess = { parking ->
+                                                              parkingViewModel.selectParking(
+                                                                  parking)
+                                                              navigationActions.navigateTo(
+                                                                  Screen.PARKING_DETAILS)
+                                                            },
+                                                            onFailure = { error ->
+                                                              // Handle failure for IMAGE-based
+                                                              // parking retrieval
+                                                              Log.e(
+                                                                  "ImageError",
+                                                                  "Failed to get parking from image: ${error.message}")
+                                                            })
+                                                      }
+                                                      else -> {
+                                                        reviewViewModel.getReviewById(
+                                                            selectedObject?.objectUID!!,
+                                                            onSuccess = { review ->
+                                                              parkingViewModel.getParkingById(
+                                                                  review.parking,
+                                                                  onSuccess = { parking ->
+                                                                    parkingViewModel.selectParking(
+                                                                        parking)
+                                                                    navigationActions.navigateTo(
+                                                                        Screen.PARKING_DETAILS)
+                                                                  },
+                                                                  onFailure = { error ->
+                                                                    // Handle failure for parking
+                                                                    // retrieval from review
+                                                                    Log.e(
+                                                                        "ParkingFromReviewError",
+                                                                        "Failed to get parking: ${error.message}")
+                                                                  })
+                                                            },
+                                                            onFailure = { error ->
+                                                              // Handle failure for review retrieval
+                                                              Log.e(
+                                                                  "ReviewError",
+                                                                  "Failed to get review: ${error.message}")
+                                                            })
+                                                      }
                                                     }
                                                   },
                                               color = MaterialTheme.colorScheme.secondary)

@@ -17,7 +17,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
-import org.mockito.kotlin.mock
 
 @RunWith(AndroidJUnit4::class)
 class AdminScreenTest {
@@ -25,29 +24,48 @@ class AdminScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var navigationActions: NavigationActions
+
+  // Repositories
+  private lateinit var imageRepository: MockImageRepository
+  private lateinit var userRepository: MockUserRepository
+  private lateinit var parkingRepository: MockParkingRepository
+  private lateinit var offlineParkingRepository: MockOfflineParkingRepository
+  private lateinit var reportedObjectRepository: MockReportedObjectRepository
+  private lateinit var reviewRepository: MockReviewRepository
+  private lateinit var authenticationRepository: MockAuthenticationRepository
+
+  // ViewModels
   private lateinit var parkingViewModel: ParkingViewModel
   private lateinit var reviewViewModel: ReviewViewModel
   private lateinit var reportedObjectViewModel: ReportedObjectViewModel
 
   @Before
   fun setUp() {
+    // Initialize Repositories
+    imageRepository = MockImageRepository()
+    userRepository = MockUserRepository()
+    parkingRepository = MockParkingRepository()
+    offlineParkingRepository = MockOfflineParkingRepository()
+    reportedObjectRepository = MockReportedObjectRepository()
+    reviewRepository = MockReviewRepository()
+    authenticationRepository = MockAuthenticationRepository()
+
+    // Initialize Navigation Actions
     navigationActions = mock(NavigationActions::class.java)
 
     // Initialize ViewModels with Mock Repositories
     parkingViewModel =
         ParkingViewModel(
-            MockImageRepository(),
+            imageRepository,
             userViewModel =
                 UserViewModel(
-                    MockUserRepository(),
-                    MockParkingRepository(),
-                    MockImageRepository(),
-                    MockAuthenticationRepository()),
-            MockParkingRepository(),
-            MockOfflineParkingRepository(),
-            MockReportedObjectRepository())
-    reviewViewModel = ReviewViewModel(MockReviewRepository(), MockReportedObjectRepository())
-    reportedObjectViewModel = ReportedObjectViewModel(MockReportedObjectRepository())
+                    userRepository, parkingRepository, imageRepository, authenticationRepository),
+            parkingRepository,
+            offlineParkingRepository,
+            reportedObjectRepository)
+
+    reviewViewModel = ReviewViewModel(reviewRepository, reportedObjectRepository)
+    reportedObjectViewModel = ReportedObjectViewModel(reportedObjectRepository)
 
     val mockReport1 =
         ReportedObject(
@@ -234,8 +252,6 @@ class AdminScreenTest {
     }
 
     composeTestRule.waitForIdle()
-
-    // Directly assert the text content exists
     composeTestRule.onNodeWithText("Owner: user1").assertExists()
   }
 }
