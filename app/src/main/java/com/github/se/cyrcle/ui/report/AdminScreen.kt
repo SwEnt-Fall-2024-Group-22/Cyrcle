@@ -160,7 +160,7 @@ fun ReportDetailsContent(
     ReportedObjectType.IMAGE -> {
       var imageUrl by remember { mutableStateOf<String?>(null) }
       LaunchedEffect(objectUID) {
-        parkingViewModel.getImageUrlFromImagePath(objectUID!!) { url -> imageUrl = url }
+        parkingViewModel.getImageUrlFromImagePath(objectUID) { url -> imageUrl = url }
       }
       Column(modifier = Modifier.testTag("ReportDetailsContentImage")) {
         Image(
@@ -170,6 +170,9 @@ fun ReportDetailsContent(
         BulletPoint(
             text = stringResource(R.string.report_details_image_owner).format(userUID),
             testTag = "BulletPointImageOwner")
+        BulletPoint(
+            text = stringResource(R.string.report_details_image_uid).format(objectUID),
+            testTag = "BulletPointImageID")
       }
     }
   }

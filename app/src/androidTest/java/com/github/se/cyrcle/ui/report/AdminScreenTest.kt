@@ -213,15 +213,9 @@ class AdminScreenTest {
           reviewViewModel = reviewViewModel,
           parkingViewModel = parkingViewModel)
     }
-    composeTestRule.onNodeWithTag("BulletPointParkingUID").assertIsDisplayed().onChildren()
-
-    composeTestRule
-        .onNodeWithTag("BulletPointParkingUID")
-        .assertTextContains("Parking UID: Test_spot_1")
-
-    composeTestRule.onNodeWithTag("BulletPointParkingOwner").assertIsDisplayed().onChildren()
-
-    composeTestRule.onNodeWithTag("BulletPointParkingOwner").assertTextContains("Owner: user1")
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithText("Parking UID: Test_spot_1").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Owner: user1").assertIsDisplayed()
   }
 
   @Test
@@ -237,5 +231,6 @@ class AdminScreenTest {
 
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithText("Owner: user1").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Image UID: image_456").assertIsDisplayed()
   }
 }
