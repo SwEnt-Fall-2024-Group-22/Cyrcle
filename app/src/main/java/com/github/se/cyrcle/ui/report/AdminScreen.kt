@@ -97,7 +97,6 @@ fun ReportDetailsContent(
     reviewViewModel: ReviewViewModel,
     parkingViewModel: ParkingViewModel
 ) {
-
   when (objectType) {
     ReportedObjectType.REVIEW -> {
       var review by remember { mutableStateOf<Review?>(null) }
@@ -105,12 +104,12 @@ fun ReportDetailsContent(
         reviewViewModel.getReviewById(objectUID!!, { result -> review = result }, {})
       }
       review?.let {
-        Column {
+        Column(modifier = Modifier.testTag("ReportDetailsContentReview")) {
           BulletPoint(text = "Review: $objectUID", testTag = "BulletPointReviewUID")
-          BulletPoint(text = "Parking: ${it.parking}", testTag = "BulletPointReviewUID")
-          BulletPoint(text = "Text: ${it.text}", testTag = "BulletPointUserID")
+          BulletPoint(text = "Parking: ${it.parking}", testTag = "BulletPointReviewParking")
+          BulletPoint(text = "Text: ${it.text}", testTag = "BulletPointReviewText")
         }
-      } ?: Text("Loading review details...")
+      } ?: Text("Loading review details...", Modifier.testTag("LoadingReviewDetails"))
     }
     ReportedObjectType.PARKING -> {
       var parking by remember { mutableStateOf<Parking?>(null) }
@@ -118,26 +117,24 @@ fun ReportDetailsContent(
         parkingViewModel.getParkingById(objectUID!!, { result -> parking = result }, {})
       }
       parking?.let {
-        Column {
+        Column(modifier = Modifier.testTag("ReportDetailsContentParking")) {
           BulletPoint(text = "Parking UID: $objectUID", testTag = "BulletPointParkingUID")
-          BulletPoint(text = "Owner: ${it.owner}", testTag = "BulletPointParkingLocation")
+          BulletPoint(text = "Owner: ${it.owner}", testTag = "BulletPointParkingOwner")
         }
-      } ?: Text("Loading parking details...")
+      } ?: Text("Loading parking details...", Modifier.testTag("LoadingParkingDetails"))
     }
     ReportedObjectType.IMAGE -> {
       var imageUrl by remember { mutableStateOf<String?>(null) }
-      var parking by remember { mutableStateOf<Parking?>(null) }
       LaunchedEffect(objectUID) {
-        parkingViewModel.getParkingById(objectUID!!, { result -> parking = result }, {})
+        parkingViewModel.getImageUrlFromImagePath(objectUID!!) { url -> imageUrl = url }
       }
-      parkingViewModel.getImageUrlFromImagePath(objectUID!!) { url -> imageUrl = url }
-      Column {
+      Column(modifier = Modifier.testTag("ReportDetailsContentImage")) {
         Image(
             painter = rememberImagePainter(data = imageUrl),
-            contentDescription = null,
+            contentDescription = "Reported Image",
             modifier = Modifier.fillMaxWidth().height(200.dp).testTag("ImageContent"))
+        BulletPoint(text = "Owner: $userUID", testTag = "BulletPointImageOwner")
       }
-      BulletPoint(text = "Owner: $userUID", testTag = "BulletPointImageUserID")
     }
   }
 }

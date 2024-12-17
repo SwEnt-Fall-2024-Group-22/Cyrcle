@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.*
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.parking.TestInstancesParking.parking1
 import com.github.se.cyrcle.model.report.ReportedObject
 import com.github.se.cyrcle.model.report.ReportedObjectType
 import com.github.se.cyrcle.model.report.ReportedObjectViewModel
@@ -16,6 +17,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
+import org.mockito.kotlin.mock
 
 @RunWith(AndroidJUnit4::class)
 class AdminScreenTest {
@@ -155,5 +157,85 @@ class AdminScreenTest {
 
     composeTestRule.onNodeWithTag("ReportCard0").performClick()
     composeTestRule.onNodeWithTag("CheckReportsButton0").performClick()
+  }
+
+  @Test
+  fun testAlertDialogAppearsOnMoreOptionsClick() {
+    composeTestRule.setContent {
+      AdminScreen(
+          navigationActions = navigationActions,
+          reportedObjectViewModel = reportedObjectViewModel,
+          parkingViewModel = parkingViewModel,
+          reviewViewModel = reviewViewModel)
+    }
+
+    // Expand the first report card
+    composeTestRule.onNodeWithTag("ReportCard0").performClick()
+    composeTestRule.waitForIdle()
+
+    // Click the More Options button
+    composeTestRule.onNodeWithTag("MoreOptionsButton0").performClick()
+    composeTestRule.waitForIdle()
+
+    // Assert dialog appears
+    composeTestRule.onNode(isDialog()).assertExists()
+
+    // Validate dialog content
+    composeTestRule.onNodeWithText("Details for this Reported Object:").assertExists()
+    composeTestRule.onNodeWithText("Loading parking details...").assertExists()
+
+    // Validate buttons
+    composeTestRule.onNodeWithText("Go To Parking").assertExists().assertHasClickAction()
+    composeTestRule.onNodeWithText("Return").assertExists().assertHasClickAction()
+
+    // Dismiss the dialog
+    composeTestRule.onNodeWithText("Return").performClick()
+    composeTestRule.waitForIdle()
+
+    // Ensure dialog is dismissed
+    composeTestRule.onNode(isDialog()).assertDoesNotExist()
+  }
+
+  @Test
+  fun testReportDetailsContentForParkingType() {
+    composeTestRule.setContent {
+      ReportDetailsContent(
+          objectType = ReportedObjectType.PARKING,
+          objectUID = parking1.uid,
+          userUID = parking1.owner,
+          reviewViewModel = reviewViewModel,
+          parkingViewModel = parkingViewModel)
+    }
+    composeTestRule
+        .onNodeWithTag("BulletPointParkingUID")
+        .assertExists()
+        .onChildren() // Focus on child nodes to inspect contents
+        .assertAny(hasText("Parking UID: Test_spot_1"))
+
+    composeTestRule
+        .onNodeWithTag("BulletPointParkingOwner")
+        .assertExists()
+        .onChildren()
+        .assertAny(hasText("Owner: user1"))
+
+    // Print the state of the root composable after validation
+    composeTestRule.onRoot().printToLog("ParkingDetailsTestRootAfterValidation")
+  }
+
+  @Test
+  fun testReportDetailsContentForImageType() {
+    composeTestRule.setContent {
+      ReportDetailsContent(
+          objectType = ReportedObjectType.IMAGE,
+          objectUID = "image_456",
+          userUID = "user1",
+          reviewViewModel = reviewViewModel,
+          parkingViewModel = parkingViewModel)
+    }
+
+    composeTestRule.waitForIdle()
+
+    // Directly assert the text content exists
+    composeTestRule.onNodeWithText("Owner: user1").assertExists()
   }
 }
