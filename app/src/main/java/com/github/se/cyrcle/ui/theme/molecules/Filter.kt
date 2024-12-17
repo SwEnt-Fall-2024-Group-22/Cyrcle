@@ -1,7 +1,6 @@
 package com.github.se.cyrcle.ui.theme.molecules
 
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -468,7 +467,7 @@ fun SearchBarListScreen(
                     val amount = matchGiveCoins.groupValues[1].toInt()
 
                     if (amount > 10) {
-                      // User loses all coins if they try to add more than 1000 coins
+                      // User loses all coins if they try to add more than 10 coins
                       userViewModel.currentUser.value?.details?.wallet?.let {
                         userViewModel.tryDebitCoinsFromCurrentUser(it.getCoins())
                       } // Implement a function to reset coins
@@ -492,7 +491,6 @@ fun SearchBarListScreen(
                   // Easter Egg 2: Kill Command
                   val matchKill = killRegex.matchEntire(textFieldValue.value.trim())
                   if (matchKill != null) {
-                    Log.e("FAVORITE_TAG", "/kill")
                     textFieldValue.value = ""
                     Toast.makeText(context, "Goodbye, cruel world!", Toast.LENGTH_SHORT).show()
                     throw RuntimeException("Goodbye, cruel world!")
