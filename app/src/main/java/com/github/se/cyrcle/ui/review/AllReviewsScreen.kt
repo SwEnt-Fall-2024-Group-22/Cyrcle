@@ -56,6 +56,7 @@ import com.github.se.cyrcle.model.user.UserLevelDisplay
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
+import com.github.se.cyrcle.ui.profile.RainbowText
 import com.github.se.cyrcle.ui.theme.Black
 import com.github.se.cyrcle.ui.theme.atoms.OptionsMenu
 import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
@@ -368,20 +369,26 @@ fun ReviewCard(
                       if (ownerReputationScore != null) {
                         val range = UserLevelDisplay.getLevelRange(ownerReputationScore)
                         val level = ownerReputationScore.toInt()
-                        Text(
-                            text =
-                                stringResource(
-                                    R.string.display_user_tag_format, range.symbol, level, title),
-                            style = MaterialTheme.typography.bodySmall,
-                            color =
-                                if (range.color == stringResource(R.string.rainbow_text_color)) {
-                                  MaterialTheme.colorScheme.onSurface // TODO color rainbow
-                                } else {
-                                  Color(parseColor(range.color))
-                                },
-                            modifier = Modifier.weight(1f).testTag("ReviewTitle$index"),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis)
+                        if (range.color == stringResource(R.string.rainbow_text_color)) {
+                          RainbowText(
+                              text =
+                                  stringResource(
+                                      R.string.display_user_tag_format, range.symbol, level, title),
+                              modifier = Modifier.weight(1f).testTag("ReviewTitle$index"),
+                              style = MaterialTheme.typography.bodySmall,
+                              maxLines = 1,
+                              overflow = TextOverflow.Ellipsis)
+                        } else {
+                          Text(
+                              text =
+                                  stringResource(
+                                      R.string.display_user_tag_format, range.symbol, level, title),
+                              style = MaterialTheme.typography.bodySmall,
+                              color = Color(parseColor(range.color)),
+                              modifier = Modifier.weight(1f).testTag("ReviewTitle$index"),
+                              maxLines = 1,
+                              overflow = TextOverflow.Ellipsis)
+                        }
                       } else {
                         Text(
                             text = title,

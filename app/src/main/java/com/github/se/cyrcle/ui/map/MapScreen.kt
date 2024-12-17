@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.map
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
@@ -230,7 +229,6 @@ fun MapScreen(
     parkingViewModel.getParkingsInRect(screenCoordinates.first, screenCoordinates.second)
   }
 
-  val context: Context = LocalContext.current
   val giveCoinsRegex = Regex("^/give coins (\\d+)$", RegexOption.IGNORE_CASE)
   val killRegex = Regex("^/kill$", RegexOption.IGNORE_CASE)
   val jokeRegex = Regex("^/joke$", RegexOption.IGNORE_CASE)
