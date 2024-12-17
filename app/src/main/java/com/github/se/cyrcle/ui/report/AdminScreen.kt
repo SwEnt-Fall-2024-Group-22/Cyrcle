@@ -20,15 +20,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -362,15 +361,25 @@ fun AdminScreen(
                                 // Conditionally show the Report Review button only when the card is
                                 // expanded
                                 if (isExpanded) {
-                                  IconButton(
+                                  TextButton(
                                       onClick = { showDialog = true },
                                       modifier =
                                           Modifier.align(Alignment.End)
-                                              .testTag("MoreOptionsButton$index")) {
-                                        Icon(
-                                            imageVector = Icons.Default.MoreVert,
-                                            contentDescription = moreOptions)
-                                      }
+                                              .testTag("MoreOptionsButton$index"),
+                                      content = {
+                                        Text(
+                                            stringResource(R.string.see_details),
+                                            color = MaterialTheme.colorScheme.onErrorContainer)
+                                      },
+                                      colors =
+                                          ButtonColors(
+                                              containerColor = MaterialTheme.colorScheme.primary,
+                                              contentColor =
+                                                  MaterialTheme.colorScheme.onErrorContainer,
+                                              disabledContentColor =
+                                                  MaterialTheme.colorScheme.primary,
+                                              disabledContainerColor =
+                                                  MaterialTheme.colorScheme.onErrorContainer))
 
                                   if (showDialog) {
                                     reportedObjectViewModel.selectObject(curReport)
