@@ -2,7 +2,6 @@ package com.github.se.cyrcle.model.network
 
 import android.content.Context
 import android.util.Log
-import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -19,7 +18,6 @@ import kotlinx.coroutines.launch
  */
 class ConnectivityObserver(
     private val userViewModel: UserViewModel,
-    private val mapViewModel: MapViewModel,
     private val parkingViewModel: ParkingViewModel
 ) {
   private lateinit var networkReceiver: NetworkReceiver

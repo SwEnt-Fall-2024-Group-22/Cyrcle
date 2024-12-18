@@ -16,8 +16,6 @@ import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.offline.OfflineParkingRepository
 import com.github.se.cyrcle.model.parking.online.ParkingRepository
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
-import com.github.se.cyrcle.model.review.ReviewRepository
-import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.user.UserRepository
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
@@ -36,13 +34,8 @@ class ParkingDetailsScreenAlertDialogTest {
   private lateinit var offlineParkingRepository: OfflineParkingRepository
   private lateinit var imageRepository: ImageRepository
   private lateinit var userRepository: UserRepository
-  private lateinit var reviewRepository: ReviewRepository
   private lateinit var mockReportedObjectRepository: ReportedObjectRepository
   private lateinit var authenticator: MockAuthenticationRepository
-
-  private lateinit var userViewModel: UserViewModel
-  private lateinit var parkingViewModel: ParkingViewModel
-  private lateinit var reviewViewModel: ReviewViewModel
 
   private lateinit var navigationActions: NavigationActions
 
@@ -80,7 +73,6 @@ class ParkingDetailsScreenAlertDialogTest {
 
   @Test
   fun testAssertDismissCloseImageDialog() {
-    var dismissedCalled = false
     val userViewModel =
         UserViewModel(
             MockUserRepository(),
@@ -98,7 +90,7 @@ class ParkingDetailsScreenAlertDialogTest {
       ParkingDetailsAlertDialogShowImage(
           parkingViewModel,
           userViewModel,
-          onDismiss = { dismissedCalled = true },
+          onDismiss = {},
           navigationActions = mock(NavigationActions::class.java),
           imageUrl = "https://picsum.photos/200/300")
     }

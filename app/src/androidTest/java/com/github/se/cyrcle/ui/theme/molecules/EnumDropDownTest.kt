@@ -32,7 +32,7 @@ class EnumDropDownTest {
     composeTestRule.onNodeWithTag(tagD, true).assertIsDisplayed()
     composeTestRule.onNodeWithTag("${tagD}Label", true).assertIsDisplayed()
     composeTestRule.onNodeWithTag(tagD).performClick()
-    parkingList.withIndex().forEach { (i, _) ->
+    parkingList.withIndex().forEach { (_, _) ->
       // TODO For some reason, the menu items are not checked
       // composeTestRule.onNodeWithTag("${tagD}${i}Item", true).assertIsDisplayed()
       // composeTestRule.onNodeWithTag("${tagD}${i}Text", true).assertIsDisplayed()
@@ -41,7 +41,7 @@ class EnumDropDownTest {
     composeTestRule.onNodeWithTag(tag1, true).assertIsDisplayed()
     composeTestRule.onNodeWithTag("${tag1}Label", true).assertIsDisplayed()
     composeTestRule.onNodeWithTag(tag1, true).performClick()
-    parkingList.withIndex().forEach { (i, _) ->
+    parkingList.withIndex().forEach { (_, _) ->
       // TODO For some reason, the menu items are not checked
       // composeTestRule.onNodeWithTag("${tag1}${i}Item", true).assertIsDisplayed()
       // composeTestRule.onNodeWithTag("${tag1}${i}Text", true).assertIsDisplayed()

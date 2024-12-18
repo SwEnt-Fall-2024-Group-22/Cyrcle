@@ -1,7 +1,10 @@
 package com.github.se.cyrcle.ui.report
 
-import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.printToLog
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
@@ -10,7 +13,6 @@ import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockReviewRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
-import com.github.se.cyrcle.model.parking.ParkingReport
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.model.report.ReportedObject
@@ -107,7 +109,6 @@ class ViewReportsScreenTest {
           userViewModel = userViewModel)
     }
 
-    val parkingReport = ParkingReport()
     parkingViewModel.selectParking(TestInstancesParking.parking1)
     composeTestRule.onRoot(useUnmergedTree = true).printToLog("ViewReportsScreen")
 

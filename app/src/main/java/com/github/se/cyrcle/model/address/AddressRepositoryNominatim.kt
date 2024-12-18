@@ -3,7 +3,12 @@ package com.github.se.cyrcle.model.address
 import com.google.gson.Gson
 import java.io.IOException
 import javax.inject.Inject
-import okhttp3.*
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.HttpUrl
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 import org.json.JSONArray
 
 class AddressRepositoryNominatim @Inject constructor(private val client: OkHttpClient) :

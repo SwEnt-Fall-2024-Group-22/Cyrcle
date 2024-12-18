@@ -9,7 +9,18 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -17,13 +28,24 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -41,8 +63,13 @@ import com.github.se.cyrcle.model.user.SPIN_COST
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
-import kotlin.math.*
-import kotlinx.coroutines.*
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 private const val textProportion = 0.65f
 
@@ -183,8 +210,7 @@ fun WheelView(
           0 -> {
             if (shouldTriggerNearMiss) {
               if (Math.random() < 0.6) {
-                val maxOffsetLeft = angleWithinSegment
-                randomOffset = -maxOffsetLeft * (0.85f + (Math.random() * 0.13f).toFloat())
+                randomOffset = -angleWithinSegment * (0.85f + (Math.random() * 0.13f).toFloat())
               } else {
                 val maxOffsetRight = segmentAngle - angleWithinSegment
                 randomOffset = maxOffsetRight * (0.95f + (Math.random() * 0.03f).toFloat())
@@ -193,16 +219,14 @@ fun WheelView(
           }
           1 -> {
             if (Math.random() < 0.8f) {
-              val maxOffsetLeft = angleWithinSegment
               val maxOffsetRight = segmentAngle - angleWithinSegment
-              val nearWinOffset = minOf(maxOffsetLeft, maxOffsetRight) * 0.05f
+              val nearWinOffset = minOf(angleWithinSegment, maxOffsetRight) * 0.05f
               randomOffset = (Math.random() * 2 * nearWinOffset - nearWinOffset).toFloat()
             }
           }
           2 -> {
             if (shouldTriggerNearMiss) {
-              val maxOffsetLeft = angleWithinSegment
-              randomOffset = -maxOffsetLeft * (0.80f + (Math.random() * 0.18f).toFloat())
+              randomOffset = -angleWithinSegment * (0.80f + (Math.random() * 0.18f).toFloat())
             }
           }
           3 -> {
@@ -213,9 +237,8 @@ fun WheelView(
           }
           4 -> {
             if (Math.random() < 0.8f) {
-              val maxOffsetLeft = angleWithinSegment
               val maxOffsetRight = segmentAngle - angleWithinSegment
-              val nearWinOffset = minOf(maxOffsetLeft, maxOffsetRight) * 0.05f
+              val nearWinOffset = minOf(angleWithinSegment, maxOffsetRight) * 0.05f
               randomOffset = (Math.random() * 2 * nearWinOffset - nearWinOffset).toFloat()
             }
           }
@@ -363,17 +386,16 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
   var displayedLevel by remember { mutableIntStateOf(flooredLevel) }
   val animatedProgress = remember { Animatable(targetProgress) }
 
-  var xpIncrement by remember { mutableStateOf(0.0) }
+  var xpIncrement by remember { mutableDoubleStateOf(0.0) }
   var showXpIncrement by remember { mutableStateOf(false) }
   var rarityText by remember { mutableStateOf("") }
   var isSpinning by remember { mutableStateOf(false) }
 
   LaunchedEffect(currentLevel) {
     val startLevel = displayedLevel
-    val endLevel = flooredLevel
 
-    if (endLevel > startLevel) {
-      for (level in startLevel until endLevel) {
+    if (flooredLevel > startLevel) {
+      for (level in startLevel until flooredLevel) {
         animatedProgress.animateTo(
             targetValue = 1f,
             animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing))

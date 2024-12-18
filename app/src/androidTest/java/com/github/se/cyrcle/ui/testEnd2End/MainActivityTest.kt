@@ -374,16 +374,6 @@ class MainActivityTest {
     }
 
     @OptIn(ExperimentalTestApi::class)
-    fun toMap() {
-      composeTestRule
-          .onNodeWithTag(TopLevelDestinations.MAP.textId)
-          .assertHasClickAction()
-          .performClick()
-
-      composeTestRule.waitUntilExactlyOneExists(hasTestTag("MapScreen"))
-    }
-
-    @OptIn(ExperimentalTestApi::class)
     fun toUserProfile() {
       composeTestRule
           .onNodeWithTag(TopLevelDestinations.PROFILE.textId)
@@ -391,16 +381,6 @@ class MainActivityTest {
           .performClick()
 
       composeTestRule.waitUntilExactlyOneExists(hasTestTag("ViewProfileScreen"))
-    }
-
-    @OptIn(ExperimentalTestApi::class)
-    fun toAnonymousUserProfile() {
-      composeTestRule
-          .onNodeWithTag(TopLevelDestinations.PROFILE.textId)
-          .assertHasClickAction()
-          .performClick()
-
-      composeTestRule.waitUntilExactlyOneExists(hasTestTag("CreateProfileScreen"))
     }
   }
 
@@ -507,7 +487,6 @@ class MainActivityTest {
   // ============================ USER PROFILE ROBOT ============================
   // ============================================================================
   private class UserProfileRobot(val composeTestRule: ComposeTestRule) {
-    @OptIn(ExperimentalTestApi::class)
     fun assertUserProfileScreen(isUserSignedIn: Boolean) {
       if (isUserSignedIn) {
         composeTestRule.onNodeWithTag("ViewProfileScreen").assertIsDisplayed()
@@ -531,26 +510,6 @@ class MainActivityTest {
     }
 
     @OptIn(ExperimentalTestApi::class)
-    fun toMap() {
-      composeTestRule
-          .onNodeWithTag("MapScreen")
-          .assertIsDisplayed()
-          .assertHasClickAction()
-          .performClick()
-      composeTestRule.waitUntilExactlyOneExists(hasTestTag("MapScreen"))
-    }
-
-    @OptIn(ExperimentalTestApi::class)
-    fun toList() {
-      composeTestRule
-          .onNodeWithTag("SpotListColumn")
-          .assertIsDisplayed()
-          .assertHasClickAction()
-          .performClick()
-      composeTestRule.waitUntilExactlyOneExists(hasTestTag("SpotListScreen"))
-    }
-
-    @OptIn(ExperimentalTestApi::class)
     fun toAuth() {
       composeTestRule
           .onNodeWithTag("GoBackToSignInButton")
@@ -565,10 +524,10 @@ class MainActivityTest {
   // ============================================================================
   private class AllReviewRobot(val composeTestRule: ComposeTestRule) {
 
-    fun assertAllReviewScreen(SignedIn: Boolean) {
+    fun assertAllReviewScreen(signedIn: Boolean) {
       composeTestRule.onNodeWithTag("ReviewCard0").assertIsDisplayed()
 
-      if (SignedIn) {
+      if (signedIn) {
         composeTestRule.onNodeWithTag("AddReviewButton").assertIsDisplayed().assertHasClickAction()
       } else {
         composeTestRule.onNodeWithTag("AddReviewButton").assertIsNotDisplayed()

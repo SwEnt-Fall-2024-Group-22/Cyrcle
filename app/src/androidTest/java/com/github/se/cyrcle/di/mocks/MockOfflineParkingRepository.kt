@@ -12,7 +12,7 @@ import javax.inject.Inject
 
 class MockOfflineParkingRepository @Inject constructor() : OfflineParkingRepository {
   var uid: Int = 0
-  var parkings = mutableListOf<Parking>()
+  private var parkings = mutableListOf<Parking>()
 
   private val reports =
       mutableListOf(
