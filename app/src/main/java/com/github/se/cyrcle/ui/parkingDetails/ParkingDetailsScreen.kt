@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -27,6 +28,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.AddAPhoto
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -436,10 +438,23 @@ fun ParkingDetailsScreen(
                                   color = MaterialTheme.colorScheme.onSurface)
                             }
                             Column(modifier = Modifier.weight(1f).testTag("RackTypeColumn")) {
-                              Text(
-                                  text = stringResource(R.string.card_screen_rack_type),
-                                  style = MaterialTheme.typography.bodyMedium,
-                                  color = MaterialTheme.colorScheme.onBackground)
+                              Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = stringResource(R.string.card_screen_rack_type),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onBackground)
+                                Icon(
+                                    imageVector = Icons.Outlined.Info,
+                                    contentDescription = "Info",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier =
+                                        Modifier.padding(horizontal = 4.dp)
+                                            .size(16.dp)
+                                            .testTag("RackInfoIcon")
+                                            .clickable {
+                                              navigationActions.navigateTo(Screen.RACK_INFO)
+                                            })
+                              }
                               Text(
                                   text = selectedParking.rackType.description,
                                   style = MaterialTheme.typography.bodyMedium,
