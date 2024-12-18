@@ -872,8 +872,6 @@ class ParkingViewModel(
             .toInt() / 100.00
     parking.nbReviews += 1
     parkingRepository.updateParking(parking, onSuccess = { updateCache(parking) }, onFailure = {})
-    // updates the cache  :
-
   }
 
   /**
