@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AddModerator
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Diamond
@@ -105,16 +106,30 @@ fun ViewProfileScreen(
             selectedItem = Route.VIEW_PROFILE)
       }) { innerPadding ->
         Box(Modifier.fillMaxSize().padding(innerPadding)) {
-          IconButton(
-              modifier = Modifier.padding(10.dp).align(Alignment.TopEnd),
+          Row(
+            modifier = Modifier.padding(top = 10.dp).align(Alignment.TopEnd),
+            horizontalArrangement = Arrangement.End
+          ) {
+            IconButton(
+              modifier = Modifier.padding(end = 10.dp),
               icon = Icons.Filled.Outbox,
               contentDescription = "Sign Out",
               testTag = "SignOutButton",
               onClick = { signOut = true })
 
+            if (userViewModel.currentUser.collectAsState().value?.details?.isAdmin == true) {
+              IconButton(
+                modifier = Modifier.padding(end = 10.dp),
+                icon = Icons.AutoMirrored.Filled.MenuBook,
+                contentDescription = "Tutorial",
+                testTag = "TutorialButton",
+                onClick = { navigationActions.navigateTo(Route.TUTORIAL) })
+            }
+          }
+
           if (userViewModel.currentUser.collectAsState().value?.details?.isAdmin == true) {
             IconButton(
-                modifier = Modifier.padding(10.dp).align(Alignment.TopEnd).padding(80.dp),
+                modifier = Modifier.padding(10.dp).align(Alignment.TopEnd).padding(end = 100.dp, top=80.dp),
                 icon = Icons.Filled.AddModerator,
                 contentDescription = "Admin",
                 testTag = "AdminButton",

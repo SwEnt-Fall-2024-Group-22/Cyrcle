@@ -54,7 +54,7 @@ private val split = 0.70f
  * to the map screen.
  */
 @Composable
-fun TutorialScreen(navigationActions: NavigationActions) {
+fun TutorialScreen(navigationActions: NavigationActions, finalDestination: String = Route.MAP) {
   var currentPage by remember { mutableIntStateOf(0) }
 
   /* As no list can be created (the whole list would be displayed at once before the layout), this
@@ -127,7 +127,7 @@ fun TutorialScreen(navigationActions: NavigationActions) {
               style =
                   TextStyle(
                       textDecoration = TextDecoration.Underline, fontStyle = FontStyle.Italic),
-              onClick = { navigationActions.navigateTo(Route.MAP) })
+              onClick = { navigationActions.navigateTo(finalDestination) })
         }
   }
 }
