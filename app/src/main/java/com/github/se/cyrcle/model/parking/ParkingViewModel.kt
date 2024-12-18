@@ -1054,7 +1054,7 @@ class ParkingViewModel(
   private fun updateCache(parking: Parking) {
     val tile = TileUtils.getTileFromPoint(parking.location.center)
     tilesToParking[tile] =
-        tilesToParking[tile]?.map { if (it.uid == parking.uid) parking else it }!!
+        tilesToParking[tile]?.map { if (it.uid == parking.uid) parking else it } ?: emptyList()
   }
 
   /** Changes the parking view model to offline mode. */
