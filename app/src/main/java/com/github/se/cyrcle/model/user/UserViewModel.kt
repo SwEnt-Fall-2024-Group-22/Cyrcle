@@ -22,9 +22,6 @@ class UserViewModel(
   private val _currentUser = MutableStateFlow<User?>(null)
   val currentUser: StateFlow<User?> = _currentUser
 
-  private val _selectedParkingOwner = MutableStateFlow<User?>(null)
-  val selectedParkingOwner: StateFlow<User?> = _selectedParkingOwner
-
   var _selectedUserImageUrls = MutableStateFlow<List<String>>(emptyList())
   var selectedUserImageUrls: StateFlow<List<String>> = _selectedUserImageUrls
 
@@ -77,26 +74,9 @@ class UserViewModel(
           onFailure = { Log.e("ParkingViewModel", "Error getting image URL for path") })
     }
   }
-  /**
-   * Sets the selected parking owner in the view model. Updates `_selectedParkingOwner` with the
-   * provided user and logs the action.
-   *
-   * @param user The user to set as the selected parking owner, or `null` to clear the selection.
-   */
-  fun setParkingUser(user: User?) {
-    Log.d("UserViewModel", "Setting the current user in viewmodel : $user")
-    _selectedParkingOwner.value = user
-  }
 
   private val _favoriteParkings = MutableStateFlow<List<Parking>>(emptyList())
   val favoriteParkings: StateFlow<List<Parking>> = _favoriteParkings
-
-  private val _reportedParkings = MutableStateFlow<List<String>>(emptyList())
-  val reportedParkings: StateFlow<List<String>> = _reportedParkings
-
-  private val _reportedReviews = MutableStateFlow<List<String>>(emptyList())
-  val reportedReviews: StateFlow<List<String>> = _reportedReviews
-
   /**
    * Set the current user by fetching the user from the Firestore database with the given ID.
    *
@@ -230,22 +210,7 @@ class UserViewModel(
       val updatedDetails =
           user.details?.copy(reportedParkings = user.details.reportedParkings + parking)
       val updatedUser = user.copy(details = updatedDetails)
-      updateUser(updatedUser) { _reportedParkings.value += parking }
-    }
-  }
-
-  /**
-   * Adds a review to the list of reported reviews for the selected user and updates the reported
-   * reviews state.
-   *
-   * @param review The review ID to add to the list of reported reviews.
-   */
-  fun addReportedReviewToSelectedUser(review: String) {
-    currentUser.value?.let { user ->
-      val updatedDetails =
-          user.details?.copy(reportedReviews = user.details.reportedReviews + review)
-      val updatedUser = user.copy(details = updatedDetails)
-      updateUser(updatedUser) { _reportedParkings.value += review }
+      updateUser(updatedUser) {}
     }
   }
 
@@ -259,7 +224,7 @@ class UserViewModel(
     currentUser.value?.let { user ->
       val updatedDetails = user.details?.copy(reportedImages = user.details.reportedImages + image)
       val updatedUser = user.copy(details = updatedDetails)
-      updateUser(updatedUser) { _reportedParkings.value += image }
+      updateUser(updatedUser) {  }
     }
   }
 
@@ -273,7 +238,7 @@ class UserViewModel(
     currentUser.value?.let { user ->
       val updatedDetails = user.details?.copy(userImages = user.details.userImages + image)
       val updatedUser = user.copy(details = updatedDetails)
-      updateUser(updatedUser) { _reportedParkings.value += image }
+      updateUser(updatedUser) { }
     }
   }
 
@@ -389,7 +354,7 @@ class UserViewModel(
 
     userRepository.getUserById(
         userId,
-        onSuccess = { setParkingUser(it) },
+        onSuccess = { },
         onFailure = { exception ->
           Log.e(
               "com.github.se.cyrcle.model.user.UserViewModel",

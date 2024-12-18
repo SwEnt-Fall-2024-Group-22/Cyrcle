@@ -72,7 +72,7 @@ import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
-@SuppressLint("StateFlowValueCalledInComposition")
+
 @Composable
 fun ParkingDetailsScreen(
     mapViewModel: MapViewModel,
@@ -97,15 +97,15 @@ fun ParkingDetailsScreen(
   val defaultUsername = stringResource(R.string.undefined_username)
   var ownerReputationScore by remember { mutableDoubleStateOf(0.0) }
   var ownerUsername by remember { mutableStateOf(defaultUsername) }
-  if (selectedParking.owner != "Unknown Owner") {
-    userViewModel.selectSelectedParkingUser(parkingViewModel.selectedParking.value?.owner!!)
+  if (selectedParking.owner != "Unknown Owner" && selectedParking.owner != null) {
+    userViewModel.selectSelectedParkingUser(parkingViewModel.selectedParking.collectAsState().value?.owner!!)
     userViewModel.getUserById(
         selectedParking.owner,
         onSuccess = {
           ownerReputationScore = it.public.userReputationScore
           ownerUsername = it.public.username
         })
-  } else userViewModel.setParkingUser(null)
+  }
   val range = UserLevelDisplay.getLevelRange(ownerReputationScore)
   val level = ownerReputationScore.toInt()
 
@@ -531,7 +531,7 @@ fun ParkingDetailsScreen(
                           colorLevel = ColorLevel.PRIMARY,
                           testTag = "ShowInMapButton")
 
-                      if (userViewModel.currentUser.value != null) {
+                      if (userViewModel.currentUser.collectAsState().value != null) {
                         Button(
                             text = stringResource(R.string.card_screen_report),
                             onClick = { navigationActions.navigateTo(Screen.PARKING_REPORT) },
