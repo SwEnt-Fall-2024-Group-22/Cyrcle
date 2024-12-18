@@ -29,7 +29,6 @@ import com.github.se.cyrcle.ui.theme.molecules.ReportTextBlock
 import com.github.se.cyrcle.ui.theme.molecules.SubmitButtonWithDialog
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
-
 @Composable
 fun ParkingReportScreen(
     navigationActions: NavigationActions,

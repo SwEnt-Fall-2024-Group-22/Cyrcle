@@ -30,11 +30,12 @@ class PreferenceStorageTest {
   private val pkFloat = PreferencesTuple(floatPreferencesKey("float"), 5.0f, 6.0f, 7.0f)
   private val pkDouble = PreferencesTuple(doublePreferencesKey("double"), 7.0, 8.0, 9.0)
   private val pkString = PreferencesTuple(stringPreferencesKey("string"), "A", "B", "C")
-  private val pkBoolean = PreferencesTuple(booleanPreferencesKey("boolean"),
-    defaultValue = true,
-    firstValue = false,
-    secondValue = true
-  )
+  private val pkBoolean =
+      PreferencesTuple(
+          booleanPreferencesKey("boolean"),
+          defaultValue = true,
+          firstValue = false,
+          secondValue = true)
   private val pkByteArray =
       PreferencesTuple(
           byteArrayPreferencesKey("byte array"),

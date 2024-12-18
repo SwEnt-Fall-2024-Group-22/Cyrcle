@@ -3,7 +3,6 @@ package com.github.se.cyrcle.ui.theme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -56,7 +55,7 @@ class ColorTest {
 
   @Test
   fun getOnColorPrimaryLightTest() {
-    composeTestRule.setContent { ColoredSquare(getOnColor(ColorLevel.PRIMARY) )}
+    composeTestRule.setContent { ColoredSquare(getOnColor(ColorLevel.PRIMARY)) }
     composeTestRule.onNodeWithTag("TestTag").assertIsDisplayed()
     // No test for checking the color
   }
@@ -84,72 +83,56 @@ class ColorTest {
 
   @Test
   fun getContainerColorPrimaryLightTest() {
-    composeTestRule.setContent {
-      ColoredSquare(getContainerColor(ColorLevel.PRIMARY))
-    }
+    composeTestRule.setContent { ColoredSquare(getContainerColor(ColorLevel.PRIMARY)) }
     composeTestRule.onNodeWithTag("TestTag").assertIsDisplayed()
     // No test for checking the color
   }
 
   @Test
   fun getContainerColorSecondaryLightTest() {
-    composeTestRule.setContent {
-      ColoredSquare(getContainerColor(ColorLevel.SECONDARY))
-    }
+    composeTestRule.setContent { ColoredSquare(getContainerColor(ColorLevel.SECONDARY)) }
     composeTestRule.onNodeWithTag("TestTag").assertIsDisplayed()
     // No test for checking the color
   }
 
   @Test
   fun getContainerColorTertiaryLightTest() {
-    composeTestRule.setContent {
-      ColoredSquare(getContainerColor(ColorLevel.TERTIARY))
-    }
+    composeTestRule.setContent { ColoredSquare(getContainerColor(ColorLevel.TERTIARY)) }
     composeTestRule.onNodeWithTag("TestTag").assertIsDisplayed()
     // No test for checking the color
   }
 
   @Test
   fun getContainerColorErrorLightTest() {
-    composeTestRule.setContent {
-      ColoredSquare(getContainerColor(ColorLevel.ERROR))
-    }
+    composeTestRule.setContent { ColoredSquare(getContainerColor(ColorLevel.ERROR)) }
     composeTestRule.onNodeWithTag("TestTag").assertIsDisplayed()
     // No test for checking the color
   }
 
   @Test
   fun getOnContainerColorPrimaryLightTest() {
-    composeTestRule.setContent {
-      ColoredSquare(getOnContainerColor(ColorLevel.PRIMARY))
-    }
+    composeTestRule.setContent { ColoredSquare(getOnContainerColor(ColorLevel.PRIMARY)) }
     composeTestRule.onNodeWithTag("TestTag").assertIsDisplayed()
     // No test for checking the color
   }
 
   @Test
   fun getOnContainerColorSecondaryLightTest() {
-    composeTestRule.setContent {
-      ColoredSquare(getOnContainerColor(ColorLevel.SECONDARY))
-    }
+    composeTestRule.setContent { ColoredSquare(getOnContainerColor(ColorLevel.SECONDARY)) }
     composeTestRule.onNodeWithTag("TestTag").assertIsDisplayed()
     // No test for checking the color
   }
 
   @Test
   fun getOnContainerColorTertiaryLightTest() {
-    composeTestRule.setContent {
-      ColoredSquare(getOnContainerColor(ColorLevel.TERTIARY))
-    }
+    composeTestRule.setContent { ColoredSquare(getOnContainerColor(ColorLevel.TERTIARY)) }
     composeTestRule.onNodeWithTag("TestTag").assertIsDisplayed()
     // No test for checking the color
   }
 
   @Test
   fun getOnContainerColorErrorLightTest() {
-    composeTestRule.setContent {
-      ColoredSquare(getOnContainerColor(ColorLevel.ERROR))
-    }
+    composeTestRule.setContent { ColoredSquare(getOnContainerColor(ColorLevel.ERROR)) }
     composeTestRule.onNodeWithTag("TestTag").assertIsDisplayed()
     // No test for checking the color
   }
