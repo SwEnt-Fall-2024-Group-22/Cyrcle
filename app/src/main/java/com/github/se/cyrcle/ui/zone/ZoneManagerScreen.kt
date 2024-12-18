@@ -32,14 +32,19 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.map.MapViewModel
+import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.zone.Zone
 import com.github.se.cyrcle.ui.map.MapConfig
+import com.github.se.cyrcle.ui.map.minZoom
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.ColorLevel
@@ -78,7 +83,7 @@ fun ZoneManagerScreen(
             }
             LazyColumn(modifier = Modifier.fillMaxSize().padding(bottom = 8.dp)) {
               items(zones.value) { zone ->
-                ZoneCard(parkingViewModel, zone, zones)
+                ZoneCard(parkingViewModel, mapViewModel, navigationActions, zone, zones)
                 if (zone != zones.value.last()) {
                   HorizontalDivider(
                       color = MaterialTheme.colorScheme.onBackground.copy(0.5f),
@@ -118,12 +123,29 @@ fun AddZoneButton(mapViewModel: MapViewModel, navigationActions: NavigationActio
 }
 // Display relevant information about a zone. Allows the user to refresh the zone or delete it.
 @Composable
-fun ZoneCard(parkingViewModel: ParkingViewModel, zone: Zone, zones: MutableState<List<Zone>>) {
+fun ZoneCard(
+    parkingViewModel: ParkingViewModel,
+    mapViewModel: MapViewModel,
+    navigationActions: NavigationActions,
+    zone: Zone,
+    zones: MutableState<List<Zone>>
+) {
   val context = LocalContext.current
   Row(
       modifier = Modifier.padding(16.dp).fillMaxWidth().testTag("ZoneCard"),
       horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(text = zone.name, textAlign = TextAlign.Left, modifier = Modifier.weight(2f))
+        Text(
+            text = zone.name,
+            style =
+                TextStyle(textDecoration = TextDecoration.Underline, fontStyle = FontStyle.Italic),
+            textAlign = TextAlign.Left,
+            modifier =
+                Modifier.weight(2f).testTag("ZoneCardName").clickable {
+                  mapViewModel.updateTrackingMode(false)
+                  mapViewModel.updateMapRecentering(true)
+                  mapViewModel.zoomOnLocation(Location(zone.boundingBox.southwest()), minZoom)
+                  navigationActions.navigateTo(Screen.MAP)
+                })
         Text(text = zone.lastRefreshed.toString(), modifier = Modifier.weight(1f))
         Icon(
             Icons.Filled.Refresh,

@@ -81,7 +81,9 @@ class ZoneManagerScreenTest {
             "Test Zone",
         )
     val zonesState = mutableStateOf(listOf(zone))
-    composeTestRule.setContent { ZoneCard(parkingViewModel, zone, zonesState) }
+    composeTestRule.setContent {
+      ZoneCard(parkingViewModel, mapViewModel, navigationActions, zone, zonesState)
+    }
     composeTestRule
         .onNodeWithContentDescription("Refresh")
         .assertIsDisplayed()
@@ -98,5 +100,20 @@ class ZoneManagerScreenTest {
     composeTestRule.onNodeWithTag("ZoneManagerHeaderArea").assertIsDisplayed()
     composeTestRule.onNodeWithTag("ZoneManagerHeaderLastRefreshed").assertIsDisplayed()
     composeTestRule.onNodeWithContentDescription("Refresh").assertIsDisplayed()
+  }
+
+  @Test
+  fun verifyGoToMap() {
+    val zone =
+        Zone(
+            BoundingBox.fromLngLats(0.0, 0.0, 1.0, 1.0),
+            "Test Zone",
+        )
+    val zonesState = mutableStateOf(listOf(zone))
+    composeTestRule.setContent {
+      ZoneCard(parkingViewModel, mapViewModel, navigationActions, zone, zonesState)
+    }
+    composeTestRule.onNodeWithTag("ZoneCardName").performClick()
+    verify(navigationActions).navigateTo(Screen.MAP)
   }
 }
