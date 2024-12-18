@@ -70,7 +70,7 @@
     <!-- Location Picker Bottom Bar -->
     <string name="location_picker_bottom_bar_cancel_button">Cancel</string>
     <string name="location_picker_bottom_bar_next_button">Next</string>
-    <string name="location_picker_invalid_area">Please select a valid area</string>
+    <string name="location_picker_invalid_area">The parking should be at least %d[m²] and at max. %d[m²]</string>
     <!-- Location Picker Top Bar -->
     <string name="location_picker_top_bar_where">Where is the Parking ?</string>
     <string name="location_picker_top_bar_select_top_left">Set the top-left corner of the parking, by placing it under the crosshair below</string>
