@@ -16,7 +16,6 @@ two-wheeled companion is always safe well-stored.
 - **Community**: Share your experiences and help others by adding new parking spots and repair stations.
 - **Profile**: Keep track of your contributions and earn rewards.
 - **Offline Mode**: Use the app even when you're offline.
-- **Notifications**: Get notified about new parking spots and repair stations in your area.
 - **Where's my bike**: Never forget where you parked your bike again.
 
 ## Resources
