@@ -93,7 +93,7 @@ fun RackTypeItem(rackType: ParkingRackType, isImageOnRight: Boolean) {
 @Composable
 fun RackImage(rackType: ParkingRackType, modifier: Modifier = Modifier) {
   Image(
-      painter = painterResource(R.drawable.rack), // TODO: Define the image resource for each
+      painter = painterResource(getRackImageResource(rackType)),
       contentDescription = "${rackType.description} image",
       modifier =
           modifier
@@ -128,5 +128,24 @@ private fun getRackDescriptionResource(rackType: ParkingRackType): Int {
     ParkingRackType.POST_AND_RING -> R.string.post_and_ring_rack_description
     ParkingRackType.GRID -> R.string.grid_rack_description
     else -> R.string.other_rack_description
+  }
+}
+
+/**
+ * Returns the resource ID for the image of the given rack type.
+ *
+ * @param rackType The rack type for which the image resource is needed.
+ * @return The resource ID for the image of the given rack type.
+ */
+private fun getRackImageResource(rackType: ParkingRackType): Int {
+  return when (rackType) {
+    ParkingRackType.TWO_TIER -> R.drawable.two_tier
+    ParkingRackType.U_RACK -> R.drawable.inverted_u
+    ParkingRackType.VERTICAL -> R.drawable.vertical
+    ParkingRackType.WAVE -> R.drawable.wave
+    ParkingRackType.WALL_BUTTERFLY -> R.drawable.butterfly
+    ParkingRackType.POST_AND_RING -> R.drawable.post_and_ring
+    ParkingRackType.GRID -> R.drawable.grid
+    else -> R.drawable.rack
   }
 }
