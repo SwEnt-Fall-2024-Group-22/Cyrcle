@@ -187,7 +187,7 @@ fun DeleteConfirmationDialog(
                 showDialog.value = false
                 onConfirm()
               }) {
-                Text("Delete")
+                Text(stringResource(id = R.string.delete_dialog_confirm_button))
               }
         },
         dismissButton = {
@@ -196,10 +196,10 @@ fun DeleteConfirmationDialog(
                 showDialog.value = false
                 onDismiss()
               }) {
-                Text("Cancel")
+                Text(stringResource(id = R.string.delete_dialog_cancel_button))
               }
         },
-        title = { Text("Delete Item") },
-        text = { Text("Are you sure you want to delete this item? This action cannot be undone.") })
+        title = { Text(stringResource(id = R.string.delete_dialog_title)) },
+        text = { Text(stringResource(id = R.string.delete_dialog_message)) })
   }
 }
