@@ -77,6 +77,7 @@ import com.github.se.cyrcle.ui.theme.atoms.Button
 import com.github.se.cyrcle.ui.theme.atoms.IconButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
+import com.github.se.cyrcle.ui.theme.molecules.DeleteConfirmationDialog
 import kotlinx.coroutines.launch
 
 @Composable
@@ -458,7 +459,8 @@ private fun UserReviewsSection(
                       options = mapOf(),
                       userViewModel = userViewModel,
                       reviewViewModel = reviewViewModel,
-                      ownerReputationScore = null)
+                      ownerReputationScore = null,
+                      navigationActions)
                 }
           }
     }
@@ -472,18 +474,15 @@ private fun UserImagesSection(
     parkingViewModel: ParkingViewModel,
     navigationActions: NavigationActions
 ) {
-
   val context = LocalContext.current
-  // Image URLs to display
   val imagesUrls = userViewModel.selectedUserImageUrls.collectAsState().value
-  // destinations paths of the images
   val imagesPaths = userViewModel.selectedUserAssociatedImages.collectAsState().value
-  // Variables for Image/Parking in Alert Dialog
-  val showDialogImage = remember { mutableStateOf<String?>(null) }
-  val showDialogParking = remember { mutableStateOf<String?>(null) }
-  val showDialogImageDestinationPath = remember { mutableStateOf<List<String>>(emptyList()) }
-  val showDialogImagePath = remember { mutableStateOf<String?>(null) }
 
+  // States for managing dialogs
+  val showFirstDialog = remember { mutableStateOf(false) } // First dialog visibility
+  val showDeleteDialog = remember { mutableStateOf(false) } // Delete confirmation dialog visibility
+  val selectedImagePath = remember { mutableStateOf<String?>(null) }
+  val selectedParkingId = remember { mutableStateOf<String?>(null) }
   val strResToast = stringResource(R.string.view_profile_screen_image_deleted)
 
   Box(modifier = Modifier.fillMaxSize()) {
@@ -500,72 +499,87 @@ private fun UserImagesSection(
               UserImageCard(
                   url = url,
                   onClick = {
-                    showDialogImage.value = url
-                    showDialogImageDestinationPath.value =
-                        showDialogImageDestinationPath.value.plus(it)
-                    showDialogParking.value =
+                    // When an image is clicked, trigger the first AlertDialog
+                    selectedImagePath.value = imagesPaths[index]
+                    selectedParkingId.value =
                         parkingViewModel.getParkingFromImagePath(imagesPaths[index])
-                    showDialogImagePath.value = imagesPaths[index]
+                    showFirstDialog.value = true
                   })
             }
           }
     }
   }
 
-  // Show dialog if an image is clicked
-  showDialogImage.value?.let { imageUrl ->
+  // First AlertDialog
+  if (showFirstDialog.value) {
     AlertDialog(
-        onDismissRequest = { showDialogImage.value = null },
+        onDismissRequest = { showFirstDialog.value = false },
         title = { Text(stringResource(R.string.view_profile_screen_image_dialog_title)) },
         text = {
           Column {
             Text(stringResource(R.string.view_profile_screen_image_dialog_description))
             Spacer(modifier = Modifier.height(16.dp))
             Image(
-                painter = rememberAsyncImagePainter(model = imageUrl),
+                painter = rememberAsyncImagePainter(model = selectedImagePath.value),
                 contentDescription = null,
                 modifier = Modifier.fillMaxWidth().height(200.dp))
           }
         },
         confirmButton = {
           IconButton(
-              modifier = Modifier.padding(10.dp),
-              icon = Icons.Filled.LocalParking,
-              contentDescription = "Go To Parking",
-              testTag = "ParkingFromImageButton",
               onClick = {
                 parkingViewModel.getParkingById(
-                    showDialogParking.value!!,
+                    selectedParkingId.value!!,
                     { parkingForPath ->
                       parkingViewModel.selectParking(parkingForPath)
                       navigationActions.navigateTo(Screen.PARKING_DETAILS)
+                      showFirstDialog.value = false
                     },
                     {})
-              })
+              },
+              icon = Icons.Filled.LocalParking,
+              contentDescription = "Parking From Image",
+              modifier = Modifier.testTag("ParkingFromImageButton"))
         },
         dismissButton = {
+          // Delete Button opens the SECOND delete dialog
           IconButton(
-              modifier = Modifier.padding(10.dp),
-              icon = Icons.Filled.Delete,
-              contentDescription = "Delete",
-              testTag = "DeleteImageButton",
               onClick = {
-                userViewModel.removeImageFromUserImages(showDialogImagePath.value!!)
-                parkingViewModel.getParkingById(
-                    showDialogParking.value!!,
-                    { parkingForPath ->
-                      parkingViewModel.selectParking(parkingForPath)
-                      parkingViewModel.deleteImageFromParking(
-                          parkingViewModel.selectedParking.value?.uid!!,
-                          showDialogImagePath.value!!)
-                      Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
-                      navigationActions.navigateTo(Screen.VIEW_PROFILE)
-                    },
-                    {})
-              })
+                showFirstDialog.value = false
+                showDeleteDialog.value = true // Trigger the DeleteConfirmationDialog
+              },
+              modifier = Modifier.testTag("DeleteImageButton"),
+              icon = Icons.Filled.Delete,
+              contentDescription = "Delete Image")
+        })
+  }
+
+  // Use reusable DeleteConfirmationDialog
+  if (showDeleteDialog.value) {
+    DeleteConfirmationDialog(
+        showDialog = showDeleteDialog,
+        onDismiss = { showDeleteDialog.value = false },
+        onConfirm = {
+          val imagePath = selectedImagePath.value
+          val parkingId = selectedParkingId.value
+
+          if (imagePath != null && parkingId != null) {
+            userViewModel.removeImageFromUserImages(imagePath)
+            parkingViewModel.getParkingById(
+                parkingId,
+                { parkingForPath ->
+                  parkingViewModel.selectParking(parkingForPath)
+                  parkingViewModel.deleteImageFromParking(parkingId, imagePath)
+                  Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
+                  navigationActions.navigateTo(Screen.VIEW_PROFILE)
+                },
+                {})
+          }
+          showDeleteDialog.value = false
         })
   }
 }
+
 /** Card representing a UserImage to display in the above column */
 @Composable
 private fun UserImageCard(url: String, onClick: (String) -> Unit) {

@@ -187,6 +187,10 @@
     <string name="view_profile_screen_my_images">My Images</string>
     <string name="view_profile_screen_no_images_message">No images to display.</string>
     <string name="view_profile_screen_image_item">Image #%d</string>
+    <string name="delete_alert_dialog_title">Delete Image</string>
+    <string name="delete_alert_dialog_message">Are you sure you want to delete this image?</string>
+    <string name="delete_alert_dialog_confirm_button">Delete</string>
+    <string name="delete_alert_dialog_cancel_button">Cancel</string>
 
     <!-- All Reviews Screen -->
     <string name="all_review_title">All Reviews For %s</string>
