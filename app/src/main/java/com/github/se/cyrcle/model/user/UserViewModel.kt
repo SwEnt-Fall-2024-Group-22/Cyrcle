@@ -241,7 +241,7 @@ class UserViewModel(
       val updatedDetails =
           user.details?.copy(reportedReviews = user.details.reportedReviews + review)
       val updatedUser = user.copy(details = updatedDetails)
-      updateUser(updatedUser) { _reportedParkings.value += review }
+      updateUser(updatedUser) {}
     }
   }
 
