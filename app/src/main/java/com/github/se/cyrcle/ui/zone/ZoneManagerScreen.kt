@@ -143,8 +143,7 @@ fun ZoneCard(
                 Modifier.weight(2f).testTag("ZoneCardName").clickable {
                   mapViewModel.updateTrackingMode(false)
                   mapViewModel.updateMapRecentering(true)
-                  mapViewModel.zoomOnLocation(Location(zone.boundingBox.southwest()), minZoom)
-                  navigationActions.navigateTo(Screen.MAP)
+                  mapViewModel.zoomOnLocation(navigationActions, Location(zone.boundingBox.southwest()), minZoom)
                 })
         Text(text = zone.lastRefreshed.toString(), modifier = Modifier.weight(1f))
         Icon(
