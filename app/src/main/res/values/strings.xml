@@ -290,6 +290,22 @@
     <string name="admin_reason">Reason: %s</string>
     <string name="admin_reportedBy">Reported By: %s</string>
     <string name="admin_description">Description: %s</string>
+    <string name="more_options">More Options</string>
+    <string name="options_for_report">Details for this Reported Object:</string>
+    <string name="choose_action_for_report">Choose an action for this report</string>
+    <string name="Return">Return</string>
+    <string name="go_to_parking">Go To Parking</string>
+    <string name="see_details">See Details</string>
+    <string name="report_details_review_uid">Review: %1$s</string>
+    <string name="report_details_review_parking">Parking: %1$s</string>
+    <string name="report_details_review_text">Text: %1$s</string>
+    <string name="loading_review_details">Loading review details...</string>
+    <string name="report_details_parking_uid">Parking UID: %1$s</string>
+    <string name="report_details_image_uid">Image UID: %1$s</string>
+    <string name="report_details_parking_owner">Owner: %1$s</string>
+    <string name="loading_parking_details">Loading parking details...</string>
+    <string name="reported_image_description">Reported Image</string>
+    <string name="report_details_image_owner">Owner: %1$s</string>
 
     <!-- Zone Screens -->
     <string name="zone_manager_screen_title">Offline Maps</string>
