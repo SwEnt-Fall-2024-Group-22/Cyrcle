@@ -2,13 +2,10 @@ package com.github.se.cyrcle.model.authentication
 
 import android.os.Looper
 import androidx.credentials.CredentialManager
-import androidx.credentials.CustomCredential
-import androidx.credentials.GetCredentialResponse
 import com.github.se.cyrcle.MainActivity
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.CoroutineDispatcher
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -23,19 +20,14 @@ import org.robolectric.Shadows.shadowOf
 class AuthenticationRepositoryGoogleTest {
 
   @Mock lateinit var context: MainActivity
-  @Mock lateinit var credential: CustomCredential
-  @Mock lateinit var credentialResponse: GetCredentialResponse
   @Mock lateinit var credentialManager: CredentialManager
   @Mock lateinit var firebaseAuth: FirebaseAuth
   @Mock lateinit var authResult: AuthResult
 
-  private lateinit var testDispatcher: CoroutineDispatcher
   private lateinit var authenticationRepositoryGoogle: AuthenticationRepositoryGoogle
 
   @Before
   fun setUp() {
-    // testDispatcher = StandardTestDispatcher()
-    // Dispatchers.setMain(testDispatcher)
 
     MockitoAnnotations.openMocks(this)
     authenticationRepositoryGoogle = AuthenticationRepositoryGoogle(context, firebaseAuth)

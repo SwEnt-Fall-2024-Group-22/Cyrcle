@@ -416,7 +416,7 @@ class ParkingViewModelTest {
       it.getArgument<(String?) -> Unit>(1).invoke(null) // Trigger onSuccess with no existing object
     }
     parkingViewModel.selectParking(parking)
-    parkingViewModel.addReport(report, user)
+    parkingViewModel.addReport(report)
     verify(parkingRepository).addReport(eq(report), any(), any())
     verify(parkingRepository).updateParking(any(), any(), any())
   }
@@ -494,7 +494,7 @@ class ParkingViewModelTest {
       it.getArgument<(ParkingReport) -> Unit>(1).invoke(report) // Simulate success
     }
     parkingViewModel.selectParking(parking)
-    parkingViewModel.addReport(report, user)
+    parkingViewModel.addReport(report)
     // verify that "add reported object" associated functions are not called
     verify(parkingRepository).addReport(eq(report), any(), any())
     verify(reportedObjectRepository, never()).addReportedObject(any(), any(), any())
@@ -532,7 +532,7 @@ class ParkingViewModelTest {
     }
     parkingViewModel.selectParking(parking)
     parkingViewModel.selectImage("imagePath1")
-    parkingViewModel.addImageReport(imageReport, TestInstancesUser.user1)
+    parkingViewModel.addImageReport(imageReport)
     // verify that adding image report has effect on repository
     verify(parkingRepository).addImageReport(eq(imageReport), eq(parking.uid), any(), any())
     verify(parkingRepository)
@@ -567,7 +567,7 @@ class ParkingViewModelTest {
     }
     parkingViewModel.selectParking(parking)
     parkingViewModel.selectImage("imagePath1")
-    parkingViewModel.addImageReport(imageReport, TestInstancesUser.user1)
+    parkingViewModel.addImageReport(imageReport)
     // verify that adding image report this time has NO effect on repository
     verify(parkingRepository).addImageReport(eq(imageReport), eq(parking.uid), any(), any())
   }
@@ -609,7 +609,7 @@ class ParkingViewModelTest {
 
     parkingViewModel.selectParking(parking)
     parkingViewModel.selectImage("imagePath1")
-    parkingViewModel.addImageReport(imageReport, TestInstancesUser.user1)
+    parkingViewModel.addImageReport(imageReport)
     // verify that reported object was created as expected
     verify(parkingRepository).addImageReport(eq(imageReport), eq(parking.uid), any(), any())
     verify(reportedObjectRepository).addReportedObject(eq(reportedObject), any(), any())

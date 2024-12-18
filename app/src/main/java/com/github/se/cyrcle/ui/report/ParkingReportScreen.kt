@@ -2,11 +2,21 @@ package com.github.se.cyrcle.ui.report
 
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,9 +38,6 @@ import com.github.se.cyrcle.ui.theme.molecules.ReportInputs
 import com.github.se.cyrcle.ui.theme.molecules.ReportTextBlock
 import com.github.se.cyrcle.ui.theme.molecules.SubmitButtonWithDialog
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
-
-const val MAX_CHARACTERS = 256
-const val MAX_LINES = 6
 
 @Composable
 fun ParkingReportScreen(
@@ -69,7 +76,7 @@ fun ParkingReportScreen(
     if (userViewModel.currentUser.value!!.details?.reportedParkings?.contains(parkingId) == true) {
       Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
     } else {
-      parkingViewModel.addReport(report, userViewModel.currentUser.value!!)
+      parkingViewModel.addReport(report)
       userViewModel.addReportedParkingToSelectedUser(parkingId)
       Toast.makeText(context, strRes, Toast.LENGTH_SHORT).show()
     }

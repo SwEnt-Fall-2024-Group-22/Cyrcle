@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.parkingDetails
 
-import android.annotation.SuppressLint
 import android.graphics.Color.parseColor
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -20,7 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
@@ -73,7 +71,6 @@ import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
-@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ParkingDetailsScreen(
     mapViewModel: MapViewModel,
@@ -85,7 +82,6 @@ fun ParkingDetailsScreen(
       parkingViewModel.selectedParking.collectAsState().value
           ?: return Text(stringResource(R.string.no_selected_parking_error))
   val userSignedIn by userViewModel.isSignedIn.collectAsState(false)
-  val scrollState = rememberScrollState()
   val context = LocalContext.current
 
   // === States for the images ===
@@ -100,14 +96,15 @@ fun ParkingDetailsScreen(
   var ownerReputationScore by remember { mutableDoubleStateOf(0.0) }
   var ownerUsername by remember { mutableStateOf(defaultUsername) }
   if (selectedParking.owner != "Unknown Owner" && selectedParking.owner != null) {
-    userViewModel.selectSelectedParkingUser(parkingViewModel.selectedParking.value?.owner!!)
+    userViewModel.selectSelectedParkingUser(
+        parkingViewModel.selectedParking.collectAsState().value?.owner!!)
     userViewModel.getUserById(
         selectedParking.owner,
         onSuccess = {
           ownerReputationScore = it.public.userReputationScore
           ownerUsername = it.public.username
         })
-  } else userViewModel.setParkingUser(null)
+  }
   val range = UserLevelDisplay.getLevelRange(ownerReputationScore)
   val level = ownerReputationScore.toInt()
 
@@ -386,7 +383,7 @@ fun ParkingDetailsScreen(
                               horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 itemsIndexed(
                                     items = imagesUrls,
-                                    key = { index, url ->
+                                    key = { index, _ ->
                                       imagesPaths[index]
                                     } // Use associated paths as stable keys
                                     ) { index, url ->
@@ -533,7 +530,7 @@ fun ParkingDetailsScreen(
                           colorLevel = ColorLevel.PRIMARY,
                           testTag = "ShowInMapButton")
 
-                      if (userViewModel.currentUser.value != null) {
+                      if (userViewModel.currentUser.collectAsState().value != null) {
                         Button(
                             text = stringResource(R.string.card_screen_report),
                             onClick = { navigationActions.navigateTo(Screen.PARKING_REPORT) },

@@ -364,11 +364,12 @@ fun SearchBarListScreen(
   // value that contain the size fo the textfield to align the suggestion menu below
   val textFieldSize = remember { mutableStateOf(IntSize.Zero) }
 
-  val alpha by animateFloatAsState(targetValue = if (isTextFieldVisible.value) 1f else 0f)
+  val alpha by
+      animateFloatAsState(targetValue = if (isTextFieldVisible.value) 1f else 0f, label = "")
 
   // Animation values
   val slideOffset by
-      animateDpAsState(targetValue = if (isTextFieldVisible.value) 0.dp else (-200).dp)
+      animateDpAsState(targetValue = if (isTextFieldVisible.value) 0.dp else (-200).dp, label = "")
 
   Box {
     OutlinedTextField(

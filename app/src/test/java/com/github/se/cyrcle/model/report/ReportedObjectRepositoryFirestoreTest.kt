@@ -5,7 +5,10 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.FirebaseApp
-import com.google.firebase.firestore.*
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import junit.framework.TestCase.assertEquals
@@ -15,7 +18,10 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.*
+import org.mockito.Mockito.anyLong
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.robolectric.RobolectricTestRunner
@@ -270,7 +276,7 @@ class ReportedObjectRepositoryFirestoreTest {
     var onSuccessCalled = false
     reportedObjectRepositoryFirestore.checkIfObjectExists(
         objectUID = "existing-object",
-        onSuccess = { documentId -> onSuccessCalled = true },
+        onSuccess = { _ -> onSuccessCalled = true },
         onFailure = { fail("Expected success but got failure") })
 
     taskCompletionSource.setResult(mockQuerySnapshot)

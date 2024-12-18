@@ -28,20 +28,21 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TextButton
-import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
@@ -163,7 +164,7 @@ fun ReportDetailsContent(
       }
       Column(modifier = Modifier.testTag("ReportDetailsContentImage")) {
         Image(
-            painter = rememberImagePainter(data = imageUrl),
+            painter = rememberAsyncImagePainter(model = imageUrl),
             contentDescription = stringResource(R.string.reported_image_description),
             modifier = Modifier.fillMaxWidth().height(200.dp).testTag("ImageContent"))
         BulletPoint(
@@ -233,7 +234,7 @@ fun SortingOptionSelector(
     onOptionSelected: (ReportSortingOption) -> Unit
 ) {
   Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-    ReportSortingOption.values().forEach { sortingOption ->
+    ReportSortingOption.entries.forEach { sortingOption ->
       Row(
           modifier =
               Modifier.fillMaxWidth()
@@ -275,12 +276,9 @@ fun AdminScreen(
   LaunchedEffect(Unit) { reportedObjectViewModel.fetchAllReportedObjects() }
   val selectedObject by reportedObjectViewModel.selectedObject.collectAsState()
   val reportsList by reportedObjectViewModel.reportsList.collectAsState()
-  var selectedCardIndex by remember { mutableStateOf(-1) }
-  val context = LocalContext.current
+  var selectedCardIndex by remember { mutableIntStateOf(-1) }
   var selectedSortingOption by remember { mutableStateOf(ReportSortingOption.Parking) }
-  val moreOptions = stringResource(R.string.more_options)
   val optionsForReport = stringResource(R.string.options_for_report)
-  val chooseActionForReport = stringResource(R.string.choose_action_for_report)
   val confirm = stringResource(R.string.Return)
   val cancel = stringResource(R.string.go_to_parking)
 
@@ -324,7 +322,7 @@ fun AdminScreen(
                 items(items = sortedReports) { curReport ->
                   val index = sortedReports.indexOf(curReport)
                   val isExpanded = selectedCardIndex == index
-                  val cardHeight by animateDpAsState(if (isExpanded) 150.dp else 100.dp)
+                  val cardHeight by animateDpAsState(if (isExpanded) 150.dp else 100.dp, label = "")
                   val cardColor = MaterialTheme.colorScheme.surfaceContainer
                   var showDialog by remember { mutableStateOf(false) } // Dialog visibility state
 
@@ -472,16 +470,12 @@ fun AdminScreen(
                                               style = MaterialTheme.typography.titleMedium)
                                         },
                                         text = {
-                                          val selectedObject =
-                                              reportedObjectViewModel.selectedObject
-                                                  .collectAsState()
-                                                  .value
                                           Column {
                                             if (selectedObject != null) {
                                               ReportDetailsContent(
-                                                  selectedObject.objectType,
-                                                  selectedObject.objectUID,
-                                                  selectedObject.userUID,
+                                                  selectedObject!!.objectType,
+                                                  selectedObject!!.objectUID,
+                                                  selectedObject!!.userUID,
                                                   reviewViewModel,
                                                   parkingViewModel)
                                             }

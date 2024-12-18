@@ -11,6 +11,11 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.github.se.cyrcle.ui.theme.ColorLevel.ERROR
+import com.github.se.cyrcle.ui.theme.ColorLevel.INVERSE_PRIMARY
+import com.github.se.cyrcle.ui.theme.ColorLevel.PRIMARY
+import com.github.se.cyrcle.ui.theme.ColorLevel.SECONDARY
+import com.github.se.cyrcle.ui.theme.ColorLevel.TERTIARY
 
 val Aero = Color(0xFF5BC0EB)
 val ShamrockGreen = Color(0xFF229C6B)

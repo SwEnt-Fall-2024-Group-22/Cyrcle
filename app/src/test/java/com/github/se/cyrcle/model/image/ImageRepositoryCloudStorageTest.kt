@@ -18,7 +18,9 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.*
+import org.mockito.Mockito.any
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
@@ -44,7 +46,7 @@ class ImageRepositoryCloudStorageTest {
   }
 
   @Test
-  fun testGetUrl(): Unit {
+  fun testGetUrl() {
 
     val path = "test/path"
     val expectedUrl = "https://example.com/test/path"
@@ -110,18 +112,13 @@ class ImageRepositoryCloudStorageTest {
     }
     `when`(mockUploadTask.addOnFailureListener(any())).thenReturn(mockUploadTask)
 
-    var actualUrl: String? = null
-    var onFailureCalled = false
     var onSuccessCalled = false
     imageRepositoryCloudStorage.uploadImage(
         mockContext,
         fileUri,
         destinationPath,
-        onSuccess = {
-          onSuccessCalled = true
-          actualUrl = it
-        },
-        onFailure = { onFailureCalled = true })
+        onSuccess = { onSuccessCalled = true },
+        onFailure = {})
     taskCompletionSource.setResult(Uri.parse(expectedUrl))
     shadowOf(Looper.getMainLooper()).idle()
     assertTrue(onSuccessCalled)
@@ -129,13 +126,8 @@ class ImageRepositoryCloudStorageTest {
 
   @Test
   fun testUploadImageWithNullUser() {
-    val mockTaskSnapshot = mock(UploadTask.TaskSnapshot::class.java)
     val fileUri = "test/path"
     val destinationPath = "test/path"
-    val expectedUrl = "https://example.com/test/path"
-    val bytearray = ByteArray(100)
-    val taskCompletionSource = TaskCompletionSource<Uri>()
-    val mockUploadTask = mock(UploadTask::class.java)
     `when`(mockAuth.currentUser).thenReturn(null)
     var onFailureCalled = false
     var onSuccessCalled = false

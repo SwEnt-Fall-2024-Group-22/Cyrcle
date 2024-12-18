@@ -122,37 +122,4 @@ class MockReportedObjectRepository @Inject constructor() : ReportedObjectReposit
       onSuccess(null)
     }
   }
-
-  fun updateObject(
-      documentId: String,
-      updatedObject: ReportedObject,
-      onSuccess: () -> Unit,
-      onFailure: (Exception) -> Unit
-  ) {
-    val index = reportedObjects.indexOfFirst { it.reportUID == documentId }
-    if (index != -1) {
-      reportedObjects[index] = updatedObject
-      onSuccess()
-    } else {
-      onFailure(Exception("No ReportedObject found with reportUID: $documentId"))
-    }
-  }
-
-  fun addObject(
-      objectUID: String,
-      reportedObject: ReportedObject,
-      onSuccess: () -> Unit,
-      onFailure: (Exception) -> Unit
-  ) {
-    try {
-      // Check for duplicates
-      if (reportedObjects.any { it.objectUID == objectUID }) {
-        throw IllegalArgumentException("ReportedObject with the same ObjectUID already exists.")
-      }
-      reportedObjects.add(reportedObject)
-      onSuccess()
-    } catch (e: Exception) {
-      onFailure(e)
-    }
-  }
 }

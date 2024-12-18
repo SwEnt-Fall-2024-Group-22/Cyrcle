@@ -1,7 +1,12 @@
 package com.github.se.cyrcle.ui.addParking
 
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToIndex
 import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.ui.addParking.attributes.RackTypeHelpScreen
 import com.github.se.cyrcle.ui.addParking.attributes.RackTypeItem

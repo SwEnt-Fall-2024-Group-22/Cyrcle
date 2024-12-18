@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.theme.molecules
 
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
@@ -19,7 +18,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
 
-@OptIn(ExperimentalMaterial3Api::class)
 class ReportScreenMoleculesTest {
 
   @get:Rule val composeTestRule = createComposeRule()

@@ -79,7 +79,6 @@ fun ReportTextBlock(title: String, bulletPoints: List<String>, modifier: Modifie
  *   displayed.
  * @param reportDescription A mutable state holding the description provided by the user.
  * @param horizontalPadding Padding applied to the input fields for consistent alignment.
- * @param modifier A [Modifier] to customize the appearance and layout of the inputs.
  */
 @Composable
 fun ReportInputs(
@@ -89,7 +88,6 @@ fun ReportInputs(
     reportedObjectType: ReportedObjectType,
     reportDescription: MutableState<String>,
     horizontalPadding: Dp,
-    modifier: Modifier = Modifier
 ) {
   when (reportedObjectType) {
     ReportedObjectType.PARKING -> {
