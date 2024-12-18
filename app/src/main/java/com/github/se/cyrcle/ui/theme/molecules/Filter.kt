@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
@@ -34,9 +35,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -112,7 +115,7 @@ fun FilterPanel(
   val isTextFieldVisible = remember { mutableStateOf(false) }
 
   // Text field value
-  val textFieldValue = remember { mutableStateOf("") }
+  val textFieldValue = rememberSaveable { mutableStateOf("") }
 
   val radius = parkingViewModel.radius.collectAsState()
 
@@ -354,9 +357,16 @@ fun SearchBarListScreen(
   val virtualKeyboardManager = LocalSoftwareKeyboardController.current
 
   // List of suggestions from NominatimAPI
-  val listOfSuggestions = addressViewModel.addressList.collectAsState()
-
-  val uniqueSuggestions = remember { mutableStateOf(listOf<Address>()) }
+  val listOfSuggestions by addressViewModel.addressList.collectAsState()
+  val uniqueSuggestions by
+      remember(listOfSuggestions) {
+        derivedStateOf {
+          listOfSuggestions.distinctBy {
+            it.suggestionFormatDisplayName(
+                MAX_SUGGESTION_DISPLAY_NAME_LENGTH_LIST, Address.Mode.LIST)
+          }
+        }
+      }
 
   // Show suggestions screen
   val showSuggestions = remember { mutableStateOf(false) }
@@ -372,6 +382,25 @@ fun SearchBarListScreen(
       animateDpAsState(targetValue = if (isTextFieldVisible.value) 0.dp else (-200).dp, label = "")
 
   Box {
+    // Callback for when a suggestion is clicked. Either called with a valid (non-null) address or
+    // explicitly called with null to indicate we want to use the user's location.
+    val onLocationClicked: (Address?) -> Unit = {
+      if (it == null) {
+        parkingViewModel.setCircleCenter(mapViewModel.userPosition.value)
+        parkingViewModel.setMyLocation(true)
+        textFieldValue.value = context.resources.getString(R.string.my_location)
+      } else {
+        parkingViewModel.setChosenLocation(it)
+        parkingViewModel.setMyLocation(false)
+        textFieldValue.value =
+            it.suggestionFormatDisplayName(
+                MAX_SUGGESTION_DISPLAY_NAME_LENGTH_LIST, Address.Mode.LIST)
+      }
+      showSuggestions.value = false
+      isTextFieldVisible.value = false
+      focusManager.clearFocus()
+    }
+
     OutlinedTextField(
         value = textFieldValue.value,
         onValueChange = { textFieldValue.value = it },
@@ -384,6 +413,7 @@ fun SearchBarListScreen(
                 .testTag("SearchBarListScreen"),
         colors = getOutlinedTextFieldColorsSearchBar(ColorLevel.PRIMARY),
         trailingIcon = {
+          // Clear button
           if (textFieldValue.value.isNotEmpty()) {
             Icon(
                 imageVector = Icons.Filled.Clear,
@@ -395,6 +425,16 @@ fun SearchBarListScreen(
                           showSuggestions.value = false
                         }
                         .testTag("ClearSearchButtonListScreen"))
+            // If the text field is empty and the user has granted location permission, display the
+            // my location button
+          } else if (permissionHandler.getLocalisationPerm().collectAsState().value) {
+            Icon(
+                imageVector = Icons.Filled.LocationOn,
+                contentDescription = "My location",
+                tint = MaterialTheme.colorScheme.secondary,
+                modifier =
+                    Modifier.clickable { onLocationClicked(null) }
+                        .testTag("MyLocationButtonListScreen"))
           }
         },
         singleLine = true,
@@ -409,66 +449,37 @@ fun SearchBarListScreen(
                   showSuggestions.value = true
                 }))
 
-    if (listOfSuggestions.value.size + 1 > 0) {
-      DropdownMenu(
-          expanded = showSuggestions.value,
-          onDismissRequest = { showSuggestions.value = false },
-          modifier =
-              Modifier.width(with(LocalDensity.current) { textFieldSize.value.width.toDp() })
-                  .testTag("SuggestionsMenuListScreen")) {
-            if (permissionHandler.getLocalisationPerm().collectAsState().value) {
-              DropdownMenuItem(
-                  text = {
-                    Text(stringResource(R.string.my_location), textAlign = TextAlign.Start)
-                  },
-                  modifier = Modifier.testTag("MyLocationSuggestionMenuItem"),
-                  contentPadding = PaddingValues(8.dp),
-                  onClick = {
-                    parkingViewModel.setCircleCenter(mapViewModel.userPosition.value)
-                    parkingViewModel.setMyLocation(true)
-                    showSuggestions.value = false
-                    textFieldValue.value = context.resources.getString(R.string.my_location)
-                    isTextFieldVisible.value = false
-                    focusManager.clearFocus()
-                  })
-            }
-
-            val seenNames = mutableSetOf<String>()
-            uniqueSuggestions.value =
-                listOfSuggestions.value.filter { suggestion ->
-                  val displayName =
-                      suggestion.suggestionFormatDisplayName(
-                          MAX_SUGGESTION_DISPLAY_NAME_LENGTH_LIST, Address.Mode.LIST)
-                  if (displayName in seenNames) {
-                    false
-                  } else {
-                    seenNames.add(displayName)
-                    true
-                  }
-                }
-
-            for (address in uniqueSuggestions.value.take(NUMBER_OF_SUGGESTIONS_FOR_MENU)) {
-              DropdownMenuItem(
-                  text = {
-                    Text(
-                        address.suggestionFormatDisplayName(
-                            MAX_SUGGESTION_DISPLAY_NAME_LENGTH_LIST, Address.Mode.LIST),
-                        textAlign = TextAlign.Start)
-                  },
-                  modifier = Modifier.testTag("SuggestionMenuItem${address.city}"),
-                  contentPadding = PaddingValues(8.dp),
-                  onClick = {
-                    parkingViewModel.setChosenLocation(address)
-                    showSuggestions.value = false
-                    parkingViewModel.setMyLocation(false)
-                    isTextFieldVisible.value = false
-                    textFieldValue.value =
-                        address.suggestionFormatDisplayName(
-                            MAX_SUGGESTION_DISPLAY_NAME_LENGTH_LIST, Address.Mode.LIST)
-                    focusManager.clearFocus()
-                  })
-            }
+    DropdownMenu(
+        expanded = showSuggestions.value,
+        onDismissRequest = { showSuggestions.value = false },
+        modifier =
+            Modifier.width(with(LocalDensity.current) { textFieldSize.value.width.toDp() })
+                .testTag("SuggestionsMenuListScreen")) {
+          // If there are no suggestions, display a message
+          if (listOfSuggestions.isEmpty()) {
+            DropdownMenuItem(
+                text = {
+                  Text(
+                      text = stringResource(R.string.search_bar_no_results),
+                      textAlign = TextAlign.Start,
+                      modifier = Modifier.padding(8.dp))
+                },
+                onClick = {},
+                enabled = false)
           }
-    }
+          // Display a certain number of suggestions
+          for (address in uniqueSuggestions.take(NUMBER_OF_SUGGESTIONS_FOR_MENU)) {
+            DropdownMenuItem(
+                text = {
+                  Text(
+                      address.suggestionFormatDisplayName(
+                          MAX_SUGGESTION_DISPLAY_NAME_LENGTH_LIST, Address.Mode.LIST),
+                      textAlign = TextAlign.Start)
+                },
+                modifier = Modifier.testTag("SuggestionMenuItem${address.city}"),
+                contentPadding = PaddingValues(8.dp),
+                onClick = { onLocationClicked(address) })
+          }
+        }
   }
 }
