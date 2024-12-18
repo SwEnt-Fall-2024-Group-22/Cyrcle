@@ -22,7 +22,7 @@ two-wheeled companion is always safe well-stored.
 
 ### Architecture
 
-![img.png](readme_rsc/app_arch_m2.png)
+![img.png](readme_rsc/app_arch_m3.png)
 
 ### External resources
 
