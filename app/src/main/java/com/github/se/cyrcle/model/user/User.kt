@@ -37,6 +37,7 @@ data class UserDetails(
     val reportedImages: List<String> = emptyList(),
     val userImages: List<String> =
         emptyList(), // Only destinationPaths are stored to load from repository
+    val reviewedParkings: List<String> = emptyList(),
     val favoriteParkings: List<String> = emptyList(),
     // val lastLoginTime: Timestamp? = null,
     val wallet: Wallet = Wallet.empty(),
