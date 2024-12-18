@@ -1026,22 +1026,22 @@ fun BikeLocationButton(
           },
       modifier = Modifier.testTag("goToBikeLocationButton"),
       onClick = {
-        bikeLocationTriggerRedraw = !bikeLocationTriggerRedraw
         when (bikeLocationState) {
           NO_LOCATION -> {
+            bikeLocationTriggerRedraw = !bikeLocationTriggerRedraw
             bikeLocationViewModel.parkBike(userPosition)
             Log.d("BikeLocationButton", "on NO_LOCATION (${userPosition})")
           }
           LOCATION_STORED_UNUSED -> {
+            bikeLocationTriggerRedraw = !bikeLocationTriggerRedraw
             val bikeLocation = Location(bikeLocationViewModel.goToMyBike()?.location!!)
-            mapViewModel.zoomOnLocation(navigationActions, bikeLocation)
+            mapViewModel.zoomOnLocation(null, bikeLocation)
             Log.d("BikeLocationButton", "on LOCATION_STORED_UNUSED (${bikeLocation})")
           }
           LOCATION_STORED_USED -> {
             val bikeLocation = Location(bikeLocationViewModel.goToMyBike()?.location!!)
-            mapViewModel.zoomOnLocation(navigationActions, bikeLocation)
+            mapViewModel.zoomOnLocation(null, bikeLocation)
             Log.d("BikeLocationButton", "on LOCATION_STORED_USED (${bikeLocation})")
-
             forgetBikeLocation.value = true
           }
         }
@@ -1067,14 +1067,20 @@ fun RemoveBikeLocationPopup(
       confirmButton = {
         TextButton(
             modifier = Modifier.testTag("RemoveBikeLocationDialogConfirmButton"),
-            onClick = { bikeLocationViewModel.removeBikeLocation() }) {
+            onClick = {
+              forgetBikeLocation.value = false
+              bikeLocationViewModel.removeBikeLocation()
+            }) {
               Text(stringResource(R.string.bike_location_dialog_button_confirm))
             }
       },
       dismissButton = {
         TextButton(
             modifier = Modifier.testTag("RemoveBikeLocationDialogCancelButton"),
-            onClick = { forgetBikeLocation.value = false }) {
+            onClick = {
+              forgetBikeLocation.value = false
+              bikeLocationTriggerRedraw = !bikeLocationTriggerRedraw
+            }) {
               Text(stringResource(R.string.bike_location_dialog_button_cancel))
             }
       },
