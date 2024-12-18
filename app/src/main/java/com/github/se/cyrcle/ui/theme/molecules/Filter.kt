@@ -1,6 +1,7 @@
 package com.github.se.cyrcle.ui.theme.molecules
 
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -65,9 +66,12 @@ import com.github.se.cyrcle.model.parking.ParkingCapacity
 import com.github.se.cyrcle.model.parking.ParkingProtection
 import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.permission.PermissionHandler
 import com.github.se.cyrcle.ui.list.MAX_SUGGESTION_DISPLAY_NAME_LENGTH_LIST
 import com.github.se.cyrcle.ui.list.NUMBER_OF_SUGGESTIONS_FOR_MENU
+import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
@@ -99,7 +103,9 @@ fun FilterPanel(
     displayHeader: Boolean,
     addressViewModel: AddressViewModel,
     mapViewModel: MapViewModel,
-    permissionHandler: PermissionHandler
+    permissionHandler: PermissionHandler,
+    userViewModel: UserViewModel,
+    navigationActions: NavigationActions
 ) {
   val showProtectionOptions = remember { mutableStateOf(false) }
   val showRackTypeOptions = remember { mutableStateOf(false) }
@@ -143,7 +149,9 @@ fun FilterPanel(
                   isTextFieldVisible,
                   permissionHandler,
                   mapViewModel,
-                  textFieldValue)
+                  textFieldValue,
+                  userViewModel,
+                  navigationActions)
             } else {
               Text(
                   text = stringResource(R.string.all_parkings_radius, radius.value.toInt()),
@@ -345,7 +353,9 @@ fun SearchBarListScreen(
     isTextFieldVisible: MutableState<Boolean>,
     permissionHandler: PermissionHandler,
     mapViewModel: MapViewModel,
-    textFieldValue: MutableState<String>
+    textFieldValue: MutableState<String>,
+    userViewModel: UserViewModel,
+    navigationActions: NavigationActions
 ) {
 
   val context: Context = LocalContext.current
@@ -403,7 +413,9 @@ fun SearchBarListScreen(
 
     OutlinedTextField(
         value = textFieldValue.value,
-        onValueChange = { textFieldValue.value = it },
+        onValueChange = {
+          textFieldValue.value = it // Update the text field value
+        },
         placeholder = { Text(text = stringResource(R.string.search_bar_placeholder)) },
         modifier =
             Modifier.padding(start = 4.dp, end = 8.dp)
@@ -444,9 +456,19 @@ fun SearchBarListScreen(
                 onSearch = {
                   virtualKeyboardManager?.hide()
 
-                  runBlocking { addressViewModel.search(textFieldValue.value) }
+                  val easterEggTriggered =
+                      processEasterEgg(
+                          query = textFieldValue.value,
+                          clearInput = { textFieldValue.value = "" },
+                          context = context,
+                          userViewModel = userViewModel,
+                          navigationActions = navigationActions,
+                      )
 
-                  showSuggestions.value = true
+                  if (!easterEggTriggered) {
+                    runBlocking { addressViewModel.search(textFieldValue.value) }
+                    showSuggestions.value = true
+                  }
                 }))
 
     DropdownMenu(
@@ -482,4 +504,74 @@ fun SearchBarListScreen(
           }
         }
   }
+}
+
+fun processEasterEgg(
+    query: String,
+    clearInput: () -> Unit,
+    context: Context,
+    userViewModel: UserViewModel,
+    navigationActions: NavigationActions,
+): Boolean {
+  val giveCoinsRegex = Regex("^/give coins (\\d+)$", RegexOption.IGNORE_CASE)
+  val killRegex = Regex("^/kill$", RegexOption.IGNORE_CASE)
+  val teleportRegex = Regex("^/tp$", RegexOption.IGNORE_CASE)
+  val trimmedQuery = query.trim()
+
+  // Easter Egg 1: Give Coins
+  giveCoinsRegex.matchEntire(trimmedQuery)?.let { matchResult ->
+    val amount = matchResult.groupValues[1].toInt()
+    clearInput()
+
+    if (amount > 10) {
+      userViewModel.currentUser.value?.details?.wallet?.let {
+        userViewModel.tryDebitCoinsFromCurrentUser(it.getCoins())
+      }
+      Toast.makeText(
+              context,
+              context.getString(R.string.easter_egg_coins_greedy_message),
+              Toast.LENGTH_SHORT)
+          .show()
+    } else {
+      userViewModel.creditCoinsToCurrentUser(amount)
+      Toast.makeText(
+              context,
+              context.getString(R.string.easter_egg_coins_credited_message, amount),
+              Toast.LENGTH_SHORT)
+          .show()
+    }
+    return true
+  }
+
+  // Easter Egg 2: Kill Command
+  killRegex.matchEntire(trimmedQuery)?.let {
+    clearInput()
+    val message = context.getString(R.string.easter_egg_kill_message)
+    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    throw RuntimeException(message)
+  }
+
+  // Easter Egg 3: Teleport
+  teleportRegex.matchEntire(trimmedQuery)?.let {
+    clearInput()
+    val availableScreens =
+        listOf(
+            Screen.MAP,
+            Screen.LIST,
+            Screen.VIEW_PROFILE,
+            Screen.GAMBLING,
+            Screen.RACK_INFO,
+            Screen.ADMIN,
+        )
+    val randomScreen = availableScreens.random()
+    Toast.makeText(
+            context,
+            context.getString(R.string.easter_egg_teleport_message, randomScreen.toString()),
+            Toast.LENGTH_SHORT)
+        .show()
+    navigationActions.navigateTo(randomScreen)
+    return true
+  }
+
+  return false
 }

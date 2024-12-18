@@ -176,6 +176,7 @@ class ParkingDetailsScreenTest {
 
   @Test
   fun displayAllComponents() {
+    userViewModel.addUser(TestInstancesUser.user1, {}, {})
     parkingViewModel.selectParking(TestInstancesParking.parking1)
     composeTestRule.setContent {
       ParkingDetailsScreen(mapViewModel, navigationActions, parkingViewModel, userViewModel)

@@ -7,12 +7,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.user.User
@@ -50,12 +57,12 @@ fun DisplayProfileComponent(user: User?, extras: @Composable () -> Unit) {
               Text(
                   text = firstName,
                   style = MaterialTheme.typography.headlineMedium,
-                  testTag = "DisplayFirstName")
+                  modifier = Modifier.testTag("DisplayFirstName"))
 
               Text(
                   text = lastName,
                   style = MaterialTheme.typography.headlineMedium,
-                  testTag = "DisplayLastName")
+                  modifier = Modifier.testTag("DisplayLastName"))
 
               Spacer(modifier = Modifier.height(16.dp))
 
@@ -67,21 +74,86 @@ fun DisplayProfileComponent(user: User?, extras: @Composable () -> Unit) {
 
               Spacer(modifier = Modifier.height(8.dp))
 
-              Text(
-                  text =
-                      stringResource(
-                          R.string.display_user_tag_format, range.symbol, level, username),
-                  style = MaterialTheme.typography.bodyMedium,
-                  color =
-                      if (range.color == stringResource(R.string.rainbow_text_color)) {
-                        MaterialTheme.colorScheme.onSurface // TODO rainbow color
-                      } else {
-                        Color(parseColor(range.color))
-                      },
-                  modifier = Modifier.testTag("DisplayUsernameWithLevel"))
+              UserTagText(
+                  ownerUsername = username,
+                  symbol = range.symbol,
+                  color = range.color,
+                  level = level,
+                  modifier = Modifier.testTag("DisplayUsernameWithLevel"),
+                  style = MaterialTheme.typography.bodyMedium)
 
               Spacer(modifier = Modifier.height(16.dp))
             }
         extras()
       }
+}
+
+@Composable
+fun RainbowText(
+    text: String,
+    modifier: Modifier = Modifier,
+    style: TextStyle = MaterialTheme.typography.bodySmall,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip
+) {
+  val Orange = Color(0xFFFFA500) // Hex for orange
+  val Indigo = Color(0xFF4B0082) // Hex for indigo
+  val Violet = Color(0xFF8A2BE2) // Hex for violet
+
+  Text(
+      text = text,
+      modifier = modifier,
+      style =
+          style.copy(
+              brush =
+                  Brush.horizontalGradient(
+                      colors =
+                          listOf(
+                              Color.Red,
+                              Orange,
+                              Color.Yellow,
+                              Color.Green,
+                              Color.Blue,
+                              Indigo,
+                              Violet))),
+      maxLines = maxLines,
+      overflow = overflow)
+}
+
+@Composable
+fun UserTagText(
+    ownerUsername: String,
+    symbol: String,
+    color: String,
+    level: Int,
+    modifier: Modifier = Modifier,
+    style: TextStyle = MaterialTheme.typography.bodyMedium,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip
+) {
+  val formattedText = stringResource(R.string.display_user_tag_format, symbol, level, ownerUsername)
+
+  if (color == stringResource(R.string.rainbow_text_color)) {
+    RainbowText(
+        text = formattedText,
+        modifier = modifier,
+        style =
+            style.copy(
+                fontWeight = FontWeight.Bold,
+                shadow =
+                    Shadow(
+                        color = Color.Black.copy(alpha = 0.3f),
+                        offset = Offset(1f, 1f),
+                        blurRadius = 2f)),
+        maxLines = maxLines,
+        overflow = overflow)
+  } else {
+    Text(
+        text = formattedText,
+        style = style,
+        color = Color(parseColor(color)),
+        modifier = modifier,
+        maxLines = maxLines,
+        overflow = overflow)
+  }
 }

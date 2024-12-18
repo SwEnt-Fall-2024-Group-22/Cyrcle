@@ -97,6 +97,7 @@ import com.github.se.cyrcle.ui.theme.defaultOnColor
 import com.github.se.cyrcle.ui.theme.getOutlinedTextFieldColorsSearchBar
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.github.se.cyrcle.ui.theme.molecules.FilterPanel
+import com.github.se.cyrcle.ui.theme.molecules.processEasterEgg
 import com.google.gson.Gson
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.geojson.Point
@@ -228,6 +229,11 @@ fun MapScreen(
   LaunchedEffect(isOnlineMode) {
     parkingViewModel.getParkingsInRect(screenCoordinates.first, screenCoordinates.second)
   }
+
+  val giveCoinsRegex = Regex("^/give coins (\\d+)$", RegexOption.IGNORE_CASE)
+  val killRegex = Regex("^/kill$", RegexOption.IGNORE_CASE)
+  val jokeRegex = Regex("^/joke$", RegexOption.IGNORE_CASE)
+  val teleportRegex = Regex("^/tp$", RegexOption.IGNORE_CASE)
 
   // Draw markers on the map when the list of parkings changes
   LaunchedEffect(
@@ -522,8 +528,20 @@ fun MapScreen(
                         KeyboardActions(
                             onSearch = {
                               virtualKeyboardManager?.hide()
-                              runBlocking { addressViewModel.search(searchQuery.value) }
-                              showSuggestions.value = true
+
+                              val easterEggTriggered =
+                                  processEasterEgg(
+                                      query = searchQuery.value,
+                                      clearInput = { searchQuery.value = "" },
+                                      context = context,
+                                      userViewModel = userViewModel,
+                                      navigationActions = navigationActions,
+                                  )
+
+                              if (!easterEggTriggered) {
+                                runBlocking { addressViewModel.search(searchQuery.value) }
+                                showSuggestions.value = true
+                              }
                             }))
 
                 // Filter button
@@ -568,6 +586,8 @@ fun MapScreen(
               addressViewModel,
               permissionHandler,
               mapViewModel,
+              userViewModel,
+              navigationActions,
               onDismiss = { showFilter.value = false })
         }
 
@@ -802,6 +822,8 @@ fun FilterDialog(
     addressViewModel: AddressViewModel,
     permissionHandler: PermissionHandler,
     mapViewModel: MapViewModel,
+    userViewModel: UserViewModel,
+    navigationActions: NavigationActions,
     onDismiss: () -> Unit
 ) {
   AlertDialog(
@@ -819,7 +841,9 @@ fun FilterDialog(
               displayHeader = false,
               addressViewModel,
               mapViewModel,
-              permissionHandler = permissionHandler)
+              permissionHandler = permissionHandler,
+              userViewModel,
+              navigationActions)
         }
       },
       confirmButton = {
