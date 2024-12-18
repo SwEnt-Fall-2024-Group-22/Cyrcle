@@ -4,7 +4,7 @@ object TestInstancesUser {
 
   val user1 =
       User(
-          public = UserPublic(userId = "user1", username = "john_doe", userReputationScore = 127.0),
+          public = UserPublic(userId = "user1", username = "john_doe"),
           details =
               UserDetails(
                   firstName = "John",
