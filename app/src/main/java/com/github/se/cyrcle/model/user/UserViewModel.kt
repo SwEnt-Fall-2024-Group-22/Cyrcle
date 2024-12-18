@@ -231,21 +231,6 @@ class UserViewModel(
   }
 
   /**
-   * Adds a review to the list of reported reviews for the selected user and updates the reported
-   * reviews state.
-   *
-   * @param review The review ID to add to the list of reported reviews.
-   */
-  fun addReportedReviewToSelectedUser(review: String) {
-    currentUser.value?.let { user ->
-      val updatedDetails =
-          user.details?.copy(reportedReviews = user.details.reportedReviews + review)
-      val updatedUser = user.copy(details = updatedDetails)
-      updateUser(updatedUser) {}
-    }
-  }
-
-  /**
    * Adds an image to the list of reported images for the selected user and updates the reported
    * images state.
    *
