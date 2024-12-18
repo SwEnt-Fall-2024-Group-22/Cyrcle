@@ -60,8 +60,8 @@ fun CyrcleNavHost(
     }
 
     navigation(
-        startDestination = Screen.VIEW_PROFILE,
-        route = Screen.TUTORIAL,
+        startDestination = Screen.TUTORIAL,
+        route = Route.TUTORIAL,
     ) {
       composable(Screen.TUTORIAL) { TutorialScreen(navigationActions) }
       composable(Screen.MAP) {
