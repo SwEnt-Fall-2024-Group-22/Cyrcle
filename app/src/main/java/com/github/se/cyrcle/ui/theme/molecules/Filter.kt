@@ -451,24 +451,25 @@ fun SearchBarListScreen(
         },
         singleLine = true,
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
-        keyboardActions = KeyboardActions(
-            onSearch = {
-                virtualKeyboardManager?.hide()
+        keyboardActions =
+            KeyboardActions(
+                onSearch = {
+                  virtualKeyboardManager?.hide()
 
-                val easterEggTriggered = processEasterEgg(
-                    query = textFieldValue.value,
-                    clearInput = { textFieldValue.value = "" },
-                    context = context,
-                    userViewModel = userViewModel,
-                    navigationActions = navigationActions,
-                )
+                  val easterEggTriggered =
+                      processEasterEgg(
+                          query = textFieldValue.value,
+                          clearInput = { textFieldValue.value = "" },
+                          context = context,
+                          userViewModel = userViewModel,
+                          navigationActions = navigationActions,
+                      )
 
-                if (!easterEggTriggered) {
+                  if (!easterEggTriggered) {
                     runBlocking { addressViewModel.search(textFieldValue.value) }
                     showSuggestions.value = true
-                }
-            }
-        ))
+                  }
+                }))
 
     DropdownMenu(
         expanded = showSuggestions.value,
@@ -512,47 +513,49 @@ fun processEasterEgg(
     userViewModel: UserViewModel,
     navigationActions: NavigationActions,
 ): Boolean {
-    val giveCoinsRegex = Regex("^/give coins (\\d+)$", RegexOption.IGNORE_CASE)
-    val killRegex = Regex("^/kill$", RegexOption.IGNORE_CASE)
-    val jokeRegex = Regex("^/joke$", RegexOption.IGNORE_CASE)
-    val teleportRegex = Regex("^/tp$", RegexOption.IGNORE_CASE)
-    val trimmedQuery = query.trim()
+  val giveCoinsRegex = Regex("^/give coins (\\d+)$", RegexOption.IGNORE_CASE)
+  val killRegex = Regex("^/kill$", RegexOption.IGNORE_CASE)
+  val jokeRegex = Regex("^/joke$", RegexOption.IGNORE_CASE)
+  val teleportRegex = Regex("^/tp$", RegexOption.IGNORE_CASE)
+  val trimmedQuery = query.trim()
 
-    // Easter Egg 1: Give Coins
-    giveCoinsRegex.matchEntire(trimmedQuery)?.let { matchResult ->
-        val amount = matchResult.groupValues[1].toInt()
-        clearInput()
+  // Easter Egg 1: Give Coins
+  giveCoinsRegex.matchEntire(trimmedQuery)?.let { matchResult ->
+    val amount = matchResult.groupValues[1].toInt()
+    clearInput()
 
-        if (amount > 10) {
-            userViewModel.currentUser.value?.details?.wallet?.let {
-                userViewModel.tryDebitCoinsFromCurrentUser(it.getCoins())
-            }
-            Toast.makeText(context, "Greedy, aren't you? All your coins are gone!", Toast.LENGTH_SHORT).show()
-        } else {
-            userViewModel.creditCoinsToCurrentUser(amount)
-            Toast.makeText(context, "You've been credited $amount coins!", Toast.LENGTH_SHORT).show()
-        }
-        return true
+    if (amount > 10) {
+      userViewModel.currentUser.value?.details?.wallet?.let {
+        userViewModel.tryDebitCoinsFromCurrentUser(it.getCoins())
+      }
+      Toast.makeText(context, "Greedy, aren't you? All your coins are gone!", Toast.LENGTH_SHORT)
+          .show()
+    } else {
+      userViewModel.creditCoinsToCurrentUser(amount)
+      Toast.makeText(context, "You've been credited $amount coins!", Toast.LENGTH_SHORT).show()
     }
+    return true
+  }
 
-    // Easter Egg 2: Kill Command
-    killRegex.matchEntire(trimmedQuery)?.let {
-        clearInput()
-        Toast.makeText(context, "Goodbye, cruel world!", Toast.LENGTH_SHORT).show()
-        throw RuntimeException("Goodbye, cruel world!")
-    }
+  // Easter Egg 2: Kill Command
+  killRegex.matchEntire(trimmedQuery)?.let {
+    clearInput()
+    Toast.makeText(context, "Goodbye, cruel world!", Toast.LENGTH_SHORT).show()
+    throw RuntimeException("Goodbye, cruel world!")
+  }
 
-    // Easter Egg 3: Joke Command
-    jokeRegex.matchEntire(trimmedQuery)?.let {
-        clearInput()
-        Toast.makeText(context, "You're the joke \uD83E\uDD21", Toast.LENGTH_SHORT).show()
-        return true
-    }
+  // Easter Egg 3: Joke Command
+  jokeRegex.matchEntire(trimmedQuery)?.let {
+    clearInput()
+    Toast.makeText(context, "You're the joke \uD83E\uDD21", Toast.LENGTH_SHORT).show()
+    return true
+  }
 
-    // Easter Egg 4: Teleport
-    teleportRegex.matchEntire(trimmedQuery)?.let {
-        clearInput()
-        val availableScreens = listOf(
+  // Easter Egg 4: Teleport
+  teleportRegex.matchEntire(trimmedQuery)?.let {
+    clearInput()
+    val availableScreens =
+        listOf(
             Screen.MAP,
             Screen.LIST,
             Screen.VIEW_PROFILE,
@@ -560,11 +563,11 @@ fun processEasterEgg(
             Screen.RACK_INFO,
             Screen.ADMIN,
         )
-        val randomScreen = availableScreens.random()
-        Toast.makeText(context, "Teleporting to $randomScreen", Toast.LENGTH_SHORT).show()
-        navigationActions.navigateTo(randomScreen)
-        return true
-    }
+    val randomScreen = availableScreens.random()
+    Toast.makeText(context, "Teleporting to $randomScreen", Toast.LENGTH_SHORT).show()
+    navigationActions.navigateTo(randomScreen)
+    return true
+  }
 
-    return false
+  return false
 }

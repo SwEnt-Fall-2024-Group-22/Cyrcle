@@ -524,24 +524,25 @@ fun MapScreen(
                     },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
-                    keyboardActions = KeyboardActions(
-                        onSearch = {
-                            virtualKeyboardManager?.hide()
+                    keyboardActions =
+                        KeyboardActions(
+                            onSearch = {
+                              virtualKeyboardManager?.hide()
 
-                            val easterEggTriggered = processEasterEgg(
-                                query = searchQuery.value,
-                                clearInput = { searchQuery.value = "" },
-                                context = context,
-                                userViewModel = userViewModel,
-                                navigationActions = navigationActions,
-                            )
+                              val easterEggTriggered =
+                                  processEasterEgg(
+                                      query = searchQuery.value,
+                                      clearInput = { searchQuery.value = "" },
+                                      context = context,
+                                      userViewModel = userViewModel,
+                                      navigationActions = navigationActions,
+                                  )
 
-                            if (!easterEggTriggered) {
+                              if (!easterEggTriggered) {
                                 runBlocking { addressViewModel.search(searchQuery.value) }
                                 showSuggestions.value = true
-                            }
-                        }
-                    ))
+                              }
+                            }))
 
                 // Filter button
                 Box(modifier = Modifier.size(56.dp).padding(start = 5.dp)) {

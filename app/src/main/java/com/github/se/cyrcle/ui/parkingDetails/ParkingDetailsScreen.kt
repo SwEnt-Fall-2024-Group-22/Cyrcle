@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.parkingDetails
 
-import android.graphics.Color.parseColor
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -44,7 +43,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -63,7 +61,7 @@ import com.github.se.cyrcle.model.user.UserLevelDisplay
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
-import com.github.se.cyrcle.ui.profile.RainbowText
+import com.github.se.cyrcle.ui.profile.UserTagText
 import com.github.se.cyrcle.ui.theme.Black
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.Red
@@ -510,28 +508,19 @@ fun ParkingDetailsScreen(
                                   text = stringResource(R.string.card_screen_user),
                                   style = MaterialTheme.typography.bodyMedium,
                                   color = MaterialTheme.colorScheme.onBackground)
-                              if (range.color == stringResource(R.string.rainbow_text_color)) {
-                                RainbowText(
-                                    text =
-                                        stringResource(
-                                            R.string.display_user_tag_format,
-                                            range.symbol,
-                                            level,
-                                            ownerUsername),
-                                    modifier = Modifier.testTag("RainbowUserTag"),
-                                    style = MaterialTheme.typography.bodyMedium)
-                              } else {
-                                Text(
-                                    text =
-                                        stringResource(
-                                            R.string.display_user_tag_format,
-                                            range.symbol,
-                                            level,
-                                            ownerUsername),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = Color(parseColor(range.color)),
-                                    modifier = Modifier.testTag("UserTag"))
-                              }
+                              UserTagText(
+                                  ownerUsername = ownerUsername,
+                                  symbol = range.symbol,
+                                  color = range.color,
+                                  level = level,
+                                  modifier =
+                                      if (range.color ==
+                                          stringResource(R.string.rainbow_text_color)) {
+                                        Modifier.testTag("RainbowUserTag")
+                                      } else {
+                                        Modifier.testTag("UserTag")
+                                      },
+                                  style = MaterialTheme.typography.bodyMedium)
                             }
                           }
                     }
