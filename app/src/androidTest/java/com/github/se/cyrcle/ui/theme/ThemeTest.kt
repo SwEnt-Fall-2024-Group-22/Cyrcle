@@ -33,13 +33,6 @@ class ThemeTest {
   }
 
   @Test
-  fun disableColorTestDark() {
-    composeTestRule.setContent { ColoredSquare(disabledColor()) }
-    composeTestRule.onNodeWithTag("TestTag").assertIsDisplayed()
-    // No test for checking the color
-  }
-
-  @Test
   fun defaultOnColorFromHighLuminance() {
     composeTestRule.setContent { ColoredSquare(defaultOnColorFromLuminance(White)) }
     composeTestRule.onNodeWithTag("TestTag").assertIsDisplayed()
