@@ -532,10 +532,7 @@ fun ParkingDetailsScreen(
                           text = stringResource(R.string.card_screen_show_map),
                           onClick = {
                             parkingViewModel.selectParking(selectedParking)
-                            mapViewModel.updateTrackingMode(false)
-                            mapViewModel.updateMapRecentering(true)
-                            mapViewModel.zoomOnLocation(selectedParking.location)
-                            navigationActions.navigateTo(Screen.MAP)
+                            mapViewModel.zoomOnLocation(navigationActions, selectedParking.location)
                           },
                           modifier = Modifier.fillMaxWidth(),
                           colorLevel = ColorLevel.PRIMARY,

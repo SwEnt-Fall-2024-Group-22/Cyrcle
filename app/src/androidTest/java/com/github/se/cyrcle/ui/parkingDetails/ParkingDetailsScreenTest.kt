@@ -37,6 +37,7 @@ import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.model.user.UserRepository
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
 import org.junit.Before
 import org.junit.Rule
@@ -339,6 +340,6 @@ class ParkingDetailsScreenTest {
         .assertHasClickAction()
         .performClick()
 
-    verify(navigationActions).navigateTo(Screen.MAP)
+    verify(navigationActions).navigateTo(Route.MAP)
   }
 }
