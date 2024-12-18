@@ -139,7 +139,11 @@ class MapViewModel : ViewModel() {
    * @param location the location to zoom on.
    * @param zoom the zoom level to set.
    */
-  fun zoomOnLocation(navigationActions: NavigationActions?, location: Location, zoom: Double = maxZoom) {
+  fun zoomOnLocation(
+      navigationActions: NavigationActions?,
+      location: Location,
+      zoom: Double = maxZoom
+  ) {
     _cameraPosition.value =
         CameraState(
             location.center,
