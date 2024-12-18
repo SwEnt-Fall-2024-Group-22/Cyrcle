@@ -58,10 +58,22 @@ fun CyrcleNavHost(
     }
 
     navigation(
-        startDestination = Screen.CREATE_PROFILE,
-        route = Screen.CREATE_PROFILE,
+        startDestination = Route.TUTORIAL,
+        route = Screen.TUTORIAL,
     ) {
       composable(Screen.TUTORIAL) { TutorialScreen(navigationActions) }
+      composable(Screen.MAP) {
+        MapScreen(
+            navigationActions,
+            parkingViewModel,
+            userViewModel,
+            mapViewModel,
+            permissionHandler,
+            addressViewModel)
+      }
+      composable(Screen.VIEW_PROFILE) {
+        ProfileScreen(navigationActions, userViewModel, parkingViewModel, reviewViewModel)
+      }
     }
 
     navigation(
@@ -166,21 +178,6 @@ fun CyrcleNavHost(
       }
       composable(Screen.ZONE_SELECTION) {
         ZoneSelectionScreen(navigationActions, mapViewModel, parkingViewModel)
-      }
-    }
-
-    navigation(startDestination = Route.TUTORIAL, route = Route.TUTORIAL) {
-      composable(Route.MAP) {
-        MapScreen(
-            navigationActions,
-            parkingViewModel,
-            userViewModel,
-            mapViewModel,
-            permissionHandler,
-            addressViewModel)
-      }
-      composable(Route.VIEW_PROFILE) {
-        ProfileScreen(navigationActions, userViewModel, parkingViewModel, reviewViewModel)
       }
     }
   }
