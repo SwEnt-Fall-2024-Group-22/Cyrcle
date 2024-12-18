@@ -311,7 +311,7 @@
     <string name="zone_manager_screen_title">Offline Maps</string>
     <string name="zone_selection_screen_title">Select Zone</string>
     <string name ="zone_manager_no_zones">Nothing downloaded yet</string>
-    <string name ="zone_manager_header_area">Map Name</string>
+    <string name ="zone_manager_header_area">Map Name \n(Click to show on map)</string>
     <string name ="zone_manager_header_lastRefreshed">Last Refreshed</string>
     <string name ="zone_selection_alert_tilte">Please name the Area you are about to download</string>
     <string name ="zone_selection_button_when_none_set">Set top left corner</string>
