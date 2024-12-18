@@ -72,10 +72,12 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.address.Address
 import com.github.se.cyrcle.model.address.AddressViewModel
@@ -868,12 +870,23 @@ fun PreviewCard(navigationActions: NavigationActions, parkingViewModel: ParkingV
                     color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Left,
                     testTag = "PreviewCardTitle")
-                ScoreStars(
-                    score = parking.avgScore,
-                    text =
-                        pluralStringResource(R.plurals.reviews_count, count = parking.nbReviews)
-                            .format(parking.nbReviews),
-                    scale = 0.6f)
+                if (parking.nbReviews == 0) {
+                  Text(
+                      text = stringResource(R.string.no_reviews),
+                      style =
+                          MaterialTheme.typography.bodySmall.copy(
+                              fontStyle = FontStyle.Italic, fontSize = 12.sp),
+                      textAlign = TextAlign.Left,
+                      color = MaterialTheme.colorScheme.onSurface,
+                      testTag = "PreviewCardNoReviews")
+                } else {
+                  ScoreStars(
+                      score = parking.avgScore,
+                      text =
+                          pluralStringResource(R.plurals.reviews_count, count = parking.nbReviews)
+                              .format(parking.nbReviews),
+                      scale = 0.6f)
+                }
                 HorizontalDivider(
                     thickness = 1.dp,
                     modifier = Modifier.fillMaxWidth(),
