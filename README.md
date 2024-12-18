@@ -11,7 +11,13 @@ Our mapping system helps you find the perfect parking spot and repair stations f
 ensuring that your two-wheeled companion is always safe and well-maintained.
 
 ## Features
-Todo
+
+- **Parking Spots**: Find the nearest parking spot for your bike.
+- **Community**: Share your experiences and help others by adding new parking spots and repair stations.
+- **Profile**: Keep track of your contributions and earn rewards.
+- **Offline Mode**: Use the app even when you're offline.
+- **Notifications**: Get notified about new parking spots and repair stations in your area.
+- **Where's my bike**: Never forget where you parked your bike again.
 
 ## Tech stack
 
