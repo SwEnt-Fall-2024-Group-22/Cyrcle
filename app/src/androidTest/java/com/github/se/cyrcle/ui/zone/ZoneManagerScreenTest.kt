@@ -36,22 +36,24 @@ class ZoneManagerScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var navigationActions: NavigationActions
-
+  private lateinit var userViewModel: UserViewModel
   private lateinit var mapViewModel: MapViewModel
   private lateinit var parkingViewModel: ParkingViewModel
 
   @Before
   fun setUp() {
+    userViewModel =
+        UserViewModel(
+            MockUserRepository(),
+            MockParkingRepository(),
+            MockImageRepository(),
+            MockAuthenticationRepository())
     navigationActions = mock(NavigationActions::class.java)
     mapViewModel = MapViewModel()
     parkingViewModel =
         ParkingViewModel(
             MockImageRepository(),
-            UserViewModel(
-                MockUserRepository(),
-                MockParkingRepository(),
-                MockImageRepository(),
-                MockAuthenticationRepository()),
+            userViewModel,
             MockParkingRepository(),
             MockOfflineParkingRepository(),
             MockReportedObjectRepository())
@@ -61,7 +63,7 @@ class ZoneManagerScreenTest {
   @Test
   fun checkAllUIElementsAreDisplayedWithNoZones() {
     composeTestRule.setContent {
-      ZoneManagerScreen(mapViewModel, parkingViewModel, navigationActions)
+      ZoneManagerScreen(mapViewModel, parkingViewModel, navigationActions, userViewModel)
     }
 
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("TopAppBar"))

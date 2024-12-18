@@ -158,7 +158,8 @@ fun SpotListScreen(
               displayHeader = true,
               addressViewModel,
               mapViewModel,
-              permissionHandler)
+              permissionHandler,
+              userViewModel)
           val listState = rememberLazyListState()
           LazyColumn(state = listState, modifier = Modifier.testTag("SpotListColumn")) {
             // Pinned parking spots if any (includes titles and dividers)

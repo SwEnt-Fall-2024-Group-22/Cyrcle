@@ -10,6 +10,7 @@ import com.github.se.cyrcle.model.parking.online.ParkingRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
 class UserViewModel(
@@ -40,6 +41,14 @@ class UserViewModel(
   // Keep track of whether the user has connection to the internet or not.
   private val _hasConnection = MutableStateFlow(true)
   val hasConnection: StateFlow<Boolean> = _hasConnection
+
+  // Combine the connectivity status and the mode selected to decide if we show ui elements that
+  // require internet.
+  // (i.e the search bars)
+  val displayOnlineElementFlow =
+      combine(_isOnlineMode, _hasConnection) { isOnlineMode, hasConnection ->
+        isOnlineMode && hasConnection
+      }
   // === === === === === === ===
 
   /**
