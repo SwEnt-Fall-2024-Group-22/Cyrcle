@@ -61,6 +61,7 @@ import com.github.se.cyrcle.ui.theme.atoms.OptionsMenu
 import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
+import com.github.se.cyrcle.ui.theme.molecules.DeleteConfirmationDialog
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
@@ -252,7 +253,8 @@ fun AllReviewsScreen(
                                           }),
                               userViewModel = userViewModel,
                               reviewViewModel = reviewViewModel,
-                              ownerReputationScore = currentUser?.public?.userReputationScore)
+                              ownerReputationScore = currentUser?.public?.userReputationScore,
+                              navigationActions)
                         }
                       } else {
                         // Add review button
@@ -324,7 +326,8 @@ fun AllReviewsScreen(
                                       }),
                           userViewModel = userViewModel,
                           reviewViewModel = reviewViewModel,
-                          ownerReputationScore = ownerReputationScore)
+                          ownerReputationScore = ownerReputationScore,
+                          navigationActions)
                     }
               }
         }
@@ -341,10 +344,13 @@ fun ReviewCard(
     options: Map<String, () -> Unit>,
     userViewModel: UserViewModel,
     reviewViewModel: ReviewViewModel,
-    ownerReputationScore: Double?
+    ownerReputationScore: Double?,
+    navigationActions: NavigationActions
 ) {
   val currentUser by userViewModel.currentUser.collectAsState()
   val userSignedIn by userViewModel.isSignedIn.collectAsState(false)
+  var showDeleteDialog by remember { mutableStateOf(false) }
+  val context = LocalContext.current
 
   Card(
       modifier =
@@ -454,8 +460,13 @@ fun ReviewCard(
                             }
 
                             // More options button
-                            if (options.isNotEmpty())
-                                OptionsMenu(options = options, testTag = "MoreOptions$index")
+                            if (options.isNotEmpty()) {
+                              val updatedOptions = options.toMutableMap()
+                              updatedOptions[stringResource(R.string.all_reviews_delete_review)] = {
+                                showDeleteDialog = true
+                              }
+                              OptionsMenu(options = updatedOptions, testTag = "MoreOptions$index")
+                            }
                           }
                     }
 
@@ -477,6 +488,18 @@ fun ReviewCard(
               }
         }
       }
+
+  // Use DeleteConfirmationDialog for delete functionality
+  if (showDeleteDialog) {
+    DeleteConfirmationDialog(
+        showDialog = remember { mutableStateOf(showDeleteDialog) },
+        onDismiss = { showDeleteDialog = false },
+        onConfirm = {
+          reviewViewModel.deleteReviewById(review.uid)
+          showDeleteDialog = false
+          navigationActions.navigateTo(Screen.PARKING_DETAILS)
+        })
+  }
 }
 
 /** Converts a [Timestamp] to a formatted date string. */
