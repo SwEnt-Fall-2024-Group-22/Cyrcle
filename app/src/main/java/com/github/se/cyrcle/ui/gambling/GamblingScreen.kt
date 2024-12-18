@@ -63,13 +63,13 @@ import com.github.se.cyrcle.model.user.SPIN_COST
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.math.cos
-import kotlin.math.sin
-import kotlin.math.sqrt
 
 private const val textProportion = 0.65f
 

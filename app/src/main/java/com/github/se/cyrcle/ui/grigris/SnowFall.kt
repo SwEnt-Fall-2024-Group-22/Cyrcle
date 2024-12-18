@@ -20,8 +20,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.ui.theme.CeruleanLowest
-import kotlinx.coroutines.delay
 import kotlin.random.Random
+import kotlinx.coroutines.delay
 
 /**
  * A simple snowfall animation where snowflakes fall from the top of the screen to the bottom. The

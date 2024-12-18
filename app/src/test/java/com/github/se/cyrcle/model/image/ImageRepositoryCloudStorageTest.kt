@@ -11,6 +11,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.UploadTask
+import java.io.ByteArrayInputStream
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -24,7 +25,6 @@ import org.mockito.MockitoAnnotations
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
-import java.io.ByteArrayInputStream
 
 @RunWith(RobolectricTestRunner::class)
 class ImageRepositoryCloudStorageTest {

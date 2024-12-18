@@ -1,10 +1,10 @@
 package com.github.se.cyrcle.io.datastore
 
 import com.github.se.cyrcle.io.Settings
-import kotlinx.coroutines.runBlocking
-import org.junit.Test
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import kotlinx.coroutines.runBlocking
+import org.junit.Test
 
 class SettingsSerializerTest {
   private val settings =

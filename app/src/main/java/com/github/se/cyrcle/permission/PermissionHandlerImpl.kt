@@ -7,9 +7,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import com.github.se.cyrcle.MainActivity
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import javax.inject.Inject
 
 /** Handles permissions for the app. */
 class PermissionHandlerImpl @Inject constructor() : PermissionHandler {

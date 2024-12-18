@@ -1,9 +1,9 @@
 package com.github.se.cyrcle.io
 
+import java.io.File
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import java.io.File
 
 class MapTileStorageTest {
 
