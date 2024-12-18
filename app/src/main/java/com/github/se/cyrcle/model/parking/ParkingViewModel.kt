@@ -159,7 +159,15 @@ class ParkingViewModel(
 
   fun deleteParkingByUid(uid: String) {
     parkingRepository.deleteParkingById(
-        uid, {}, { Log.d("ParkingViewModel", "Error deleting Parking") })
+        uid,
+        {
+          // can not use updateCache() here as we remove the parking from the cache, also we can't
+          // get the tile from the uid so we iterate over the whole cache.
+          tilesToParking.forEach { (tile, parkings) ->
+            tilesToParking[tile] = parkings.filter { parking -> parking.uid != uid }
+          }
+        },
+        { Log.d("ParkingViewModel", "Error deleting Parking") })
   }
 
   /**
@@ -512,12 +520,13 @@ class ParkingViewModel(
     parkingRepository.getParkingById(
         parkingId,
         onSuccess = { parking ->
-          val updatedImages = parking.images.filterNot { it.equals(imgId) }
+          val updatedImages = parking.images.filterNot { it == imgId }
           val updatedParking = parking.copy(images = updatedImages)
 
           parkingRepository.updateParking(
               updatedParking,
               onSuccess = {
+                updateCache(updatedParking)
                 Log.d("deleteImageFromParking", "Image removed successfully from parking.")
               },
               onFailure = { exception ->
@@ -841,7 +850,7 @@ class ParkingViewModel(
           0.0
         }
     parking.nbReviews -= 1
-    parkingRepository.updateParking(parking, {}, {})
+    parkingRepository.updateParking(parking, { updateCache(parking) }, {})
   }
 
   /**
@@ -862,7 +871,7 @@ class ParkingViewModel(
         (100 * ((parking.avgScore * parking.nbReviews) + newScore) / (parking.nbReviews + 1))
             .toInt() / 100.00
     parking.nbReviews += 1
-    parkingRepository.updateParking(parking, onSuccess = {}, onFailure = {})
+    parkingRepository.updateParking(parking, onSuccess = { updateCache(parking) }, onFailure = {})
   }
 
   /**
@@ -886,7 +895,7 @@ class ParkingViewModel(
     if (parking.nbReviews != 0) {
       val delta = (newScore - oldScore) / parking.nbReviews
       parking.avgScore += delta
-      parkingRepository.updateParking(parking, {}, {})
+      parkingRepository.updateParking(parking, { updateCache(parking) }, {})
     } else {
       Log.e("ParkingViewModel", "An unexpect error occured (0 reviews)")
     }
@@ -968,7 +977,10 @@ class ParkingViewModel(
           selectParking(updatedParking)
           parkingRepository.updateParking(
               updatedParking,
-              { onSuccess() },
+              {
+                onSuccess()
+                updateCache(updatedParking)
+              },
               { Log.e("ParkingViewModel", "Error adding image path to parking firestore $it") })
         },
         onFailure = { Log.e("ParkingViewModel", "Error uploading image") },
@@ -1037,6 +1049,12 @@ class ParkingViewModel(
     offlineParkingRepository.deleteTiles(tilesToDelete - tilesToKeep) {
       Log.d("ParkingViewModel", "Tiles deleted successfully")
     }
+  }
+
+  private fun updateCache(parking: Parking) {
+    val tile = TileUtils.getTileFromPoint(parking.location.center)
+    tilesToParking[tile] =
+        tilesToParking[tile]?.map { if (it.uid == parking.uid) parking else it } ?: emptyList()
   }
 
   /** Changes the parking view model to offline mode. */
