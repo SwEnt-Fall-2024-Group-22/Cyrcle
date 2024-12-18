@@ -614,12 +614,13 @@ class ViewProfileScreenTest {
     val mockImagePath = "parking/mockParkingId/1"
     userViewModel._selectedUserImageUrls.value = listOf(mockImageUrl)
     userViewModel._selectedUserAssociatedImages.value = listOf(mockImagePath)
-    // check that click on the delete button calls the expected function
     composeTestRule.onNodeWithTag("TabMyImages").performClick()
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("ImageCard").performClick()
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("DeleteImageButton").performClick()
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithText("Delete").assertExists().performClick()
     composeTestRule.waitForIdle()
     val associatedImages = userViewModel._selectedUserAssociatedImages.value
     assert(!associatedImages.contains(mockImagePath)) {
