@@ -8,7 +8,7 @@
 
 Cyrcle is a community-driven app designed to solve the everyday challenges faced by cyclists. <br>
 Our mapping system helps you find the perfect parking spot for your bike, ensuring that your 
-two-wheeled companion is always safe well-stored.
+two-wheeled companion is always safe and well-stored.
 
 ## Features
 
