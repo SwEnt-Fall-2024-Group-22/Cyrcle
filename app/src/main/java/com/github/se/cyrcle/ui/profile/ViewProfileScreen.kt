@@ -554,7 +554,6 @@ private fun UserImagesSection(
         })
   }
 
-  // Use reusable DeleteConfirmationDialog
   if (showDeleteDialog.value) {
     DeleteConfirmationDialog(
         showDialog = showDeleteDialog,
