@@ -224,7 +224,7 @@ class ParkingDetailsScreenTest {
         .assertTextContains(ParkingCapacity.LARGE.description)
     composeTestRule
         .onNodeWithTag("RackTypeColumn")
-        .onChildAt(1)
+        .onChildAt(2)
         .assertTextContains(ParkingRackType.TWO_TIER.description)
     composeTestRule
         .onNodeWithTag("ProtectionColumn")
