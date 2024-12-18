@@ -232,7 +232,7 @@ fun SortingOptionSelector(
     onOptionSelected: (ReportSortingOption) -> Unit
 ) {
   Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-    ReportSortingOption.values().forEach { sortingOption ->
+    ReportSortingOption.entries.forEach { sortingOption ->
       Row(
           modifier =
               Modifier.fillMaxWidth()
@@ -320,7 +320,7 @@ fun AdminScreen(
                 items(items = sortedReports) { curReport ->
                   val index = sortedReports.indexOf(curReport)
                   val isExpanded = selectedCardIndex == index
-                  val cardHeight by animateDpAsState(if (isExpanded) 150.dp else 100.dp)
+                  val cardHeight by animateDpAsState(if (isExpanded) 150.dp else 100.dp, label = "")
                   val cardColor = MaterialTheme.colorScheme.surfaceContainer
                   var showDialog by remember { mutableStateOf(false) } // Dialog visibility state
 

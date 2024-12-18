@@ -44,7 +44,7 @@ class ImageRepositoryCloudStorageTest {
   }
 
   @Test
-  fun testGetUrl(): Unit {
+  fun testGetUrl() {
 
     val path = "test/path"
     val expectedUrl = "https://example.com/test/path"

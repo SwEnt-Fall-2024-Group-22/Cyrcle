@@ -183,8 +183,7 @@ fun WheelView(
           0 -> {
             if (shouldTriggerNearMiss) {
               if (Math.random() < 0.6) {
-                val maxOffsetLeft = angleWithinSegment
-                randomOffset = -maxOffsetLeft * (0.85f + (Math.random() * 0.13f).toFloat())
+                randomOffset = -angleWithinSegment * (0.85f + (Math.random() * 0.13f).toFloat())
               } else {
                 val maxOffsetRight = segmentAngle - angleWithinSegment
                 randomOffset = maxOffsetRight * (0.95f + (Math.random() * 0.03f).toFloat())
@@ -193,16 +192,14 @@ fun WheelView(
           }
           1 -> {
             if (Math.random() < 0.8f) {
-              val maxOffsetLeft = angleWithinSegment
               val maxOffsetRight = segmentAngle - angleWithinSegment
-              val nearWinOffset = minOf(maxOffsetLeft, maxOffsetRight) * 0.05f
+              val nearWinOffset = minOf(angleWithinSegment, maxOffsetRight) * 0.05f
               randomOffset = (Math.random() * 2 * nearWinOffset - nearWinOffset).toFloat()
             }
           }
           2 -> {
             if (shouldTriggerNearMiss) {
-              val maxOffsetLeft = angleWithinSegment
-              randomOffset = -maxOffsetLeft * (0.80f + (Math.random() * 0.18f).toFloat())
+              randomOffset = -angleWithinSegment * (0.80f + (Math.random() * 0.18f).toFloat())
             }
           }
           3 -> {
@@ -213,9 +210,8 @@ fun WheelView(
           }
           4 -> {
             if (Math.random() < 0.8f) {
-              val maxOffsetLeft = angleWithinSegment
               val maxOffsetRight = segmentAngle - angleWithinSegment
-              val nearWinOffset = minOf(maxOffsetLeft, maxOffsetRight) * 0.05f
+              val nearWinOffset = minOf(angleWithinSegment, maxOffsetRight) * 0.05f
               randomOffset = (Math.random() * 2 * nearWinOffset - nearWinOffset).toFloat()
             }
           }
@@ -363,17 +359,16 @@ fun GamblingScreen(navigationActions: NavigationActions, userViewModel: UserView
   var displayedLevel by remember { mutableIntStateOf(flooredLevel) }
   val animatedProgress = remember { Animatable(targetProgress) }
 
-  var xpIncrement by remember { mutableStateOf(0.0) }
+  var xpIncrement by remember { mutableDoubleStateOf(0.0) }
   var showXpIncrement by remember { mutableStateOf(false) }
   var rarityText by remember { mutableStateOf("") }
   var isSpinning by remember { mutableStateOf(false) }
 
   LaunchedEffect(currentLevel) {
     val startLevel = displayedLevel
-    val endLevel = flooredLevel
 
-    if (endLevel > startLevel) {
-      for (level in startLevel until endLevel) {
+    if (flooredLevel > startLevel) {
+      for (level in startLevel until flooredLevel) {
         animatedProgress.animateTo(
             targetValue = 1f,
             animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing))

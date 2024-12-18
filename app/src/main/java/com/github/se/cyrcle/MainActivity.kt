@@ -99,7 +99,7 @@ class MainActivity : ComponentActivity() {
 
     permissionsHandler.initHandler(this@MainActivity)
 
-    ConnectivityObserver(userViewModel, mapViewModel, parkingViewModel).init(this)
+    ConnectivityObserver(userViewModel, parkingViewModel).init(this)
 
     setContent {
       CyrcleTheme {
