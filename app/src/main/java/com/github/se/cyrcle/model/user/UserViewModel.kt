@@ -224,7 +224,7 @@ class UserViewModel(
     currentUser.value?.let { user ->
       val updatedDetails = user.details?.copy(reportedImages = user.details.reportedImages + image)
       val updatedUser = user.copy(details = updatedDetails)
-      updateUser(updatedUser) {  }
+      updateUser(updatedUser) {}
     }
   }
 
@@ -238,7 +238,7 @@ class UserViewModel(
     currentUser.value?.let { user ->
       val updatedDetails = user.details?.copy(userImages = user.details.userImages + image)
       val updatedUser = user.copy(details = updatedDetails)
-      updateUser(updatedUser) { }
+      updateUser(updatedUser) {}
     }
   }
 
@@ -354,7 +354,7 @@ class UserViewModel(
 
     userRepository.getUserById(
         userId,
-        onSuccess = { },
+        onSuccess = {},
         onFailure = { exception ->
           Log.e(
               "com.github.se.cyrcle.model.user.UserViewModel",

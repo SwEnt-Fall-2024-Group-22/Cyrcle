@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.parkingDetails
 
-import android.annotation.SuppressLint
 import android.graphics.Color.parseColor
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -72,7 +71,6 @@ import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
-
 @Composable
 fun ParkingDetailsScreen(
     mapViewModel: MapViewModel,
@@ -98,7 +96,8 @@ fun ParkingDetailsScreen(
   var ownerReputationScore by remember { mutableDoubleStateOf(0.0) }
   var ownerUsername by remember { mutableStateOf(defaultUsername) }
   if (selectedParking.owner != "Unknown Owner" && selectedParking.owner != null) {
-    userViewModel.selectSelectedParkingUser(parkingViewModel.selectedParking.collectAsState().value?.owner!!)
+    userViewModel.selectSelectedParkingUser(
+        parkingViewModel.selectedParking.collectAsState().value?.owner!!)
     userViewModel.getUserById(
         selectedParking.owner,
         onSuccess = {

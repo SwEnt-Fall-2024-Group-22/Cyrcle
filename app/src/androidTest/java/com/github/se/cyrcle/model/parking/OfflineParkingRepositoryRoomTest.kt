@@ -7,7 +7,6 @@ import com.github.se.cyrcle.model.parking.offline.OfflineParkingRepositoryRoom
 import com.github.se.cyrcle.model.parking.offline.ParkingDao
 import com.github.se.cyrcle.model.parking.offline.ParkingDatabase
 import com.github.se.cyrcle.model.parking.offline.UnSupportedOperationException
-import java.util.concurrent.CountDownLatch
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -16,6 +15,7 @@ import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.concurrent.CountDownLatch
 
 @RunWith(AndroidJUnit4::class)
 class OfflineParkingRepositoryRoomTest {
