@@ -59,6 +59,7 @@ fun RectangleSelection(
         modifier =
             Modifier.padding(paddingValues)
                 .fillMaxSize()
+                .testTag("canvas")
                 .then(
                     if (!mapGesturesEnabled.value) {
                       Modifier.pointerInput(Unit) {
