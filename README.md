@@ -14,10 +14,16 @@ ensuring that your two-wheeled companion is always safe and well-maintained.
 Todo
 
 ## Tech stack
+
 - Language: Kotlin
 - Testing
   - Espresso - UI Testing
+  - JUnit - Unit Testing
+  - Mockk - Mocking
+  - Robolectric - Android Testing
 - CI Tools
   - GitHub Actions
-- Design 
+- Dependency Injection
+  - Dagger Hilt
+- Design
   - Figma
