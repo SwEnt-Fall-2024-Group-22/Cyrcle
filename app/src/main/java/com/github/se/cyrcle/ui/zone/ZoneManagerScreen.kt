@@ -140,7 +140,7 @@ fun ZoneCard(
                 TextStyle(textDecoration = TextDecoration.Underline, fontStyle = FontStyle.Italic),
             textAlign = TextAlign.Left,
             modifier =
-                Modifier.weight(2f).clickable {
+                Modifier.weight(2f).testTag("ZoneCardName").clickable {
                   mapViewModel.updateTrackingMode(false)
                   mapViewModel.updateMapRecentering(true)
                   mapViewModel.zoomOnLocation(Location(zone.boundingBox.southwest()), minZoom)
