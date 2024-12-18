@@ -1,6 +1,7 @@
 package com.github.se.cyrcle.ui.review
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -152,9 +153,20 @@ fun ReviewScreen(
                               uid = reviewViewModel.getNewUid(),
                               reportingUsers = emptyList()))
 
-                      userViewModel.creditCoinsToCurrentUser(PARKING_REVIEW_REWARD)
-                      // Show combined toast
-                      Toast.makeText(context, combinedToastText, Toast.LENGTH_LONG).show()
+                      if (userViewModel.currentUser.value
+                          ?.details
+                          ?.reviewedParkings
+                          ?.contains(selectedParking.uid) != true) {
+                        userViewModel.creditCoinsToCurrentUser(PARKING_REVIEW_REWARD)
+                        Log.d("SELLED USR", userViewModel.currentUser.value?.public?.userId!!)
+                        userViewModel.addReviewedParkingToSelectedUser(selectedParking.uid)
+                        Log.d(
+                            "SELLED USR",
+                            userViewModel.currentUser.value?.details?.reviewedParkings!!.toString())
+                        Toast.makeText(context, combinedToastText, Toast.LENGTH_LONG).show()
+                      } else {
+                        Toast.makeText(context, reviewAddedText, Toast.LENGTH_LONG).show()
+                      }
                     } else {
                       parkingViewModel.handleReviewUpdate(
                           newScore = sliderToValue, oldScore = matchingReview?.rating!!)
