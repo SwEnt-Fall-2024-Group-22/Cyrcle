@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.map.MapViewModel.LocationPickerState
+import com.github.se.cyrcle.model.parking.PARKING_MAX_AREA
+import com.github.se.cyrcle.model.parking.PARKING_MIN_AREA
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.Typography
@@ -88,15 +90,15 @@ fun LocationPickerBottomBar(
                           textAlign = TextAlign.Center)
                     }
               } else if (locationPickerState == LocationPickerState.TOP_LEFT_SET) {
+                val invalidAreaText =
+                    stringResource(
+                        R.string.location_picker_invalid_area, PARKING_MIN_AREA, PARKING_MAX_AREA)
                 Button(
                     {
                       if (isLocationValid) {
                         onBottomRightSelected(mapViewModel)
                       } else {
-                        Toast.makeText(
-                                mapView.value?.context,
-                                R.string.location_picker_invalid_area,
-                                Toast.LENGTH_SHORT)
+                        Toast.makeText(mapView.value?.context, invalidAreaText, Toast.LENGTH_SHORT)
                             .show()
                       }
                     },
