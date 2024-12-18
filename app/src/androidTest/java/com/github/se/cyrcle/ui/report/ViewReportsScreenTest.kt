@@ -107,7 +107,6 @@ class ViewReportsScreenTest {
           userViewModel = userViewModel)
     }
 
-    val parkingReport = ParkingReport()
     parkingViewModel.selectParking(TestInstancesParking.parking1)
     composeTestRule.onRoot(useUnmergedTree = true).printToLog("ViewReportsScreen")
 

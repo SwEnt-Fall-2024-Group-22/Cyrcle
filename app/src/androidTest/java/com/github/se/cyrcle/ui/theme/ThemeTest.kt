@@ -21,7 +21,6 @@ class ThemeTest {
   @Composable
   fun ColoredSquare(
       color: Color,
-      colorScheme: ColorScheme = LightColorScheme,
       testTag: String = "TestTag",
   ) {
     Box(modifier = Modifier.size(100.dp).background(color).testTag(testTag)) {}
@@ -29,14 +28,14 @@ class ThemeTest {
 
   @Test
   fun disabledColorTestLight() {
-    composeTestRule.setContent { ColoredSquare(disabledColor(), LightColorScheme) }
+    composeTestRule.setContent { ColoredSquare(disabledColor()) }
     composeTestRule.onNodeWithTag("TestTag").assertIsDisplayed()
     // No test for checking the color
   }
 
   @Test
   fun disableColorTestDark() {
-    composeTestRule.setContent { ColoredSquare(disabledColor(), DarkColorScheme) }
+    composeTestRule.setContent { ColoredSquare(disabledColor()) }
     composeTestRule.onNodeWithTag("TestTag").assertIsDisplayed()
     // No test for checking the color
   }

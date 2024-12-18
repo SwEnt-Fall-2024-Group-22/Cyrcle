@@ -80,7 +80,6 @@ class ParkingDetailsScreenAlertDialogTest {
 
   @Test
   fun testAssertDismissCloseImageDialog() {
-    var dismissedCalled = false
     val userViewModel =
         UserViewModel(
             MockUserRepository(),
@@ -98,7 +97,7 @@ class ParkingDetailsScreenAlertDialogTest {
       ParkingDetailsAlertDialogShowImage(
           parkingViewModel,
           userViewModel,
-          onDismiss = { dismissedCalled = true },
+          onDismiss = {},
           navigationActions = mock(NavigationActions::class.java),
           imageUrl = "https://picsum.photos/200/300")
     }

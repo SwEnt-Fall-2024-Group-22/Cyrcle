@@ -29,8 +29,6 @@ import com.github.se.cyrcle.ui.theme.molecules.ReportTextBlock
 import com.github.se.cyrcle.ui.theme.molecules.SubmitButtonWithDialog
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 
-const val MAX_CHARACTERS = 256
-const val MAX_LINES = 6
 
 @Composable
 fun ParkingReportScreen(

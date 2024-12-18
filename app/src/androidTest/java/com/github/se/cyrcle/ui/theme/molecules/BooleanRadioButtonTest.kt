@@ -21,7 +21,7 @@ class BooleanRadioButtonTest {
 
     composeTestRule.setContent {
       BooleanRadioButton("Q1 ?", a1)
-      BooleanRadioButton("Q2 ?", a2, Modifier, tag1)
+      BooleanRadioButton("Q2 ?", a2, tag1)
     }
 
     composeTestRule.onNodeWithTag(tagD, true).assertIsDisplayed()
