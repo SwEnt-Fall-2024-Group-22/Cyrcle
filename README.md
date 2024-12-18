@@ -6,9 +6,9 @@
 ![GitHub forks](https://img.shields.io/github/forks/SwEnt-Fall-2024-Group-22/Cyrcle)
 ![GitHub stars](https://img.shields.io/github/stars/SwEnt-Fall-2024-Group-22/Cyrcle)
 
-Cyrcle is a community-driven app designed to solve the everyday challenges faced by  cyclists. <br>
-Our mapping system helps you find the perfect parking spot and repair stations for your bike,
-ensuring that your two-wheeled companion is always safe and well-maintained.
+Cyrcle is a community-driven app designed to solve the everyday challenges faced by cyclists. <br>
+Our mapping system helps you find the perfect parking spot for your bike, ensuring that your 
+two-wheeled companion is always safe well-stored.
 
 ## Features
 
