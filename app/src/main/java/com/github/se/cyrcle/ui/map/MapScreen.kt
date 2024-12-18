@@ -141,8 +141,7 @@ const val CLUSTER_COLORS = "#1A4988"
 const val MAX_SUGGESTION_DISPLAY_NAME_LENGTH_MAP = 100
 const val PIN_BITMAP_SIZE = 80
 
-// A trigger for redrawing the bike location marker, simply flip it.
-private var bikeLocationTriggerRedraw = false
+var lastBikeLocation: Point? = null
 
 @Composable
 fun MapScreen(
@@ -190,9 +189,6 @@ fun MapScreen(
 
   // Mutable state to store the PointAnnotationManager for parking labels
   var pLabelAnnotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
-
-  // TODO
-  var bikeLocationAnnotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
 
   // Mutable state to store the visibility of the preview card
   var showPreviewCard by remember { mutableStateOf(false) }
@@ -246,15 +242,13 @@ fun MapScreen(
 
   val forgetBikeLocation = remember { mutableStateOf(false) }
   val bikeLocationBitmap =
-      BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.app_logo_name)
-  var lastBikeLocation: Point? = null
+      BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.dot)
 
   fun bikeLocationMarker(bikeLocation: Point) =
       PointAnnotationOptions()
           .withPoint(bikeLocation)
           .withIconImage(bikeLocationBitmap)
           .withIconAnchor(IconAnchor.BOTTOM)
-          // .withIconOffset(listOf(0.0, bikeLocationBitmap.height/12.0))
           .withIconSize(0.25)
 
   val giveCoinsRegex = Regex("^/give coins (\\d+)$", RegexOption.IGNORE_CASE)
@@ -262,37 +256,39 @@ fun MapScreen(
   val jokeRegex = Regex("^/joke$", RegexOption.IGNORE_CASE)
   val teleportRegex = Regex("^/tp$", RegexOption.IGNORE_CASE)
 
-  // Draw markers on the map when the list of parkings changes
-  LaunchedEffect(
-      listOfParkings, /*markerAnnotationManager,*/
-      selectedParking?.nbReviews,
-      mapMode.value,
-      bikeLocationTriggerRedraw) {
-        Log.d("MapScreen", "Redrawing markers")
-        pLabelAnnotationManager?.deleteAll()
-        markerAnnotationManager?.deleteAll()
-        rectangleAnnotationManager?.deleteAll()
+  fun redrawMarkers() {
+    pLabelAnnotationManager?.deleteAll()
+    markerAnnotationManager?.deleteAll()
+    rectangleAnnotationManager?.deleteAll()
 
-        if (mapMode.value.isAdvancedMode)
-            mapViewModel.drawRectangles(
-                rectangleAnnotationManager, pLabelAnnotationManager, listOfParkings)
-        else mapViewModel.drawMarkers(markerAnnotationManager, listOfParkings, resizedBitmap)
-
-        if (bikeLocationViewModel.bikeLocationState.value != NO_LOCATION) {
-          lastBikeLocation = bikeLocationViewModel.bikeLocation.value.location!!
-          markerAnnotationManager?.create(
-              bikeLocationMarker(bikeLocationViewModel.bikeLocation.value.location!!))
-        } else {
-          if (lastBikeLocation != null) {
+    when (bikeLocationViewModel.bikeLocationState.value) {
+      NO_LOCATION -> {
+        if (lastBikeLocation != null)
             markerAnnotationManager?.delete(
                 bikeLocationMarker(lastBikeLocation!!).build("", markerAnnotationManager!!))
-          }
-        }
-
-        // This is so that when we filter the parkings and the list is updated, the preview card
-        // stays open only if the selected parking is still in the list of parkings
-        showPreviewCard = showPreviewCard && listOfParkings.contains(selectedParking)
       }
+      LOCATION_STORED_UNUSED -> {
+        markerAnnotationManager?.create(
+            bikeLocationMarker(bikeLocationViewModel.bikeLocation.value.location!!))
+      }
+      LOCATION_STORED_USED -> {
+        markerAnnotationManager?.create(
+            bikeLocationMarker(bikeLocationViewModel.bikeLocation.value.location!!))
+      }
+    }
+
+    if (mapMode.value.isAdvancedMode)
+        mapViewModel.drawRectangles(
+            rectangleAnnotationManager, pLabelAnnotationManager, listOfParkings)
+    else mapViewModel.drawMarkers(markerAnnotationManager, listOfParkings, resizedBitmap)
+
+    // This is so that when we filter the parkings and the list is updated, the preview card
+    // stays open only if the selected parking is still in the list of parkings
+    showPreviewCard = showPreviewCard && listOfParkings.contains(selectedParking)
+  }
+
+  // Draw markers on the map when the list of parkings changes
+  LaunchedEffect(listOfParkings, selectedParking?.nbReviews, mapMode.value) { redrawMarkers() }
 
   // Center the camera on th puck and transition to the follow puck state. Update the user
   // position to the center of the camera
@@ -344,8 +340,7 @@ fun MapScreen(
                     screenCoordinates.first, screenCoordinates.second)
 
                 // When map is loaded, check if the location permission is granted and initialize
-                // the
-                // location component
+                // the location component
                 if (locationEnabled) mapViewModel.initLocationComponent(mapView)
                 // ======================= GLOBAL SETTINGS =======================
 
@@ -369,9 +364,6 @@ fun MapScreen(
                     mapView.annotations.createPolygonAnnotationManager(AnnotationConfig())
                 // Create point annotation manager to draw parking labels
                 pLabelAnnotationManager =
-                    mapView.annotations.createPointAnnotationManager(AnnotationConfig())
-                // Create point annotation manager to draw bike location
-                bikeLocationAnnotationManager =
                     mapView.annotations.createPointAnnotationManager(AnnotationConfig())
                 // ======================= ANNOTATIONS =======================
 
@@ -509,7 +501,9 @@ fun MapScreen(
                   .padding(bottom = 25.dp, end = 16.dp)
                   .scale(1.2f)) {
                 BikeLocationButton(
-                    bikeLocationViewModel, mapViewModel, navigationActions, forgetBikeLocation)
+                    bikeLocationViewModel, mapViewModel, navigationActions, forgetBikeLocation) {
+                      redrawMarkers()
+                    }
 
                 if (locationEnabled) {
                   IconButton(
@@ -993,9 +987,8 @@ fun PreviewCard(navigationActions: NavigationActions, parkingViewModel: ParkingV
 }
 
 /**
- * Composable function to display the Bike Location Floating action button. QUESTION : Should this
- * be visible if the user doesn't have GPS enable, and if so, should we have a screen to add the
- * location manually ?
+ * Composable function to display the Bike Location Floating action button. Will have different
+ * icons depending on the state of the bikeViewModel.
  *
  * @param bikeLocationViewModel The ViewModel for managing bike location-related data and actions.
  * @param mapViewModel The ViewModel for managing map-related data and actions.
@@ -1006,7 +999,8 @@ fun BikeLocationButton(
     bikeLocationViewModel: BikeLocationViewModel,
     mapViewModel: MapViewModel,
     navigationActions: NavigationActions,
-    forgetBikeLocation: MutableState<Boolean>
+    forgetBikeLocation: MutableState<Boolean>,
+    redrawMarkers: () -> Unit
 ) {
   val bikeLocationState by bikeLocationViewModel.bikeLocationState.collectAsState()
   val userPosition: Point by mapViewModel.userPosition.collectAsState()
@@ -1026,25 +1020,24 @@ fun BikeLocationButton(
           },
       modifier = Modifier.testTag("goToBikeLocationButton"),
       onClick = {
+        if (bikeLocationViewModel.bikeLocation.value.isValid) lastBikeLocation = userPosition
+
         when (bikeLocationState) {
           NO_LOCATION -> {
-            bikeLocationTriggerRedraw = !bikeLocationTriggerRedraw
             bikeLocationViewModel.parkBike(userPosition)
-            Log.d("BikeLocationButton", "on NO_LOCATION (${userPosition})")
           }
           LOCATION_STORED_UNUSED -> {
-            bikeLocationTriggerRedraw = !bikeLocationTriggerRedraw
             val bikeLocation = Location(bikeLocationViewModel.goToMyBike()?.location!!)
             mapViewModel.zoomOnLocation(null, bikeLocation)
-            Log.d("BikeLocationButton", "on LOCATION_STORED_UNUSED (${bikeLocation})")
           }
           LOCATION_STORED_USED -> {
             val bikeLocation = Location(bikeLocationViewModel.goToMyBike()?.location!!)
             mapViewModel.zoomOnLocation(null, bikeLocation)
-            Log.d("BikeLocationButton", "on LOCATION_STORED_USED (${bikeLocation})")
             forgetBikeLocation.value = true
           }
         }
+
+        redrawMarkers()
       },
       colorLevel =
           when (bikeLocationState) {
@@ -1057,7 +1050,8 @@ fun BikeLocationButton(
 @Composable
 fun RemoveBikeLocationPopup(
     bikeLocationViewModel: BikeLocationViewModel,
-    forgetBikeLocation: MutableState<Boolean>
+    forgetBikeLocation: MutableState<Boolean>,
+    redrawMarkers: () -> Unit = {}
 ) {
   AlertDialog(
       modifier = Modifier.testTag("RemoveBikeLocationDialog"),
@@ -1070,6 +1064,7 @@ fun RemoveBikeLocationPopup(
             onClick = {
               forgetBikeLocation.value = false
               bikeLocationViewModel.removeBikeLocation()
+              redrawMarkers()
             }) {
               Text(stringResource(R.string.bike_location_dialog_button_confirm))
             }
@@ -1077,10 +1072,7 @@ fun RemoveBikeLocationPopup(
       dismissButton = {
         TextButton(
             modifier = Modifier.testTag("RemoveBikeLocationDialogCancelButton"),
-            onClick = {
-              forgetBikeLocation.value = false
-              bikeLocationTriggerRedraw = !bikeLocationTriggerRedraw
-            }) {
+            onClick = { forgetBikeLocation.value = false }) {
               Text(stringResource(R.string.bike_location_dialog_button_cancel))
             }
       },

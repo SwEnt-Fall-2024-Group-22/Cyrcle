@@ -3,7 +3,6 @@ package com.github.se.cyrcle.model.map
 import android.graphics.Bitmap
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.model.parking.PARKING_MAX_AREA
@@ -292,9 +291,6 @@ class MapViewModel : ViewModel() {
       parkingList: List<Parking>,
       bitmap: Bitmap,
   ) {
-    Log.d(
-        "MapViewModel",
-        "drawMarkers| pointAnnotationManager:$pointAnnotationManager, image:$bitmap")
     parkingList.forEach {
       pointAnnotationManager?.create(
           PointAnnotationOptions()
