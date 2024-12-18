@@ -107,27 +107,29 @@ fun ViewProfileScreen(
       }) { innerPadding ->
         Box(Modifier.fillMaxSize().padding(innerPadding)) {
           Row(
-            modifier = Modifier.padding(top = 10.dp).align(Alignment.TopEnd),
-            horizontalArrangement = Arrangement.End
-          ) {
-            IconButton(
-              modifier = Modifier.padding(end = 10.dp),
-              icon = Icons.Filled.Outbox,
-              contentDescription = "Sign Out",
-              testTag = "SignOutButton",
-              onClick = { signOut = true })
+              modifier = Modifier.padding(top = 10.dp).align(Alignment.TopEnd),
+              horizontalArrangement = Arrangement.End) {
+                IconButton(
+                    modifier = Modifier.padding(end = 10.dp),
+                    icon = Icons.Filled.Outbox,
+                    contentDescription = "Sign Out",
+                    testTag = "SignOutButton",
+                    onClick = { signOut = true })
 
-              IconButton(
-                modifier = Modifier.padding(end = 10.dp),
-                icon = Icons.AutoMirrored.Filled.MenuBook,
-                contentDescription = "Tutorial",
-                testTag = "TutorialButton",
-                onClick = { navigationActions.navigateTo(Route.TUTORIAL) })
-          }
+                IconButton(
+                    modifier = Modifier.padding(end = 10.dp),
+                    icon = Icons.AutoMirrored.Filled.MenuBook,
+                    contentDescription = "Tutorial",
+                    testTag = "TutorialButton",
+                    onClick = { navigationActions.navigateTo(Route.TUTORIAL) })
+              }
 
           if (userViewModel.currentUser.collectAsState().value?.details?.isAdmin == true) {
             IconButton(
-                modifier = Modifier.padding(10.dp).align(Alignment.TopEnd).padding(end = 100.dp, top=80.dp),
+                modifier =
+                    Modifier.padding(10.dp)
+                        .align(Alignment.TopEnd)
+                        .padding(end = 100.dp, top = 80.dp),
                 icon = Icons.Filled.AddModerator,
                 contentDescription = "Admin",
                 testTag = "AdminButton",

@@ -172,12 +172,19 @@ fun CyrcleNavHost(
       }
     }
 
-    navigation(
-      startDestination = Route.TUTORIAL,
-      route = Route.TUTORIAL
-    ) {
-      composable(Route.MAP) { MapScreen(navigationActions, parkingViewModel, userViewModel, mapViewModel, permissionHandler, addressViewModel) }
-      composable(Route.VIEW_PROFILE) { ProfileScreen(navigationActions, userViewModel, parkingViewModel, reviewViewModel) }
+    navigation(startDestination = Route.TUTORIAL, route = Route.TUTORIAL) {
+      composable(Route.MAP) {
+        MapScreen(
+            navigationActions,
+            parkingViewModel,
+            userViewModel,
+            mapViewModel,
+            permissionHandler,
+            addressViewModel)
+      }
+      composable(Route.VIEW_PROFILE) {
+        ProfileScreen(navigationActions, userViewModel, parkingViewModel, reviewViewModel)
+      }
     }
   }
 }
