@@ -251,11 +251,6 @@ fun MapScreen(
           .withIconAnchor(IconAnchor.BOTTOM)
           .withIconSize(0.25)
 
-  val giveCoinsRegex = Regex("^/give coins (\\d+)$", RegexOption.IGNORE_CASE)
-  val killRegex = Regex("^/kill$", RegexOption.IGNORE_CASE)
-  val jokeRegex = Regex("^/joke$", RegexOption.IGNORE_CASE)
-  val teleportRegex = Regex("^/tp$", RegexOption.IGNORE_CASE)
-
   fun redrawMarkers() {
     pLabelAnnotationManager?.deleteAll()
     markerAnnotationManager?.deleteAll()
