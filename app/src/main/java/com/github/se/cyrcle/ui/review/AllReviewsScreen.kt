@@ -165,6 +165,7 @@ fun AllReviewsScreen(
 ) {
   val selectedParking by parkingViewModel.selectedParking.collectAsState()
   val reviewsList by reviewViewModel.parkingReviews.collectAsState()
+
   LaunchedEffect(Unit) {
     reviewViewModel.clearReviews()
     selectedParking?.let { reviewViewModel.getReviewsByParking(it.uid) }
@@ -488,6 +489,7 @@ fun ReviewCard(
               }
         }
       }
+  val deleteReview = stringResource(R.string.review_deleted)
 
   // Use DeleteConfirmationDialog for delete functionality
   if (showDeleteDialog) {
@@ -497,6 +499,7 @@ fun ReviewCard(
         onConfirm = {
           reviewViewModel.deleteReviewById(review.uid)
           showDeleteDialog = false
+          Toast.makeText(context, deleteReview, Toast.LENGTH_SHORT).show()
           navigationActions.navigateTo(Screen.PARKING_DETAILS)
         })
   }
