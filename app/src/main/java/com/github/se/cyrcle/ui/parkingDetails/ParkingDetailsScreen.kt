@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
@@ -85,7 +84,6 @@ fun ParkingDetailsScreen(
       parkingViewModel.selectedParking.collectAsState().value
           ?: return Text(stringResource(R.string.no_selected_parking_error))
   val userSignedIn by userViewModel.isSignedIn.collectAsState(false)
-  val scrollState = rememberScrollState()
   val context = LocalContext.current
 
   // === States for the images ===
@@ -99,7 +97,7 @@ fun ParkingDetailsScreen(
   val defaultUsername = stringResource(R.string.undefined_username)
   var ownerReputationScore by remember { mutableDoubleStateOf(0.0) }
   var ownerUsername by remember { mutableStateOf(defaultUsername) }
-  if (selectedParking.owner != "Unknown Owner" && selectedParking.owner != null) {
+  if (selectedParking.owner != "Unknown Owner") {
     userViewModel.selectSelectedParkingUser(parkingViewModel.selectedParking.value?.owner!!)
     userViewModel.getUserById(
         selectedParking.owner,
@@ -386,7 +384,7 @@ fun ParkingDetailsScreen(
                               horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 itemsIndexed(
                                     items = imagesUrls,
-                                    key = { index, url ->
+                                    key = { index, _ ->
                                       imagesPaths[index]
                                     } // Use associated paths as stable keys
                                     ) { index, url ->

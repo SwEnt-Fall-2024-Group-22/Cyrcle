@@ -69,7 +69,7 @@ fun ParkingReportScreen(
     if (userViewModel.currentUser.value!!.details?.reportedParkings?.contains(parkingId) == true) {
       Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
     } else {
-      parkingViewModel.addReport(report, userViewModel.currentUser.value!!)
+      parkingViewModel.addReport(report)
       userViewModel.addReportedParkingToSelectedUser(parkingId)
       Toast.makeText(context, strRes, Toast.LENGTH_SHORT).show()
     }

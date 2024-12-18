@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.StarHalf
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
@@ -328,7 +329,7 @@ fun ScoreStars(
                     modifier = Modifier.size((30 * scale).dp).testTag("${testTag}Icon$i"))
             i == fullStars + 1 && hasHalfStar ->
                 Icon(
-                    imageVector = Icons.Filled.StarHalf,
+                    imageVector = Icons.AutoMirrored.Filled.StarHalf,
                     contentDescription = "Half Star",
                     tint = starColor,
                     modifier = Modifier.size((30 * scale).dp).testTag("${testTag}Icon$i"))

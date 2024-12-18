@@ -270,7 +270,7 @@ class ReportedObjectRepositoryFirestoreTest {
     var onSuccessCalled = false
     reportedObjectRepositoryFirestore.checkIfObjectExists(
         objectUID = "existing-object",
-        onSuccess = { documentId -> onSuccessCalled = true },
+        onSuccess = { _ -> onSuccessCalled = true },
         onFailure = { fail("Expected success but got failure") })
 
     taskCompletionSource.setResult(mockQuerySnapshot)

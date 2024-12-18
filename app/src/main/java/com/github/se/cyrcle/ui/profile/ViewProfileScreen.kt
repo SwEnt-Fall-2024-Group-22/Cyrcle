@@ -59,7 +59,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
@@ -522,7 +522,7 @@ private fun UserImagesSection(
             Text(stringResource(R.string.view_profile_screen_image_dialog_description))
             Spacer(modifier = Modifier.height(16.dp))
             Image(
-                painter = rememberImagePainter(data = imageUrl),
+                painter = rememberAsyncImagePainter(model = imageUrl),
                 contentDescription = null,
                 modifier = Modifier.fillMaxWidth().height(200.dp))
           }
@@ -580,7 +580,7 @@ private fun UserImageCard(url: String, onClick: (String) -> Unit) {
         Column(modifier = Modifier.padding(16.dp)) {
           Spacer(modifier = Modifier.height(8.dp))
           Image(
-              painter = rememberImagePainter(data = url),
+              painter = rememberAsyncImagePainter(model = url),
               contentDescription = null,
               modifier = Modifier.fillMaxWidth().height(200.dp).testTag("ImageContent"))
         }

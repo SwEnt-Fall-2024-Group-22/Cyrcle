@@ -11,7 +11,6 @@ import com.github.se.cyrcle.model.parking.online.ParkingRepository
 import com.github.se.cyrcle.model.report.ReportedObject
 import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.report.ReportedObjectType
-import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.model.zone.Zone
 import com.github.se.cyrcle.ui.map.MapConfig
@@ -578,9 +577,8 @@ class ParkingViewModel(
    * reflected in the repository.
    *
    * @param report The report to be added, which includes details such as the reason and user ID.
-   * @param user The user submitting the report, required for identifying the reporter.
    */
-  fun addReport(report: ParkingReport, user: User) {
+  fun addReport(report: ParkingReport) {
     if (_selectedParking.value == null) {
       Log.e("ParkingViewModel", "No parking selected")
       return
@@ -659,9 +657,8 @@ class ParkingViewModel(
    * multiple times.
    *
    * @param report The report to be added, which includes details such as the reason and user ID.
-   * @param user The user submitting the report, required for identifying the reporter.
    */
-  fun addImageReport(report: ImageReport, user: User) {
+  fun addImageReport(report: ImageReport) {
     if (_selectedImage.value == null) {
       Log.e("ParkingViewModel", "No parking image selected")
       return

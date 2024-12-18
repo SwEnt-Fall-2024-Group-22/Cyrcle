@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.report
 
+import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -42,6 +43,7 @@ const val HORIZONTAL_PADDING = 0.03f
 const val VERTICAL_PADDING = 0.02f
 const val TOP_BOX_HEIGHT = 0.10f
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun ImageReportScreen(
     navigationActions: NavigationActions,
@@ -95,7 +97,7 @@ fun ImageReportScreen(
       Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
     } else {
       Log.d("ImageReportScreen", "Adding image report...")
-      parkingViewModel.addImageReport(report, userViewModel.currentUser.value!!)
+      parkingViewModel.addImageReport(report)
       userViewModel.addReportedImageToSelectedUser(imageId)
       Toast.makeText(context, strResToast2, Toast.LENGTH_SHORT).show()
     }
@@ -105,9 +107,7 @@ fun ImageReportScreen(
 
   Scaffold(
       modifier = Modifier.testTag("ImageReportScreen"),
-      topBar = {
-        TopAppBar(navigationActions, title = stringResource(R.string.report_an_image))
-      }) { padding ->
+      topBar = { TopAppBar(navigationActions, title = stringResource(R.string.report_an_image)) }) {
         val scaledPaddingValues =
             PaddingValues(horizontal = horizontalPadding, vertical = verticalPadding)
 

@@ -110,18 +110,13 @@ class ImageRepositoryCloudStorageTest {
     }
     `when`(mockUploadTask.addOnFailureListener(any())).thenReturn(mockUploadTask)
 
-    var actualUrl: String? = null
-    var onFailureCalled = false
     var onSuccessCalled = false
     imageRepositoryCloudStorage.uploadImage(
         mockContext,
         fileUri,
         destinationPath,
-        onSuccess = {
-          onSuccessCalled = true
-          actualUrl = it
-        },
-        onFailure = { onFailureCalled = true })
+        onSuccess = { onSuccessCalled = true },
+        onFailure = {})
     taskCompletionSource.setResult(Uri.parse(expectedUrl))
     shadowOf(Looper.getMainLooper()).idle()
     assertTrue(onSuccessCalled)
@@ -129,13 +124,8 @@ class ImageRepositoryCloudStorageTest {
 
   @Test
   fun testUploadImageWithNullUser() {
-    val mockTaskSnapshot = mock(UploadTask.TaskSnapshot::class.java)
     val fileUri = "test/path"
     val destinationPath = "test/path"
-    val expectedUrl = "https://example.com/test/path"
-    val bytearray = ByteArray(100)
-    val taskCompletionSource = TaskCompletionSource<Uri>()
-    val mockUploadTask = mock(UploadTask::class.java)
     `when`(mockAuth.currentUser).thenReturn(null)
     var onFailureCalled = false
     var onSuccessCalled = false

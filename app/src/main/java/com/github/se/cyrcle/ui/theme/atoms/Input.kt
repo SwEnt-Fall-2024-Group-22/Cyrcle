@@ -31,6 +31,7 @@ import com.github.se.cyrcle.ui.theme.getOutlinedTextFieldColors
  * ```
  *
  * @param label The label of the field.
+ * @param modifier The modifier of the field.
  * @param value The initial text that the field should contain.
  * @param onValueChange The function to update your mutable variable. Will often be `{ newText ->
  *   yourMutableVariable = newText }`.
@@ -38,6 +39,7 @@ import com.github.se.cyrcle.ui.theme.getOutlinedTextFieldColors
  * @param maxLines If not single line, contains the field within a maximum line number.
  * @param minLines The minimal number of lines that should be displayed at the same time.
  * @param hasClearIcon Boolean indicating if the field should have an icon to clear the text.
+ * @param isError Boolean indicating if the field should be displayed as an error.
  * @param testTag The test tag of the object.
  */
 @Composable
@@ -51,7 +53,6 @@ fun InputText(
     minLines: Int = 1,
     hasClearIcon: Boolean = true,
     isError: Boolean = false,
-    colorLevel: ColorLevel = ColorLevel.PRIMARY,
     testTag: String = "InputText"
 ) {
   OutlinedTextField(

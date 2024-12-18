@@ -37,11 +37,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingViewModel
@@ -163,7 +162,7 @@ fun ReportDetailsContent(
       }
       Column(modifier = Modifier.testTag("ReportDetailsContentImage")) {
         Image(
-            painter = rememberImagePainter(data = imageUrl),
+            painter = rememberAsyncImagePainter(model = imageUrl),
             contentDescription = stringResource(R.string.reported_image_description),
             modifier = Modifier.fillMaxWidth().height(200.dp).testTag("ImageContent"))
         BulletPoint(
@@ -275,12 +274,9 @@ fun AdminScreen(
   LaunchedEffect(Unit) { reportedObjectViewModel.fetchAllReportedObjects() }
   val selectedObject by reportedObjectViewModel.selectedObject.collectAsState()
   val reportsList by reportedObjectViewModel.reportsList.collectAsState()
-  var selectedCardIndex by remember { mutableStateOf(-1) }
-  val context = LocalContext.current
+  var selectedCardIndex by remember { mutableIntStateOf(-1) }
   var selectedSortingOption by remember { mutableStateOf(ReportSortingOption.Parking) }
-  val moreOptions = stringResource(R.string.more_options)
   val optionsForReport = stringResource(R.string.options_for_report)
-  val chooseActionForReport = stringResource(R.string.choose_action_for_report)
   val confirm = stringResource(R.string.Return)
   val cancel = stringResource(R.string.go_to_parking)
 
@@ -472,16 +468,13 @@ fun AdminScreen(
                                               style = MaterialTheme.typography.titleMedium)
                                         },
                                         text = {
-                                          val selectedObject =
-                                              reportedObjectViewModel.selectedObject
-                                                  .collectAsState()
-                                                  .value
+                                          reportedObjectViewModel.selectedObject.collectAsState()
                                           Column {
                                             if (selectedObject != null) {
                                               ReportDetailsContent(
-                                                  selectedObject.objectType,
-                                                  selectedObject.objectUID,
-                                                  selectedObject.userUID,
+                                                  selectedObject!!.objectType,
+                                                  selectedObject!!.objectUID,
+                                                  selectedObject!!.userUID,
                                                   reviewViewModel,
                                                   parkingViewModel)
                                             }
