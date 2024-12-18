@@ -581,6 +581,7 @@ class MainActivityTest {
       composeTestRule.onNodeWithTag("ReviewCard-1").assertIsNotDisplayed().assertDoesNotExist()
       composeTestRule
           .onNodeWithTag("ShowInMapButton")
+        .performScrollTo()
           .assertIsDisplayed()
           .assertHasClickAction()
           .performClick()
