@@ -71,9 +71,9 @@ class FilterTest {
 
     userViewModel =
         UserViewModel(
-            MockUserRepository(),
-            MockParkingRepository(),
-            MockImageRepository(),
+            mockUserRepository,
+            mockParkingRepository,
+            mockImageRepository,
             MockAuthenticationRepository())
     addressViewModel = AddressViewModel(mockAddressRepository)
     mapViewModel = MapViewModel()
