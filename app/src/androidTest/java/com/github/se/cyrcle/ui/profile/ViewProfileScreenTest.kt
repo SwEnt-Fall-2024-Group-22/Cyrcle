@@ -164,6 +164,7 @@ class ViewProfileScreenTest {
     composeTestRule.onNodeWithTag("DisplayFirstName").assertTextEquals("Jane")
     composeTestRule.onNodeWithTag("DisplayLastName").assertTextEquals("Smith")
     composeTestRule.onNodeWithTag("DisplayUsernameWithLevel").assertTextEquals("[☤92] janesmith")
+    composeTestRule.onNodeWithTag("TutorialButton", true).assertIsDisplayed()
   }
 
   @Test
@@ -636,5 +637,11 @@ class ViewProfileScreenTest {
     composeTestRule.onNodeWithTag("TabMyImages").performClick()
     composeTestRule.onNodeWithTag("NoImagesMessage").assertIsDisplayed()
     composeTestRule.onNodeWithTag("UserImagesList").assertIsNotDisplayed()
+  }
+
+  @Test
+  fun testTutorialButton() {
+    composeTestRule.onNodeWithTag("TutorialButton").assertHasClickAction().performClick()
+    verify(mockNavigationActions).navigateTo(Screen.TUTORIAL)
   }
 }

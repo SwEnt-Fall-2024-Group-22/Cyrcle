@@ -117,14 +117,12 @@ fun ViewProfileScreen(
               testTag = "SignOutButton",
               onClick = { signOut = true })
 
-            if (userViewModel.currentUser.collectAsState().value?.details?.isAdmin == true) {
               IconButton(
                 modifier = Modifier.padding(end = 10.dp),
                 icon = Icons.AutoMirrored.Filled.MenuBook,
                 contentDescription = "Tutorial",
                 testTag = "TutorialButton",
                 onClick = { navigationActions.navigateTo(Route.TUTORIAL) })
-            }
           }
 
           if (userViewModel.currentUser.collectAsState().value?.details?.isAdmin == true) {
