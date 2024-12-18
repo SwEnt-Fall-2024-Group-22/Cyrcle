@@ -21,6 +21,7 @@ import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.model.zone.Zone
 import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
 import com.mapbox.geojson.BoundingBox
 import org.junit.Before
@@ -114,6 +115,6 @@ class ZoneManagerScreenTest {
       ZoneCard(parkingViewModel, mapViewModel, navigationActions, zone, zonesState)
     }
     composeTestRule.onNodeWithTag("ZoneCardName").performClick()
-    verify(navigationActions).navigateTo(Screen.MAP)
+    verify(navigationActions).navigateTo(Route.MAP)
   }
 }
