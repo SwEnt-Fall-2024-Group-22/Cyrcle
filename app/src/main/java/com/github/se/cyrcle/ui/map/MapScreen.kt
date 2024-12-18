@@ -97,6 +97,7 @@ import com.github.se.cyrcle.ui.theme.defaultOnColor
 import com.github.se.cyrcle.ui.theme.getOutlinedTextFieldColorsSearchBar
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
 import com.github.se.cyrcle.ui.theme.molecules.FilterPanel
+import com.github.se.cyrcle.ui.theme.molecules.processEasterEgg
 import com.google.gson.Gson
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.geojson.Point
@@ -523,86 +524,24 @@ fun MapScreen(
                     },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
-                    keyboardActions =
-                        KeyboardActions(
-                            onSearch = {
-                              virtualKeyboardManager?.hide()
+                    keyboardActions = KeyboardActions(
+                        onSearch = {
+                            virtualKeyboardManager?.hide()
 
-                              // Easter Egg 1: Give Coins
-                              val matchGiveCoins =
-                                  giveCoinsRegex.matchEntire(searchQuery.value.trim())
-                              if (matchGiveCoins != null) {
-                                val amount = matchGiveCoins.groupValues[1].toInt()
+                            val easterEggTriggered = processEasterEgg(
+                                query = searchQuery.value,
+                                clearInput = { searchQuery.value = "" },
+                                context = context,
+                                userViewModel = userViewModel,
+                                navigationActions = navigationActions,
+                            )
 
-                                if (amount > 10) {
-                                  // User loses all coins if they try to add more than 1000 coins
-                                  userViewModel.currentUser.value?.details?.wallet?.let {
-                                    userViewModel.tryDebitCoinsFromCurrentUser(it.getCoins())
-                                  } // Implement a function to reset coins
-                                  searchQuery.value = ""
-                                  Toast.makeText(
-                                          context,
-                                          "Greedy, aren't you? All your coins are gone!",
-                                          Toast.LENGTH_SHORT)
-                                      .show()
-                                } else {
-                                  // Credit the specified amount
-                                  userViewModel.creditCoinsToCurrentUser(amount)
-                                  searchQuery.value = ""
-                                  Toast.makeText(
-                                          context,
-                                          "You've been credited $amount coins!",
-                                          Toast.LENGTH_SHORT)
-                                      .show()
-                                }
-                                return@KeyboardActions
-                              }
-
-                              // Easter Egg 2: Kill Command
-                              val matchKill = killRegex.matchEntire(searchQuery.value.trim())
-                              if (matchKill != null) {
-                                searchQuery.value = ""
-                                Toast.makeText(context, "Goodbye, cruel world!", Toast.LENGTH_SHORT)
-                                    .show()
-                                throw RuntimeException("Goodbye, cruel world !")
-                              }
-
-                              // Easter Egg 3: Joke Command
-                              val matchJoke = jokeRegex.matchEntire(searchQuery.value.trim())
-                              if (matchJoke != null) {
-                                searchQuery.value = ""
-                                Toast.makeText(
-                                        context, "You're the joke \uD83E\uDD21", Toast.LENGTH_SHORT)
-                                    .show()
-                                return@KeyboardActions
-                              }
-
-                              // Easter Egg 4 : Teleport
-                              val matchTeleport =
-                                  teleportRegex.matchEntire(searchQuery.value.trim())
-                              if (matchTeleport != null) {
-                                searchQuery.value = ""
-                                val availableScreens =
-                                    listOf(
-                                        Screen.LIST,
-                                        Screen.VIEW_PROFILE,
-                                        Screen.GAMBLING,
-                                        Screen.RACK_INFO,
-                                        Screen.ADMIN, // this one's hilarious, imagine you're not
-                                        // admin
-                                    )
-                                val randomScreen = availableScreens.random()
-                                Toast.makeText(
-                                        context, "Teleporting to $randomScreen", Toast.LENGTH_SHORT)
-                                    .show()
-                                navigationActions.navigateTo(randomScreen)
-                                return@KeyboardActions
-                              }
-
-                              // If no Easter egg is triggered, proceed with the search
-                              runBlocking { addressViewModel.search(searchQuery.value) }
-                              showSuggestions.value = true
-                            }))
+                            if (!easterEggTriggered) {
+                                runBlocking { addressViewModel.search(searchQuery.value) }
+                                showSuggestions.value = true
+                            }
+                        }
+                    ))
 
                 // Filter button
                 Box(modifier = Modifier.size(56.dp).padding(start = 5.dp)) {
