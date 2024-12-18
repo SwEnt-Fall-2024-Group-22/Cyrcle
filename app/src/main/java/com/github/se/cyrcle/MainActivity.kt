@@ -121,8 +121,8 @@ class MainActivity : ComponentActivity() {
               mapViewModel,
               addressViewModel,
               reportedObjectViewModel,
-              bikeLocationViewModel,
-              permissionsHandler)
+              permissionsHandler,
+              bikeLocationViewModel)
 
           if (showSnow) SnowfallAnimation()
         }
