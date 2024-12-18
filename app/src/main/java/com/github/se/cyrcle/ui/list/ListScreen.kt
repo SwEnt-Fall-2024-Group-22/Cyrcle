@@ -1,6 +1,7 @@
 package com.github.se.cyrcle.ui.list
 
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -20,7 +21,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material3.Card
@@ -29,11 +32,13 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -47,8 +52,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Popup
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
@@ -102,6 +109,20 @@ fun SpotListScreen(
    */
   fun computeDistance(parking: Parking): Double {
     return TurfMeasurement.distance(
+        if (myLocation.value) userPosition
+        else
+            Point.fromLngLat(
+                chosenLocation.value.longitude.toDouble(),
+                chosenLocation.value.latitude.toDouble()),
+        parking.location.center)
+  }
+
+  /*
+   * Function that computes the bearing between the user's location and a parking spot
+   * @param parking: the parking spot for which we want to compute the bearing
+   */
+  fun computeBearing(parking: Parking): Double {
+    return TurfMeasurement.bearing(
         if (myLocation.value) userPosition
         else
             Point.fromLngLat(
@@ -166,7 +187,8 @@ fun SpotListScreen(
                         parkingViewModel = parkingViewModel,
                         userViewModel = userViewModel,
                         parking = parking,
-                        distance = computeDistance(parking))
+                        distance = computeDistance(parking),
+                        bearing = computeBearing(parking))
                   }
               item { Spacer(modifier = Modifier.height(32.dp)) }
             }
@@ -193,7 +215,8 @@ fun SpotListScreen(
                       parkingViewModel = parkingViewModel,
                       userViewModel = userViewModel,
                       parking = parking,
-                      distance = computeDistance(parking))
+                      distance = computeDistance(parking),
+                      bearing = computeBearing(parking))
 
                   if (filteredParkingSpots.indexOf(parking) == filteredParkingSpots.size - 1) {
                     parkingViewModel.incrementRadius()
@@ -210,7 +233,8 @@ fun SpotCard(
     parkingViewModel: ParkingViewModel,
     userViewModel: UserViewModel,
     parking: Parking,
-    distance: Double
+    distance: Double,
+    bearing: Double
 ) {
   val context = LocalContext.current
 
@@ -314,15 +338,21 @@ fun SpotCard(
                       .testTag("SpotCardContent"),
               verticalAlignment = Alignment.Top,
               horizontalArrangement = Arrangement.SpaceBetween) {
-                Column {
-                  Text(
-                      text =
-                          parking.optName?.let { if (it.length > 35) it.take(32) + "..." else it }
-                              ?: stringResource(R.string.default_parking_name),
+                Column(
+                    modifier =
+                        Modifier.weight(1f) // Allowing this column to take available space
+                            .padding(end = 16.dp),
+                ) {
+                  androidx.compose.material3.Text(
+                      text = parking.optName ?: stringResource(R.string.default_parking_name),
                       style = MaterialTheme.typography.bodyLarge,
-                      testTag = "ParkingName")
+                      maxLines = 1, // Limit to one line
+                      overflow = TextOverflow.Ellipsis, // Use ellipsis for overflow
+                      modifier = Modifier.fillMaxWidth().testTag("ParkingName"),
+                  )
 
                   Spacer(modifier = Modifier.height(8.dp))
+
                   if (parking.nbReviews > 0) {
                     ScoreStars(
                         parking.avgScore,
@@ -338,14 +368,21 @@ fun SpotCard(
                         testTag = "ParkingNoReviews")
                   }
                 }
+
                 Column(horizontalAlignment = Alignment.End) {
-                  Text(
-                      text =
-                          if (distance < 1)
-                              stringResource(R.string.distance_m).format(distance * 1000)
-                          else stringResource(R.string.distance_km).format(distance),
-                      style = MaterialTheme.typography.bodySmall,
-                      testTag = "ParkingDistance")
+                  Row {
+                    // Bearing wrt user's location. This is the orientation wrt north
+                    BearingIcon(bearing)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text =
+                            if (distance < 1)
+                                stringResource(R.string.distance_m).format(distance * 1000)
+                            else stringResource(R.string.distance_km).format(distance),
+                        style = MaterialTheme.typography.bodySmall,
+                        testTag = "ParkingDistance")
+                  }
+
                   if (isPinned) {
                     Icon(
                         imageVector = Icons.Default.PushPin,
@@ -388,4 +425,44 @@ fun ActionCard(
               )
             }
       }
+}
+
+/**
+ * Composable that displays a bearing icon. Clicking on the icon will display a popup explaining
+ * what the bearing represents. The popup is closed by clicking outside of it.
+ *
+ * @param bearing the bearing to display
+ */
+@Composable
+fun BearingIcon(bearing: Double) {
+  var showPopup by remember { mutableStateOf(false) }
+
+  Box {
+    Icon(
+        imageVector = Icons.Default.ArrowUpward,
+        contentDescription = "Bearing",
+        tint = MaterialTheme.colorScheme.primary,
+        modifier =
+            Modifier.size(20.dp).rotate(bearing.toFloat()).testTag("BearingIcon").clickable {
+              showPopup = true
+            })
+
+    if (showPopup) {
+      Popup(onDismissRequest = { showPopup = false }, alignment = Alignment.TopCenter) {
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(8.dp),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)),
+            shadowElevation = 4.dp,
+            modifier =
+                Modifier.padding(start = 128.dp, end = 16.dp, top = 20.dp)
+                    .testTag("BearingPopUp")) {
+              Text(
+                  text = stringResource(R.string.list_screen_bearing_popup),
+                  modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
+                  style = MaterialTheme.typography.bodyMedium)
+            }
+      }
+    }
+  }
 }

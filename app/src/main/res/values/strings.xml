@@ -118,8 +118,10 @@
     <string name="all_parkings_radius">Parkings within %1$d m</string>
     <string name="list_screen_edit_note">Edit your note</string>
     <string name="list_screen_no_note">Add a note by clicking on +</string>
+    <string name="list_screen_bearing_popup">This arrow shows the direction relative to true north. It doesn\'t reflect your device\'s orientation.</string>
     <string name="sign_in_to_add_note">Please sign in to add notes</string>
     <string name="my_location">My Location</string>
+    <string name="search_bar_no_results">No results found</string>
 
     <!-- Zoom Controls -->
     <string name="zoom_in">Zoom In</string>
