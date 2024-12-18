@@ -89,6 +89,7 @@ fun CyrcleNavHost(
         ImageReportScreen(navigationActions, userViewModel, parkingViewModel)
       }
     }
+
     navigation(
         startDestination = Screen.ALL_REVIEWS,
         route = Route.REVIEW,
@@ -103,6 +104,7 @@ fun CyrcleNavHost(
         ReviewReportScreen(navigationActions, userViewModel, reviewViewModel)
       }
     }
+
     navigation(
         startDestination = Screen.MAP,
         route = Route.MAP,
@@ -148,6 +150,7 @@ fun CyrcleNavHost(
             reviewViewModel,
             userViewModel)
       }
+      composable(Screen.TUTORIAL) { TutorialScreen(navigationActions) }
     }
 
     navigation(
@@ -156,6 +159,7 @@ fun CyrcleNavHost(
     ) {
       composable(Screen.GAMBLING) { GamblingScreen(navigationActions, userViewModel) }
     }
+
     navigation(
         startDestination = Screen.ZONE_MANAGER,
         route = Route.ZONE,
