@@ -12,6 +12,7 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToIndex
@@ -552,11 +553,6 @@ class MainActivityTest {
     fun toUserProfile() {
 
       composeTestRule
-          .onNodeWithTag("TopAppBarGoBackButton")
-          .assertIsDisplayed()
-          .assertHasClickAction()
-          .performClick()
-      composeTestRule
           .onNodeWithTag(TopLevelDestinations.PROFILE.textId)
           .assertHasClickAction()
           .performClick()
@@ -577,7 +573,17 @@ class MainActivityTest {
           .assertIsDisplayed()
           .assertHasClickAction()
           .performClick()
+      composeTestRule
+          .onNodeWithText("Delete")
+          .assertIsDisplayed()
+          .assertHasClickAction()
+          .performClick()
       composeTestRule.onNodeWithTag("ReviewCard-1").assertIsNotDisplayed().assertDoesNotExist()
+      composeTestRule
+          .onNodeWithTag("ShowInMapButton")
+          .assertIsDisplayed()
+          .assertHasClickAction()
+          .performClick()
     }
   }
 
