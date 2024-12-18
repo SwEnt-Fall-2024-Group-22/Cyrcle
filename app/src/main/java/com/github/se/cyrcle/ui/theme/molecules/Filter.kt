@@ -515,7 +515,6 @@ fun processEasterEgg(
 ): Boolean {
   val giveCoinsRegex = Regex("^/give coins (\\d+)$", RegexOption.IGNORE_CASE)
   val killRegex = Regex("^/kill$", RegexOption.IGNORE_CASE)
-  val jokeRegex = Regex("^/joke$", RegexOption.IGNORE_CASE)
   val teleportRegex = Regex("^/tp$", RegexOption.IGNORE_CASE)
   val trimmedQuery = query.trim()
 
@@ -528,11 +527,18 @@ fun processEasterEgg(
       userViewModel.currentUser.value?.details?.wallet?.let {
         userViewModel.tryDebitCoinsFromCurrentUser(it.getCoins())
       }
-      Toast.makeText(context, "Greedy, aren't you? All your coins are gone!", Toast.LENGTH_SHORT)
+      Toast.makeText(
+              context,
+              context.getString(R.string.easter_egg_coins_greedy_message),
+              Toast.LENGTH_SHORT)
           .show()
     } else {
       userViewModel.creditCoinsToCurrentUser(amount)
-      Toast.makeText(context, "You've been credited $amount coins!", Toast.LENGTH_SHORT).show()
+      Toast.makeText(
+              context,
+              context.getString(R.string.easter_egg_coins_credited_message, amount),
+              Toast.LENGTH_SHORT)
+          .show()
     }
     return true
   }
@@ -540,18 +546,12 @@ fun processEasterEgg(
   // Easter Egg 2: Kill Command
   killRegex.matchEntire(trimmedQuery)?.let {
     clearInput()
-    Toast.makeText(context, "Goodbye, cruel world!", Toast.LENGTH_SHORT).show()
-    throw RuntimeException("Goodbye, cruel world!")
+    val message = context.getString(R.string.easter_egg_kill_message)
+    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    throw RuntimeException(message)
   }
 
-  // Easter Egg 3: Joke Command
-  jokeRegex.matchEntire(trimmedQuery)?.let {
-    clearInput()
-    Toast.makeText(context, "You're the joke \uD83E\uDD21", Toast.LENGTH_SHORT).show()
-    return true
-  }
-
-  // Easter Egg 4: Teleport
+  // Easter Egg 3: Teleport
   teleportRegex.matchEntire(trimmedQuery)?.let {
     clearInput()
     val availableScreens =
@@ -564,7 +564,11 @@ fun processEasterEgg(
             Screen.ADMIN,
         )
     val randomScreen = availableScreens.random()
-    Toast.makeText(context, "Teleporting to $randomScreen", Toast.LENGTH_SHORT).show()
+    Toast.makeText(
+            context,
+            context.getString(R.string.easter_egg_teleport_message, randomScreen.toString()),
+            Toast.LENGTH_SHORT)
+        .show()
     navigationActions.navigateTo(randomScreen)
     return true
   }
