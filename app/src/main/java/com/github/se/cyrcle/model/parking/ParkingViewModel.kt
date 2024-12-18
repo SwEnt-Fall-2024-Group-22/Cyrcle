@@ -256,7 +256,6 @@ class ParkingViewModel(
    * @param endPos the opposite corner of the rectangle
    */
   fun getParkingsInRect(startPos: Point, endPos: Point) {
-    Log.d("ParkingViewModel", "Parkings in Cache : ${tilesToParking.size}")
     // flush the list of parkings
     _rectParkings.value = emptyList()
     if (startPos.latitude() == endPos.latitude() || startPos.longitude() == endPos.longitude()) {
