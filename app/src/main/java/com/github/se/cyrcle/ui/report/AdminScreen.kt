@@ -470,7 +470,6 @@ fun AdminScreen(
                                               style = MaterialTheme.typography.titleMedium)
                                         },
                                         text = {
-                                          reportedObjectViewModel.selectedObject.collectAsState()
                                           Column {
                                             if (selectedObject != null) {
                                               ReportDetailsContent(
