@@ -19,6 +19,17 @@ ensuring that your two-wheeled companion is always safe and well-maintained.
 - **Notifications**: Get notified about new parking spots and repair stations in your area.
 - **Where's my bike**: Never forget where you parked your bike again.
 
+## Resources
+
+### Architecture
+
+![img.png](readme_rsc/app_arch_m2.png)
+
+### External resources
+
+- [Figma Design](https://www.figma.com/design/glKpOCnBOjzx8mTTJUkyqH/Cyrcle?node-id=4-2&t=axZO6k6pPJuiWDin-1)
+- [Documentation](https://github.com/SwEnt-Fall-2024-Group-22/Cyrcle/wiki/Documentation)
+
 ## Tech stack
 
 - Language: Kotlin
