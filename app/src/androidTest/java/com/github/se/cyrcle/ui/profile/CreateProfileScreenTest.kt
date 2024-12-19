@@ -13,13 +13,11 @@ import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
-import com.github.se.cyrcle.ui.navigation.Screen
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 
 @RunWith(AndroidJUnit4::class)

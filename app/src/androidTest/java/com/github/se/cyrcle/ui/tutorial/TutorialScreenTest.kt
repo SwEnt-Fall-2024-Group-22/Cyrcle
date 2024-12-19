@@ -17,8 +17,7 @@ class TutorialScreenTest {
 
   private lateinit var navigationActions: NavigationActions
 
-  @get:Rule
-  val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
   @Before
   fun setup() {

@@ -111,12 +111,11 @@ fun ViewProfileScreen(
               horizontalArrangement = Arrangement.End) {
                 if (userViewModel.currentUser.collectAsState().value?.details?.isAdmin == true) {
                   IconButton(
-                    modifier =
-                    Modifier.padding(end = 10.dp),
-                    icon = Icons.Filled.AddModerator,
-                    contentDescription = "Admin",
-                    testTag = "AdminButton",
-                    onClick = { navigationActions.navigateTo(Screen.ADMIN) })
+                      modifier = Modifier.padding(end = 10.dp),
+                      icon = Icons.Filled.AddModerator,
+                      contentDescription = "Admin",
+                      testTag = "AdminButton",
+                      onClick = { navigationActions.navigateTo(Screen.ADMIN) })
                 }
 
                 IconButton(
