@@ -110,11 +110,10 @@ data class Address(
    * @return the suggestion formatted display name
    */
   fun suggestionFormatDisplayName(maxLength: Int, mode: Mode): String {
-    val fieldPriorities: List<String>
-    if (mode == Mode.LIST) {
-      fieldPriorities = listOf(publicName, road, city, country)
+    val fieldPriorities: List<String> = if (mode == Mode.LIST) {
+      listOf(publicName, road, city, country)
     } else {
-      fieldPriorities = listOf(publicName, road, city, region, country)
+      listOf(publicName, road, city, region, country)
     }
     return shortenString(fieldPriorities.filter { it.isNotEmpty() }.joinToString(", "), maxLength)
   }
