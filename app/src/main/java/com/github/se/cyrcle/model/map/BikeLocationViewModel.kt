@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.model.map
 
-import android.util.Log
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.lifecycle.ViewModel
@@ -84,7 +83,6 @@ class BikeLocationViewModel(private val preferenceStorage: PreferenceStorage) : 
   val bikeLocation = _bikeLocation
 
   init {
-    Log.d("BikeLocationViewModel", "Init | Fetching bike location from Preferences")
 
     runBlocking {
       val bikeLocation =
@@ -95,11 +93,9 @@ class BikeLocationViewModel(private val preferenceStorage: PreferenceStorage) : 
           )
 
       if (bikeLocation.checkValidity()) {
-        Log.d("BikeLocationViewModel", "Bike location is valid : $bikeLocation")
         _bikeLocation.update { bikeLocation }
         _bikeLocationState.update { LOCATION_STORED_UNUSED }
       } else {
-        Log.d("BikeLocationViewModel", "Bike location is invalid : $bikeLocation")
         _bikeLocation.update { INVALID_LOCATION }
         _bikeLocationState.update { NO_LOCATION }
       }
@@ -136,7 +132,6 @@ class BikeLocationViewModel(private val preferenceStorage: PreferenceStorage) : 
    *   will be a valid location only if there was no IO error neither data corruption.
    */
   fun goToMyBike(): BikeLocation? {
-    Log.d("BikeLocationViewModel", "Fetching bike location from Preferences")
     if (_bikeLocationState.value !in setOf(LOCATION_STORED_USED, LOCATION_STORED_UNUSED))
         return null
     bikeLocationState.update { LOCATION_STORED_USED }
@@ -149,7 +144,6 @@ class BikeLocationViewModel(private val preferenceStorage: PreferenceStorage) : 
               preferenceStorage.readPreference(longitudePreferenceKey, INVALID_DOUBLE),
               preferenceStorage.readPreference(latitudePreferenceKey, INVALID_DOUBLE))
     }
-    Log.d("BikeLocationViewModel", "Bike location is valid : $bikeLocation")
 
     if (bikeLocation.checkValidity()) {
       _bikeLocation.update { bikeLocation }
