@@ -105,9 +105,9 @@ fun ViewProfileScreen(
             tabList = LIST_TOP_LEVEL_DESTINATION,
             selectedItem = Route.VIEW_PROFILE)
       }) { innerPadding ->
-        Box(Modifier.fillMaxSize().padding(innerPadding)) {
+        Column(Modifier.fillMaxSize().padding(innerPadding)) {
           Row(
-              modifier = Modifier.padding(top = 10.dp).align(Alignment.TopEnd),
+              modifier = Modifier.padding(top = 10.dp).align(Alignment.End),
               horizontalArrangement = Arrangement.End) {
                 if (userViewModel.currentUser.collectAsState().value?.details?.isAdmin == true) {
                   IconButton(
@@ -134,7 +134,7 @@ fun ViewProfileScreen(
               }
 
           IconButton(
-              modifier = Modifier.padding(10.dp).align(Alignment.TopStart),
+              modifier = Modifier.padding(10.dp).align(Alignment.Start),
               icon =
                   Icons.Filled.Diamond, // or Icons.Filled.Paid or Icons.Filled.AttachMoney etc...
               contentDescription = "Go to Gambling Screen",

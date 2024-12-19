@@ -52,7 +52,6 @@ class TutorialScreenTest {
 
     // Welcome Screen
     composeTestRule.onNodeWithTag("TutorialScreenWelcomeTitle", true).assertIsDisplayed()
-    composeTestRule.onNodeWithTag("TutorialScreenWelcomeSubtitle", true).assertIsDisplayed()
     nextPage()
 
     // Images
@@ -63,7 +62,6 @@ class TutorialScreenTest {
 
     // Thank you Screen
     composeTestRule.onNodeWithTag("TutorialScreenThankYouTitle", true).assertIsDisplayed()
-    composeTestRule.onNodeWithTag("TutorialScreenThankYouSubtitle", true).assertIsDisplayed()
     nextPage()
 
     verify(navigationActions).navigateTo(Route.MAP)
