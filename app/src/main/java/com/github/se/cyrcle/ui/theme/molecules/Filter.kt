@@ -560,8 +560,7 @@ fun processEasterEgg(
             Screen.LIST,
             Screen.VIEW_PROFILE,
             Screen.GAMBLING,
-            Screen.RACK_INFO,
-            Screen.ADMIN,
+            Screen.RACK_INFO
         )
     val randomScreen = availableScreens.random()
     Toast.makeText(
