@@ -504,17 +504,8 @@ class ParkingViewModel(
   /**
    * Removes an image from the list of images of the given parking.
    *
-   * @param parking The parking object to update.
+   * @param parkingId The ID of the parking to remove the image from.
    * @param imgId The ID of the image to remove.
-   * @param onSuccess A callback function executed when the operation is successful.
-   * @param onFailure A callback function executed if the operation fails.
-   */
-  /**
-   * Removes an image from the list of images of the given parking.
-   *
-   * @param parking The parking object to update.
-   * @param imgId The ID of the image to remove.
-   * @return A new Parking object with the image removed from the images list.
    */
   fun deleteImageFromParking(parkingId: String, imgId: String) {
     parkingRepository.getParkingById(
