@@ -30,14 +30,11 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.compose.rememberNavController
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
-import com.github.se.cyrcle.ui.theme.CyrcleTheme
 import com.github.se.cyrcle.ui.theme.atoms.Text
 
 // Border padding
@@ -192,11 +189,4 @@ fun ThankYouScreen() {
       style = MaterialTheme.typography.bodyMedium,
       modifier = Modifier.padding(generalPadding),
       testTag = "TutorialScreenThankYouSubtitle")
-}
-
-// Uncomment to have a preview of the Tutorial
-@Preview
-@Composable
-fun PreviewTutorialScreen() {
-  CyrcleTheme { TutorialScreen(NavigationActions(rememberNavController())) }
 }
