@@ -6,8 +6,9 @@ import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialException
 import com.github.se.cyrcle.R
-import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
@@ -45,6 +46,22 @@ constructor(
    * @param onFailure a function to be called if the authentication fails
    */
   override fun authenticate(onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
+    makeRequest(onSuccess, onFailure, true)
+  }
+
+  /**
+   * Semi recursive function to make a credential request. The first attempt will try to use the
+   * last account used to sign in. If that fails, it will prompt the user to link a Google account
+   *
+   * @param onSuccess a function to be called once the user is authenticated
+   * @param onFailure a function to be called if the authentication fails
+   * @param firstTry a boolean to indicate if this is the first attempt to sign in
+   */
+  private fun makeRequest(
+      onSuccess: (String) -> Unit,
+      onFailure: (Exception) -> Unit,
+      firstTry: Boolean = false
+  ) {
     val webClientId = context.getString(R.string.default_web_client_id)
 
     // Generate a nonce for security (a random number used once)
@@ -56,7 +73,11 @@ constructor(
 
     // Setup the options for the credential request
     val signInWithGoogleOption =
-        GetSignInWithGoogleOption.Builder(webClientId).setNonce(hashedNonce).build()
+        GetGoogleIdOption.Builder()
+            .setFilterByAuthorizedAccounts(firstTry)
+            .setServerClientId(webClientId)
+            .setNonce(hashedNonce)
+            .build()
 
     val request = GetCredentialRequest.Builder().addCredentialOption(signInWithGoogleOption).build()
 
@@ -77,6 +98,8 @@ constructor(
         } else {
           onFailure(Exception("Unexpected type of credential"))
         }
+      } catch (e: GetCredentialException) {
+        if (firstTry) makeRequest(onSuccess, onFailure, false) else onFailure(e)
       } catch (e: Exception) {
         onFailure(e)
       }
