@@ -96,9 +96,9 @@ fun RainbowText(
     maxLines: Int = Int.MAX_VALUE,
     overflow: TextOverflow = TextOverflow.Clip
 ) {
-  val Orange = Color(0xFFFFA500) // Hex for orange
-  val Indigo = Color(0xFF4B0082) // Hex for indigo
-  val Violet = Color(0xFF8A2BE2) // Hex for violet
+  val orange = Color(0xFFFFA500) // Hex for orange
+  val indigo = Color(0xFF4B0082) // Hex for indigo
+  val violet = Color(0xFF8A2BE2) // Hex for violet
 
   Text(
       text = text,
@@ -110,12 +110,12 @@ fun RainbowText(
                       colors =
                           listOf(
                               Color.Red,
-                              Orange,
+                              orange,
                               Color.Yellow,
                               Color.Green,
                               Color.Blue,
-                              Indigo,
-                              Violet))),
+                              indigo,
+                              violet))),
       maxLines = maxLines,
       overflow = overflow)
 }
