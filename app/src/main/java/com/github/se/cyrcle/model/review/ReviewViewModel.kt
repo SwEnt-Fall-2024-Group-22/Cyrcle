@@ -30,7 +30,7 @@ class ReviewViewModel(
   val userReviews: StateFlow<List<Review>> = _userReviews
 
   /** Selected parking has already been reported by current user */
-  private val _hasAlreadyReported = MutableStateFlow<Boolean>(false)
+  private val _hasAlreadyReported = MutableStateFlow(false)
   val hasAlreadyReported: StateFlow<Boolean> = _hasAlreadyReported
 
   /** Selected parking to review/edit */
@@ -262,7 +262,7 @@ class ReviewViewModel(
               onSuccess = { documentId ->
                 if (documentId != null) {
                   reportedObjectRepository.updateReportedObject(
-                      documentId = documentId,
+                      objectUID = documentId,
                       updatedObject = newReportedObject,
                       onSuccess = { updateLocalReviewAndMetrics(report) },
                       onFailure = { Log.d("ReviewViewModel", "Error updating ReportedObject") })

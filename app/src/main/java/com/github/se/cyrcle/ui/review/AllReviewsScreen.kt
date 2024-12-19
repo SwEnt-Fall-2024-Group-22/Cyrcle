@@ -256,8 +256,7 @@ fun AllReviewsScreen(
                               reviewViewModel = reviewViewModel,
                               parkingViewModel = parkingViewModel,
                               oldScore = it.rating,
-                              ownerReputationScore = currentUser?.public?.userReputationScore,
-                              navigationActions = navigationActions)
+                              ownerReputationScore = currentUser?.public?.userReputationScore)
                         }
                       } else {
                         // Add review button
@@ -331,8 +330,7 @@ fun AllReviewsScreen(
                           reviewViewModel = reviewViewModel,
                           parkingViewModel = parkingViewModel,
                           oldScore = 0.0, // not needed in this case
-                          ownerReputationScore = ownerReputationScore,
-                          navigationActions = navigationActions)
+                          ownerReputationScore = ownerReputationScore)
                     }
               }
         }
@@ -351,8 +349,7 @@ fun ReviewCard(
     reviewViewModel: ReviewViewModel,
     parkingViewModel: ParkingViewModel,
     oldScore: Double,
-    ownerReputationScore: Double?,
-    navigationActions: NavigationActions
+    ownerReputationScore: Double?
 ) {
   val currentUser by userViewModel.currentUser.collectAsState()
   val userSignedIn by userViewModel.isSignedIn.collectAsState(false)

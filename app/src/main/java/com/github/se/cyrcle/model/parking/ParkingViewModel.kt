@@ -414,16 +414,6 @@ class ParkingViewModel(
   }
 
   /**
-   * Finds a ParkingImage in the imageObjects list that matches the given imagePath.
-   *
-   * @param destinationPath The imagePath to match.
-   * @return The ParkingImage with the matching imagePath, or null if no match is found.
-   */
-  fun Parking.findImageByPath(destinationPath: String): ParkingImage? {
-    return imageObjects.find { it.imagePath == destinationPath }
-  }
-
-  /**
    * Retrieves the image URL for a given image path.
    *
    * @param imagePath The path of the image stored in the repository.
@@ -504,17 +494,8 @@ class ParkingViewModel(
   /**
    * Removes an image from the list of images of the given parking.
    *
-   * @param parking The parking object to update.
+   * @param parkingId The ID of the parking to remove the image from.
    * @param imgId The ID of the image to remove.
-   * @param onSuccess A callback function executed when the operation is successful.
-   * @param onFailure A callback function executed if the operation fails.
-   */
-  /**
-   * Removes an image from the list of images of the given parking.
-   *
-   * @param parking The parking object to update.
-   * @param imgId The ID of the image to remove.
-   * @return A new Parking object with the image removed from the images list.
    */
   fun deleteImageFromParking(parkingId: String, imgId: String) {
     parkingRepository.getParkingById(
@@ -614,7 +595,7 @@ class ParkingViewModel(
               onSuccess = { documentId ->
                 if (documentId != null) {
                   reportedObjectRepository.updateReportedObject(
-                      documentId = documentId,
+                      objectUID = documentId,
                       updatedObject = newReportedObject,
                       onSuccess = { updateLocalParkingAndMetrics(report) },
                       onFailure = { Log.d("ParkingViewModel", "Error updating ReportedObject") })
@@ -755,7 +736,7 @@ class ParkingViewModel(
                 onSuccess = { documentId ->
                   if (documentId != null) {
                     reportedObjectRepository.updateReportedObject(
-                        documentId = documentId,
+                        objectUID = documentId,
                         updatedObject = updatedReportedObject,
                         onSuccess = {
                           Log.d("ParkingViewModel", "ReportedObject updated successfully.")

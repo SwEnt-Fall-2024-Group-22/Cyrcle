@@ -75,7 +75,7 @@ data class Zone(
      * @param zone The zone to store.
      * @param context The context of the application, necessary to access the file system.
      */
-    fun storeZone(zone: Zone, context: Context) {
+    private fun storeZone(zone: Zone, context: Context) {
       val zoneDir = File(context.filesDir, ZONE_DIR)
       if (!zoneDir.exists()) {
         zoneDir.mkdirs()

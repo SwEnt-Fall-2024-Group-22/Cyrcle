@@ -70,13 +70,6 @@ class ReportedObjectRepositoryFirestore @Inject constructor(private val db: Fire
    * @param onSuccess A callback invoked when the operation is successful.
    * @param onFailure A callback invoked when the operation fails with an exception.
    */
-  /**
-   * Adds a new reported object to the Firestore collection.
-   *
-   * @param reportedObject The reported object to add.
-   * @param onSuccess A callback invoked when the operation is successful.
-   * @param onFailure A callback invoked when the operation fails with an exception.
-   */
   override fun addReportedObject(
       reportedObject: ReportedObject,
       onSuccess: () -> Unit,

@@ -132,7 +132,9 @@ interface ParkingRepository {
    * multiple times.
    *
    * @param report The report to be added, which includes details such as the reason and user ID.
-   * @param user The user submitting the report, required for identifying the reporter.
+   * @param parking The ID of the parking to which the image belongs.
+   * @param onSuccess A callback that is called when the report is successfully added.
+   * @param onFailure A callback that is called when an error occurs.
    */
   fun addImageReport(
       report: ImageReport,

@@ -6,7 +6,6 @@ import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.ParkingCapacity
 import com.github.se.cyrcle.model.parking.ParkingProtection
 import com.github.se.cyrcle.model.parking.ParkingRackType
-import com.github.se.cyrcle.model.parking.TileUtils
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
@@ -123,16 +122,7 @@ class ParkingAdapter : JsonSerializer<Parking>, JsonDeserializer<Parking> {
    */
   fun deserializeParking(map: Map<String, Any>): Parking {
     val json = gson.toJson(map)
-    val parking = gson.fromJson(json, Parking::class.java)
-
-    // FIXME: update the default values if the Firestore parking object is missing some fields
-    return parking.copy(
-        tile = parking.tile ?: TileUtils.getTileFromPoint(parking.location.center),
-        owner = parking.owner ?: "Unknown Owner", // Replace with your default owner value
-        images = parking.images ?: emptyList(),
-        imageObjects = parking.imageObjects ?: emptyList(),
-        reportingUsers = parking.reportingUsers ?: emptyList(),
-        reportedImages = parking.reportedImages ?: emptyList()) // Default to empty list
+    return gson.fromJson(json, Parking::class.java)
   }
 
   /**

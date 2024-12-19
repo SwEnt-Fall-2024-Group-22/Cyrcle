@@ -47,6 +47,17 @@ data class Parking(
     var nbMaxSeverityReports: Int = 0,
     val tile: Tile = TileUtils.getTileFromPoint(location.center)
 ) {
+
+  /**
+   * Finds a ParkingImage in the imageObjects list that matches the given imagePath.
+   *
+   * @param destinationPath The imagePath to match.
+   * @return The ParkingImage with the matching imagePath, or null if no match is found.
+   */
+  fun findImageByPath(destinationPath: String): ParkingImage? {
+    return imageObjects.find { it.imagePath == destinationPath }
+  }
+
   companion object {
     const val TABLE_NAME = "parkings"
   }
