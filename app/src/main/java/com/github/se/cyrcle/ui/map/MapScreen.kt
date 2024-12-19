@@ -82,7 +82,9 @@ import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.address.Address
 import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.map.BikeLocationViewModel
-import com.github.se.cyrcle.model.map.BikeLocationViewModel.BikeLocationState.*
+import com.github.se.cyrcle.model.map.BikeLocationViewModel.BikeLocationState.LOCATION_STORED_UNUSED
+import com.github.se.cyrcle.model.map.BikeLocationViewModel.BikeLocationState.LOCATION_STORED_USED
+import com.github.se.cyrcle.model.map.BikeLocationViewModel.BikeLocationState.NO_LOCATION
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.Location
 import com.github.se.cyrcle.model.parking.Parking
@@ -242,7 +244,7 @@ fun MapScreen(
 
   val forgetBikeLocation = remember { mutableStateOf(false) }
   val bikeLocationBitmap =
-      BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.dot)
+      BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.bike_location_marker)
 
   fun bikeLocationMarker(bikeLocation: Point) =
       PointAnnotationOptions()
