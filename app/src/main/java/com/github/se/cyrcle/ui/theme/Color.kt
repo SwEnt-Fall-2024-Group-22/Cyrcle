@@ -71,11 +71,11 @@ enum class ColorLevel {
 @Composable
 fun getColor(colorLevel: ColorLevel): Color {
   return when (colorLevel) {
-    ColorLevel.PRIMARY -> MaterialTheme.colorScheme.primary
-    ColorLevel.INVERSE_PRIMARY -> MaterialTheme.colorScheme.onPrimary
-    ColorLevel.SECONDARY -> MaterialTheme.colorScheme.secondary
-    ColorLevel.TERTIARY -> MaterialTheme.colorScheme.tertiary
-    ColorLevel.ERROR -> MaterialTheme.colorScheme.error
+    PRIMARY -> MaterialTheme.colorScheme.primary
+    INVERSE_PRIMARY -> MaterialTheme.colorScheme.onPrimary
+    SECONDARY -> MaterialTheme.colorScheme.secondary
+    TERTIARY -> MaterialTheme.colorScheme.tertiary
+    ERROR -> MaterialTheme.colorScheme.error
   }
 }
 
@@ -88,11 +88,11 @@ fun getColor(colorLevel: ColorLevel): Color {
 @Composable
 fun getOnColor(colorLevel: ColorLevel): Color {
   return when (colorLevel) {
-    ColorLevel.PRIMARY -> MaterialTheme.colorScheme.onPrimary
-    ColorLevel.INVERSE_PRIMARY -> MaterialTheme.colorScheme.primary
-    ColorLevel.SECONDARY -> MaterialTheme.colorScheme.onSecondary
-    ColorLevel.TERTIARY -> MaterialTheme.colorScheme.onTertiary
-    ColorLevel.ERROR -> MaterialTheme.colorScheme.onError
+    PRIMARY -> MaterialTheme.colorScheme.onPrimary
+    INVERSE_PRIMARY -> MaterialTheme.colorScheme.primary
+    SECONDARY -> MaterialTheme.colorScheme.onSecondary
+    TERTIARY -> MaterialTheme.colorScheme.onTertiary
+    ERROR -> MaterialTheme.colorScheme.onError
   }
 }
 
@@ -105,11 +105,11 @@ fun getOnColor(colorLevel: ColorLevel): Color {
 @Composable
 fun getContainerColor(colorLevel: ColorLevel): Color {
   return when (colorLevel) {
-    ColorLevel.PRIMARY -> MaterialTheme.colorScheme.primaryContainer
-    ColorLevel.INVERSE_PRIMARY -> MaterialTheme.colorScheme.onPrimaryContainer
-    ColorLevel.SECONDARY -> MaterialTheme.colorScheme.secondaryContainer
-    ColorLevel.TERTIARY -> MaterialTheme.colorScheme.tertiaryContainer
-    ColorLevel.ERROR -> MaterialTheme.colorScheme.errorContainer
+    PRIMARY -> MaterialTheme.colorScheme.primaryContainer
+    INVERSE_PRIMARY -> MaterialTheme.colorScheme.onPrimaryContainer
+    SECONDARY -> MaterialTheme.colorScheme.secondaryContainer
+    TERTIARY -> MaterialTheme.colorScheme.tertiaryContainer
+    ERROR -> MaterialTheme.colorScheme.errorContainer
   }
 }
 
@@ -122,11 +122,11 @@ fun getContainerColor(colorLevel: ColorLevel): Color {
 @Composable
 fun getOnContainerColor(colorLevel: ColorLevel): Color {
   return when (colorLevel) {
-    ColorLevel.PRIMARY -> MaterialTheme.colorScheme.onPrimaryContainer
-    ColorLevel.INVERSE_PRIMARY -> MaterialTheme.colorScheme.primaryContainer
-    ColorLevel.SECONDARY -> MaterialTheme.colorScheme.onSecondaryContainer
-    ColorLevel.TERTIARY -> MaterialTheme.colorScheme.onTertiaryContainer
-    ColorLevel.ERROR -> MaterialTheme.colorScheme.onErrorContainer
+    PRIMARY -> MaterialTheme.colorScheme.onPrimaryContainer
+    INVERSE_PRIMARY -> MaterialTheme.colorScheme.primaryContainer
+    SECONDARY -> MaterialTheme.colorScheme.onSecondaryContainer
+    TERTIARY -> MaterialTheme.colorScheme.onTertiaryContainer
+    ERROR -> MaterialTheme.colorScheme.onErrorContainer
   }
 }
 
