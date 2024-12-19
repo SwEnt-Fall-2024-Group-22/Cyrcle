@@ -20,7 +20,7 @@ enum class ReportedObjectType {
  * @property reportUID The unique identifier of the report itself.
  * @property nbOfTimesReported The number of times the object has been reported.
  * @property nbOfTimesMaxSeverityReported The number of times the object has been reported with the
- * highest severity.
+ *   highest severity.
  * @property userUID The unique identifier of the user who owns the object being reported
  * @property objectType The type of the reported object, as a [ReportedObjectType].
  */

@@ -16,8 +16,7 @@ const val MAX_IMAGE_SIZE = 200
 
 class ImageRepositoryCloudStorage
 @Inject
-constructor(private val auth: FirebaseAuth, storage: FirebaseStorage) :
-    ImageRepository {
+constructor(private val auth: FirebaseAuth, storage: FirebaseStorage) : ImageRepository {
 
   private val storageRef: StorageReference = storage.reference
 
