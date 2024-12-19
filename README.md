@@ -21,8 +21,9 @@ two-wheeled companion is always safe and well-stored.
 ## Resources
 
 ### Architecture
+[LINK](https://lucid.app/lucidchart/e6c82ff2-b0c7-4b08-8564-f81cd8183538/edit?viewport_loc=-284%2C-415%2C6395%2C3666%2Cm-5o7ONTd-nK&invitationId=inv_bf6c20bb-06e1-4ccd-ab71-662c32d67c0c)
 
-![img.png](readme_rsc/app_arch_m3.png)
+<img width="1366" alt="Screenshot 2024-12-19 at 20 52 41" src="https://github.com/user-attachments/assets/4a436771-5b92-461f-a479-c36b42acd48c" />
 
 ### External resources
 
