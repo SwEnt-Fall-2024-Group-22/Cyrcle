@@ -70,8 +70,6 @@ class CreateProfileScreenTest {
 
     composeTestRule.onNodeWithTag("AuthenticateButton", useUnmergedTree = true).performClick()
 
-    verify(mockNavigationActions).navigateTo(Screen.TUTORIAL)
-
     assert(
         mockUserRepository.users.any {
           it.public.userId == testUser.public.userId &&

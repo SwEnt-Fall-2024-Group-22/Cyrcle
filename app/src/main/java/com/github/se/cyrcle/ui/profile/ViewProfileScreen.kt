@@ -109,6 +109,16 @@ fun ViewProfileScreen(
           Row(
               modifier = Modifier.padding(top = 10.dp).align(Alignment.TopEnd),
               horizontalArrangement = Arrangement.End) {
+                if (userViewModel.currentUser.collectAsState().value?.details?.isAdmin == true) {
+                  IconButton(
+                    modifier =
+                    Modifier.padding(end = 10.dp),
+                    icon = Icons.Filled.AddModerator,
+                    contentDescription = "Admin",
+                    testTag = "AdminButton",
+                    onClick = { navigationActions.navigateTo(Screen.ADMIN) })
+                }
+
                 IconButton(
                     modifier = Modifier.padding(end = 10.dp),
                     icon = Icons.Filled.Outbox,
@@ -123,18 +133,6 @@ fun ViewProfileScreen(
                     testTag = "TutorialButton",
                     onClick = { navigationActions.navigateTo(Route.TUTORIAL) })
               }
-
-          if (userViewModel.currentUser.collectAsState().value?.details?.isAdmin == true) {
-            IconButton(
-                modifier =
-                    Modifier.padding(10.dp)
-                        .align(Alignment.TopEnd)
-                        .padding(end = 100.dp, top = 80.dp),
-                icon = Icons.Filled.AddModerator,
-                contentDescription = "Admin",
-                testTag = "AdminButton",
-                onClick = { navigationActions.navigateTo(Screen.ADMIN) })
-          }
 
           IconButton(
               modifier = Modifier.padding(10.dp).align(Alignment.TopStart),

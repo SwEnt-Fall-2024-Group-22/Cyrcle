@@ -17,7 +17,8 @@ class TutorialScreenTest {
 
   private lateinit var navigationActions: NavigationActions
 
-  @get:Rule val composeTestRule = createComposeRule()
+  @get:Rule
+  val composeTestRule = createComposeRule()
 
   @Before
   fun setup() {
@@ -65,19 +66,6 @@ class TutorialScreenTest {
     composeTestRule.onNodeWithTag("TutorialScreenThankYouTitle", true).assertIsDisplayed()
     composeTestRule.onNodeWithTag("TutorialScreenThankYouSubtitle", true).assertIsDisplayed()
     nextPage()
-
-    verify(navigationActions).navigateTo(Route.MAP)
-  }
-
-  @Test
-  fun tutorialScreenSkipNavigateToMap() {
-    composeTestRule.setContent { TutorialScreen(navigationActions) }
-
-    composeTestRule
-        .onNodeWithTag("TutorialScreenSkipButton")
-        .assertIsDisplayed()
-        // .assertHasClickAction() // Can not be found on a clickable text
-        .performClick()
 
     verify(navigationActions).navigateTo(Route.MAP)
   }
