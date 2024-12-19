@@ -23,10 +23,10 @@ class UserViewModel(
   private val _currentUser = MutableStateFlow<User?>(null)
   val currentUser: StateFlow<User?> = _currentUser
 
-  var _selectedUserImageUrls = MutableStateFlow<List<String>>(emptyList())
+  private var _selectedUserImageUrls = MutableStateFlow<List<String>>(emptyList())
   var selectedUserImageUrls: StateFlow<List<String>> = _selectedUserImageUrls
 
-  var _selectedUserAssociatedImages = MutableStateFlow<List<String>>(emptyList())
+  private var _selectedUserAssociatedImages = MutableStateFlow<List<String>>(emptyList())
   var selectedUserAssociatedImages: StateFlow<List<String>> = _selectedUserAssociatedImages
 
   val isSignedIn: Flow<Boolean>
