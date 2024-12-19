@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.review
 
-import android.graphics.Color.parseColor
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -56,6 +55,7 @@ import com.github.se.cyrcle.model.user.UserLevelDisplay
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
+import com.github.se.cyrcle.ui.profile.UserTagText
 import com.github.se.cyrcle.ui.theme.Black
 import com.github.se.cyrcle.ui.theme.atoms.OptionsMenu
 import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
@@ -368,18 +368,13 @@ fun ReviewCard(
                       if (ownerReputationScore != null) {
                         val range = UserLevelDisplay.getLevelRange(ownerReputationScore)
                         val level = ownerReputationScore.toInt()
-                        Text(
-                            text =
-                                stringResource(
-                                    R.string.display_user_tag_format, range.symbol, level, title),
-                            style = MaterialTheme.typography.bodySmall,
-                            color =
-                                if (range.color == stringResource(R.string.rainbow_text_color)) {
-                                  MaterialTheme.colorScheme.onSurface // TODO color rainbow
-                                } else {
-                                  Color(parseColor(range.color))
-                                },
+                        UserTagText(
+                            ownerUsername = title,
+                            symbol = range.symbol,
+                            color = range.color,
+                            level = level,
                             modifier = Modifier.weight(1f).testTag("ReviewTitle$index"),
+                            style = MaterialTheme.typography.bodySmall,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis)
                       } else {
