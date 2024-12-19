@@ -283,7 +283,7 @@ class ParkingViewModelTest {
 
     var onSuccessCallbackCalled = false
     reportedObjectRepository.updateReportedObject(
-        documentId = documentId,
+        objectUID = documentId,
         updatedObject = reportedObject,
         onSuccess = { onSuccessCallbackCalled = true },
         onFailure = { fail("Expected success but got failure") })
