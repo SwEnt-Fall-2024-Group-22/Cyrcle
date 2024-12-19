@@ -461,8 +461,7 @@ private fun UserReviewsSection(
                       reviewViewModel = reviewViewModel,
                       parkingViewModel = parkingViewModel,
                       oldScore = 0.0, // not needed in this case
-                      ownerReputationScore = null,
-                      navigationActions = navigationActions)
+                      ownerReputationScore = null)
                 }
           }
     }
