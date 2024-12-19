@@ -29,6 +29,10 @@
     <string name="sign_in_to_add_favorites">Please sign in to add favorites</string>
     <string name="filter">Filter</string>
     <string name="close">Close</string>
+    <string name="delete_dialog_title">Delete Item</string>
+    <string name="delete_dialog_message">Are you sure you want to delete this item? This action cannot be undone.</string>
+    <string name="delete_dialog_confirm_button">Delete</string>
+    <string name="delete_dialog_cancel_button">Cancel</string>
 
     <!-- Error Messages -->
     <string name="input_min_characters">Minimum %1$d characters required (current: %2$d)</string>

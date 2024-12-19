@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.review
 
-import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -45,7 +44,6 @@ import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 const val REVIEW_MIN_LENGTH = 0
 const val REVIEW_MAX_LENGTH = 256
 
-@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ReviewScreen(
     navigationActions: NavigationActions,
@@ -63,11 +61,11 @@ fun ReviewScreen(
 
   reviewViewModel.getReviewsByParking(selectedParking.uid)
   val ownerHasReviewed =
-      reviewViewModel.parkingReviews.value.any {
+      reviewViewModel.parkingReviews.collectAsState().value.any {
         it.owner == userViewModel.currentUser.value?.public?.userId
       }
   val matchingReview =
-      reviewViewModel.parkingReviews.value.find {
+      reviewViewModel.parkingReviews.collectAsState().value.find {
         it.owner == userViewModel.currentUser.value?.public?.userId
       }
   if (matchingReview != null) {
@@ -152,9 +150,16 @@ fun ReviewScreen(
                               uid = reviewViewModel.getNewUid(),
                               reportingUsers = emptyList()))
 
-                      userViewModel.creditCoinsToCurrentUser(PARKING_REVIEW_REWARD)
-                      // Show combined toast
-                      Toast.makeText(context, combinedToastText, Toast.LENGTH_LONG).show()
+                      if (userViewModel.currentUser.value
+                          ?.details
+                          ?.reviewedParkings
+                          ?.contains(selectedParking.uid) != true) {
+                        userViewModel.creditCoinsToCurrentUser(PARKING_REVIEW_REWARD)
+                        userViewModel.addReviewedParkingToSelectedUser(selectedParking.uid)
+                        Toast.makeText(context, combinedToastText, Toast.LENGTH_LONG).show()
+                      } else {
+                        Toast.makeText(context, reviewAddedText, Toast.LENGTH_LONG).show()
+                      }
                     } else {
                       parkingViewModel.handleReviewUpdate(
                           newScore = sliderToValue, oldScore = matchingReview?.rating!!)

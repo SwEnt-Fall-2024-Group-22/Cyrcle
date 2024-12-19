@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
@@ -161,4 +163,43 @@ fun SubmitButtonWithDialog(
                   textAlign = TextAlign.Center)
             }
       }
+}
+
+/**
+ * A reusable alert dialog to confirm deletion.
+ *
+ * @param onConfirm The function to call when the user confirms the deletion.
+ * @param onDismiss The function to call when the dialog is dismissed.
+ * @param showDialog A mutable state controlling the visibility of the dialog.
+ */
+@Composable
+fun DeleteConfirmationDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    showDialog: MutableState<Boolean>
+) {
+  if (showDialog.value) {
+    AlertDialog(
+        onDismissRequest = { showDialog.value = false },
+        confirmButton = {
+          TextButton(
+              onClick = {
+                showDialog.value = false
+                onConfirm()
+              }) {
+                Text(stringResource(id = R.string.delete_dialog_confirm_button))
+              }
+        },
+        dismissButton = {
+          TextButton(
+              onClick = {
+                showDialog.value = false
+                onDismiss()
+              }) {
+                Text(stringResource(id = R.string.delete_dialog_cancel_button))
+              }
+        },
+        title = { Text(stringResource(id = R.string.delete_dialog_title)) },
+        text = { Text(stringResource(id = R.string.delete_dialog_message)) })
+  }
 }

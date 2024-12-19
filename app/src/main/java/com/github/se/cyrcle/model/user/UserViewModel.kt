@@ -211,6 +211,22 @@ class UserViewModel(
           user.details?.copy(reportedParkings = user.details.reportedParkings + parking)
       val updatedUser = user.copy(details = updatedDetails)
       updateUser(updatedUser) {}
+      updateUser(updatedUser) {}
+    }
+  }
+
+  /**
+   * Adds a parking to the list of reviewed parkings for the selected user and updates the reviewed
+   * parkings state.
+   *
+   * @param parking The parking ID to add to the list of reviewed parkings.
+   */
+  fun addReviewedParkingToSelectedUser(parking: String) {
+    currentUser.value?.let { user ->
+      val updatedDetails =
+          user.details?.copy(reviewedParkings = user.details.reviewedParkings + parking)
+      val updatedUser = user.copy(details = updatedDetails)
+      updateUser(updatedUser) {}
     }
   }
 
