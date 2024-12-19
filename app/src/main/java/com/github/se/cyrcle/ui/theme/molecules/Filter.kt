@@ -96,6 +96,8 @@ import kotlinx.coroutines.runBlocking
  * @param addressViewModel The view model that contains the address search functionality
  * @param mapViewModel The view model that manage the Map
  * @param permissionHandler The handler for managing permissions
+ * @param userViewModel The view model that contains the user information (if not specified, we
+ *   always display the online elements)
  */
 @Composable
 fun FilterPanel(
@@ -125,6 +127,14 @@ fun FilterPanel(
 
   val radius = parkingViewModel.radius.collectAsState()
 
+  // Check for user connectivity and mode selected to decide if we display the elements that require
+  // online connection.
+  // (i.e the search bar). If not specified, we always display the online elements. (Mapcreen, test,
+  // ect..)
+  val displayOnlineElement =
+      userViewModel?.displayOnlineElementFlow?.collectAsState(initial = false)
+          ?: remember { mutableStateOf(true) }
+
   Column(modifier = Modifier.padding(if (displayHeader) 16.dp else 0.dp)) {
     if (displayHeader) {
 
@@ -134,12 +144,15 @@ fun FilterPanel(
           horizontalArrangement = Arrangement.End,
           verticalAlignment = Alignment.CenterVertically) {
             // Button transforms into a close button
-            SmallFloatingActionButton(
-                icon = if (isTextFieldVisible.value) Icons.Default.Close else Icons.Default.Search,
-                onClick = { isTextFieldVisible.value = !isTextFieldVisible.value },
-                modifier = Modifier.testTag("ShowSearchButton"),
-                contentDescription = "Search List Screen",
-            )
+            if (displayOnlineElement.value) {
+              SmallFloatingActionButton(
+                  icon =
+                      if (isTextFieldVisible.value) Icons.Default.Close else Icons.Default.Search,
+                  onClick = { isTextFieldVisible.value = !isTextFieldVisible.value },
+                  modifier = Modifier.testTag("ShowSearchButton"),
+                  contentDescription = "Search List Screen",
+              )
+            }
 
             // Text field slides out to the right of the button
             if (isTextFieldVisible.value) {

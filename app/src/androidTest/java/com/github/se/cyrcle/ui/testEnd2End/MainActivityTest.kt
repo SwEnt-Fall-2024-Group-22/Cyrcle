@@ -152,7 +152,7 @@ class MainActivityTest {
     // Offline user
     authRobot.assertAuthScreen()
     authRobot.performOfflineSignIn()
-    mapRobot.assertMapScreen()
+    mapRobot.assertMapScreen(userIsOnline = false)
     mapRobot.assertIsOfflineMode()
     mapRobot.toAnonymousUserProfile()
     userProfileRobot.assertUserProfileScreen(false)
@@ -395,11 +395,12 @@ class MainActivityTest {
       val permissionHandler: PermissionHandler
   ) {
 
-    fun assertMapScreen() {
+    fun assertMapScreen(userIsOnline: Boolean = true) {
       composeTestRule.onNodeWithTag("MapScreen").assertIsDisplayed()
       composeTestRule.onNodeWithTag("NavigationBar").assertIsDisplayed()
 
-      composeTestRule.onNodeWithTag("SearchBar").assertIsDisplayed().assertHasClickAction()
+      if (userIsOnline)
+          composeTestRule.onNodeWithTag("SearchBar").assertIsDisplayed().assertHasClickAction()
       if (permissionHandler.getLocalisationPerm().value)
           composeTestRule.onNodeWithTag("recenterButton").assertIsDisplayed().assertHasClickAction()
     }
