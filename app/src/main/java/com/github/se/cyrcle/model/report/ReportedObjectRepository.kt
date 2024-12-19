@@ -43,13 +43,13 @@ interface ReportedObjectRepository {
   /**
    * Updates a reported object with a given document ID in the Firestore collection.
    *
-   * @param documentId The document ID of the object to update.
+   * @param objectUID The unique identifier of the object to update.
    * @param updatedObject The updated [ReportedObject] instance.
    * @param onSuccess A callback invoked when the operation is successful.
    * @param onFailure A callback invoked when the operation fails with an exception.
    */
   fun updateReportedObject(
-      documentId: String,
+      objectUID: String,
       updatedObject: ReportedObject,
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
