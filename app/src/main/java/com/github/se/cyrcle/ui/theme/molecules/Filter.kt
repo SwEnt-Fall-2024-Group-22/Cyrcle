@@ -555,14 +555,7 @@ fun processEasterEgg(
   teleportRegex.matchEntire(trimmedQuery)?.let {
     clearInput()
     val availableScreens =
-        listOf(
-            Screen.MAP,
-            Screen.LIST,
-            Screen.VIEW_PROFILE,
-            Screen.GAMBLING,
-            Screen.RACK_INFO,
-            Screen.ADMIN,
-        )
+        listOf(Screen.MAP, Screen.LIST, Screen.VIEW_PROFILE, Screen.GAMBLING, Screen.RACK_INFO)
     val randomScreen = availableScreens.random()
     Toast.makeText(
             context,

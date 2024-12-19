@@ -111,7 +111,12 @@ class ReviewViewModel(
 
   fun deleteReviewById(uid: String) {
     reviewRepository.deleteReviewById(
-        uid, {}, { Log.e("ReviewViewModel", "Error deleting reviews", it) })
+        uid,
+        {
+          _parkingReviews.value = _parkingReviews.value.filter { it.uid != uid }
+          _userReviews.value = _userReviews.value.filter { it.uid != uid }
+        },
+        { Log.e("ReviewViewModel", "Error deleting reviews", it) })
   }
 
   /**

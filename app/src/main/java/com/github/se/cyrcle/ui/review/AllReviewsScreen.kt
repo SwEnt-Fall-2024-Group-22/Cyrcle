@@ -61,6 +61,7 @@ import com.github.se.cyrcle.ui.theme.atoms.OptionsMenu
 import com.github.se.cyrcle.ui.theme.atoms.ScoreStars
 import com.github.se.cyrcle.ui.theme.atoms.SmallFloatingActionButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
+import com.github.se.cyrcle.ui.theme.molecules.DeleteConfirmationDialog
 import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
@@ -164,6 +165,7 @@ fun AllReviewsScreen(
 ) {
   val selectedParking by parkingViewModel.selectedParking.collectAsState()
   val reviewsList by reviewViewModel.parkingReviews.collectAsState()
+
   LaunchedEffect(Unit) {
     reviewViewModel.clearReviews()
     selectedParking?.let { reviewViewModel.getReviewsByParking(it.uid) }
@@ -252,7 +254,10 @@ fun AllReviewsScreen(
                                           }),
                               userViewModel = userViewModel,
                               reviewViewModel = reviewViewModel,
-                              ownerReputationScore = currentUser?.public?.userReputationScore)
+                              parkingViewModel = parkingViewModel,
+                              oldScore = it.rating,
+                              ownerReputationScore = currentUser?.public?.userReputationScore,
+                              navigationActions = navigationActions)
                         }
                       } else {
                         // Add review button
@@ -324,7 +329,10 @@ fun AllReviewsScreen(
                                       }),
                           userViewModel = userViewModel,
                           reviewViewModel = reviewViewModel,
-                          ownerReputationScore = ownerReputationScore)
+                          parkingViewModel = parkingViewModel,
+                          oldScore = 0.0, // not needed in this case
+                          ownerReputationScore = ownerReputationScore,
+                          navigationActions = navigationActions)
                     }
               }
         }
@@ -341,10 +349,23 @@ fun ReviewCard(
     options: Map<String, () -> Unit>,
     userViewModel: UserViewModel,
     reviewViewModel: ReviewViewModel,
-    ownerReputationScore: Double?
+    parkingViewModel: ParkingViewModel,
+    oldScore: Double,
+    ownerReputationScore: Double?,
+    navigationActions: NavigationActions
 ) {
   val currentUser by userViewModel.currentUser.collectAsState()
   val userSignedIn by userViewModel.isSignedIn.collectAsState(false)
+  var showDeleteDialog by remember { mutableStateOf(false) }
+  val context = LocalContext.current
+
+  // Filter options to include delete only if the review belongs to the current user
+  val updatedOptions =
+      options.toMutableMap().apply {
+        if (review.owner == currentUser?.public?.userId) {
+          this[stringResource(R.string.all_reviews_delete_review)] = { showDeleteDialog = true }
+        }
+      }
 
   Card(
       modifier =
@@ -454,8 +475,9 @@ fun ReviewCard(
                             }
 
                             // More options button
-                            if (options.isNotEmpty())
-                                OptionsMenu(options = options, testTag = "MoreOptions$index")
+                            if (updatedOptions.isNotEmpty()) {
+                              OptionsMenu(options = updatedOptions, testTag = "MoreOptions$index")
+                            }
                           }
                     }
 
@@ -477,6 +499,21 @@ fun ReviewCard(
               }
         }
       }
+
+  val deleteReview = stringResource(R.string.review_deleted)
+
+  // Use DeleteConfirmationDialog for delete functionality
+  if (showDeleteDialog) {
+    DeleteConfirmationDialog(
+        showDialog = remember { mutableStateOf(showDeleteDialog) },
+        onDismiss = { showDeleteDialog = false },
+        onConfirm = {
+          reviewViewModel.deleteReviewById(review.uid)
+          parkingViewModel.handleReviewDeletion(oldScore = oldScore)
+          showDeleteDialog = false
+          Toast.makeText(context, deleteReview, Toast.LENGTH_SHORT).show()
+        })
+  }
 }
 
 /** Converts a [Timestamp] to a formatted date string. */

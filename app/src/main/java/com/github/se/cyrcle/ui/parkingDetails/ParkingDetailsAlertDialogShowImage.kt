@@ -16,6 +16,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -32,13 +34,17 @@ import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import com.github.se.cyrcle.ui.theme.atoms.IconButton
+import com.github.se.cyrcle.ui.theme.molecules.DeleteConfirmationDialog
 
 /**
  * Alert dialog to show the image of a parking spot. This composable is displayed when the user
- * clicks on an image of a parking spot, as well as report it when necessary
+ * clicks on an image of a parking spot, allowing the owner to delete or other users to report it.
  *
+ * @param parkingViewModel ViewModel handling parking-related operations.
+ * @param userViewModel ViewModel handling user-related operations.
  * @param onDismiss Callback when the dialog is dismissed.
  * @param imageUrl URL of the image to display.
+ * @param navigationActions Navigation actions to navigate to different screens.
  */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,6 +58,10 @@ fun ParkingDetailsAlertDialogShowImage(
   val context = LocalContext.current
   val strResToast = stringResource(R.string.view_profile_screen_image_deleted)
   val imageMinWidth = LocalConfiguration.current.screenWidthDp.dp * 0.8f
+
+  // State for delete confirmation dialog
+  val showDeleteDialog = remember { mutableStateOf(false) }
+
   BasicAlertDialog(
       modifier = Modifier.testTag("ParkingDetailsAlertDialogShowImage").wrapContentSize(),
       onDismissRequest = onDismiss,
@@ -64,9 +74,7 @@ fun ParkingDetailsAlertDialogShowImage(
               contentScale = ContentScale.FillWidth,
               modifier =
                   Modifier.width(imageMinWidth)
-                      .background(
-                          MaterialTheme.colorScheme.background,
-                          MaterialTheme.shapes.small) // Set the background color
+                      .background(MaterialTheme.colorScheme.background, MaterialTheme.shapes.small)
                       .padding(4.dp)
                       .testTag("parkingDetailsAlertDialogImage"))
 
@@ -84,21 +92,15 @@ fun ParkingDetailsAlertDialogShowImage(
                   userViewModel.currentUser.collectAsState().value?.public?.userId
 
           if (isOwner) {
+            // Show Delete button for the owner
             IconButton(
                 modifier = Modifier.align(Alignment.TopEnd).padding(6.dp),
                 icon = Icons.Outlined.Delete,
                 contentDescription = "Delete",
-                onClick = {
-                  parkingViewModel.deleteImageFromParking(
-                      parkingViewModel.selectedParking.value?.uid!!,
-                      parkingViewModel.selectedImageObject.value?.imagePath!!)
-                  userViewModel.removeImageFromUserImages(
-                      parkingViewModel.selectedImageObject.value?.imagePath!!)
-                  navigationActions.navigateTo(Screen.LIST)
-                  Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
-                },
+                onClick = { showDeleteDialog.value = true }, // Show confirmation dialog
                 inverted = true)
           } else {
+            // Show Report button for non-owners
             IconButton(
                 modifier = Modifier.align(Alignment.TopEnd).padding(6.dp),
                 icon = Icons.Outlined.Flag,
@@ -109,4 +111,21 @@ fun ParkingDetailsAlertDialogShowImage(
           }
         }
       })
+
+  // Delete Confirmation Dialog
+  if (showDeleteDialog.value) {
+    DeleteConfirmationDialog(
+        onConfirm = {
+          parkingViewModel.deleteImageFromParking(
+              parkingViewModel.selectedParking.value?.uid!!,
+              parkingViewModel.selectedImageObject.value?.imagePath!!)
+          userViewModel.removeImageFromUserImages(
+              parkingViewModel.selectedImageObject.value?.imagePath!!)
+          Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
+          navigationActions.navigateTo(Screen.LIST)
+          showDeleteDialog.value = false
+        },
+        onDismiss = { showDeleteDialog.value = false },
+        showDialog = showDeleteDialog)
+  }
 }

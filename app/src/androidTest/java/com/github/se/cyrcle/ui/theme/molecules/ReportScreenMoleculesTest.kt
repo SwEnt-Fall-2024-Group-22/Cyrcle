@@ -98,10 +98,43 @@ class ReportScreenMoleculesTest {
     composeTestRule
         .onNodeWithText("Yes") // Ensure dialog has a test tag
         .performClick()
-
-    // Simulate dialog acceptance
     composeTestRule.runOnUiThread { showDialog.value = false }
 
     assert(wasSubmitted)
+  }
+
+  @Test
+  fun deleteConfirmationDialog_showsDialogAndHandlesActions() {
+    val showDialog = mutableStateOf(true)
+    var wasConfirmed = false
+    var wasDismissed = false
+
+    composeTestRule.setContent {
+      DeleteConfirmationDialog(
+          onConfirm = { wasConfirmed = true },
+          onDismiss = { wasDismissed = true },
+          showDialog = showDialog)
+    }
+
+    composeTestRule.onNodeWithText("Delete Item").assertExists().assertIsDisplayed()
+    composeTestRule
+        .onNodeWithText("Are you sure you want to delete this item? This action cannot be undone.")
+        .assertExists()
+        .assertIsDisplayed()
+
+    composeTestRule.onNodeWithText("Delete").assertExists().performClick()
+    composeTestRule.runOnUiThread { showDialog.value = false }
+    composeTestRule.waitForIdle()
+
+    assert(wasConfirmed)
+    assert(!wasDismissed)
+
+    showDialog.value = true
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithText("Cancel").assertExists().performClick()
+    composeTestRule.runOnUiThread { showDialog.value = false }
+    composeTestRule.waitForIdle()
+
+    assert(wasDismissed)
   }
 }
