@@ -283,6 +283,7 @@ fun MapScreen(
     // stays open only if the selected parking is still in the list of parkings
     showPreviewCard = showPreviewCard && listOfParkings.contains(selectedParking)
   }
+  redrawMarkers()
 
   // Draw markers on the map when the list of parkings changes
   LaunchedEffect(listOfParkings, selectedParking?.nbReviews, mapMode.value) { redrawMarkers() }
@@ -1027,11 +1028,11 @@ fun BikeLocationButton(
           }
           LOCATION_STORED_UNUSED -> {
             val bikeLocation = Location(bikeLocationViewModel.goToMyBike()?.location!!)
-            mapViewModel.zoomOnLocation(null, bikeLocation)
+            mapViewModel.zoomOnLocation(navigationActions, bikeLocation)
           }
           LOCATION_STORED_USED -> {
             val bikeLocation = Location(bikeLocationViewModel.goToMyBike()?.location!!)
-            mapViewModel.zoomOnLocation(null, bikeLocation)
+            mapViewModel.zoomOnLocation(navigationActions, bikeLocation)
             forgetBikeLocation.value = true
           }
         }

@@ -152,6 +152,7 @@ class MapViewModel : ViewModel() {
             MapConfig.defaultCameraState().bearing,
             MapConfig.defaultCameraState().pitch)
 
+    updateLocation(location)
     updateTrackingMode(false)
     updateMapRecentering(true)
     navigationActions?.navigateTo(Route.MAP)
