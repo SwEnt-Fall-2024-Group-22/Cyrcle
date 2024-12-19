@@ -161,7 +161,7 @@ class BikeLocationViewModel(private val preferenceStorage: PreferenceStorage) : 
    * moves the map, and the location of the bike is still stored.
    */
   fun mapMoved() {
-    _bikeLocationState.update { LOCATION_STORED_UNUSED }
+    if (_bikeLocationState.value != NO_LOCATION) _bikeLocationState.update { LOCATION_STORED_UNUSED }
   }
 
   /**
