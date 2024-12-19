@@ -459,8 +459,10 @@ private fun UserReviewsSection(
                       options = mapOf(),
                       userViewModel = userViewModel,
                       reviewViewModel = reviewViewModel,
+                      parkingViewModel = parkingViewModel,
+                      oldScore = 0.0, // not needed in this case
                       ownerReputationScore = null,
-                      navigationActions)
+                      navigationActions = navigationActions)
                 }
           }
     }
