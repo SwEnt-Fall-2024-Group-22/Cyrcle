@@ -572,7 +572,7 @@ fun processEasterEgg(
     val randomScreen = availableScreens.random()
     Toast.makeText(
             context,
-            context.getString(R.string.easter_egg_teleport_message, randomScreen.toString()),
+            context.getString(R.string.easter_egg_teleport_message, randomScreen),
             Toast.LENGTH_SHORT)
         .show()
     navigationActions.navigateTo(randomScreen)
