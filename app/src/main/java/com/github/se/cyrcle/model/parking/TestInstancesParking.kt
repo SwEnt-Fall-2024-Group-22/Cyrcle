@@ -5,8 +5,8 @@ import com.mapbox.geojson.Point
 
 object TestInstancesParking {
 
-  val referencePoint = Point.fromLngLat(6.55, 46.65)
-  val EPFLCenter = Point.fromLngLat(6.566397, 46.518467)
+  val referencePoint: Point = Point.fromLngLat(6.55, 46.65)
+  val EPFLCenter: Point = Point.fromLngLat(6.566397, 46.518467)
   // This parking has to be close to the center point of the map launched by the end2end test
   val parking1 =
       Parking(
