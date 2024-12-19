@@ -157,6 +157,14 @@ class BikeLocationViewModel(private val preferenceStorage: PreferenceStorage) : 
   }
 
   /**
+   * Update the state of the bike location to [LOCATION_STORED_UNUSED]. This is used when the user
+   * moves the map, and the location of the bike is still stored.
+   */
+  fun mapMoved() {
+    _bikeLocationState.update { LOCATION_STORED_UNUSED }
+  }
+
+  /**
    * Remove the location of the bike from the preferences and update the state of the bike location.
    * In effect, store an [INVALID_LOCATION] in the preferences and update the state to
    * [NO_LOCATION].

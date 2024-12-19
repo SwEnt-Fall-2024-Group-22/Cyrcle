@@ -385,6 +385,8 @@ fun MapScreen(
                                   .build())
                           mapViewModel.updateTrackingMode(false)
                         }
+
+                        bikeLocationViewModel.mapMoved()
                       }
 
                       override fun onMove(detector: MoveGestureDetector): Boolean {
@@ -620,7 +622,7 @@ fun MapScreen(
         }
 
         if (forgetBikeLocation.value) {
-          RemoveBikeLocationPopup(bikeLocationViewModel, forgetBikeLocation)
+          RemoveBikeLocationPopup(bikeLocationViewModel, forgetBikeLocation) { redrawMarkers() }
         }
 
         // Filter dialog is shown when the showFilter state is true, until the user dismisses it by
@@ -1031,8 +1033,7 @@ fun BikeLocationButton(
             mapViewModel.zoomOnLocation(navigationActions, bikeLocation)
           }
           LOCATION_STORED_USED -> {
-            val bikeLocation = Location(bikeLocationViewModel.goToMyBike()?.location!!)
-            mapViewModel.zoomOnLocation(navigationActions, bikeLocation)
+            // Logic in inside the [RemoveBikeLocationPopup]
             forgetBikeLocation.value = true
           }
         }
@@ -1058,7 +1059,7 @@ fun BikeLocationButton(
 fun RemoveBikeLocationPopup(
     bikeLocationViewModel: BikeLocationViewModel,
     forgetBikeLocation: MutableState<Boolean>,
-    redrawMarkers: () -> Unit = {}
+    redrawMarkers: () -> Unit
 ) {
   AlertDialog(
       modifier = Modifier.testTag("RemoveBikeLocationDialog"),
