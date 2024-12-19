@@ -1,7 +1,6 @@
 package com.github.se.cyrcle.model.authentication
 
 import android.content.Context
-import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
@@ -79,8 +78,6 @@ constructor(
             .setServerClientId(webClientId)
             .setNonce(hashedNonce)
             .build()
-
-    Log.d("GoogleIdToken", "Made request $firstTry")
 
     val request = GetCredentialRequest.Builder().addCredentialOption(signInWithGoogleOption).build()
 
