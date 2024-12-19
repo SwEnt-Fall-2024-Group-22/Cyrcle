@@ -254,8 +254,10 @@ fun AllReviewsScreen(
                                           }),
                               userViewModel = userViewModel,
                               reviewViewModel = reviewViewModel,
+                              parkingViewModel = parkingViewModel,
+                              oldScore = it.rating,
                               ownerReputationScore = currentUser?.public?.userReputationScore,
-                              navigationActions)
+                              navigationActions = navigationActions)
                         }
                       } else {
                         // Add review button
@@ -327,8 +329,10 @@ fun AllReviewsScreen(
                                       }),
                           userViewModel = userViewModel,
                           reviewViewModel = reviewViewModel,
+                          parkingViewModel = parkingViewModel,
+                          oldScore = 0.0, // not needed in this case
                           ownerReputationScore = ownerReputationScore,
-                          navigationActions)
+                          navigationActions = navigationActions)
                     }
               }
         }
@@ -345,6 +349,8 @@ fun ReviewCard(
     options: Map<String, () -> Unit>,
     userViewModel: UserViewModel,
     reviewViewModel: ReviewViewModel,
+    parkingViewModel: ParkingViewModel,
+    oldScore: Double,
     ownerReputationScore: Double?,
     navigationActions: NavigationActions
 ) {
@@ -352,6 +358,14 @@ fun ReviewCard(
   val userSignedIn by userViewModel.isSignedIn.collectAsState(false)
   var showDeleteDialog by remember { mutableStateOf(false) }
   val context = LocalContext.current
+
+  // Filter options to include delete only if the review belongs to the current user
+  val updatedOptions =
+      options.toMutableMap().apply {
+        if (review.owner == currentUser?.public?.userId) {
+          this[stringResource(R.string.all_reviews_delete_review)] = { showDeleteDialog = true }
+        }
+      }
 
   Card(
       modifier =
@@ -461,11 +475,7 @@ fun ReviewCard(
                             }
 
                             // More options button
-                            if (options.isNotEmpty()) {
-                              val updatedOptions = options.toMutableMap()
-                              updatedOptions[stringResource(R.string.all_reviews_delete_review)] = {
-                                showDeleteDialog = true
-                              }
+                            if (updatedOptions.isNotEmpty()) {
                               OptionsMenu(options = updatedOptions, testTag = "MoreOptions$index")
                             }
                           }
@@ -489,6 +499,7 @@ fun ReviewCard(
               }
         }
       }
+
   val deleteReview = stringResource(R.string.review_deleted)
 
   // Use DeleteConfirmationDialog for delete functionality
@@ -498,6 +509,7 @@ fun ReviewCard(
         onDismiss = { showDeleteDialog = false },
         onConfirm = {
           reviewViewModel.deleteReviewById(review.uid)
+          parkingViewModel.handleReviewDeletion(oldScore = oldScore)
           showDeleteDialog = false
           Toast.makeText(context, deleteReview, Toast.LENGTH_SHORT).show()
           navigationActions.navigateTo(Screen.PARKING_DETAILS)
