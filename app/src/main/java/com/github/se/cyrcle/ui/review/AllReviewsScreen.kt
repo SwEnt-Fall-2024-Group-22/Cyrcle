@@ -512,7 +512,6 @@ fun ReviewCard(
           parkingViewModel.handleReviewDeletion(oldScore = oldScore)
           showDeleteDialog = false
           Toast.makeText(context, deleteReview, Toast.LENGTH_SHORT).show()
-          navigationActions.navigateTo(Screen.PARKING_DETAILS)
         })
   }
 }
