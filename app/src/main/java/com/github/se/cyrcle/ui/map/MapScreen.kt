@@ -990,6 +990,8 @@ fun PreviewCard(navigationActions: NavigationActions, parkingViewModel: ParkingV
  * @param bikeLocationViewModel The ViewModel for managing bike location-related data and actions.
  * @param mapViewModel The ViewModel for managing map-related data and actions.
  * @param navigationActions The actions to navigate to different screens.
+ * @param forgetBikeLocation The value to trigger an [AlertDialog].
+ * @param redrawMarkers The function to redraw the markers on the map.
  */
 @Composable
 fun BikeLocationButton(
@@ -1044,6 +1046,13 @@ fun BikeLocationButton(
           })
 }
 
+/**
+ * Composable function to display the remove bike location confirmation dialog.
+ *
+ * @param bikeLocationViewModel The ViewModel for managing bike location-related data and actions.
+ * @param forgetBikeLocation The state to forget the bike location.
+ * @param redrawMarkers The function to redraw the markers on the map if the user accept.
+ */
 @Composable
 fun RemoveBikeLocationPopup(
     bikeLocationViewModel: BikeLocationViewModel,
