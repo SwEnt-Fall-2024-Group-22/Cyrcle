@@ -50,6 +50,14 @@ constructor(
     makeRequest(onSuccess, onFailure, true)
   }
 
+  /**
+   * Semi recursive function to make a credential request. The first attempt will try to use the
+   * last account used to sign in. If that fails, it will prompt the user to link a Google account
+   *
+   * @param onSuccess a function to be called once the user is authenticated
+   * @param onFailure a function to be called if the authentication fails
+   * @param firstTry a boolean to indicate if this is the first attempt to sign in
+   */
   private fun makeRequest(
       onSuccess: (String) -> Unit,
       onFailure: (Exception) -> Unit,
@@ -94,9 +102,7 @@ constructor(
           onFailure(Exception("Unexpected type of credential"))
         }
       } catch (e: GetCredentialException) {
-        if (firstTry) makeRequest(onSuccess, onFailure, false)
-        else onFailure(e)
-
+        if (firstTry) makeRequest(onSuccess, onFailure, false) else onFailure(e)
       } catch (e: Exception) {
         onFailure(e)
       }
