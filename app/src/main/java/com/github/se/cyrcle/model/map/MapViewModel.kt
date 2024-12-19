@@ -12,6 +12,8 @@ import com.github.se.cyrcle.model.parking.Parking
 import com.github.se.cyrcle.model.parking.TestInstancesParking
 import com.github.se.cyrcle.ui.map.MapConfig
 import com.github.se.cyrcle.ui.map.maxZoom
+import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.theme.molecules.DropDownableEnum
 import com.google.gson.Gson
 import com.mapbox.geojson.Point
@@ -130,12 +132,18 @@ class MapViewModel : ViewModel() {
 
   /**
    * Set the camera to go to a specific location, with default padding, bearing and pitch. The zoom
-   * is set to the max zoom defined in the UI.
+   * is set to the max zoom defined in the UI. The tracking mode and the map recentering will be
+   * disabled (call [updateTrackingMode] and [updateMapRecentering] with false).
    *
+   * @param navigationActions the navigation actions to navigate to the map screen
    * @param location the location to zoom on.
    * @param zoom the zoom level to set.
    */
-  fun zoomOnLocation(location: Location, zoom: Double = maxZoom) {
+  fun zoomOnLocation(
+      navigationActions: NavigationActions?,
+      location: Location,
+      zoom: Double = maxZoom
+  ) {
     _cameraPosition.value =
         CameraState(
             location.center,
@@ -143,6 +151,11 @@ class MapViewModel : ViewModel() {
             zoom,
             MapConfig.defaultCameraState().bearing,
             MapConfig.defaultCameraState().pitch)
+
+    updateLocation(location)
+    updateTrackingMode(false)
+    updateMapRecentering(true)
+    navigationActions?.navigateTo(Route.MAP)
   }
 
   /**
@@ -305,7 +318,6 @@ class MapViewModel : ViewModel() {
       plabelAnnotationManager: PointAnnotationManager?,
       parkingsList: List<Parking>
   ) {
-
     // Create a list of annotations to draw
     val annotations: MutableList<PolygonAnnotationOptions> = mutableListOf()
 

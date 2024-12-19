@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.map
 
+import android.content.Context
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
@@ -20,7 +21,9 @@ import com.github.se.cyrcle.di.mocks.MockParkingRepository
 import com.github.se.cyrcle.di.mocks.MockPermissionHandler
 import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
+import com.github.se.cyrcle.io.datastore.PreferenceStorage
 import com.github.se.cyrcle.model.address.AddressViewModel
+import com.github.se.cyrcle.model.map.BikeLocationViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
@@ -51,6 +54,7 @@ class MapScreenTest {
   private lateinit var mapViewModel: MapViewModel
   private lateinit var permissionHandler: MockPermissionHandler
   private lateinit var addressViewModel: AddressViewModel
+  private lateinit var bikeLocationViewModel: BikeLocationViewModel
 
   @Before
   fun setUp() {
@@ -78,6 +82,8 @@ class MapScreenTest {
     permissionHandler = MockPermissionHandler()
     addressViewModel = AddressViewModel(addressRepository)
 
+    bikeLocationViewModel = BikeLocationViewModel(PreferenceStorage(mock(Context::class.java)))
+
     `when`(mockNavigation.currentRoute()).thenReturn(Screen.MAP)
   }
 
@@ -96,7 +102,8 @@ class MapScreenTest {
           userViewModel,
           mapViewModel,
           permissionHandler,
-          addressViewModel)
+          addressViewModel,
+          bikeLocationViewModel)
     }
 
     composeTestRule.onNodeWithTag("MapScreen").assertIsDisplayed()
@@ -113,7 +120,8 @@ class MapScreenTest {
           userViewModel,
           mapViewModel,
           permissionHandler,
-          addressViewModel)
+          addressViewModel,
+          bikeLocationViewModel)
     }
 
     // Check that the add button has no click action when there is no user
@@ -143,7 +151,8 @@ class MapScreenTest {
           userViewModel,
           mapViewModel,
           permissionHandler,
-          addressViewModel)
+          addressViewModel,
+          bikeLocationViewModel)
     }
 
     // Start with enabled location
@@ -176,7 +185,8 @@ class MapScreenTest {
           userViewModel,
           mapViewModel,
           permissionHandler,
-          addressViewModel)
+          addressViewModel,
+          bikeLocationViewModel)
     }
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("addButton"))
     // Perform click on the add button
@@ -198,7 +208,8 @@ class MapScreenTest {
           userViewModel,
           mapViewModel,
           permissionHandler,
-          addressViewModel)
+          addressViewModel,
+          bikeLocationViewModel)
     }
 
     composeTestRule.onNodeWithTag("SettingsMenuButton").assertIsDisplayed().assertHasClickAction()
@@ -219,7 +230,8 @@ class MapScreenTest {
           userViewModel,
           mapViewModel,
           permissionHandler,
-          addressViewModel)
+          addressViewModel,
+          bikeLocationViewModel)
     }
 
     composeTestRule
@@ -246,7 +258,8 @@ class MapScreenTest {
           userViewModel,
           mapViewModel,
           permissionHandler,
-          addressViewModel)
+          addressViewModel,
+          bikeLocationViewModel)
     }
 
     composeTestRule.onNodeWithTag("SearchBar").assertIsDisplayed()
@@ -268,7 +281,8 @@ class MapScreenTest {
           userViewModel,
           mapViewModel,
           permissionHandler,
-          addressViewModel)
+          addressViewModel,
+          bikeLocationViewModel)
     }
 
     composeTestRule.onNodeWithTag("SearchBar").assertIsDisplayed()
