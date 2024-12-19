@@ -93,6 +93,7 @@ fun ParkingDetailsScreen(
   val showDialogImage = remember { mutableStateOf<String?>(null) }
   val showDialogImageDestinationPath = remember { mutableStateOf<String?>("") }
 
+  val displayOnlineElement by userViewModel.displayOnlineElementFlow.collectAsState(false)
   val defaultUsername = stringResource(R.string.undefined_username)
   var ownerReputationScore by remember { mutableDoubleStateOf(0.0) }
   var ownerUsername by remember { mutableStateOf(defaultUsername) }

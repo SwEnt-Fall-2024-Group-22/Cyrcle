@@ -511,43 +511,47 @@ fun MapScreen(
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.End) {
                 // Search bar
-                OutlinedTextField(
-                    value = searchQuery.value,
-                    onValueChange = { searchQuery.value = it },
-                    placeholder = { Text(text = stringResource(R.string.search_bar_placeholder)) },
-                    modifier = Modifier.weight(1f).height(56.dp).testTag("SearchBar"),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = getOutlinedTextFieldColorsSearchBar(ColorLevel.PRIMARY),
-                    trailingIcon = {
-                      if (searchQuery.value.isNotEmpty()) {
-                        Icon(
-                            imageVector = Icons.Filled.Clear,
-                            contentDescription = "Clear search",
-                            tint = defaultOnColor(),
-                            modifier = Modifier.clickable { searchQuery.value = "" })
-                      }
-                    },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
-                    keyboardActions =
-                        KeyboardActions(
-                            onSearch = {
-                              virtualKeyboardManager?.hide()
+                if (displayOnlineElement.value) {
+                  OutlinedTextField(
+                      value = searchQuery.value,
+                      onValueChange = { searchQuery.value = it },
+                      placeholder = {
+                        Text(text = stringResource(R.string.search_bar_placeholder))
+                      },
+                      modifier = Modifier.weight(1f).height(56.dp).testTag("SearchBar"),
+                      shape = RoundedCornerShape(16.dp),
+                      colors = getOutlinedTextFieldColorsSearchBar(ColorLevel.PRIMARY),
+                      trailingIcon = {
+                        if (searchQuery.value.isNotEmpty()) {
+                          Icon(
+                              imageVector = Icons.Filled.Clear,
+                              contentDescription = "Clear search",
+                              tint = defaultOnColor(),
+                              modifier = Modifier.clickable { searchQuery.value = "" })
+                        }
+                      },
+                      singleLine = true,
+                      keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
+                      keyboardActions =
+                          KeyboardActions(
+                              onSearch = {
+                                virtualKeyboardManager?.hide()
 
-                              val easterEggTriggered =
-                                  processEasterEgg(
-                                      query = searchQuery.value,
-                                      clearInput = { searchQuery.value = "" },
-                                      context = context,
-                                      userViewModel = userViewModel,
-                                      navigationActions = navigationActions,
-                                  )
+                                val easterEggTriggered =
+                                    processEasterEgg(
+                                        query = searchQuery.value,
+                                        clearInput = { searchQuery.value = "" },
+                                        context = context,
+                                        userViewModel = userViewModel,
+                                        navigationActions = navigationActions,
+                                    )
 
-                              if (!easterEggTriggered) {
-                                runBlocking { addressViewModel.search(searchQuery.value) }
-                                showSuggestions.value = true
-                              }
-                            }))
+                                if (!easterEggTriggered) {
+                                  runBlocking { addressViewModel.search(searchQuery.value) }
+                                  showSuggestions.value = true
+                                }
+                              }))
+                }
 
                 // Filter button
                 Box(modifier = Modifier.size(56.dp).padding(start = 5.dp)) {
