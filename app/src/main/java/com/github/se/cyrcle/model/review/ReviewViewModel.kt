@@ -262,7 +262,7 @@ class ReviewViewModel(
               onSuccess = { documentId ->
                 if (documentId != null) {
                   reportedObjectRepository.updateReportedObject(
-                      documentId = documentId,
+                      objectUID = documentId,
                       updatedObject = newReportedObject,
                       onSuccess = { updateLocalReviewAndMetrics(report) },
                       onFailure = { Log.d("ReviewViewModel", "Error updating ReportedObject") })

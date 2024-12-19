@@ -595,7 +595,7 @@ class ParkingViewModel(
               onSuccess = { documentId ->
                 if (documentId != null) {
                   reportedObjectRepository.updateReportedObject(
-                      documentId = documentId,
+                      objectUID = documentId,
                       updatedObject = newReportedObject,
                       onSuccess = { updateLocalParkingAndMetrics(report) },
                       onFailure = { Log.d("ParkingViewModel", "Error updating ReportedObject") })
@@ -736,7 +736,7 @@ class ParkingViewModel(
                 onSuccess = { documentId ->
                   if (documentId != null) {
                     reportedObjectRepository.updateReportedObject(
-                        documentId = documentId,
+                        objectUID = documentId,
                         updatedObject = updatedReportedObject,
                         onSuccess = {
                           Log.d("ParkingViewModel", "ReportedObject updated successfully.")
