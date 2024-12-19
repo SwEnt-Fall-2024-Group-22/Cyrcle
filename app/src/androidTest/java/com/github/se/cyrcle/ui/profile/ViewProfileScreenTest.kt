@@ -41,6 +41,7 @@ import com.github.se.cyrcle.model.user.UserDetails
 import com.github.se.cyrcle.model.user.UserPublic
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import com.mapbox.geojson.Point
@@ -642,6 +643,6 @@ class ViewProfileScreenTest {
   @Test
   fun testTutorialButton() {
     composeTestRule.onNodeWithTag("TutorialButton").assertHasClickAction().performClick()
-    verify(mockNavigationActions).navigateTo(Screen.TUTORIAL)
+    verify(mockNavigationActions).navigateTo(Route.TUTORIAL)
   }
 }
