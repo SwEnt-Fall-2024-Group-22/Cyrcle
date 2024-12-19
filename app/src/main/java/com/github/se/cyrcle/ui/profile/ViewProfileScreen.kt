@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AddModerator
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Diamond
@@ -104,30 +105,45 @@ fun ViewProfileScreen(
             tabList = LIST_TOP_LEVEL_DESTINATION,
             selectedItem = Route.VIEW_PROFILE)
       }) { innerPadding ->
-        Box(Modifier.fillMaxSize().padding(innerPadding)) {
-          IconButton(
-              modifier = Modifier.padding(10.dp).align(Alignment.TopEnd),
-              icon = Icons.Filled.Outbox,
-              contentDescription = "Sign Out",
-              testTag = "SignOutButton",
-              onClick = { signOut = true })
+        Column(Modifier.fillMaxSize().padding(innerPadding)) {
+          Row(
+              modifier = Modifier.padding(top = 10.dp).fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween) {
+                IconButton(
+                    modifier = Modifier.padding(start = 10.dp),
+                    icon = Icons.Filled.Diamond,
+                    contentDescription = "Go to Gambling Screen",
+                    testTag = "GamblingButton",
+                    onClick = { navigationActions.navigateTo(Screen.GAMBLING) })
 
-          if (userViewModel.currentUser.collectAsState().value?.details?.isAdmin == true) {
-            IconButton(
-                modifier = Modifier.padding(10.dp).align(Alignment.TopEnd).padding(80.dp),
-                icon = Icons.Filled.AddModerator,
-                contentDescription = "Admin",
-                testTag = "AdminButton",
-                onClick = { navigationActions.navigateTo(Screen.ADMIN) })
-          }
+                Row(
+                    modifier = Modifier.padding(end = 10.dp),
+                    horizontalArrangement = Arrangement.End) {
+                      if (userViewModel.currentUser.collectAsState().value?.details?.isAdmin ==
+                          true) {
+                        IconButton(
+                            modifier = Modifier.padding(end = 10.dp),
+                            icon = Icons.Filled.AddModerator,
+                            contentDescription = "Admin",
+                            testTag = "AdminButton",
+                            onClick = { navigationActions.navigateTo(Screen.ADMIN) })
+                      }
 
-          IconButton(
-              modifier = Modifier.padding(10.dp).align(Alignment.TopStart),
-              icon =
-                  Icons.Filled.Diamond, // or Icons.Filled.Paid or Icons.Filled.AttachMoney etc...
-              contentDescription = "Go to Gambling Screen",
-              testTag = "GamblingButton",
-              onClick = { navigationActions.navigateTo(Screen.GAMBLING) })
+                      IconButton(
+                          modifier = Modifier.padding(end = 10.dp),
+                          icon = Icons.Filled.Outbox,
+                          contentDescription = "Sign Out",
+                          testTag = "SignOutButton",
+                          onClick = { signOut = true })
+
+                      IconButton(
+                          modifier = Modifier.padding(end = 10.dp),
+                          icon = Icons.AutoMirrored.Filled.MenuBook,
+                          contentDescription = "Tutorial",
+                          testTag = "TutorialButton",
+                          onClick = { navigationActions.navigateTo(Route.TUTORIAL) })
+                    }
+              }
 
           if (signOut) {
             AlertDialog(

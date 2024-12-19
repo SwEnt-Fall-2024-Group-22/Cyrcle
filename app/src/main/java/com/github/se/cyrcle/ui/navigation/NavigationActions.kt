@@ -16,6 +16,7 @@ object Route {
   const val REVIEW = "Review"
   const val GAMBLING = "Gambling"
   const val ZONE = "Zone"
+  const val TUTORIAL = "Tutorial"
 }
 
 object Screen {
@@ -38,6 +39,7 @@ object Screen {
   const val VIEW_REPORTS = "View Reports Screen"
   const val ZONE_SELECTION = "Zone Selection Screen"
   const val ZONE_MANAGER = "Zone Manager Screen"
+  const val TUTORIAL = "Tutorial Screen"
 }
 
 /**

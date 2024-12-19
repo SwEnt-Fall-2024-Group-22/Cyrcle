@@ -41,6 +41,7 @@ import com.github.se.cyrcle.model.user.UserDetails
 import com.github.se.cyrcle.model.user.UserPublic
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.github.se.cyrcle.ui.navigation.Route
 import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import com.mapbox.geojson.Point
@@ -164,6 +165,7 @@ class ViewProfileScreenTest {
     composeTestRule.onNodeWithTag("DisplayFirstName").assertTextEquals("Jane")
     composeTestRule.onNodeWithTag("DisplayLastName").assertTextEquals("Smith")
     composeTestRule.onNodeWithTag("DisplayUsernameWithLevel").assertTextEquals("[☤92] janesmith")
+    composeTestRule.onNodeWithTag("TutorialButton", true).assertIsDisplayed()
   }
 
   @Test
@@ -636,5 +638,11 @@ class ViewProfileScreenTest {
     composeTestRule.onNodeWithTag("TabMyImages").performClick()
     composeTestRule.onNodeWithTag("NoImagesMessage").assertIsDisplayed()
     composeTestRule.onNodeWithTag("UserImagesList").assertIsNotDisplayed()
+  }
+
+  @Test
+  fun testTutorialButton() {
+    composeTestRule.onNodeWithTag("TutorialButton").assertHasClickAction().performClick()
+    verify(mockNavigationActions).navigateTo(Route.TUTORIAL)
   }
 }

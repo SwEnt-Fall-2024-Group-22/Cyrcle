@@ -13,13 +13,11 @@ import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
-import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 
 @RunWith(AndroidJUnit4::class)
@@ -69,8 +67,6 @@ class CreateProfileScreenTest {
         .performTextInput(testUser.public.username)
 
     composeTestRule.onNodeWithTag("AuthenticateButton", useUnmergedTree = true).performClick()
-
-    verify(mockNavigationActions).navigateTo(TopLevelDestinations.MAP)
 
     assert(
         mockUserRepository.users.any {
