@@ -32,14 +32,12 @@ class EnumDropDownTest {
     composeTestRule.onNodeWithTag(tagD, true).assertIsDisplayed()
     composeTestRule.onNodeWithTag("${tagD}Label", true).assertIsDisplayed()
     composeTestRule.onNodeWithTag(tagD).performClick()
-    parkingList.withIndex().forEach { (_, _) ->
-    }
+    parkingList.withIndex().forEach { (_, _) -> }
 
     composeTestRule.onNodeWithTag(tag1, true).assertIsDisplayed()
     composeTestRule.onNodeWithTag("${tag1}Label", true).assertIsDisplayed()
     composeTestRule.onNodeWithTag(tag1, true).performClick()
-    parkingList.withIndex().forEach { (_, _) ->
-    }
+    parkingList.withIndex().forEach { (_, _) -> }
   }
 
   @Test
