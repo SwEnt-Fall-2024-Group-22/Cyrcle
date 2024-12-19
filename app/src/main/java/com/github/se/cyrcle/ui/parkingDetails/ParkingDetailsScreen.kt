@@ -353,7 +353,14 @@ fun ParkingDetailsScreen(
                           testTag = "SeeAllReviewsText",
                           modifier =
                               Modifier.clickable {
-                                navigationActions.navigateTo(Screen.ALL_REVIEWS)
+                                if (displayOnlineElement)
+                                    navigationActions.navigateTo(Screen.ALL_REVIEWS)
+                                else
+                                    Toast.makeText(
+                                            context,
+                                            R.string.card_screen_offline_info,
+                                            Toast.LENGTH_SHORT)
+                                        .show()
                               })
                     }
 

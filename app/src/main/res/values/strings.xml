@@ -101,6 +101,7 @@
     <string name="card_screen_no_image">No images for this parking yet</string>
     <string name="card_screen_confirm_upload">Do you want to add this image to the parking spot ? </string>
     <string name="free">Free</string>
+    <string name="card_screen_offline_info">You need to be online to load the reviews</string>
 
     <!-- List Screen -->
     <string name="list_screen_protection">Protection</string>
