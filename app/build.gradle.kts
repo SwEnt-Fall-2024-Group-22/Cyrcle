@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.ktfmt)
     alias(libs.plugins.gms)
-    alias(libs.plugins.sonar)
+    kotlin("plugin.serialization") version "2.0.21"
     id("jacoco")
 
     id("kotlin-kapt")
@@ -119,22 +119,6 @@ android {
     }
 }
 
-
-sonar {
-    properties {
-        property("sonar.projectKey", "gf_android-sample")
-        property("sonar.projectName", "Android-Sample")
-        property("sonar.organization", "gabrielfleischer")
-        property("sonar.host.url", "https://sonarcloud.io")
-        // Comma-separated paths to the various directories containing the *.xml JUnit report files. Each path may be absolute or relative to the project base directory.
-        property("sonar.junit.reportPaths", "${project.layout.buildDirectory.get()}/test-results/testDebugunitTest/")
-        // Paths to xml files with Android Lint issues. If the main flavor is changed, this file will have to be changed too.
-        property("sonar.androidLint.reportPaths", "${project.layout.buildDirectory.get()}/reports/lint-results-debug.xml")
-        // Paths to JaCoCo XML coverage report files.
-        property("sonar.coverage.jacoco.xmlReportPaths", "${project.layout.buildDirectory.get()}/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
-    }
-}
-
 // When a library is used both by robolectric and connected tests, use this function
 fun DependencyHandlerScope.globalTestImplementation(dep: Any) {
     androidTestImplementation(dep)
@@ -148,6 +132,13 @@ dependencies {
     implementation(libs.androidx.material.compose)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.datastore)
+    implementation(libs.protobuf.javalite)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlin.stdlib)
+
 
     // ------------- Jetpack Compose ------------------
     val composeBom = platform(libs.compose.bom)
@@ -166,6 +157,11 @@ dependencies {
     implementation(libs.compose.preview)
     debugImplementation(libs.compose.tooling)
 
+    implementation(libs.credentials)
+    implementation(libs.credentials.play.services.auth)
+    implementation(libs.android.googleid)
+
+
 
     // ---------------------------------------------------
     // -------------------  PLUGINS  ---------------------
@@ -173,7 +169,6 @@ dependencies {
 
     // ---------------- Firebase  ------------------
     implementation(libs.google.services)
-    implementation(libs.play.services.auth)
 
     val firebaseBom = platform(libs.firebase.bom)
     implementation(firebaseBom)
@@ -193,6 +188,11 @@ dependencies {
     // ------------     Hilt      --------------
     kapt(libs.hilt.compiler)
     implementation(libs.hilt.android)
+
+    // ------------     Room      --------------
+    kapt(libs.androidx.room.compiler)
+    implementation(libs.androidx.room)
+
 
     // ---------------- MapBox ------------------
     implementation(libs.mapbox.compose)

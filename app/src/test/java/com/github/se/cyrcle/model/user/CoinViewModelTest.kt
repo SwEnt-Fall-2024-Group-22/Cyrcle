@@ -1,7 +1,11 @@
 package com.github.se.cyrcle.model.user
 
-import com.github.se.cyrcle.model.parking.ParkingRepository
-import org.junit.Assert.*
+import com.github.se.cyrcle.model.authentication.AuthenticationRepository
+import com.github.se.cyrcle.model.image.ImageRepository
+import com.github.se.cyrcle.model.parking.online.ParkingRepository
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -9,15 +13,17 @@ import org.mockito.MockitoAnnotations
 
 class CoinViewModelTest {
 
-  @Mock private lateinit var userViewModel: UserViewModel
+  private lateinit var userViewModel: UserViewModel
   @Mock private lateinit var userRepository: UserRepository
   @Mock private lateinit var parkingRepository: ParkingRepository
+  @Mock private lateinit var imageRepository: ImageRepository
+  @Mock private lateinit var authenticator: AuthenticationRepository
 
   @Before
   fun setUp() {
     MockitoAnnotations.openMocks(this)
 
-    userViewModel = UserViewModel(userRepository, parkingRepository)
+    userViewModel = UserViewModel(userRepository, parkingRepository, imageRepository, authenticator)
   }
 
   @Test

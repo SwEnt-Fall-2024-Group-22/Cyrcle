@@ -9,14 +9,20 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeRight
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
+import com.github.se.cyrcle.di.mocks.MockOfflineParkingRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
+import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockReviewRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
-import com.github.se.cyrcle.model.parking.ImageRepository
-import com.github.se.cyrcle.model.parking.ParkingRepository
+import com.github.se.cyrcle.model.authentication.AuthenticationRepository
+import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
+import com.github.se.cyrcle.model.parking.offline.OfflineParkingRepository
+import com.github.se.cyrcle.model.parking.online.ParkingRepository
+import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.review.ReviewRepository
 import com.github.se.cyrcle.model.review.ReviewViewModel
 import com.github.se.cyrcle.model.review.TestInstancesReview
@@ -40,9 +46,12 @@ class ReviewScreenTest {
   private lateinit var mockNavigationActions: NavigationActions
 
   private lateinit var mockParkingRepository: ParkingRepository
+  private lateinit var mockOfflineParkingRepository: OfflineParkingRepository
   private lateinit var mockImageRepository: ImageRepository
   private lateinit var mockReviewRepository: ReviewRepository
   private lateinit var mockUserRepository: UserRepository
+  private lateinit var mockAuthenticator: AuthenticationRepository
+  private lateinit var mockReportedObjectRepository: ReportedObjectRepository
 
   private lateinit var parkingViewModel: ParkingViewModel
   private lateinit var reviewViewModel: ReviewViewModel
@@ -55,11 +64,22 @@ class ReviewScreenTest {
     mockImageRepository = MockImageRepository()
     mockUserRepository = MockUserRepository()
     mockParkingRepository = MockParkingRepository()
+    mockOfflineParkingRepository = MockOfflineParkingRepository()
     mockReviewRepository = MockReviewRepository()
+    mockReportedObjectRepository = MockReportedObjectRepository()
+    mockAuthenticator = MockAuthenticationRepository()
 
-    userViewModel = UserViewModel(mockUserRepository, mockParkingRepository)
-    parkingViewModel = ParkingViewModel(mockImageRepository, mockParkingRepository)
-    reviewViewModel = ReviewViewModel(mockReviewRepository)
+    userViewModel =
+        UserViewModel(
+            mockUserRepository, mockParkingRepository, mockImageRepository, mockAuthenticator)
+    parkingViewModel =
+        ParkingViewModel(
+            mockImageRepository,
+            userViewModel,
+            mockParkingRepository,
+            mockOfflineParkingRepository,
+            mockReportedObjectRepository)
+    reviewViewModel = ReviewViewModel(mockReviewRepository, mockReportedObjectRepository)
 
     parkingViewModel.selectParking(TestInstancesParking.parking1)
     reviewViewModel.addReview(TestInstancesReview.review1)

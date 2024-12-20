@@ -31,6 +31,7 @@ import com.github.se.cyrcle.ui.theme.getOutlinedTextFieldColors
  * ```
  *
  * @param label The label of the field.
+ * @param modifier The modifier of the field.
  * @param value The initial text that the field should contain.
  * @param onValueChange The function to update your mutable variable. Will often be `{ newText ->
  *   yourMutableVariable = newText }`.
@@ -38,6 +39,7 @@ import com.github.se.cyrcle.ui.theme.getOutlinedTextFieldColors
  * @param maxLines If not single line, contains the field within a maximum line number.
  * @param minLines The minimal number of lines that should be displayed at the same time.
  * @param hasClearIcon Boolean indicating if the field should have an icon to clear the text.
+ * @param isError Boolean indicating if the field should be displayed as an error.
  * @param testTag The test tag of the object.
  */
 @Composable
@@ -51,7 +53,6 @@ fun InputText(
     minLines: Int = 1,
     hasClearIcon: Boolean = true,
     isError: Boolean = false,
-    colorLevel: ColorLevel = ColorLevel.PRIMARY,
     testTag: String = "InputText"
 ) {
   OutlinedTextField(
@@ -102,37 +103,50 @@ fun ConditionCheckingInputText(
     value: String = "",
     minCharacters: Int = 0,
     maxCharacters: Int = Int.MAX_VALUE,
+    maxLines: Int = Int.MAX_VALUE,
     hasClearIcon: Boolean = true,
+    smallText: Boolean = false,
     testTag: String = "ConditionCheckingInputText"
 ) {
   Column {
     val isError = value.length !in minCharacters..maxCharacters
     InputText(
         label = label,
-        modifier = modifier,
+        modifier = modifier.align(Alignment.CenterHorizontally),
         onValueChange = onValueChange,
         value = value,
         singleLine = false,
+        maxLines = maxLines,
         hasClearIcon = hasClearIcon,
         testTag = testTag,
         isError = isError)
     // Display error message below the text field if the input is not valid
     if (isError) {
       Row(
-          modifier = Modifier.padding(start = 16.dp, top = 4.dp).testTag("${testTag}ErrorRow"),
+          modifier = modifier.padding(top = 4.dp).testTag("${testTag}ErrorRow"),
           verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Filled.WarningAmber,
-                contentDescription = "Error",
-                tint = MaterialTheme.colorScheme.error,
-                modifier = Modifier.size(16.dp),
-            )
+            if (!smallText) {
+              Icon(
+                  imageVector = Icons.Filled.WarningAmber,
+                  contentDescription = "Error",
+                  tint = MaterialTheme.colorScheme.error,
+                  modifier = Modifier.size(16.dp),
+              )
+            }
             Text(
                 text =
                     if (value.length < minCharacters) {
-                      stringResource(R.string.input_min_characters, minCharacters, value.length)
+                      if (smallText) {
+                        stringResource(R.string.input_min_characters_small, minCharacters)
+                      } else {
+                        stringResource(R.string.input_min_characters, minCharacters, value.length)
+                      }
                     } else {
-                      stringResource(R.string.input_max_characters, maxCharacters, value.length)
+                      if (smallText) {
+                        stringResource(R.string.input_max_characters_small, maxCharacters)
+                      } else {
+                        stringResource(R.string.input_max_characters, maxCharacters, value.length)
+                      }
                     },
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,

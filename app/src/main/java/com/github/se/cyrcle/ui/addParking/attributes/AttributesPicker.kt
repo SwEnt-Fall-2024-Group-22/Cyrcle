@@ -2,6 +2,7 @@ package com.github.se.cyrcle.ui.addParking.attributes
 
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,8 +18,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -30,6 +34,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,12 +59,16 @@ import com.github.se.cyrcle.model.parking.ParkingCapacity
 import com.github.se.cyrcle.model.parking.ParkingProtection
 import com.github.se.cyrcle.model.parking.ParkingRackType
 import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.parking.TestInstancesParking
+import com.github.se.cyrcle.model.user.PARKING_CREATION_REWARD
+import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.map.MapConfig
-import com.github.se.cyrcle.ui.map.drawRectangles
 import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import com.github.se.cyrcle.ui.theme.Typography
 import com.github.se.cyrcle.ui.theme.atoms.ConditionCheckingInputText
+import com.github.se.cyrcle.ui.theme.disabledColor
 import com.github.se.cyrcle.ui.theme.molecules.BooleanRadioButton
 import com.github.se.cyrcle.ui.theme.molecules.EnumDropDown
 import com.mapbox.geojson.Point
@@ -82,7 +91,8 @@ fun AttributesPicker(
     navigationActions: NavigationActions,
     parkingViewModel: ParkingViewModel,
     mapViewModel: MapViewModel,
-    addressViewModel: AddressViewModel
+    addressViewModel: AddressViewModel,
+    userViewModel: UserViewModel
 ) {
   val configuration = LocalConfiguration.current
   val screenWidth = configuration.screenWidthDp.dp
@@ -96,19 +106,23 @@ fun AttributesPicker(
   val topBoxHeight = screenHeight * 0.10f // 10% of screen height for top box
   val bottomBoxHeight = screenHeight * 0.15f // 15% of screen height for bottom box
 
-  val title = remember { mutableStateOf("") }
-
-  val description = remember { mutableStateOf("") }
-
-  val rackType = remember { mutableStateOf<ParkingAttribute>(ParkingRackType.TWO_TIER) }
-  val capacity = remember { mutableStateOf<ParkingAttribute>(ParkingCapacity.XSMALL) }
-  val protection = remember { mutableStateOf<ParkingAttribute>(ParkingProtection.INDOOR) }
-  val hasSecurity = remember { mutableStateOf(false) }
+  val title = rememberSaveable { mutableStateOf("") }
+  val description = rememberSaveable { mutableStateOf("") }
+  val rackType = rememberSaveable { mutableStateOf<ParkingAttribute>(ParkingRackType.TWO_TIER) }
+  val capacity = rememberSaveable { mutableStateOf<ParkingAttribute>(ParkingCapacity.XSMALL) }
+  val protection = rememberSaveable { mutableStateOf<ParkingAttribute>(ParkingProtection.NONE) }
+  val hasSecurity = rememberSaveable { mutableStateOf(false) }
 
   val location = mapViewModel.selectedLocation.collectAsState().value!!
   LaunchedEffect(location) { addressViewModel.search(location.center) }
   val suggestedAddress = addressViewModel.address.collectAsState().value
-  LaunchedEffect(suggestedAddress) { title.value = suggestedAddress.displayRelevantFields() }
+  LaunchedEffect(suggestedAddress) {
+    if (title.value.isEmpty()) title.value = suggestedAddress.displayRelevantFields()
+  }
+  val context = LocalContext.current
+  val parkingAddedWithRewardText =
+      stringResource(
+          R.string.attributes_picker_parking_added_with_reward_toast, PARKING_CREATION_REWARD)
 
   fun onSubmit() {
     val parking =
@@ -121,9 +135,17 @@ fun AttributesPicker(
             hasSecurity = hasSecurity.value,
             location = location,
             images = listOf(),
+            imageObjects = emptyList(),
+            reportedImages = emptyList(),
             price = 0.0,
-            uid = parkingViewModel.getNewUid())
+            uid = parkingViewModel.getNewUid(),
+            owner = userViewModel.currentUser.value?.public?.userId!!,
+            reportingUsers = emptyList())
     parkingViewModel.addParking(parking)
+
+    userViewModel.creditCoinsToCurrentUser(PARKING_CREATION_REWARD)
+    Toast.makeText(context, parkingAddedWithRewardText, Toast.LENGTH_LONG).show()
+
     navigationActions.navigateTo(TopLevelDestinations.MAP)
   }
 
@@ -180,11 +202,24 @@ fun AttributesPicker(
                         selectedValue = capacity,
                         label = stringResource(R.string.attributes_picker_capacity_label),
                     )
-                    EnumDropDown(
-                        options = ParkingRackType.entries.toList(),
-                        selectedValue = rackType,
-                        label = stringResource(R.string.attributes_picker_rack_type_label),
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()) {
+                          EnumDropDown(
+                              options = ParkingRackType.entries.toList(),
+                              selectedValue = rackType,
+                              label = stringResource(R.string.attributes_picker_rack_type_label),
+                              modifier = Modifier.weight(1f).fillMaxWidth())
+                          Icon(
+                              imageVector = Icons.Default.Info,
+                              contentDescription = "Info",
+                              tint = MaterialTheme.colorScheme.primary,
+                              modifier =
+                                  Modifier.padding(start = 4.dp, end = 10.dp)
+                                      .testTag("RackInfoIcon")
+                                      .clickable { navigationActions.navigateTo(Screen.RACK_INFO) })
+                        }
+
                     BooleanRadioButton(
                         question =
                             stringResource(R.string.attributes_picker_has_surveillance_question),
@@ -224,8 +259,6 @@ private fun scaledPadding(
       end = padding.calculateEndPadding(LayoutDirection.Ltr) * horizontalScaleFactor,
       bottom = padding.calculateBottomPadding() * verticalScaleFactor)
 }
-
-private const val s = "Please fill in all fields appropriately"
 
 @Composable
 fun BottomBarAddAttr(
@@ -271,7 +304,8 @@ fun BottomBarAddAttr(
                   colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
                     Text(
                         text = stringResource(R.string.attributes_picker_bottom_bar_submit_button),
-                        color = if (validInputs) MaterialTheme.colorScheme.primary else Color.Gray,
+                        color =
+                            if (validInputs) MaterialTheme.colorScheme.primary else disabledColor(),
                         fontWeight = FontWeight.Bold,
                         style = Typography.headlineMedium,
                         textAlign = TextAlign.Center,
@@ -363,7 +397,11 @@ fun AttributePickerTopBar(mapViewModel: MapViewModel, title: MutableState<String
               fontWeight = FontWeight.Bold,
               maxLines = 1)
         }
-        drawRectangles(annotationManager, null, listOf(location))
+        // To draw a rectangles to preview the location of the future parking spot,
+        // we need to wrap the location in a Parking object to pass it to the drawRectangles
+        // function
+        val placeholderParking = TestInstancesParking.parking1.copy(location = location)
+        mapViewModel.drawRectangles(annotationManager, null, listOf(placeholderParking))
       }
 }
 
