@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.model.parking
 
+import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.mapbox.geojson.Point
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -19,11 +20,16 @@ class ParkingsTest {
             optDescription = null,
             location = location,
             images = listOf("image_url"),
+            imageObjects = emptyList(),
             capacity = ParkingCapacity.LARGE,
             rackType = ParkingRackType.U_RACK,
             protection = ParkingProtection.COVERED,
             price = 0.0,
-            hasSecurity = true)
+            hasSecurity = true,
+            owner = TestInstancesUser.user1.public.userId,
+            reportingUsers = emptyList(),
+            reportedImages = emptyList(),
+            maxNumOfImages = 0)
 
     assertEquals("1", parking.uid)
     assertEquals("Parking", parking.optName)
@@ -46,11 +52,16 @@ class ParkingsTest {
             optDescription = null,
             location = Location(Point.fromLngLat(6.545, 46.518)),
             images = listOf("image_url"),
+            imageObjects = emptyList(),
             capacity = ParkingCapacity.LARGE,
             rackType = ParkingRackType.U_RACK,
             protection = ParkingProtection.COVERED,
             price = 0.0,
-            hasSecurity = true)
+            hasSecurity = true,
+            owner = TestInstancesUser.user1.public.userId,
+            reportingUsers = emptyList(),
+            reportedImages = emptyList(),
+            maxNumOfImages = 0)
 
     val parking2 =
         Parking(
@@ -59,11 +70,16 @@ class ParkingsTest {
             optDescription = null,
             location = Location(Point.fromLngLat(6.545, 46.518)),
             images = listOf("image_url"),
+            imageObjects = emptyList(),
             capacity = ParkingCapacity.LARGE,
             rackType = ParkingRackType.U_RACK,
             protection = ParkingProtection.COVERED,
             price = 0.0,
-            hasSecurity = true)
+            hasSecurity = true,
+            owner = TestInstancesUser.user1.public.userId,
+            reportingUsers = emptyList(),
+            reportedImages = emptyList(),
+            maxNumOfImages = 0)
 
     assertEquals(parking1, parking2)
     assertEquals(parking1.hashCode(), parking2.hashCode())

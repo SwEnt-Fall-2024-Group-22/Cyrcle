@@ -1,6 +1,5 @@
 package com.github.se.cyrcle.ui.review
 
-import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
@@ -30,6 +31,7 @@ import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.review.Review
 import com.github.se.cyrcle.model.review.ReviewViewModel
+import com.github.se.cyrcle.model.user.PARKING_REVIEW_REWARD
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.theme.ColorLevel
@@ -42,7 +44,6 @@ import com.github.se.cyrcle.ui.theme.molecules.TopAppBar
 const val REVIEW_MIN_LENGTH = 0
 const val REVIEW_MAX_LENGTH = 256
 
-@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ReviewScreen(
     navigationActions: NavigationActions,
@@ -60,11 +61,11 @@ fun ReviewScreen(
 
   reviewViewModel.getReviewsByParking(selectedParking.uid)
   val ownerHasReviewed =
-      reviewViewModel.parkingReviews.value.any {
+      reviewViewModel.parkingReviews.collectAsState().value.any {
         it.owner == userViewModel.currentUser.value?.public?.userId
       }
   val matchingReview =
-      reviewViewModel.parkingReviews.value.find {
+      reviewViewModel.parkingReviews.collectAsState().value.find {
         it.owner == userViewModel.currentUser.value?.public?.userId
       }
   if (matchingReview != null) {
@@ -77,6 +78,10 @@ fun ReviewScreen(
   var textValue by remember { mutableStateOf(if (ownerHasReviewed) matchingReview?.text!! else "") }
 
   val context = LocalContext.current
+  val reviewAddedText = stringResource(R.string.review_screen_submit_toast)
+  val reviewRewardText = stringResource(R.string.review_screen_reward_toast, PARKING_REVIEW_REWARD)
+  val reviewUpdateText = stringResource(R.string.review_screen_update_toast)
+  val combinedToastText = "$reviewAddedText\n$reviewRewardText"
 
   Scaffold(
       topBar = {
@@ -87,7 +92,11 @@ fun ReviewScreen(
                 else stringResource(R.string.review_screen_title_new_review))
       }) { paddingValues ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(paddingValues).padding(16.dp),
+            modifier =
+                Modifier.fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()), // Make the entire content scrollable
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center) {
               ScoreStars(sliderValue.toDouble(), scale = scaleFactor) // Use dynamic scale factor
@@ -128,7 +137,6 @@ fun ReviewScreen(
               Button(
                   text = stringResource(R.string.review_screen_submit_button),
                   onClick = {
-                    Toast.makeText(context, "Review Added!", Toast.LENGTH_SHORT).show()
                     val sliderToValue = (sliderValue * 100).toInt() / 100.0
 
                     if (!ownerHasReviewed) {
@@ -139,7 +147,19 @@ fun ReviewScreen(
                               text = textValue,
                               parking = selectedParking.uid,
                               rating = sliderToValue,
-                              uid = reviewViewModel.getNewUid()))
+                              uid = reviewViewModel.getNewUid(),
+                              reportingUsers = emptyList()))
+
+                      if (userViewModel.currentUser.value
+                          ?.details
+                          ?.reviewedParkings
+                          ?.contains(selectedParking.uid) != true) {
+                        userViewModel.creditCoinsToCurrentUser(PARKING_REVIEW_REWARD)
+                        userViewModel.addReviewedParkingToSelectedUser(selectedParking.uid)
+                        Toast.makeText(context, combinedToastText, Toast.LENGTH_LONG).show()
+                      } else {
+                        Toast.makeText(context, reviewAddedText, Toast.LENGTH_LONG).show()
+                      }
                     } else {
                       parkingViewModel.handleReviewUpdate(
                           newScore = sliderToValue, oldScore = matchingReview?.rating!!)
@@ -149,7 +169,9 @@ fun ReviewScreen(
                               text = textValue,
                               parking = selectedParking.uid,
                               rating = sliderToValue,
-                              uid = reviewViewModel.selectedReview.value?.uid!!))
+                              uid = reviewViewModel.selectedReview.value?.uid!!,
+                              reportingUsers = emptyList()))
+                      Toast.makeText(context, reviewUpdateText, Toast.LENGTH_SHORT).show()
                     }
                     navigationActions.goBack()
                   },

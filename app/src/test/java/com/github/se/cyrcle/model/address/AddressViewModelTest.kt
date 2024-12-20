@@ -33,16 +33,37 @@ class AddressViewModelTest {
   @Test
   fun testSearchSetsAddress() {
     `when`(addressRepositoryNominatim.search(any(), any(), any())).then {
-      it.getArgument<(Address) -> Unit>(1)(
-          Address(
-              city = "Paris",
-              country = "France",
-          ))
+      it.getArgument<(List<Address>) -> Unit>(1)(
+          listOf(
+              Address(
+                  city = "Paris",
+                  country = "France",
+              )))
     }
     val point = Point.fromLngLat(0.0, 0.0)
     addressViewModel.search(point)
 
     // Check that the address state is not empty
     assert(addressViewModel.address.value != Address())
+  }
+
+  @Test
+  fun testSearchSetsAddressList() {
+    `when`(addressRepositoryNominatim.search(any(), any(), any())).then {
+      it.getArgument<(List<Address>) -> Unit>(1)(
+          listOf(
+              Address(
+                  city = "Paris",
+                  country = "France",
+              )))
+    }
+    addressViewModel.search("Paris")
+
+    assert(
+        addressViewModel.addressList.value.first() ==
+            Address(
+                city = "Paris",
+                country = "France",
+            ))
   }
 }

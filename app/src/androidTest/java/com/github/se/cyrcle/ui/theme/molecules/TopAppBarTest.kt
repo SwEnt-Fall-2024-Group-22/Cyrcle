@@ -76,4 +76,28 @@ class TopAppBarTest {
         .assertIsDisplayed()
         .assertHasClickAction()
   }
+
+  @Test
+  fun displayTopAppBarWithLongTitle() {
+    val tag2 = "TopAppBar2"
+    val title =
+        "This is a very long title that should be truncated but just in case it is not, I am making it longer"
+    composeTestRule.setContent {
+      Scaffold(topBar = { TopAppBar(navigationActions, title, tag2) }) { innerPadding ->
+        Column(modifier = Modifier.padding(innerPadding)) {}
+      }
+    }
+
+    // Top App Bar
+    composeTestRule.onNodeWithTag(tag2).assertIsDisplayed()
+
+    // Title
+    composeTestRule.onNodeWithTag("${tag2}Title", true).assertIsDisplayed().assertTextEquals(title)
+
+    // Ensure button is still displayed
+    composeTestRule
+        .onNodeWithTag("${tag2}GoBackButton", true)
+        .assertIsDisplayed()
+        .assertHasClickAction()
+  }
 }

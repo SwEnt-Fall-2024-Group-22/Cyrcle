@@ -5,9 +5,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -16,6 +17,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.cyrcle.ui.theme.ColorLevel
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -320,5 +322,52 @@ class ButtonTest {
 
     // Check for 3 full stars and confirm the presence of the component
     composeTestRule.onAllNodesWithContentDescription("Full Star").assertCountEquals(3)
+  }
+
+  @Test
+  fun displayOptionsMenu() {
+    val tag = "OptionsMenu"
+    var option1clicked = false
+    var option2clicked = false
+
+    composeTestRule.setContent {
+      OptionsMenu(
+          mapOf(
+              "Option 1" to { option1clicked = true },
+              "Option 2" to { option2clicked = true },
+          ),
+          testTag = tag)
+    }
+
+    // Click on the button
+    composeTestRule
+        .onNodeWithTag("${tag}Button")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+    composeTestRule.onNodeWithTag("${tag}Menu").assertIsDisplayed()
+
+    // Click on the first item
+    composeTestRule
+        .onNodeWithTag("${tag}Option1Item")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+    assertTrue(option1clicked)
+
+    // Check that the dropdown is not displayed after clicking on the first item
+    composeTestRule.onNodeWithTag("${tag}Menu").assertIsNotDisplayed()
+
+    // Click on the button again and assert that the dropdown is displayed again
+    composeTestRule.onNodeWithTag("${tag}Button").performClick()
+    composeTestRule.onNodeWithTag("${tag}Menu").assertIsDisplayed()
+
+    // Click on the second item
+    composeTestRule
+        .onNodeWithTag("${tag}Option2Item")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+    assertTrue(option2clicked)
   }
 }

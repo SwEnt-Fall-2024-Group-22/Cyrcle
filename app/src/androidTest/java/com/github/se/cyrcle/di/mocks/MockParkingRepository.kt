@@ -1,14 +1,24 @@
 package com.github.se.cyrcle.di.mocks
 
+import com.github.se.cyrcle.model.parking.ImageReport
+import com.github.se.cyrcle.model.parking.ImageReportReason
 import com.github.se.cyrcle.model.parking.Parking
-import com.github.se.cyrcle.model.parking.ParkingRepository
+import com.github.se.cyrcle.model.parking.ParkingReport
+import com.github.se.cyrcle.model.parking.ParkingReportReason
 import com.github.se.cyrcle.model.parking.TestInstancesParking
-import com.mapbox.geojson.Point
+import com.github.se.cyrcle.model.parking.Tile
+import com.github.se.cyrcle.model.parking.online.ParkingRepository
 import javax.inject.Inject
 
 class MockParkingRepository @Inject constructor() : ParkingRepository {
-  private var uid = 0
+  var uid = 0
   private val parkings = mutableListOf(TestInstancesParking.parking1)
+  private val reports =
+      mutableListOf(
+          ParkingReport(
+              "1", ParkingReportReason.INEXISTANT, "1", TestInstancesParking.parking1.uid, ""))
+  private val reports2 =
+      mutableListOf(ImageReport("1", ImageReportReason.WRONG, "2", "parking/2/b.png", ""))
 
   override fun getNewUid(): String {
     return (uid++).toString()
@@ -18,9 +28,39 @@ class MockParkingRepository @Inject constructor() : ParkingRepository {
     onSuccess()
   }
 
-  override fun getAllParkings(onSuccess: (List<Parking>) -> Unit, onFailure: (Exception) -> Unit) {
-    if (parkings.none { it.uid == "" }) onSuccess(parkings)
-    else onFailure(Exception("Error getting parkings"))
+  override fun getReportsForParking(
+      parkingId: String,
+      onSuccess: (List<ParkingReport>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    if (parkingId.isEmpty()) {
+      onFailure(Exception("Parking ID cannot be empty"))
+    } else {
+      val associatedReports = reports.filter { it.parking == parkingId }
+      if (associatedReports.isEmpty()) {
+        onFailure(Exception("No reports found for the given parking ID"))
+      } else {
+        onSuccess(associatedReports)
+      }
+    }
+  }
+
+  override fun getReportsForImage(
+      parkingId: String,
+      imageId: String,
+      onSuccess: (List<ImageReport>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    if (parkingId.isEmpty()) {
+      onFailure(Exception("Parking ID cannot be empty"))
+    } else {
+      val associatedReports = reports2.filter { it.uid == parkingId }
+      if (associatedReports.isEmpty()) {
+        onFailure(Exception("No reports found for the given parking ID"))
+      } else {
+        onSuccess(associatedReports)
+      }
+    }
   }
 
   override fun getParkingById(
@@ -32,20 +72,13 @@ class MockParkingRepository @Inject constructor() : ParkingRepository {
     else onSuccess(parkings.find { it.uid == id }!!)
   }
 
-  override fun getParkingsBetween(
-      start: Point,
-      end: Point,
+  override fun getParkingsForTile(
+      tile: Tile,
       onSuccess: (List<Parking>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    if (start.latitude() > end.latitude() || start.longitude() > end.longitude())
-        onFailure(Exception("Error getting parkings"))
-    else
-        onSuccess(
-            parkings.filter {
-              it.location.center.latitude() in start.latitude()..end.latitude() &&
-                  it.location.center.longitude() in start.longitude()..end.longitude()
-            })
+    if (tile == "") onFailure(Exception("Error getting parkings"))
+    else onSuccess(parkings.filter { it.tile == tile })
   }
 
   override fun addParking(parking: Parking, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
@@ -89,5 +122,24 @@ class MockParkingRepository @Inject constructor() : ParkingRepository {
   ) {
     if (ids.any { it == "" }) onFailure(Exception("Error getting parkings"))
     else onSuccess(parkings.filter { it.uid in ids })
+  }
+
+  override fun addReport(
+      report: ParkingReport,
+      onSuccess: (ParkingReport) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    if (report.uid == "") onFailure(Exception("Error adding report"))
+    onSuccess(reports[0])
+  }
+
+  override fun addImageReport(
+      report: ImageReport,
+      parking: String,
+      onSuccess: (ImageReport) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    if (report.uid == "") onFailure(Exception("Error adding report"))
+    onSuccess(reports2[0])
   }
 }

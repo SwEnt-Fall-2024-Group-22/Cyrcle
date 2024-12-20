@@ -3,6 +3,8 @@ package com.github.se.cyrcle.model.address
 import android.util.Log
 import com.google.gson.annotations.SerializedName
 
+const val maxDisplayNameLength = 32
+
 /**
  * Represents an address.
  *
@@ -56,15 +58,17 @@ data class Address(
     val cityBlock: String = "",
     @SerializedName("neighbourhood", alternate = ["quarter", "allotments"])
     val neighbourhood: String = "",
-    @SerializedName("hamlet", alternate = ["isolated_dwelling, croft"]) val hamlet: String = "",
+    @SerializedName("hamlet", alternate = ["isolated_dwelling", "croft"]) val hamlet: String = "",
     @SerializedName("suburb", alternate = ["city_district", "district", "borough", "subdivision"])
     val suburb: String = "",
-    @SerializedName("city", alternate = ["municipality", "village, town"]) val city: String = "",
+    @SerializedName("city", alternate = ["municipality", "village", "town"]) val city: String = "",
     @SerializedName("postcode") val postcode: String = "",
     @SerializedName("region", alternate = ["state", "state_district", "county", "ISO3166-2-lvl"])
     val region: String = "",
     @SerializedName("country") val country: String = "",
-    @SerializedName("continent") val continent: String = ""
+    @SerializedName("continent") val continent: String = "",
+    @SerializedName("lat") var latitude: String = "0.0",
+    @SerializedName("lon") var longitude: String = "0.0"
 ) {
   /**
    * Among the fields of the address, we choose the most relevant ones to display. The order of the
@@ -75,7 +79,8 @@ data class Address(
   fun displayRelevantFields(): String {
     val fieldPriorities =
         listOf(publicName, road, house, cityBlock, neighbourhood, hamlet, suburb, city)
-    return shortenString(fieldPriorities.filter { it.isNotEmpty() }.take(3).joinToString(", "), 32)
+    return shortenString(
+        fieldPriorities.filter { it.isNotEmpty() }.take(3).joinToString(", "), maxDisplayNameLength)
   }
 
   /**
@@ -95,5 +100,28 @@ data class Address(
       return string
     }
     return shortenString(string.substring(0, lastComma), length)
+  }
+
+  /**
+   * Function that format the Address to display its suggestion name.
+   *
+   * @param maxLength the maximum length of the string
+   * @param mode the mode of the suggestion formatting
+   * @return the suggestion formatted display name
+   */
+  fun suggestionFormatDisplayName(maxLength: Int, mode: Mode): String {
+    val fieldPriorities: List<String> =
+        if (mode == Mode.LIST) {
+          listOf(publicName, road, city, country)
+        } else {
+          listOf(publicName, road, city, region, country)
+        }
+    return shortenString(fieldPriorities.filter { it.isNotEmpty() }.joinToString(", "), maxLength)
+  }
+
+  // Enum that determine the mode of formatting of the suggestion display name
+  enum class Mode {
+    MAP,
+    LIST
   }
 }

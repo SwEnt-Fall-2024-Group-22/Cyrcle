@@ -2,6 +2,10 @@
     <string name="app_name">Cyrcle</string>
     <string name="default_web_client_id">836297757379-3rvkggdu23fdvnof5nko2lablc993e0u.apps.googleusercontent.com</string>
 
+    <!-- Snow section -->
+    <string name="snow_enabled">It\'s snowing ❄️! Shake again to stop</string>
+    <string name="snow_disabled">The snow has stopped</string>
+
     <!-- Common section -->
     <string name="yes">Yes</string>
     <string name="no">No</string>
@@ -24,11 +28,17 @@
     <string name="already_in_favorites_toast">Parking is already in favorites</string>
     <string name="sign_in_to_add_favorites">Please sign in to add favorites</string>
     <string name="filter">Filter</string>
+    <string name="close">Close</string>
+    <string name="delete_dialog_title">Delete Item</string>
+    <string name="delete_dialog_message">Are you sure you want to delete this item? This action cannot be undone.</string>
+    <string name="delete_dialog_confirm_button">Delete</string>
+    <string name="delete_dialog_cancel_button">Cancel</string>
 
     <!-- Error Messages -->
     <string name="input_min_characters">Minimum %1$d characters required (current: %2$d)</string>
     <string name="input_max_characters">Maximum %1$d characters allowed (current: %2$d)</string>
-
+    <string name="input_min_characters_small">Minimum %1$d characters required </string>
+    <string name="input_max_characters_small">Maximum %1$d characters allowed </string>
     <!-- Attributes Picker -->
     <string name="attributes_picker_title_label">Title</string>
     <string name="attributes_picker_protection_label">How protected from the weather is the spot?</string>
@@ -36,6 +46,9 @@
     <string name="attributes_picker_rack_type_label">Which type of rack is in the parking spot?</string>
     <string name="attributes_picker_has_surveillance_question">Is the parking spot under camera surveillance ?</string>
     <string name="attributes_picker_description_label">Description (Optional)</string>
+    <string name="attributes_picker_parking_added_with_reward_toast">Parking spot added!\n+%d coins !</string>
+
+
     <!-- Attributes Picker > BottomBarAddAttr -->
     <string name="attributes_picker_bottom_bar_cancel_button">Cancel</string>
     <string name="attributes_picker_bottom_bar_submit_button">Submit</string>
@@ -44,24 +57,37 @@
     <string name="attributes_picker_top_bar_set_attributes">Set the attributes of the parking spot</string>
     <string name="attributes_picker_bottom_bar_submit_button_toast">Please fill in all mandatory fields appropriately</string>
 
+    <!-- Rack Type Helper -->
+    <string name="rack_info_screen_title">Rack Types</string>
+    <string name="two_tier_rack_description">Space-efficient vertical storage with upper and lower tiers. Upper tier has a pull-out tray, but lifting bikes may be challenging for some users.</string>
+    <string name="u_rack_description">Simple, versatile stands allowing bikes to be locked at two points. Supports frame and wheels, suitable for most bike types and sizes.</string>
+    <string name="vertical_rack_description">Holds bikes upright by the front wheel, saving space. May not suit heavy bikes or those with attachments. Requires lifting the front wheel.</string>
+    <string name="wave_rack_description">Continuous, wavy design for multiple bikes. Space-efficient but works best with alternating bike directions. Securing both frame and wheel can be tricky.</string>
+    <string name="wall_butterfly_rack_description">Wall-mounted, foldable racks ideal for tight spaces. Holds bikes vertically but may not suit heavier bikes or those with attachments.</string>
+    <string name="post_and_ring_rack_description">Simple design with a ring attached to a post. Allows locking at two points and fits most bike types, but may be less space-efficient in high-density areas.</string>
+    <string name="grid_rack_description">Parallel bars for wheels to slot between. Space-efficient but primarily secures the wheel. Locking both frame and wheel can be challenging.</string>
+    <string name="other_rack_description">Other</string>
+
     <!-- Rectangle Selection -->
     <string name="rectangle_selection_lock_map">Lock Map</string>
     <string name="rectangle_selection_unlock_map">Unlock Map</string>
     <!-- Location Picker Bottom Bar -->
     <string name="location_picker_bottom_bar_cancel_button">Cancel</string>
     <string name="location_picker_bottom_bar_next_button">Next</string>
-    <string name="location_picker_invalid_area">Please select a valid area</string>
+    <string name="location_picker_invalid_area">The parking should be at least %d[m²] and at max. %d[m²]</string>
     <!-- Location Picker Top Bar -->
     <string name="location_picker_top_bar_where">Where is the Parking ?</string>
     <string name="location_picker_top_bar_select_top_left">Set the top-left corner of the parking, by placing it under the crosshair below</string>
     <string name="location_picker_top_bar_select_bottom_right">Set the bottom-right corner of the parking, by dragging on the screen</string>
 
     <!-- Sign In -->
-    <string name="sign_in_welcome">Welcome to Cyrcle</string>
+    <string name="sign_in_welcome">Welcome to </string>
     <string name="sign_in_successful_toast">Login successful!</string>
     <string name="sign_in_failed_toast">Login failed!</string>
     <string name="sign_in_guest_button">Continue as Guest</string>
+    <string name="sign_in_account_not_found">Your account was not found, please create one</string>
     <string name="sign_in_google_button">Sign in with Google</string>
+    <string name="sign_in_offline_button"> Continue Offline</string>
 
     <!-- Card Screen -->
     <string name="card_screen_description">Description of %s</string>
@@ -75,8 +101,11 @@
     <string name="card_screen_show_map">Show in Map</string>
     <string name="card_screen_add_review">Add A Review</string>
     <string name="card_screen_report">Report</string>
+    <string name="card_screen_user">Added By:</string>
     <string name="card_screen_no_image">No images for this parking yet</string>
+    <string name="card_screen_confirm_upload">Do you want to add this image to the parking spot ? </string>
     <string name="free">Free</string>
+    <string name="card_screen_offline_info">You need to be online to load the reviews</string>
 
     <!-- List Screen -->
     <string name="list_screen_protection">Protection</string>
@@ -84,21 +113,54 @@
     <string name="list_screen_show_filters">Show Filters</string>
     <string name="list_screen_rack_type">Rack Type</string>
     <string name="list_screen_capacity">Capacity</string>
+    <string name="list_screen_clear_all">Clear All</string>
+    <string name="list_screen_apply_all">Select All</string>
+    <string name="list_screen_clear">Clear</string>
+    <string name="list_screen_apply">Select All</string>
     <string name="list_screen_price">%.2f $</string>
     <string name="list_screen_rating">Rating: %.1f</string>
     <string name="list_screen_display_only_cctv">Only display parkings with CCTV camera</string>
-    <string name="all_parkings_radius">All parkings in a radius of \n %1$d m</string>
+    <string name="all_parkings_radius">Parkings within %1$d m</string>
+    <string name="list_screen_edit_note">Edit your note</string>
+    <string name="list_screen_no_note">Add a note by clicking on +</string>
+    <string name="list_screen_bearing_popup">This arrow shows the direction relative to true north. It doesn\'t reflect your device\'s orientation.</string>
+    <string name="sign_in_to_add_note">Please sign in to add notes</string>
+    <string name="my_location">My Location</string>
+    <string name="search_bar_no_results">No results found</string>
 
     <!-- Zoom Controls -->
     <string name="zoom_in">Zoom In</string>
     <string name="zoom_out">Zoom Out</string>
 
     <!-- Map Screen -->
-    <string name="map_screen_capacity">Capacity is %s</string>
-    <string name="map_screen_mode_switch_label">Advanced</string>
+    <string name="map_screen_capacity">Capacity: %s</string>
+    <string name="map_screen_rack_type">Rack Type: %s</string>
+    <string name="map_screen_protection">Protection: %s</string>
+    <string name="map_screen_mode_switch_label">Advanced Mode</string>
+    <string name="map_screen_settings_to_zone">Offline Map</string>
+    <string name="settings">Settings</string>
+    <string name="search_bar_placeholder">Search for a location</string>
+    <string name="map_screen_details_button">See Details</string>
+
+    <!-- Profile Commons -->
+    <string name="profile_account_already_exists">Your account is already linked, please try with another email</string>
+    <string name="profile_is_null">User is not signed in, should not happen</string>
 
     <!-- Create Profile Screen -->
-    <string name="profile_screen_title">Create your profile</string>
+    <string name="create_profile_screen_title">Create your profile</string>
+    <string name="create_profile_validation_toast">Profile created successfully!</string>
+    <string name="create_profile_incorrect_field_inputs">Please fill in all fields correctly</string>
+    <string name="create_profile_error_toast">Error during authentication…</string>
+    <string name="create_profile_account_already_exists">Your account already exists, please sign in</string>
+    <string name="create_profile_sign_in_explanation">To complete account creation,\n please authenticate with Google to link your email.</string>
+    <string name="create_profile_welcome_bonus_toast">Welcome bonus: %d coins added to your wallet!</string>
+
+    <!-- Invite to AuthScreen Screen -->
+    <string name="invite_auth_screen_to_sign_in">Go back to sign in</string>
+    <string name="invite_auth_screen_finish_sign_in_indication">Finish by signing in with Google to link your e-mail</string>
+    <string name="invite_auth_screen_invite_to_sign_in">You need to be signed-in to modify your profile</string>
+    <string name="invite_auth_screen_give_reasons_to_sign_in">"Sign in now to add new spots, share reviews, and help fellow cyclists find the perfect parking space."</string>
+
     <!-- View Profile Screen -->
     <string name="view_profile_screen_first_name_label">First Name</string>
     <string name="view_profile_screen_last_name_label">Last Name</string>
@@ -110,29 +172,55 @@
     <string name="view_profile_screen_default_profile_picture">Default Profile Picture</string>
     <string name="view_profile_screen_profile_picture">Profile Picture</string>
     <string name="view_profile_screen_edit_profile_picture">Edit Profile Picture</string>
-    <string name="view_profile_screen_favorite_parking_title">Favorite Parkings</string>
-    <string name="view_profile_screen_no_favorite_parking">No favorite parking</string>
+    <string name="view_profile_screen_no_favorite_parking">You haven\'t added any parking to your favorites yet</string>
     <string name="view_profile_screen_remove_from_favorite">Remove from Favorites</string>
     <string name="view_profile_screen_remove_favorite_dialog_title">Remove favorite</string>
     <string name="view_profile_screen_remove_favorite_dialog_message">Are you sure you want to remove %s from your favorites?</string>
     <string name="view_profile_screen_remove_favorite_dialog_action_button">Remove</string>
     <string name="view_profile_screen_remove_favorite_dialog_cancel_button">Cancel</string>
+    <string name="view_profile_on_sign_out_toast">You\'re signed out!</string>
+    <string name="view_profile_on_fav_parking_removal_toast">Removed from Favorites!</string>
+    <string name="view_profile_screen_sign_out_dialog_title">Sign Out ? </string>
+    <string name="view_profile_screen_sign_out_dialog_message">Are you sure you want to sign out?</string>
+    <string name="view_profile_screen_sign_out_dialog_action_button">Sign Out</string>
+    <string name="view_profile_screen_sign_out_dialog_cancel_button">Cancel</string>
+    <string name="view_profile_screen_favorite_parkings">Favorite Parkings</string>
+    <string name="view_profile_screen_my_reviews">My Reviews</string>
+    <string name="view_profile_screen_no_note">No personal notes to this parking yet</string>
+    <string name="view_profile_screen_note">Note: %s</string>
+    <string name="view_profile_screen_no_reviews_message">You haven\'t written any reviews yet</string>
+    <string name="view_profile_screen_my_images">My Images</string>
+    <string name="view_profile_screen_no_images_message">No images to display.</string>
+    <string name="view_profile_screen_image_item">Image #%d</string>
 
     <!-- All Reviews Screen -->
     <string name="all_review_title">All Reviews For %s</string>
     <string name="all_review_rating">Rating: %.1f</string>
     <string name="all_review_text">Text: %s</string>
     <string name="by_text">By: %s</string>
-    <string name="on_text">On: %s</string>
     <string name="undefined_username">Unknown user</string>
     <string name="sort_reviews">Sort Reviews</string>
-    <string name="sort_by_rating">Sort By Rating (Best Rated First)</string>
-    <string name="sort_by_date">Sort By Date (Most Recent First)</string>
-    <string name="delete_review">Delete Review</string>
+    <string name="all_reviews_sort_by_rating">Sort By Score (Highest Score First)</string>
+    <string name="all_reviews_sort_by_date">Sort By Date (Most Recent First)</string>
+    <string name="all_reviews_sort_by_helpful">Sort By Helpful (Most Helpful First)</string>
+    <string name="all_reviews_sort_by_interactions">Sort By Interactions (Most Interactions First)</string>
+    <string name="all_reviews_delete_review">Delete Review</string>
     <string name="add_review_first">Add A Review First!</string>
-    <string name="add_review">Add Review</string>
-    <string name="edit_review">Edit Review</string>
+    <string name="all_reviews_add_review">Add Review</string>
+    <string name="all_reviews_edit_review">Edit Review</string>
     <string name="review_deleted">Review Deleted!</string>
+    <string name="all_review_report_review_option">Report Review</string>
+    <string name="review_reported">Review Reported!</string>
+    <string name="sign_in_to_report_review">Please sign in to report reviews</string>
+    <string name="all_reviews_your_review">Your Review</string>
+    <string name="all_reviews_other_reviews">Other Reviews</string>
+    <string name="all_reviews_all_reviews">All Reviews</string>
+    <string name="view_profile_screen_image_dialog_title">Image Details</string>
+    <string name="view_profile_screen_image_dialog_description">Preview of the selected image:</string>
+    <string name="view_profile_screen_image_dialog_close">Close</string>
+    <string name="view_profile_screen_image_dialog_go_to_parking">Go To Parking</string>
+    <string name="view_profile_screen_image_path">Path: %s</string>
+    <string name="view_profile_screen_image_deleted">Image deleted!</string>
 
     <!-- Review Screen -->
     <string name="review_screen_title_new_review">Add your review</string>
@@ -146,9 +234,128 @@
     <string name="review_screen_rating">Rating: %.1f</string>
     <string name="review_screen_write_review_label">Write your review</string>
     <string name="review_screen_submit_button">Save my review</string>
-    <string name="review_screen_submit_button_toast">Review added!</string>
+    <string name="review_screen_submit_toast">Review added!</string>
+    <string name="review_screen_update_toast">Review Updated!</string>
     <string name="review_screen_default_review_owner">default</string>
+    <string name="review_screen_reward_toast">+%d coins !</string>
+
 
     <!-- TopAppBar -->
     <string name="top_app_bar_go_back">Go Back</string>
+
+    <!-- GamblingScreen -->
+    <string name="spin_button_text">SPIN</string>
+    <string name="rarity_nothing">Nothing</string>
+    <string name="rarity_legendary">Legendary</string>
+    <string name="rarity_common">Common</string>
+    <string name="rarity_rare">Rare</string>
+    <string name="rarity_epic">Epic</string>
+    <string name="gambling_screen_title">Gambling</string>
+    <string name="gambling_screen_coins_display">Coins: %d</string>
+    <string name="gambling_screen_spin_button_cost">(%d coins)</string>
+    <string name="level_display">Level %d</string>
+    <string name="level_up">Level Up!</string>
+    <string name="xp_increment" formatted="true">%s: +%.2f XP!</string>
+    <string name="display_user_tag_format" formatted="true">[%s%d] %s</string>
+    <string name="rainbow_text_color">rainbow</string>
+
+
+    <!-- Report Screens -->
+    <string name="report_title">The following will be submitted in your report:</string>
+    <string name="report_parking">Report Parking: %s</string>
+    <string name="report_a_review">Report Review: %s</string>
+    <string name="report_an_image">Report Image</string>
+    <string name="report_bullet_point_1">Your User Information</string>
+    <string name="report_bullet_point_2_parking">This Parking\'s information</string>
+    <string name="report_bullet_point_2_review">This Review\'s information</string>
+    <string name="report_bullet_point_3">Reason + Description below</string>
+    <string name="report_reason">Reason for Reporting</string>
+    <string name="report_details">Additional Details (Optional)</string>
+    <string name="alert_content">We take reports very seriously. Please make sure that the information you have mentioned is accurate. Do you want to add this Report?</string>
+    <string name="alert_title">Are You Sure?</string>
+    <string name="report_added">Report added</string>
+    <string name="report_already">You Have Already Reported This Object</string>
+
+    <!-- Admin Screen -->
+    <string name="admin_topappbar_title">All %s Reports</string>
+    <string name="admin_lastreportedby">Last Reported By:</string>
+    <string name="admin_timesbeenreported">Has been reported %d times</string>
+    <string name="admin_timesbeenmaxreported">Has been reported at max level %d times</string>
+    <string name="check_reports">Check Reports</string>
+    <string name="parking_reports">Parking Reports</string>
+    <string name="review_reports">Review Reports</string>
+    <string name="image_reports">Image Reports</string>
+    <string name="sort_reported_parkings">Get Reported Parkings (Most Reported First)</string>
+    <string name="sort_reported_reviews">Get Reported Reviews (Most Reported First)</string>
+    <string name="sort_reported_images">Get Reported Images (Most Reported First)</string>
+    <string name="view_reports">View Reports</string>
+    <string name="sort_reports">Get Reported Reviews (Most Reported First)</string>
+    <string name="choose_parking_review_or_image">Parkings, Reviews, or Images?</string>
+    <string name="object_deleted">Object Deleted in all Repositories</string>
+    <string name="delete_object">Delete Object</string>
+    <string name="no_reports_available">No Reports Available.</string>
+    <string name="admin_reason">Reason: %s</string>
+    <string name="admin_reportedBy">Reported By: %s</string>
+    <string name="admin_description">Description: %s</string>
+    <string name="more_options">More Options</string>
+    <string name="options_for_report">Details for this Reported Object:</string>
+    <string name="choose_action_for_report">Choose an action for this report</string>
+    <string name="Return">Return</string>
+    <string name="go_to_parking">Go To Parking</string>
+    <string name="see_details">See Details</string>
+    <string name="report_details_review_uid">Review: %1$s</string>
+    <string name="report_details_review_parking">Parking: %1$s</string>
+    <string name="report_details_review_text">Text: %1$s</string>
+    <string name="loading_review_details">Loading review details...</string>
+    <string name="report_details_parking_uid">Parking UID: %1$s</string>
+    <string name="report_details_image_uid">Image UID: %1$s</string>
+    <string name="report_details_parking_owner">Owner: %1$s</string>
+    <string name="loading_parking_details">Loading parking details...</string>
+    <string name="reported_image_description">Reported Image</string>
+    <string name="report_details_image_owner">Owner: %1$s</string>
+
+    <!-- Zone Screens -->
+    <string name="zone_manager_screen_title">Offline Maps</string>
+    <string name="zone_selection_screen_title">Select Zone</string>
+    <string name ="zone_manager_no_zones">Nothing downloaded yet</string>
+    <string name ="zone_manager_header_area">Map Name \n(Click to show on map)</string>
+    <string name ="zone_manager_header_lastRefreshed">Last Refreshed</string>
+    <string name ="zone_selection_alert_tilte">Please name the Area you are about to download</string>
+    <string name ="zone_selection_button_when_none_set">Set top left corner</string>
+    <string name ="zone_selection_button_when_top_left_set">Download Area</string>
+    <string name ="zone_selection_button_when_both_set">Please wait...</string>
+    <string name ="zone_selection_button_accept">Confirm</string>
+    <string name ="zone_selection_button_cancel">Cancel</string>
+    <string name ="zone_selection_download_error">Error downloading zone</string>
+    <string name="zone_selection_downloading_progress">Downloading : %.0f%%</string>
+    <string name ="zone_selection_hide">hide</string>
+
+    <!-- Connectivity Alert Dialog -->
+    <string name="connectivity_alert_offline_title">No Internet Connection</string>
+    <string name="connectivity_alert_offline_message">Do you want to use your Offline Maps ?</string>
+    <string name="connectivity_alert_online_title">Internet Connection Available</string>
+    <string name="connectivity_alert_online_message">Do you want to use the Online Maps ? </string>
+    <string name="connectivity_alert_button_confirm">Yes</string>
+
+    <!-- BikeLocation Dialog -->
+    <string name="bike_location_dialog_title">Bike Location</string>
+    <string name="bike_location_dialog_message">Do you want the app to forget the location of your bike ?</string>
+    <string name="bike_location_dialog_button_confirm">Forget</string>
+    <string name="bike_location_dialog_button_cancel">Keep remembering</string>
+
+    <!-- Tutorial Screens -->
+    <string name="tutorial_screen_welcome_title">Welcome to Cyrcle !</string>
+    <string name="tutorial_screen_welcome_subtitle">Here is a small tutorial to help you take the app in your hand !</string>
+    <string name="tutorial_screen_button_start">Start</string>
+    <string name="tutorial_screen_button_next">Next</string>
+    <string name="tutorial_screen_button_finish">Finish</string>
+    <string name="tutorial_screen_button_skip">Skip</string>
+    <string name="tutorial_screen_thank_you_title">You\'re all done !</string>
+    <string name="tutorial_screen_thank_you_subtitle">Thank you for using Cyrcle !</string>
+
+    <!-- Easter Egg Toast Messages -->
+    <string name="easter_egg_coins_greedy_message">Greedy, aren\'t you? All your coins are gone!</string>
+    <string name="easter_egg_coins_credited_message">You\'ve been credited %1$d coins!</string>
+    <string name="easter_egg_kill_message">Goodbye, cruel world!</string>
+    <string name="easter_egg_teleport_message">Teleporting to %1$s</string>
 </resources>

@@ -1,44 +1,62 @@
 package com.github.se.cyrcle.model.review
 
+import android.os.Looper
+import androidx.test.core.app.ApplicationProvider
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.android.gms.tasks.Tasks
-import com.google.firebase.firestore.*
-import org.junit.Assert.*
+import com.google.firebase.FirebaseApp
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QueryDocumentSnapshot
+import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.WriteBatch
+import junit.framework.TestCase
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mock
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.spy
+import org.mockito.Mockito.times
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
-import org.mockito.kotlin.timeout
 import org.mockito.kotlin.verify
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 
-@RunWith(JUnit4::class)
+@RunWith(RobolectricTestRunner::class)
 class ReviewRepositoryFirestoreTest {
 
   @Mock private lateinit var mockFirestore: FirebaseFirestore
   @Mock private lateinit var mockDocumentReference: DocumentReference
   @Mock private lateinit var mockCollectionReference: CollectionReference
   @Mock private lateinit var mockDocumentSnapshot: DocumentSnapshot
-  @Mock private lateinit var mockQuerySnapshot: QuerySnapshot
-  @Mock private lateinit var mockQuery: Query
+  @Mock private lateinit var mockReviewQuerySnapshot: QuerySnapshot
+  @Mock private lateinit var mockQueryDocumentSnapshot: QueryDocumentSnapshot
 
-  private lateinit var reviewRepositoryFirestore: ReviewRepositoryFirestore
+  @Mock private lateinit var reviewRepositoryFirestore: ReviewRepositoryFirestore
 
-  private val review =
-      Review(
-          uid = "1",
-          owner = "user1",
-          parking = "parking1",
-          text = "Great parking spot!",
-          rating = 4.5)
+  private val review = TestInstancesReview.review1
+  private lateinit var mockReviewData: Map<String, Any>
 
   @Before
   fun setUp() {
     MockitoAnnotations.openMocks(this)
+
+    // Initialize Firebase if necessary
+    if (FirebaseApp.getApps(ApplicationProvider.getApplicationContext()).isEmpty()) {
+      FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
+    }
+
     reviewRepositoryFirestore = ReviewRepositoryFirestore(mockFirestore)
+    mockReviewData = reviewRepositoryFirestore.serializeReview(review)
+
     `when`(mockFirestore.collection(any())).thenReturn(mockCollectionReference)
     `when`(mockCollectionReference.document(any())).thenReturn(mockDocumentReference)
     `when`(mockCollectionReference.document()).thenReturn(mockDocumentReference)
@@ -49,232 +67,267 @@ class ReviewRepositoryFirestoreTest {
     `when`(mockDocumentReference.id).thenReturn("1")
     val uid = reviewRepositoryFirestore.getNewUid()
     verify(mockDocumentReference).id
-    assert(uid == "1")
+    assertEquals("1", uid)
   }
 
   @Test
-  fun getReviewByParking_returnsCorrectValues() {
-    val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
-    `when`(mockCollectionReference.whereEqualTo("parking", "parking1")).thenReturn(mockQuery)
-    `when`(mockQuery.get()).thenReturn(taskCompletionSource.task)
-    `when`(mockQuerySnapshot.documents).thenReturn(listOf(mockDocumentSnapshot))
-    `when`(mockDocumentSnapshot.toObject(Review::class.java)).thenReturn(review)
+  fun getReviewById_callsOnSuccess() {
+    val taskCompletionSource = TaskCompletionSource<DocumentSnapshot>()
+    `when`(mockDocumentReference.get()).thenReturn(taskCompletionSource.task)
+    `when`(mockDocumentSnapshot.data).thenReturn(mockReviewData) // Include the mocked review data
 
-    reviewRepositoryFirestore.getReviewByParking(
-        parking = "parking1",
+    var onSuccessCallbackCalled = false
+    reviewRepositoryFirestore.getReviewById(
+        review.uid,
+        { onSuccessCallbackCalled = true },
+        { TestCase.fail("Expected success but got failure") })
+
+    // Complete the task to trigger the addOnCompleteListener with a successful result
+    taskCompletionSource.setResult(mockDocumentSnapshot)
+    shadowOf(Looper.getMainLooper()).idle()
+
+    verify(mockDocumentReference, times(1)).get()
+    assertTrue(onSuccessCallbackCalled)
+  }
+
+  @Test
+  fun getReviewById_callsOnFailure() {
+    val taskCompletionSource = TaskCompletionSource<DocumentSnapshot>()
+    `when`(mockDocumentReference.get()).thenReturn(taskCompletionSource.task)
+
+    var onFailureCallbackCalled = false
+    reviewRepositoryFirestore.getReviewById(
+        review.uid,
+        { TestCase.fail("Expected failure but got success") },
+        { onFailureCallbackCalled = true })
+    // Complete the task to trigger the addOnCompleteListener with an exception
+    taskCompletionSource.setException(Exception("Test exception"))
+    shadowOf(Looper.getMainLooper()).idle()
+
+    verify(mockDocumentReference, times(1)).get()
+    assertTrue(onFailureCallbackCalled)
+  }
+
+  @Test
+  fun getReviewByOwnerId_returnsCorrectValues() {
+    `when`(mockQueryDocumentSnapshot.data).thenReturn(mockReviewData)
+    `when`(mockQueryDocumentSnapshot.id).thenReturn(review.uid)
+
+    `when`(mockCollectionReference.whereEqualTo(any<String>(), any()))
+        .thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockReviewQuerySnapshot))
+    `when`(mockReviewQuerySnapshot.documents).thenReturn(listOf(mockQueryDocumentSnapshot))
+
+    var onSuccessCallbackCalled = false
+    // Spy on the repository to verify deserialization
+    val spyReviewRepositoryFirestore = spy(reviewRepositoryFirestore)
+    spyReviewRepositoryFirestore.getReviewsByOwnerId(
+        ownerId = review.owner,
         onSuccess = { reviews ->
           assertEquals(1, reviews.size)
           assertEquals(review, reviews[0])
+          onSuccessCallbackCalled = true
         },
         onFailure = { fail("Expected success but got failure") })
+    shadowOf(Looper.getMainLooper()).idle()
 
-    taskCompletionSource.setResult(mockQuerySnapshot)
-    verify(timeout(100)) { mockQuery.get() }
-    verify(timeout(100)) { mockDocumentSnapshot.toObject(Review::class.java) }
+    verify(mockReviewQuerySnapshot, times(1)).documents
+    verify(mockQueryDocumentSnapshot, times(1)).data
+    verify(spyReviewRepositoryFirestore, times(1)).deserializeReview(mockReviewData)
+    assertTrue(onSuccessCallbackCalled)
   }
 
   @Test
-  fun getReviewByParking_callsOnFailure() {
-    val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
-    `when`(mockCollectionReference.whereEqualTo("parking", "parking1")).thenReturn(mockQuery)
-    `when`(mockQuery.get()).thenReturn(taskCompletionSource.task)
+  fun getReviewByOwnerId_callsOnFailure() {
+    `when`(mockCollectionReference.whereEqualTo(any<String>(), any()))
+        .thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.get()).thenReturn(Tasks.forException(Exception()))
 
-    reviewRepositoryFirestore.getReviewByParking(
-        parking = "parking1",
+    var onFailureCallbackCalled = false
+    reviewRepositoryFirestore.getReviewsByOwnerId(
+        ownerId = review.parking,
         onSuccess = { fail("Expected failure but got success") },
-        onFailure = { assertTrue(true) })
+        onFailure = { onFailureCallbackCalled = true })
+    shadowOf(Looper.getMainLooper()).idle()
 
+    verify(mockReviewQuerySnapshot, times(0)).documents
+    assertTrue(onFailureCallbackCalled)
+  }
+
+  @Test
+  fun getReviewsByParkingId_returnsCorrectValues() {
+    `when`(mockQueryDocumentSnapshot.data).thenReturn(mockReviewData)
+    `when`(mockQueryDocumentSnapshot.id).thenReturn(review.uid)
+    `when`(mockCollectionReference.whereEqualTo(any<String>(), any()))
+        .thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockReviewQuerySnapshot))
+    `when`(mockReviewQuerySnapshot.documents).thenReturn(listOf(mockQueryDocumentSnapshot))
+
+    var onSuccessCallbackCalled = false
+    // Spy on the repository to verify review deserialization
+    val spyReviewRepositoryFirestore = spy(reviewRepositoryFirestore)
+    spyReviewRepositoryFirestore.getReviewsByParkingId(
+        parkingId = review.parking,
+        onSuccess = { reviews ->
+          assertEquals(1, reviews.size)
+          assertEquals(review, reviews[0])
+          onSuccessCallbackCalled = true
+        },
+        onFailure = { fail("Expected success but got failure") })
+    shadowOf(Looper.getMainLooper()).idle()
+
+    verify(mockReviewQuerySnapshot, times(1)).documents
+    verify(mockQueryDocumentSnapshot, times(1)).data
+    verify(spyReviewRepositoryFirestore, times(1)).deserializeReview(mockReviewData)
+    assertTrue(onSuccessCallbackCalled)
+  }
+
+  @Test
+  fun getReviewsByParkingId_callsOnFailure() {
+    `when`(mockCollectionReference.whereEqualTo(any<String>(), any()))
+        .thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.get()).thenReturn(Tasks.forException(Exception()))
+
+    var onFailureCallbackCalled = false
+    reviewRepositoryFirestore.getReviewsByParkingId(
+        parkingId = review.parking,
+        onSuccess = { fail("Expected failure but got success") },
+        onFailure = { onFailureCallbackCalled = true })
+    shadowOf(Looper.getMainLooper()).idle()
+
+    verify(mockReviewQuerySnapshot, times(0)).documents
+    assertTrue(onFailureCallbackCalled)
+  }
+
+  @Test
+  fun addReview_callsOnSuccess() {
+    `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
+    var onSuccessCallbackCalled = false
+    reviewRepositoryFirestore.addReview(
+        review,
+        onSuccess = { onSuccessCallbackCalled = true },
+        onFailure = { fail("Expected success but got failure") })
+    shadowOf(Looper.getMainLooper()).idle()
+
+    verify(mockDocumentReference).set(any())
+    assertTrue(onSuccessCallbackCalled)
+  }
+
+  @Test
+  fun addReview_callsOnFailure() {
+    val taskCompletionSource = TaskCompletionSource<Void>()
+    `when`(mockDocumentReference.set(any())).thenReturn(taskCompletionSource.task)
+
+    var onFailureCallbackCalled = false
+    reviewRepositoryFirestore.addReview(
+        review,
+        { TestCase.fail("Expected failure but got success") },
+        { onFailureCallbackCalled = true })
+    // Complete the task to trigger the addOnCompleteListener with an exception
     taskCompletionSource.setException(Exception("Test exception"))
-    verify(timeout(100)) { mockQuery.get() }
+    shadowOf(Looper.getMainLooper()).idle()
+
+    verify(mockDocumentReference, times(1)).set(any())
+    assertTrue(onFailureCallbackCalled)
   }
 
   @Test
   fun updateReview_callsOnSuccess() {
     `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
 
+    var onSuccessCallbackCalled = false
     reviewRepositoryFirestore.updateReview(
-        review, onSuccess = {}, onFailure = { fail("Expected success but got failure") })
+        review,
+        onSuccess = { onSuccessCallbackCalled = true },
+        onFailure = { fail("Expected success but got failure") })
+    shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference).set(any())
+    assertTrue(onSuccessCallbackCalled)
   }
 
   @Test
   fun updateReview_callsOnFailure() {
-    val exception = Exception("Failed to update review")
-    `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forException(exception))
+    val taskCompletionSource = TaskCompletionSource<Void>()
+    `when`(mockDocumentReference.set(any())).thenReturn(taskCompletionSource.task)
 
+    var onFailureCallbackCalled = false
     reviewRepositoryFirestore.updateReview(
         review,
-        onSuccess = { fail("Expected failure but got success") },
-        onFailure = { error -> assertEquals(exception, error) })
+        { TestCase.fail("Expected failure but got success") },
+        { onFailureCallbackCalled = true })
+    // Complete the task to trigger the addOnCompleteListener with an exception
+    taskCompletionSource.setException(Exception("Test exception"))
+    shadowOf(Looper.getMainLooper()).idle()
 
-    verify(mockDocumentReference).set(any())
+    verify(mockDocumentReference, times(1)).set(any())
+    assertTrue(onFailureCallbackCalled)
+  }
+
+  @Test
+  fun deleteReviewById_callsOnSuccess() {
+    // Mock subcollection fetching
+    `when`(mockDocumentReference.collection("reports")).thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockReviewQuerySnapshot))
+    `when`(mockReviewQuerySnapshot.documents).thenReturn(emptyList()) // No reports to delete
+
+    // Mock Firestore batch
+    val mockWriteBatch = mock(WriteBatch::class.java)
+    `when`(mockFirestore.batch()).thenReturn(mockWriteBatch)
+    `when`(mockWriteBatch.commit()).thenReturn(Tasks.forResult(null)) // Batch commit succeeds
+
+    // Mock deleting the review document
+    `when`(mockDocumentReference.delete()).thenReturn(Tasks.forResult(null))
+
+    var onSuccessCallbackCalled = false
+    reviewRepositoryFirestore.deleteReviewById(
+        review.uid,
+        onSuccess = { onSuccessCallbackCalled = true },
+        onFailure = { fail("Expected success but got failure") })
+    shadowOf(Looper.getMainLooper()).idle()
+
+    verify(mockDocumentReference).delete()
+    verify(mockWriteBatch).commit() // Verify batch commit
+    assertTrue(onSuccessCallbackCalled)
   }
 
   @Test
   fun deleteReviewById_callsOnFailure() {
-    val exception = Exception("Failed to delete review")
-    `when`(mockDocumentReference.delete()).thenReturn(Tasks.forException(exception))
+    // Mock subcollection fetching
+    `when`(mockDocumentReference.collection("reports")).thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockReviewQuerySnapshot))
+    `when`(mockReviewQuerySnapshot.documents).thenReturn(emptyList()) // No reports to delete
 
+    // Mock Firestore batch
+    val mockWriteBatch = mock(WriteBatch::class.java)
+    `when`(mockFirestore.batch()).thenReturn(mockWriteBatch)
+    `when`(mockWriteBatch.commit()).thenReturn(Tasks.forException(Exception("Batch commit failed")))
+
+    var onFailureCallbackCalled = false
     reviewRepositoryFirestore.deleteReviewById(
         review.uid,
         onSuccess = { fail("Expected failure but got success") },
-        onFailure = { error -> assertEquals(exception, error) })
+        onFailure = { onFailureCallbackCalled = true })
+    shadowOf(Looper.getMainLooper()).idle()
 
-    verify(mockDocumentReference).delete()
+    verify(mockWriteBatch).commit() // Verify batch commit
+    assertTrue(onFailureCallbackCalled)
   }
 
   @Test
-  fun addAndRetrieveReview_verifiesSerializationAndDeserialization() {
-    // Mock the Firestore set and get behaviors
-    val reviewData =
-        mapOf(
-            "uid" to review.uid,
-            "owner" to review.owner,
-            "text" to review.text,
-            "rating" to review.rating,
-            "parking" to review.parking,
-            "time" to review.time)
-
-    // Verify serialization by checking the data passed to Firestore on `set`
-    `when`(mockDocumentReference.set(any())).thenAnswer { invocation ->
-      val data = invocation.arguments[0] as Map<String, Any>
-      assertEquals(data["uid"], reviewData["uid"])
-      assertEquals(data["owner"], reviewData["owner"])
-      assertEquals(data["text"], reviewData["text"])
-      assertEquals(data["rating"], reviewData["rating"])
-      assertEquals(data["parking"], reviewData["parking"])
-      Tasks.forResult(null)
-    }
-
-    // Add the review
-    reviewRepositoryFirestore.addReview(
-        review,
-        onSuccess = { assertTrue(true) }, // Just to verify that onSuccess is called
-        onFailure = { fail("Expected success but got failure") })
-
-    // Verify that `set` was called with the serialized data
-    verify(timeout(100)) { mockDocumentReference.set(reviewData) }
-
-    // Mock the deserialization when retrieving the review by ID
-    `when`(mockDocumentSnapshot.data).thenReturn(reviewData)
-    `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
-    `when`(mockDocumentSnapshot.toObject(Review::class.java)).thenReturn(review)
-
-    // Retrieve the review and verify deserialization
-    reviewRepositoryFirestore.getReviewById(
-        review.uid,
-        onSuccess = { retrievedReview ->
-          assertEquals(
-              review, retrievedReview) // Check that deserialized review matches the original
-        },
-        onFailure = { fail("Expected success but got failure") })
-
-    // Verify that `get` was called, triggering the deserialization
-    verify(timeout(100)) { mockDocumentReference.get() }
+  fun testCreateTime() {
+    val timeAttributes = mapOf("seconds" to 1610000000L, "nanoseconds" to 0)
+    val timestamp = reviewRepositoryFirestore.createTimestamp(timeAttributes)
+    assertEquals(1610000000L, timestamp?.seconds)
+    assertEquals(0, timestamp?.nanoseconds)
   }
 
   @Test
-  fun getAllReviews_returnsCorrectValues() {
-    val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
-    `when`(mockCollectionReference.get()).thenReturn(taskCompletionSource.task)
-    `when`(mockQuerySnapshot.documents).thenReturn(listOf(mockDocumentSnapshot))
-    `when`(mockDocumentSnapshot.toObject(Review::class.java)).thenReturn(review)
-
-    reviewRepositoryFirestore.getAllReviews(
-        onSuccess = { reviews ->
-          assertEquals(1, reviews.size)
-          assertEquals(review, reviews[0])
-        },
-        onFailure = { fail("Expected success but got failure") })
-
-    taskCompletionSource.setResult(mockQuerySnapshot)
-    verify(timeout(100)) { mockQuerySnapshot.documents }
-    verify(timeout(100)) { mockDocumentSnapshot.toObject(Review::class.java) }
-  }
-
-  @Test
-  fun getAllReviews_callsOnFailure() {
-    val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
-    `when`(mockCollectionReference.get()).thenReturn(taskCompletionSource.task)
-    reviewRepositoryFirestore.getAllReviews(
-        onSuccess = { fail("Expected failure but got success") }, onFailure = { assertTrue(true) })
-
-    taskCompletionSource.setException(Exception("Test exception"))
-    verify(timeout(100).times(0)) { mockQuerySnapshot.documents }
-  }
-
-  @Test
-  fun getReviewById_callsOnSuccess() {
-    `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
-    `when`(mockDocumentSnapshot.toObject(Review::class.java)).thenReturn(review)
-
-    reviewRepositoryFirestore.getReviewById(
-        review.uid,
-        onSuccess = { retrievedReview -> assertEquals(review, retrievedReview) },
-        onFailure = { fail("Expected success but got failure") })
-
-    verify(timeout(100)) { mockDocumentReference.get() }
-    verify(timeout(100)) { mockDocumentSnapshot.toObject(Review::class.java) }
-  }
-
-  @Test
-  fun getReviewById_callsOnFailure() {
-    `when`(mockDocumentReference.get()).thenReturn(Tasks.forException(Exception()))
-
-    reviewRepositoryFirestore.getReviewById(
-        review.uid,
-        onSuccess = { fail("Expected failure but got success") },
-        onFailure = { assertTrue(true) })
-
-    verify(timeout(100)) { mockDocumentReference.get() }
-  }
-
-  @Test
-  fun addReview_callsFirestoreSet() {
-    `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
-
-    reviewRepositoryFirestore.addReview(review, onSuccess = {}, onFailure = {})
-
-    verify(timeout(100)) { mockDocumentReference.set(review) }
-  }
-
-  @Test
-  fun deleteReviewById_callsFirestoreDelete() {
-    `when`(mockDocumentReference.delete()).thenReturn(Tasks.forResult(null))
-
-    reviewRepositoryFirestore.deleteReviewById(review.uid, onSuccess = {}, onFailure = {})
-
-    verify(timeout(100)) { mockDocumentReference.delete() }
-  }
-
-  @Test
-  fun getReviewsByOwner_returnsCorrectValues() {
-    val taskCompletionSource = TaskCompletionSource<QuerySnapshot>()
-
-    // Mock the Query object and the get() call
-    `when`(mockCollectionReference.whereEqualTo("owner", "user1")).thenReturn(mockQuery)
-    `when`(mockQuery.get()).thenReturn(taskCompletionSource.task)
-
-    // Set up the mock QuerySnapshot to return a list with the mock DocumentSnapshot
-    `when`(mockQuerySnapshot.documents).thenReturn(listOf(mockDocumentSnapshot))
-    `when`(mockDocumentSnapshot.toObject(Review::class.java)).thenReturn(review)
-
-    // Call the method to be tested
-    reviewRepositoryFirestore.getReviewsByOwner(
-        owner = "user1",
-        onSuccess = { reviews ->
-          assertEquals(1, reviews.size)
-          assertEquals(review, reviews[0])
-        },
-        onFailure = { fail("Expected success but got failure") })
-
-    // Complete the task to trigger the success callback
-    taskCompletionSource.setResult(mockQuerySnapshot)
-
-    // Verify that documents were accessed and converted
-    verify(timeout(100)) { mockQuery.get() }
-    verify(timeout(100)) { mockQuerySnapshot.documents }
-    verify(timeout(100)) { mockDocumentSnapshot.toObject(Review::class.java) }
+  fun testDeserializeReview_withTime() {
+    val timeAttributes = mapOf("seconds" to 1610000000L, "nanoseconds" to 0)
+    val reviewData = mockReviewData.toMutableMap()
+    reviewData["time"] = timeAttributes
+    val review = reviewRepositoryFirestore.deserializeReview(reviewData)
+    assertEquals(review, review)
   }
 }

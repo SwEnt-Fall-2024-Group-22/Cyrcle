@@ -5,6 +5,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestoreSettings
 import com.google.firebase.firestore.memoryCacheSettings
 import com.google.firebase.firestore.persistentCacheSettings
+import com.google.firebase.storage.FirebaseStorage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,6 +35,12 @@ object AppModule {
     db.firestoreSettings = settings
 
     return db
+  }
+
+  @Provides
+  @Singleton
+  fun provideFirebaseStorage(): FirebaseStorage {
+    return FirebaseStorage.getInstance()
   }
 
   @Provides

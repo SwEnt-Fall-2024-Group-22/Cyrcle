@@ -2,19 +2,27 @@ package com.github.se.cyrcle.model.map
 
 import com.github.se.cyrcle.model.map.MapViewModel.LocationPickerState
 import com.github.se.cyrcle.model.parking.Location
+import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.github.se.cyrcle.ui.navigation.Route
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraState
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.ScreenCoordinate
 import org.junit.Before
 import org.junit.Test
+import org.mockito.Mock
+import org.mockito.Mockito.times
+import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.verify
 
 class MapViewModelTest {
   private lateinit var mapViewModel: MapViewModel
+  @Mock private lateinit var navigationActions: NavigationActions
 
   @Before
   fun setUp() {
     mapViewModel = MapViewModel()
+    MockitoAnnotations.openMocks(this)
   }
 
   @Test
@@ -70,5 +78,22 @@ class MapViewModelTest {
     val screenCoordinates = listOf(ScreenCoordinate(10.0, 10.0))
     mapViewModel.updateScreenCoordinates(screenCoordinates)
     assert(mapViewModel.screenCoordinates.value == screenCoordinates)
+  }
+
+  @Test
+  fun mapViewModelTestZoomOnLocation() {
+    assert(mapViewModel.screenCoordinates.value.isEmpty())
+    val expected = Location(Point.fromLngLat(6.566, 46.519))
+    mapViewModel.zoomOnLocation(navigationActions, expected)
+
+    val actual =
+        mapViewModel.cameraPosition.value?.center
+            ?: Point.fromLngLat(0.0, 0.0) // Default to somewhere not expected
+
+    verify(navigationActions, times(1)).navigateTo(Route.MAP)
+    assert(expected.center == actual)
+    assert(mapViewModel.cameraRecentering.value)
+    assert(!mapViewModel.isTrackingModeEnable.value)
+    assert(mapViewModel.locationPickerState.value == LocationPickerState.NONE_SET)
   }
 }

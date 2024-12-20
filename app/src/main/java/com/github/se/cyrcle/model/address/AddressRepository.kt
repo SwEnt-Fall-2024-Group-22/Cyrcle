@@ -9,5 +9,5 @@ interface AddressRepository {
    * @param onSuccess The callback to be called when the search is successful.
    * @param onFailure The callback to be called when the search fails.
    */
-  fun search(query: String, onSuccess: (Address) -> Unit, onFailure: (Exception) -> Unit)
+  fun search(query: String, onSuccess: (List<Address>) -> Unit, onFailure: (Exception) -> Unit)
 }

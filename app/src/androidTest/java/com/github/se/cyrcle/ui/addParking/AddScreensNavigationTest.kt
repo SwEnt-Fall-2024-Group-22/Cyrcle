@@ -1,114 +1,91 @@
 package com.github.se.cyrcle.ui.addParking
 
-import CyrcleNavHost
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.github.se.cyrcle.di.mocks.AuthenticatorMock
+import com.github.se.cyrcle.di.mocks.MockAddressRepository
+import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
+import com.github.se.cyrcle.di.mocks.MockImageRepository
+import com.github.se.cyrcle.di.mocks.MockOfflineParkingRepository
+import com.github.se.cyrcle.di.mocks.MockParkingRepository
+import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
+import com.github.se.cyrcle.di.mocks.MockUserRepository
 import com.github.se.cyrcle.model.address.AddressViewModel
 import com.github.se.cyrcle.model.map.MapViewModel
-import com.github.se.cyrcle.model.parking.ImageRepository
 import com.github.se.cyrcle.model.parking.Location
-import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
-import com.github.se.cyrcle.model.review.ReviewViewModel
-import com.github.se.cyrcle.model.user.User
-import com.github.se.cyrcle.model.user.UserPublic
+import com.github.se.cyrcle.model.user.TestInstancesUser
 import com.github.se.cyrcle.model.user.UserViewModel
 import com.github.se.cyrcle.ui.addParking.attributes.AttributesPicker
 import com.github.se.cyrcle.ui.addParking.location.LocationPicker
-import com.github.se.cyrcle.ui.map.MapScreen
 import com.github.se.cyrcle.ui.navigation.NavigationActions
+import com.github.se.cyrcle.ui.navigation.Screen
+import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
 import com.mapbox.geojson.Point
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.verify
 
 @RunWith(AndroidJUnit4::class)
 class AddScreensNavigationTest {
   @get:Rule val composeTestRule = createComposeRule()
 
-  @Mock lateinit var mockedParkingRepository: ParkingRepository
-  @Mock lateinit var mockedImageRepository: ImageRepository
+  @Mock lateinit var navigationActions: NavigationActions
 
-  @Composable
-  fun setUp(): List<Any> {
-    val navController = rememberNavController()
-    val navigationActions = NavigationActions(navController)
+  private lateinit var reportedObjectRepository: MockReportedObjectRepository
+  private lateinit var mockParkingRepository: MockParkingRepository
+  private lateinit var mockOfflineParkingRepository: MockOfflineParkingRepository
+  private lateinit var mockImageRepository: MockImageRepository
+  private lateinit var addressRepository: MockAddressRepository
+  private lateinit var userRepository: MockUserRepository
+  private lateinit var mockAuthenticator: MockAuthenticationRepository
 
-    val mockedAuthenticator = AuthenticatorMock()
+  private lateinit var parkingViewModel: ParkingViewModel
+  private lateinit var mapViewModel: MapViewModel
+  private lateinit var addressViewModel: AddressViewModel
+  private lateinit var userViewModel: UserViewModel
 
-    val parkingViewModel: ParkingViewModel = viewModel(factory = ParkingViewModel.Factory)
-    val reviewViewModel: ReviewViewModel = viewModel(factory = ReviewViewModel.Factory)
-    val mapViewModel: MapViewModel = viewModel(factory = MapViewModel.Factory)
-    val userViewModel: UserViewModel = viewModel(factory = UserViewModel.Factory)
-    val addressViewModel: AddressViewModel = viewModel(factory = AddressViewModel.Factory)
+  @Before
+  fun setUp() {
+    MockitoAnnotations.openMocks(this)
 
-    CyrcleNavHost(
-        navigationActions,
-        navController,
-        parkingViewModel,
-        reviewViewModel,
-        userViewModel,
-        mapViewModel,
-        addressViewModel,
-        mockedAuthenticator,
-        LocalContext.current as android.app.Activity)
-    return listOf(
-        navigationActions,
-        parkingViewModel,
-        reviewViewModel,
-        userViewModel,
-        mapViewModel,
-        addressViewModel)
-  }
+    reportedObjectRepository = MockReportedObjectRepository()
+    mockParkingRepository = MockParkingRepository()
+    mockOfflineParkingRepository = MockOfflineParkingRepository()
+    mockImageRepository = MockImageRepository()
+    addressRepository = MockAddressRepository()
+    userRepository = MockUserRepository()
+    mockAuthenticator = MockAuthenticationRepository()
 
-  @OptIn(ExperimentalTestApi::class)
-  @Test
-  fun testAddButtonNavigatesToLocationPicker() {
+    userViewModel =
+        UserViewModel(userRepository, mockParkingRepository, mockImageRepository, mockAuthenticator)
 
-    composeTestRule.setContent {
-      val list = setUp()
-      val navigationActions = list[0] as NavigationActions
-      val parkingViewModel = list[1] as ParkingViewModel
-      val userViewModel = list[3] as UserViewModel
-      val mapViewModel = list[4] as MapViewModel
-
-      userViewModel.setCurrentUser(User(UserPublic("default", "sayMyName", ""), null))
-      MapScreen(navigationActions, parkingViewModel, userViewModel, mapViewModel)
-    }
-    composeTestRule.waitUntilExactlyOneExists(hasTestTag("addButton"))
-    // Perform click on the add button
-    composeTestRule.onNodeWithTag("addButton").performClick()
-    composeTestRule.waitUntilExactlyOneExists(hasTestTag("LocationPickerScreen"))
-    // Wait until the Location Picker screen is displayed
-    composeTestRule.onNodeWithText("Where is the Parking ?").assertExists().isDisplayed()
+    parkingViewModel =
+        ParkingViewModel(
+            mockImageRepository,
+            userViewModel,
+            mockParkingRepository,
+            mockOfflineParkingRepository,
+            reportedObjectRepository)
+    mapViewModel = MapViewModel()
+    addressViewModel = AddressViewModel(addressRepository)
+    userViewModel.setCurrentUser(TestInstancesUser.user1)
   }
 
   @OptIn(ExperimentalTestApi::class)
   @Test
   fun testNavigationToAttribute() {
-
-    composeTestRule.setContent {
-      val list = setUp()
-      val navigationActions = list[0] as NavigationActions
-      val mapViewModel = list[4] as MapViewModel
-      LocationPicker(navigationActions, mapViewModel)
-    }
+    composeTestRule.setContent { LocationPicker(navigationActions, mapViewModel, parkingViewModel) }
+    composeTestRule.waitForIdle()
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("nextButton"))
     // Perform click on the add button
     composeTestRule.onNodeWithTag("nextButton").performClick()
@@ -124,16 +101,11 @@ class AddScreensNavigationTest {
   @OptIn(ExperimentalTestApi::class)
   @Test
   fun testSubmit() {
-    MockitoAnnotations.openMocks(this)
-    `when`(mockedParkingRepository.getNewUid()).thenReturn("newUid")
+    mapViewModel.updateLocation(Location(Point.fromLngLat(0.0, 0.0)))
+
     composeTestRule.setContent {
-      val list = setUp()
-      val navigationActions = list[0] as NavigationActions
-      val parkingViewModel = ParkingViewModel(mockedImageRepository, mockedParkingRepository)
-      val mapViewModel = list[4] as MapViewModel
-      val addressViewModel = list[5] as AddressViewModel
-      mapViewModel.updateLocation(Location(Point.fromLngLat(0.0, 0.0)))
-      AttributesPicker(navigationActions, parkingViewModel, mapViewModel, addressViewModel)
+      AttributesPicker(
+          navigationActions, parkingViewModel, mapViewModel, addressViewModel, userViewModel)
     }
 
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("AttributesPickerTitle"))
@@ -146,43 +118,32 @@ class AddScreensNavigationTest {
     // Perform click on the add button
     composeTestRule.onNodeWithTag("submitButton").performClick()
 
-    composeTestRule.waitUntilAtLeastOneExists(hasTestTag("MapScreen"))
-    composeTestRule.onNodeWithTag("MapScreen").assertExists().assertIsDisplayed()
+    verify(navigationActions).navigateTo(TopLevelDestinations.MAP)
   }
 
   @OptIn(ExperimentalTestApi::class)
   @Test
   fun testCancel() {
+    mapViewModel.updateLocation(Location(Point.fromLngLat(0.0, 0.0)))
+
     composeTestRule.setContent {
-      val list = setUp()
-      val navigationActions = list[0] as NavigationActions
-      val parkingViewModel = list[1] as ParkingViewModel
-      val mapViewModel = list[4] as MapViewModel
-      val addressViewModel = list[5] as AddressViewModel
-      mapViewModel.updateLocation(Location(Point.fromLngLat(0.0, 0.0)))
-      AttributesPicker(navigationActions, parkingViewModel, mapViewModel, addressViewModel)
+      AttributesPicker(
+          navigationActions, parkingViewModel, mapViewModel, addressViewModel, userViewModel)
     }
 
     composeTestRule.waitUntilExactlyOneExists(hasTestTag("cancelButton"))
     // Perform click on the add button
     composeTestRule.onNodeWithTag("cancelButton").performClick()
 
-    composeTestRule.waitUntilAtLeastOneExists(hasTestTag("MapScreen"))
-    composeTestRule.onNodeWithTag("MapScreen").assertExists().assertIsDisplayed()
+    verify(navigationActions).navigateTo(TopLevelDestinations.MAP)
   }
 
-  @OptIn(ExperimentalTestApi::class)
   @Test
   fun testCancel2() {
-    composeTestRule.setContent {
-      val list = setUp()
-      val navigationActions = list[0] as NavigationActions
-      val mapViewModel = list[4] as MapViewModel
-      LocationPicker(navigationActions, mapViewModel)
-    }
+    composeTestRule.setContent { LocationPicker(navigationActions, mapViewModel, parkingViewModel) }
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("cancelButton").performClick()
-    composeTestRule.waitUntilExactlyOneExists((hasTestTag("MapScreen")))
-    composeTestRule.onNodeWithTag("MapScreen").assertExists().assertIsDisplayed()
+
+    verify(navigationActions).navigateTo(Screen.MAP)
   }
 }

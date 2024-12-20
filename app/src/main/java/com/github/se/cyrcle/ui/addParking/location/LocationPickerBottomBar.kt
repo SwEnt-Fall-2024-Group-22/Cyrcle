@@ -1,5 +1,6 @@
 package com.github.se.cyrcle.ui.addParking.location
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -28,10 +29,13 @@ import androidx.compose.ui.unit.dp
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.map.MapViewModel
 import com.github.se.cyrcle.model.map.MapViewModel.LocationPickerState
+import com.github.se.cyrcle.model.parking.PARKING_MAX_AREA
+import com.github.se.cyrcle.model.parking.PARKING_MIN_AREA
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.theme.Typography
 import com.github.se.cyrcle.ui.theme.atoms.Text
+import com.github.se.cyrcle.ui.theme.disabledColor
 import com.mapbox.maps.MapView
 
 @Composable
@@ -41,70 +45,77 @@ fun LocationPickerBottomBar(
     mapView: MutableState<MapView?>,
 ) {
   val locationPickerState by mapViewModel.locationPickerState.collectAsState()
-  val isAreaTooLarge by mapViewModel.isAreaTooLarge.collectAsState()
-  Box(Modifier.background(Color.White).height(100.dp).testTag("LocationPickerBottomBar")) {
-    Row(
-        Modifier.fillMaxWidth()
-            .wrapContentHeight()
-            .padding(16.dp)
-            .background(MaterialTheme.colorScheme.background),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically) {
-          Button(
-              {
-                mapViewModel.updateCameraPositionWithoutBearing(
-                    mapView.value?.mapboxMap?.cameraState!!)
-                navigationActions.navigateTo(Screen.MAP)
-              },
-              modifier = Modifier.testTag("cancelButton"),
-              colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
-                Text(
-                    stringResource(R.string.location_picker_bottom_bar_cancel_button),
-                    modifier = Modifier.width(100.dp),
-                    color = MaterialTheme.colorScheme.primary,
-                    style = Typography.headlineMedium,
-                    textAlign = TextAlign.Center)
-              }
-          VerticalDivider(
-              color = MaterialTheme.colorScheme.primary,
-              modifier = Modifier.height(32.dp).width(1.dp),
-              thickness = 2.dp)
-
-          if (locationPickerState == LocationPickerState.NONE_SET) {
-            Button(
-                { onTopLeftSelected(mapViewModel) },
-                modifier = Modifier.testTag("nextButton"),
-                colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
-                  Text(
-                      stringResource(R.string.location_picker_bottom_bar_next_button),
-                      modifier = Modifier.width(100.dp),
-                      color = MaterialTheme.colorScheme.primary,
-                      style = Typography.headlineMedium,
-                      textAlign = TextAlign.Center)
-                }
-          } else if (locationPickerState == LocationPickerState.TOP_LEFT_SET) {
-            Button(
-                {
-                  if (isAreaTooLarge) {
-                    Toast.makeText(
-                            mapView.value?.context,
-                            R.string.location_picker_invalid_area,
-                            Toast.LENGTH_SHORT)
-                        .show()
-                  } else {
-                    onBottomRightSelected(mapViewModel)
+  val isLocationValid by mapViewModel.isLocationValid.collectAsState(true)
+  Box(
+      Modifier.background(Color.White).height(100.dp).testTag("LocationPickerBottomBar"),
+      contentAlignment = Alignment.Center) {
+        Row(
+            Modifier.fillMaxWidth()
+                .wrapContentHeight()
+                .padding(16.dp)
+                .background(MaterialTheme.colorScheme.background),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically) {
+              Button(
+                  {
+                    mapViewModel.updateCameraPositionWithoutBearing(
+                        mapView.value?.mapboxMap?.cameraState!!)
+                    navigationActions.navigateTo(Screen.MAP)
+                  },
+                  modifier = Modifier.testTag("cancelButton"),
+                  colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
+                    Text(
+                        stringResource(R.string.location_picker_bottom_bar_cancel_button),
+                        modifier = Modifier.width(100.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        style = Typography.headlineMedium,
+                        textAlign = TextAlign.Center)
                   }
-                },
-                modifier = Modifier.testTag("nextButton"),
-                colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
-                  Text(
-                      stringResource(R.string.location_picker_bottom_bar_next_button),
-                      modifier = Modifier.width(100.dp),
-                      color = if (isAreaTooLarge) Color.Gray else MaterialTheme.colorScheme.primary,
-                      style = Typography.headlineMedium,
-                      textAlign = TextAlign.Center)
-                }
-          }
-        }
-  }
+              VerticalDivider(
+                  color = MaterialTheme.colorScheme.primary,
+                  modifier = Modifier.height(32.dp).width(1.dp),
+                  thickness = 2.dp)
+
+              if (locationPickerState == LocationPickerState.NONE_SET) {
+                Button(
+                    { onTopLeftSelected(mapViewModel) },
+                    modifier = Modifier.testTag("nextButton"),
+                    colors =
+                        ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
+                      Text(
+                          stringResource(R.string.location_picker_bottom_bar_next_button),
+                          modifier = Modifier.width(100.dp),
+                          color = MaterialTheme.colorScheme.primary,
+                          style = Typography.headlineMedium,
+                          textAlign = TextAlign.Center)
+                    }
+              } else if (locationPickerState == LocationPickerState.TOP_LEFT_SET) {
+                val invalidAreaText =
+                    stringResource(
+                        R.string.location_picker_invalid_area, PARKING_MIN_AREA, PARKING_MAX_AREA)
+                Button(
+                    {
+                      if (isLocationValid) {
+                        onBottomRightSelected(mapViewModel)
+                      } else {
+                        Toast.makeText(mapView.value?.context, invalidAreaText, Toast.LENGTH_SHORT)
+                            .show()
+                      }
+                    },
+                    modifier = Modifier.testTag("nextButton"),
+                    colors =
+                        ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)) {
+                      Log.d("LocationPickerBottomBar", "isLocationValid: $isLocationValid")
+                      Text(
+                          stringResource(R.string.location_picker_bottom_bar_next_button),
+                          modifier = Modifier.width(100.dp),
+                          color =
+                              if (isLocationValid) MaterialTheme.colorScheme.primary
+                              else disabledColor(),
+                          style = Typography.headlineMedium,
+                          textAlign = TextAlign.Center)
+                    }
+              }
+            }
+      }
 }
