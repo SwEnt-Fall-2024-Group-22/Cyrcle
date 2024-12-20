@@ -11,6 +11,11 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.github.se.cyrcle.ui.theme.ColorLevel.ERROR
+import com.github.se.cyrcle.ui.theme.ColorLevel.INVERSE_PRIMARY
+import com.github.se.cyrcle.ui.theme.ColorLevel.PRIMARY
+import com.github.se.cyrcle.ui.theme.ColorLevel.SECONDARY
+import com.github.se.cyrcle.ui.theme.ColorLevel.TERTIARY
 
 val Aero = Color(0xFF5BC0EB)
 val ShamrockGreen = Color(0xFF229C6B)
@@ -24,7 +29,7 @@ val Cerulean = Color(0xFF22799B)
 val CeruleanLowest = Color(0xFF134558)
 val CeruleanLow = Color(0xFF1B5F7A)
 val CeruleanHigh = Color(0xFF2687AE)
-val CeruleanHighest = Color(0xFF2A96C0)
+val CeruleanHighest = Color(0xFFF3FBFE)
 
 /**
  * Invert a color, without changing its alpha channel.
@@ -66,11 +71,11 @@ enum class ColorLevel {
 @Composable
 fun getColor(colorLevel: ColorLevel): Color {
   return when (colorLevel) {
-    ColorLevel.PRIMARY -> MaterialTheme.colorScheme.primary
-    ColorLevel.INVERSE_PRIMARY -> MaterialTheme.colorScheme.onPrimary
-    ColorLevel.SECONDARY -> MaterialTheme.colorScheme.secondary
-    ColorLevel.TERTIARY -> MaterialTheme.colorScheme.tertiary
-    ColorLevel.ERROR -> MaterialTheme.colorScheme.error
+    PRIMARY -> MaterialTheme.colorScheme.primary
+    INVERSE_PRIMARY -> MaterialTheme.colorScheme.onPrimary
+    SECONDARY -> MaterialTheme.colorScheme.secondary
+    TERTIARY -> MaterialTheme.colorScheme.tertiary
+    ERROR -> MaterialTheme.colorScheme.error
   }
 }
 
@@ -83,11 +88,11 @@ fun getColor(colorLevel: ColorLevel): Color {
 @Composable
 fun getOnColor(colorLevel: ColorLevel): Color {
   return when (colorLevel) {
-    ColorLevel.PRIMARY -> MaterialTheme.colorScheme.onPrimary
-    ColorLevel.INVERSE_PRIMARY -> MaterialTheme.colorScheme.primary
-    ColorLevel.SECONDARY -> MaterialTheme.colorScheme.onSecondary
-    ColorLevel.TERTIARY -> MaterialTheme.colorScheme.onTertiary
-    ColorLevel.ERROR -> MaterialTheme.colorScheme.onError
+    PRIMARY -> MaterialTheme.colorScheme.onPrimary
+    INVERSE_PRIMARY -> MaterialTheme.colorScheme.primary
+    SECONDARY -> MaterialTheme.colorScheme.onSecondary
+    TERTIARY -> MaterialTheme.colorScheme.onTertiary
+    ERROR -> MaterialTheme.colorScheme.onError
   }
 }
 
@@ -100,11 +105,11 @@ fun getOnColor(colorLevel: ColorLevel): Color {
 @Composable
 fun getContainerColor(colorLevel: ColorLevel): Color {
   return when (colorLevel) {
-    ColorLevel.PRIMARY -> MaterialTheme.colorScheme.primaryContainer
-    ColorLevel.INVERSE_PRIMARY -> MaterialTheme.colorScheme.onPrimaryContainer
-    ColorLevel.SECONDARY -> MaterialTheme.colorScheme.secondaryContainer
-    ColorLevel.TERTIARY -> MaterialTheme.colorScheme.tertiaryContainer
-    ColorLevel.ERROR -> MaterialTheme.colorScheme.errorContainer
+    PRIMARY -> MaterialTheme.colorScheme.primaryContainer
+    INVERSE_PRIMARY -> MaterialTheme.colorScheme.onPrimaryContainer
+    SECONDARY -> MaterialTheme.colorScheme.secondaryContainer
+    TERTIARY -> MaterialTheme.colorScheme.tertiaryContainer
+    ERROR -> MaterialTheme.colorScheme.errorContainer
   }
 }
 
@@ -117,11 +122,11 @@ fun getContainerColor(colorLevel: ColorLevel): Color {
 @Composable
 fun getOnContainerColor(colorLevel: ColorLevel): Color {
   return when (colorLevel) {
-    ColorLevel.PRIMARY -> MaterialTheme.colorScheme.onPrimaryContainer
-    ColorLevel.INVERSE_PRIMARY -> MaterialTheme.colorScheme.primaryContainer
-    ColorLevel.SECONDARY -> MaterialTheme.colorScheme.onSecondaryContainer
-    ColorLevel.TERTIARY -> MaterialTheme.colorScheme.onTertiaryContainer
-    ColorLevel.ERROR -> MaterialTheme.colorScheme.onErrorContainer
+    PRIMARY -> MaterialTheme.colorScheme.onPrimaryContainer
+    INVERSE_PRIMARY -> MaterialTheme.colorScheme.primaryContainer
+    SECONDARY -> MaterialTheme.colorScheme.onSecondaryContainer
+    TERTIARY -> MaterialTheme.colorScheme.onTertiaryContainer
+    ERROR -> MaterialTheme.colorScheme.onErrorContainer
   }
 }
 
@@ -155,6 +160,15 @@ fun getIconButtonColors(colorLevel: ColorLevel): IconButtonColors {
       disabledContentColor = onDisabledColor())
 }
 
+@Composable
+fun getInvertedIconButtonColors(colorLevel: ColorLevel): IconButtonColors {
+  return IconButtonDefaults.iconButtonColors(
+      containerColor = getOnColor(colorLevel),
+      contentColor = getColor(colorLevel),
+      disabledContainerColor = disabledColor(),
+      disabledContentColor = onDisabledColor())
+}
+
 /**
  * Get the colors for a text field from a ColorScheme.
  *
@@ -169,6 +183,25 @@ fun getOutlinedTextFieldColors(colorLevel: ColorLevel): TextFieldColors {
           focusedIndicatorColor = getColor(colorLevel),
           unfocusedTextColor = defaultOnColor(),
           focusedTextColor = defaultOnColor())
+}
+
+/**
+ * Get the colors for a text field from a ColorScheme (Destined for Search Text Fields).
+ *
+ * @param colorLevel The chosen ColorScheme
+ * @return The `TextFieldColors` from the `colorScheme`
+ */
+@Composable
+fun getOutlinedTextFieldColorsSearchBar(colorLevel: ColorLevel): TextFieldColors {
+  return OutlinedTextFieldDefaults.colors(
+      focusedTextColor = defaultOnColor(),
+      focusedLabelColor = defaultOnColor(),
+      focusedBorderColor = getColor(colorLevel),
+      unfocusedBorderColor = getColor(colorLevel),
+      cursorColor = defaultOnColor(),
+      unfocusedContainerColor = invertColor(defaultOnColor()),
+      focusedContainerColor = invertColor(defaultOnColor()),
+      unfocusedPlaceholderColor = defaultOnColor())
 }
 
 /**

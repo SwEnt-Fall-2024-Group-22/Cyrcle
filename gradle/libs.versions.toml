@@ -4,11 +4,16 @@
 # --------------------  CORE  -----------------------
 # ---------------------------------------------------
 agp = "8.5.2"
+datastorePreferences = "1.1.1"
 kotlin = "1.9.0"
-coreKtx = "1.13.1"
 appcompat = "1.7.0"
+kotlinStdlib = "2.0.20"
+kotlinxSerializationJson = "1.6.2"
 material = "1.12.0"
-lifecycleRuntimeKtx = "2.8.6"
+lifecycleRuntimeKtx = "2.8.7"
+
+#noinspection GradleDependency
+coreKtx = "1.13.1"
 
 #noinspection GradleDependency
 composeBom = "2024.02.02"
@@ -23,10 +28,14 @@ composeNavigation = "2.7.7"
 # Hilt
 hilt = "2.52"
 
+# Room
+room = "2.6.1"
+
 # Firebase
 gms = "4.4.2"
-firebaseBom = "33.5.1"
-playServicesAuth = "21.2.0"
+credentials = "1.3.0"
+googleid = "1.1.1"
+firebaseBom = "33.7.0"
 
 # OkHTTP
 okhttp = "4.12.0"
@@ -45,6 +54,7 @@ coilCompose = "2.7.0"
 # ---------------------------------------------------
 # -------------------  TESTING  ---------------------
 # ---------------------------------------------------
+protobufJavalite = "3.25.1"
 robolectric = "4.13"
 
 junit = "4.13.2"
@@ -57,15 +67,17 @@ junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 mockitoAndroid = "5.14.1"
 
-sonar = "4.4.1.3373"
-
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastorePreferences" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-espresso-intents = { group = "androidx.test.espresso", name = "espresso-intents", version.ref = "espressoCore" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlinStdlib" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
@@ -86,7 +98,12 @@ androidx-material-compose = { group = "androidx.compose.material", name = "mater
 androidx-material-icons-extended = { group = "androidx.compose.material", name="material-icons-extended" }
 
 google-services = { module = "com.google.gms:google-services", version.ref = "gms" }
-play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
+credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }
+credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials" }
+android-googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
+
+androidx-room = { group = "androidx.room", name = "room-ktx", version.ref = "room"}
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room"}
 
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom"}
 firebase-auth = { group = "com.google.firebase" , name = "firebase-auth" }
@@ -108,6 +125,7 @@ mapbox-compose = { group = "com.mapbox.extension", name = "maps-compose", versio
 mapbox-android = { group = "com.mapbox.maps", name = "android", version.ref = "mapbox" }
 mapbox-sdk-turf = { group = "com.mapbox.mapboxsdk", name = "mapbox-sdk-turf", version.ref = "mapbox-turf" }
 
+protobuf-javalite = { module = "com.google.protobuf:protobuf-javalite", version.ref = "protobufJavalite" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 
 mockito-inline = { group = "org.mockito", name = "mockito-inline", version.ref = "mockitoInline" }
@@ -121,6 +139,5 @@ mockk-android = { group = "io.mockk", name = "mockk-android", version.ref = "moc
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ktfmt = { id = "com.ncorti.ktfmt.gradle", version.ref = "ktfmt" }
-sonar = { id = "org.sonarqube", version.ref = "sonar" }
 gms = { id = "com.google.gms.google-services", version.ref = "gms" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }

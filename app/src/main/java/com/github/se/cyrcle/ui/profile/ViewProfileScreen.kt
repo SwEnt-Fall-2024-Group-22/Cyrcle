@@ -1,79 +1,101 @@
 package com.github.se.cyrcle.ui.profile
 
+import android.app.Activity
+import android.util.Log
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.AddModerator
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Diamond
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.LocalParking
+import androidx.compose.material.icons.filled.Outbox
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.TextButton
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
-import coil.transform.CircleCropTransformation
 import com.github.se.cyrcle.R
 import com.github.se.cyrcle.model.parking.Parking
+import com.github.se.cyrcle.model.parking.ParkingViewModel
+import com.github.se.cyrcle.model.review.ReviewViewModel
+import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserViewModel
-import com.github.se.cyrcle.ui.authentication.Authenticator
 import com.github.se.cyrcle.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.github.se.cyrcle.ui.navigation.NavigationActions
 import com.github.se.cyrcle.ui.navigation.Route
+import com.github.se.cyrcle.ui.navigation.Screen
 import com.github.se.cyrcle.ui.navigation.TopLevelDestinations
+import com.github.se.cyrcle.ui.review.ReviewCard
 import com.github.se.cyrcle.ui.theme.ColorLevel
-import com.github.se.cyrcle.ui.theme.Red
 import com.github.se.cyrcle.ui.theme.atoms.Button
-import com.github.se.cyrcle.ui.theme.atoms.ConditionCheckingInputText
+import com.github.se.cyrcle.ui.theme.atoms.IconButton
 import com.github.se.cyrcle.ui.theme.atoms.Text
 import com.github.se.cyrcle.ui.theme.molecules.BottomNavigationBar
-
-const val FIRST_NAME_MIN_LENGTH = 0
-const val FIRST_NAME_MAX_LENGTH = 32
-const val LAST_NAME_MIN_LENGTH = 0
-const val LAST_NAME_MAX_LENGTH = 32
-const val USERNAME_MIN_LENGTH = 4
-const val USERNAME_MAX_LENGTH = 32
+import com.github.se.cyrcle.ui.theme.molecules.DeleteConfirmationDialog
+import kotlinx.coroutines.launch
 
 @Composable
 fun ViewProfileScreen(
     navigationActions: NavigationActions,
     userViewModel: UserViewModel,
-    authenticator: Authenticator
+    parkingViewModel: ParkingViewModel,
+    reviewViewModel: ReviewViewModel
 ) {
+
+  val context = LocalContext.current
   val userState by userViewModel.currentUser.collectAsState()
   var isEditing by remember { mutableStateOf(false) }
-  var firstName by remember { mutableStateOf(userState?.details?.firstName ?: "") }
-  var lastName by remember { mutableStateOf(userState?.details?.lastName ?: "") }
-  var username by remember { mutableStateOf(userState?.public?.username ?: "") }
-  var profilePictureUrl by remember { mutableStateOf(userState?.public?.profilePictureUrl ?: "") }
-  val context = LocalContext.current
+  var signOut by remember { mutableStateOf(false) }
+  val signOutToastText = stringResource(R.string.view_profile_on_sign_out_toast)
 
-  val imagePickerLauncher =
-      rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let { profilePictureUrl = it.toString() }
-      }
+  LaunchedEffect(Unit, userState) { userViewModel.loadSelectedUserImages() }
 
   Scaffold(
       modifier = Modifier.testTag("ViewProfileScreen"),
@@ -81,313 +103,313 @@ fun ViewProfileScreen(
         BottomNavigationBar(
             navigationActions = navigationActions,
             tabList = LIST_TOP_LEVEL_DESTINATION,
-            selectedItem = Route.PROFILE)
+            selectedItem = Route.VIEW_PROFILE)
       }) { innerPadding ->
-        Box(Modifier.fillMaxSize().padding(innerPadding)) {
-          authenticator.SignOutButton(Modifier.padding(10.dp).align(Alignment.TopEnd)) {
-            userViewModel.setCurrentUser(null)
-            Toast.makeText(context, "You're signed out!", Toast.LENGTH_SHORT).show()
-            navigationActions.navigateTo(TopLevelDestinations.AUTH)
-          }
+        Column(Modifier.fillMaxSize().padding(innerPadding)) {
+          Row(
+              modifier = Modifier.padding(top = 10.dp).fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween) {
+                IconButton(
+                    modifier = Modifier.padding(start = 10.dp),
+                    icon = Icons.Filled.Diamond,
+                    contentDescription = "Go to Gambling Screen",
+                    testTag = "GamblingButton",
+                    onClick = { navigationActions.navigateTo(Screen.GAMBLING) })
 
-          Column(
-              modifier = Modifier.fillMaxSize().padding(16.dp).testTag("ProfileContent"),
-              horizontalAlignment = Alignment.CenterHorizontally) {
-                if (isEditing) {
-                  EditProfileContent(
-                      firstName = firstName,
-                      lastName = lastName,
-                      username = username,
-                      profilePictureUrl = profilePictureUrl,
-                      onFirstNameChange = { firstName = it },
-                      onLastNameChange = { lastName = it },
-                      onUsernameChange = { username = it },
-                      onImageClick = { imagePickerLauncher.launch("image/*") },
-                      onSave = {
-                        userViewModel.updateUser(
-                            userState?.copy(
-                                public =
-                                    userState
-                                        ?.public!!
-                                        .copy(
-                                            username = username,
-                                            profilePictureUrl = profilePictureUrl),
-                                details =
-                                    userState
-                                        ?.details
-                                        ?.copy(firstName = firstName, lastName = lastName))
-                                ?: return@EditProfileContent)
-                        userViewModel.getUserById(userState?.public!!.userId)
-                        isEditing = false
-                      },
-                      onCancel = {
-                        firstName = userState?.details?.firstName ?: ""
-                        lastName = userState?.details?.lastName ?: ""
-                        username = userState?.public!!.username
-                        profilePictureUrl = userState?.public!!.profilePictureUrl
-                        isEditing = false
-                      })
-                } else {
-                  DisplayProfileContent(
-                      firstName = firstName,
-                      lastName = lastName,
-                      username = username,
-                      profilePictureUrl = profilePictureUrl,
-                      onEditClick = { isEditing = true })
+                Row(
+                    modifier = Modifier.padding(end = 10.dp),
+                    horizontalArrangement = Arrangement.End) {
+                      if (userViewModel.currentUser.collectAsState().value?.details?.isAdmin ==
+                          true) {
+                        IconButton(
+                            modifier = Modifier.padding(end = 10.dp),
+                            icon = Icons.Filled.AddModerator,
+                            contentDescription = "Admin",
+                            testTag = "AdminButton",
+                            onClick = { navigationActions.navigateTo(Screen.ADMIN) })
+                      }
 
-                  Spacer(modifier = Modifier.height(24.dp))
+                      IconButton(
+                          modifier = Modifier.padding(end = 10.dp),
+                          icon = Icons.Filled.Outbox,
+                          contentDescription = "Sign Out",
+                          testTag = "SignOutButton",
+                          onClick = { signOut = true })
 
-                  FavoriteParkingsSection(userViewModel)
-                }
+                      IconButton(
+                          modifier = Modifier.padding(end = 10.dp),
+                          icon = Icons.AutoMirrored.Filled.MenuBook,
+                          contentDescription = "Tutorial",
+                          testTag = "TutorialButton",
+                          onClick = { navigationActions.navigateTo(Route.TUTORIAL) })
+                    }
               }
-        }
-      }
-}
 
-@Composable
-private fun EditProfileContent(
-    firstName: String,
-    lastName: String,
-    username: String,
-    profilePictureUrl: String,
-    onFirstNameChange: (String) -> Unit,
-    onLastNameChange: (String) -> Unit,
-    onUsernameChange: (String) -> Unit,
-    onImageClick: () -> Unit,
-    onSave: () -> Unit,
-    onCancel: () -> Unit
-) {
-  ProfileImage(
-      url = profilePictureUrl,
-      onClick = onImageClick,
-      isEditable = true,
-      modifier = Modifier.testTag("ProfileImage"))
-
-  Spacer(modifier = Modifier.height(24.dp))
-
-  ConditionCheckingInputText(
-      value = firstName,
-      onValueChange = onFirstNameChange,
-      label = stringResource(R.string.view_profile_screen_first_name_label),
-      minCharacters = FIRST_NAME_MIN_LENGTH,
-      maxCharacters = FIRST_NAME_MAX_LENGTH,
-      testTag = "FirstNameField")
-
-  Spacer(modifier = Modifier.height(8.dp))
-
-  ConditionCheckingInputText(
-      value = lastName,
-      onValueChange = onLastNameChange,
-      label = stringResource(R.string.view_profile_screen_last_name_label),
-      minCharacters = LAST_NAME_MIN_LENGTH,
-      maxCharacters = LAST_NAME_MAX_LENGTH,
-      testTag = "LastNameField")
-
-  Spacer(modifier = Modifier.height(8.dp))
-
-  ConditionCheckingInputText(
-      value = username,
-      onValueChange = onUsernameChange,
-      label = stringResource(R.string.view_profile_screen_username_label),
-      minCharacters = USERNAME_MIN_LENGTH,
-      maxCharacters = USERNAME_MAX_LENGTH,
-      testTag = "UsernameField")
-
-  Spacer(modifier = Modifier.height(16.dp))
-
-  Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-    Button(
-        text = stringResource(R.string.view_profile_screen_save_button),
-        onClick = onSave,
-        colorLevel = ColorLevel.PRIMARY,
-        enabled = areInputsValid(firstName, lastName, username),
-        testTag = "SaveButton")
-
-    Button(
-        text = stringResource(R.string.view_profile_screen_cancel_button),
-        onClick = onCancel,
-        colorLevel = ColorLevel.SECONDARY,
-        testTag = "CancelButton")
-  }
-}
-
-fun areInputsValid(firstName: String, lastName: String, username: String): Boolean {
-  return firstName.length in FIRST_NAME_MIN_LENGTH..FIRST_NAME_MAX_LENGTH &&
-      lastName.length in LAST_NAME_MIN_LENGTH..LAST_NAME_MAX_LENGTH &&
-      username.length in USERNAME_MIN_LENGTH..USERNAME_MAX_LENGTH
-}
-
-@Composable
-private fun DisplayProfileContent(
-    firstName: String,
-    lastName: String,
-    username: String,
-    profilePictureUrl: String,
-    onEditClick: () -> Unit
-) {
-  Text(
-      text = firstName,
-      style = MaterialTheme.typography.headlineMedium,
-      testTag = "DisplayFirstName")
-
-  Text(
-      text = lastName, style = MaterialTheme.typography.headlineMedium, testTag = "DisplayLastName")
-
-  Spacer(modifier = Modifier.height(16.dp))
-
-  ProfileImage(
-      url = profilePictureUrl,
-      onClick = {},
-      isEditable = false,
-      modifier = Modifier.testTag("ProfileImage"))
-  Spacer(modifier = Modifier.height(8.dp))
-
-  Text(
-      text = stringResource(R.string.view_profile_screen_display_username, username),
-      style = MaterialTheme.typography.bodyMedium,
-      testTag = "DisplayUsername")
-
-  Spacer(modifier = Modifier.height(16.dp))
-
-  Button(
-      text = stringResource(R.string.view_profile_screen_modify_profile_button),
-      onClick = onEditClick,
-      colorLevel = ColorLevel.TERTIARY,
-      testTag = "EditButton")
-}
-
-@Composable
-private fun ProfileImage(
-    url: String,
-    onClick: () -> Unit,
-    isEditable: Boolean,
-    modifier: Modifier = Modifier
-) {
-  Box(
-      modifier =
-          modifier.then(if (isEditable) Modifier.clickable(onClick = onClick) else Modifier)) {
-        if (url.isBlank()) {
-          Box(
-              modifier =
-                  Modifier.size(120.dp)
-                      .clip(CircleShape)
-                      .background(MaterialTheme.colorScheme.primaryContainer),
-              contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = Icons.Filled.Person,
-                    contentDescription =
-                        stringResource(R.string.view_profile_screen_default_profile_picture),
-                    modifier = Modifier.size(60.dp),
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer)
-              }
-        } else {
-          Image(
-              painter =
-                  rememberAsyncImagePainter(
-                      ImageRequest.Builder(LocalContext.current)
-                          .data(url)
-                          .apply { transformations(CircleCropTransformation()) }
-                          .build()),
-              contentDescription = stringResource(R.string.view_profile_screen_profile_picture),
-              modifier = Modifier.size(120.dp).clip(CircleShape),
-              contentScale = ContentScale.Crop)
-        }
-
-        if (isEditable) {
-          Box(
-              modifier =
-                  Modifier.size(120.dp)
-                      .clip(CircleShape)
-                      .background(Color.Black.copy(alpha = 0.3f)),
-              contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = Icons.Filled.Edit,
-                    contentDescription =
-                        stringResource(R.string.view_profile_screen_edit_profile_picture),
-                    tint = Color.White,
-                    modifier = Modifier.size(40.dp))
-              }
-        }
-      }
-}
-
-@Composable
-private fun FavoriteParkingsSection(userViewModel: UserViewModel) {
-  val favoriteParkings = userViewModel.favoriteParkings.collectAsState().value
-
-  LaunchedEffect(Unit) { userViewModel.getSelectedUserFavoriteParking() }
-
-  Text(
-      text = stringResource(R.string.view_profile_screen_favorite_parking_title),
-      style = MaterialTheme.typography.titleLarge,
-      modifier = Modifier.testTag("FavoriteParkingsTitle"))
-
-  Spacer(modifier = Modifier.height(16.dp))
-
-  if (favoriteParkings.isEmpty()) {
-    Text(
-        text = stringResource(R.string.view_profile_screen_no_favorite_parking),
-        style = MaterialTheme.typography.bodyMedium,
-        modifier = Modifier.testTag("NoFavoritesMessage"))
-  } else {
-    LazyRow(
-        modifier = Modifier.fillMaxWidth().testTag("FavoriteParkingList"),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-          itemsIndexed(favoriteParkings) { index, parking ->
-            FavoriteParkingCard(
-                parking = parking,
-                index = index,
-                onRemove = {
-                  userViewModel.removeFavoriteParkingFromSelectedUser(parking.uid)
-                  userViewModel.getSelectedUserFavoriteParking()
+          if (signOut) {
+            AlertDialog(
+                modifier = Modifier.testTag("SignOutDialog"),
+                onDismissRequest = {},
+                title = {
+                  Text(stringResource(R.string.view_profile_screen_sign_out_dialog_title))
+                },
+                text = {
+                  Text(stringResource(R.string.view_profile_screen_sign_out_dialog_message))
+                },
+                confirmButton = {
+                  TextButton(
+                      modifier = Modifier.testTag("SignOutDialogConfirmButton"),
+                      onClick = {
+                        userViewModel.signOut {
+                          (context as Activity).runOnUiThread {
+                            Toast.makeText(context, signOutToastText, Toast.LENGTH_SHORT).show()
+                          }
+                          navigationActions.navigateTo(TopLevelDestinations.AUTH)
+                        }
+                      }) {
+                        Text(
+                            stringResource(
+                                R.string.view_profile_screen_sign_out_dialog_action_button))
+                      }
+                },
+                dismissButton = {
+                  TextButton(
+                      modifier = Modifier.testTag("SignOutDialogCancelButton"),
+                      onClick = { signOut = false }) {
+                        Text(
+                            stringResource(
+                                R.string.view_profile_screen_sign_out_dialog_cancel_button))
+                      }
                 })
           }
+
+          if (isEditing) {
+            EditProfileComponent(
+                user = userState,
+                saveButton = { editedUser: User, validInputs: Boolean ->
+                  Button(
+                      text = stringResource(R.string.view_profile_screen_save_button),
+                      onClick = {
+                        userViewModel.updateUser(editedUser, context)
+                        isEditing = false
+                      },
+                      colorLevel = ColorLevel.PRIMARY,
+                      enabled = validInputs,
+                      testTag = "SaveButton")
+                },
+                cancelButton = {
+                  Button(
+                      text = stringResource(R.string.view_profile_screen_cancel_button),
+                      onClick = { isEditing = false },
+                      colorLevel = ColorLevel.SECONDARY,
+                      testTag = "CancelButton")
+                })
+          } else {
+            DisplayProfileComponent(userState) {
+              // Edit Button directly in the Box
+              Button(
+                  text = stringResource(R.string.view_profile_screen_modify_profile_button),
+                  onClick = { isEditing = true },
+                  colorLevel = ColorLevel.TERTIARY,
+                  testTag = "EditButton")
+
+              val userReviews by reviewViewModel.userReviews.collectAsState()
+              // Map to store the parking corresponding to each review. This is used to display the
+              // parking
+              // name in the review card and allow to navigate to the parking's details screen
+              val reviewToParkingMap = remember { mutableStateMapOf<String, Parking>() }
+              LaunchedEffect(userReviews) {
+                userReviews.forEach { review ->
+                  parkingViewModel.getParkingById(
+                      review.parking, { parking -> reviewToParkingMap[review.uid] = parking }, {})
+                }
+              }
+
+              // Display the TabLayout
+              TabLayout(
+                  userViewModel = userViewModel,
+                  parkingViewModel = parkingViewModel,
+                  reviewViewModel = reviewViewModel,
+                  navigationActions = navigationActions,
+                  reviewToParkingMap = reviewToParkingMap)
+            }
+          }
         }
+      }
+}
+
+/**
+ * Tab layout for the profile screen. This layout contains the following tabs:
+ * - Favorite Parkings
+ * - My Reviews
+ *
+ * This layout allows a tab to be selected by either clicking on the tab itself or by swiping
+ * horizontally.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun TabLayout(
+    userViewModel: UserViewModel,
+    parkingViewModel: ParkingViewModel,
+    reviewViewModel: ReviewViewModel,
+    navigationActions: NavigationActions,
+    reviewToParkingMap: Map<String, Parking>
+) {
+  val tabs =
+      listOf(
+          stringResource(R.string.view_profile_screen_favorite_parkings),
+          stringResource(R.string.view_profile_screen_my_reviews),
+          stringResource(R.string.view_profile_screen_my_images))
+
+  val pagerState = rememberPagerState(pageCount = { tabs.size })
+  val coroutineScope = rememberCoroutineScope()
+
+  Column(modifier = Modifier.fillMaxWidth().padding(top = 24.dp)) {
+    TabRow(selectedTabIndex = pagerState.currentPage, modifier = Modifier.testTag("TabRow")) {
+      tabs.forEachIndexed { index, title ->
+        Tab(
+            text = { Text(title) },
+            selected = pagerState.currentPage == index,
+            onClick = { coroutineScope.launch { pagerState.animateScrollToPage(index) } },
+            modifier = Modifier.testTag("Tab${title.replace(" ", "")}"))
+      }
+    }
+
+    HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
+      when (page) {
+        0 -> FavoriteParkingsSection(userViewModel, parkingViewModel, navigationActions)
+        1 ->
+            UserReviewsSection(
+                reviewViewModel,
+                userViewModel,
+                parkingViewModel,
+                navigationActions,
+                reviewToParkingMap)
+        2 -> UserImagesSection(userViewModel, parkingViewModel, navigationActions)
+      }
+    }
   }
 }
 
 @Composable
-private fun FavoriteParkingCard(parking: Parking, index: Int, onRemove: () -> Unit) {
-  var showConfirmDialog by remember { mutableStateOf(false) }
-  val context = LocalContext.current
+private fun FavoriteParkingsSection(
+    userViewModel: UserViewModel,
+    parkingViewModel: ParkingViewModel,
+    navigationActions: NavigationActions
+) {
+  val favoriteParkings = userViewModel.favoriteParkings.collectAsState().value
 
-  Card(modifier = Modifier.size(120.dp).padding(8.dp), shape = MaterialTheme.shapes.medium) {
-    Box(modifier = Modifier.fillMaxSize()) {
+  Box(modifier = Modifier.fillMaxSize()) {
+    if (favoriteParkings.isEmpty()) {
       Text(
-          text = parking.optName ?: "",
-          style = MaterialTheme.typography.bodySmall,
-          modifier = Modifier.align(Alignment.Center).padding(8.dp).testTag("ParkingItem_$index"))
-
-      IconButton(
-          onClick = { showConfirmDialog = true },
-          modifier =
-              Modifier.align(Alignment.TopEnd).size(32.dp).testTag("FavoriteToggle_$index")) {
-            Icon(
-                imageVector = Icons.Default.Favorite,
-                contentDescription =
-                    stringResource(R.string.view_profile_screen_remove_from_favorite),
-                tint = Red,
-                modifier = Modifier.size(20.dp))
+          text = stringResource(R.string.view_profile_screen_no_favorite_parking),
+          style = MaterialTheme.typography.bodyMedium,
+          modifier = Modifier.testTag("NoFavoritesMessage").padding(16.dp))
+    } else {
+      LazyColumn(
+          modifier = Modifier.fillMaxWidth().testTag("FavoriteParkingList"),
+          contentPadding = PaddingValues(16.dp)) {
+            itemsIndexed(favoriteParkings) { index, parking ->
+              FavoriteParkingCard(
+                  navigationActions, parkingViewModel, userViewModel, parking, index)
+            }
           }
     }
   }
+}
+
+@Composable
+fun FavoriteParkingCard(
+    navigationActions: NavigationActions,
+    parkingViewModel: ParkingViewModel,
+    userViewModel: UserViewModel,
+    parking: Parking,
+    index: Int
+) {
+  val userState by userViewModel.currentUser.collectAsState()
+  var showConfirmDialog by remember { mutableStateOf(false) }
+
+  Card(
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(8.dp)
+              .clickable(
+                  onClick = {
+                    parkingViewModel.selectParking(parking)
+                    navigationActions.navigateTo(Screen.PARKING_DETAILS)
+                  })
+              .testTag("ParkingItem$index"),
+      colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+      elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
+        Row(
+            modifier = Modifier.fillMaxSize().padding(16.dp).testTag("ParkingContent$index"),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween) {
+              Column(
+                  modifier = Modifier.weight(1f),
+                  verticalArrangement = Arrangement.spacedBy(8.dp)) {
+
+                    // Parking name
+                    androidx.compose.material3.Text(
+                        text = parking.optName ?: stringResource(R.string.default_parking_name),
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.testTag("ParkingName$index"))
+
+                    // Display the personal note if it exists. Otherwise, display a message
+                    // indicating that there is no note.
+                    val personalNote = userState?.details?.personalNotes?.get(parking.uid)
+                    Text(
+                        text =
+                            if (personalNote.isNullOrBlank()) {
+                              stringResource(R.string.view_profile_screen_no_note)
+                            } else {
+                              stringResource(R.string.view_profile_screen_note, personalNote)
+                            },
+                        style =
+                            if (personalNote.isNullOrBlank())
+                                MaterialTheme.typography.bodyMedium.copy(
+                                    fontStyle = FontStyle.Italic, fontSize = 12.sp)
+                            else MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.testTag("ParkingNote$index"),
+                        textAlign = TextAlign.Justify)
+                  }
+
+              Spacer(modifier = Modifier.weight(0.1f).width(8.dp))
+
+              // Favorite icon
+              androidx.compose.material3.IconButton(
+                  onClick = { showConfirmDialog = true },
+                  modifier = Modifier.size(32.dp).testTag("FavoriteToggle$index")) {
+                    Icon(
+                        imageVector = Icons.Default.Favorite,
+                        contentDescription = "Favorite Parking",
+                        tint = Color.Red)
+                  }
+            }
+      }
 
   if (showConfirmDialog) {
     AlertDialog(
         onDismissRequest = { showConfirmDialog = false },
-        title = { Text(stringResource(R.string.view_profile_screen_remove_favorite_dialog_title)) },
+        title = {
+          Text(
+              stringResource(R.string.view_profile_screen_remove_favorite_dialog_title),
+              style = MaterialTheme.typography.titleMedium)
+        },
         text = {
           Text(
               stringResource(
                   R.string.view_profile_screen_remove_favorite_dialog_message,
-                  parking.optName ?: stringResource(R.string.default_parking_name)))
+                  parking.optName ?: stringResource(R.string.default_parking_name)),
+              textAlign = TextAlign.Justify)
         },
         confirmButton = {
           TextButton(
               onClick = {
-                onRemove()
+                userViewModel.removeFavoriteParkingFromSelectedUser(parking)
                 showConfirmDialog = false
-                Toast.makeText(context, "Removed from Favorites!", Toast.LENGTH_SHORT).show()
               }) {
                 Text(
                     stringResource(
@@ -400,4 +422,197 @@ private fun FavoriteParkingCard(parking: Parking, index: Int, onRemove: () -> Un
           }
         })
   }
+}
+
+@Composable
+private fun UserReviewsSection(
+    reviewViewModel: ReviewViewModel,
+    userViewModel: UserViewModel,
+    parkingViewModel: ParkingViewModel,
+    navigationActions: NavigationActions,
+    reviewToParkingMap: Map<String, Parking>
+) {
+  val userState by userViewModel.currentUser.collectAsState()
+
+  LaunchedEffect(userState?.public?.userId) {
+    userState?.public?.userId?.let { userId ->
+      Log.d("ViewProfileScreen", "Fetching reviews for user $userId")
+      reviewViewModel.getReviewsByOwnerId(userId)
+    }
+  }
+
+  val userReviews by reviewViewModel.userReviews.collectAsState()
+
+  Box(modifier = Modifier.fillMaxSize()) {
+    if (userReviews.isEmpty()) {
+      Text(
+          text = stringResource(R.string.view_profile_screen_no_reviews_message),
+          style = MaterialTheme.typography.bodyMedium,
+          modifier = Modifier.padding(16.dp).testTag("NoReviewsMessage"))
+    } else {
+      LazyColumn(
+          modifier = Modifier.fillMaxWidth().testTag("UserReviewsList"),
+          contentPadding = PaddingValues(16.dp)) {
+            items(
+                // Filter out reviews that do not have a corresponding parking (desynced data)
+                items = userReviews.filter { reviewToParkingMap.containsKey(it.uid) },
+                key = { it.uid }) { curReview ->
+                  val index = userReviews.indexOf(curReview)
+                  val isExpanded = true
+
+                  // We can assert parking is not null thanks to the filter above
+                  val parking = reviewToParkingMap[curReview.uid]!!
+
+                  ReviewCard(
+                      review = curReview,
+                      title = parking.optName ?: stringResource(R.string.default_parking_name),
+                      index = index,
+                      isExpanded = isExpanded,
+                      onCardClick = {
+                        parkingViewModel.selectParking(parking)
+                        navigationActions.navigateTo(Screen.PARKING_DETAILS)
+                      },
+                      options = mapOf(),
+                      userViewModel = userViewModel,
+                      reviewViewModel = reviewViewModel,
+                      parkingViewModel = parkingViewModel,
+                      oldScore = 0.0, // not needed in this case
+                      ownerReputationScore = null)
+                }
+          }
+    }
+  }
+}
+
+/** Section where all the User Images are displayed */
+@Composable
+private fun UserImagesSection(
+    userViewModel: UserViewModel,
+    parkingViewModel: ParkingViewModel,
+    navigationActions: NavigationActions
+) {
+  val context = LocalContext.current
+  val imagesUrls = userViewModel.selectedUserImageUrls.collectAsState().value
+  val imagesPaths = userViewModel.selectedUserAssociatedImages.collectAsState().value
+
+  // States for managing dialogs
+  val showFirstDialog = remember { mutableStateOf(false) } // First dialog visibility
+  val showDeleteDialog = remember { mutableStateOf(false) } // Delete confirmation dialog visibility
+  val selectedImagePath = remember { mutableStateOf<String?>(null) }
+  val selectedParkingId = remember { mutableStateOf<String?>(null) }
+  val strResToast = stringResource(R.string.view_profile_screen_image_deleted)
+
+  Box(modifier = Modifier.fillMaxSize()) {
+    if (imagesUrls.isEmpty()) {
+      Text(
+          text = stringResource(R.string.view_profile_screen_no_images_message),
+          style = MaterialTheme.typography.bodyMedium,
+          modifier = Modifier.padding(16.dp).testTag("NoImagesMessage"))
+    } else {
+      LazyColumn(
+          modifier = Modifier.fillMaxWidth().testTag("UserImagesList"),
+          contentPadding = PaddingValues(16.dp)) {
+            itemsIndexed(imagesUrls) { index, url ->
+              UserImageCard(
+                  url = url,
+                  onClick = {
+                    // When an image is clicked, trigger the first AlertDialog
+                    selectedImagePath.value = imagesPaths[index]
+                    selectedParkingId.value =
+                        parkingViewModel.getParkingFromImagePath(imagesPaths[index])
+                    showFirstDialog.value = true
+                  })
+            }
+          }
+    }
+  }
+
+  // First AlertDialog
+  if (showFirstDialog.value) {
+    AlertDialog(
+        onDismissRequest = { showFirstDialog.value = false },
+        title = { Text(stringResource(R.string.view_profile_screen_image_dialog_title)) },
+        text = {
+          Column {
+            Text(stringResource(R.string.view_profile_screen_image_dialog_description))
+            Spacer(modifier = Modifier.height(16.dp))
+            Image(
+                painter = rememberAsyncImagePainter(model = selectedImagePath.value),
+                contentDescription = null,
+                modifier = Modifier.fillMaxWidth().height(200.dp))
+          }
+        },
+        confirmButton = {
+          IconButton(
+              onClick = {
+                parkingViewModel.getParkingById(
+                    selectedParkingId.value!!,
+                    { parkingForPath ->
+                      parkingViewModel.selectParking(parkingForPath)
+                      navigationActions.navigateTo(Screen.PARKING_DETAILS)
+                      showFirstDialog.value = false
+                    },
+                    {})
+              },
+              icon = Icons.Filled.LocalParking,
+              contentDescription = "Parking From Image",
+              modifier = Modifier.testTag("ParkingFromImageButton"))
+        },
+        dismissButton = {
+          // Delete Button opens the SECOND delete dialog
+          IconButton(
+              onClick = {
+                showFirstDialog.value = false
+                showDeleteDialog.value = true // Trigger the DeleteConfirmationDialog
+              },
+              modifier = Modifier.testTag("DeleteImageButton"),
+              icon = Icons.Filled.Delete,
+              contentDescription = "Delete Image")
+        })
+  }
+
+  if (showDeleteDialog.value) {
+    DeleteConfirmationDialog(
+        showDialog = showDeleteDialog,
+        onDismiss = { showDeleteDialog.value = false },
+        onConfirm = {
+          val imagePath = selectedImagePath.value
+          val parkingId = selectedParkingId.value
+
+          if (imagePath != null && parkingId != null) {
+            userViewModel.removeImageFromUserImages(imagePath)
+            parkingViewModel.getParkingById(
+                parkingId,
+                { parkingForPath ->
+                  parkingViewModel.selectParking(parkingForPath)
+                  parkingViewModel.deleteImageFromParking(parkingId, imagePath)
+                  Toast.makeText(context, strResToast, Toast.LENGTH_SHORT).show()
+                  navigationActions.navigateTo(Screen.VIEW_PROFILE)
+                },
+                {})
+          }
+          showDeleteDialog.value = false
+        })
+  }
+}
+
+/** Card representing a UserImage to display in the above column */
+@Composable
+private fun UserImageCard(url: String, onClick: (String) -> Unit) {
+  Card(
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(8.dp)
+              .clickable { onClick(url) } // Attach onClick here
+              .testTag("ImageCard"),
+      colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+      elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
+          Spacer(modifier = Modifier.height(8.dp))
+          Image(
+              painter = rememberAsyncImagePainter(model = url),
+              contentDescription = null,
+              modifier = Modifier.fillMaxWidth().height(200.dp).testTag("ImageContent"))
+        }
+      }
 }

@@ -12,20 +12,34 @@ object Route {
   const val LIST = "List"
   const val MAP = "Map"
   const val ADD_SPOTS = "Add Spots"
-  const val PROFILE = "Profile"
+  const val VIEW_PROFILE = "Profile"
   const val REVIEW = "Review"
+  const val GAMBLING = "Gambling"
+  const val ZONE = "Zone"
+  const val TUTORIAL = "Tutorial"
 }
 
 object Screen {
-  const val AUTH = "Auth Screen"
   const val LIST = "List Screen"
   const val MAP = "Map Screen"
   const val PARKING_DETAILS = "Parking Details Screen"
   const val ADD_REVIEW = "Add Review Screen"
+  const val ALL_REVIEWS = "All Reviews"
   const val LOCATION_PICKER = "Location Picker Screen"
   const val ATTRIBUTES_PICKER = "Attributes Picker Screen"
-  const val PROFILE = "Profile Screen"
-  const val ALL_REVIEWS = "All Reviews"
+  const val RACK_INFO = "Rack Info Screen"
+  const val AUTH = "Auth Screen"
+  const val VIEW_PROFILE = "Profile Screen"
+  const val CREATE_PROFILE = "Create Profile"
+  const val PARKING_REPORT = "Parking Report Screen"
+  const val REVIEW_REPORT = "Review Report Screen"
+  const val IMAGE_REPORT = "Image Report Screen"
+  const val GAMBLING = "Gambling Screen"
+  const val ADMIN = "Admin Screen"
+  const val VIEW_REPORTS = "View Reports Screen"
+  const val ZONE_SELECTION = "Zone Selection Screen"
+  const val ZONE_MANAGER = "Zone Manager Screen"
+  const val TUTORIAL = "Tutorial Screen"
 }
 
 /**
@@ -47,7 +61,7 @@ object TopLevelDestinations {
       TopLevelDestination(route = Route.MAP, icon = Icons.Outlined.LocationOn, textId = Route.MAP)
   val PROFILE =
       TopLevelDestination(
-          route = Route.PROFILE, icon = Icons.Outlined.Person, textId = Route.PROFILE)
+          route = Route.VIEW_PROFILE, icon = Icons.Outlined.Person, textId = Route.VIEW_PROFILE)
 }
 
 /** List of top level destinations in the app. */
@@ -68,8 +82,7 @@ open class NavigationActions(private val navController: NavHostController) {
     navController.navigate(destination.route) {
       // Pop up the whole back stack to the start destination
       popUpTo(0) { inclusive = true }
-      // Avoid multiple copies of the same destination when
-      // reselecting the same item
+      // Avoid multiple copies of the same destination when reselecting the same item
       launchSingleTop = true
       // Restore state when reselecting a previously selected item
       restoreState = true

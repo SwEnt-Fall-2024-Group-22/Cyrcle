@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -38,10 +39,14 @@ import com.mapbox.maps.ScreenCoordinate
 fun RectangleSelection(
     mapViewModel: MapViewModel,
     paddingValues: PaddingValues,
-    mapView: MapView?
+    mapView: MapView?,
+    restrictSelectionSize: Boolean = true
 ) {
   val locationPickerState by mapViewModel.locationPickerState.collectAsState()
-  val isAreaTooLarge by mapViewModel.isAreaTooLarge.collectAsState()
+  val isLocationValid by
+      mapViewModel.isLocationValid.collectAsState(initial = true).let { locationValidState ->
+        derivedStateOf { !restrictSelectionSize || locationValidState.value }
+      }
   val center = Offset(0.5f, 0.5f)
   var touchPosition by remember { mutableStateOf(Offset.Unspecified) }
   val hasDragged = remember { mutableStateOf(false) }
@@ -54,6 +59,7 @@ fun RectangleSelection(
         modifier =
             Modifier.padding(paddingValues)
                 .fillMaxSize()
+                .testTag("canvas")
                 .then(
                     if (!mapGesturesEnabled.value) {
                       Modifier.pointerInput(Unit) {
@@ -76,22 +82,19 @@ fun RectangleSelection(
 
           val listScreenCoordinates = computeCornersScreenCoordinates(canvasCenter, width, height)
           val pointsList = mapView?.mapboxMap?.coordinatesForPixels(listScreenCoordinates)
-          mapViewModel.updateIsAreaTooLarge(pointsList?.let { Location(it).computeArea() } ?: 0.0)
+          if (pointsList != null) mapViewModel.updateLocation(Location(pointsList))
 
           if (hasDragged.value) {
             // Fill of the rectangle
             drawRect(
-                color = if (isAreaTooLarge) Red.copy(alpha = 0.5f) else Cerulean.copy(alpha = 0.7f),
+                color =
+                    if (isLocationValid) Cerulean.copy(alpha = 0.7f) else Red.copy(alpha = 0.5f),
                 topLeft = canvasCenter,
                 size = rectSize)
 
             // Outline of the rectangle
             drawRect(
-                color = if (isAreaTooLarge) Red.copy(alpha = 0.5f) else Cerulean.copy(alpha = 0.7f),
-                topLeft = canvasCenter,
-                size = rectSize)
-            drawRect(
-                color = if (isAreaTooLarge) Red else Cerulean,
+                color = if (isLocationValid) Cerulean else Red,
                 topLeft = canvasCenter,
                 size = rectSize,
                 style = Stroke(width = 2f))

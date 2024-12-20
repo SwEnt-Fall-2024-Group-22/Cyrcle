@@ -1,12 +1,22 @@
 package com.github.se.cyrcle.di.mocks
 
 import com.github.se.cyrcle.model.review.Review
+import com.github.se.cyrcle.model.review.ReviewReport
+import com.github.se.cyrcle.model.review.ReviewReportReason
 import com.github.se.cyrcle.model.review.ReviewRepository
+import com.github.se.cyrcle.model.review.TestInstancesReview
 import javax.inject.Inject
 
 class MockReviewRepository @Inject constructor() : ReviewRepository {
   private var uid = 0
   private val reviews = mutableListOf<Review>()
+  private val reports =
+      mutableListOf(
+          ReviewReport(
+              "1", ReviewReportReason.IRRELEVANT, "1", TestInstancesReview.review1.uid, ""),
+          ReviewReport(
+              "2", ReviewReportReason.DEFAMATION, "2", TestInstancesReview.review1.uid, ""),
+          ReviewReport("3", ReviewReportReason.HARMFUL, "3", "nonexistent-review-id", ""))
 
   override fun getNewUid(): String {
     return (uid++).toString()
@@ -14,11 +24,6 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
 
   override fun onSignIn(onSuccess: () -> Unit) {
     onSuccess()
-  }
-
-  override fun getAllReviews(onSuccess: (List<Review>) -> Unit, onFailure: (Exception) -> Unit) {
-    if (reviews.none { it.uid == "" }) onSuccess(reviews)
-    else onFailure(Exception("Failed to get all reviews"))
   }
 
   override fun getReviewById(
@@ -31,24 +36,24 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
     else onSuccess(reviews.find { it.uid == id }!!)
   }
 
-  override fun getReviewByParking(
-      id: String,
+  override fun getReviewsByParkingId(
+      parkingId: String,
       onSuccess: (List<Review>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    if (id == "" || reviews.none { it.parking == id })
+    if (parkingId == "" || reviews.none { it.parking == parkingId })
         onFailure(Exception("Failed to get review by parking id"))
-    else onSuccess(reviews.filter { it.parking == id })
+    else onSuccess(reviews.filter { it.parking == parkingId })
   }
 
-  override fun getReviewsByOwner(
-      owner: String,
+  override fun getReviewsByOwnerId(
+      ownerId: String,
       onSuccess: (List<Review>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    if (owner == "" || reviews.none { it.owner == owner })
+    if (ownerId == "" || reviews.none { it.owner == ownerId })
         onFailure(Exception("Failed to get review by parking id"))
-    else onSuccess(reviews.filter { it.owner == owner })
+    else onSuccess(reviews.filter { it.owner == ownerId })
   }
 
   override fun addReview(review: Review, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
@@ -65,5 +70,34 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
 
   override fun deleteReviewById(id: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     if (id == "") onFailure(Exception("Failed to delete review")) else onSuccess()
+  }
+
+  override fun addReport(
+      report: ReviewReport,
+      onSuccess: (ReviewReport) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    if (report.uid == "") onFailure(Exception("Error adding report"))
+    else {
+      reports.add(report)
+      onSuccess(report)
+    }
+  }
+
+  override fun getReportsForReview(
+      reviewId: String,
+      onSuccess: (List<ReviewReport>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    if (reviewId == "") {
+      onFailure(Exception("Review ID is empty"))
+    } else {
+      val filteredReports = reports.filter { it.uid == reviewId }
+      if (filteredReports.isNotEmpty()) {
+        onSuccess(filteredReports)
+      } else {
+        onFailure(Exception("No reports found for review ID: $reviewId"))
+      }
+    }
   }
 }

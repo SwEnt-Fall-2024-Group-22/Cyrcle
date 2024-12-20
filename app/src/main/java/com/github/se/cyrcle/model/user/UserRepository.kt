@@ -26,12 +26,13 @@ interface UserRepository {
   fun getUserById(userId: String, onSuccess: (User) -> Unit, onFailure: (Exception) -> Unit)
 
   /**
-   * Get all users
+   * Check if a user exists
    *
-   * @param onSuccess a callback that is called when the users are retrieved
+   * @param user the user to check
+   * @param onSuccess a callback that is called with a boolean indicating if the user exists
    * @param onFailure a callback that is called when an error occurs
    */
-  fun getAllUsers(onSuccess: (List<User>) -> Unit, onFailure: (Exception) -> Unit)
+  fun userExists(user: User, onSuccess: (Boolean) -> Unit, onFailure: (Exception) -> Unit)
 
   /**
    * Add a user
@@ -59,21 +60,4 @@ interface UserRepository {
    * @param onFailure a callback that is called when an error occurs
    */
   fun deleteUserById(userId: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
-
-  /*
-
-   /**
-   * Get the contributed spots of a user
-   *
-   * @param userId the identifier of the user
-   * @param onSuccess a callback that is called when the contributed spots are retrieved
-   * @param onFailure a callback that is called when an error occurs
-   */
-  fun getUserContributedSpots(
-      userId: String,
-      onSuccess: (List<String>) -> Unit,
-      onFailure: (Exception) -> Unit
-  )
-
-   */
 }

@@ -1,35 +1,35 @@
 package com.github.se.cyrcle.ui.list
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.assertAll
-import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertTextEquals
-import androidx.compose.ui.test.hasClickAction
-import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performImeAction
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipe
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.se.cyrcle.di.mocks.MockAddressRepository
+import com.github.se.cyrcle.di.mocks.MockAuthenticationRepository
 import com.github.se.cyrcle.di.mocks.MockImageRepository
+import com.github.se.cyrcle.di.mocks.MockOfflineParkingRepository
 import com.github.se.cyrcle.di.mocks.MockParkingRepository
+import com.github.se.cyrcle.di.mocks.MockPermissionHandler
+import com.github.se.cyrcle.di.mocks.MockReportedObjectRepository
 import com.github.se.cyrcle.di.mocks.MockUserRepository
+import com.github.se.cyrcle.model.address.AddressRepository
+import com.github.se.cyrcle.model.address.AddressViewModel
+import com.github.se.cyrcle.model.authentication.AuthenticationRepository
+import com.github.se.cyrcle.model.image.ImageRepository
 import com.github.se.cyrcle.model.map.MapViewModel
-import com.github.se.cyrcle.model.parking.ImageRepository
-import com.github.se.cyrcle.model.parking.ParkingCapacity
-import com.github.se.cyrcle.model.parking.ParkingProtection
-import com.github.se.cyrcle.model.parking.ParkingRackType
-import com.github.se.cyrcle.model.parking.ParkingRepository
 import com.github.se.cyrcle.model.parking.ParkingViewModel
 import com.github.se.cyrcle.model.parking.TestInstancesParking
+import com.github.se.cyrcle.model.parking.offline.OfflineParkingRepository
+import com.github.se.cyrcle.model.parking.online.ParkingRepository
+import com.github.se.cyrcle.model.report.ReportedObjectRepository
 import com.github.se.cyrcle.model.user.User
 import com.github.se.cyrcle.model.user.UserDetails
 import com.github.se.cyrcle.model.user.UserPublic
@@ -53,11 +53,19 @@ class ListScreenTest {
 
   private lateinit var mockUserRepository: UserRepository
   private lateinit var mockParkingRepository: ParkingRepository
+  private lateinit var mockOfflineParkingRepository: OfflineParkingRepository
   private lateinit var mockImageRepository: ImageRepository
-  private lateinit var mockNavigationActions: NavigationActions
+  private lateinit var authenticator: AuthenticationRepository
+  private lateinit var addressRepository: AddressRepository
+  private lateinit var mockReportedObjectRepository: ReportedObjectRepository
+
   private lateinit var parkingViewModel: ParkingViewModel
   private lateinit var mapViewModel: MapViewModel
   private lateinit var userViewModel: UserViewModel
+  private lateinit var addressViewModel: AddressViewModel
+
+  private lateinit var mockNavigationActions: NavigationActions
+  private lateinit var permissionHandler: MockPermissionHandler
 
   @Before
   fun setUp() {
@@ -65,11 +73,25 @@ class ListScreenTest {
     mockNavigationActions = mock(NavigationActions::class.java)
     mockUserRepository = MockUserRepository()
     mockParkingRepository = MockParkingRepository()
+    mockOfflineParkingRepository = MockOfflineParkingRepository()
     mockImageRepository = MockImageRepository()
+    authenticator = MockAuthenticationRepository()
+    mockReportedObjectRepository = MockReportedObjectRepository()
+    addressRepository = MockAddressRepository()
 
-    parkingViewModel = ParkingViewModel(mockImageRepository, mockParkingRepository)
+    permissionHandler = MockPermissionHandler()
+
     mapViewModel = MapViewModel()
-    userViewModel = UserViewModel(mockUserRepository, mockParkingRepository)
+    userViewModel =
+        UserViewModel(mockUserRepository, mockParkingRepository, mockImageRepository, authenticator)
+    parkingViewModel =
+        ParkingViewModel(
+            mockImageRepository,
+            userViewModel,
+            mockParkingRepository,
+            mockOfflineParkingRepository,
+            mockReportedObjectRepository)
+    addressViewModel = AddressViewModel(addressRepository)
 
     `when`(mockNavigationActions.currentRoute()).thenReturn(Screen.LIST)
 
@@ -83,11 +105,10 @@ class ListScreenTest {
     // parking1 already in
     parkingViewModel.addParking(TestInstancesParking.parking2)
     parkingViewModel.addParking(TestInstancesParking.parking3)
-    userViewModel.addUser(user)
-    userViewModel.getUserById(user.public.userId)
-    userViewModel.addFavoriteParkingToSelectedUser(TestInstancesParking.parking1.uid)
-    userViewModel.addFavoriteParkingToSelectedUser(TestInstancesParking.parking2.uid)
-    userViewModel.getSelectedUserFavoriteParking()
+    userViewModel.setCurrentUser(user)
+    userViewModel.setCurrentUserById(user.public.userId)
+    userViewModel.addFavoriteParkingToSelectedUser(TestInstancesParking.parking1)
+    userViewModel.addFavoriteParkingToSelectedUser(TestInstancesParking.parking2)
   }
 
   @Test
@@ -99,7 +120,7 @@ class ListScreenTest {
           userViewModel,
           TestInstancesParking.parking1,
           0.0,
-          initialIsPinned = false)
+          0.0)
     }
 
     // Verify that the PinActionCard is displayed
@@ -116,8 +137,12 @@ class ListScreenTest {
           userViewModel,
           TestInstancesParking.parking1,
           0.0,
-          initialIsPinned = true)
+          0.0)
     }
+
+    // Unpin the parking
+    parkingViewModel.togglePinStatus(TestInstancesParking.parking1)
+
     composeTestRule.onNodeWithTag("PinActionCard").assertIsNotDisplayed()
     composeTestRule.onNodeWithTag("UnpinActionCard").assertIsDisplayed()
   }
@@ -131,7 +156,7 @@ class ListScreenTest {
           userViewModel,
           TestInstancesParking.parking3, // not in our user's favorites
           0.0,
-          initialIsPinned = false)
+          0.0)
     }
 
     // Verify that the AddToFavoriteActionCard is displayed
@@ -148,7 +173,7 @@ class ListScreenTest {
           userViewModel,
           TestInstancesParking.parking1, // in our user's favorites
           0.0,
-          initialIsPinned = false)
+          0.0)
     }
 
     // Verify that the AlreadyFavoriteActionCard is displayed
@@ -165,7 +190,7 @@ class ListScreenTest {
           userViewModel,
           TestInstancesParking.parking3,
           0.0,
-          initialIsPinned = false)
+          0.0)
     }
 
     val isFavorite =
@@ -198,7 +223,7 @@ class ListScreenTest {
           userViewModel,
           TestInstancesParking.parking1, // already in favorites
           0.0,
-          initialIsPinned = false)
+          0.0)
     }
 
     val isFavorite =
@@ -232,7 +257,7 @@ class ListScreenTest {
           userViewModel,
           TestInstancesParking.parking3,
           0.0,
-          initialIsPinned = false)
+          0.0)
     }
 
     composeTestRule.onNodeWithTag("AddToFavoriteActionCard").assertIsDisplayed()
@@ -254,7 +279,9 @@ class ListScreenTest {
           navigationActions = mockNavigationActions,
           parkingViewModel = parkingViewModel,
           mapViewModel = mapViewModel,
-          userViewModel = userViewModel)
+          userViewModel = userViewModel,
+          addressViewModel = addressViewModel,
+          permissionHandler = permissionHandler)
     }
 
     // Show filters
@@ -264,33 +291,13 @@ class ListScreenTest {
     composeTestRule.onNodeWithTag("CCTVCheckbox").assertIsDisplayed().performClick()
 
     // Verify the ViewModel was updated
-    assert(parkingViewModel.onlyWithCCTV.value == true)
+    assert(parkingViewModel.onlyWithCCTV.value)
 
     // Click again to uncheck
     composeTestRule.onNodeWithTag("CCTVCheckbox").performClick()
 
     // Verify the ViewModel was updated back to false
-    assert(parkingViewModel.onlyWithCCTV.value == false)
-  }
-
-  @Test
-  fun testCCTVCheckboxInteraction() {
-    composeTestRule.setContent {
-      FilterHeader(
-          selectedProtection = emptySet(),
-          selectedRackTypes = emptySet(),
-          selectedCapacities = emptySet(),
-          onAttributeSelected = {},
-          onlyWithCCTV = false,
-          onCCTVCheckedChange = {})
-    }
-
-    // Show filters first
-    composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
-
-    // Check both checkbox and label are displayed
-    composeTestRule.onNodeWithTag("CCTVCheckbox").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("CCTVCheckboxLabel").assertIsDisplayed()
+    assert(!parkingViewModel.onlyWithCCTV.value)
   }
 
   @Test
@@ -300,12 +307,37 @@ class ListScreenTest {
           navigationActions = mockNavigationActions,
           parkingViewModel = parkingViewModel,
           mapViewModel = mapViewModel,
-          userViewModel = userViewModel)
+          userViewModel = userViewModel,
+          addressViewModel,
+          permissionHandler = permissionHandler)
     }
 
     // Verify main screen components
-    composeTestRule.onNodeWithTag("SpotListScreen").assertExists()
-    composeTestRule.onNodeWithTag("SpotListColumn").assertExists()
+    composeTestRule.onNodeWithTag("SpotListScreen").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("SpotListColumn").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("AllSpotsTitle").assertIsDisplayed()
+  }
+
+  @Test
+  fun testPinnedSpotsTitle() {
+    composeTestRule.setContent {
+      SpotListScreen(
+          navigationActions = mockNavigationActions,
+          parkingViewModel = parkingViewModel,
+          mapViewModel = mapViewModel,
+          userViewModel = userViewModel,
+          addressViewModel,
+          permissionHandler = permissionHandler)
+    }
+
+    // Initially, no parking is pinned
+    assert(parkingViewModel.pinnedParkings.value.isEmpty())
+    composeTestRule.onNodeWithTag("PinnedSpotsTitle").assertIsNotDisplayed()
+
+    // Pin a parking
+    parkingViewModel.togglePinStatus(TestInstancesParking.parking1)
+    assert(parkingViewModel.pinnedParkings.value.isNotEmpty())
+    composeTestRule.onNodeWithTag("PinnedSpotsTitle").assertIsDisplayed()
   }
 
   @Test
@@ -317,7 +349,7 @@ class ListScreenTest {
           userViewModel = userViewModel,
           parking = TestInstancesParking.parking1,
           distance = 0.0,
-          initialIsPinned = false)
+          0.0)
     }
 
     composeTestRule.onNodeWithTag("SpotListItem", useUnmergedTree = true).assertIsDisplayed()
@@ -329,6 +361,7 @@ class ListScreenTest {
         .onNodeWithTag("ParkingDistance", useUnmergedTree = true)
         .assertIsDisplayed()
         .assertTextEquals(String.format("%.0f m", 0.0))
+    composeTestRule.onNodeWithTag("BearingIcon", useUnmergedTree = true).assertIsDisplayed()
     composeTestRule.onNodeWithTag("ParkingNoReviews", useUnmergedTree = true).assertIsNotDisplayed()
   }
 
@@ -341,7 +374,7 @@ class ListScreenTest {
           userViewModel = userViewModel,
           parking = TestInstancesParking.parking2,
           distance = 0.0,
-          initialIsPinned = false)
+          0.0)
     }
 
     composeTestRule
@@ -351,160 +384,10 @@ class ListScreenTest {
         .performClick()
 
     composeTestRule.onNodeWithTag("ParkingNoReviews", useUnmergedTree = true).assertIsDisplayed()
-    composeTestRule.onNodeWithTag("ParkingNbReviews", useUnmergedTree = true).assertIsNotDisplayed()
     composeTestRule.onNodeWithTag("ParkingRating", useUnmergedTree = true).assertIsNotDisplayed()
 
     verify(mockNavigationActions).navigateTo(Screen.PARKING_DETAILS)
     assertEquals(TestInstancesParking.parking2, parkingViewModel.selectedParking.value)
-  }
-
-  @Test
-  fun testShowFiltersButtonInitiallyDisplaysShowFilters() {
-    // Arrange
-    composeTestRule.setContent {
-      FilterHeader(
-          selectedProtection = emptySet(),
-          selectedRackTypes = emptySet(),
-          selectedCapacities = emptySet(),
-          onAttributeSelected = {},
-          onlyWithCCTV = false,
-          onCCTVCheckedChange = {})
-    }
-
-    // Act & Assert
-    composeTestRule.onNodeWithTag("ShowFiltersButton").assertIsDisplayed().assertHasClickAction()
-  }
-
-  @Test
-  @OptIn(ExperimentalTestApi::class)
-  fun testShowFiltersButtonTogglesFilterSection() {
-    // Arrange
-    composeTestRule.setContent {
-      FilterHeader(
-          selectedProtection = emptySet(),
-          selectedRackTypes = emptySet(),
-          selectedCapacities = emptySet(),
-          onAttributeSelected = {},
-          onlyWithCCTV = false,
-          onCCTVCheckedChange = {})
-    }
-
-    // Act: Click to show filters
-    composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
-    composeTestRule.waitUntilExactlyOneExists(hasTestTag("ShowFiltersButton"))
-
-    // Act: Click to hide filters
-    composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
-    composeTestRule.waitUntilExactlyOneExists(hasTestTag("ShowFiltersButton"))
-  }
-
-  @Test
-  @OptIn(ExperimentalTestApi::class)
-  fun testProtectionFilters() {
-
-    val selectedProtection = mutableSetOf<ParkingProtection>()
-    composeTestRule.setContent {
-      FilterHeader(
-          selectedProtection = selectedProtection,
-          selectedRackTypes = emptySet(),
-          selectedCapacities = emptySet(),
-          onAttributeSelected = {
-            when (it) {
-              is ParkingProtection -> selectedProtection.add(it)
-            }
-          },
-          onlyWithCCTV = false,
-          onCCTVCheckedChange = {})
-    }
-
-    // Act: Click to show filters
-    composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
-    composeTestRule.waitUntilExactlyOneExists(hasTestTag("Protection"))
-
-    composeTestRule
-        .onNodeWithTag("Protection")
-        .assertIsDisplayed()
-        .assertTextEquals("Protection")
-        .performClick()
-
-    composeTestRule.waitUntilExactlyOneExists(hasTestTag("ProtectionFilter"))
-    composeTestRule.onNodeWithTag("ProtectionFilter").assertIsDisplayed()
-    composeTestRule
-        .onAllNodesWithTag("ProtectionFilterItem")
-        .assertCountEquals(ParkingProtection.entries.size)
-        .assertAll(hasClickAction())
-    composeTestRule.onAllNodesWithTag("ProtectionFilterItem").onFirst().performClick()
-    assert(selectedProtection.contains(ParkingProtection.entries[0]))
-  }
-
-  @Test
-  @OptIn(ExperimentalTestApi::class)
-  fun testRackTypeFilters() {
-    // Arrange
-    val selectedRackType = mutableSetOf<ParkingRackType>()
-    composeTestRule.setContent {
-      FilterHeader(
-          selectedProtection = emptySet(),
-          selectedRackTypes = selectedRackType,
-          selectedCapacities = emptySet(),
-          onAttributeSelected = {
-            when (it) {
-              is ParkingRackType -> selectedRackType.add(it)
-            }
-          },
-          onlyWithCCTV = false,
-          onCCTVCheckedChange = {})
-    }
-
-    // Act: Click to show filters
-    composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
-    composeTestRule.waitUntilExactlyOneExists(hasTestTag("Rack Type"))
-
-    composeTestRule
-        .onNodeWithTag("Rack Type")
-        .assertIsDisplayed()
-        .assertTextEquals("Rack Type")
-        .performClick()
-
-    composeTestRule.waitUntilExactlyOneExists(hasTestTag("RackTypeFilter"))
-    composeTestRule.onNodeWithTag("RackTypeFilter").assertIsDisplayed()
-    composeTestRule.onAllNodesWithTag("RackTypeFilterItem").assertAll(hasClickAction())
-    composeTestRule.onAllNodesWithTag("RackTypeFilterItem").onFirst().performClick()
-    assert(selectedRackType.contains(ParkingRackType.entries[0]))
-  }
-
-  @Test
-  @OptIn(ExperimentalTestApi::class)
-  fun testCapacityFilters() {
-    // Arrange
-    val selectedCapacities = mutableSetOf(ParkingCapacity.XSMALL)
-    composeTestRule.setContent {
-      FilterHeader(
-          selectedProtection = emptySet(),
-          selectedRackTypes = emptySet(),
-          selectedCapacities = selectedCapacities,
-          onAttributeSelected = {
-            when (it) {
-              is ParkingCapacity -> selectedCapacities.add(it)
-            }
-          },
-          onlyWithCCTV = false,
-          onCCTVCheckedChange = {})
-    }
-
-    // Act: Click to show filters
-    composeTestRule.onNodeWithTag("ShowFiltersButton").performClick()
-    composeTestRule.waitUntilExactlyOneExists(hasTestTag("Capacity"))
-    composeTestRule
-        .onNodeWithTag("Capacity")
-        .assertIsDisplayed()
-        .assertTextEquals("Capacity")
-        .performClick()
-    composeTestRule.waitUntilExactlyOneExists(hasTestTag("CapacityFilter"))
-    composeTestRule.onNodeWithTag("CapacityFilter").assertIsDisplayed()
-    composeTestRule.onAllNodesWithTag("CapacityFilterItem").assertAll(hasClickAction())
-    composeTestRule.onAllNodesWithTag("CapacityFilterItem").onFirst().performClick()
-    assert(selectedCapacities.contains(ParkingCapacity.entries[0]))
   }
 
   @Test
@@ -516,7 +399,7 @@ class ListScreenTest {
           userViewModel = userViewModel,
           parking = TestInstancesParking.parking1,
           distance = 0.5, // 500m
-          initialIsPinned = false)
+          bearing = 12.0)
     }
 
     // Test meters display
@@ -534,34 +417,115 @@ class ListScreenTest {
           userViewModel = userViewModel,
           parking = TestInstancesParking.parking1,
           distance = 2.5, // 2.5km
-          initialIsPinned = false)
+          bearing = 12.0)
     }
 
     // Test kilometers display
     composeTestRule
         .onNodeWithTag("ParkingDistance", useUnmergedTree = true)
-        .assertTextEquals("2.50 km")
+        .assertTextEquals("%.2f km".format(2.5))
   }
 
   @Test
-  fun testParkingNameTruncation() {
-    val longNameParking =
-        TestInstancesParking.parking1.copy(
-            optName = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-    parkingViewModel.addParking(longNameParking)
-
+  fun testBearingPopUp() {
     composeTestRule.setContent {
       SpotCard(
           navigationActions = mockNavigationActions,
           parkingViewModel = parkingViewModel,
           userViewModel = userViewModel,
-          parking = longNameParking,
-          distance = 0.0,
-          initialIsPinned = false)
+          parking = TestInstancesParking.parking1,
+          distance = 0.5, // 500m
+          bearing = 12.0)
+    }
+    // Open the bearing pop up
+    composeTestRule
+        .onNodeWithTag("BearingIcon")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+    composeTestRule.onNodeWithTag("BearingPopUp").assertIsDisplayed()
+  }
+
+  @Test
+  fun assertSearchBarIsDisplayed() {
+    composeTestRule.setContent {
+      SpotListScreen(
+          navigationActions = mockNavigationActions,
+          parkingViewModel = parkingViewModel,
+          mapViewModel = mapViewModel,
+          userViewModel = userViewModel,
+          addressViewModel = addressViewModel,
+          permissionHandler = permissionHandler)
     }
 
     composeTestRule
-        .onNodeWithTag("ParkingName", useUnmergedTree = true)
-        .assertTextEquals("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...")
+        .onNodeWithTag("ShowSearchButton")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+
+    composeTestRule
+        .onNodeWithTag("SearchBarListScreen")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performTextInput("Mock Park")
+
+    composeTestRule.onNodeWithTag("SearchBarListScreen").assertTextEquals("Mock Park")
+    composeTestRule.onNodeWithTag("SearchBarListScreen").performImeAction()
+
+    composeTestRule.onNodeWithTag("SuggestionsMenuListScreen").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag("SuggestionMenuItemMock City")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+    composeTestRule
+        .onNodeWithTag("SuggestionMenuItemMock City 2")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+
+    composeTestRule.onNodeWithTag("SuggestionMenuItemMock City").performClick()
+
+    composeTestRule.onNodeWithTag("SuggestionsMenuListScreen").assertIsNotDisplayed()
+    composeTestRule.onNodeWithTag("SearchBarListScreen").assertIsNotDisplayed()
+  }
+
+  @Test
+  fun assertCloseButtonWorks() {
+    composeTestRule.setContent {
+      SpotListScreen(
+          navigationActions = mockNavigationActions,
+          parkingViewModel = parkingViewModel,
+          mapViewModel = mapViewModel,
+          userViewModel = userViewModel,
+          addressViewModel = addressViewModel,
+          permissionHandler = permissionHandler)
+    }
+
+    composeTestRule
+        .onNodeWithTag("ShowSearchButton")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+
+    composeTestRule
+        .onNodeWithTag("SearchBarListScreen")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performTextInput("Mock Park")
+
+    composeTestRule.onNodeWithTag("SearchBarListScreen").assertTextEquals("Mock Park")
+    composeTestRule
+        .onNodeWithTag("ClearSearchButtonListScreen")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+
+    composeTestRule
+        .onNodeWithTag("ShowSearchButton")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+
+    composeTestRule.onNodeWithTag("SearchBarListScreen").assertIsNotDisplayed()
   }
 }

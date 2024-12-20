@@ -22,13 +22,11 @@ import com.github.se.cyrcle.ui.theme.atoms.Text
  *
  * @param question The question to display.
  * @param state The MutableState that stores the boolean value.
- * @param modifier The modifier to apply to the composable.
  */
 @Composable
 fun BooleanRadioButton(
     question: String,
     state: MutableState<Boolean>,
-    modifier: Modifier = Modifier,
     testTag: String = "BooleanRadioButton"
 ) {
   Column(Modifier.testTag(testTag)) {
