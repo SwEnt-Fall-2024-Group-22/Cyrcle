@@ -1,0 +1,162 @@
+# Milestone M3: Team Feedback
+
+This milestone M3 is the culmination of your SwEnt journey, and it gives us the final opportunity to give you, as a team, formal feedback on how you performed in the project. By now, you should be capable of demonstrating a solid command of the Scrum methodology and collaborative teamwork, and be able to deliver a high-quality, application that is ready for real users.
+This feedback report is meant to complement the informal, ungraded feedback that you received from your coaches during the weekly meetings, over email, on Discord, etc.
+
+You can find the evaluation criteria in the [M3 Deliverables](https://github.com/swent-epfl/public/blob/main/project/M3.md) document.
+As mentioned before, the standards for M2 were elevated relative to M1, and this progression continued into M3: we now hold you to the highest professional standard in SwEnt.
+
+For this milestone, we looked at several aspects, grouped as follows:
+
+- Application
+  - [Completeness](#app-completeness)
+  - [Functionality](#app-functionality)
+  - [User Experience](#app-user-experience)
+- [Design and Implementation](#design-and-implementation)
+- [Testing and CI Pipeline](#testing-and-ci-pipeline)
+- Process
+  - [Documentation](#process-documentation)
+  - [Autonomy](#process-autonomy)
+
+## App: Completeness
+
+We first evaluated the depth and complexity of the main __epics__ in your app, along with their contribution to the app, the tangible value they provide to the user, and their alignment with the app’s goals.
+We evaluated the extent to which your app meets the __course requirements__ articulated at the start of the semester, and whether they are implemented effectively, they integrate seamlessly, and are indeed essential to the app.
+We then looked at the __robustness and completeness__ of the different features you implemented: are all the features finished and polished, are they secure and bug-free, and are they thoughtfully designed.
+
+
+- The EPICS that you chose were really well implemented in your app congratulations!! Your app was really smooth to try and the UI is really good looking. (Easter eggs were also great to discover!)
+
+- The offline mode still allows the user to use the most important features of the app and making the map "offline compatible" was a really good challenge/idea that is not often seen. 
+
+- The phone sensor were used for good purposes and denying access did not break any feature in your app. Your attention to small details, like the arrow pointing in the direction of the parkings is a good and innovative idea, great job!
+
+- The features are robusts, polished and fully implemented! 
+
+
+For this part, you received 7.4 points out of a maximum of 8.0.
+
+## App: Functionality
+
+In this context, we assessed your app's ability to __handle unexpected inputs__ provided by clueless or malicious users (including spamming buttons, entering wrong inputs, stopping a process mid-way, etc.); we wanted to see that your app handles all edge cases gracefully, has comprehensive error handling, and includes robust mechanisms for maintaining stability under stress.
+
+We then evaluated the performance and reliability of the final product, i.e., __the APK__: we wanted to see that your APK is stable and delivers excellent performance, the UI responds quickly and has seamless navigation.
+
+Next we looked into your implementation of __user authentication and multi-user support__: does the app correctly manage users, can users personalize their accounts, does the app support session persistence, are multi-user interactions well supported, can a user recover a lost password, can accounts be used on another device, and is account information preserved when switching devices.
+
+
+Here is a list of issues that we encountered while using the app:
+
+Blank screen when clicking on report:
+- I turned the offline mode on, clicked on a parking and tried to report a picture
+- A blank screen appear with no content, not breaking, but this case could have been handled
+
+- Some uploaded pictures oddly do a 90 degree rotation, this is not breaking and the app is still usable but weird looking.
+
+Where is my bike crash:
+- Click on the bike icon, a marker appears
+- click on the marker, the app crashes
+
+Where is my bike, account confusion:
+- Click on the bike icon, a marker appears,
+- Quit the app, and log in with another account
+- The marker is still here
+
+
+
+
+
+
+For this part, you received 6.9 points out of a maximum of 8.0.
+
+## App: User Experience
+
+For this part, we wanted to see how __intuitive and user-friendly__ the app is for real users. Beyond having good usability, did you pay attention to streamlining the interactions, is it easy to figure out, can new users start making good use of the app quickly, are the interaction flows well thought out and refined.
+
+
+The user experience was really good, we did not encounter any real issue while using the app, but here are some general remarks:
+
+- One thing that could be better handled, is the fact that if you close the app, you have to go through the login page again, which is cumbersome. You could have looked if the user was already logged-in and navigate directly to the homepage.
+
+- Also, as a small UI thing, if you are offline, the button to add picture is still here but darkened, which is not totally clear and could simply be removed.
+
+
+For this part, you received 1.8 points out of a maximum of 2.0.
+
+## Design and Implementation
+
+We evaluated whether __your code is of high quality and employs best practices__, is it modular and robust, etc.
+We expect the codebase to be polished, well documented, follow consistent conventions, be modular, and allow for easy modifications.
+You should be able to employ advanced techniques by now, such as asynchronous functions (flows, coroutines), good resource management, and automated dependency injection (e.g., with Hilt).
+
+We assessed your overall __app architecture and design__, looking in particular at aspects surrounding robustness and scalability.
+We looked at both the codebase and the documentation of the app (Wiki and architecture diagram).
+We expect your design to demonstrate thoughtful consideration for performance, maintainability, and future growth.
+
+
+- Your code contains good documentation in general and the quality is good since you made overall relevant code reviews, but you could still improve. For example if you look at your new static analyser, Codacy, it would have led you to some issues that are easily fixable in the code, but you still made a good job regarding that.
+
+- The app's architecture is well thought and follows the principle taught in the course.
+
+
+For this part, you received 7.2 points out of a maximum of 8.0.
+
+## Testing and CI Pipeline
+
+The first aspect we looked at here was your __test suite__, in terms of both quality and the final line coverage.
+We expect testing the be rigorous and to cover all components and edge cases, and they should validate every significant user journey.
+Line coverage should be getting close to 90%.
+Your end-to-end tests should be detailed and include error-handling scenarios.
+The tests should be well-documented and easy to maintain.
+Finally, your test suite should demonstrate  advanced techniques, mock data for performance testing, and automated regression tests.
+
+We then considered the quality of your __repository setup and the CI pipeline__, and how professional it is and how easy it is for new developers to bring contributions to the project.
+We expect your repository to have a logical structure, use consistent naming, and take full advantage of CI (code quality checks, linting, formatting, etc.)
+Ideally, you should also have automated performance testing, deployment pipelines, and the CI should provide detailed feedback for developers.
+
+
+- In the end. you managed to have a working CI with code coverage information and analysis, well done !!
+
+- Regarding the tests, Codacy reports 83.24% coverage, which is good! The tests were in general well written and relevant.
+
+- The end-2-end tests are there, but testProfile for example doesn't really follow any "risky" path of executino but still validates the flow that a normal user would follow.
+
+
+For this part, you received 6.6 points out of a maximum of 8.0.
+
+## Process: Documentation
+
+We looked at your `README` and GitHub Wiki to evaluate the quality and completeness of __your app’s documentation__. We expect the README and Wiki to be thorough and achieve professional-level clarity and completeness.
+They should provide detailed descriptions of the app's architecture, implementation of the features, and the development setup.
+We also assessed __your use of Figma and the architecture diagram__ for effective UI design, organization, and app structure planning.
+By this stage, we expect your Figma to be complete, up-to-date, and to include UI elements for future features, showing foresight and organization.
+The architecture diagram should be comprehensive, providing a clear and detailed overview of the app structure and dependencies.
+The architecture should be robust, scalable, and optimized for performance, security, and future development.
+
+
+- Your readme is well written and your wiki contains relevant information, nice work!
+
+- The architecture diagram has a viewmodel in the data layer, which is quite odd and doesn't really fit with the MVVM nature of your app, but otherwise, it's quite precise and a good work.
+
+- The figma is representative of your app, but one could argue that the admin page would have its screen in it, but since it is only for internal use, it's not really an issue. There is also one visual issue, the search bar in the list view is not displayed in the showcase
+
+
+For this part, you received 3.5 points out of a maximum of 4.0.
+
+## Process: Autonomy
+
+A primary goal of SwEnt is to teach you how to __function autonomously as a team__.
+For this part of the evaluation, we assessed you team’s independence, spanning Sprint 6 to Sprint 10, based on the meetings with coaches, Sprint planning, and how you managed risk.
+By this stage, coaches should no longer be necessary for the team to operate, i.e., you can organize yourselves, you don't need to be reminded about tasks, and you can conduct the Scrum ceremonies on your own.
+
+
+- During the meetings, you showed great autonomy and led the meetings professionally, without the need of our intervention, nice work!
+
+
+For this part, you received 2 points out of a maximum of 2.0.
+
+## Summary
+
+Based on the above points, your intermediate grade for this milestone M3 is 5.42.
+
+The entire SwEnt staff wishes you the very best in your career, and we look forward to seeing you do great things with what you learned this semester.
